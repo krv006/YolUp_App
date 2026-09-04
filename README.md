@@ -109,12 +109,19 @@ src/
 | Faza | Holat |
 |---|---|
 | 0 — Poydevor, domen porti, login | ✅ Tugadi |
-| 1 — Dizayn tizimi, marshrut skeleti | ⏳ Keyingisi |
-| 2 — Chat | ⬜ |
-| 3 — Dars, vazifa, test | ⬜ |
-| 4 — Jonli dars (LiveKit) | ⬜ |
-| 5 — Doska (Skia) | ⬜ |
-| 6 — Xavfsizlik, reliz | ⬜ |
+| 1 — Dizayn tizimi, marshrut skeleti | ✅ Tugadi (i18n bundan mustasno — DECISIONS §13) |
+| 2 — Chat | ✅ Tugadi (push va delta sync backendni kutmoqda) |
+| 3 — Dars, vazifa, test, ota-ona | ✅ Tugadi (yaratish oqimlarisiz — DECISIONS §14) |
+| 4 — Jonli dars (LiveKit) | ✅ Tugadi (iOS ekran ulashish v1.1) |
+| 5 — Doska (Skia) | ✅ Tugadi (LaTeX render qolgan) |
+| 6 — Xavfsizlik, reliz | 🟡 FLAG_SECURE + watermark bor; Sentry, testlar, do'kon qolgan |
+
+**Ochiq ishlarning to'liq ro'yxati:** [docs/DECISIONS.md §15](docs/DECISIONS.md).
+
+⚠️ **Ilova hali REAL QURILMADA ishga tushirilmagan** — bu muhitda Android SDK
+va Xcode yo'q edi. Metro ikkala platformaga bundle yasaydi (`npm run
+bundle:check`), bu kuchli signal, lekin ishlayotgan ilova bilan bir xil emas.
+Birinchi ish — `npx expo run:android` bilan dev build.
 
 ## Qoidalar
 

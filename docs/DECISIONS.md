@@ -174,3 +174,62 @@ Mobilda `AppState` OS'dan aniq javob beradi. Qo'shimcha ehtiyot: iOS'ning
 qisqa `inactive` holati (ruxsat oynasi, bildirishnoma pardasi) filtrlanadi —
 aks holda har kamera ruxsati so'rovi "darsdan chiqish" bo'lib yozilib,
 ota-onaga yolg'on signal ketardi.
+
+---
+
+## 13. i18n KIRITILMADI — ongli qaror
+
+**Sana:** Faza 1 · **Holat:** Qabul qilindi, qayta ko'rib chiqiladi
+
+`MOBILE_PLAN.md` §18.10 "matn literal emas, `t()` — birinchi kundan" degan
+edi. Amalda bu bajarilmadi va sababi shu yerda yozilgan.
+
+**Nega:** ko'chirilgan domen qatlami (toast xabarlari, xato matnlari,
+`lesson-status`, `homework` baholari) o'zbekcha LITERAL matn qaytaradi va u
+🟢 NUSXA — tahrirlab bo'lmaydi. Ya'ni i18n faqat YANGI UI kodini qamrab
+olardi: ilovaning yarmi `t("...")`, yarmi literal. Bunday nomuvofiqlik
+i18n yo'qligidan yomonroq — keyin qaysi biri qayerdaligini hech kim
+bilmaydi.
+
+**Narxi:** ikkinchi til qo'shilganda barcha literal matnlar bir yo'la
+ajratiladi. Bu bir martalik, mexanik ish (~2-3 kun).
+
+**Qachon qayta ko'riladi:** ikkinchi til rejaga kirganda. O'sha paytda
+veb ham i18n'ga o'tishi kerak — ikkalasi BIR VAQTDA, aks holda domen
+qatlami yana ikkiga bo'linadi.
+
+---
+
+## 14. Mobilda YARATISH oqimlari yo'q
+
+**Holat:** Ongli cheklov
+
+Mobil ilovada dars, vazifa, test va kurs YARATIB bo'lmaydi; o'quvchi
+qo'shib ham bo'lmaydi. Ko'rish, kirish, topshirish va baholash — hammasi bor.
+
+**Nega:** bu oqimlar uzun forma, sana/vaqt tanlash, haftalik jadval
+generatori va ko'p bosqichli qidiruvni talab qiladi (veb'da
+`quiz-create-dialog` 349 qator, `add-student-dialog` 267 qator,
+`group-action-dialogs` 606 qator). O'qituvchi bu ishlarni odatda kurs
+boshida, kompyuterda bajaradi.
+
+**Narxi:** o'qituvchi mobil ilovadan kontent yarata olmaydi. Agar
+foydalanuvchi tadqiqoti buni talab qilsa — avval TEST yaratish qo'shiladi
+(eng ko'p so'raladigan), keyin vazifa.
+
+---
+
+## 15. Bajarilmagan ishlar (ochiq ro'yxat)
+
+Bular qilinishi kerak, lekin hozircha yo'q — yashirilmasin:
+
+| Ish | Sabab |
+|---|---|
+| Push xabarnoma (FCM/APNs) | Backend `POST /api/v1/devices/` hali yo'q (MOBILE_PLAN §11 #1) |
+| Chat delta sync | Backend `?after=<id>` hali yo'q (§11 #2). `RealtimeSocket` da `onResync` ilgagi tayyor turibdi |
+| Doskada LaTeX render | Skia'da matn dvigateli yo'q; WebView qatlami kerak |
+| iOS ekran ulashish | Broadcast Extension — alohida nativ target (§7.2) |
+| Sentry, analytics | Faza 6 |
+| Unit va E2E testlar | Faza 6. Ko'chirilgan mapperlar uchun test MAJBURIY (§13) |
+| Do'kon materiallari | Faza 6 |
+| Real qurilmada sinov | Bu muhitda Android SDK/Xcode yo'q. Metro bundle ikkala platformada quriladi, lekin bu ishlayotgan ilova bilan bir xil emas |

@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **115**
-- 🟡/🔴 moslashtirilgan: **37**
+- 🟡/🔴 moslashtirilgan: **43**
 - 🆕 mobilga xos: **5**
-- Jami: **157**
+- Jami: **163**
 
 ## Fayllar
 
@@ -74,6 +74,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/conversation/model/conversation-filter.store.ts` | 🟢 NUSXA | `c072b4693565` | — |
 | `src/modules/conversation/model/conversation.keys.ts` | 🟢 NUSXA | `8dedfc078009` | — |
 | `src/modules/conversation/model/use-conversations.ts` | 🟢 NUSXA | `047e6d098c68` | — |
+| `src/modules/conversation/ui/chat-header.tsx` | 🟡 MOSLASH | `106599ec34ab` | farq qayd etilmagan — tekshiring |
 | `src/modules/conversation/ui/conversation-item.tsx` | 🟡 MOSLASH | `e68e12cace5f` | farq qayd etilmagan — tekshiring |
 | `src/modules/course/api/course.api.ts` | 🟢 NUSXA | `0d1f74fef20d` | — |
 | `src/modules/course/api/course.dto.ts` | 🟢 NUSXA | `c8ade40bb51b` | — |
@@ -118,6 +119,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/lib/message.mappers.ts` | 🟢 NUSXA | `6252760113bd` | — |
 | `src/modules/message/model/message.keys.ts` | 🟢 NUSXA | `fadd16224f37` | — |
 | `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `8e0e288f1631` | react-router-dom useNavigate -> expo-router useRouter |
+| `src/modules/message/ui/message-attachment.tsx` | 🟡 MOSLASH | `e5c7e28f553a` | farq qayd etilmagan — tekshiring |
+| `src/modules/message/ui/message-bubble.tsx` | 🟡 MOSLASH | `2cefe5cc619f` | farq qayd etilmagan — tekshiring |
+| `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2d0725ac8b8a` | farq qayd etilmagan — tekshiring |
+| `src/modules/message/ui/message-list.tsx` | 🟡 MOSLASH | `06013405aa64` | farq qayd etilmagan — tekshiring |
+| `src/modules/message/ui/message-text.tsx` | 🟡 MOSLASH | `61a4de2c8e42` | farq qayd etilmagan — tekshiring |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `980ff0a9d175` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `b1a8ffe524dc` | — |
 | `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `23a2b0dd4313` | — |

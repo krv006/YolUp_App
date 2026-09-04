@@ -24,3 +24,7 @@ export {
   useRespondDirect,
   useSetRoomImage,
 } from "./model/use-conversations";
+
+// --- Mobil UI ---
+export { ChatHeader } from "./ui/chat-header";
+export { ConversationItem } from "./ui/conversation-item";

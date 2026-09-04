@@ -27,6 +27,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "expo": "~57.0.20",
+    "expo-clipboard": "~57.0.1",
     "expo-constants": "~57.0.17",
     "expo-file-system": "~57.0.6",
     "expo-linking": "~57.0.9",

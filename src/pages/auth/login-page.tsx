@@ -5,6 +5,7 @@ import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { loginSchema, resolveHomeRoute, useAuth } from "@/modules/auth";
+import { ROUTES } from "@/shared/config";
 import type { LoginCredentials } from "@/shared/types";
 import { Button, Checkbox, Input, Screen, Text, useTheme } from "@/shared/ui";
 
@@ -120,6 +121,16 @@ export function LoginPage() {
         ) : null}
 
         <Button title="Kirish" size="lg" loading={isSubmitting} onPress={handleSubmit(submit)} />
+
+        <Text
+          accessibilityRole="button"
+          onPress={() => router.push(ROUTES.auth.register)}
+          variant="caption"
+          tone="brand"
+          style={styles.link}
+        >
+          Hisobingiz yo'qmi? Ro'yxatdan o'tish
+        </Text>
       </View>
     </Screen>
   );
@@ -129,4 +140,5 @@ const styles = StyleSheet.create({
   header: { gap: 6, paddingTop: 48, paddingBottom: 32 },
   form: { gap: 18 },
   alert: { padding: 12, borderRadius: 13, borderWidth: StyleSheet.hairlineWidth },
+  link: { textAlign: "center", paddingVertical: 12 },
 });

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { Search, X } from "lucide-react-native";
+import { Bell, Search, X } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import {
   matchesConversationFilter,
@@ -12,10 +12,12 @@ import {
 } from "@/modules/conversation";
 import { ConversationItem } from "@/modules/conversation/ui/conversation-item";
 import { useLiveLessons } from "@/modules/lesson";
+import { useUnreadNotificationCount } from "@/modules/notification";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import {
   Chip,
   ChipRow,
+  CountBadge,
   IconButton,
   Input,
   Screen,
@@ -50,6 +52,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   const { data = [], isLoading, isError, error, refetch, isRefetching } = useConversations(role);
+  const unread = useUnreadNotificationCount();
 
   /**
    * Qaysi guruhda dars ketyapti. Dars kurs bilan bog'langan, chat ham —
@@ -108,6 +111,17 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
             </Text>
             <IconButton accessibilityLabel="Qidirish" onPress={() => setSearchOpen(true)}>
               <Search size={20} color={palette["muted-foreground"]} />
+            </IconButton>
+            <IconButton
+              accessibilityLabel="Bildirishnomalar"
+              onPress={() => router.push("/notifications")}
+            >
+              <Bell size={20} color={palette["muted-foreground"]} />
+              {(unread.data ?? 0) > 0 ? (
+                <View style={styles.bellBadge}>
+                  <CountBadge count={unread.data ?? 0} />
+                </View>
+              ) : null}
             </IconButton>
           </View>
         )}
@@ -228,6 +242,8 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 8 },
   title: { flex: 1 },
   searchRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, gap: 4 },
+  // Qo'ng'iroq ustidagi hisoblagich — tugma maydonini o'zgartirmasligi kerak.
+  bellBadge: { position: "absolute", top: 4, right: 2 },
   searchInput: { flex: 1 },
   skeleton: { paddingTop: 8 },
   skeletonRow: { flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },

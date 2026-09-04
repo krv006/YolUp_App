@@ -1,10 +1,5 @@
-import { Screen, ScreenEmpty } from "@/shared/ui";
+import { ProfilePage } from "@/pages/profile/profile-page";
 
-/** Faza 1 */
 export default function TeacherProfileRoute() {
-  return (
-    <Screen>
-      <ScreenEmpty title="Profil" description="Bu bo'lim keyingi bosqichda qo'shiladi." />
-    </Screen>
-  );
+  return <ProfilePage roleLabel="O'qituvchi" />;
 }

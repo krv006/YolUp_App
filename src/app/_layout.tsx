@@ -3,6 +3,7 @@ import "@/shared/lib/bootstrap";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AppProviders } from "@/providers/app-providers";
+import { NotificationBridge } from "@/providers/notification-bridge";
 import { useTheme } from "@/shared/ui";
 
 /**
@@ -21,6 +22,7 @@ export default function RootLayout() {
   return (
     <AppProviders>
       <ThemedStack />
+      <NotificationBridge />
     </AppProviders>
   );
 }

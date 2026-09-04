@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **115**
-- 🟡/🔴 moslashtirilgan: **48**
+- 🟡/🔴 moslashtirilgan: **49**
 - 🆕 mobilga xos: **5**
-- Jami: **168**
+- Jami: **169**
 
 ## Fayllar
 
@@ -155,6 +155,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/student/model/student.queries.ts` | 🟢 NUSXA | `e507a2f33021` | — |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
+| `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
 | `src/shared/api/api-config.ts` | 🟢 NUSXA | `0e6a5d2a4cc7` | — |

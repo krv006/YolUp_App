@@ -1,5 +1,6 @@
 import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
+import { useState } from "react";
 import { useRouter } from "expo-router";
 import { ArrowLeft, BellRing } from "lucide-react-native";
 import {
@@ -11,6 +12,8 @@ import {
 import { formatDayTime, htmlToPlainText } from "@/shared/lib";
 import {
   Avatar,
+  Button,
+  HtmlView,
   IconButton,
   radius,
   Screen,
@@ -18,6 +21,7 @@ import {
   ScreenError,
   ScreenLoading,
   Separator,
+  Sheet,
   Text,
   useTheme,
 } from "@/shared/ui";
@@ -38,6 +42,7 @@ export function NotificationsPage() {
   const { palette } = useTheme();
   const inbox = useNotificationInbox();
   const markRead = useMarkNotificationRead();
+  const [detail, setDetail] = useState<InboxNotification | null>(null);
 
   function goBack() {
     if (router.canGoBack()) router.back();
@@ -59,7 +64,9 @@ export function NotificationsPage() {
 
   function openNotification(item: InboxNotification) {
     if (!item.isRead) markRead.mutate(item.notificationId);
-    openLink(item.link);
+    // Ro'yxatda faqat qisqa matn ko'rinadi (WebView xotira sababi) —
+    // to'liq HTML tafsilot oynasida chiziladi.
+    setDetail(item);
   }
 
   if (inbox.isLoading) {
@@ -110,6 +117,25 @@ export function NotificationsPage() {
           )}
         />
       )}
+
+      <Sheet
+        open={Boolean(detail)}
+        onClose={() => setDetail(null)}
+        title={detail?.sender?.name ?? "Fokus"}
+        description={detail ? formatDayTime(detail.createdAt) : undefined}
+      >
+        {detail ? <HtmlView html={detail.html} /> : null}
+
+        {detail?.link ? (
+          <Button
+            title="Ochish"
+            onPress={() => {
+              openLink(detail.link);
+              setDetail(null);
+            }}
+          />
+        ) : null}
+      </Sheet>
     </Screen>
   );
 }

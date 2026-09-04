@@ -111,10 +111,13 @@ src/
 | 0 — Poydevor, domen porti, login | ✅ Tugadi |
 | 1 — Dizayn tizimi, marshrut skeleti | ✅ Tugadi (i18n bundan mustasno — DECISIONS §13) |
 | 2 — Chat | ✅ Tugadi (push va delta sync backendni kutmoqda) |
-| 3 — Dars, vazifa, test, ota-ona | ✅ Tugadi (yaratish oqimlarisiz — DECISIONS §14) |
+| 3 — Dars, vazifa, test, ota-ona | ✅ Tugadi |
 | 4 — Jonli dars (LiveKit) | ✅ Tugadi (iOS ekran ulashish v1.1) |
-| 5 — Doska (Skia) | ✅ Tugadi (LaTeX render qolgan) |
+| 5 — Doska (Skia) | ✅ Tugadi |
 | 6 — Xavfsizlik, reliz | 🟡 FLAG_SECURE + watermark bor; Sentry, testlar, do'kon qolgan |
+
+**Veb bilan funksional taqqoslash:** [docs/PARITY.md](docs/PARITY.md) — veb'dagi
+barcha 54 modul komponenti, 6 widget va 21 sahifaning mobil manzili.
 
 **Ochiq ishlarning to'liq ro'yxati:** [docs/DECISIONS.md §15](docs/DECISIONS.md).
 

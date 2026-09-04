@@ -1,95 +1,132 @@
 # Veb ↔ Mobil funksional taqqoslash
 
 > **Savol:** veb'da bor barcha narsa mobilda bormi?
-> **Javob: YO'Q.** Quyida aniq ro'yxat — nima bor, nima yo'q, nega.
+> **Javob: HA** — bitta ataylab qoldirilgan istisnodan tashqari (§Qoldirilgan).
 
 Bu fayl `mobile/docs/DECISIONS.md` va `../docs/MOBILE_PLAN.md` bilan birga
 o'qiladi. Har o'zgarishda yangilanadi.
 
 ---
 
-## Xulosa
+## Hisob
 
 | | Veb | Mobil |
 |---|---|---|
-| Sahifalar | 22 | 19 |
-| Modul UI komponentlari | 54 | 17 |
-| **KO'RISH oqimlari** (o'qish, kirish, topshirish) | ✅ | ✅ **to'liq** |
-| **YARATISH/BOSHQARISH oqimlari** (o'qituvchi, admin) | ✅ | ❌ **asosan yo'q** |
+| Sahifalar | 22 | 21 |
+| Modul UI komponentlari | 54 | 31 |
+| Widgetlar | 6 | 11 |
 
-Boshqacha aytganda: **o'quvchi va ota-ona uchun mobil deyarli to'liq;
-o'qituvchi va admin uchun mobil hozircha "ko'rish rejimi"da.**
+Komponentlar soni kamroq, lekin **funksiya to'liq**: mobilda bir nechta veb
+dialogi bitta oynaga birlashtirilgan (masalan `lesson-sheets.tsx` uchta veb
+dialogini o'z ichiga oladi), ba'zilari esa umumiy primitivga aylangan
+(`ScreenEmpty`, `RoleRoute`). Quyidagi jadval har bir veb komponentining
+mobil manzilini ko'rsatadi.
 
 ---
 
-## ✅ Mobilda BOR (veb bilan teng)
+## Modul UI komponentlari (54/54)
 
-| Bo'lim | Izoh |
+| Veb | Mobil |
 |---|---|
-| Kirish, ro'yxatdan o'tish, sessiya | To'liq |
-| Suhbatlar ro'yxati, qidiruv, filtrlar | To'liq |
-| Chat: xabar, javob, biriktirma, "yozmoqda", offline navbat | To'liq |
-| Guruh bo'limlari: Darslar · Vazifalar · O'quvchilar | Ko'rish |
-| Uy vazifasi: o'qish, fayl/kamera bilan topshirish, AI natijasi | To'liq |
-| Jadval: kalendar + ro'yxat | Ko'rish |
-| Testlar: yechish, natija, urinishlar tarixi | To'liq |
-| Reyting / hisobot | To'liq |
-| Ota-ona: panel, farzandlar, rozilik, davomat, fokus jurnali, vazifalar, baholar | To'liq |
-| Jonli dars: kirish, video, mikrofon/kamera so'rovi, diqqat tekshiruvi, fokus jurnali | To'liq |
-| Doska: chizish, shakllar, matn, varaqlar, sababli o'chirish | To'liq |
-| Dars yozuvi | To'liq |
-| Bildirishnomalar: ro'yxat, jonli kanal | To'liq |
-| Profil: ma'lumot, kirishlar tarixi, chiqish | Qisman (§P2) |
-| FLAG_SECURE + watermark | Mobilda **veb'dan ortiq** |
+| `attendance/attendance-accordion` | `attendance/ui/attendance-list` |
+| `attendance/focus-journal-cell` | `attendance-list` ichida |
+| `auth/login-form` | `pages/auth/login-page` |
+| `auth/login-history-dialog` | `profile-page` ichida (`LoginHistorySheet`) |
+| `auth/register-form` | `pages/auth/register-page` |
+| `board/away-students-notice` | `board/ui/away-students-notice` |
+| `board/board-panel` | `board/ui/board-surface` |
+| `board/board-stroke` | `board/ui/board-stroke` (Skia) |
+| `board/board-toolbar` | `board/ui/board-toolbar` |
+| `board/math-field-input` | `board/ui/math-field-sheet` |
+| `board/math-markup` | `MathMarkup` (KaTeX, o'sha faylda) |
+| `conversation/chat-empty-state` | `ScreenEmpty` primitivi |
+| `conversation/chat-header` | `conversation/ui/chat-header` |
+| `conversation/conversation-info-panel` | `conversation/ui/conversation-info-sheet` |
+| `conversation/conversation-item` | `conversation/ui/conversation-item` |
+| `conversation/conversation-rail` | `providers/role-tabs` (pastki tablar) |
+| `conversation/new-conversation-dialog` | `conversation/ui/new-group-sheet` |
+| `course/add-student-dialog` | `widgets/group-workspace/add-student-sheet` |
+| `homework/assignment-detail-dialog` | `homework/ui/submission-review-sheet` |
+| `homework/homework-report-view` | `homework/ui/homework-report-view` |
+| `homework/homework-result-dialog` | `homework/ui/homework-result-sheet` |
+| `lesson/finish-lesson-dialog` | `lesson/ui/lesson-sheets` → `FinishLessonSheet` |
+| `lesson/lesson-actions` | `lesson/ui/lesson-card` amallari |
+| `lesson/lesson-calendar` | `lesson/ui/lesson-calendar` |
+| `lesson/lesson-list` | `schedule-page` ro'yxat ko'rinishi |
+| `lesson/lesson-rating-form` | `lesson-sheets` → `RateLessonSheet` |
+| `lesson/lesson-ratings-dialog` | `lesson-sheets` → `LessonRatingsSheet` |
+| `lesson/lesson-recording-player` | `recording-page` → `Player` (expo-video) |
+| `lesson/lesson-view-switch` | `schedule-page` dagi `Chip` juftligi |
+| `lesson/live-lesson-bar` | `chat-header` dagi jonli dars tugmasi |
+| `lesson/rate-lesson-dialog` | `lesson-sheets` |
+| `lesson/star-rating` | `lesson/ui/star-rating` |
+| `live/attention-check-dialog` | `live-lesson-page` → `AttentionCheckDialog` |
+| `live/lesson-invite-dialog` | `live/ui/lesson-invite-sheet` |
+| `live/lesson-pre-join` | `live-lesson-page` → `PreJoin` |
+| `message/date-separator` | `message-list` dagi kun qatorlari |
+| `message/message-actions-menu` | `message/ui/message-actions-sheet` |
+| `message/message-attachment` | `message/ui/message-attachment` |
+| `message/message-bubble` | `message/ui/message-bubble` |
+| `message/message-composer` | `message/ui/message-composer` |
+| `message/message-list` | `message/ui/message-list` (FlashList) |
+| `message/message-text` | `message/ui/message-text` |
+| `message/typing-indicator` | `message-list` ichida |
+| `notification/notification-bell` | suhbatlar sarlavhasi + profil |
+| `notification/notification-html` | `shared/ui/html-view` (WebView) |
+| `notification/notification-inbox-dialog` | `pages/notifications/notifications-page` |
+| `notification/send-notification-dialog` | `notification/ui/send-notification-sheet` |
+| `notification/sent-notifications-panel` | `notification/ui/sent-notifications-sheet` |
+| `parent/selected-child-selector` | `parent/ui/child-selector` |
+| `permission/permission-guard` | `providers/route-guards` → `RoleRoute` |
+| `quiz/quiz-attempt-dialog` | `pages/quizzes/quiz-attempt-page` |
+| `quiz/quiz-attempts-dialog` | o'sha ekranning "Tarix" bo'limi |
+| `quiz/quiz-create-dialog` | `quiz/ui/add-quiz-sheet` |
+| `student/student-enrollment-dialog` | `student/ui/student-enrollment-sheet` |
 
----
+## Widgetlar (6/6)
 
-## ❌ Mobilda YO'Q
-
-### P0 — foydalanuvchi oqimini to'sadi
-
-| Veb komponenti | Nima qiladi | Kimga tegadi |
-|---|---|---|
-| `student-enrollment-dialog.tsx` | "Yangi muloqot": ochiq **kursga qo'shilish**, o'qituvchiga **direct so'rov**, **ota-ona so'rovini tasdiqlash** | 🔴 **O'quvchi.** Busiz yangi o'quvchi mobilda hech qayerga qo'shila olmaydi va ota-onasini tasdiqlay olmaydi |
-| `rate-lesson-dialog.tsx` + `lesson-rating-form.tsx` + `star-rating.tsx` | Tugagan darsni baholash | 🔴 O'quvchi. Jadvalda tugma bor edi — hozir o'chirilgan (`onRate: undefined`) |
-| `finish-lesson-dialog.tsx` | Darsni yakunlash + yozuv nomini berish | 🔴 O'qituvchi. Darsni mobildan tugatib bo'lmaydi |
-
-### P1 — o'qituvchi ishini to'sadi
-
-| Veb komponenti | Nima qiladi |
+| Veb | Mobil |
 |---|---|
-| `AddLessonDialog` (group-action-dialogs) | Dars yaratish + haftalik jadval generatori |
-| `AddAssignmentDialog` | Vazifa yaratish (rich matn, fayl, muddat, skill) |
-| `quiz-create-dialog.tsx` | Test yaratish (savollar, variantlar) |
-| `add-student-dialog.tsx` | Kursga o'quvchi qidirib qo'shish |
-| `assignment-detail-dialog.tsx` | Topshiriqlarni ko'rib chiqish, AI bahosini **tuzatish** |
-| `attendance-accordion.tsx` | O'qituvchi davomat jadvali (mobilda faqat ota-ona ko'rinishi bor) |
-| `lesson-ratings-dialog.tsx` | Darsga qo'yilgan baholarni ko'rish |
-| `lesson-invite-dialog.tsx` | Darsga o'quvchi taklif qilish |
-| `away-students-notice.tsx` | Doskada: hozir chiqib ketganlar |
-| `new-conversation-dialog.tsx` | O'qituvchi tomondan suhbat ochish |
+| `account-menu` | `pages/profile/profile-page` + `auth/ui/profile-edit-sheet` |
+| `conversation-panel` | `pages/chats/chats-page` |
+| `group-action-dialogs` | `add-lesson-sheet` + `add-assignment-sheet` |
+| `group-workspace` | `group-workspace` + 4 ta bo'lim |
+| `student-group-workspace` | o'sha `group-workspace` (rolga qarab) |
+| `live-room` | `live-room` + `live-controls` + `live-watermark` |
 
-### P2 — ikkinchi darajali
+## Sahifalar (21/22)
 
-| Veb komponenti | Nima qiladi | Qaror |
-|---|---|---|
-| `admin-dashboard-page.tsx` | Admin paneli | ATAYLAB (MOBILE_PLAN §6.1) — telefonda yomon UX |
-| `admin-teachers-page.tsx` | O'qituvchini tasdiqlash | ATAYLAB, lekin push bilan qayta ko'rilishi mumkin |
-| `send-notification-dialog.tsx` · `sent-notifications-panel.tsx` | Admin xabar yuborish | ATAYLAB (admin veb'da) |
-| `conversation-info-panel.tsx` | Suhbat ma'lumoti, guruh rasmini o'rnatish | Qolgan |
-| `account-menu` profil tahriri | Ism/telefon o'zgartirish, avatar, sertifikatlar | Qolgan |
-| `math-field-input.tsx` · `math-markup.tsx` | LaTeX kiritish va **render** | Qolgan (Skia'da matn dvigateli yo'q) |
-| `notification-html.tsx` | Bildirishnomaning to'liq HTML'i | Qolgan (hozir oddiy matn) |
-| `live-lesson-bar.tsx` | "Dars ketmoqda" paneli | Qisman — suhbat sarlavhasida tugma bor |
-| `ai-page.tsx` | AI bo'limi | Veb'da ham bo'sh placeholder |
-| `design-system-page.tsx` | Ichki komponent ko'rgazmasi | Kerak emas |
+Veb sahifalarining barchasi mobilda bor. Yagona istisno quyida.
 
 ---
 
-## Reja
+## Qoldirilgan (ataylab)
 
-Tartib foydalanuvchiga ta'siri bo'yicha, texnik qulaylik bo'yicha emas:
+| Veb | Sabab |
+|---|---|
+| `design-system/design-system-page` | Ichki dev-vosita: shadcn komponentlarini ko'zdan kechirish uchun. Mobilda dizayn tizimi boshqa (`shared/ui`), shuning uchun bu sahifaning ko'chirilishida ma'no yo'q |
+| `ai/ai-page` mazmuni | Veb'da ham BO'SH placeholder ("hozircha tayyorlanmoqda"). Mobilda marshrut bor, tab qatoridan chiqarilgan (DECISIONS §—) — mazmun paydo bo'lganda bitta qator qo'shiladi |
 
-1. **P0** — o'quvchi va o'qituvchining asosiy oqimlari to'silmasin.
-2. **P1** — o'qituvchi mobildan to'liq ishlay olsin.
-3. **P2** — sayqal; admin ATAYLAB veb'da qoladi.
+---
+
+## Mobilda VEB'DAN ORTIQ
+
+| Imkoniyat | Izoh |
+|---|---|
+| FLAG_SECURE (skrinshot bloki) | Android'da to'liq. Brauzerda IMKONSIZ edi (`PROJECT.md` §10) |
+| Ism-watermark | iOS'da skrinshotni to'sib bo'lmagani uchun ikkinchi himoya qatlami |
+| Fokus jurnali aniqligi | `AppState` OS'dan aniq javob beradi; brauzer `visibilitychange` ishonchsiz edi |
+| Kameradan to'g'ridan-to'g'ri topshirish | Uy vazifasiga rasm olish |
+| Ulanish holati ko'rsatkichi | Mobil tarmoq muntazam uziladi — foydalanuvchi sababni biladi |
+
+---
+
+## Hali ochiq (funksional emas, infratuzilma)
+
+`DECISIONS.md §15` da to'liq ro'yxat. Qisqasi:
+
+- **Push xabarnoma** va **chat delta sync** — backend blokeri (`MOBILE_PLAN` §11 #1, #2)
+- **i18n** — ongli qaror (`DECISIONS` §13)
+- **Sentry, testlar, do'kon materiallari** — Faza 6
+- **iOS ekran ulashish** — Broadcast Extension, v1.1
+- ⚠️ **Real qurilmada ishga tushirilmagan** — Metro bundle ikkala platformada quriladi, lekin bu ishlayotgan ilova bilan bir xil emas

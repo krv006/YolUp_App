@@ -200,22 +200,22 @@ qatlami yana ikkiga bo'linadi.
 
 ---
 
-## 14. Mobilda YARATISH oqimlari yo'q
+## 14. Yaratish oqimlari — QAYTA KO'RIB CHIQILDI
 
-**Holat:** Ongli cheklov
+**Holat:** Bekor qilindi, oqimlar qo'shildi
 
-Mobil ilovada dars, vazifa, test va kurs YARATIB bo'lmaydi; o'quvchi
-qo'shib ham bo'lmaydi. Ko'rish, kirish, topshirish va baholash — hammasi bor.
+Dastlab dars/vazifa/test/kurs yaratish mobilga chiqarilmagan edi: ular uzun
+forma va ko'p bosqichli qidiruvni talab qiladi (veb'da `group-action-dialogs`
+606 qator, `quiz-create-dialog` 349, `add-student-dialog` 267), va
+o'qituvchi bu ishlarni odatda kompyuterda bajaradi degan taxmin bor edi.
 
-**Nega:** bu oqimlar uzun forma, sana/vaqt tanlash, haftalik jadval
-generatori va ko'p bosqichli qidiruvni talab qiladi (veb'da
-`quiz-create-dialog` 349 qator, `add-student-dialog` 267 qator,
-`group-action-dialogs` 606 qator). O'qituvchi bu ishlarni odatda kurs
-boshida, kompyuterda bajaradi.
+**Nega bekor qilindi:** buyurtmachi to'liq funksional tenglikni talab qildi.
+Taxmin ham tekshirilmagan edi — o'qituvchi darsni telefondan ham qo'shishi
+mumkin (masalan yo'lda jadval o'zgarganda).
 
-**Narxi:** o'qituvchi mobil ilovadan kontent yarata olmaydi. Agar
-foydalanuvchi tadqiqoti buni talab qilsa — avval TEST yaratish qo'shiladi
-(eng ko'p so'raladigan), keyin vazifa.
+**Natija:** hammasi qo'shildi — dars (bitta yoki haftalik jadval), vazifa,
+test, o'quvchi qo'shish/chiqarish, topshiriqni baholash, kurs yaratish.
+Uzun formalar pastdan ochiladigan `Sheet` da, klaviatura hisobga olingan.
 
 ---
 
@@ -227,9 +227,11 @@ Bular qilinishi kerak, lekin hozircha yo'q — yashirilmasin:
 |---|---|
 | Push xabarnoma (FCM/APNs) | Backend `POST /api/v1/devices/` hali yo'q (MOBILE_PLAN §11 #1) |
 | Chat delta sync | Backend `?after=<id>` hali yo'q (§11 #2). `RealtimeSocket` da `onResync` ilgagi tayyor turibdi |
-| Doskada LaTeX render | Skia'da matn dvigateli yo'q; WebView qatlami kerak |
 | iOS ekran ulashish | Broadcast Extension — alohida nativ target (§7.2) |
 | Sentry, analytics | Faza 6 |
 | Unit va E2E testlar | Faza 6. Ko'chirilgan mapperlar uchun test MAJBURIY (§13) |
 | Do'kon materiallari | Faza 6 |
 | Real qurilmada sinov | Bu muhitda Android SDK/Xcode yo'q. Metro bundle ikkala platformada quriladi, lekin bu ishlayotgan ilova bilan bir xil emas |
+
+**Funksional tenglik yopildi** — `docs/PARITY.md` ga qarang. Yuqoridagilar
+funksiya emas, infratuzilma va tashqi bog'liqliklar.

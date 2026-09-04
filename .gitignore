@@ -42,3 +42,6 @@ yarn-error.*
 
 # Tokenlardan generatsiya qilinadi, lekin Metro uchun kerak — commit qilinadi.
 # (build:tokens qayta yaratadi)
+
+# Tekshiruv uchun yasalgan bundle
+.expo-export*

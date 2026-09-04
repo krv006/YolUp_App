@@ -76,7 +76,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         },
       ],
     ],
-    experiments: { typedRoutes: true },
+    // typedRoutes ATAYLAB o'chiq: marshrut yo'llari veb'dan ko'chirilgan
+    // `shared/config/routes.ts` dan oddiy `string` sifatida keladi (masalan
+    // `resolveHomeRoute(user)`). Typed routes ularning har birida cast talab
+    // qilardi. Faza 1 da ROUTES tiplanganidan keyin yoqiladi.
+    experiments: { typedRoutes: false },
     extra: {
       appName: "Fokus",
       appEnv: VARIANT,

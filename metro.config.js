@@ -3,18 +3,37 @@ const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 
 const projectRoot = __dirname;
+const webRoot = path.resolve(projectRoot, "..");
+
 const config = getDefaultConfig(projectRoot);
 
 /**
- * MUHIM: mobil loyiha veb loyiha (Edu_Front) ICHIDA joylashgan. Node ham,
- * Metro ham modul topolmasa yuqoriga qarab qidiradi — natijada `sonner` yoki
+ * MUHIM: mobil loyiha veb loyiha (Edu_Front) papkasi ICHIDA joylashgan.
+ * Metro modul topolmasa yuqoriga qarab qidiradi — natijada `sonner`,
  * `react-dom` kabi VEB paketlari mobil bundle'ga jimgina kirib kelardi.
  *
- * Shuning uchun qidiruv faqat shu loyihaning `node_modules` iga cheklanadi.
- * Bo'lmagan paket endi ochiq xato beradi, bundle'ga tushmaydi.
+ * `disableHierarchicalLookup` bu yerda TO'G'RI KELMAYDI: u yuqoriga qarashni
+ * butunlay o'chiradi va `expo/node_modules/@expo/metro-runtime` kabi
+ * bog'liqlikning ichki bog'liqligini ham topolmay qoladi.
+ *
+ * Shuning uchun aniq nishon oladi: qidiruv boshlanishi shu loyihadan, va
+ * VEB loyihaning `node_modules`/`src` papkalari butunlay bloklanadi.
  */
+function escapeForRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const BLOCKED_ROOTS = [
+  path.join(webRoot, "node_modules"),
+  // Mobil hech qachon veb manba kodini to'g'ridan-to'g'ri import qilmaydi —
+  // ko'chirish `docs/PORTED.md` orqali, ochiq va kuzatiladigan bo'lishi kerak.
+  path.join(webRoot, "src"),
+];
+
 config.resolver.nodeModulesPaths = [path.resolve(projectRoot, "node_modules")];
-config.resolver.disableHierarchicalLookup = true;
+config.resolver.blockList = BLOCKED_ROOTS.map(
+  (root) => new RegExp(`^${escapeForRegExp(root + path.sep)}.*$`)
+);
 config.watchFolders = [projectRoot];
 
 /**

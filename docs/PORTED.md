@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **115**
-- 🟡/🔴 moslashtirilgan: **29**
+- 🟡/🔴 moslashtirilgan: **33**
 - 🆕 mobilga xos: **5**
-- Jami: **149**
+- Jami: **153**
 
 ## Fayllar
 
@@ -145,6 +145,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/student/model/student.queries.ts` | 🟢 NUSXA | `e507a2f33021` | — |
+| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
 | `src/shared/api/api-config.ts` | 🟢 NUSXA | `0e6a5d2a4cc7` | — |
 | `src/shared/api/api-error.ts` | 🟢 NUSXA | `3095f2c59319` | — |
@@ -178,6 +179,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/types/domain.ts` | 🟢 NUSXA | `8e02eaee77fd` | — |
 | `src/shared/types/dto.ts` | 🟢 NUSXA | `88f0bb9ba6c1` | — |
 | `src/shared/types/index.ts` | 🟢 NUSXA | `4aabcac82ddd` | — |
+| `src/shared/ui/button.tsx` | 🟡 MOSLASH | `693a56cdfe79` | farq qayd etilmagan — tekshiring |
+| `src/shared/ui/checkbox.tsx` | 🟡 MOSLASH | `073b5898e69d` | farq qayd etilmagan — tekshiring |
+| `src/shared/ui/input.tsx` | 🟡 MOSLASH | `52da1927077d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/palette.json` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |

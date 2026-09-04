@@ -32,6 +32,12 @@ module.exports = defineConfig([
       // taqiqlangan (MOBILE_PLAN §18.3) — shuning uchun uslub qoidasi manba
       // loyihaga moslashtiriladi, teskarisi emas.
       "@typescript-eslint/array-type": "off",
+
+      // Bu qoida HTML uchun: `&apos;` ni brauzer apostrofga aylantiradi.
+      // React Native'da esa `<Text>` uni MATN sifatida ko'rsatadi — ya'ni
+      // qoidaga bo'ysunish ekranda "o&apos;quvchi" chiqishiga olib keladi.
+      // O'zbekcha matnda apostrof deyarli har so'zda (o'quvchi, ta'lim).
+      "react/no-unescaped-entities": "off",
       // `export const ApiError = AppError` + bir nomli tip — eski nom uchun
       // ataylab qilingan alias (api-error.ts).
       "@typescript-eslint/no-redeclare": "off",

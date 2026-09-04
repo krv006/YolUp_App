@@ -1,0 +1,65 @@
+import { ROLES } from "@/shared/constants";
+
+export const PERMISSIONS = Object.freeze({
+  COURSE_VIEW: "course:view",
+  COURSE_CREATE: "course:create",
+  COURSE_UPDATE: "course:update",
+  COURSE_DELETE: "course:delete",
+  LESSON_VIEW: "lesson:view",
+  LESSON_CREATE: "lesson:create",
+  LESSON_UPDATE: "lesson:update",
+  ASSIGNMENT_VIEW: "assignment:view",
+  ASSIGNMENT_CREATE: "assignment:create",
+  ASSIGNMENT_SUBMIT: "assignment:submit",
+  SUBMISSION_REVIEW: "submission:review",
+  STUDENT_VIEW: "student:view",
+  ATTENDANCE_MANAGE: "attendance:manage",
+  GRADE_MANAGE: "grade:manage",
+  PAYMENT_VIEW: "payment:view",
+  USER_MANAGE: "user:manage",
+  /** Bildirishnoma yuborish — backendda `notification.send` (docs/COMPLETED_WORK.md §2). */
+  NOTIFICATION_SEND: "notification:send",
+});
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+export const ROLE_PERMISSIONS: Record<string, readonly (Permission | "*")[]> = Object.freeze({
+  [ROLES.SUPER_ADMIN]: ["*"],
+  [ROLES.ADMIN]: [
+    PERMISSIONS.COURSE_VIEW,
+    PERMISSIONS.COURSE_CREATE,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.COURSE_DELETE,
+    PERMISSIONS.STUDENT_VIEW,
+    PERMISSIONS.PAYMENT_VIEW,
+    PERMISSIONS.USER_MANAGE,
+    PERMISSIONS.NOTIFICATION_SEND,
+  ],
+  [ROLES.TEACHER]: [
+    PERMISSIONS.COURSE_VIEW,
+    PERMISSIONS.COURSE_CREATE,
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.LESSON_VIEW,
+    PERMISSIONS.LESSON_CREATE,
+    PERMISSIONS.LESSON_UPDATE,
+    PERMISSIONS.ASSIGNMENT_VIEW,
+    PERMISSIONS.ASSIGNMENT_CREATE,
+    PERMISSIONS.SUBMISSION_REVIEW,
+    PERMISSIONS.STUDENT_VIEW,
+    PERMISSIONS.ATTENDANCE_MANAGE,
+    PERMISSIONS.GRADE_MANAGE,
+  ],
+  [ROLES.STUDENT]: [
+    PERMISSIONS.COURSE_VIEW,
+    PERMISSIONS.LESSON_VIEW,
+    PERMISSIONS.ASSIGNMENT_VIEW,
+    PERMISSIONS.ASSIGNMENT_SUBMIT,
+  ],
+  [ROLES.PARENT]: [
+    PERMISSIONS.COURSE_VIEW,
+    PERMISSIONS.LESSON_VIEW,
+    PERMISSIONS.ASSIGNMENT_VIEW,
+    PERMISSIONS.STUDENT_VIEW,
+    PERMISSIONS.PAYMENT_VIEW,
+  ],
+});

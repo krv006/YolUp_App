@@ -123,4 +123,31 @@ module.exports = defineConfig([
       ],
     },
   },
+
+  // Navigatsiya — istisno.
+  // Veb loyihada `model/` qatlami `react-router-dom` ni ishlatishi mumkin
+  // (masalan `use-chat.ts`: guruhdan chiqarilganda ro'yxatga qaytariladi).
+  // Mobilda uning ekvivalenti `expo-router`, shuning uchun aynan shu paket
+  // MODEL qatlamida ochiq qoladi — qolgan platforma paketlari baribir yopiq.
+  {
+    files: ["src/modules/*/model/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["react-native", "react-native/*", "nativewind"],
+              message:
+                "Domen qatlami platformadan mustaqil bo'lishi kerak. Platforma kodi @/shared/api yoki @/shared/lib ichida.",
+            },
+            {
+              group: ["@/app/**", "@/pages/**", "@/widgets/**"],
+              message: "Domain modul app, page yoki widget qatlamini import qilmasligi kerak.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

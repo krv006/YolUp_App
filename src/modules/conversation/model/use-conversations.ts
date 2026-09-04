@@ -1,0 +1,67 @@
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import type { Page } from "@/shared/api";
+import type { Conversation, ConversationRole } from "@/shared/types";
+import { conversationApi } from "../api/conversation.api";
+import type { DirectAction } from "../api/conversation.dto";
+import { conversationKeys } from "./conversation.keys";
+
+export function useConversations(role: ConversationRole = "teacher") {
+  return useQuery({
+    queryKey: conversationKeys.list(role),
+    queryFn: ({ signal }) => conversationApi.getAll({ signal }),
+    select: (page) => page.items,
+  });
+}
+
+/**
+ * Yon paneldagi ro'yxatdan bitta suhbatni oladi.
+ *
+ * Ro'yxat ham, detal ham `mapConversationDto` orqali bir xil shaklga keladi,
+ * shuning uchun chat sahifasi detal so'rovi kelguncha shu nusxani ko'rsatib
+ * turishi mumkin — skeleton umuman chiqmaydi.
+ */
+export function readCachedConversation(
+  client: QueryClient,
+  id: string | undefined,
+  role: ConversationRole = "teacher"
+): Conversation | undefined {
+  if (!id) return undefined;
+  const page = client.getQueryData<Page<Conversation>>(conversationKeys.list(role));
+  return page?.items.find((item) => item.id === id);
+}
+
+/** `enabled` — o'qituvchilar ro'yxati faqat dialog ochilganda kerak. */
+export function useTeachersForDirect(enabled = true) {
+  return useQuery({
+    queryKey: ["conversations", "teachers"],
+    queryFn: ({ signal }) => conversationApi.getTeachers({ signal }),
+    enabled,
+  });
+}
+
+export function useRequestDirect() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (teacherId: string) => conversationApi.requestDirect(teacherId),
+    onSuccess: () => client.invalidateQueries({ queryKey: conversationKeys.all }),
+  });
+}
+
+/** Guruh chat rasmini o'rnatish (o'qituvchi). */
+export function useSetRoomImage() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roomId, image }: { roomId: string; image: File }) =>
+      conversationApi.setRoomImage(roomId, image),
+    onSuccess: () => client.invalidateQueries({ queryKey: conversationKeys.all }),
+  });
+}
+
+export function useRespondDirect() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ roomId, action }: { roomId: string; action: DirectAction }) =>
+      conversationApi.respondDirect(roomId, action),
+    onSuccess: () => client.invalidateQueries({ queryKey: conversationKeys.all }),
+  });
+}

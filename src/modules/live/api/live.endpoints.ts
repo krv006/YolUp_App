@@ -1,0 +1,16 @@
+export const liveEndpoints = Object.freeze({
+  token: "/api/v1/live/token/",
+  leave: "/api/v1/live/leave/",
+  attention: "/api/v1/live/attention/",
+  focus: "/api/v1/live/focus/",
+  allowShare: "/api/v1/live/allow-share/",
+  requestMic: "/api/v1/live/request-mic/",
+  grantMic: "/api/v1/live/grant-mic/",
+  denyMic: "/api/v1/live/deny-mic/",
+  requestCamera: "/api/v1/live/request-camera/",
+  grantCamera: "/api/v1/live/grant-camera/",
+  denyCamera: "/api/v1/live/deny-camera/",
+  invite: "/api/v1/live/invite/",
+  ban: "/api/v1/live/ban/",
+  unban: "/api/v1/live/unban/",
+});

@@ -1,0 +1,9 @@
+# Repoda har doim LF saqlanadi; Windows'da ish nusxasi CRLF bo'lishi mumkin.
+# Busiz har commit'da "LF will be replaced by CRLF" ogohlantirishlari chiqadi
+# va veb loyiha bilan `check-sync` solishtiruvi shovqinga to'ladi.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ttf binary
+*.otf binary

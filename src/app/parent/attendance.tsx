@@ -1,10 +1,5 @@
-import { Screen, ScreenEmpty } from "@/shared/ui";
+import { ParentAttendancePage } from "@/pages/parent/parent-attendance-page";
 
-/** Faza 3 */
 export default function ParentAttendanceRoute() {
-  return (
-    <Screen>
-      <ScreenEmpty title="Davomat" description="Bu bo'lim Faza 3 da qo'shiladi." />
-    </Screen>
-  );
+  return <ParentAttendancePage />;
 }

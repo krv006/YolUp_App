@@ -32,3 +32,6 @@ export {
 } from "./model/parent.queries";
 export { useSelectedChild, useSelectedChildStore } from "./model/selected-child.store";
 export type { UseSelectedChildResult } from "./model/selected-child.store";
+
+// --- Mobil UI ---
+export { ChildSelector, SelectedChildHeader } from "./ui/child-selector";

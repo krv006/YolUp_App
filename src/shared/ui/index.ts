@@ -1,3 +1,5 @@
+export { Sheet } from "./sheet";
+export type { SheetProps } from "./sheet";
 export { Avatar } from "./avatar";
 export type { AvatarProps, AvatarSize, AvatarTone } from "./avatar";
 export { Badge, CountBadge } from "./badge";

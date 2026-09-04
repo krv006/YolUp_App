@@ -1,5 +1,5 @@
-import { HomePlaceholderPage } from "@/pages/home-placeholder-page";
+import { ParentDashboardPage } from "@/pages/parent/parent-dashboard-page";
 
 export default function ParentDashboardRoute() {
-  return <HomePlaceholderPage area="Ota-ona paneli" />;
+  return <ParentDashboardPage />;
 }

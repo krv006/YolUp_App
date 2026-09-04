@@ -1,10 +1,5 @@
-import { Screen, ScreenEmpty } from "@/shared/ui";
+import { SchedulePage } from "@/pages/schedule/schedule-page";
 
-/** Faza 3 */
-export default function StudentScheduleRoute() {
-  return (
-    <Screen>
-      <ScreenEmpty title="Dars jadvali" description="Bu bo'lim Faza 3 da qo'shiladi." />
-    </Screen>
-  );
+export default function ScheduleRoute() {
+  return <SchedulePage />;
 }

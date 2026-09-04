@@ -1,10 +1,5 @@
-import { Screen, ScreenEmpty } from "@/shared/ui";
+import { ParentChildrenPage } from "@/pages/parent/parent-children-page";
 
-/** Faza 3 */
 export default function ParentChildrenRoute() {
-  return (
-    <Screen>
-      <ScreenEmpty title="Farzandlar" description="Bu bo'lim Faza 3 da qo'shiladi." />
-    </Screen>
-  );
+  return <ParentChildrenPage />;
 }

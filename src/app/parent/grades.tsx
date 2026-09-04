@@ -1,10 +1,5 @@
-import { Screen, ScreenEmpty } from "@/shared/ui";
+import { ParentGradesPage } from "@/pages/parent/parent-grades-page";
 
-/** Faza 3 */
 export default function ParentGradesRoute() {
-  return (
-    <Screen>
-      <ScreenEmpty title="Reyting" description="Bu bo'lim Faza 3 da qo'shiladi." />
-    </Screen>
-  );
+  return <ParentGradesPage />;
 }

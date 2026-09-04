@@ -1,10 +1,5 @@
-import { Screen, ScreenEmpty } from "@/shared/ui";
+import { ReportPage } from "@/pages/report/report-page";
 
-/** Faza 3 */
 export default function StudentReportRoute() {
-  return (
-    <Screen>
-      <ScreenEmpty title="Reyting" description="Bu bo'lim Faza 3 da qo'shiladi." />
-    </Screen>
-  );
+  return <ReportPage />;
 }

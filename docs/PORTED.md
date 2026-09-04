@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **115**
-- 🟡/🔴 moslashtirilgan: **43**
+- 🟡/🔴 moslashtirilgan: **47**
 - 🆕 mobilga xos: **5**
-- Jami: **163**
+- Jami: **167**
 
 ## Fayllar
 
@@ -90,6 +90,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `707bc7bdd871` | — |
 | `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `c6134f9edb5c` | — |
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `0ec6144f32c9` | — |
+| `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `b1cd81660536` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `f93d64607dd8` | — |
 | `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `d7972958badd` | — |
 | `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `d87faa16509a` | — |
@@ -100,6 +101,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `e4595502465f` | — |
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `32243c91e8da` | — |
 | `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `9a44b4a54d5d` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
+| `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `111c8b0a89c6` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `865100a4509c` | — |
 | `src/modules/live/api/live.endpoints.ts` | 🟢 NUSXA | `aa9f29631b19` | — |
@@ -153,6 +155,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/student/model/student.queries.ts` | 🟢 NUSXA | `e507a2f33021` | — |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
+| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
 | `src/shared/api/api-config.ts` | 🟢 NUSXA | `0e6a5d2a4cc7` | — |
 | `src/shared/api/api-error.ts` | 🟢 NUSXA | `3095f2c59319` | — |
@@ -193,6 +196,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/checkbox.tsx` | 🟡 MOSLASH | `073b5898e69d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/input.tsx` | 🟡 MOSLASH | `52da1927077d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/palette.json` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
+| `src/shared/ui/sheet.tsx` | 🟡 MOSLASH | `ef338bb871e5` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 

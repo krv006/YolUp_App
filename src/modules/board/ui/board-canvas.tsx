@@ -2,11 +2,17 @@ import { useMemo } from "react";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import { Canvas, Group, Path, Skia } from "@shopify/react-native-skia";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS, useDerivedValue, useSharedValue } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
 import { useTheme } from "@/shared/ui";
 import type { Point, StrokeDto, StrokeShapeDto } from "../api/board.dto";
 import { buildStroke, MARKER_OPACITY, type DrawKind } from "../lib/board.geometry";
 import { BoardStroke, hitTestStroke, useBoardFont } from "./board-stroke";
+import { MathMarkup } from "./math-field-sheet";
 import type { BoardTool } from "./board-toolbar";
 
 export interface BoardCanvasProps {
@@ -230,7 +236,30 @@ export function BoardCanvas({
     tapGesture
   );
 
+  /** Canvas bilan bir xil transform — formula qatlami uni takrorlaydi. */
+  const overlayStyle = useAnimatedStyle(() => {
+    "worklet";
+    return {
+      transform: [
+        { translateX: translateX.get() },
+        { translateY: translateY.get() },
+        { scale: fit.get() * scale.get() },
+      ],
+    };
+  });
+
   const draftOpacity = drawKind === "marker" ? MARKER_OPACITY : 1;
+
+  /**
+   * Formula (`type: "math"`) Skia'da chizilmaydi — u yerda LaTeX dvigateli
+   * yo'q. Shuning uchun formulalar canvas USTIDAGI qatlamda, WebView bilan
+   * chiziladi va canvas bilan BIR XIL transform'ga bo'ysunadi (pastdagi
+   * `overlayStyle`), ya'ni kattalashtirilganda ular ham birga suriladi.
+   */
+  const mathStrokes = useMemo(
+    () => strokes.filter((stroke) => stroke.type === "math"),
+    [strokes]
+  );
 
   // Saqlangan stroke'lar React tomonda memo qilinadi — draft ularga tegmaydi.
   const rendered = useMemo(
@@ -269,6 +298,25 @@ export function BoardCanvas({
           </Group>
         </Canvas>
       </GestureDetector>
+
+      {/* Formulalar — teginishni o'tkazib yuboradi, chizishga xalaqit bermaydi. */}
+      {mathStrokes.length > 0 ? (
+        <Animated.View style={[styles.mathLayer, overlayStyle]} pointerEvents="none">
+          {mathStrokes.map((stroke) =>
+            stroke.type === "math" ? (
+              <View
+                key={stroke.id}
+                style={[
+                  styles.mathItem,
+                  { left: stroke.x, top: stroke.y - (stroke.size ?? 20) },
+                ]}
+              >
+                <MathMarkup latex={stroke.latex} size={stroke.size ?? 20} />
+              </View>
+            ) : null
+          )}
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
@@ -276,4 +324,15 @@ export function BoardCanvas({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   canvas: { flex: 1 },
+  // Canvas ustidagi qatlam: transform origini chap-yuqori burchakda
+  // bo'lishi shart, aks holda formulalar canvas bilan bir joyda turmaydi.
+  mathLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 1,
+    height: 1,
+    transformOrigin: "0 0",
+  },
+  mathItem: { position: "absolute", minWidth: 120 },
 });

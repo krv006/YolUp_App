@@ -13,6 +13,7 @@ import {
 import { ConversationItem } from "@/modules/conversation/ui/conversation-item";
 import { useLiveLessons } from "@/modules/lesson";
 import { useUnreadNotificationCount } from "@/modules/notification";
+import { NewGroupSheet } from "@/modules/conversation/ui/new-group-sheet";
 import { StudentEnrollmentSheet } from "@/modules/student";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import {
@@ -77,11 +78,12 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
 
   const basePath = role === "teacher" ? "/teacher/chats" : "/student/chats";
   /*
-   * "Yangi muloqot" faqat O'QUVCHIDA. Shaxsiy suhbatni faqat o'quvchi
-   * boshlay oladi (backend o'qituvchidan so'rovni qabul qilmaydi) va
-   * kursga ham faqat o'quvchi yoziladi — veb bilan bir xil qoida.
+   * FAB ikkala rolda ham bor, lekin BOSHQA ish qiladi:
+   *   o'quvchi  — kursga qo'shilish, o'qituvchiga so'rov (shaxsiy suhbatni
+   *               faqat o'quvchi boshlay oladi — backend qoidasi)
+   *   o'qituvchi — yangi kurs va guruh chat yaratish + yozilish so'rovlari
    */
-  const canStartConversation = role === "student";
+  const isStudent = role === "student";
 
   function openConversation(id: string) {
     router.push(`${basePath}/${id}`);
@@ -153,21 +155,27 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
         hasFilter={Boolean(search.trim()) || filter !== "all"}
       />
 
-      {canStartConversation ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Yangi muloqot: kursga qo'shilish yoki o'qituvchiga yozish"
-          onPress={() => setEnrollOpen(true)}
-          style={({ pressed }) => [
-            styles.fab,
-            { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
-          ]}
-        >
-          <Plus size={24} color={palette["primary-foreground"]} />
-        </Pressable>
-      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={
+          isStudent
+            ? "Yangi muloqot: kursga qo'shilish yoki o'qituvchiga yozish"
+            : "Yangi kurs va guruh chat yaratish"
+        }
+        onPress={() => setEnrollOpen(true)}
+        style={({ pressed }) => [
+          styles.fab,
+          { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
+        ]}
+      >
+        <Plus size={24} color={palette["primary-foreground"]} />
+      </Pressable>
 
-      <StudentEnrollmentSheet open={enrollOpen} onClose={() => setEnrollOpen(false)} />
+      {isStudent ? (
+        <StudentEnrollmentSheet open={enrollOpen} onClose={() => setEnrollOpen(false)} />
+      ) : (
+        <NewGroupSheet open={enrollOpen} onClose={() => setEnrollOpen(false)} />
+      )}
     </Screen>
   );
 }

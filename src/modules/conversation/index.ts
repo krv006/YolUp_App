@@ -29,3 +29,4 @@ export {
 export { ChatHeader } from "./ui/chat-header";
 export { ConversationItem } from "./ui/conversation-item";
 export { ConversationInfoSheet } from "./ui/conversation-info-sheet";
+export { NewGroupSheet } from "./ui/new-group-sheet";

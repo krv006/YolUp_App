@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CheckCircle2,
   LogOut,
+  Megaphone,
   Send,
   ShieldCheck,
   UsersRound,
@@ -16,7 +17,11 @@ import { useAttendancePage } from "@/modules/attendance";
 import { useAuth } from "@/modules/auth";
 import { useCoursePage } from "@/modules/course";
 import { useLessonPage } from "@/modules/lesson";
-import { SendNotificationSheet, useUnreadNotificationCount } from "@/modules/notification";
+import {
+  SendNotificationSheet,
+  SentNotificationsSheet,
+  useUnreadNotificationCount,
+} from "@/modules/notification";
 import { can, PERMISSIONS } from "@/modules/permission";
 import { ROUTES } from "@/shared/config";
 import {
@@ -45,6 +50,7 @@ export function AdminDashboardPage() {
   const { palette } = useTheme();
   const { user, logout } = useAuth();
   const [sendOpen, setSendOpen] = useState(false);
+  const [sentOpen, setSentOpen] = useState(false);
 
   const courses = useCoursePage({ page_size: 10 });
   const lessons = useLessonPage({ page_size: 10 });
@@ -159,6 +165,14 @@ export function AdminDashboardPage() {
                 chevron
                 onPress={() => setSendOpen(true)}
               />
+              <Separator inset={52} />
+              <ListItem
+                title="Yuborilgan xabarlar"
+                subtitle="Kim o'qigani bilan"
+                leading={<Megaphone size={20} color={palette["muted-foreground"]} />}
+                chevron
+                onPress={() => setSentOpen(true)}
+              />
             </>
           ) : null}
         </View>
@@ -201,6 +215,7 @@ export function AdminDashboardPage() {
       </ScrollView>
 
       <SendNotificationSheet open={sendOpen} onClose={() => setSendOpen(false)} />
+      <SentNotificationsSheet open={sentOpen} onClose={() => setSentOpen(false)} />
     </Screen>
   );
 }

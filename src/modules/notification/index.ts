@@ -46,3 +46,4 @@ export { useNotificationFeed } from "./model/use-notification-feed";
 // --- Mobil UI ---
 export { SendNotificationSheet } from "./ui/send-notification-sheet";
 export type { SendNotificationSheetProps } from "./ui/send-notification-sheet";
+export { SentNotificationsSheet } from "./ui/sent-notifications-sheet";

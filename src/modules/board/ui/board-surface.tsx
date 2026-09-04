@@ -10,6 +10,7 @@ import { useAddSheet, useAddStroke, useBoard, useEraseStrokes } from "../model/b
 import { useBoardRealtime } from "../model/use-board-realtime";
 import { AwayStudentsNotice } from "./away-students-notice";
 import { BoardCanvas } from "./board-canvas";
+import { MathFieldSheet } from "./math-field-sheet";
 import { BoardToolbar, type BoardTool } from "./board-toolbar";
 import {
   Badge,
@@ -88,6 +89,21 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
    */
   function commitStroke(stroke: StrokeShapeDto) {
     if (!realtime.sendStroke(sheet, stroke)) addStroke.mutate({ sheet, stroke });
+  }
+
+  /** Formula: matn state'iga tayanmaydi — qiymat to'g'ridan-to'g'ri keladi. */
+  function placeMath(latex: string) {
+    if (!placement) return;
+    commitStroke({
+      type: "math",
+      latex,
+      x: placement.point[0],
+      y: placement.point[1],
+      size: BOARD_TEXT_SIZE,
+      color,
+    });
+    setPlacement(null);
+    setDraftText("");
   }
 
   function placeText() {
@@ -230,24 +246,20 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
       />
 
       <Sheet
-        open={Boolean(placement)}
+        open={placement?.tool === "text"}
         onClose={() => setPlacement(null)}
-        title={placement?.tool === "math" ? "Formula qo'shish" : "Matn qo'shish"}
-        description={
-          placement?.tool === "math"
-            ? "LaTeX ko'rinishida yozing, masalan: \\frac{a}{b}"
-            : undefined
-        }
+        title="Matn qo'shish"
       >
-        <Input
-          value={draftText}
-          onChangeText={setDraftText}
-          placeholder={placement?.tool === "math" ? "\\frac{a}{b}" : "Matn"}
-          multiline
-          autoFocus
-        />
+        <Input value={draftText} onChangeText={setDraftText} placeholder="Matn" multiline autoFocus />
         <Button title="Qo'shish" disabled={!draftText.trim()} onPress={placeText} />
       </Sheet>
+
+      {/* Formula alohida oynada: u yozilayotgan LaTeX'ni jonli chizadi. */}
+      <MathFieldSheet
+        open={placement?.tool === "math"}
+        onClose={() => setPlacement(null)}
+        onSubmit={placeMath}
+      />
 
       <Sheet
         open={reasonOpen}

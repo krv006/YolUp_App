@@ -46,3 +46,4 @@ export { BoardToolbar } from "./ui/board-toolbar";
 export type { BoardTool, BoardToolbarProps } from "./ui/board-toolbar";
 export { AwayStudentsNotice } from "./ui/away-students-notice";
 export type { AwayStudentsNoticeProps } from "./ui/away-students-notice";
+export { MathFieldSheet, MathMarkup } from "./ui/math-field-sheet";

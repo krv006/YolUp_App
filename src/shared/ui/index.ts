@@ -1,3 +1,5 @@
+export { HtmlView } from "./html-view";
+export type { HtmlViewProps } from "./html-view";
 export { DateField, SelectField, TimeField } from "./pickers";
 export type { DateFieldProps, SelectFieldProps, SelectOption, TimeFieldProps } from "./pickers";
 export { Sheet } from "./sheet";

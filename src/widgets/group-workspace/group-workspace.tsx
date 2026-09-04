@@ -1,11 +1,19 @@
 import { StyleSheet, View } from "react-native";
-import { BookOpen, CalendarDays, ListChecks, UsersRound, type LucideIcon } from "lucide-react-native";
+import {
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
+  ListChecks,
+  UsersRound,
+  type LucideIcon,
+} from "lucide-react-native";
 import { Chip, ChipRow } from "@/shared/ui";
 import { AssignmentsSection } from "./assignments-section";
+import { AttendanceSection } from "./attendance-section";
 import { LessonsSection } from "./lessons-section";
 import { StudentsSection } from "./students-section";
 
-export type GroupTab = "chat" | "lessons" | "assignments" | "students";
+export type GroupTab = "chat" | "lessons" | "assignments" | "students" | "attendance";
 
 interface TabDefinition {
   id: GroupTab;
@@ -20,6 +28,7 @@ const TABS: readonly TabDefinition[] = [
   { id: "lessons", label: "Darslar", icon: CalendarDays },
   { id: "assignments", label: "Vazifalar", icon: ListChecks },
   { id: "students", label: "O'quvchilar", icon: UsersRound, teacherOnly: true },
+  { id: "attendance", label: "Davomat", icon: CheckCircle2, teacherOnly: true },
 ];
 
 export function GroupTabsRow({
@@ -78,6 +87,7 @@ export function GroupWorkspaceSection({
         <AssignmentsSection courseId={courseId} isTeacher={isTeacher} subject={subject} />
       ) : null}
       {tab === "students" ? <StudentsSection courseId={courseId} /> : null}
+      {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}
     </View>
   );
 }

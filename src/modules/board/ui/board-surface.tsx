@@ -8,6 +8,7 @@ import type { Point, StrokeShapeDto } from "../api/board.dto";
 import { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "../constants/board.constants";
 import { useAddSheet, useAddStroke, useBoard, useEraseStrokes } from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
+import { AwayStudentsNotice } from "./away-students-notice";
 import { BoardCanvas } from "./board-canvas";
 import { BoardToolbar, type BoardTool } from "./board-toolbar";
 import {
@@ -192,6 +193,9 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
           ))}
         </ChipRow>
       ) : null}
+
+      {/* Chiqib ketganlar — faqat o'qituvchida, doska so'rovini baham ko'radi. */}
+      <AwayStudentsNotice lessonId={lessonId} enabled={Boolean(state.isTeacher)} />
 
       <BoardCanvas
         strokes={active?.strokes ?? []}

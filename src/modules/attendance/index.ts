@@ -11,3 +11,7 @@ export { mapAttendanceDto, mapAttendancePage } from "./lib/attendance.mappers";
 export { attendanceKeys, useAttendance, useAttendancePage } from "./model/attendance.queries";
 export { groupAttendanceByLesson } from "./lib/group-by-lesson";
 export type { LessonAttendanceGroup } from "./lib/group-by-lesson";
+
+// --- Mobil UI ---
+export { AttendanceList } from "./ui/attendance-list";
+export type { AttendanceListProps } from "./ui/attendance-list";

@@ -38,3 +38,7 @@ export { useCameraSignals } from "./model/use-camera-signals";
 export type { CameraRequest } from "./model/use-camera-signals";
 export { useMicSignals } from "./model/use-mic-signals";
 export type { MicRequest } from "./model/use-mic-signals";
+
+// --- Mobil UI ---
+export { LessonInviteSheet } from "./ui/lesson-invite-sheet";
+export type { LessonInviteSheetProps } from "./ui/lesson-invite-sheet";

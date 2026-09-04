@@ -8,11 +8,11 @@ import {
   type TrackReferenceOrPlaceholder,
 } from "@livekit/react-native";
 import { ConnectionState, Track } from "livekit-client";
-import { MicOff, MonitorUp } from "lucide-react-native";
+import { MicOff, MonitorUp, UserRoundPlus } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { BoardSurface } from "@/modules/board";
-import { useCameraSignals, useMicSignals } from "@/modules/live";
-import { Avatar, Badge, Chip, ChipRow, radius, Text, useTheme } from "@/shared/ui";
+import { LessonInviteSheet, useCameraSignals, useMicSignals } from "@/modules/live";
+import { Avatar, Badge, Chip, ChipRow, IconButton, radius, Text, useTheme } from "@/shared/ui";
 import { LiveControls } from "./live-controls";
 import { LiveWatermark } from "./live-watermark";
 
@@ -52,6 +52,7 @@ export function LiveRoom({
   const { user } = useAuth();
   const { width } = useWindowDimensions();
   const [tab, setTab] = useState<LiveTab>("video");
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const connection = useConnectionState();
   const participants = useParticipants();
@@ -96,6 +97,12 @@ export function LiveRoom({
           </Text>
         </View>
         {screenTrack ? <Badge label="Ekran ulashilmoqda" tone="brand" /> : null}
+
+        {isTeacher ? (
+          <IconButton accessibilityLabel="Darsga taklif qilish" onPress={() => setInviteOpen(true)}>
+            <UserRoundPlus size={20} color={palette.foreground} />
+          </IconButton>
+        ) : null}
       </View>
 
       <ChipRow>
@@ -179,6 +186,13 @@ export function LiveRoom({
         onRequestCamera={cameraSignals.requestCamera}
         cameraRequesting={cameraSignals.requesting}
         cameraWaiting={cameraSignals.waiting}
+      />
+
+      <LessonInviteSheet
+        lessonId={lessonId}
+        courseId={courseId}
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
       />
     </View>
   );

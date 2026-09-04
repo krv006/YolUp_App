@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **117**
-- 🟡/🔴 moslashtirilgan: **56**
+- 🟡/🔴 moslashtirilgan: **57**
 - 🆕 mobilga xos: **5**
-- Jami: **178**
+- Jami: **179**
 
 ## Fayllar
 
@@ -65,6 +65,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/model/board.queries.ts` | 🟢 NUSXA | `68694539eaf7` | — |
 | `src/modules/board/model/use-board-channel.ts` | 🟢 NUSXA | `d5b7970375ab` | — |
 | `src/modules/board/model/use-board-realtime.ts` | 🟢 NUSXA | `ba27436ef0f2` | — |
+| `src/modules/board/ui/away-students-notice.tsx` | 🟡 MOSLASH | `86e30eba5686` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `4821801d0b13` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |
 | `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `979cd2dfe197` | — |

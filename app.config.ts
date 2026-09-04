@@ -62,6 +62,25 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         backgroundColor: "#f5f7fa",
       },
       predictiveBackGestureEnabled: false,
+      /*
+       * LiveKit/WebRTC uchun ruxsatlar. `@livekit/react-native` da Expo
+       * config plugini YO'Q, shuning uchun ular shu yerda qo'lda beriladi —
+       * aks holda prebuild'dan keyin kamera va mikrofon jimgina ishlamaydi.
+       */
+      permissions: [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        // Simsiz quloqchin bilan gapirish uchun.
+        "android.permission.BLUETOOTH_CONNECT",
+        // Dars fon rejimiga o'tganda ovoz uzilmasligi uchun.
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        // Ekran ulashish (Android; iOS'da Broadcast Extension kerak — v1.1).
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+      ],
     },
     plugins: [
       "expo-router",
@@ -73,6 +92,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           resizeMode: "contain",
           backgroundColor: "#f5f7fa",
           dark: { backgroundColor: "#0f1319" },
+        },
+      ],
+      // Dars yozuvini "picture in picture" da ko'rish uchun.
+      ["expo-video", { supportsPictureInPicture: true }],
+      [
+        "expo-build-properties",
+        {
+          // WebRTC minimal Android API 24 talab qiladi.
+          android: { minSdkVersion: 24 },
+          // Expo SDK 57 ning minimal talabi (LiveKit undan pastini kutadi).
+          ios: { deploymentTarget: "16.4" },
         },
       ],
     ],

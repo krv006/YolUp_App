@@ -40,6 +40,8 @@ export type { DrawKind } from "./lib/board.geometry";
 export { BoardCanvas } from "./ui/board-canvas";
 export type { BoardCanvasProps } from "./ui/board-canvas";
 export { BoardStroke, hitTestStroke, useBoardFont } from "./ui/board-stroke";
+export { BoardSurface } from "./ui/board-surface";
+export type { BoardSurfaceProps } from "./ui/board-surface";
 export { BoardToolbar } from "./ui/board-toolbar";
 export type { BoardTool, BoardToolbarProps } from "./ui/board-toolbar";
 

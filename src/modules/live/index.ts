@@ -34,4 +34,7 @@ export {
   useUnbanFromLesson,
 } from "./model/live.queries";
 
-// Faza 4 (LiveKit) ga qoldirilgan: useCameraSignals, useMicSignals -> model/_deferred/
+export { useCameraSignals } from "./model/use-camera-signals";
+export type { CameraRequest } from "./model/use-camera-signals";
+export { useMicSignals } from "./model/use-mic-signals";
+export type { MicRequest } from "./model/use-mic-signals";

@@ -23,10 +23,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **115**
-- 🟡/🔴 moslashtirilgan: **53**
+- 🟢 NUSXA: **117**
+- 🟡/🔴 moslashtirilgan: **55**
 - 🆕 mobilga xos: **5**
-- Jami: **173**
+- Jami: **177**
 
 ## Fayllar
 
@@ -114,6 +114,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/live/lib/screen-share-signal.ts` | 🟢 NUSXA | `b5c1de5417ea` | — |
 | `src/modules/live/lib/use-focus-tracker.ts` | 🔴 QAYTA | `fa7446fcc285` | visibilitychange/blur -> AppState; iOS `inactive` filtrlanadi |
 | `src/modules/live/model/live.queries.ts` | 🟢 NUSXA | `3c140339b7b0` | — |
+| `src/modules/live/model/use-camera-signals.ts` | 🟢 NUSXA | `1228853f5af6` | — |
+| `src/modules/live/model/use-mic-signals.ts` | 🟢 NUSXA | `0bfe2f48ef49` | — |
 | `src/modules/message/api/message.api.ts` | 🟢 NUSXA | `b5f453550de6` | — |
 | `src/modules/message/api/message.dto.ts` | 🟢 NUSXA | `71e170c44c16` | — |
 | `src/modules/message/api/message.endpoints.ts` | 🟢 NUSXA | `8427678cbb4f` | — |
@@ -159,6 +161,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
+| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | farq qayd etilmagan — tekshiring |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
@@ -205,6 +208,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/widgets/group-workspace/group-workspace.tsx` | 🟡 MOSLASH | `17d7db1ac265` | farq qayd etilmagan — tekshiring |
+| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `770a6277c18c` | farq qayd etilmagan — tekshiring |
 
 ## Ataylab ko'chirilmagan
 

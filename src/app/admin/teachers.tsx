@@ -1,12 +1,12 @@
-import { AdminDashboardPage } from "@/pages/admin/admin-dashboard-page";
+import { AdminTeachersPage } from "@/pages/admin/admin-teachers-page";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { ROLES } from "@/shared/constants";
 
-export default function AdminDashboardRoute() {
+export default function AdminTeachersRoute() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
-        <AdminDashboardPage />
+        <AdminTeachersPage />
       </RoleRoute>
     </ProtectedRoute>
   );

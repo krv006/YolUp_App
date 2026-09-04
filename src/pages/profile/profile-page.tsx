@@ -5,12 +5,14 @@ import { useRouter } from "expo-router";
 import {
   Bell,
   History,
+  Pencil,
   LogOut,
   Moon,
   ShieldCheck,
   Smartphone,
 } from "lucide-react-native";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
+import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
 import { useUnreadNotificationCount } from "@/modules/notification";
 import { env, ROUTES } from "@/shared/config";
 import { formatDayTime } from "@/shared/lib";
@@ -19,6 +21,7 @@ import {
   Badge,
   Button,
   CountBadge,
+  IconButton,
   ListItem,
   radius,
   Screen,
@@ -41,6 +44,7 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
   const { user, logout } = useAuth();
   const unread = useUnreadNotificationCount();
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   async function signOut() {
     await logout();
@@ -59,6 +63,9 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
             </Text>
             <Badge label={roleLabel} tone="brand" />
           </View>
+          <IconButton accessibilityLabel="Profilni tahrirlash" onPress={() => setEditOpen(true)}>
+            <Pencil size={20} color={palette["muted-foreground"]} />
+          </IconButton>
         </View>
 
         {/* O'qituvchi tasdiqlanmagan bo'lsa — veb'dagi kabi ogohlantirish. */}
@@ -130,6 +137,7 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
       </ScrollView>
 
       <LoginHistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} />
+      <ProfileEditSheet user={user} open={editOpen} onClose={() => setEditOpen(false)} />
     </Screen>
   );
 }

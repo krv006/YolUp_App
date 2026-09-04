@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
+import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
 import { useLiveLessons } from "@/modules/lesson";
 import { useChat } from "@/modules/message";
 import { MessageActionsSheet } from "@/modules/message/ui/message-actions-sheet";
@@ -35,6 +36,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
   const [tab, setTab] = useState<GroupTab>("chat");
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const chat = useChat(conversationId, { role, senderId: user?.id ?? null });
   const conversation = chat.conversation.data;
@@ -96,6 +98,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
       <ChatHeader
         conversation={conversation}
         onBack={goBack}
+        onOpenInfo={() => setInfoOpen(true)}
         socketOffline={chat.socketState !== "connected"}
         onJoinLive={liveLesson ? () => router.push(`/live/${liveLesson.id}`) : undefined}
       />
@@ -146,6 +149,12 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         message={actionMessage}
         onClose={() => setActionMessage(null)}
         onReply={setReplyTo}
+      />
+
+      <ConversationInfoSheet
+        conversation={conversation}
+        open={infoOpen}
+        onClose={() => setInfoOpen(false)}
       />
     </View>
   );

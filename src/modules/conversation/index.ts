@@ -28,3 +28,4 @@ export {
 // --- Mobil UI ---
 export { ChatHeader } from "./ui/chat-header";
 export { ConversationItem } from "./ui/conversation-item";
+export { ConversationInfoSheet } from "./ui/conversation-info-sheet";

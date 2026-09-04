@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { ArrowLeft, Video } from "lucide-react-native";
 import type { Conversation } from "@/shared/types";
 import { Avatar, IconButton, Text, useTheme } from "@/shared/ui";
@@ -6,6 +6,8 @@ import { Avatar, IconButton, Text, useTheme } from "@/shared/ui";
 export interface ChatHeaderProps {
   conversation: Conversation;
   onBack: () => void;
+  /** Sarlavha bosilganda — suhbat ma'lumoti oynasi. */
+  onOpenInfo?: () => void;
   /** Shu guruhda dars ketyapti — tugma darsga olib kiradi. */
   onJoinLive?: () => void;
   socketOffline?: boolean;
@@ -18,7 +20,13 @@ export interface ChatHeaderProps {
  * uchraydi; mobilda esa tarmoq muntazam uziladi va foydalanuvchi nega yangi
  * xabar kelmayotganini bilishi kerak (§9.1).
  */
-export function ChatHeader({ conversation, onBack, onJoinLive, socketOffline }: ChatHeaderProps) {
+export function ChatHeader({
+  conversation,
+  onBack,
+  onOpenInfo,
+  onJoinLive,
+  socketOffline,
+}: ChatHeaderProps) {
   const { palette } = useTheme();
 
   const subtitle = socketOffline
@@ -40,26 +48,34 @@ export function ChatHeader({ conversation, onBack, onJoinLive, socketOffline }: 
         <ArrowLeft size={22} color={palette.foreground} />
       </IconButton>
 
-      <Avatar
-        name={conversation.title}
-        tone={conversation.avatarTone}
-        src={conversation.imageUrl}
-        size="md"
-        status={conversation.type === "direct" ? conversation.status : undefined}
-      />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${conversation.title} ma'lumotlarini ochish`}
+        onPress={onOpenInfo}
+        disabled={!onOpenInfo}
+        style={({ pressed }) => [styles.identityRow, pressed && { opacity: 0.8 }]}
+      >
+        <Avatar
+          name={conversation.title}
+          tone={conversation.avatarTone}
+          src={conversation.imageUrl}
+          size="md"
+          status={conversation.type === "direct" ? conversation.status : undefined}
+        />
 
-      <View style={styles.identity}>
-        <Text variant="label" numberOfLines={1}>
-          {conversation.title}
-        </Text>
-        <Text
-          variant="caption"
-          tone={socketOffline ? "danger" : "muted"}
-          numberOfLines={1}
-        >
-          {subtitle}
-        </Text>
-      </View>
+        <View style={styles.identity}>
+          <Text variant="label" numberOfLines={1}>
+            {conversation.title}
+          </Text>
+          <Text
+            variant="caption"
+            tone={socketOffline ? "danger" : "muted"}
+            numberOfLines={1}
+          >
+            {subtitle}
+          </Text>
+        </View>
+      </Pressable>
 
       {onJoinLive ? (
         <IconButton accessibilityLabel="Jonli darsga kirish" onPress={onJoinLive}>
@@ -79,5 +95,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  identityRow: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10 },
   identity: { flex: 1, gap: 2 },
 });

@@ -41,3 +41,6 @@ export {
 export { mapCertificateDto, mapLoginRequest, mapTokenPairDto, mapUserDto } from "./lib/auth.mappers";
 export { resolveHomeRoute } from "./lib/resolve-home-route";
 export { describeCreateError } from "./lib/teacher-approval";
+
+// --- Mobil UI ---
+export { ProfileEditSheet } from "./ui/profile-edit-sheet";

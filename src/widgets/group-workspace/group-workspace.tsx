@@ -62,14 +62,21 @@ export function GroupTabsRow({
 export function GroupWorkspaceSection({
   tab,
   courseId,
+  isTeacher = false,
+  subject = "",
 }: {
   tab: Exclude<GroupTab, "chat">;
   courseId: string;
+  isTeacher?: boolean;
+  /** Kurs fani — vazifa oynasidagi "tekshiruv turi" tanlovi shunga bog'liq. */
+  subject?: string;
 }) {
   return (
     <View style={styles.root}>
-      {tab === "lessons" ? <LessonsSection courseId={courseId} /> : null}
-      {tab === "assignments" ? <AssignmentsSection courseId={courseId} /> : null}
+      {tab === "lessons" ? <LessonsSection courseId={courseId} isTeacher={isTeacher} /> : null}
+      {tab === "assignments" ? (
+        <AssignmentsSection courseId={courseId} isTeacher={isTeacher} subject={subject} />
+      ) : null}
       {tab === "students" ? <StudentsSection courseId={courseId} /> : null}
     </View>
   );

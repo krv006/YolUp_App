@@ -107,7 +107,12 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
       ) : null}
 
       {courseId && tab !== "chat" ? (
-        <GroupWorkspaceSection tab={tab} courseId={courseId} />
+        <GroupWorkspaceSection
+          tab={tab}
+          courseId={courseId}
+          isTeacher={role === "teacher"}
+          subject={conversation.subject ?? ""}
+        />
       ) : (
         <KeyboardAvoidingView
           style={styles.body}

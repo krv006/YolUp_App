@@ -1,43 +1,83 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useLessons } from "@/modules/lesson";
+import { Plus } from "lucide-react-native";
+import { FinishLessonSheet, LessonRatingsSheet, useLessons } from "@/modules/lesson";
 import { LessonCard } from "@/modules/lesson/ui/lesson-card";
 import { ROUTES } from "@/shared/config";
 import type { Lesson } from "@/shared/types";
-import { ScreenEmpty, ScreenLoading } from "@/shared/ui";
+import { Button, ScreenEmpty, ScreenLoading, useTheme } from "@/shared/ui";
+import { AddLessonSheet } from "./add-lesson-sheet";
 
 /**
  * Guruhning darslari — veb `group-workspace.tsx` ning "Darslar" bo'limi.
  *
- * Dars YARATISH bu yerda yo'q: u forma, sana tanlash va haftalik jadval
- * generatori talab qiladi — o'qituvchi buni odatda kompyuterda qiladi.
- * Mobilda asosiy ehtiyoj darsga KIRISH va yozuvni ko'rish.
+ * O'qituvchida: dars yaratish (bitta yoki haftalik jadval), jonli darsni
+ * yakunlash va qo'yilgan baholarni ko'rish. O'quvchida: kirish va yozuv.
  */
-export function LessonsSection({ courseId }: { courseId: string }) {
+export function LessonsSection({
+  courseId,
+  isTeacher = false,
+}: {
+  courseId: string;
+  isTeacher?: boolean;
+}) {
   const router = useRouter();
+  const { palette } = useTheme();
+  const [addOpen, setAddOpen] = useState(false);
+  const [finishTarget, setFinishTarget] = useState<Lesson | null>(null);
+  const [ratingsTarget, setRatingsTarget] = useState<Lesson | null>(null);
   const lessons = useLessons({ course: courseId, page_size: 100 }, Boolean(courseId));
 
   if (lessons.isLoading) return <ScreenLoading label="Darslar yuklanmoqda…" />;
 
   const items = lessons.data ?? [];
-  if (items.length === 0) {
-    return <ScreenEmpty title="Dars yo'q" description="Bu guruhda hali dars rejalashtirilmagan." />;
-  }
 
   return (
-    <ScrollView contentContainerStyle={styles.list}>
-      {items.map((lesson: Lesson) => (
-        <LessonCard
-          key={lesson.id}
-          lesson={lesson}
-          onJoin={(item) => router.push(ROUTES.live(item.id))}
-          onRecording={(item) => router.push(ROUTES.recording(item.id))}
-        />
-      ))}
-    </ScrollView>
+    <View style={styles.root}>
+      <ScrollView contentContainerStyle={styles.list}>
+        {isTeacher ? (
+          <Button
+            title="Dars qo'shish"
+            variant="secondary"
+            icon={<Plus size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => setAddOpen(true)}
+          />
+        ) : null}
+
+        {items.length === 0 ? (
+          <ScreenEmpty title="Dars yo'q" description="Bu guruhda hali dars rejalashtirilmagan." />
+        ) : (
+          items.map((lesson: Lesson) => (
+            <LessonCard
+              key={lesson.id}
+              lesson={lesson}
+              onJoin={(item) => router.push(ROUTES.live(item.id))}
+              onRecording={(item) => router.push(ROUTES.recording(item.id))}
+              onFinish={isTeacher ? setFinishTarget : undefined}
+              onRatings={isTeacher ? setRatingsTarget : undefined}
+            />
+          ))
+        )}
+      </ScrollView>
+
+      <AddLessonSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        courseId={courseId}
+        existingLessons={items}
+      />
+      <FinishLessonSheet
+        lesson={finishTarget}
+        onClose={() => setFinishTarget(null)}
+        onFinished={() => void lessons.refetch()}
+      />
+      <LessonRatingsSheet lesson={ratingsTarget} onClose={() => setRatingsTarget(null)} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   list: { padding: 16, gap: 12 },
 });

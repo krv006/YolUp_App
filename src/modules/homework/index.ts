@@ -23,3 +23,5 @@ export { getHomeworkPollingInterval, homeworkKeys, useAssignment, useAssignments
 // --- Mobil UI ---
 export { HomeworkReportView } from "./ui/homework-report-view";
 export { HomeworkResultSheet } from "./ui/homework-result-sheet";
+export { SubmissionReviewSheet } from "./ui/submission-review-sheet";
+

@@ -1,14 +1,17 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { FileQuestion, History } from "lucide-react-native";
+import { FileQuestion, History, Plus } from "lucide-react-native";
 import { useCourses } from "@/modules/course";
-import { useQuizzes } from "@/modules/quiz";
+import { useAuth } from "@/modules/auth";
+import { ROLES } from "@/shared/constants";
+import { AddQuizSheet, useQuizzes } from "@/modules/quiz";
 import { formatDayTime } from "@/shared/lib";
 import type { QuizSummary } from "@/shared/types";
 import {
   Badge,
+  Button,
   IconButton,
   radius,
   Screen,
@@ -31,6 +34,9 @@ import {
 export function QuizzesPage({ basePath }: { basePath: string }) {
   const router = useRouter();
   const { palette } = useTheme();
+  const { user } = useAuth();
+  const [createOpen, setCreateOpen] = useState(false);
+  const isTeacher = user?.role === ROLES.TEACHER;
   const quizzes = useQuizzes(null);
   const courses = useCourses();
 
@@ -67,6 +73,14 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
         <Text variant="caption" tone="muted">
           Vaqt chegarasi yo'q — cheklanmagan qayta urinish.
         </Text>
+        {isTeacher ? (
+          <Button
+            title="Test yaratish"
+            variant="secondary"
+            icon={<Plus size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => setCreateOpen(true)}
+          />
+        ) : null}
       </View>
 
       {list.length === 0 ? (
@@ -96,6 +110,12 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
           )}
         />
       )}
+
+      <AddQuizSheet
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        courses={(courses.data ?? []).map((course) => ({ id: course.id, title: course.title }))}
+      />
     </Screen>
   );
 }

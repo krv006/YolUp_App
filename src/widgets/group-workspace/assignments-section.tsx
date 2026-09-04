@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { Camera, CheckCircle2, Clock3, FileUp, ImageIcon, Paperclip } from "lucide-react-native";
+import {
+  Camera,
+  CheckCircle2,
+  ClipboardList,
+  Clock3,
+  FileUp,
+  ImageIcon,
+  Paperclip,
+  Plus,
+} from "lucide-react-native";
 import {
   useAssignments,
   useDownloadAssignmentFile,
@@ -8,6 +17,9 @@ import {
   useSubmitHomework,
 } from "@/modules/homework";
 import { HomeworkResultSheet } from "@/modules/homework/ui/homework-result-sheet";
+import { SubmissionReviewSheet } from "@/modules/homework/ui/submission-review-sheet";
+import { useLessons } from "@/modules/lesson";
+import { AddAssignmentSheet } from "./add-assignment-sheet";
 import { formatDayTime, pickDocument, pickImage, toUploadFile, type PickedFile } from "@/shared/lib";
 import type { Assignment, Submission } from "@/shared/types";
 import {
@@ -35,27 +47,57 @@ function isOverdue(assignment: Assignment): boolean {
  * O'quvchi vazifani o'qiydi, faylini biriktiradi va topshiradi; AI natijasi
  * tayyor bo'lgach shu yerda ochiladi.
  */
-export function AssignmentsSection({ courseId }: { courseId: string }) {
+export function AssignmentsSection({
+  courseId,
+  isTeacher = false,
+  subject = "",
+}: {
+  courseId: string;
+  isTeacher?: boolean;
+  /** Kurs fani — til fanlarida vazifaga "tekshiruv turi" tanlovi qo'shiladi. */
+  subject?: string;
+}) {
   const { palette } = useTheme();
   const assignments = useAssignments(courseId);
+  // Darslar faqat o'qituvchiga kerak — vazifani tugagan darsga bog'lash uchun.
+  const lessons = useLessons({ course: courseId, page_size: 100 }, isTeacher && Boolean(courseId));
   const [selected, setSelected] = useState<Assignment | null>(null);
   const [resultOf, setResultOf] = useState<Submission | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [reviewOf, setReviewOf] = useState<Assignment | null>(null);
 
   if (assignments.isLoading) return <ScreenLoading label="Vazifalar yuklanmoqda…" />;
 
   const items = assignments.data ?? [];
-  if (items.length === 0) {
-    return <ScreenEmpty title="Vazifa yo'q" description="O'qituvchi vazifa berganda shu yerda ko'rinadi." />;
-  }
 
   return (
     <>
       <ScrollView contentContainerStyle={styles.list}>
+        {isTeacher ? (
+          <Button
+            title="Vazifa qo'shish"
+            variant="secondary"
+            icon={<Plus size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => setAddOpen(true)}
+          />
+        ) : null}
+
+        {items.length === 0 ? (
+          <ScreenEmpty
+            title="Vazifa yo'q"
+            description={
+              isTeacher
+                ? "Birinchi vazifani qo'shing."
+                : "O'qituvchi vazifa berganda shu yerda ko'rinadi."
+            }
+          />
+        ) : null}
+
         {items.map((assignment) => (
           <Pressable
             key={assignment.id}
             accessibilityRole="button"
-            onPress={() => setSelected(assignment)}
+            onPress={() => (isTeacher ? setReviewOf(assignment) : setSelected(assignment))}
             style={({ pressed }) => [
               styles.card,
               {
@@ -80,7 +122,14 @@ export function AssignmentsSection({ courseId }: { courseId: string }) {
             </View>
 
             <View style={styles.cardFoot}>
-              {assignment.mySubmission ? (
+              {isTeacher ? (
+                <View style={styles.teacherFoot}>
+                  <ClipboardList size={14} color={palette["muted-foreground"]} />
+                  <Text variant="caption" tone="muted">
+                    {assignment.submissionsCount ?? assignment.submissions.length} ta topshiriq
+                  </Text>
+                </View>
+              ) : assignment.mySubmission ? (
                 <SubmissionPill submission={assignment.mySubmission} onOpen={setResultOf} />
               ) : (
                 <Badge
@@ -99,6 +148,15 @@ export function AssignmentsSection({ courseId }: { courseId: string }) {
         onOpenResult={setResultOf}
       />
       <HomeworkResultSheet submission={resultOf} onClose={() => setResultOf(null)} />
+
+      <AddAssignmentSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        courseId={courseId}
+        lessons={lessons.data ?? []}
+        isLanguageSubject={/til|language|ingliz|english/i.test(subject)}
+      />
+      <SubmissionReviewSheet assignment={reviewOf} onClose={() => setReviewOf(null)} />
     </>
   );
 }
@@ -300,6 +358,7 @@ const styles = StyleSheet.create({
   cardHead: { flexDirection: "row", alignItems: "center", gap: 10 },
   cardBody: { flex: 1, gap: 3 },
   cardFoot: { flexDirection: "row" },
+  teacherFoot: { flexDirection: "row", alignItems: "center", gap: 6 },
   pill: {
     flexDirection: "row",
     alignItems: "center",

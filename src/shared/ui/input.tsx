@@ -4,7 +4,9 @@ import {
   StyleSheet,
   TextInput,
   View,
+  type StyleProp,
   type TextInputProps,
+  type TextStyle,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
@@ -18,6 +20,12 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
   icon?: React.ReactNode;
   /** Parol maydoni — ko'rsatish/yashirish tugmasi qo'shiladi. */
   secure?: boolean;
+  /**
+   * Maydonning O'ZIGA beriladigan uslub (balandlik, kenglik, tekislash).
+   * `style` ataylab ochilmadi: u o'ramga (yorliq + xato) tegishlimi yoki
+   * maydonga — noaniq bo'lardi.
+   */
+  inputStyle?: StyleProp<TextStyle>;
 }
 
 /**
@@ -28,7 +36,7 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
  * foydalanuvchi uchun ham, screen reader uchun ham.
  */
 export const Input = forwardRef<TextInput, InputProps>(function Input(
-  { label, error, icon, secure = false, ...rest },
+  { label, error, icon, secure = false, inputStyle, ...rest },
   ref
 ) {
   const { palette } = useTheme();
@@ -54,7 +62,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
         {icon ? <View style={styles.icon}>{icon}</View> : null}
         <TextInput
           ref={ref}
-          style={[styles.input, { color: palette.foreground }]}
+          style={[styles.input, { color: palette.foreground }, inputStyle]}
           placeholderTextColor={palette["muted-foreground"]}
           secureTextEntry={secure && !revealed}
           autoCapitalize="none"

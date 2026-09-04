@@ -4,12 +4,14 @@ import { useRouter } from "expo-router";
 import { CalendarDays, List } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import {
+  FinishLessonSheet,
   formatDayTitle,
   groupLessonsByDay,
   resolveInitialMonth,
   toDayKey,
   useLessons,
   useLessonView,
+  RateLessonSheet,
 } from "@/modules/lesson";
 import { LessonCalendar } from "@/modules/lesson/ui/lesson-calendar";
 import { LessonCard } from "@/modules/lesson/ui/lesson-card";
@@ -44,6 +46,8 @@ export function SchedulePage() {
   const lessons = useLessons({ page_size: 200 });
   const items = useMemo(() => lessons.data ?? [], [lessons.data]);
 
+  const [rateTarget, setRateTarget] = useState<Lesson | null>(null);
+  const [finishTarget, setFinishTarget] = useState<Lesson | null>(null);
   const [month, setMonth] = useState<Date | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
@@ -64,8 +68,9 @@ export function SchedulePage() {
   const actions = {
     onJoin: (lesson: Lesson) => router.push(ROUTES.live(lesson.id)),
     onRecording: (lesson: Lesson) => router.push(ROUTES.recording(lesson.id)),
-    // Baholash dialogi Faza 3 ning keyingi qadamida qo'shiladi.
-    onRate: isStudent ? undefined : undefined,
+    // Baholash — faqat o'quvchida; yakunlash — faqat o'qituvchida.
+    onRate: isStudent ? setRateTarget : undefined,
+    onFinish: isStudent ? undefined : setFinishTarget,
   };
 
   if (lessons.isLoading) {
@@ -155,6 +160,13 @@ export function SchedulePage() {
           )}
         </ScrollView>
       )}
+
+      <RateLessonSheet lesson={rateTarget} onClose={() => setRateTarget(null)} />
+      <FinishLessonSheet
+        lesson={finishTarget}
+        onClose={() => setFinishTarget(null)}
+        onFinished={() => void lessons.refetch()}
+      />
     </Screen>
   );
 }

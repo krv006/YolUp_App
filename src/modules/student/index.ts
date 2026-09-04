@@ -13,3 +13,8 @@ export type {
   StudentNextLesson,
 } from "./api/student.dto";
 export { studentKeys, useStudentDashboard } from "./model/student.queries";
+
+// --- Mobil UI ---
+export { StudentEnrollmentSheet } from "./ui/student-enrollment-sheet";
+export type { StudentEnrollmentSheetProps } from "./ui/student-enrollment-sheet";
+

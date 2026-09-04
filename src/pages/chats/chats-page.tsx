@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { RefreshControl, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { Bell, Search, X } from "lucide-react-native";
+import { Bell, Plus, Search, X } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import {
   matchesConversationFilter,
@@ -13,6 +13,7 @@ import {
 import { ConversationItem } from "@/modules/conversation/ui/conversation-item";
 import { useLiveLessons } from "@/modules/lesson";
 import { useUnreadNotificationCount } from "@/modules/notification";
+import { StudentEnrollmentSheet } from "@/modules/student";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import {
   Chip,
@@ -50,6 +51,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   const { filter, setFilter } = useConversationFilter();
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [enrollOpen, setEnrollOpen] = useState(false);
 
   const { data = [], isLoading, isError, error, refetch, isRefetching } = useConversations(role);
   const unread = useUnreadNotificationCount();
@@ -74,6 +76,12 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   }, [data, search, filter]);
 
   const basePath = role === "teacher" ? "/teacher/chats" : "/student/chats";
+  /*
+   * "Yangi muloqot" faqat O'QUVCHIDA. Shaxsiy suhbatni faqat o'quvchi
+   * boshlay oladi (backend o'qituvchidan so'rovni qabul qilmaydi) va
+   * kursga ham faqat o'quvchi yoziladi — veb bilan bir xil qoida.
+   */
+  const canStartConversation = role === "student";
 
   function openConversation(id: string) {
     router.push(`${basePath}/${id}`);
@@ -144,6 +152,22 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
         onOpen={openConversation}
         hasFilter={Boolean(search.trim()) || filter !== "all"}
       />
+
+      {canStartConversation ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Yangi muloqot: kursga qo'shilish yoki o'qituvchiga yozish"
+          onPress={() => setEnrollOpen(true)}
+          style={({ pressed }) => [
+            styles.fab,
+            { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
+          ]}
+        >
+          <Plus size={24} color={palette["primary-foreground"]} />
+        </Pressable>
+      ) : null}
+
+      <StudentEnrollmentSheet open={enrollOpen} onClose={() => setEnrollOpen(false)} />
     </Screen>
   );
 }
@@ -245,6 +269,22 @@ const styles = StyleSheet.create({
   // Qo'ng'iroq ustidagi hisoblagich — tugma maydonini o'zgartirmasligi kerak.
   bellBadge: { position: "absolute", top: 4, right: 2 },
   searchInput: { flex: 1 },
+  // Suzuvchi tugma ro'yxat USTIDA — pastdagi tab paneli ustida turadi.
+  fab: {
+    position: "absolute",
+    right: 18,
+    bottom: 22,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+    elevation: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+  },
   skeleton: { paddingTop: 8 },
   skeletonRow: { flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
   skeletonAvatar: { borderRadius: 23 },

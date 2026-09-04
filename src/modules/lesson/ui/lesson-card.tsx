@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import { Clock, PlayCircle, Star, Video } from "lucide-react-native";
+import { Clock, PlayCircle, Square, Star, Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
 import { isLessonClosed, lessonStatusMeta } from "../lib/lesson-status";
@@ -9,6 +9,10 @@ export interface LessonCardProps {
   onJoin?: (lesson: Lesson) => void;
   onRecording?: (lesson: Lesson) => void;
   onRate?: (lesson: Lesson) => void;
+  /** O'qituvchi: jonli darsni yakunlash. */
+  onFinish?: (lesson: Lesson) => void;
+  /** O'qituvchi: qo'yilgan baholarni ko'rish. */
+  onRatings?: (lesson: Lesson) => void;
 }
 
 /** Veb `lessonStatusMeta` ohangini mobil `Badge` ohangiga bog'laydi. */
@@ -26,7 +30,14 @@ const TONE: Record<ReturnType<typeof lessonStatusMeta>["tone"], BadgeTone> = {
  * ko'rish yoki baholash. Veb'da bularning hammasi bir qatorda edi; mobilda
  * bir vaqtda bittadan ko'pi kerak bo'lmaydi.
  */
-export function LessonCard({ lesson, onJoin, onRecording, onRate }: LessonCardProps) {
+export function LessonCard({
+  lesson,
+  onJoin,
+  onRecording,
+  onRate,
+  onFinish,
+  onRatings,
+}: LessonCardProps) {
   const { palette } = useTheme();
   const meta = lessonStatusMeta(lesson.status);
   const closed = isLessonClosed(lesson);
@@ -96,6 +107,25 @@ export function LessonCard({ lesson, onJoin, onRecording, onRate }: LessonCardPr
             tone="secondary"
             icon={<Star size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onRate(lesson)}
+          />
+        ) : null}
+
+        {lesson.status === "live" && onFinish ? (
+          <Action
+            label="Yakunlash"
+            tone="secondary"
+            icon={<Square size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => onFinish(lesson)}
+          />
+        ) : null}
+
+        {/* Baholarni ko'rish faqat baho qo'yilgan tugagan darsda ma'noli. */}
+        {lesson.status === "finished" && onRatings && lesson.ratingCount > 0 ? (
+          <Action
+            label="Baholar"
+            tone="secondary"
+            icon={<Star size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => onRatings(lesson)}
           />
         ) : null}
       </View>

@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **117**
-- 🟡/🔴 moslashtirilgan: **55**
+- 🟡/🔴 moslashtirilgan: **56**
 - 🆕 mobilga xos: **5**
-- Jami: **177**
+- Jami: **178**
 
 ## Fayllar
 
@@ -104,6 +104,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `32243c91e8da` | — |
 | `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `9a44b4a54d5d` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
+| `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `111c8b0a89c6` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `865100a4509c` | — |
 | `src/modules/live/api/live.endpoints.ts` | 🟢 NUSXA | `aa9f29631b19` | — |

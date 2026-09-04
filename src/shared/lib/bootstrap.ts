@@ -1,3 +1,4 @@
+import { installFormDataShim } from "./form-data-shim";
 import { installWebStorageShim } from "./web-storage-shim";
 
 /**
@@ -10,5 +11,11 @@ import { installWebStorageShim } from "./web-storage-shim";
  *
  * Kech qolinsa store allaqachon "saqlagich yo'q" deb qaror qilib bo'ladi va
  * foydalanuvchi tanlovlari jimgina saqlanmay qoladi.
+ *
+ * Bu yerdagi ikkala shim ham VEB API'sining RN'da yetishmayotgan qismini
+ * to'ldiradi. Ikkalasi ham `tsc` va ESLint ko'ra olmaydigan xatolarni
+ * yopadi — Expo tsconfig'i `DOM` lib'ini yoqadi va TypeScript brauzerning
+ * to'liq API'sini ko'radi, RN esa uni to'liq bermaydi.
  */
 installWebStorageShim();
+installFormDataShim();

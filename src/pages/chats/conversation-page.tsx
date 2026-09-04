@@ -9,6 +9,11 @@ import { useChat } from "@/modules/message";
 import { MessageActionsSheet } from "@/modules/message/ui/message-actions-sheet";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
 import { MessageList } from "@/modules/message/ui/message-list";
+import {
+  GroupTabsRow,
+  GroupWorkspaceSection,
+  type GroupTab,
+} from "@/widgets/group-workspace/group-workspace";
 import type { ChatMessage, ConversationRole } from "@/shared/types";
 import { Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
 
@@ -29,6 +34,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
+  const [tab, setTab] = useState<GroupTab>("chat");
 
   const chat = useChat(conversationId, { role, senderId: user?.id ?? null });
   const conversation = chat.conversation.data;
@@ -94,32 +100,42 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         onJoinLive={liveLesson ? () => router.push(`/live/${liveLesson.id}`) : undefined}
       />
 
-      <KeyboardAvoidingView
-        style={styles.body}
-        // iOS klaviaturani kontent USTIGA chiqaradi; Android oynani o'zi
-        // kichraytiradi, shuning uchun u yerda hech narsa qilmaymiz.
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <MessageList
-          messages={chat.messages.data}
-          loading={chat.messages.isLoading}
-          error={chat.messages.isError}
-          onRetry={() => void chat.messages.refetch()}
-          onLongPress={setActionMessage}
-          onRetryMessage={chat.retryMessage}
-          currentUserId={user?.id ?? null}
-          typingName={conversation.typingName ?? null}
-        />
+      {/* Bo'limlar faqat GURUH chatida: shaxsiy suhbatda kurs, dars va
+          vazifa tushunchasi yo'q. */}
+      {courseId ? (
+        <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} />
+      ) : null}
 
-        <MessageComposer
-          onSend={(payload) => chat.sendMessage.mutate(payload)}
-          onTyping={chat.sendTyping}
-          replyTo={replyTo}
-          onCancelReply={() => setReplyTo(null)}
-          disabled={composerDisabled}
-          disabledReason={disabledReason}
-        />
-      </KeyboardAvoidingView>
+      {courseId && tab !== "chat" ? (
+        <GroupWorkspaceSection tab={tab} courseId={courseId} />
+      ) : (
+        <KeyboardAvoidingView
+          style={styles.body}
+          // iOS klaviaturani kontent USTIGA chiqaradi; Android oynani o'zi
+          // kichraytiradi, shuning uchun u yerda hech narsa qilmaymiz.
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <MessageList
+            messages={chat.messages.data}
+            loading={chat.messages.isLoading}
+            error={chat.messages.isError}
+            onRetry={() => void chat.messages.refetch()}
+            onLongPress={setActionMessage}
+            onRetryMessage={chat.retryMessage}
+            currentUserId={user?.id ?? null}
+            typingName={conversation.typingName ?? null}
+          />
+
+          <MessageComposer
+            onSend={(payload) => chat.sendMessage.mutate(payload)}
+            onTyping={chat.sendTyping}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyTo(null)}
+            disabled={composerDisabled}
+            disabledReason={disabledReason}
+          />
+        </KeyboardAvoidingView>
+      )}
 
       <MessageActionsSheet
         message={actionMessage}

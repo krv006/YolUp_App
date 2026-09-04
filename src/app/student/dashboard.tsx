@@ -1,13 +1,6 @@
-import { HomePlaceholderPage } from "@/pages/home-placeholder-page";
-import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
-import { ROLES } from "@/shared/constants";
+import { Redirect } from "expo-router";
 
+/** Veb'dagi kabi: bosh sahifa suhbatlarga yo'naltiradi (app-router.tsx). */
 export default function StudentDashboardRoute() {
-  return (
-    <ProtectedRoute>
-      <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <HomePlaceholderPage area="O'quvchi bo'limi" />
-      </RoleRoute>
-    </ProtectedRoute>
-  );
+  return <Redirect href="/student/chats" />;
 }

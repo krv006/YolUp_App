@@ -1,3 +1,5 @@
+// ENG BIRINCHI import bo'lishi shart — izohi bootstrap.ts da.
+import "@/shared/lib/bootstrap";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AppProviders } from "@/providers/app-providers";

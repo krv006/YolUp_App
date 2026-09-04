@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **115**
-- 🟡/🔴 moslashtirilgan: **49**
+- 🟡/🔴 moslashtirilgan: **53**
 - 🆕 mobilga xos: **5**
-- Jami: **169**
+- Jami: **173**
 
 ## Fayllar
 
@@ -65,6 +65,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/model/board.queries.ts` | 🟢 NUSXA | `68694539eaf7` | — |
 | `src/modules/board/model/use-board-channel.ts` | 🟢 NUSXA | `d5b7970375ab` | — |
 | `src/modules/board/model/use-board-realtime.ts` | 🟢 NUSXA | `ba27436ef0f2` | — |
+| `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `4821801d0b13` | farq qayd etilmagan — tekshiring |
+| `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |
 | `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `979cd2dfe197` | — |
 | `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `1de00c8a66ce` | — |
 | `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `6ceb4a4484a7` | — |
@@ -156,6 +158,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/student/model/student.queries.ts` | 🟢 NUSXA | `e507a2f33021` | — |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |
+| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
+| `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | farq qayd etilmagan — tekshiring |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
 | `src/shared/api/api-config.ts` | 🟢 NUSXA | `0e6a5d2a4cc7` | — |

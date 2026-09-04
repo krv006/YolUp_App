@@ -35,3 +35,11 @@ export { useBoardRealtime } from "./model/use-board-realtime";
 export { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "./constants/board.constants";
 export { arrowHeadPoints, boxFromDrag, buildStroke, strokeKindOf } from "./lib/board.geometry";
 export type { DrawKind } from "./lib/board.geometry";
+
+// --- Mobil UI ---
+export { BoardCanvas } from "./ui/board-canvas";
+export type { BoardCanvasProps } from "./ui/board-canvas";
+export { BoardStroke, hitTestStroke, useBoardFont } from "./ui/board-stroke";
+export { BoardToolbar } from "./ui/board-toolbar";
+export type { BoardTool, BoardToolbarProps } from "./ui/board-toolbar";
+

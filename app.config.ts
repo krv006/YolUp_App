@@ -38,13 +38,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     orientation: "portrait",
     scheme: "fokus",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
     icon: "./assets/icon.png",
-    splash: {
-      image: "./assets/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#f5f7fa",
-    },
     ios: {
       supportsTablet: true,
       bundleIdentifier: `${BASE_ID}${variant.idSuffix}`,
@@ -67,7 +61,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         monochromeImage: "./assets/android-icon-monochrome.png",
         backgroundColor: "#f5f7fa",
       },
-      edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
     },
     plugins: [

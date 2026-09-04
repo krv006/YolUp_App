@@ -1,6 +1,7 @@
 const { defineConfig, globalIgnores } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 const prettier = require("eslint-config-prettier/flat");
+const tsPlugin = require("@typescript-eslint/eslint-plugin");
 
 const SOURCE = "**/*.{js,jsx,ts,tsx}";
 
@@ -16,6 +17,7 @@ module.exports = defineConfig([
   prettier,
   {
     files: [SOURCE],
+    plugins: { "@typescript-eslint": tsPlugin },
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -23,6 +25,16 @@ module.exports = defineConfig([
       ],
       // Domen qatlami veb'dan ko'chirilgan — konsol chiqishi u yerda ham yo'q.
       "no-console": ["warn", { allow: ["warn", "error"] }],
+
+      // --- Veb loyiha bilan moslik ---
+      // Quyidagi ikki qoida eslint-config-expo dan keladi, lekin veb loyihada
+      // yo'q. 🟢 NUSXA fayllar bayt-bayt ko'chiriladi va ularni tahrirlash
+      // taqiqlangan (MOBILE_PLAN §18.3) — shuning uchun uslub qoidasi manba
+      // loyihaga moslashtiriladi, teskarisi emas.
+      "@typescript-eslint/array-type": "off",
+      // `export const ApiError = AppError` + bir nomli tip — eski nom uchun
+      // ataylab qilingan alias (api-error.ts).
+      "@typescript-eslint/no-redeclare": "off",
     },
   },
 

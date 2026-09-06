@@ -262,3 +262,46 @@ Sabab bitta: mobil domen qatlami TO'LIQ ko'chirilgan, shuning uchun
 tekshiriladi (usuli `PARITY.md` §"Bu javob QANDAY tekshirilgan" da):
 hooklar, modul eksportlari, `shared/lib`. Qo'lda ko'z yugurtirish
 hisobga olinmaydi.
+
+---
+
+## 17. NativeWind olib tashlandi (JSX'ni buzardi)
+
+**Qaror:** `nativewind` babel preseti va metro o'rami loyihadan chiqarildi.
+`className` bilan uslub berish umuman ishlatilmaydi.
+
+**Nega:** ilova birinchi marta emulyatorda ishga tushganda login ekrani
+chiqdi, lekin "Kirish" tugmasi **oq fonda oq matn** bo'lib ko'rinmadi.
+Piksellarni o'lchab, so'ng `uiautomator` daraxtini olib aniqlandi:
+
+```
+"Kirish" TextView  bounds=[53,1111][157,1164]  clickable="false"
+```
+
+Ya'ni tugmaning na foni, na balandligi, na ichki bo'shlig'i qo'llangan —
+faqat matn rangi ishlagan. Checkbox va Input esa to'g'ri chizilardi.
+
+Farq shunda ediki, ular `View` ga MASSIV uslub beradi, `Button` esa
+`Pressable` ga FUNKSIYA beradi:
+
+```tsx
+style={({ pressed }) => [styles.base, { backgroundColor: ... }]}
+```
+
+NativeWind `jsxImportSource` orqali har bir JSX elementini o'z runtime'i
+bilan o'raydi va `Pressable` uchun `style` propini qayta hisoblaydi —
+funksiya ko'rinishidagi uslubni esa yo'qotadi.
+
+**Ta'sir doirasi:** `style={({ pressed }) => ...}` naqshi **23 ta faylda**
+ishlatilgan — tugmalar, ro'yxat qatorlari, ikonka tugmalari, chat
+elementlari. Ya'ni bu bitta ekranning emas, butun ilovaning nuqsoni edi.
+
+**Nega umuman qo'shilgan edi:** Expo shabloni bilan kelgan. Veb loyihada
+Tailwind bor, shuning uchun mobilda ham "kerak bo'lar" deb qoldirilgan.
+Amalda `className` biror joyda ishlatilmadi (0 ta), chunki dizayn tizimi
+`StyleSheet` + `shared/ui/tokens.ts` ustiga qurilgan.
+
+**Qoldirildi:** `nativewind`, `tailwindcss`, `tailwind-merge` hali
+`package.json` da (`shared/lib/utils.ts` dagi `cn()` 🟢 veb porti, hozir
+ishlatilmaydi). Ular endi qurilishga TA'SIR QILMAYDI. Qayta yoqilmasligi
+uchun `babel.config.js` ga to'liq sabab yozib qo'yildi.

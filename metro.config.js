@@ -1,6 +1,5 @@
 const path = require("node:path");
 const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require("nativewind/metro");
 
 const projectRoot = __dirname;
 const webRoot = path.resolve(projectRoot, "..");
@@ -57,4 +56,8 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     : context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = withNativeWind(config, { input: "./src/shared/styles/global.css" });
+/*
+ * NativeWind o'rami (`withNativeWind`) ataylab olib tashlangan —
+ * sababi `babel.config.js` dagi izohda.
+ */
+module.exports = config;

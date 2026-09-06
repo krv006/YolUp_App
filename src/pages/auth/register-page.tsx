@@ -7,7 +7,7 @@ import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { registerSchema, useAuth, useRegisterMutation } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import type { RegisterFormValues } from "@/modules/auth";
-import { Button, Chip, ChipRow, Input, Screen, Text, toast, useTheme } from "@/shared/ui";
+import { Button, Chip, ChipRow, Input, Logo, Screen, Text, toast, useTheme } from "@/shared/ui";
 
 /** Veb `register-form.tsx` dagi tanlov bilan bir xil (o'quvchi ham mumkin). */
 const ROLE_OPTIONS: { id: RegisterFormValues["role"]; label: string }[] = [
@@ -62,6 +62,7 @@ export function RegisterPage() {
   return (
     <Screen scroll avoidKeyboard>
       <View style={styles.header}>
+        <Logo size={48} variant="tile" />
         <Text variant="title">Ro'yxatdan o'tish</Text>
         <Text tone="muted">Fokus platformasida yangi hisob oching.</Text>
       </View>
@@ -188,7 +189,7 @@ function Field({
 }
 
 const styles = StyleSheet.create({
-  header: { gap: 6, paddingTop: 32, paddingBottom: 24 },
+  header: { gap: 10, paddingTop: 28, paddingBottom: 24 },
   form: { gap: 16, paddingBottom: 24 },
   roleGroup: { gap: 8 },
   roles: { marginHorizontal: -20 },

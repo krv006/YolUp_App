@@ -55,11 +55,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     },
     android: {
       package: `${BASE_ID}${variant.idSuffix}`,
+      /*
+       * Har YANGI APK uchun bu son OSHISHI SHART. Android eski
+       * `versionCode` li paketni yangilanish deb qabul qilmaydi, telefon
+       * "ilova o'rnatilmadi" deydi. `version` (0.1.0) — bu odamlar uchun,
+       * `versionCode` — tizim uchun.
+       */
+      versionCode: 1,
       adaptiveIcon: {
         foregroundImage: "./assets/android-icon-foreground.png",
         backgroundImage: "./assets/android-icon-background.png",
         monochromeImage: "./assets/android-icon-monochrome.png",
-        backgroundColor: "#f5f7fa",
+        backgroundColor: "#1a66e0",
       },
       predictiveBackGestureEnabled: false,
       /*
@@ -105,6 +112,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           ios: { deploymentTarget: "16.4" },
         },
       ],
+      // Release APK'ni haqiqiy kalit bilan imzolaydi. `credentials/`
+      // bo'lmasa jim o'tadi va debug kaliti ishlatiladi.
+      "./plugins/with-release-signing",
     ],
     // typedRoutes ATAYLAB o'chiq: marshrut yo'llari veb'dan ko'chirilgan
     // `shared/config/routes.ts` dan oddiy `string` sifatida keladi (masalan

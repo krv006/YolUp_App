@@ -45,3 +45,7 @@ yarn-error.*
 
 # Tekshiruv uchun yasalgan bundle
 .expo-export*
+
+# Release imzolash kaliti va parollari — HECH QACHON git'ga kirmasin.
+# Yo'qotmang: kalitsiz Play Store'dagi ilovani yangilab bo'lmaydi.
+credentials/

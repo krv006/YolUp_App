@@ -1,0 +1,11 @@
+{
+  "_": "Fokus belgisining YAGONA manbai. Bu yerdan ham PNG ikonkalar (scripts/build-icons.mjs), ham ilova ichidagi SVG logo (src/shared/ui/logo.tsx) chiziladi — shuning uchun ular hech qachon bir-biridan ajralib ketmaydi. Koordinatalar 0..1 oraliqda, kvadrat ichida.",
+  "brand": "#1a66e0",
+  "onBrand": "#ffffff",
+  "shapes": [
+    { "type": "rect", "x": 0.300, "y": 0.160, "w": 0.155, "h": 0.680, "r": 0.036 },
+    { "type": "rect", "x": 0.300, "y": 0.160, "w": 0.500, "h": 0.155, "r": 0.036 },
+    { "type": "rect", "x": 0.300, "y": 0.437, "w": 0.320, "h": 0.150, "r": 0.036 },
+    { "type": "circle", "cx": 0.742, "cy": 0.512, "r": 0.078 }
+  ]
+}

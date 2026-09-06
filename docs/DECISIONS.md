@@ -414,3 +414,74 @@ Bu kod ayb emas: Windows `Memory Compression` 2.5 GB ni egallagan,
 emulyatorga 2 GB RAM ajratilgan va Android Studio, Chrome, Gradle
 demonlari bir vaqtda ishlayotgan edi. Dev rejimida ishlashdan oldin
 ortiqcha dasturlarni yopish yoki AVD'ga ko'proq RAM berish kerak.
+
+---
+
+## 20. Logotip va launcher ikonkasi
+
+**Qaror:** logo QO'LDA chizilmaydi — geometriyasi
+`src/shared/ui/logo-mark.json` da saqlanadi va undan ikki narsa
+chiqariladi:
+
+| Kim o'qiydi | Nima chiqadi |
+|---|---|
+| `scripts/build-icons.mjs` | `assets/*.png` — launcher, splash, favicon |
+| `src/shared/ui/logo.tsx` | ilova ichidagi SVG `<Logo />` |
+
+**Nega shunday:** aks holda telefondagi ikonka bilan ekrandagi logo asta
+ajralib ketadi — biri yangilanadi, ikkinchisi unutiladi. Endi belgini
+o'zgartirish uchun bitta JSON tahrirlanadi va `npm run build:icons`
+ishga tushiriladi; SVG esa o'sha faylni to'g'ridan-to'g'ri o'qigani
+uchun avtomatik yangilanadi.
+
+**Belgi:** brend ko'k (`#1a66e0`) ustida oq "F" va undan ajralgan nuqta.
+Nuqta o'rta chiziq bilan bir o'qda — "fokus nuqtasi" ma'nosini beradi.
+Avvalgi ikonka Expo shablonining standart rasmi edi.
+
+**Texnik tafsilotlar:**
+
+- Rasterlash `pngjs` bilan, har piksel 4×4 nuqtada tekshiriladi
+  (supersampling) — tashqi grafik kutubxona kerak emas.
+- Belgi chegara qutisi RENDER VAQTIDA hisoblanib markazlashtiriladi,
+  shuning uchun JSON'dagi koordinatalarni qo'lda muvozanatlash shart emas.
+- `icon.png` — shaffofliksiz to'la kvadrat (Apple talabi: burchakni tizim
+  o'zi yumaloqlaydi).
+- Adaptiv old qism belgisi 359×471 px — Android'ning 676 px xavfsiz
+  zonasidan ancha kichik, ya'ni hech qanday niqobda kesilmaydi.
+- `splash-icon.png` — brend plitka ustida oq belgi: splash foni och
+  (`#f5f7fa`) ham, to'q (`#0f1319`) ham bo'lishi mumkin, plitka
+  ikkalasida ham ko'rinadi.
+
+---
+
+## 21. Telefonga APK: arxitektura, variant va imzolash
+
+**Qaror:** telefonga mo'ljallangan APK `npm run apk` bilan quriladi.
+
+Uchta narsa **oldingi qurilishlarda noto'g'ri** edi va telefonda
+ishlamasdi:
+
+| Muammo | Oqibati | Yechim |
+|---|---|---|
+| `-PreactNativeArchitectures=x86_64` | APK hech qanday telefonga o'rnatilmaydi (u emulyator arxitekturasi) | `arm64-v8a,armeabi-v7a` |
+| `APP_VARIANT` berilmagan | paket `uz.fokus.edu.dev`, nomi "Fokus (Dev)" | `production` |
+| debug kaliti bilan imzolash | do'konga yaramaydi; kalit har mashinada boshqacha | haqiqiy keystore |
+
+**Imzolash — nega config plugin:** `android/` git'da yo'q va
+`expo prebuild` uni har safar qaytadan yaratadi. Imzolashni qo'lda
+`build.gradle` ga yozsak, birinchi prebuild'da yo'qoladi. Shuning uchun
+`plugins/with-release-signing.js` yozildi — u har prebuild'da kalitni
+`android/app/` ga ko'chiradi va `signingConfigs.release` ni qo'shadi.
+`credentials/` bo'lmasa plugin jim o'tadi va debug kaliti ishlatiladi,
+ya'ni kalitsiz ham loyiha quriladi (yangi dasturchi uchun muhim).
+
+⚠️ **`credentials/` git'ga KIRMAYDI va uni ZAXIRALASH SHART.** Kalit
+yo'qolsa, Play Store'dagi ilovani yangilab bo'lmaydi — Google boshqa
+kalit bilan imzolangan yangilanishni qabul qilmaydi.
+
+⚠️ **`versionCode`** (`app.config.ts`) har yangi APK uchun oshirilishi
+kerak. Aks holda telefon "ilova o'rnatilmadi" deydi.
+
+**Windows'dagi to'siq:** `expo prebuild` `android/` ni o'chirib qaytadan
+yaratadi. Android Studio o'sha papkani ochib tursa, Windows o'chirishga
+ruxsat bermaydi (`EBUSY`). Qurishdan oldin Android Studio yopilishi kerak.

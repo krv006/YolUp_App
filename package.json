@@ -6,8 +6,8 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
-    "android:release": "cd android && gradlew.bat app:assembleRelease -PreactNativeArchitectures=x86_64 -x lint -x test --no-parallel",
-    "android:install": "adb install -r android/app/build/outputs/apk/release/app-release.apk",
+    "apk": "node scripts/build-apk.mjs",
+    "apk:emulator": "cd android && gradlew.bat app:assembleRelease -PreactNativeArchitectures=x86_64 -x lint -x test --no-parallel",
     "dev:android": "node scripts/dev-android.mjs",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild --clean",
@@ -17,6 +17,7 @@
     "check-sync": "node scripts/check-sync.mjs",
     "doctor": "npx expo-doctor",
     "build:tokens": "node scripts/build-tokens.mjs",
+    "build:icons": "node scripts/build-icons.mjs",
     "check-deps": "node scripts/check-deps.mjs",
     "verify": "npm run typecheck && npm run lint && npm run check-deps",
     "build:ported": "node scripts/build-ported.mjs",

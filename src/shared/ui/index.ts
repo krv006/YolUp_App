@@ -4,6 +4,8 @@ export { DateField, SelectField, TimeField } from "./pickers";
 export type { DateFieldProps, SelectFieldProps, SelectOption, TimeFieldProps } from "./pickers";
 export { Sheet } from "./sheet";
 export type { SheetProps } from "./sheet";
+export { Logo } from "./logo";
+export type { LogoProps } from "./logo";
 export { ConfirmSheet } from "./confirm-sheet";
 export type { ConfirmSheetProps } from "./confirm-sheet";
 export { Avatar } from "./avatar";

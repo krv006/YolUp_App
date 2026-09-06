@@ -7,7 +7,7 @@ import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { loginSchema, resolveHomeRoute, useAuth } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import type { LoginCredentials } from "@/shared/types";
-import { Button, Checkbox, Input, Screen, Text, useTheme } from "@/shared/ui";
+import { Button, Checkbox, Input, Logo, Screen, Text, useTheme } from "@/shared/ui";
 
 /**
  * Veb `src/modules/auth/ui/login-form.tsx` + `src/pages/auth/login-page.tsx`
@@ -48,6 +48,7 @@ export function LoginPage() {
   return (
     <Screen scroll avoidKeyboard>
       <View style={styles.header}>
+        <Logo size={64} variant="tile" />
         <Text variant="title">Fokus</Text>
         <Text tone="muted">Onlayn ta'lim platformasi</Text>
       </View>
@@ -137,7 +138,7 @@ export function LoginPage() {
 }
 
 const styles = StyleSheet.create({
-  header: { gap: 6, paddingTop: 48, paddingBottom: 32 },
+  header: { gap: 10, paddingTop: 40, paddingBottom: 28 },
   form: { gap: 18 },
   alert: { padding: 12, borderRadius: 13, borderWidth: StyleSheet.hairlineWidth },
   link: { textAlign: "center", paddingVertical: 12 },

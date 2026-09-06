@@ -136,3 +136,65 @@ muhimlari:
 3. **Har ekran uch holatni ko'rsatadi:** loading · empty · error.
 4. **Ro'yxat = FlashList**, `ScrollView` ichida 50+ element yo'q.
 5. **Bosiladigan element >= 44pt.**
+
+## Telefonga APK qurish
+
+```bash
+npm run apk
+```
+
+APK shu yerda hosil bo'ladi:
+`android/app/build/outputs/apk/release/app-release.apk`
+
+O'rnatish:
+
+```bash
+adb install -r android/app/build/outputs/apk/release/app-release.apk
+```
+
+yoki APK faylni telefonga ko'chirib, fayl menejeridan oching (Android
+"noma'lum manbadan o'rnatish" ruxsatini so'raydi).
+
+**Qurishdan oldin Android Studio'ni yoping.** `expo prebuild` `android/`
+papkasini qayta yaratadi, IDE esa uni ushlab turadi va qurish
+`EBUSY: resource busy or locked` bilan to'xtaydi.
+
+### Sozlash
+
+| O'zgaruvchi | Standart | Izoh |
+|---|---|---|
+| `APP_VARIANT` | `production` | `development` / `staging` / `production` — paket nomi va ilova nomi shunga qarab o'zgaradi |
+| `ANDROID_ABIS` | `arm64-v8a,armeabi-v7a` | faqat zamonaviy telefonlar uchun `arm64-v8a` bering — tezroq quriladi |
+
+```bash
+ANDROID_ABIS=arm64-v8a npm run apk     # tezroq
+APP_VARIANT=staging npm run apk        # beta
+npm run apk:emulator                   # emulyator uchun (x86_64)
+```
+
+### Har yangi versiyada
+
+`app.config.ts` dagi `android.versionCode` ni **oshiring**. Aks holda
+telefon eski versiyaning ustiga yangisini o'rnatmaydi va "ilova
+o'rnatilmadi" deb xato beradi.
+
+### Imzolash kaliti
+
+Release APK `credentials/fokus-release.keystore` bilan imzolanadi.
+Bu papka git'ga kirmaydi.
+
+⚠️ **Kalitni zaxiralang.** Yo'qotsangiz, Play Store'ga chiqarilgan
+ilovani boshqa hech qachon yangilay olmaysiz — Google boshqa kalit bilan
+imzolangan yangilanishni qabul qilmaydi.
+
+### Logotip
+
+Logo `src/shared/ui/logo-mark.json` da — bitta manba. O'zgartirgach:
+
+```bash
+npm run build:icons   # assets/*.png qayta chiziladi
+npm run apk           # yangi ikonka APK ga tushadi
+```
+
+Ilova ichidagi `<Logo />` o'sha JSON'ni to'g'ridan-to'g'ri o'qiydi,
+shuning uchun u avtomatik yangilanadi.

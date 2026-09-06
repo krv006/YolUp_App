@@ -305,3 +305,62 @@ Amalda `className` biror joyda ishlatilmadi (0 ta), chunki dizayn tizimi
 `package.json` da (`shared/lib/utils.ts` dagi `cn()` 🟢 veb porti, hozir
 ishlatilmaydi). Ular endi qurilishga TA'SIR QILMAYDI. Qayta yoqilmasligi
 uchun `babel.config.js` ga to'liq sabab yozib qo'yildi.
+
+---
+
+## 18. Emulyatorda ishga tushirish: release qurilishi (dev-server emas)
+
+**Qaror:** bu muhitda ilova `npm run android:release` bilan quriladi va
+`npm run android:install` bilan o'rnatiladi. Metro dev-serveri
+ISHLATILMAYDI.
+
+**Nega:** dev-client Metro'dan JS bundle'ni ola olmaydi. Ilova splash
+ekranda qotib qoladi va logda:
+
+```
+java.net.ProtocolException: Expected leading [0-9a-fA-F] character but was 0x2d
+  at MultipartStreamReader.readAllParts
+  at BundleDownloader.processMultipartResponse
+```
+
+Chunked ramka desinxron bo'ladi — o'qigich chunk chegarasidan sakrab
+multipart tanasining o'rtasiga tushadi.
+
+**Tekshirilgan va istisno qilinganlar:**
+
+| Gumon | Natija |
+|---|---|
+| Metro noto'g'ri javob beradi | ❌ Host'dan 4338 ta chunk, ramka benuqson |
+| Emulyator NAT (`10.0.2.2`) | ❌ `adb reverse` orqali ham aynan shu xato |
+| Emulyatorda HTTP proksi | ❌ `http_proxy` = null |
+| OkHttp o'qish taymauti | ❌ RN'da `readTimeout(0)` — o'chirilgan |
+| expo-dev-client tarmoq inspektori | ❌ `shouldParseBody` chunked javobni chetlab o'tadi |
+| Bundle hajmi | ⚠️ 21.8 MB → minify bilan 10.8 MB, **baribir xato** |
+
+Ya'ni sabab Metro'da ham, bizning kodimizda ham emas — bundle
+host'dan qurilmaga uzatilayotganda buziladi. Bu mashinada
+(Windows + qemu emulyatori, xotira tanqisligi ostida) takrorlanadi.
+
+**Yechim:** release qurilishida JS bundle APK ICHIGA joylanadi, tarmoq
+umuman ishlatilmaydi. Ilova shu yo'l bilan muvaffaqiyatli ishga tushdi
+(login ekrani chizildi, `ReactNativeJS: Running "main"`).
+
+**Narxi:** fast refresh yo'q — har o'zgarishdan keyin qayta qurish kerak
+(~4 daqiqa, nativ kutubxonalar keshda). Bu vaqtinchalik cheklov; boshqa
+mashinada yoki real qurilmada dev-server sinab ko'rilishi kerak.
+
+**Muhim:** `-PreactNativeArchitectures=x86_64` MAJBURIY. Usiz Gradle
+to'rtala ABI uchun quradi, 5.3 GB xotira so'raydi va demon halok bo'ladi
+(shu xato bir marta uchradi).
+
+**Bundle tarkibi** (dev, 20.7 MB) — kelajakda kichraytirish uchun:
+
+| hajm | paket |
+|---|---|
+| 3.31 MB | `lucide-react-native` (dev'da tree-shaking yo'q) |
+| 2.09 MB | `react-native-reanimated` |
+| 2.07 MB | `react-native` |
+| 2.02 MB | `date-fns` |
+| 1.61 MB | `expo-router` |
+| 1.39 MB | `livekit-client` |
+| 1.04 MB | bizning kodimiz |

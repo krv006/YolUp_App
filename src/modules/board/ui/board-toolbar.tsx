@@ -75,7 +75,13 @@ export function BoardToolbar({
       ]}
       pointerEvents={disabled ? "none" : "auto"}
     >
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      {/* `flexGrow: 0` — RN ScrollView aks holda vertikal cho'ziladi. */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.scrollRow}
+        contentContainerStyle={styles.row}
+      >
         {tools.map(({ id, label, icon: Icon }) => {
           const active = tool === id;
           return (
@@ -100,7 +106,12 @@ export function BoardToolbar({
       </ScrollView>
 
       <View style={styles.optionsRow}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollRow}
+          contentContainerStyle={styles.row}
+        >
           {BOARD_COLORS.map((item) => (
             <Pressable
               key={item}
@@ -163,6 +174,7 @@ export function BoardToolbar({
 const styles = StyleSheet.create({
   root: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 6, gap: 4 },
   disabled: { opacity: 0.5 },
+  scrollRow: { flexGrow: 0, flexShrink: 0 },
   row: { gap: 8, paddingHorizontal: 12 },
   tool: {
     width: MIN_TOUCH_SIZE,

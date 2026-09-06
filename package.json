@@ -8,6 +8,7 @@
     "android": "expo run:android",
     "android:release": "cd android && gradlew.bat app:assembleRelease -PreactNativeArchitectures=x86_64 -x lint -x test --no-parallel",
     "android:install": "adb install -r android/app/build/outputs/apk/release/app-release.apk",
+    "dev:android": "node scripts/dev-android.mjs",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild --clean",
     "typecheck": "tsc --noEmit",

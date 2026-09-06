@@ -364,3 +364,53 @@ to'rtala ABI uchun quradi, 5.3 GB xotira so'raydi va demon halok bo'ladi
 | 1.61 MB | `expo-router` |
 | 1.39 MB | `livekit-client` |
 | 1.04 MB | bizning kodimiz |
+
+---
+
+## 19. Fast refresh ishlaydi — `adb reverse` orqali
+
+**Qaror:** emulyatorda dev-server `adb reverse` kanali orqali ishlatiladi.
+`npm run dev:android` shuni sozlaydi.
+
+**§18 ga tuzatish:** o'sha yerda "adb reverse orqali ham aynan shu xato"
+deb yozilgan edi. **Bu noto'g'ri xulosa edi** — sinov haqiqiy emas edi:
+ilovaga `adb reverse` o'rnatilgan bo'lsa-da, u dev-server manzilini
+almashtirmagan va baribir `10.0.2.2` ga murojaat qilgan. Buni logdan
+ko'rish mumkin edi (`Callback failure for call to http://10.0.2.2:8081/`),
+lekin men e'tibor bermay, yo'l sinaldi deb hisoblagandim.
+
+Manzil haqiqatan `localhost` ga o'tkazilganda bundle **muvaffaqiyatli
+yuklandi**: `ReactNativeJS: Running "main"`.
+
+**Uchala shart birga kerak** — bittasi yetishmasa ishlamaydi:
+
+| # | Shart | Nima uchun |
+|---|---|---|
+| 1 | `adb reverse tcp:8081 tcp:8081` | trafik qemu NAT'i o'rniga adb kanaliga o'tadi |
+| 2 | ilovada `debug_http_host=localhost:8081` | RN aks holda `10.0.2.2` ga uradi |
+| 3 | Metro'ga `--localhost` BERILMASIN | u bu mashinada faqat `[::1]` (IPv6) ga bog'lanadi, `adb reverse` esa IPv4 `127.0.0.1` ga yo'naltiradi — ulanish uziladi |
+
+3-shart alohida tuzoq: `--localhost` mantiqan to'g'ridek tuyuladi, lekin
+aynan u ishni buzadi. `netstat` bilan tekshirish mumkin:
+
+```
+--localhost bilan:  TCP  [::1]:8081        LISTENING   ← adb reverse yeta olmaydi
+--localhostsiz:     TCP  0.0.0.0:8081      LISTENING   ← to'g'ri
+```
+
+**Demak §18 dagi sabab ham aniqroq bo'ldi:** muammo emulyatorning virtual
+tarmog'ida (`10.0.2.2`, qemu SLIRP), Metro'da ham, bizning kodimizda ham
+emas. Release qurilishi (§18) hamon eng tez va ishonchli yo'l, lekin
+kod ustida ishlash uchun endi fast refresh bor.
+
+**Ogohlantirish — mashina resursi.** Debug qurilishi bu kompyuterda juda
+sekin ishga tushadi. Logdan:
+
+```
+Verification of int AccessibilityActionCompat.getId() took 30.713s (0.29 bytecodes/s)
+```
+
+Bu kod ayb emas: Windows `Memory Compression` 2.5 GB ni egallagan,
+emulyatorga 2 GB RAM ajratilgan va Android Studio, Chrome, Gradle
+demonlari bir vaqtda ishlayotgan edi. Dev rejimida ishlashdan oldin
+ortiqcha dasturlarni yopish yoki AVD'ga ko'proq RAM berish kerak.

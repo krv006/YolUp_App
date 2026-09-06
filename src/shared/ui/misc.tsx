@@ -59,6 +59,15 @@ export function ChipRow({ children }: { children: ReactNode }) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      /*
+       * `flexGrow: 0` SHART. RN'da `ScrollView` ning ichki uslubi
+       * `{ flexGrow: 1, flexShrink: 1 }` — ya'ni GORIZONTAL ScrollView ham
+       * ustun ichida VERTIKAL bo'yicha cho'ziladi va bo'sh joyni bo'lib oladi.
+       *
+       * Suhbat ekranida bu chip qatori va xabarlar bloki ekranni teng ikkiga
+       * bo'lib olishiga olib kelgan edi: tablar ekranning yarmini egallardi.
+       */
+      style={styles.chipRowOuter}
       contentContainerStyle={styles.chipRow}
       // Chip'lar ekranga sig'sa skroll kerak emas, lekin uzbekcha yorliqlar
       // uzun bo'lgani uchun ko'pincha sig'maydi.
@@ -171,6 +180,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   chipLabel: { fontSize: fontSize.sm, fontWeight: "600" },
+  chipRowOuter: { flexGrow: 0, flexShrink: 0 },
   chipRow: { gap: 8, paddingHorizontal: 16, paddingVertical: 10 },
   iconButton: {
     width: MIN_TOUCH_SIZE,

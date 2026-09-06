@@ -1,10 +1,32 @@
 # Veb ↔ Mobil funksional taqqoslash
 
 > **Savol:** veb'da bor barcha narsa mobilda bormi?
-> **Javob: HA** — bitta ataylab qoldirilgan istisnodan tashqari (§Qoldirilgan).
+> **Javob: HA** — ataylab qoldirilgan ikkitadan tashqari (§Qoldirilgan).
 
 Bu fayl `mobile/docs/DECISIONS.md` va `../docs/MOBILE_PLAN.md` bilan birga
 o'qiladi. Har o'zgarishda yangilanadi.
+
+## Bu javob QANDAY tekshirilgan
+
+Komponent nomlarini taqqoslash yetarli emas edi: nom mos kelsa ham
+ichidagi amal yetishmasligi mumkin. Shuning uchun tekshiruv MASHINA
+o'qiy oladigan uch o'lchovda o'tkaziladi — har biri "veb'da bor, mobilda
+chaqirilmagan" narsani topadi:
+
+1. **Hooklar.** Veb `*.queries.ts` dagi 93 ta `use*` eksporti mobil
+   `pages/`, `widgets/`, `modules/*/ui/`, `app/` da qidiriladi.
+2. **Modul eksportlari.** Barcha `modules/*/index.ts` dan 139 ta nom.
+3. **Umumiy kutubxona.** `shared/lib` va `shared/hooks` dan 16 ta funksiya.
+
+Birinchi o'tkazishda 20 ta hook mobilda hech qayerdan chaqirilmagani
+aniqlandi. Ulardan 10 tasi veb'da ham ishlatilmagan (`useCreateCourse`,
+`useUnbanFromLesson`, `useStudentDashboard` — bu oxirgisi veb'da
+umuman marshrutga ulanmagan o'lik kod), qolgan **10 tasi esa haqiqiy
+kamchilik edi va shu tekshiruvdan keyin yopildi** (pastdagi jadval).
+
+Domen qatlami boshidanoq to'liq edi: yetishmagani UI edi — ma'lumot bor,
+tugmasi yo'q. Shuning uchun "modul ko'chirilgan" degani "funksiya bor"
+degani EMAS; ushbu uch o'lchov aynan shu farqni ko'radi.
 
 ---
 
@@ -21,6 +43,30 @@ dialogi bitta oynaga birlashtirilgan (masalan `lesson-sheets.tsx` uchta veb
 dialogini o'z ichiga oladi), ba'zilari esa umumiy primitivga aylangan
 (`ScreenEmpty`, `RoleRoute`). Quyidagi jadval har bir veb komponentining
 mobil manzilini ko'rsatadi.
+
+---
+
+## Tekshiruvdan keyin yopilgan kamchiliklar
+
+Bularning har biri veb UI'da bor edi, mobilda esa faqat ma'lumot qatlami
+bor edi:
+
+| Veb amali | Mobil manzili |
+|---|---|
+| `useGrantDraw` — o'quvchiga chizish ruxsati | `board-surface` → "Chizishga ruxsat" oynasi |
+| `useSolveFormula` — SymPy formula yordamchisi | `board-surface` → "Formula yordamchisi" oynasi |
+| `useAllowShare` — ekran ulashish ruxsati | `live-room` → ishtirokchi qatoridagi "Ruxsat" + so'rov toast'i |
+| ekran ulashish SO'ROVI (o'quvchi) | `live-controls` → `MonitorUp` tugmasi |
+| `useUpdateLesson` — darsni tahrirlash | `lesson-card` → "Tahrirlash" → `add-lesson-sheet` tahrir rejimi |
+| `useDeleteLesson` — darsni o'chirish | `lessons-section` → `ConfirmSheet` |
+| `useDeleteAssignment` — vazifani o'chirish | `assignments-section` → `ConfirmSheet` |
+| `useDeleteQuiz` — testni o'chirish | `quizzes-page` → `ConfirmSheet` |
+| `useDeleteRecording` — video yozuvni o'chirish | `recording-page` → `ConfirmSheet` |
+| `useAssignment` — vazifa tafsilotini yangilash | `submission-review-sheet` |
+| `useDownloadSubmissionFile` — topshiriq faylini olish | `submission-review-sheet` (qo'lda yozilgani hook bilan almashtirildi) |
+| `LiveLessonBar` — "dars ketmoqda" chizig'i | `conversation-page` (avval faqat ikonka bor edi) |
+| `PermissionGuard` | `modules/permission/ui/permission-guard` |
+| `ForbiddenPage` (403) | `app/forbidden.tsx` |
 
 ---
 
@@ -57,7 +103,7 @@ mobil manzilini ko'rsatadi.
 | `lesson/lesson-ratings-dialog` | `lesson-sheets` → `LessonRatingsSheet` |
 | `lesson/lesson-recording-player` | `recording-page` → `Player` (expo-video) |
 | `lesson/lesson-view-switch` | `schedule-page` dagi `Chip` juftligi |
-| `lesson/live-lesson-bar` | `chat-header` dagi jonli dars tugmasi |
+| `lesson/live-lesson-bar` | `lesson/ui/live-lesson-bar` + `chat-header` tugmasi |
 | `lesson/rate-lesson-dialog` | `lesson-sheets` |
 | `lesson/star-rating` | `lesson/ui/star-rating` |
 | `live/attention-check-dialog` | `live-lesson-page` → `AttentionCheckDialog` |
@@ -77,7 +123,7 @@ mobil manzilini ko'rsatadi.
 | `notification/send-notification-dialog` | `notification/ui/send-notification-sheet` |
 | `notification/sent-notifications-panel` | `notification/ui/sent-notifications-sheet` |
 | `parent/selected-child-selector` | `parent/ui/child-selector` |
-| `permission/permission-guard` | `providers/route-guards` → `RoleRoute` |
+| `permission/permission-guard` | `permission/ui/permission-guard` (marshrut qorovuli — `providers/route-guards`) |
 | `quiz/quiz-attempt-dialog` | `pages/quizzes/quiz-attempt-page` |
 | `quiz/quiz-attempts-dialog` | o'sha ekranning "Tarix" bo'limi |
 | `quiz/quiz-create-dialog` | `quiz/ui/add-quiz-sheet` |
@@ -96,7 +142,11 @@ mobil manzilini ko'rsatadi.
 
 ## Sahifalar (21/22)
 
-Veb sahifalarining barchasi mobilda bor. Yagona istisno quyida.
+Veb sahifalarining barchasi mobilda bor. Istisnolar quyida.
+
+Marshrutlar ham tekshirildi: veb `app-router.tsx` dagi har bir `path`
+mobil `src/app/` da fayl sifatida bor — 403 (`/forbidden`) va 404
+(`+not-found`) ham qo'shildi.
 
 ---
 

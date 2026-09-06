@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { CheckCircle2, Clock3, Download, RefreshCw } from "lucide-react-native";
-import { downloadBlob } from "@/shared/lib";
 import type { Assignment, Submission } from "@/shared/types";
 import {
   Badge,
   Button,
   Input,
   ScreenEmpty,
+  ScreenLoading,
   Separator,
   Sheet,
   Text,
-  toast,
   useTheme,
 } from "@/shared/ui";
-import { homeworkApi } from "../api/homework.api";
-import { useRecheckSubmission, useReviewSubmission } from "../model/homework.queries";
+import {
+  useAssignment,
+  useDownloadSubmissionFile,
+  useRecheckSubmission,
+  useReviewSubmission,
+} from "../model/homework.queries";
 
 export interface SubmissionReviewSheetProps {
   assignment: Assignment | null;
@@ -35,6 +38,15 @@ export interface SubmissionReviewSheetProps {
 export function SubmissionReviewSheet({ assignment, onClose }: SubmissionReviewSheetProps) {
   const [selected, setSelected] = useState<Submission | null>(null);
 
+  /*
+   * Ro'yxatdan kelgan vazifa QISQARTIRILGAN bo'lishi mumkin (topshiriqlar
+   * soni ko'p bo'lsa server ularni to'liq bermaydi), shuning uchun oyna
+   * ochilganda tafsilot alohida so'raladi — 🟢 veb ham shunday qiladi.
+   * So'rov kelguncha ro'yxatdagi nusxa ko'rsatiladi: oyna bo'sh turmaydi.
+   */
+  const detail = useAssignment(assignment?.id ?? null);
+  const data = detail.data ?? assignment;
+
   return (
     <Sheet
       open={Boolean(assignment)}
@@ -42,20 +54,22 @@ export function SubmissionReviewSheet({ assignment, onClose }: SubmissionReviewS
         setSelected(null);
         onClose();
       }}
-      title={assignment?.title ?? ""}
+      title={data?.title ?? ""}
       description={
-        assignment
-          ? `${assignment.submissions.length} ta topshiriq${
-              assignment.stats?.studentsCount ? ` · ${assignment.stats.studentsCount} o'quvchi` : ""
+        data
+          ? `${data.submissions.length} ta topshiriq${
+              data.stats?.studentsCount ? ` · ${data.stats.studentsCount} o'quvchi` : ""
             }`
           : undefined
       }
     >
-      {assignment && assignment.submissions.length === 0 ? (
+      {detail.isLoading && !assignment ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+
+      {data && data.submissions.length === 0 ? (
         <ScreenEmpty title="Hali topshirilmagan" description="O'quvchilar topshirgach shu yerda ko'rinadi." />
       ) : null}
 
-      {(assignment?.submissions ?? []).map((submission, index) => (
+      {(data?.submissions ?? []).map((submission, index) => (
         <View key={submission.id}>
           {index > 0 ? <Separator /> : null}
           <SubmissionRow
@@ -82,19 +96,10 @@ function SubmissionRow({
   const review = useReviewSubmission();
   const recheck = useRecheckSubmission();
 
-  const [busy, setBusy] = useState(false);
-
-  async function download() {
-    setBusy(true);
-    try {
-      const blob = await homeworkApi.downloadSubmission(submission.id);
-      await downloadBlob(blob, submission.fileName);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Faylni yuklab bo'lmadi");
-    } finally {
-      setBusy(false);
-    }
-  }
+  // Yuklab olish 🟢 ko'chirilgan hook orqali: xato matni va fayl nomi
+  // qoidasi veb bilan bitta joyda turadi.
+  const downloadFile = useDownloadSubmissionFile();
+  const busy = downloadFile.isPending;
 
   function save(score: string, grade: string) {
     review.mutate({
@@ -150,7 +155,9 @@ function SubmissionRow({
               fullWidth={false}
               loading={busy}
               icon={<Download size={15} color={palette["secondary-foreground"]} />}
-              onPress={() => void download()}
+              onPress={() =>
+                downloadFile.mutate({ id: submission.id, fileName: submission.fileName })
+              }
             />
             <Button
               title="Qayta tekshirish"

@@ -9,9 +9,11 @@ import {
   ImageIcon,
   Paperclip,
   Plus,
+  Trash2,
 } from "lucide-react-native";
 import {
   useAssignments,
+  useDeleteAssignment,
   useDownloadAssignmentFile,
   useSubmission,
   useSubmitHomework,
@@ -25,6 +27,7 @@ import type { Assignment, Submission } from "@/shared/types";
 import {
   Badge,
   Button,
+  ConfirmSheet,
   IconButton,
   radius,
   ScreenEmpty,
@@ -59,6 +62,8 @@ export function AssignmentsSection({
 }) {
   const { palette } = useTheme();
   const assignments = useAssignments(courseId);
+  const removeAssignment = useDeleteAssignment();
+  const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
   // Darslar faqat o'qituvchiga kerak — vazifani tugagan darsga bog'lash uchun.
   const lessons = useLessons({ course: courseId, page_size: 100 }, isTeacher && Boolean(courseId));
   const [selected, setSelected] = useState<Assignment | null>(null);
@@ -119,6 +124,16 @@ export function AssignmentsSection({
               {assignment.hasAttachment ? (
                 <Paperclip size={16} color={palette["muted-foreground"]} />
               ) : null}
+
+              {/* O'chirish — kartani ochib yubormasligi uchun alohida tugma. */}
+              {isTeacher ? (
+                <IconButton
+                  accessibilityLabel={`${assignment.title} vazifasini o'chirish`}
+                  onPress={() => setDeleteTarget(assignment)}
+                >
+                  <Trash2 size={17} color={palette.destructive} />
+                </IconButton>
+              ) : null}
             </View>
 
             <View style={styles.cardFoot}>
@@ -141,6 +156,18 @@ export function AssignmentsSection({
           </Pressable>
         ))}
       </ScrollView>
+
+      <ConfirmSheet
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Vazifani o'chirish"
+        description={`"${deleteTarget?.title ?? ""}" va unga bog'liq topshiriqlar o'chadi.`}
+        loading={removeAssignment.isPending}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          removeAssignment.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+        }}
+      />
 
       <AssignmentSheet
         assignment={selected}

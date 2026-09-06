@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
-import { useLiveLessons } from "@/modules/lesson";
+import { LiveLessonBar, useLiveLessons } from "@/modules/lesson";
 import { useChat } from "@/modules/message";
 import { MessageActionsSheet } from "@/modules/message/ui/message-actions-sheet";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
@@ -101,6 +101,12 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         onOpenInfo={() => setInfoOpen(true)}
         socketOffline={chat.socketState !== "connected"}
         onJoinLive={liveLesson ? () => router.push(`/live/${liveLesson.id}`) : undefined}
+      />
+
+      {/* Sarlavhadagi ikonka qaysi dars ketayotganini aytmaydi — chiziq aytadi. */}
+      <LiveLessonBar
+        lesson={liveLesson}
+        onJoin={() => liveLesson && router.push(`/live/${liveLesson.id}`)}
       />
 
       {/* Bo'limlar faqat GURUH chatida: shaxsiy suhbatda kurs, dars va

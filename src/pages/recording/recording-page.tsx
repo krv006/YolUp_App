@@ -1,13 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useKeepAwake } from "expo-keep-awake";
-import { ArrowLeft, BookOpen, CalendarDays, Clock3, Star } from "lucide-react-native";
-import { useLesson, useLessonRecording } from "@/modules/lesson";
+import { ArrowLeft, BookOpen, CalendarDays, Clock3, Star, Trash2 } from "lucide-react-native";
+import { useAuth } from "@/modules/auth";
+import { useDeleteRecording, useLesson, useLessonRecording } from "@/modules/lesson";
+import { ROLES } from "@/shared/constants";
 import { formatDateTime } from "@/shared/lib";
 import {
   Badge,
+  ConfirmSheet,
   IconButton,
   radius,
   Screen,
@@ -34,8 +37,15 @@ export function RecordingPage() {
   const { palette } = useTheme();
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
+  const { user } = useAuth();
   const lesson = useLesson(lessonId ?? null);
   const recording = useLessonRecording(lessonId ?? null);
+  const removeRecording = useDeleteRecording();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  // Yozuvni faqat o'qituvchi o'chira oladi — veb ham `canDelete` ni shu
+  // shartda beradi. Backend baribir qayta tekshiradi.
+  const canDelete = user?.role === ROLES.TEACHER && Boolean(recording.data?.ready);
 
   function goBack() {
     if (router.canGoBack()) router.back();
@@ -72,7 +82,24 @@ export function RecordingPage() {
         <Text variant="subheading" numberOfLines={1} style={styles.title}>
           {data.title}
         </Text>
+
+        {canDelete ? (
+          <IconButton accessibilityLabel="Video yozuvni o'chirish" onPress={() => setConfirmOpen(true)}>
+            <Trash2 size={20} color={palette.destructive} />
+          </IconButton>
+        ) : null}
       </View>
+
+      <ConfirmSheet
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="Video yozuvni o'chirish"
+        description="Yozuv butunlay o'chadi va qayta tiklanmaydi."
+        loading={removeRecording.isPending}
+        onConfirm={() =>
+          removeRecording.mutate(lessonId ?? "", { onSuccess: () => setConfirmOpen(false) })
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.body}>
         <RecordingPlayer

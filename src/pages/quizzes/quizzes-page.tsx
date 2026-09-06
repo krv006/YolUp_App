@@ -2,16 +2,17 @@ import { useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { FileQuestion, History, Plus } from "lucide-react-native";
+import { FileQuestion, History, Plus, Trash2 } from "lucide-react-native";
 import { useCourses } from "@/modules/course";
 import { useAuth } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
-import { AddQuizSheet, useQuizzes } from "@/modules/quiz";
+import { AddQuizSheet, useDeleteQuiz, useQuizzes } from "@/modules/quiz";
 import { formatDayTime } from "@/shared/lib";
 import type { QuizSummary } from "@/shared/types";
 import {
   Badge,
   Button,
+  ConfirmSheet,
   IconButton,
   radius,
   Screen,
@@ -38,6 +39,8 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const [createOpen, setCreateOpen] = useState(false);
   const isTeacher = user?.role === ROLES.TEACHER;
   const quizzes = useQuizzes(null);
+  const removeQuiz = useDeleteQuiz();
+  const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
   const courses = useCourses();
 
   const courseTitleById = useMemo(
@@ -106,10 +109,23 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
               courseTitle={courseTitleById.get(item.courseId) ?? "Kurs"}
               onOpen={() => router.push(`${basePath}/${item.id}`)}
               onHistory={() => router.push(`${basePath}/${item.id}?tab=history`)}
+              onDelete={isTeacher ? () => setDeleteTarget(item) : undefined}
             />
           )}
         />
       )}
+
+      <ConfirmSheet
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Testni o'chirish"
+        description={`"${deleteTarget?.title ?? ""}" va uning urinishlari o'chadi.`}
+        loading={removeQuiz.isPending}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          removeQuiz.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+        }}
+      />
 
       <AddQuizSheet
         open={createOpen}
@@ -125,11 +141,14 @@ function QuizRow({
   courseTitle,
   onOpen,
   onHistory,
+  onDelete,
 }: {
   quiz: QuizSummary;
   courseTitle: string;
   onOpen: () => void;
   onHistory: () => void;
+  /** Faqat o'qituvchida — berilmasa tugma chizilmaydi. */
+  onDelete?: () => void;
 }) {
   const { palette } = useTheme();
   const overdue = quiz.dueAt ? new Date(quiz.dueAt) < new Date() : false;
@@ -151,6 +170,12 @@ function QuizRow({
         <IconButton accessibilityLabel="Urinishlar tarixi" onPress={onHistory}>
           <History size={18} color={palette["muted-foreground"]} />
         </IconButton>
+
+        {onDelete ? (
+          <IconButton accessibilityLabel={`${quiz.title} testini o'chirish`} onPress={onDelete}>
+            <Trash2 size={18} color={palette.destructive} />
+          </IconButton>
+        ) : null}
       </View>
 
       <View style={styles.cardFoot}>

@@ -2,11 +2,16 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
-import { FinishLessonSheet, LessonRatingsSheet, useLessons } from "@/modules/lesson";
+import {
+  FinishLessonSheet,
+  LessonRatingsSheet,
+  useDeleteLesson,
+  useLessons,
+} from "@/modules/lesson";
 import { LessonCard } from "@/modules/lesson/ui/lesson-card";
 import { ROUTES } from "@/shared/config";
 import type { Lesson } from "@/shared/types";
-import { Button, ScreenEmpty, ScreenLoading, useTheme } from "@/shared/ui";
+import { Button, ConfirmSheet, ScreenEmpty, ScreenLoading, useTheme } from "@/shared/ui";
 import { AddLessonSheet } from "./add-lesson-sheet";
 
 /**
@@ -27,7 +32,10 @@ export function LessonsSection({
   const [addOpen, setAddOpen] = useState(false);
   const [finishTarget, setFinishTarget] = useState<Lesson | null>(null);
   const [ratingsTarget, setRatingsTarget] = useState<Lesson | null>(null);
+  const [editing, setEditing] = useState<Lesson | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Lesson | null>(null);
   const lessons = useLessons({ course: courseId, page_size: 100 }, Boolean(courseId));
+  const remove = useDeleteLesson();
 
   if (lessons.isLoading) return <ScreenLoading label="Darslar yuklanmoqda…" />;
 
@@ -56,16 +64,47 @@ export function LessonsSection({
               onRecording={(item) => router.push(ROUTES.recording(item.id))}
               onFinish={isTeacher ? setFinishTarget : undefined}
               onRatings={isTeacher ? setRatingsTarget : undefined}
+              onEdit={
+                isTeacher
+                  ? (item) => {
+                      setEditing(item);
+                      setAddOpen(true);
+                    }
+                  : undefined
+              }
+              onDelete={isTeacher ? setDeleteTarget : undefined}
             />
           ))
         )}
       </ScrollView>
 
+      {/*
+       * `key` — tahrirdan yaratishga (va aksincha) o'tganda oyna qaytadan
+       * quriladi, shuning uchun maydonlar to'g'ri boshlang'ich qiymat oladi.
+       * Veb ham `AddLessonDialog` ga aynan shu `key` ni beradi.
+       */}
       <AddLessonSheet
+        key={editing?.id ?? "new-lesson"}
         open={addOpen}
-        onClose={() => setAddOpen(false)}
+        onClose={() => {
+          setAddOpen(false);
+          setEditing(null);
+        }}
         courseId={courseId}
         existingLessons={items}
+        editing={editing}
+      />
+
+      <ConfirmSheet
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Darsni o'chirish"
+        description={`"${deleteTarget?.title ?? ""}" qayta tiklanmaydi.`}
+        loading={remove.isPending}
+        onConfirm={() => {
+          if (!deleteTarget) return;
+          remove.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+        }}
       />
       <FinishLessonSheet
         lesson={finishTarget}

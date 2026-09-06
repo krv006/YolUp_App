@@ -5,7 +5,7 @@
 > (`docs/MOBILE_PLAN.md` §18.4).
 
 - **Manba:** `Edu_Front` @ `1e53492`
-- **Oxirgi yangilanish:** 2026-09-04
+- **Oxirgi yangilanish:** 2026-09-06
 - **Qayta yaratish:** `npm run build:ported`
 - **Drift tekshiruvi:** `npm run check-sync`
 
@@ -24,9 +24,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **117**
-- 🟡/🔴 moslashtirilgan: **58**
+- 🟡/🔴 moslashtirilgan: **60**
 - 🆕 mobilga xos: **5**
-- Jami: **180**
+- Jami: **182**
 
 ## Fayllar
 
@@ -105,6 +105,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `32243c91e8da` | — |
 | `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `9a44b4a54d5d` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
+| `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `520a875a379e` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `111c8b0a89c6` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `865100a4509c` | — |
@@ -150,6 +151,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/permission/index.ts` | 🟡 MOSLASH | `5b5ffd8d4e1d` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/permission/lib/can.ts` | 🟢 NUSXA | `9f3189dc554c` | — |
 | `src/modules/permission/lib/has-role.ts` | 🟢 NUSXA | `d5aa99b1c50d` | — |
+| `src/modules/permission/ui/permission-guard.tsx` | 🟡 MOSLASH | `4c2702ba4a5d` | farq qayd etilmagan — tekshiring |
 | `src/modules/quiz/api/quiz.api.ts` | 🟢 NUSXA | `9bad6c757187` | — |
 | `src/modules/quiz/api/quiz.dto.ts` | 🟢 NUSXA | `3646b0daa593` | — |
 | `src/modules/quiz/api/quiz.endpoints.ts` | 🟢 NUSXA | `0c5a2be7325e` | — |

@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import { Clock, PlayCircle, Square, Star, Video } from "lucide-react-native";
+import { Clock, Pencil, PlayCircle, Square, Star, Trash2, Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
 import { isLessonClosed, lessonStatusMeta } from "../lib/lesson-status";
@@ -13,6 +13,10 @@ export interface LessonCardProps {
   onFinish?: (lesson: Lesson) => void;
   /** O'qituvchi: qo'yilgan baholarni ko'rish. */
   onRatings?: (lesson: Lesson) => void;
+  /** O'qituvchi: darsni tahrirlash. */
+  onEdit?: (lesson: Lesson) => void;
+  /** O'qituvchi: darsni o'chirish. */
+  onDelete?: (lesson: Lesson) => void;
 }
 
 /** Veb `lessonStatusMeta` ohangini mobil `Badge` ohangiga bog'laydi. */
@@ -37,6 +41,8 @@ export function LessonCard({
   onRate,
   onFinish,
   onRatings,
+  onEdit,
+  onDelete,
 }: LessonCardProps) {
   const { palette } = useTheme();
   const meta = lessonStatusMeta(lesson.status);
@@ -116,6 +122,29 @@ export function LessonCard({
             tone="secondary"
             icon={<Square size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onFinish(lesson)}
+          />
+        ) : null}
+
+        {/*
+         * Tahrirlash va o'chirish faqat BOSHLANMAGAN darsda: ketayotgan yoki
+         * tugagan darsning vaqtini o'zgartirish ma'nosiz, o'chirish esa
+         * davomat va yozuvni ham olib ketadi. Veb ham shu qoidani tutadi.
+         */}
+        {lesson.status === "scheduled" && onEdit ? (
+          <Action
+            label="Tahrirlash"
+            tone="secondary"
+            icon={<Pencil size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => onEdit(lesson)}
+          />
+        ) : null}
+
+        {lesson.status === "scheduled" && onDelete ? (
+          <Action
+            label="O'chirish"
+            tone="secondary"
+            icon={<Trash2 size={16} color={palette.destructive} />}
+            onPress={() => onDelete(lesson)}
           />
         ) : null}
 

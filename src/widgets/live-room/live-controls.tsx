@@ -1,12 +1,21 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { useLocalParticipant, useLocalParticipantPermissions } from "@livekit/react-native";
-import { Hand, Mic, MicOff, PhoneOff, Video, VideoOff } from "lucide-react-native";
+import {
+  Hand,
+  Mic,
+  MicOff,
+  MonitorUp,
+  PhoneOff,
+  Video,
+  VideoOff,
+} from "lucide-react-native";
 import {
   CAMERA_SOURCE,
   canPublishSource,
   MICROPHONE_SOURCE,
+  SCREEN_SHARE_SOURCE,
 } from "@/modules/live";
-import { MIN_TOUCH_SIZE, radius, Text, useTheme } from "@/shared/ui";
+import { MIN_TOUCH_SIZE, radius, Text, toast, useTheme } from "@/shared/ui";
 
 /**
  * Jonli dars boshqaruvlari — veb `live-room.tsx` dagi `StudentMicControl`,
@@ -29,6 +38,9 @@ export interface LiveControlsProps {
   onRequestCamera: () => void;
   cameraRequesting: boolean;
   cameraWaiting: boolean;
+  /** O'quvchi ekran ulashish so'rovi. */
+  onRequestShare: () => void;
+  shareRequesting: boolean;
 }
 
 export function LiveControls({
@@ -40,6 +52,8 @@ export function LiveControls({
   onRequestCamera,
   cameraRequesting,
   cameraWaiting,
+  onRequestShare,
+  shareRequesting,
 }: LiveControlsProps) {
   const { palette } = useTheme();
   const permissions = useLocalParticipantPermissions();
@@ -47,9 +61,11 @@ export function LiveControls({
 
   const canSpeak = canPublishSource(permissions, MICROPHONE_SOURCE);
   const canShowCamera = canPublishSource(permissions, CAMERA_SOURCE);
+  const canShare = canPublishSource(permissions, SCREEN_SHARE_SOURCE);
 
   const micOn = localParticipant.isMicrophoneEnabled;
   const cameraOn = localParticipant.isCameraEnabled;
+  const shareOn = localParticipant.isScreenShareEnabled;
 
   async function toggleMic() {
     await localParticipant.setMicrophoneEnabled(!micOn);
@@ -57,6 +73,24 @@ export function LiveControls({
 
   async function toggleCamera() {
     await localParticipant.setCameraEnabled(!cameraOn);
+  }
+
+  /**
+   * Ekranni ulashish. Android'da MediaProjection ishlaydi (manifestda
+   * `FOREGROUND_SERVICE_MEDIA_PROJECTION` bor). iOS'da esa ReplayKit
+   * Broadcast Extension kerak — u v1.1 ga qoldirilgan (DECISIONS §15),
+   * shuning uchun bu yerda sababi aytiladi, tugma jim qolmaydi.
+   */
+  async function toggleShare() {
+    if (Platform.OS === "ios") {
+      toast.info("Ekran ulashish iOS'da hali mavjud emas");
+      return;
+    }
+    try {
+      await localParticipant.setScreenShareEnabled(!shareOn);
+    } catch {
+      toast.error("Ekranni ulashib bo'lmadi");
+    }
   }
 
   return (
@@ -108,6 +142,28 @@ export function LiveControls({
           disabled={cameraRequesting || cameraWaiting || isTeacher}
           onPress={onRequestCamera}
           icon={<VideoOff size={20} color={palette["muted-foreground"]} />}
+        />
+      )}
+
+      {canShare ? (
+        <ControlButton
+          label={shareOn ? "Ulashishni to'xtatish" : "Ekranni ulashish"}
+          active={shareOn}
+          onPress={() => void toggleShare()}
+          icon={
+            <MonitorUp
+              size={20}
+              color={shareOn ? palette["primary-foreground"] : palette["muted-foreground"]}
+            />
+          }
+        />
+      ) : (
+        <RequestButton
+          label="Ekran ulashish uchun ruxsat so'rash"
+          waiting={false}
+          disabled={shareRequesting || isTeacher}
+          onPress={onRequestShare}
+          icon={<MonitorUp size={20} color={palette["muted-foreground"]} />}
         />
       )}
 

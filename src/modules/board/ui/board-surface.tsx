@@ -1,12 +1,20 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
-import { ArrowLeft, FilePlus2, Trash2 } from "lucide-react-native";
+import { ArrowLeft, FilePlus2, Sigma, Trash2, UserRoundCheck } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
-import type { Point, StrokeShapeDto } from "../api/board.dto";
+import { useCourseStudents } from "@/modules/course";
+import type { FormulaSolutionDto, Point, StrokeShapeDto } from "../api/board.dto";
 import { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "../constants/board.constants";
-import { useAddSheet, useAddStroke, useBoard, useEraseStrokes } from "../model/board.queries";
+import {
+  useAddSheet,
+  useAddStroke,
+  useBoard,
+  useEraseStrokes,
+  useGrantDraw,
+  useSolveFormula,
+} from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
 import { AwayStudentsNotice } from "./away-students-notice";
 import { BoardCanvas } from "./board-canvas";
@@ -19,9 +27,12 @@ import {
   ChipRow,
   IconButton,
   Input,
+  ListItem,
+  radius,
   Screen,
   ScreenError,
   ScreenLoading,
+  Separator,
   Sheet,
   Text,
   toast,
@@ -30,6 +41,12 @@ import {
 
 export interface BoardSurfaceProps {
   lessonId: string;
+  /**
+   * Kurs — "chizishga ruxsat" ro'yxati uchun kerak: o'quvchilar shundan
+   * olinadi. Bo'lmasa tugma ko'rsatilmaydi — veb ham `courseId` ni
+   * `BoardPanel` ga prop qilib beradi.
+   */
+  courseId?: string | null;
   /**
    * Jonli dars ichida ochilganmi. Shunda o'z sarlavhasi va "orqaga" tugmasi
    * ko'rsatilmaydi — ular xona sarlavhasida allaqachon bor.
@@ -48,7 +65,7 @@ export interface BoardSurfaceProps {
  * chizmada qayta so'rov yuborilmaydi. Kanal ulanmasa `useBoard` pollingga
  * qaytadi — bu ham veb bilan bir xil.
  */
-export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) {
+export function BoardSurface({ lessonId, courseId = null, embedded = false }: BoardSurfaceProps) {
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -61,6 +78,8 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
   const addStroke = useAddStroke(lessonId ?? "");
   const addSheet = useAddSheet(lessonId ?? "");
   const erase = useEraseStrokes(lessonId ?? "");
+  const grant = useGrantDraw(lessonId ?? "");
+  const solve = useSolveFormula(lessonId ?? "");
 
   const [sheet, setSheet] = useState(0);
   const [tool, setTool] = useState<BoardTool>("pen");
@@ -72,8 +91,16 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
   const [draftText, setDraftText] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
   const [reason, setReason] = useState("");
+  const [grantOpen, setGrantOpen] = useState(false);
+  const [formulaOpen, setFormulaOpen] = useState(false);
+  const [formula, setFormula] = useState("");
+  const [solution, setSolution] = useState<FormulaSolutionDto | null>(null);
 
   const state = board.data;
+  const members = useCourseStudents(
+    board.data?.isTeacher ? courseId : null,
+    { page_size: 100 }
+  );
   const active = state?.sheets.find((item) => item.index === sheet) ?? state?.sheets[0];
   const canDraw = Boolean(state?.canDraw);
 
@@ -131,6 +158,36 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
     setDraftText("");
   }
 
+  /**
+   * Formulani serverga yechtirish (SymPy). Xatoni oynada QOLDIRAMIZ:
+   * foydalanuvchi yozganini tuzatib qayta urinishi kerak, oyna yopilmaydi.
+   */
+  async function solveFormula() {
+    if (!formula.trim()) return;
+    try {
+      setSolution(await solve.mutateAsync(formula.trim()));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Formulani yechib bo'lmadi");
+    }
+  }
+
+  /** SymPy yechimini doskaga matn bloki qilib qo'yadi — 🟢 veb bilan bir xil. */
+  function placeSolution() {
+    if (!solution) return;
+    const steps = solution.steps?.length ? `\n${solution.steps.join("\n")}` : "";
+    commitStroke({
+      type: "text",
+      text: `${solution.pretty}\n${solution.result}${steps}`,
+      x: 60,
+      y: 80,
+      size: BOARD_TEXT_SIZE,
+      color,
+    });
+    setFormulaOpen(false);
+    setFormula("");
+    setSolution(null);
+  }
+
   function submitErase() {
     if (!selected || !reason.trim()) return;
     // O'chirish SABABI majburiy — backend uni jurnalga yozadi
@@ -183,6 +240,18 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
         {selected ? (
           <IconButton accessibilityLabel="Tanlanganni o'chirish" onPress={() => setReasonOpen(true)}>
             <Trash2 size={20} color={palette.destructive} />
+          </IconButton>
+        ) : null}
+
+        {state.mathEnabled ? (
+          <IconButton accessibilityLabel="Formula yordamchisi" onPress={() => setFormulaOpen(true)}>
+            <Sigma size={20} color={palette.foreground} />
+          </IconButton>
+        ) : null}
+
+        {state.isTeacher && courseId ? (
+          <IconButton accessibilityLabel="Chizishga ruxsat" onPress={() => setGrantOpen(true)}>
+            <UserRoundCheck size={20} color={palette.foreground} />
           </IconButton>
         ) : null}
 
@@ -261,6 +330,88 @@ export function BoardSurface({ lessonId, embedded = false }: BoardSurfaceProps) 
         onSubmit={placeMath}
       />
 
+      {/*
+       * Chizishga ruxsat — o'qituvchi o'quvchini tanlaydi, backend unga
+       * `board_granted` signalini yuboradi. Ro'yxat KURS o'quvchilaridan
+       * olinadi (veb `board-panel.tsx` dagi kabi), darsdagilardan emas:
+       * darsga kirmagan o'quvchiga ham oldindan ruxsat berish mumkin.
+       */}
+      <Sheet
+        open={grantOpen}
+        onClose={() => setGrantOpen(false)}
+        title="Chizishga ruxsat"
+        description="Tanlangan o'quvchi doskada chiza oladi."
+      >
+        {members.isLoading ? <ScreenLoading label="O'quvchilar yuklanmoqda…" /> : null}
+
+        {(members.data?.items ?? []).map(({ student }, index) => (
+          <View key={student.id}>
+            {index > 0 ? <Separator /> : null}
+            <ListItem
+              title={student.name}
+              subtitle={`@${student.username}`}
+              disabled={grant.isPending}
+              onPress={() =>
+                grant.mutate(student.id, {
+                  onSuccess: () => toast.success(`${student.name} doskada chiza oladi`),
+                  onError: (error: Error) => toast.error(error.message),
+                })
+              }
+              trailing={<UserRoundCheck size={17} color={palette["muted-foreground"]} />}
+            />
+          </View>
+        ))}
+
+        {!members.isLoading && !members.data?.items?.length ? (
+          <Text variant="caption" tone="muted">
+            O'quvchi topilmadi.
+          </Text>
+        ) : null}
+      </Sheet>
+
+      {/* Formula yordamchisi — server SymPy bilan yechadi, natija doskaga qo'yiladi. */}
+      <Sheet
+        open={formulaOpen}
+        onClose={() => setFormulaOpen(false)}
+        title="Formula yordamchisi"
+        description="Masalan: 2x^2 - 5x + 3 = 0"
+      >
+        <Input
+          label="Formula"
+          value={formula}
+          onChangeText={(value) => {
+            setFormula(value);
+            setSolution(null);
+          }}
+          placeholder="2x^2 - 5x + 3 = 0"
+          autoFocus
+        />
+
+        {solution ? (
+          <View style={[styles.solution, { backgroundColor: palette.muted }]}>
+            <Text variant="caption" tone="muted" style={styles.mono}>
+              {solution.pretty}
+            </Text>
+            <Text variant="label">{solution.result}</Text>
+            {solution.steps?.map((step) => (
+              <Text key={step} variant="caption" tone="muted">
+                {step}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+
+        <Button
+          title="Yechish"
+          variant="secondary"
+          loading={solve.isPending}
+          disabled={!formula.trim()}
+          onPress={() => void solveFormula()}
+        />
+
+        {solution && canDraw ? <Button title="Doskaga qo'yish" onPress={placeSolution} /> : null}
+      </Sheet>
+
       <Sheet
         open={reasonOpen}
         onClose={() => setReasonOpen(false)}
@@ -290,4 +441,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headBody: { flex: 1, gap: 2, paddingHorizontal: 4 },
+  solution: { gap: 4, padding: 12, borderRadius: radius.sm },
+  mono: { fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }) },
 });

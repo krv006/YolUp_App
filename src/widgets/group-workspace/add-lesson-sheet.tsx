@@ -8,6 +8,7 @@ import {
   ODD_WEEKDAYS,
   useCreateLesson,
   useCreateLessonSchedule,
+  useUpdateLesson,
   WEEKDAYS,
 } from "@/modules/lesson";
 import type { Lesson } from "@/shared/types";
@@ -31,6 +32,13 @@ export interface AddLessonSheetProps {
   courseId: string;
   /** Mavjud darslar — vaqt to'qnashuvini tekshirish uchun. */
   existingLessons: Lesson[];
+  /**
+   * Berilsa — oyna TAHRIR rejimida ochiladi: maydonlar to'ldirilgan,
+   * takrorlash bo'limi yashiringan (mavjud darsni jadvalga aylantirish
+   * ma'nosiz) va saqlash `update` ga ketadi. Veb ham xuddi shu dialogni
+   * `initialValues` bilan qayta ishlatadi.
+   */
+  editing?: Lesson | null;
 }
 
 function todayString(): string {
@@ -54,15 +62,25 @@ function monthLaterString(): string {
  * To'qnashuv OGOHLANTIRISH, taqiq emas — veb'dagi kabi: o'qituvchi ataylab
  * ustma-ust dars qo'yishi mumkin (masalan guruh bo'linadi).
  */
-export function AddLessonSheet({ open, onClose, courseId, existingLessons }: AddLessonSheetProps) {
+export function AddLessonSheet({
+  open,
+  onClose,
+  courseId,
+  existingLessons,
+  editing = null,
+}: AddLessonSheetProps) {
   const { palette } = useTheme();
   const create = useCreateLesson();
+  const update = useUpdateLesson();
   const createSchedule = useCreateLessonSchedule();
 
-  const [topic, setTopic] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("18:30");
-  const [duration, setDuration] = useState("45");
+  // Tahrir rejimida boshlang'ich qiymatlar darsdan olinadi. Chaqiruvchi
+  // oynani `key={editing?.id ?? "new"}` bilan qayta yaratadi, shuning uchun
+  // effekt kerak emas — state bir marta shu yerdan boshlanadi.
+  const [topic, setTopic] = useState(editing?.title ?? editing?.topic ?? "");
+  const [date, setDate] = useState(editing?.date ?? "");
+  const [time, setTime] = useState(editing?.time ?? "18:30");
+  const [duration, setDuration] = useState(String(editing?.durationMinutes ?? 45));
   const [repeat, setRepeat] = useState(false);
   const [weekdays, setWeekdays] = useState<number[]>([...ODD_WEEKDAYS]);
   const [from, setFrom] = useState(todayString);
@@ -81,9 +99,10 @@ export function AddLessonSheet({ open, onClose, courseId, existingLessons }: Add
       date,
       time,
       durationMinutes,
-      excludeLessonId: null,
+      // Tahrirlanayotgan dars o'zi bilan to'qnashmasin.
+      excludeLessonId: editing?.id ?? null,
     });
-  }, [repeat, existingLessons, date, time, durationMinutes]);
+  }, [repeat, existingLessons, date, time, durationMinutes, editing]);
 
   const scheduleConflicts = useMemo(
     () =>
@@ -92,10 +111,10 @@ export function AddLessonSheet({ open, onClose, courseId, existingLessons }: Add
   );
 
   function reset() {
-    setTopic("");
-    setDate("");
-    setTime("18:30");
-    setDuration("45");
+    setTopic(editing?.title ?? editing?.topic ?? "");
+    setDate(editing?.date ?? "");
+    setTime(editing?.time ?? "18:30");
+    setDuration(String(editing?.durationMinutes ?? 45));
     setRepeat(false);
     setWeekdays([...ODD_WEEKDAYS]);
     setFrom(todayString());
@@ -118,6 +137,19 @@ export function AddLessonSheet({ open, onClose, courseId, existingLessons }: Add
   async function submit() {
     if (!topic.trim() || !time) return;
     try {
+      if (editing) {
+        if (!date) {
+          toast.error("Sanani tanlang");
+          return;
+        }
+        await update.mutateAsync({
+          id: editing.id,
+          form: { topic: topic.trim(), date, time, duration: durationMinutes },
+        });
+        close();
+        return;
+      }
+
       if (repeat) {
         if (dates.length === 0) {
           toast.error("Tanlangan oraliqda birorta ham kun topilmadi");
@@ -149,19 +181,29 @@ export function AddLessonSheet({ open, onClose, courseId, existingLessons }: Add
       }
       close();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Darsni yaratib bo'lmadi");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : editing
+            ? "Darsni saqlab bo'lmadi"
+            : "Darsni yaratib bo'lmadi"
+      );
     }
   }
 
   const conflicts = repeat ? scheduleConflicts : singleConflicts;
-  const pending = create.isPending || createSchedule.isPending;
+  const pending = create.isPending || createSchedule.isPending || update.isPending;
 
   return (
     <Sheet
       open={open}
       onClose={close}
-      title="Yangi dars"
-      description="Bitta dars yoki takrorlanuvchi haftalik jadval."
+      title={editing ? "Darsni tahrirlash" : "Yangi dars"}
+      description={
+        editing
+          ? "Mavzu, sana va vaqtni o'zgartirish mumkin."
+          : "Bitta dars yoki takrorlanuvchi haftalik jadval."
+      }
     >
       <Input
         label="Mavzu"
@@ -184,11 +226,10 @@ export function AddLessonSheet({ open, onClose, courseId, existingLessons }: Add
         </View>
       </View>
 
-      <Checkbox
-        checked={repeat}
-        onChange={setRepeat}
-        label="Har hafta takrorlansin"
-      />
+      {/* Mavjud darsni haftalik jadvalga aylantirib bo'lmaydi. */}
+      {editing ? null : (
+        <Checkbox checked={repeat} onChange={setRepeat} label="Har hafta takrorlansin" />
+      )}
 
       {repeat ? (
         <>
@@ -231,7 +272,7 @@ export function AddLessonSheet({ open, onClose, courseId, existingLessons }: Add
       ) : null}
 
       <Button
-        title={repeat ? `${dates.length} ta dars yaratish` : "Dars yaratish"}
+        title={editing ? "Saqlash" : repeat ? `${dates.length} ta dars yaratish` : "Dars yaratish"}
         size="lg"
         loading={pending}
         disabled={!topic.trim() || (repeat ? dates.length === 0 : !date)}

@@ -231,7 +231,34 @@ Bular qilinishi kerak, lekin hozircha yo'q — yashirilmasin:
 | Sentry, analytics | Faza 6 |
 | Unit va E2E testlar | Faza 6. Ko'chirilgan mapperlar uchun test MAJBURIY (§13) |
 | Do'kon materiallari | Faza 6 |
-| Real qurilmada sinov | Bu muhitda Android SDK/Xcode yo'q. Metro bundle ikkala platformada quriladi, lekin bu ishlayotgan ilova bilan bir xil emas |
+| iOS'da qurish va sinov | Bu muhitda Xcode yo'q |
+
+Android tomoni endi ochiq emas: `npx expo run:android` nativ qurilishi
+o'tdi va `app-debug.apk` hosil bo'ldi. Ekranlarni QO'LDA bosib chiqish
+hali qilinmagan — qurilish o'tgani ilova to'g'ri ishlayotganini bildirmaydi.
 
 **Funksional tenglik yopildi** — `docs/PARITY.md` ga qarang. Yuqoridagilar
 funksiya emas, infratuzilma va tashqi bog'liqliklar.
+
+---
+
+## 16. "Tenglik yopildi" da'vosi qanday tekshiriladi
+
+**Qaror:** tenglik komponent NOMLARINI taqqoslash bilan emas, veb
+eksportlarini mobil chaqiruv joylarida qidirish bilan tasdiqlanadi.
+
+**Nega:** §14 dan keyin `PARITY.md` "hammasi bor" deb yozilgan edi va
+jadval to'g'ri ko'rinardi — har veb komponentiga mobil manzil bor edi.
+Lekin jadval NOMLARNI solishtirardi. Keyingi tekshirishda veb'ning 20 ta
+`use*` hooki mobil UI'da umuman chaqirilmagani chiqdi; 10 tasi haqiqiy
+kamchilik edi (doskada chizish ruxsati, formula yordamchisi, ekran
+ulashish ruxsati, dars tahriri, to'rt joyda o'chirish amali, topshiriq
+faylini yuklash, "dars ketmoqda" chizig'i).
+
+Sabab bitta: mobil domen qatlami TO'LIQ ko'chirilgan, shuning uchun
+"modul bor" degan his aldadi. Ma'lumot bor edi — tugmasi yo'q edi.
+
+**Qoida:** har "tenglik" da'vosidan oldin uchta ro'yxat mexanik
+tekshiriladi (usuli `PARITY.md` §"Bu javob QANDAY tekshirilgan" da):
+hooklar, modul eksportlari, `shared/lib`. Qo'lda ko'z yugurtirish
+hisobga olinmaydi.

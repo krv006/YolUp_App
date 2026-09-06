@@ -16,6 +16,8 @@ export interface ListItemProps {
   /** O'ngdagi ">" ko'rsatkichi (`trailing` bo'lmasa). */
   chevron?: boolean;
   active?: boolean;
+  /** Bosilmaydigan holat — masalan so'rov ketayotganda. */
+  disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -32,6 +34,7 @@ export function ListItem({
   onPress,
   chevron = false,
   active = false,
+  disabled = false,
   style,
 }: ListItemProps) {
   const { palette } = useTheme();
@@ -67,9 +70,14 @@ export function ListItem({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityState={{ selected: active }}
+      accessibilityState={{ selected: active, disabled }}
+      disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [base, pressed && { backgroundColor: palette["surface-subtle"] }]}
+      style={({ pressed }) => [
+        base,
+        disabled && styles.disabled,
+        pressed && { backgroundColor: palette["surface-subtle"] },
+      ]}
     >
       {content}
     </Pressable>
@@ -77,6 +85,7 @@ export function ListItem({
 }
 
 const styles = StyleSheet.create({
+  disabled: { opacity: 0.5 },
   row: {
     flexDirection: "row",
     alignItems: "center",

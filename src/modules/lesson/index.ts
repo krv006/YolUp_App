@@ -79,6 +79,8 @@ export { LessonCalendar } from "./ui/lesson-calendar";
 export type { LessonCalendarProps } from "./ui/lesson-calendar";
 export { LessonCard } from "./ui/lesson-card";
 export type { LessonCardProps } from "./ui/lesson-card";
+export { LiveLessonBar } from "./ui/live-lesson-bar";
+export type { LiveLessonBarProps } from "./ui/live-lesson-bar";
 export { FinishLessonSheet, LessonRatingsSheet, RateLessonSheet } from "./ui/lesson-sheets";
 export { RatingSummary, StarRating } from "./ui/star-rating";
 export type { StarRatingProps } from "./ui/star-rating";

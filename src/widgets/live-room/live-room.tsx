@@ -1,18 +1,38 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   useConnectionState,
+  useLocalParticipant,
   useParticipants,
+  useRoomContext,
   useTracks,
   VideoTrack,
   type TrackReferenceOrPlaceholder,
 } from "@livekit/react-native";
-import { ConnectionState, Track } from "livekit-client";
+import { ConnectionState, RoomEvent, Track, type Participant } from "livekit-client";
 import { MicOff, MonitorUp, UserRoundPlus } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { BoardSurface } from "@/modules/board";
-import { LessonInviteSheet, useCameraSignals, useMicSignals } from "@/modules/live";
-import { Avatar, Badge, Chip, ChipRow, IconButton, radius, Text, useTheme } from "@/shared/ui";
+import {
+  decodeScreenShareRequest,
+  encodeScreenShareRequest,
+  LessonInviteSheet,
+  useAllowShare,
+  useCameraSignals,
+  useMicSignals,
+} from "@/modules/live";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Chip,
+  ChipRow,
+  IconButton,
+  radius,
+  Text,
+  toast,
+  useTheme,
+} from "@/shared/ui";
 import { LiveControls } from "./live-controls";
 import { LiveWatermark } from "./live-watermark";
 
@@ -64,6 +84,68 @@ export function LiveRoom({
    */
   const micSignals = useMicSignals(lessonId, isTeacher);
   const cameraSignals = useCameraSignals(lessonId, isTeacher);
+
+  const room = useRoomContext();
+  const { localParticipant } = useLocalParticipant();
+  const allowShare = useAllowShare(lessonId);
+  const [sharePending, setSharePending] = useState(false);
+
+  /**
+   * Ekran ulashish so'rovi — o'quvchi ma'lumot kanali orqali yuboradi,
+   * o'qituvchida toast chiqadi va u yerdan ruxsat beriladi.
+   * 🟢 Veb `ShareRequestListener` bilan bir xil signal formati.
+   */
+  const grantShare = useCallback(
+    (identity: string) => allowShare.mutate(identity),
+    [allowShare]
+  );
+
+  useEffect(() => {
+    if (!isTeacher) return;
+
+    function receive(
+      payload: Uint8Array,
+      participant?: Participant,
+      _kind?: unknown,
+      topic?: string
+    ) {
+      const request = decodeScreenShareRequest(payload, topic);
+      if (!request || !participant) return;
+      const identity = participant.identity;
+      const name = request.name || participant.name || identity;
+
+      toast(`${name} ekran ulashmoqchi`, {
+        description: "O'quvchiga ekran ulashish uchun ruxsat berasizmi?",
+        duration: 12_000,
+        action: { label: "Ruxsat berish", onClick: () => grantShare(identity) },
+      });
+    }
+
+    room.on(RoomEvent.DataReceived, receive);
+    return () => {
+      room.off(RoomEvent.DataReceived, receive);
+    };
+  }, [isTeacher, grantShare, room]);
+
+  /** O'quvchi: ekran ulashish uchun ruxsat so'raydi (🟢 veb bilan bir xil). */
+  async function requestShare() {
+    if (sharePending) return;
+    setSharePending(true);
+    try {
+      const signal = encodeScreenShareRequest(
+        localParticipant.name || localParticipant.identity
+      );
+      await localParticipant.publishData(signal.payload, {
+        reliable: true,
+        topic: signal.topic,
+      });
+      toast.success("Ekran ulashish so'rovi o'qituvchiga yuborildi");
+    } catch {
+      toast.error("So'rovni yuborib bo'lmadi");
+    } finally {
+      setSharePending(false);
+    }
+  }
 
   const cameraTracks = useTracks([Track.Source.Camera], { onlySubscribed: false });
   const screenTracks = useTracks([Track.Source.ScreenShare], { onlySubscribed: false });
@@ -151,7 +233,7 @@ export function LiveRoom({
 
       {tab === "board" && courseId !== null ? (
         <View style={styles.stage}>
-          <BoardSurface lessonId={lessonId} embedded />
+          <BoardSurface lessonId={lessonId} courseId={courseId} embedded />
         </View>
       ) : null}
 
@@ -172,6 +254,22 @@ export function LiveRoom({
               {!participant.isMicrophoneEnabled ? (
                 <MicOff size={16} color={palette["muted-foreground"]} />
               ) : null}
+
+              {/*
+               * Ekran ulashish ruxsati — LiveKit `identity` backend token'ida
+               * o'quvchi id'si sifatida beriladi, shuning uchun aynan shu
+               * yuboriladi (🟢 veb bilan bir xil).
+               */}
+              {isTeacher && !participant.isLocal ? (
+                <Button
+                  title="Ruxsat"
+                  variant="secondary"
+                  fullWidth={false}
+                  loading={allowShare.isPending}
+                  icon={<MonitorUp size={14} color={palette["secondary-foreground"]} />}
+                  onPress={() => grantShare(participant.identity)}
+                />
+              ) : null}
             </View>
           ))}
         </ScrollView>
@@ -186,6 +284,8 @@ export function LiveRoom({
         onRequestCamera={cameraSignals.requestCamera}
         cameraRequesting={cameraSignals.requesting}
         cameraWaiting={cameraSignals.waiting}
+        onRequestShare={() => void requestShare()}
+        shareRequesting={sharePending}
       />
 
       <LessonInviteSheet

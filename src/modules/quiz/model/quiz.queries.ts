@@ -3,6 +3,27 @@ import { toast } from "sonner";
 import type { QuizFormValues } from "@/shared/types";
 import { quizApi } from "../api/quiz.api";
 
+/*
+ * KESHNI YANGILASH QOIDASI — butun loyihaga tegishli.
+ *
+ * Mutatsiya MODULNING `all` prefiksini invalidate qiladi, tor kalitni EMAS.
+ *
+ * NEGA: tor kalit optimallashtirishdek ko'rinadi, lekin bitta ro'yxat turli
+ * parametr bilan so'ralishi mumkin. Aynan shu yerda xato bo'lgan edi:
+ *
+ *   Testlar sahifasi so'raydi:    quizKeys.list(null)
+ *   Yaratish invalidate qilardi:  quizKeys.list(courseId)
+ *
+ * TanStack Query kalitlarni prefiks bo'yicha solishtiradi; bu ikkisi hech
+ * qachon mos kelmagan, shuning uchun test yaratilgach ro'yxat yangilanmay,
+ * foydalanuvchi ekranni qo'lda tortib yangilashga majbur bo'lgan.
+ *
+ * Bitta ortiqcha so'rovning narxi eskirgan ekrandan ancha arzon.
+ *
+ * ISTISNO: real vaqtda soket orqali keladigan ma'lumot (doska, jonli dars).
+ * U yerda so'rov bitta va uning parametri mutatsiyaning O'ZIDAN keladi
+ * (server javobidan emas), shuning uchun tor kalit xavfsiz.
+ */
 export const quizKeys = Object.freeze({
   all: ["quizzes"] as const,
   list: (courseId: string | null) => ["quizzes", "list", courseId] as const,
@@ -31,8 +52,8 @@ export function useCreateQuiz() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (form: QuizFormValues) => quizApi.create(form),
-    onSuccess: (quiz) => {
-      client.invalidateQueries({ queryKey: quizKeys.list(quiz.courseId) });
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: quizKeys.all });
       toast.success("Test yaratildi");
     },
     onError: (error: Error) => toast.error(error.message),
@@ -62,8 +83,8 @@ export function useSubmitQuizAttempt() {
       quizId: string;
       answers: Array<{ questionId: string; selectedOptionId: string | null }>;
     }) => quizApi.submitAttempt(quizId, answers),
-    onSuccess: (result) => {
-      client.invalidateQueries({ queryKey: quizKeys.attempts(result.quizId) });
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: quizKeys.all });
     },
     onError: (error: Error) => toast.error(error.message),
   });

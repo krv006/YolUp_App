@@ -7,6 +7,7 @@ import {
   type StyleProp,
   type TextInputProps,
   type TextStyle,
+  type ViewStyle,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
@@ -21,11 +22,21 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
   /** Parol maydoni — ko'rsatish/yashirish tugmasi qo'shiladi. */
   secure?: boolean;
   /**
-   * Maydonning O'ZIGA beriladigan uslub (balandlik, kenglik, tekislash).
-   * `style` ataylab ochilmadi: u o'ramga (yorliq + xato) tegishlimi yoki
-   * maydonga — noaniq bo'lardi.
+   * Maydonning O'ZIGA beriladigan uslub: matn tekislash, balandlik, shrift.
+   *
+   * DIQQAT — KENGLIK BU YERGA BERILMAYDI. Ichki `TextInput` da `flex: 1`
+   * turadi va u tashqi o'ramning kengligiga bo'ysunadi; bu yerga `width`
+   * berilsa, o'ram baribir siqilib qoladi va qiymat kesiladi. Aynan shu
+   * xato test qo'shish oynasidagi "ball" maydonini ko'rinmas qilgan edi.
+   * Kenglik uchun `containerStyle` ishlatiladi.
    */
   inputStyle?: StyleProp<TextStyle>;
+  /**
+   * Tashqi o'ramga (yorliq + maydon + xato) beriladigan uslub — kenglik,
+   * chekka bo'shliqlar. `flex` qatorlarida maydon o'lchamini SHU orqali
+   * belgilang.
+   */
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -36,7 +47,7 @@ export interface InputProps extends Omit<TextInputProps, "style"> {
  * foydalanuvchi uchun ham, screen reader uchun ham.
  */
 export const Input = forwardRef<TextInput, InputProps>(function Input(
-  { label, error, icon, secure = false, inputStyle, ...rest },
+  { label, error, icon, secure = false, inputStyle, containerStyle, ...rest },
   ref
 ) {
   const { palette } = useTheme();
@@ -46,7 +57,7 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   const borderColor = error ? palette.destructive : focused ? palette.ring : palette.input;
 
   return (
-    <View style={styles.group}>
+    <View style={[styles.group, containerStyle]}>
       {label ? (
         <Text variant="label" style={styles.label}>
           {label}

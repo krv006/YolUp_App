@@ -234,8 +234,8 @@ export function useDeleteRecording() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => lessonApi.removeRecording(id),
-    onSuccess: (id) => {
-      client.invalidateQueries({ queryKey: lessonKeys.recording(id) });
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: lessonKeys.all });
       toast.success("Video yozuv o‘chirildi");
     },
   });

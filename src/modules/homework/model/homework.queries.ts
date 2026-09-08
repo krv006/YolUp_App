@@ -85,8 +85,8 @@ export function useCreateAssignment() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (form: AssignmentFormInput) => homeworkApi.createAssignment(form),
-    onSuccess: (item) => {
-      client.invalidateQueries({ queryKey: homeworkKeys.assignments(item.courseId) });
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: homeworkKeys.all });
       toast.success("Vazifa yuborildi");
     },
   });

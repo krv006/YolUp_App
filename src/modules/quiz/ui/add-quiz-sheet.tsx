@@ -239,6 +239,7 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
               value={question.points}
               onChangeText={(value) => updateQuestion(question.key, { points: value })}
               keyboardType="number-pad"
+              containerStyle={styles.pointsBox}
               inputStyle={styles.points}
             />
             {questions.length > 1 ? (
@@ -334,7 +335,8 @@ const styles = StyleSheet.create({
   },
   questionHead: { flexDirection: "row", alignItems: "center", gap: 8 },
   questionTitle: { flex: 1 },
-  points: { width: 56, textAlign: "center" },
+  pointsBox: { width: 64 },
+  points: { textAlign: "center" },
   optionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   correctToggle: {
     width: MIN_TOUCH_SIZE,

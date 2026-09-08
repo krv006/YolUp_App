@@ -2,7 +2,15 @@ import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import type { ChatMessage } from "@/shared/types";
-import { radius, ScreenEmpty, ScreenError, Skeleton, Text, useTheme } from "@/shared/ui";
+import {
+  MessageTextScale,
+  radius,
+  ScreenEmpty,
+  ScreenError,
+  Skeleton,
+  Text,
+  useTheme,
+} from "@/shared/ui";
 import { buildMessageRows, type MessageRow } from "../lib/message-day";
 import { MessageBubble } from "./message-bubble";
 
@@ -38,41 +46,45 @@ export function MessageList({
 
   if (rows.length === 0) {
     return (
-      <ScreenEmpty
-        title="Xabarlar yo'q"
-        description="Birinchi xabarni yozib suhbatni boshlang."
-      />
+      <ScreenEmpty title="Xabarlar yo'q" description="Birinchi xabarni yozib suhbatni boshlang." />
     );
   }
 
   return (
-    <FlashList
-      data={rows}
-      keyExtractor={(row) => (row.kind === "day" ? row.key : row.message.id)}
-      keyboardDismissMode="interactive"
-      keyboardShouldPersistTaps="handled"
-      contentContainerStyle={styles.content}
-      /*
-       * Chat xulqi (FlashList v2 da `inverted` o'rniga):
-       *  - ro'yxat darhol pastdan ochiladi,
-       *  - yangi xabar kelganda foydalanuvchi pastga yaqin bo'lsa avtomatik
-       *    suriladi; yuqorida eski xabarlarni o'qiyotgan bo'lsa TEGILMAYDI.
-       * Ikkinchisi muhim: aks holda har kelgan xabar o'qishni buzadi.
-       */
-      maintainVisibleContentPosition={{
-        startRenderingFromBottom: true,
-        autoscrollToBottomThreshold: 0.2,
-      }}
-      ListFooterComponent={typingName ? <TypingIndicator name={typingName} /> : null}
-      renderItem={({ item }) => (
-        <MessageRowView
-          row={item}
-          currentUserId={currentUserId}
-          onLongPress={onLongPress}
-          onRetryMessage={onRetryMessage}
-        />
-      )}
-    />
+    /*
+     * Xabar matni o'lchami FAQAT shu daraxt ichida qo'llanadi. O'ram
+     * ro'yxatning o'zida — shuning uchun ro'yxat qayerda ishlatilsa,
+     * sozlama o'sha yerda ishlaydi va uni qo'shishni unutib bo'lmaydi.
+     */
+    <MessageTextScale>
+      <FlashList
+        data={rows}
+        keyExtractor={(row) => (row.kind === "day" ? row.key : row.message.id)}
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.content}
+        /*
+         * Chat xulqi (FlashList v2 da `inverted` o'rniga):
+         *  - ro'yxat darhol pastdan ochiladi,
+         *  - yangi xabar kelganda foydalanuvchi pastga yaqin bo'lsa avtomatik
+         *    suriladi; yuqorida eski xabarlarni o'qiyotgan bo'lsa TEGILMAYDI.
+         * Ikkinchisi muhim: aks holda har kelgan xabar o'qishni buzadi.
+         */
+        maintainVisibleContentPosition={{
+          startRenderingFromBottom: true,
+          autoscrollToBottomThreshold: 0.2,
+        }}
+        ListFooterComponent={typingName ? <TypingIndicator name={typingName} /> : null}
+        renderItem={({ item }) => (
+          <MessageRowView
+            row={item}
+            currentUserId={currentUserId}
+            onLongPress={onLongPress}
+            onRetryMessage={onRetryMessage}
+          />
+        )}
+      />
+    </MessageTextScale>
   );
 }
 

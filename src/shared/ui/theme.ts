@@ -30,8 +30,6 @@ export type Palette = (typeof colors)["light"];
 export function useTheme(): {
   scheme: ColorScheme;
   palette: Palette;
-  /** Shrift ko'paytuvchisi — `Text` uni o'zi qo'llaydi. */
-  fontScale: number;
   /**
    * O'z xabari purakchasi uchun gradient. `null` bo'lsa oddiy rang
    * (`palette["bubble-own"]`) ishlatiladi.
@@ -43,7 +41,6 @@ export function useTheme(): {
   const accent = useAppearanceStore((state) => state.accent);
   const bubbleAccent = useAppearanceStore((state) => state.bubbleAccent);
   const bubbleGradientId = useAppearanceStore((state) => state.bubbleGradient);
-  const fontScale = useAppearanceStore((state) => state.fontScale);
 
   const scheme: ColorScheme =
     mode === "system" ? (systemScheme === "dark" ? "dark" : "light") : mode;
@@ -77,5 +74,5 @@ export function useTheme(): {
     } as Palette;
   }, [scheme, accent, bubbleAccent, bubbleGradient]);
 
-  return { scheme, palette, fontScale, bubbleGradient };
+  return { scheme, palette, bubbleGradient };
 }

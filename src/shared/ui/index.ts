@@ -18,6 +18,7 @@ export {
 export type { Accent, Gradient } from "./accents";
 export { GradientFill } from "./gradient";
 export type { GradientFillProps } from "./gradient";
+export { MessageTextScale, useTextScale } from "./text-scale";
 export { Slider } from "./slider";
 export type { SliderProps } from "./slider";
 export { Logo } from "./logo";

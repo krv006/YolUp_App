@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { fontSize } from "./tokens";
 import { useTheme } from "./theme";
+import { useTextScale } from "./text-scale";
 
 /**
  * Tipografiya shkalasi veb `--fs-*` tokenlaridan (MOBILE_PLAN §8.1).
@@ -37,7 +38,10 @@ export interface TextProps extends RNTextProps {
 }
 
 export function Text({ variant = "body", tone = "default", style, ...rest }: TextProps) {
-  const { palette, fontScale } = useTheme();
+  const { palette } = useTheme();
+  // Masshtab GLOBAL emas: faqat `MessageTextScale` o'ramidagi matn
+  // kattalashadi (sabab shu faylda emas, `text-scale.tsx` da yozilgan).
+  const fontScale = useTextScale();
 
   const color = {
     default: palette.foreground,

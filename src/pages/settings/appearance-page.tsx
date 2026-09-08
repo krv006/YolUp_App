@@ -2,9 +2,9 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Check, Moon, Smartphone, Sun } from "lucide-react-native";
 import {
-  FONT_SCALE_STEP,
-  MAX_FONT_SCALE,
-  MIN_FONT_SCALE,
+  MAX_MESSAGE_SCALE,
+  MESSAGE_SCALE_STEP,
+  MIN_MESSAGE_SCALE,
   useAppearanceStore,
   type ThemeMode,
 } from "@/shared/model/theme.store";
@@ -14,6 +14,7 @@ import {
   GRADIENTS,
   GradientFill,
   IconButton,
+  MessageTextScale,
   radius,
   Screen,
   Separator,
@@ -38,15 +39,16 @@ const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
  */
 export function AppearancePage() {
   const router = useRouter();
-  const { palette, fontScale } = useTheme();
+  const { palette } = useTheme();
   const {
     mode,
     accent,
+    messageScale,
     bubbleAccent,
     bubbleGradient,
     setMode,
     setAccent,
-    setFontScale,
+    setMessageScale,
     setBubbleAccent,
     setBubbleGradient,
     reset,
@@ -120,25 +122,27 @@ export function AppearancePage() {
 
         <Separator />
 
-        {/* ── Shrift ── */}
-        <Section title="Shrift o'lchami" hint="Butun ilovadagi matnga qo'llanadi.">
+        {/* ── Suhbat ── */}
+        <Section
+          title="Suhbat"
+          hint="Xabar matni o'lchami va o'z xabarlaringiz rangi. Bu sozlamalar faqat suhbatga tegishli."
+        >
           <View style={styles.fontRow}>
             {/*
              * Chekka harflar masshtabga BO'YSUNMAYDI: ular slayder
-             * chegaralarini bildiruvchi belgi, o'qiladigan matn emas. Aks
-             * holda "eng katta" tanlanganda ular slayderni siqib qo'yardi.
+             * chegaralarini bildiruvchi belgi, o'qiladigan matn emas.
              */}
             <Text allowFontScaling={false} style={styles.fontMarkSmall} tone="muted">
               A
             </Text>
             <View style={styles.sliderBox}>
               <Slider
-                value={fontScale}
-                min={MIN_FONT_SCALE}
-                max={MAX_FONT_SCALE}
-                step={FONT_SCALE_STEP}
-                onChange={setFontScale}
-                label="Shrift o'lchami"
+                value={messageScale}
+                min={MIN_MESSAGE_SCALE}
+                max={MAX_MESSAGE_SCALE}
+                step={MESSAGE_SCALE_STEP}
+                onChange={setMessageScale}
+                label="Xabar matni o'lchami"
                 formatValue={(v) => `${Math.round(v * 100)} foiz`}
               />
             </View>
@@ -147,21 +151,6 @@ export function AppearancePage() {
             </Text>
           </View>
 
-          <View style={[styles.fontPreview, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <Text>Matn shu ko'rinishda bo'ladi.</Text>
-            <Text variant="caption" tone="muted">
-              {Math.round(fontScale * 100)}%
-            </Text>
-          </View>
-        </Section>
-
-        <Separator />
-
-        {/* ── Chat purakchasi ── */}
-        <Section
-          title="Suhbat rangi"
-          hint="O'z xabarlaringiz shu rangda ko'rinadi. Asosiy rangdan mustaqil."
-        >
           <ColorSwatches
             selected={bubbleGradient ? "" : (bubbleAccent ?? accent)}
             onSelect={setBubbleAccent}
@@ -308,32 +297,36 @@ function ChatPreview() {
   const { palette, bubbleGradient } = useTheme();
 
   return (
-    <View style={[styles.preview, { backgroundColor: palette["chat-bg"] }]}>
-      <View
-        style={[
-          styles.previewBubble,
-          styles.previewIn,
-          { backgroundColor: palette.surface, borderColor: palette.border },
-        ]}
-      >
-        <Text variant="caption">Salom! Dars qachon boshlanadi?</Text>
-      </View>
+    // Namuna HAQIQIY suhbat kabi o'ralgan — shuning uchun slayder
+    // qimirlatilganda shu yerdagi matn ham darhol kattalashadi.
+    <MessageTextScale>
+      <View style={[styles.preview, { backgroundColor: palette["chat-bg"] }]}>
+        <View
+          style={[
+            styles.previewBubble,
+            styles.previewIn,
+            { backgroundColor: palette.surface, borderColor: palette.border },
+          ]}
+        >
+          <Text variant="caption">Salom! Dars qachon boshlanadi?</Text>
+        </View>
 
-      <View
-        style={[
-          styles.previewBubble,
-          styles.previewOut,
-          // Gradient bo'lsa fon SVG bilan chiziladi, shuning uchun rang
-          // berilmaydi va burchaklar kesilishi uchun `overflow` yopiladi.
-          bubbleGradient ? styles.clip : { backgroundColor: palette["bubble-own"] },
-        ]}
-      >
-        {bubbleGradient ? <GradientFill colors={bubbleGradient} /> : null}
-        <Text variant="caption" style={{ color: palette["bubble-own-foreground"] }}>
-          Soat 15:00 da boshlaymiz.
-        </Text>
+        <View
+          style={[
+            styles.previewBubble,
+            styles.previewOut,
+            // Gradient bo'lsa fon SVG bilan chiziladi, shuning uchun rang
+            // berilmaydi va burchaklar kesilishi uchun `overflow` yopiladi.
+            bubbleGradient ? styles.clip : { backgroundColor: palette["bubble-own"] },
+          ]}
+        >
+          {bubbleGradient ? <GradientFill colors={bubbleGradient} /> : null}
+          <Text variant="caption" style={{ color: palette["bubble-own-foreground"] }}>
+            Soat 15:00 da boshlaymiz.
+          </Text>
+        </View>
       </View>
-    </View>
+    </MessageTextScale>
   );
 }
 
@@ -364,12 +357,6 @@ const styles = StyleSheet.create({
   sliderBox: { flex: 1 },
   fontMarkSmall: { fontSize: 13, fontWeight: "700" },
   fontMarkLarge: { fontSize: 22, fontWeight: "700" },
-  fontPreview: {
-    gap: 2,
-    padding: 12,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
   swatches: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   swatch: {
     width: 44,

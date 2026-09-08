@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
@@ -12,7 +12,7 @@ export interface SliderProps {
   /** Qiymat shu qadam bo'yicha yaxlitlanadi. */
   step: number;
   onChange: (value: number) => void;
-  /** Ekran o'quvchi uchun: "Shrift o'lchami" kabi. */
+  /** Ekran o'quvchi uchun: "Xabar matni o'lchami" kabi. */
   label: string;
   /** Ekran o'quvchi qiymatni qanday o'qishi: 1.15 -> "115%". */
   formatValue?: (value: number) => string;
@@ -29,11 +29,21 @@ const TRACK = 6;
  * shunchaki gorizontal sudrash, u esa loyihada ALLAQACHON bor
  * `gesture-handler` + `reanimated` bilan bajariladi.
  *
- * QADAM BO'YICHA YAXLITLASH muhim: shrift o'lchami o'zgarganda BUTUN ilova
- * qayta render bo'ladi. Barmoq harakatining har kadrida qiymat berilsa,
- * sudrash sekinlashib qolardi. Shuning uchun barmoq uzluksiz harakatlanadi
- * (tugmacha shared value bilan chiziladi), qiymat esa faqat yangi qadamga
- * o'tilganda beriladi.
+ * ┌─ NEGA GESTURE `useMemo` ICHIDA ──────────────────────────────────────┐
+ * │ Dastlab `Gesture.Pan()` har renderda qaytadan yaratilardi. Sudrash   │
+ * │ paytida har qiymat o'zgarishi ota-komponentni qayta render qilar,    │
+ * │ bu esa YANGI gesture obyektini tug'dirar va uning holati nolga       │
+ * │ tushardi — tugmacha barmoq ostidan qochib, tanlangan joyga           │
+ * │ tushmasdi. Endi obyekt bir marta yaratiladi.                         │
+ * │                                                                      │
+ * │ Shu sabab o'zgaruvchan qiymatlar (`onChange`, `usable`) worklet      │
+ * │ ichiga TO'G'RIDAN-TO'G'RI olinmaydi: ular ref va shared value orqali │
+ * │ o'qiladi, aks holda gesture eski nusxani ushlab qolardi.             │
+ * └──────────────────────────────────────────────────────────────────────┘
+ *
+ * Pozitsiya `translationX` (nisbiy siljish) bo'yicha hisoblanadi, `x`
+ * (mutlaq joylashuv) bo'yicha emas: barmoq tugmachaning chetiga tekkanda
+ * ham u sakrab ketmaydi.
  */
 export function Slider({ value, min, max, step, onChange, label, formatValue }: SliderProps) {
   const { palette } = useTheme();
@@ -42,53 +52,88 @@ export function Slider({ value, min, max, step, onChange, label, formatValue }: 
   const usable = Math.max(0, width - THUMB);
   const ratio = max > min ? (value - min) / (max - min) : 0;
 
+  /** Tugmachaning joriy o'rni (piksel). Sudrash paytida yagona manba. */
   const offset = useSharedValue(0);
+  const startOffset = useSharedValue(0);
   const dragging = useSharedValue(false);
+  /** Oxirgi marta JS ga yuborilgan qadam raqami — takrorni to'sadi. */
+  const lastSent = useSharedValue(-1);
+
+  const [isDragging, setIsDragging] = useState(false);
+
+  /*
+   * O'zgaruvchan qiymatlar shared value da saqlanadi.
+   *
+   * Gesture bir marta yaratilgani uchun u closure orqali eski qiymatlarni
+   * ushlab qolardi. Shared value ni esa ham UI, ham JS oqimidan o'qish
+   * mumkin, shuning uchun `emit` ham shu manbadan foydalanadi.
+   *
+   * Ref emas: React Compiler render vaqtida ref ga yozishni taqiqlaydi.
+   */
+  /** Chegaralar va foydali uzunlik — BITTA obyektda, bitta o'qishda olinadi. */
+  const bounds = useSharedValue({ min, max, step, span: 0 });
+
+  useEffect(() => {
+    bounds.set({ min, max, step, span: usable });
+    // Sudralmayotganda tugmacha QIYMATGA ergashadi (tashqaridan o'zgarsa ham).
+    if (!isDragging) offset.set(ratio * usable);
+  }, [onChange, min, max, step, ratio, usable, isDragging, offset, bounds]);
+
+  const setDragging = useCallback((next: boolean) => setIsDragging(next), []);
+
+  const pan = Gesture.Pan()
+    // Teginish bilan ham boshlansin — tugmachani bosib ushlash kifoya.
+    .minDistance(0)
+    .onBegin(() => {
+      dragging.set(true);
+      startOffset.set(offset.get());
+      lastSent.set(-1);
+      runOnJS(setDragging)(true);
+    })
+    .onUpdate((event) => {
+      const limits = bounds.get();
+      const span = limits.span;
+      const next = Math.min(span, Math.max(0, startOffset.get() + event.translationX));
+      offset.set(next);
+
+      /*
+       * JS oqimiga faqat QADAM O'ZGARGANDA xabar beriladi.
+       *
+       * Ilgari har kadrda `onChange` chaqirilardi — bu sekundiga ~60 marta
+       * qayta render degani. Renderlar oqimi gesture yangilanishini kechiktirib,
+       * tugmacha barmoq ortidan qolib ketardi va qo'yib yuborilganda boshqa
+       * joyga tushardi. Tugmacha esa baribir silliq harakatlanadi, chunki
+       * uning o'rni UI oqimidagi `offset` bilan chiziladi.
+       */
+      if (span > 0) {
+        const raw = limits.min + (next / span) * (limits.max - limits.min);
+        const stepIndex = Math.round((raw - limits.min) / limits.step);
+        if (stepIndex !== lastSent.get()) {
+          lastSent.set(stepIndex);
+          const stepped = limits.min + stepIndex * limits.step;
+          const clamped = Math.min(limits.max, Math.max(limits.min, stepped));
+          // Suzuvchi nuqta xatosi: 1.0500000000000003 kabi qiymatlar
+          // saqlashda ham, taqqoslashda ham muammo tug'diradi.
+          // To'g'ridan-to'g'ri `onChange`: gesture har renderda qayta
+          // quriladi, shuning uchun u doim eng yangi funksiya bo'ladi.
+          runOnJS(onChange)(Math.round(clamped * 10000) / 10000);
+        }
+      }
+    })
+    .onFinalize(() => {
+      dragging.set(false);
+      runOnJS(setDragging)(false);
+    });
 
   function onLayout(event: LayoutChangeEvent) {
     setWidth(event.nativeEvent.layout.width);
   }
 
-  /** Piksel o'rnini qadamga yaxlitlangan qiymatga aylantiradi. */
-  function commit(x: number) {
-    if (usable <= 0) return;
-    const raw = min + (x / usable) * (max - min);
-    const stepped = Math.round(raw / step) * step;
-    const clamped = Math.min(max, Math.max(min, stepped));
-    // Suzuvchi nuqta xatosini yo'qotamiz: 1.0500000000000003 kabi qiymatlar
-    // saqlashda ham, taqqoslashda ham muammo tug'diradi.
-    const rounded = Number(clamped.toFixed(4));
-    if (rounded !== value) onChange(rounded);
-  }
-
-  const pan = Gesture.Pan()
-    .onBegin((event) => {
-      dragging.set(true);
-      offset.set(event.x - THUMB / 2);
-      runOnJS(commit)(event.x - THUMB / 2);
-    })
-    .onUpdate((event) => {
-      const x = Math.min(usable, Math.max(0, event.x - THUMB / 2));
-      offset.set(x);
-      runOnJS(commit)(x);
-    })
-    .onFinalize(() => {
-      dragging.set(false);
-    });
-
-  // Sudrash paytida tugmacha barmoq ortidan, aks holda qiymatga bog'lanadi.
   const thumbStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: dragging.get() ? Math.min(usable, Math.max(0, offset.get())) : ratio * usable },
-      { scale: dragging.get() ? 1.15 : 1 },
-    ],
+    transform: [{ translateX: offset.get() }, { scale: dragging.get() ? 1.15 : 1 }],
   }));
 
-  const fillStyle = useAnimatedStyle(() => ({
-    width:
-      THUMB / 2 +
-      (dragging.get() ? Math.min(usable, Math.max(0, offset.get())) : ratio * usable),
-  }));
+  const fillStyle = useAnimatedStyle(() => ({ width: THUMB / 2 + offset.get() }));
 
   return (
     <GestureDetector gesture={pan}>
@@ -100,10 +145,8 @@ export function Slider({ value, min, max, step, onChange, label, formatValue }: 
         accessibilityValue={{ text: formatValue ? formatValue(value) : String(value) }}
         accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
         onAccessibilityAction={(event) => {
-          const next =
-            event.nativeEvent.actionName === "increment" ? value + step : value - step;
-          const clamped = Math.min(max, Math.max(min, next));
-          onChange(Number(clamped.toFixed(4)));
+          const next = event.nativeEvent.actionName === "increment" ? value + step : value - step;
+          onChange(Number(Math.min(max, Math.max(min, next)).toFixed(4)));
         }}
       >
         <View style={[styles.track, { backgroundColor: palette.muted }]} />

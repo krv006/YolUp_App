@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { CheckCheck, RefreshCw } from "lucide-react-native";
 import { formatMessageTime } from "@/shared/lib";
 import type { ChatMessage } from "@/shared/types";
-import { fontSize, radius, Text, useTheme } from "@/shared/ui";
+import { fontSize, GradientFill, radius, Text, useTheme } from "@/shared/ui";
 import { MessageAttachment } from "./message-attachment";
 import { MessageText } from "./message-text";
 
@@ -31,8 +31,11 @@ export function MessageBubble({
   onLongPress,
   onRetryMessage,
 }: MessageBubbleProps) {
-  const { palette } = useTheme();
+  const { palette, bubbleGradient } = useTheme();
   const outgoing = message.senderId === currentUserId;
+  // Gradient faqat O'Z xabarlarimizga qo'llanadi — kelgan xabar purakchasi
+  // har doim neytral fonda qoladi, aks holda ikkalasi ajralib turmasdi.
+  const gradient = outgoing ? bubbleGradient : null;
 
   if (message.type === "system") {
     return (
@@ -56,8 +59,15 @@ export function MessageBubble({
         delayLongPress={280}
         style={({ pressed }) => [
           styles.bubble,
+          // Gradient bo'lsa fon SVG bilan chiziladi va burchaklar kesilishi
+          // uchun `overflow` yopiladi.
+          gradient ? styles.clip : null,
           {
-            backgroundColor: outgoing ? palette["bubble-own"] : palette.surface,
+            backgroundColor: gradient
+              ? undefined
+              : outgoing
+                ? palette["bubble-own"]
+                : palette.surface,
             borderColor: outgoing ? "transparent" : palette.border,
             // Yuborilmagan xabar so'nik ko'rinadi — holat rang bilan ham
             // beriladi, faqat ikonka bilan emas.
@@ -66,6 +76,8 @@ export function MessageBubble({
           pressed && { opacity: 0.85 },
         ]}
       >
+        {gradient ? <GradientFill colors={gradient} /> : null}
+
         {!outgoing && showSender && message.senderName ? (
           <Text variant="caption" tone="brand" style={styles.sender}>
             {message.senderName}
@@ -159,6 +171,7 @@ const styles = StyleSheet.create({
   row: { paddingHorizontal: 12, paddingVertical: 2 },
   rowIncoming: { alignItems: "flex-start" },
   rowOutgoing: { alignItems: "flex-end" },
+  clip: { overflow: "hidden" },
   bubble: {
     maxWidth: "84%",
     minWidth: 76,

@@ -12,8 +12,15 @@ export interface TabDefinition {
   icon: LucideIcon;
 }
 
-/** Ikonka qatori balandligi — pastki xavfsiz zona bunga QO'SHILADI. */
-const BAR_HEIGHT = 58;
+/**
+ * Faol bo'lim fonining yumaloqligi.
+ *
+ * QAT'IY SON, `radius.full` EMAS: plastinka balandligi kontent bo'yicha
+ * o'zgaradi va juda katta radius (999) siqilgan elementda Androidda
+ * to'g'ri chizilmaydi. Bu qiymat ikonka+yorliq balandligining yarmiga
+ * yaqin — natija barqaror.
+ */
+const PILL_RADIUS = 22;
 
 /*
  * Panel proplarining tipi `Tabs` ning O'ZIDAN chiqariladi.
@@ -101,17 +108,33 @@ function RoleTabBar({
   if (nestedIndex > 0) return null;
 
   return (
+    /*
+     * Ikki qatlam: tashqi o'ram TARTIBDA JOY EGALLAYDI, ichkarisi esa
+     * suzuvchi plastinka bo'lib ko'rinadi (Telegram naqshi — buyurtmachi
+     * namunasi: docs/ChatExport_2026-09-08/photo_6).
+     *
+     * NEGA `position: absolute` EMAS: suzuvchi panel ostidagi kontentni
+     * bekitadi va uni tuzatish uchun HAR bir ekranga pastki to'ldirish
+     * qo'shish kerak bo'lardi — yangi ekran qo'shilganda esa unutilardi.
+     * Bu yerda o'ram joy egallagani uchun ro'yxatlar o'z-o'zidan panel
+     * ustida tugaydi.
+     */
     <View
       style={[
-        styles.bar,
-        {
-          height: BAR_HEIGHT + insets.bottom,
-          paddingBottom: insets.bottom,
-          backgroundColor: palette.surface,
-          borderTopColor: palette.border,
-        },
+        styles.wrap,
+        { backgroundColor: palette.background, paddingBottom: insets.bottom + 8 },
       ]}
     >
+      <View
+        style={[
+          styles.bar,
+          {
+            backgroundColor: palette["surface-elevated"],
+            borderColor: palette.border,
+            shadowColor: palette.shadow,
+          },
+        ]}
+      >
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
 
@@ -145,48 +168,65 @@ function RoleTabBar({
             onPress={onPress}
             style={styles.item}
           >
+            {/* Telegramda tanlangan bo'lim IKONKA VA YORLIQNI birga
+                o'rab turgan yumaloq fon bilan ajratiladi. */}
             <View
               style={[
-                styles.pill,
-                focused && { backgroundColor: palette["primary-tint"] },
+                styles.itemInner,
+                focused && {
+                  backgroundColor: palette["primary-tint"],
+                  borderRadius: PILL_RADIUS,
+                },
               ]}
             >
               <Icon
-                size={21}
+                size={20}
                 color={focused ? palette["primary-text"] : palette["muted-foreground"]}
                 strokeWidth={focused ? 2.4 : 2}
               />
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.label,
+                  { color: focused ? palette["primary-text"] : palette["muted-foreground"] },
+                ]}
+              >
+                {label}
+              </Text>
             </View>
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.label,
-                { color: focused ? palette["primary-text"] : palette["muted-foreground"] },
-              ]}
-            >
-              {label}
-            </Text>
           </Pressable>
         );
       })}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: { paddingHorizontal: 10, paddingTop: 4 },
   bar: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 6,
-  },
-  item: { flex: 1, alignItems: "center", gap: 2 },
-  pill: {
-    minWidth: 52,
-    height: 28,
+    alignItems: "center",
     borderRadius: radius.full,
+    borderWidth: StyleSheet.hairlineWidth,
+    /*
+     * Ichki bo'shliq SHART: usiz chetdagi bo'limning faol foni
+     * plastinkaning yumaloq burchagiga tegib, kesilgandek ko'rinardi.
+     */
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    shadowOpacity: 1,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  item: { flex: 1, alignItems: "center" },
+  itemInner: {
     alignItems: "center",
     justifyContent: "center",
+    gap: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
   },
   label: { fontSize: fontSize["2xs"], fontWeight: "600" },
 });

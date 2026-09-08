@@ -2,17 +2,22 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Check, Moon, Smartphone, Sun } from "lucide-react-native";
 import {
-  FONT_SCALES,
+  FONT_SCALE_STEP,
+  MAX_FONT_SCALE,
+  MIN_FONT_SCALE,
   useAppearanceStore,
   type ThemeMode,
 } from "@/shared/model/theme.store";
 import {
   ACCENTS,
   Button,
+  GRADIENTS,
+  GradientFill,
   IconButton,
   radius,
   Screen,
   Separator,
+  Slider,
   Text,
   useTheme,
 } from "@/shared/ui";
@@ -34,8 +39,18 @@ const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
 export function AppearancePage() {
   const router = useRouter();
   const { palette, fontScale } = useTheme();
-  const { mode, accent, bubbleAccent, setMode, setAccent, setFontScale, setBubbleAccent, reset } =
-    useAppearanceStore();
+  const {
+    mode,
+    accent,
+    bubbleAccent,
+    bubbleGradient,
+    setMode,
+    setAccent,
+    setFontScale,
+    setBubbleAccent,
+    setBubbleGradient,
+    reset,
+  } = useAppearanceStore();
 
   function goBack() {
     if (router.canGoBack()) router.back();
@@ -100,58 +115,43 @@ export function AppearancePage() {
           title="Asosiy rang"
           hint="Tugmalar, havolalar va faol bo'limlar shu rangda bo'ladi."
         >
-          <Swatches selected={accent} onSelect={setAccent} />
+          <ColorSwatches selected={accent} onSelect={setAccent} />
         </Section>
 
         <Separator />
 
         {/* ── Shrift ── */}
         <Section title="Shrift o'lchami" hint="Butun ilovadagi matnga qo'llanadi.">
-          <View style={styles.segment}>
-            {FONT_SCALES.map(({ value, label }) => {
-              const active = Math.abs(fontScale - value) < 0.001;
-              return (
-                <Pressable
-                  key={value}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  onPress={() => setFontScale(value)}
-                  style={({ pressed }) => [
-                    styles.segmentItem,
-                    {
-                      backgroundColor: active ? palette["primary-tint"] : palette.surface,
-                      borderColor: active ? palette.primary : palette.border,
-                    },
-                    pressed && { opacity: 0.85 },
-                  ]}
-                >
-                  {/*
-                   * Namuna harfi masshtabga BO'YSUNMAYDI — u tanlovni
-                   * ko'rsatuvchi belgi, matn emas. Aks holda "Juda katta"
-                   * tanlanganda tugmaning o'zi sig'may qolardi.
-                   */}
-                  <Text
-                    allowFontScaling={false}
-                    style={{
-                      fontSize: 13 * value,
-                      fontWeight: "700",
-                      color: active ? palette["primary-text"] : palette["muted-foreground"],
-                    }}
-                  >
-                    Aa
-                  </Text>
-                  <Text
-                    variant="caption"
-                    numberOfLines={1}
-                    style={{
-                      color: active ? palette["primary-text"] : palette["muted-foreground"],
-                    }}
-                  >
-                    {label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+          <View style={styles.fontRow}>
+            {/*
+             * Chekka harflar masshtabga BO'YSUNMAYDI: ular slayder
+             * chegaralarini bildiruvchi belgi, o'qiladigan matn emas. Aks
+             * holda "eng katta" tanlanganda ular slayderni siqib qo'yardi.
+             */}
+            <Text allowFontScaling={false} style={styles.fontMarkSmall} tone="muted">
+              A
+            </Text>
+            <View style={styles.sliderBox}>
+              <Slider
+                value={fontScale}
+                min={MIN_FONT_SCALE}
+                max={MAX_FONT_SCALE}
+                step={FONT_SCALE_STEP}
+                onChange={setFontScale}
+                label="Shrift o'lchami"
+                formatValue={(v) => `${Math.round(v * 100)} foiz`}
+              />
+            </View>
+            <Text allowFontScaling={false} style={styles.fontMarkLarge} tone="muted">
+              A
+            </Text>
+          </View>
+
+          <View style={[styles.fontPreview, { backgroundColor: palette.card, borderColor: palette.border }]}>
+            <Text>Matn shu ko'rinishda bo'ladi.</Text>
+            <Text variant="caption" tone="muted">
+              {Math.round(fontScale * 100)}%
+            </Text>
           </View>
         </Section>
 
@@ -162,19 +162,23 @@ export function AppearancePage() {
           title="Suhbat rangi"
           hint="O'z xabarlaringiz shu rangda ko'rinadi. Asosiy rangdan mustaqil."
         >
-          <Swatches
-            selected={bubbleAccent ?? accent}
+          <ColorSwatches
+            selected={bubbleGradient ? "" : (bubbleAccent ?? accent)}
             onSelect={setBubbleAccent}
             extra={
               <Pressable
                 accessibilityRole="button"
-                accessibilityState={{ selected: bubbleAccent === null }}
+                accessibilityLabel="Asosiy rang"
+                accessibilityState={{ selected: bubbleAccent === null && !bubbleGradient }}
                 onPress={() => setBubbleAccent(null)}
                 style={[
                   styles.swatch,
                   styles.swatchAuto,
                   {
-                    borderColor: bubbleAccent === null ? palette.foreground : palette.border,
+                    borderColor:
+                      bubbleAccent === null && !bubbleGradient
+                        ? palette.foreground
+                        : palette.border,
                     backgroundColor: palette.surface,
                   },
                 ]}
@@ -185,6 +189,11 @@ export function AppearancePage() {
               </Pressable>
             }
           />
+
+          <Text variant="caption" tone="muted">
+            Aralash ranglar
+          </Text>
+          <GradientSwatches selected={bubbleGradient} onSelect={setBubbleGradient} />
 
           <ChatPreview />
         </Section>
@@ -215,7 +224,7 @@ function Section({
   );
 }
 
-function Swatches({
+function ColorSwatches({
   selected,
   onSelect,
   extra,
@@ -257,9 +266,46 @@ function Swatches({
   );
 }
 
+function GradientSwatches({
+  selected,
+  onSelect,
+}: {
+  selected: string | null;
+  onSelect: (id: string | null) => void;
+}) {
+  const { scheme, palette } = useTheme();
+
+  return (
+    <View style={styles.swatches}>
+      {GRADIENTS.map((item) => {
+        const colors = scheme === "dark" ? item.dark : item.light;
+        const active = selected === item.id;
+        return (
+          <Pressable
+            key={item.id}
+            accessibilityRole="button"
+            accessibilityLabel={item.label}
+            accessibilityState={{ selected: active }}
+            // Tanlangani qayta bosilsa — bekor qilinadi va oddiy rangga qaytadi.
+            onPress={() => onSelect(active ? null : item.id)}
+            style={[
+              styles.swatch,
+              styles.gradientSwatch,
+              { borderColor: active ? palette.foreground : "transparent" },
+            ]}
+          >
+            <GradientFill colors={colors} />
+            {active ? <Check size={18} color="#ffffff" strokeWidth={3} /> : null}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 /** Tanlangan ranglar suhbatda qanday ko'rinishini shu yerda ko'rsatamiz. */
 function ChatPreview() {
-  const { palette } = useTheme();
+  const { palette, bubbleGradient } = useTheme();
 
   return (
     <View style={[styles.preview, { backgroundColor: palette["chat-bg"] }]}>
@@ -277,9 +323,12 @@ function ChatPreview() {
         style={[
           styles.previewBubble,
           styles.previewOut,
-          { backgroundColor: palette["bubble-own"] },
+          // Gradient bo'lsa fon SVG bilan chiziladi, shuning uchun rang
+          // berilmaydi va burchaklar kesilishi uchun `overflow` yopiladi.
+          bubbleGradient ? styles.clip : { backgroundColor: palette["bubble-own"] },
         ]}
       >
+        {bubbleGradient ? <GradientFill colors={bubbleGradient} /> : null}
         <Text variant="caption" style={{ color: palette["bubble-own-foreground"] }}>
           Soat 15:00 da boshlaymiz.
         </Text>
@@ -311,6 +360,16 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
   },
+  fontRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  sliderBox: { flex: 1 },
+  fontMarkSmall: { fontSize: 13, fontWeight: "700" },
+  fontMarkLarge: { fontSize: 22, fontWeight: "700" },
+  fontPreview: {
+    gap: 2,
+    padding: 12,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   swatches: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   swatch: {
     width: 44,
@@ -320,6 +379,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  gradientSwatch: { overflow: "hidden" },
   swatchAuto: { borderWidth: 1 },
   autoLabel: { fontSize: 10 },
   preview: { borderRadius: radius.lg, padding: 12, gap: 8 },
@@ -329,6 +389,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
+  clip: { overflow: "hidden" },
   previewIn: { alignSelf: "flex-start", borderWidth: StyleSheet.hairlineWidth },
   previewOut: { alignSelf: "flex-end" },
 });

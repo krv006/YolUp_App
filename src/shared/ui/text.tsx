@@ -1,4 +1,9 @@
-import { Text as RNText, StyleSheet, type TextProps as RNTextProps } from "react-native";
+import {
+  Text as RNText,
+  StyleSheet,
+  type TextProps as RNTextProps,
+  type TextStyle,
+} from "react-native";
 import { fontSize } from "./tokens";
 import { useTheme } from "./theme";
 
@@ -55,7 +60,19 @@ export function Text({ variant = "body", tone = "default", style, ...rest }: Tex
    * `lineHeight` ham birga ko'payadi, aks holda katta shriftda qatorlar
    * bir-birining ustiga chiqib ketadi.
    */
-  const merged = StyleSheet.flatten([VARIANTS[variant], style]) ?? {};
+  const merged: TextStyle = StyleSheet.flatten([VARIANTS[variant], style]) ?? {};
+
+  /*
+   * `tone` — faqat ZAXIRA rang.
+   *
+   * Chaqiruvchi `style={{ color }}` bergan bo'lsa, u USTUN turadi. Bu
+   * qator bo'lmasa, quyidagi `{ color }` yig'ilgan uslubdan keyin
+   * qo'llanib, chaqiruvchining rangini jimgina bekor qilardi — natijada
+   * suhbat purakchasidagi matn yorug' mavzuda qora bo'lib, to'q purakcha
+   * ustida o'qilmay qolgan edi.
+   */
+  const resolvedColor = typeof merged.color === "string" ? merged.color : color;
+
   const scaled =
     fontScale === 1
       ? null
@@ -68,7 +85,7 @@ export function Text({ variant = "body", tone = "default", style, ...rest }: Tex
             : null),
         };
 
-  return <RNText style={[styles.base, merged, { color }, scaled]} {...rest} />;
+  return <RNText style={[styles.base, merged, { color: resolvedColor }, scaled]} {...rest} />;
 }
 
 const styles = StyleSheet.create({

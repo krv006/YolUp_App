@@ -4,8 +4,21 @@ export { DateField, SelectField, TimeField } from "./pickers";
 export type { DateFieldProps, SelectFieldProps, SelectOption, TimeFieldProps } from "./pickers";
 export { Sheet } from "./sheet";
 export type { SheetProps } from "./sheet";
-export { ACCENTS, DEFAULT_ACCENT, findAccent, readableOn, deriveAccentTokens } from "./accents";
-export type { Accent } from "./accents";
+export {
+  ACCENTS,
+  DEFAULT_ACCENT,
+  deriveAccentTokens,
+  findAccent,
+  findGradient,
+  gradientForeground,
+  GRADIENTS,
+  readableOn,
+} from "./accents";
+export type { Accent, Gradient } from "./accents";
+export { GradientFill } from "./gradient";
+export type { GradientFillProps } from "./gradient";
+export { Slider } from "./slider";
+export type { SliderProps } from "./slider";
 export { Logo } from "./logo";
 export type { LogoProps } from "./logo";
 export { ConfirmSheet } from "./confirm-sheet";

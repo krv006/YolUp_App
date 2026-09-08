@@ -115,3 +115,37 @@ export function deriveAccentTokens(
     ring: base,
   };
 }
+
+// ─── Gradientlar ────────────────────────────────────────────────────────────
+
+/**
+ * Suhbat purakchasi uchun aralash (gradient) fonlar.
+ *
+ * Har juftlik ikkala mavzuda ham ishlaydigan qilib tanlangan va o'rtacha
+ * rangi ustidagi matn `readableOn` orqali avtomatik tanlanadi — shuning
+ * uchun och gradientda matn to'q, to'qida esa oq bo'ladi.
+ */
+export interface Gradient {
+  id: string;
+  label: string;
+  light: readonly [string, string];
+  dark: readonly [string, string];
+}
+
+export const GRADIENTS: readonly Gradient[] = [
+  { id: "sunset", label: "Shafaq", light: ["#f97316", "#db2777"], dark: ["#fb923c", "#f472b6"] },
+  { id: "ocean", label: "Okean", light: ["#0284c7", "#0f766e"], dark: ["#38bdf8", "#2dd4bf"] },
+  { id: "grape", label: "Uzum", light: ["#4f46e5", "#9333ea"], dark: ["#818cf8", "#c084fc"] },
+  { id: "forest", label: "O'rmon", light: ["#15803d", "#0d9488"], dark: ["#4ade80", "#2dd4bf"] },
+  { id: "ember", label: "Cho'g'", light: ["#b91c1c", "#c2410c"], dark: ["#f87171", "#fb923c"] },
+  { id: "night", label: "Tun", light: ["#1e293b", "#4338ca"], dark: ["#64748b", "#818cf8"] },
+] as const;
+
+export function findGradient(id: string): Gradient | null {
+  return GRADIENTS.find((item) => item.id === id) ?? null;
+}
+
+/** Gradient ustidagi matn rangi — ikki uchning o'rtachasi bo'yicha. */
+export function gradientForeground(colors: readonly [string, string]): string {
+  return readableOn(mix(colors[0], colors[1], 0.5));
+}

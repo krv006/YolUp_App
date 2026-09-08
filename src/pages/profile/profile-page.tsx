@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import {
   Bell,
   History,
-  Pencil,
   LogOut,
   Palette,
+  Pencil,
   ShieldCheck,
   Smartphone,
+  Star,
+  type LucideIcon,
 } from "lucide-react-native";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
 import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
@@ -23,7 +25,6 @@ import {
   Button,
   CountBadge,
   findAccent,
-  IconButton,
   ListItem,
   radius,
   Screen,
@@ -39,10 +40,25 @@ import {
  *
  * Veb'da bu chap ustundagi ochiladigan menyu edi. Mobilda alohida tab:
  * hisob sozlamalari, xavfsizlik va chiqish bir joyda turgani tushunarliroq.
+ *
+ * KO'RINISH TELEGRAMDAN ILHOMLANGAN (buyurtmachi namunasi:
+ * `docs/ChatExport_2026-09-08/photo_9`): yirik markazlashgan avatar, uning
+ * ostida amallar qatori, so'ng "qiymat tepada — yorlig'i pastda" ko'rinishidagi
+ * ma'lumot kartasi. Bu tanish naqsh: foydalanuvchi qayerga qarashni biladi.
+ *
+ * MUHIM: bu yerda TO'QIMA (mock) ma'lumot YO'Q. Faqat backend bergan
+ * maydonlar chiziladi va qiymati bo'lmagan qator UMUMAN ko'rsatilmaydi —
+ * bo'sh "—" belgilar qo'yish ekranni to'ldirgandek ko'rsatadi, aslida esa
+ * foydalanuvchini chalg'itadi.
  */
 export function ProfilePage({ roleLabel }: { roleLabel: string }) {
   const router = useRouter();
   const { palette, scheme } = useTheme();
+  const { user, logout } = useAuth();
+  const unread = useUnreadNotificationCount();
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
   const appearanceMode = useAppearanceStore((state) => state.mode);
   const accentId = useAppearanceStore((state) => state.accent);
 
@@ -55,31 +71,64 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
         : "Yorug'",
     findAccent(accentId).label.toLowerCase(),
   ].join(" · ");
-  const { user, logout } = useAuth();
-  const unread = useUnreadNotificationCount();
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
 
   async function signOut() {
     await logout();
     router.replace(ROUTES.auth.login);
   }
 
+  /** Faqat qiymati BOR maydonlar. Bo'sh qator chizilmaydi. */
+  const facts: { value: string; label: string }[] = [
+    user?.phone ? { value: user.phone, label: "Telefon" } : null,
+    user?.username ? { value: `@${user.username}`, label: "Foydalanuvchi nomi" } : null,
+    user?.email ? { value: user.email, label: "Email" } : null,
+    user?.inviteCode
+      ? { value: user.inviteCode, label: "Taklif kodi — ota-ona shu kod bilan ulanadi" }
+      : null,
+  ].filter((item): item is { value: string; label: string } => item !== null);
+
   return (
     <Screen padded={false}>
-      <ScrollView contentContainerStyle={styles.body}>
-        <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
-          <Avatar name={user?.name} size="xl" />
-          <View style={styles.identity}>
-            <Text variant="subheading">{user?.name || "Foydalanuvchi"}</Text>
-            <Text variant="caption" tone="muted">
-              {user?.username}
-            </Text>
+      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        {/* ── Bosh qism ── */}
+        <View style={styles.hero}>
+          <Avatar name={user?.name} src={user?.avatarUrl} size="2xl" />
+          <Text variant="heading" style={styles.heroName} numberOfLines={2}>
+            {user?.name || "Foydalanuvchi"}
+          </Text>
+
+          <View style={styles.heroMeta}>
             <Badge label={roleLabel} tone="brand" />
+            {/* Reyting faqat o'qituvchida mazmunli va faqat baho bo'lsa. */}
+            {user?.avgRating != null && (user.ratingCount ?? 0) > 0 ? (
+              <View style={styles.rating}>
+                <Star size={14} color={palette["warning-strong"]} fill={palette["warning-strong"]} />
+                <Text variant="caption" tone="muted">
+                  {user.avgRating.toFixed(1)} · {user.ratingCount} baho
+                </Text>
+              </View>
+            ) : null}
           </View>
-          <IconButton accessibilityLabel="Profilni tahrirlash" onPress={() => setEditOpen(true)}>
-            <Pencil size={20} color={palette["muted-foreground"]} />
-          </IconButton>
+        </View>
+
+        {/* ── Amallar qatori ── */}
+        <View style={styles.actions}>
+          <ActionButton
+            icon={Pencil}
+            label="Tahrirlash"
+            onPress={() => setEditOpen(true)}
+          />
+          <ActionButton
+            icon={Palette}
+            label="Ko'rinish"
+            onPress={() => router.push("/appearance")}
+          />
+          <ActionButton
+            icon={Bell}
+            label="Xabarlar"
+            badge={unread.data ?? 0}
+            onPress={() => router.push("/notifications")}
+          />
         </View>
 
         {/* O'qituvchi tasdiqlanmagan bo'lsa — veb'dagi kabi ogohlantirish. */}
@@ -93,32 +142,24 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
           </View>
         ) : null}
 
-        {/* Taklif kodi — ota-ona shu kod bilan farzandiga ulanadi. */}
-        {user?.inviteCode ? (
-          <View style={[styles.card, { backgroundColor: palette["primary-tint"], borderColor: palette["border-accent"] }]}>
-            <View style={styles.inviteBody}>
-              <Text variant="caption" tone="muted">
-                Taklif kodi
-              </Text>
-              <Text variant="heading" tone="brand">
-                {user.inviteCode}
-              </Text>
-              <Text variant="caption" tone="muted">
-                Ota-onangiz shu kod bilan hisobingizga ulanadi.
-              </Text>
-            </View>
+        {/* ── Ma'lumot kartasi: qiymat tepada, yorlig'i pastda ── */}
+        {facts.length > 0 ? (
+          <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
+            {facts.map((fact, index) => (
+              <View key={fact.label}>
+                {index > 0 ? <Separator inset={16} /> : null}
+                <View style={styles.fact}>
+                  <Text selectable>{fact.value}</Text>
+                  <Text variant="caption" tone="muted">
+                    {fact.label}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
         ) : null}
 
         <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
-          <ListItem
-            title="Bildirishnomalar"
-            leading={<Bell size={20} color={palette["muted-foreground"]} />}
-            trailing={<CountBadge count={unread.data ?? 0} />}
-            chevron
-            onPress={() => router.push("/notifications")}
-          />
-          <Separator inset={52} />
           <ListItem
             title="Kirishlar tarixi"
             subtitle="Qaysi qurilma va IP'dan kirilgani"
@@ -134,9 +175,7 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
             chevron
             onPress={() => router.push("/appearance")}
           />
-        </View>
-
-        <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
+          <Separator inset={52} />
           <ListItem
             title="Ilova"
             subtitle={`${Constants.expoConfig?.version ?? "0.0.0"} · ${env.appEnv}`}
@@ -155,6 +194,46 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
       <LoginHistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} />
       <ProfileEditSheet user={user} open={editOpen} onClose={() => setEditOpen(false)} />
     </Screen>
+  );
+}
+
+/** Avatar ostidagi keng teginish maydonli amal tugmasi (Telegram naqshi). */
+function ActionButton({
+  icon: Icon,
+  label,
+  onPress,
+  badge = 0,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onPress: () => void;
+  badge?: number;
+}) {
+  const { palette } = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.action,
+        { backgroundColor: palette.card, borderColor: palette.border },
+        pressed && { opacity: 0.85 },
+      ]}
+    >
+      <View>
+        <Icon size={20} color={palette["primary-text"]} />
+        {badge > 0 ? (
+          <View style={styles.actionBadge}>
+            <CountBadge count={badge} />
+          </View>
+        ) : null}
+      </View>
+      <Text variant="caption" numberOfLines={1} style={{ color: palette["primary-text"] }}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -204,22 +283,33 @@ function LoginHistorySheet({ open, onClose }: { open: boolean; onClose: () => vo
 
 const styles = StyleSheet.create({
   body: { padding: 16, gap: 14, paddingBottom: 40 },
-  card: {
+  hero: { alignItems: "center", gap: 8, paddingTop: 12, paddingBottom: 4 },
+  heroName: { textAlign: "center" },
+  heroMeta: { flexDirection: "row", alignItems: "center", gap: 10 },
+  rating: { flexDirection: "row", alignItems: "center", gap: 4 },
+  actions: { flexDirection: "row", gap: 10 },
+  action: {
+    flex: 1,
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 14,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  actionBadge: { position: "absolute", top: -6, right: -12 },
+  notice: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 16,
+    gap: 10,
+    padding: 14,
+    borderRadius: radius.sm,
   },
-  identity: { flex: 1, gap: 4, alignItems: "flex-start" },
-  inviteBody: { flex: 1, gap: 2 },
-  notice: { flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: radius.sm },
   group: {
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.lg,
     overflow: "hidden",
   },
+  fact: { gap: 2, paddingHorizontal: 16, paddingVertical: 12 },
   record: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 },
   recordBody: { flex: 1, gap: 2 },
 });

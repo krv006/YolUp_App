@@ -5,7 +5,7 @@ import { useTheme } from "./theme";
 import { Text } from "./text";
 
 export type AvatarTone = "violet" | "blue" | "emerald" | "amber" | "rose";
-export type AvatarSize = "sm" | "md" | "lg" | "xl";
+export type AvatarSize = "sm" | "md" | "lg" | "xl" | "2xl";
 
 export interface AvatarProps {
   name?: string;
@@ -23,6 +23,8 @@ const SIZES: Record<AvatarSize, { box: number; font: number; dot: number }> = {
   md: { box: 36, font: 13, dot: 9 },
   lg: { box: 46, font: 16, dot: 11 },
   xl: { box: 64, font: 22, dot: 14 },
+  // Profil sahifasining bosh avatari — Telegramdagi kabi yirik.
+  "2xl": { box: 96, font: 32, dot: 18 },
 };
 
 const TONES: readonly AvatarTone[] = ["violet", "blue", "emerald", "amber", "rose"];

@@ -1,0 +1,280 @@
+{
+ "name": "my tasks",
+ "type": "private_group",
+ "id": 5148908471,
+ "messages": [
+  {
+   "id": 132170,
+   "type": "message",
+   "date": "2026-09-08T16:03:03",
+   "date_unixtime": "1788865383",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_1@08-09-2026_16-03-03.jpg",
+   "photo_file_size": 83468,
+   "width": 591,
+   "height": 1280,
+   "text": "Chat detailfa kirganda pastdagi bottom bar kerak emas",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Chat detailfa kirganda pastdagi bottom bar kerak emas"
+    }
+   ]
+  },
+  {
+   "id": 132171,
+   "type": "message",
+   "date": "2026-09-08T16:03:37",
+   "date_unixtime": "1788865417",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_2@08-09-2026_16-03-37.jpg",
+   "photo_file_size": 94080,
+   "width": 591,
+   "height": 1280,
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 132172,
+   "type": "message",
+   "date": "2026-09-08T16:04:28",
+   "date_unixtime": "1788865468",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "text": "Chatga yozmoqchi bolganda keyboard chiqib inputni tosib qoymoqda input ham qoshilib kotarilishi kerak sabab input korinib turishi kerak",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Chatga yozmoqchi bolganda keyboard chiqib inputni tosib qoymoqda input ham qoshilib kotarilishi kerak sabab input korinib turishi kerak"
+    }
+   ]
+  },
+  {
+   "id": 132173,
+   "type": "message",
+   "date": "2026-09-08T16:06:30",
+   "date_unixtime": "1788865590",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_3@08-09-2026_16-06-30.jpg",
+   "photo_file_size": 61168,
+   "width": 591,
+   "height": 1280,
+   "text": "Bottomsheetda yani toliq barcha bottomsheetlarni nuqsoni bor agar user bottomsheetdagi inputga bosib nmadr yozmoqchi bolsa keyboard chiqib inputni tosib qoyadi bu deyarli barcha joyda bor bottomsheet ham kotarilishi kerak lekn ekrandan chiqib ketib yoki buzib qoymasligi kerak",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Bottomsheetda yani toliq barcha bottomsheetlarni nuqsoni bor agar user bottomsheetdagi inputga bosib nmadr yozmoqchi bolsa keyboard chiqib inputni tosib qoyadi bu deyarli barcha joyda bor bottomsheet ham kotarilishi kerak lekn ekrandan chiqib ketib yoki buzib qoymasligi kerak"
+    }
+   ]
+  },
+  {
+   "id": 132180,
+   "type": "message",
+   "date": "2026-09-08T16:10:45",
+   "date_unixtime": "1788865845",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_4@08-09-2026_16-10-45.jpg",
+   "photo_file_size": 61497,
+   "width": 591,
+   "height": 1280,
+   "text": "Va yana bir narsa global muammo bor rasmga qarasanh pastda meni mobile telefonimni ozini narsasi bor yani navigatsiyasi ilovalardan chiqish yoki shunga oxshash narsalar uchun ishlatiladi shu narsa hozirda bottom barni ustiga chiqib ketib qolgan shuni chiqmaydigan holatda qilish kerak boshqa ilovalarda ajralib turar ekan yani safeareami shunga oxshash linkedin bilan bizni ilovani solishtirib korishing mumkin rasmlarda",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Va yana bir narsa global muammo bor rasmga qarasanh pastda meni mobile telefonimni ozini narsasi bor yani navigatsiyasi ilovalardan chiqish yoki shunga oxshash narsalar uchun ishlatiladi shu narsa hozirda bottom barni ustiga chiqib ketib qolgan shuni chiqmaydigan holatda qilish kerak boshqa ilovalarda ajralib turar ekan yani safeareami shunga oxshash linkedin bilan bizni ilovani solishtirib korishing mumkin rasmlarda"
+    }
+   ]
+  },
+  {
+   "id": 132181,
+   "type": "message",
+   "date": "2026-09-08T16:10:45",
+   "date_unixtime": "1788865845",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_5@08-09-2026_16-10-45.jpg",
+   "photo_file_size": 98774,
+   "width": 591,
+   "height": 1280,
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 132182,
+   "type": "message",
+   "date": "2026-09-08T16:15:29",
+   "date_unixtime": "1788866129",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_6@08-09-2026_16-15-29.jpg",
+   "photo_file_size": 71129,
+   "width": 591,
+   "height": 1280,
+   "text": "Qara bizning ilovani umumiy korinishi asosan Telegramdan olingan 100% telegramga oxshash emas lekn shunga asoslanib ui/ux qilamiz shunga etibor ber\n\nBottombarlarni ham shunga oxshatib yasaymiz bir xil qilsak ham mayli",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Qara bizning ilovani umumiy korinishi asosan Telegramdan olingan 100% telegramga oxshash emas lekn shunga asoslanib ui/ux qilamiz shunga etibor ber\n\nBottombarlarni ham shunga oxshatib yasaymiz bir xil qilsak ham mayli"
+    }
+   ]
+  },
+  {
+   "id": 132188,
+   "type": "message",
+   "date": "2026-09-08T16:17:33",
+   "date_unixtime": "1788866253",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "text": "Bottomsheetni ushlab pastga surib yopib yuborib bolmayabdi X buttoni bosishga  majbur bolmoqdamiz buni togirlash kerak user bottomsheetni ushlab hohlaganicha sura olishi kerak",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Bottomsheetni ushlab pastga surib yopib yuborib bolmayabdi X buttoni bosishga  majbur bolmoqdamiz buni togirlash kerak user bottomsheetni ushlab hohlaganicha sura olishi kerak"
+    }
+   ]
+  },
+  {
+   "id": 132208,
+   "type": "message",
+   "date": "2026-09-08T18:31:55",
+   "date_unixtime": "1788874315",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_7@08-09-2026_18-31-55.jpg",
+   "photo_file_size": 52150,
+   "width": 591,
+   "height": 1280,
+   "text": "Test qoshish bottomsheetida muamo yani ball berish inputiga yozgan narsam korinmayabdi fix qilish kerak",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "Test qoshish bottomsheetida muamo yani ball berish inputiga yozgan narsam korinmayabdi fix qilish kerak"
+    }
+   ]
+  },
+  {
+   "id": 132209,
+   "type": "message",
+   "date": "2026-09-08T18:35:05",
+   "date_unixtime": "1788874505",
+   "edited": "2026-09-08T18:36:15",
+   "edited_unixtime": "1788874575",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "text": "test yaratdim lekn test yaratishim bilan testlar screenida automatik chiqmadi refresh qilishga majbur bolmasligim kerak edi shu va shunga oxshash muammolar boshqa crud larda ham bolishi mumkin tekshirib chiqishing kerak",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "test yaratdim lekn test yaratishim bilan testlar screenida automatik chiqmadi refresh qilishga majbur bolmasligim kerak edi shu va shunga oxshash muammolar boshqa crud larda ham bolishi mumkin tekshirib chiqishing kerak"
+    }
+   ]
+  },
+  {
+   "id": 132210,
+   "type": "message",
+   "date": "2026-09-08T18:36:39",
+   "date_unixtime": "1788874599",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_8@08-09-2026_18-36-39.jpg",
+   "photo_file_size": 8045,
+   "width": 351,
+   "height": 130,
+   "text": "toast ustida ishlash kerak uni ushlab surib yoki qolda yoq qilib bolmayabdi dizaynni ham yaxshilsh kerak",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "toast ustida ishlash kerak uni ushlab surib yoki qolda yoq qilib bolmayabdi dizaynni ham yaxshilsh kerak"
+    }
+   ]
+  },
+  {
+   "id": 132211,
+   "type": "message",
+   "date": "2026-09-08T18:38:06",
+   "date_unixtime": "1788874686",
+   "edited": "2026-09-08T18:38:46",
+   "edited_unixtime": "1788874726",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_9@08-09-2026_18-38-06.jpg",
+   "photo_file_size": 29694,
+   "width": 350,
+   "height": 757,
+   "text": "bizni profile sahifamizni ham huddi telegramdan ilhom olgan holatda ui/ux ni oxshash user uchun qulay va tanish holatga keltirishimiz kerak boladi faqat mock data qoshib tashlash yoki bor narsani chopish kerak emas shunchaki backend va real ozimizda bor datani telegramga oxshash holatda korsatsak bolgani",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "bizni profile sahifamizni ham huddi telegramdan ilhom olgan holatda ui/ux ni oxshash user uchun qulay va tanish holatga keltirishimiz kerak boladi faqat mock data qoshib tashlash yoki bor narsani chopish kerak emas shunchaki backend va real ozimizda bor datani telegramga oxshash holatda korsatsak bolgani"
+    }
+   ]
+  },
+  {
+   "id": 132212,
+   "type": "message",
+   "date": "2026-09-08T18:38:06",
+   "date_unixtime": "1788874686",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_10@08-09-2026_18-38-06.jpg",
+   "photo_file_size": 20585,
+   "width": 348,
+   "height": 760,
+   "text": "",
+   "text_entities": []
+  },
+  {
+   "id": 132213,
+   "type": "message",
+   "date": "2026-09-08T18:40:59",
+   "date_unixtime": "1788874859",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "photo": "photos/photo_11@08-09-2026_18-40-59.jpg",
+   "photo_file_size": 2886,
+   "width": 323,
+   "height": 55,
+   "text": "mavzu theme boyicha ishlashimiz kerak bolmoqda yani dark light mode boladi lekn\n\n\nbiz telegramga oxshash acssebilty imkoniyatlari va qulayliklar qoshishimiz kerak boladi qanday boladi desang \n\nuser ozi hohlagan rangni oziga tanlay olishi kerak primary sifatida\n\nhuddi telegramdagidek chatga messagelariga bg color berish yoki fontsizeni katta kichik qilish imkoniyatlarini ham boshqara olish imkoniyatini qoshib berishimiz kerak boladi mana shu narsalarni korib chiq va qoshish harakattini qil",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "mavzu theme boyicha ishlashimiz kerak bolmoqda yani dark light mode boladi lekn\n\n\nbiz telegramga oxshash acssebilty imkoniyatlari va qulayliklar qoshishimiz kerak boladi qanday boladi desang \n\nuser ozi hohlagan rangni oziga tanlay olishi kerak primary sifatida\n\nhuddi telegramdagidek chatga messagelariga bg color berish yoki fontsizeni katta kichik qilish imkoniyatlarini ham boshqara olish imkoniyatini qoshib berishimiz kerak boladi mana shu narsalarni korib chiq va qoshish harakattini qil"
+    }
+   ]
+  },
+  {
+   "id": 132214,
+   "type": "message",
+   "date": "2026-09-08T18:42:46",
+   "date_unixtime": "1788874966",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "text": "va yana bir narsa toastlar deyarli har doim barcha narsani ustidan chiqishi kerak boladi qanday desang menda shunday vaziat boldi bottomsheetni overlayini orqasida qolib ketib qoldi toast mana shuni fix qilish va shunga oxshash holatlarni tekshirish kerak yana toliq",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "va yana bir narsa toastlar deyarli har doim barcha narsani ustidan chiqishi kerak boladi qanday desang menda shunday vaziat boldi bottomsheetni overlayini orqasida qolib ketib qoldi toast mana shuni fix qilish va shunga oxshash holatlarni tekshirish kerak yana toliq"
+    }
+   ]
+  },
+  {
+   "id": 132215,
+   "type": "message",
+   "date": "2026-09-08T18:45:52",
+   "date_unixtime": "1788875152",
+   "from": "Abdumo‘min",
+   "from_id": "user5752008725",
+   "text": "hozirgi etiborni toliq ui/ux qulayliklar va cruddagi refetch muammolar toliq tepada keltirilgan muammolarga qarat\n\ntoast\nbottomsheet\nbottombar/safearea\nui/ux - telegram asos\nchat qulayliklari\ntheme/customization \n\nmana shularga etibor berib bajarishingni hohlayman huddi senior software enginerdek yondosh shu ishlaringdan song keyingi bosqich yani doska live kit umuman dars ichida boladigan ishlarga otsak boladi oldin umumiy va oddiyroq ishlarni hal qilib olish kerak boladi",
+   "text_entities": [
+    {
+     "type": "plain",
+     "text": "hozirgi etiborni toliq ui/ux qulayliklar va cruddagi refetch muammolar toliq tepada keltirilgan muammolarga qarat\n\ntoast\nbottomsheet\nbottombar/safearea\nui/ux - telegram asos\nchat qulayliklari\ntheme/customization \n\nmana shularga etibor berib bajarishingni hohlayman huddi senior software enginerdek yondosh shu ishlaringdan song keyingi bosqich yani doska live kit umuman dars ichida boladigan ishlarga otsak boladi oldin umumiy va oddiyroq ishlarni hal qilib olish kerak boladi"
+    }
+   ]
+  }
+ ]
+}

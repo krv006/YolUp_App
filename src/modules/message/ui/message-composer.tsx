@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Platform, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useKeyboardState } from "react-native-keyboard-controller";
 import { SendHorizontal, X } from "lucide-react-native";
 import type { ChatMessage, SendMessagePayload } from "@/shared/types";
 import { fontSize, IconButton, MIN_TOUCH_SIZE, radius, Text, useTheme } from "@/shared/ui";
@@ -34,6 +35,15 @@ export function MessageComposer({
 }: MessageComposerProps) {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
+  /*
+   * Klaviatura ochiq bo'lsa pastki xavfsiz zona QO'SHILMAYDI.
+   *
+   * Klaviatura tizim navigatsiya chizig'ini o'zi bekitadi, shuning uchun
+   * unga qo'shimcha `insets.bottom` berilsa, kompozitor bilan klaviatura
+   * orasida bo'sh tasma paydo bo'ladi.
+   */
+  const keyboardVisible = useKeyboardState((state) => state.isVisible);
+  const bottomInset = keyboardVisible ? 8 : insets.bottom > 0 ? insets.bottom : 8;
   const [text, setText] = useState("");
   const [lastTypingAt, setLastTypingAt] = useState(0);
 
@@ -69,7 +79,7 @@ export function MessageComposer({
           {
             backgroundColor: palette.surface,
             borderTopColor: palette.border,
-            paddingBottom: insets.bottom + 12,
+            paddingBottom: bottomInset + 4,
           },
         ]}
       >
@@ -87,7 +97,7 @@ export function MessageComposer({
         {
           backgroundColor: palette.surface,
           borderTopColor: palette.border,
-          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingBottom: bottomInset,
         },
       ]}
     >

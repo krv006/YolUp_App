@@ -1,8 +1,20 @@
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  FadeInUp,
+  FadeOutUp,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react-native";
 import { create } from "zustand";
-import { colors, fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
+import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
+import { useTheme } from "./theme";
+import { Text } from "./text";
 
 /**
  * `sonner` ning mobil o'rnini bosuvchi (shim).
@@ -56,6 +68,9 @@ const DEFAULT_DURATION: Record<ToastVariant, number> = {
 /** Ekranni to'ldirib yubormaslik uchun bir vaqtda ko'rinadiganlari cheklangan. */
 const MAX_VISIBLE = 3;
 
+/** Shu masofadan ko'p surilsa yo'q qilinadi. */
+const SWIPE_DISTANCE = 80;
+
 interface ToastState {
   items: ToastItem[];
   push: (item: ToastItem) => void;
@@ -102,26 +117,48 @@ export const toast = Object.assign(
 
 // ─── Ko'rinish ──────────────────────────────────────────────────────────────
 
-/** Ilova ildizida bir marta render qilinadi (`src/app/_layout.tsx`). */
+/**
+ * Ilova ildizida bir marta render qilinadi (`providers/app-providers.tsx`).
+ *
+ * NEGA `Modal` ICHIDA: `Sheet` ham `Modal`, ya'ni ALOHIDA NATIV OYNA.
+ * Oddiy ko'rinish (qanchalik katta `zIndex` bilan bo'lsa ham) hech qachon
+ * boshqa oynaning ustiga chiqa olmaydi — shuning uchun toast bottomsheet
+ * overlayi orqasida qolib ketardi.
+ *
+ * `visible` faqat toast BOR bo'lganda `true` bo'ladi: oyna aynan o'sha
+ * paytda yaratiladi va shu sababli o'zidan oldin ochilgan oynalar ustida
+ * turadi.
+ */
 export function ToastHost() {
   const items = useToastStore((state) => state.items);
   const insets = useSafeAreaInsets();
-  const scheme = useColorScheme() === "dark" ? "dark" : "light";
-
-  if (items.length === 0) return null;
 
   return (
-    <View
-      // Ostidagi ekranga teginish o'tib ketsin — faqat toast'ning o'zi bosiladi.
-      pointerEvents="box-none"
-      style={[styles.host, { top: insets.top + 8 }]}
+    <Modal
+      visible={items.length > 0}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      navigationBarTranslucent
+      // Tizim tugmasi toast'ni emas, ostidagi ekranni boshqarsin.
+      onRequestClose={() => useToastStore.getState().dismiss()}
     >
-      {items.map((item) => (
-        <ToastCard key={item.id} item={item} scheme={scheme} />
-      ))}
-    </View>
+      <View pointerEvents="box-none" style={[styles.host, { top: insets.top + 10 }]}>
+        {items.map((item) => (
+          <ToastCard key={item.id} item={item} />
+        ))}
+      </View>
+    </Modal>
   );
 }
+
+const ICONS: Record<ToastVariant, typeof CheckCircle2> = {
+  default: Info,
+  success: CheckCircle2,
+  error: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+};
 
 const ACCENT: Record<ToastVariant, "success" | "destructive" | "warning" | "primary"> = {
   default: "primary",
@@ -131,95 +168,148 @@ const ACCENT: Record<ToastVariant, "success" | "destructive" | "warning" | "prim
   info: "primary",
 };
 
-function ToastCard({ item, scheme }: { item: ToastItem; scheme: "light" | "dark" }) {
-  const palette = colors[scheme];
+function ToastCard({ item }: { item: ToastItem }) {
+  const { palette } = useTheme();
   const dismiss = useToastStore((state) => state.dismiss);
+  const translateX = useSharedValue(0);
 
   useEffect(() => {
     const timer = setTimeout(() => dismiss(item.id), item.duration);
     return () => clearTimeout(timer);
   }, [dismiss, item.id, item.duration]);
 
-  function runAction(action: ToastAction) {
-    action.onClick();
+  function close() {
     dismiss(item.id);
   }
 
+  function runAction(action: ToastAction) {
+    action.onClick();
+    close();
+  }
+
+  /*
+   * Yon tomonga surib yo'q qilish.
+   *
+   * Buyurtmachi: "uni ushlab surib yoki qolda yoq qilib bolmayabdi".
+   * Ilgari toast faqat vaqt tugagach yo'qolardi — xato xabari 6 soniya
+   * ekranni band qilib turardi va uni olib tashlashning iloji yo'q edi.
+   */
+  const pan = Gesture.Pan()
+    .onUpdate((event) => {
+      translateX.set(event.translationX);
+    })
+    .onEnd((event) => {
+      if (Math.abs(event.translationX) > SWIPE_DISTANCE || Math.abs(event.velocityX) > 700) {
+        runOnJS(close)();
+      } else {
+        translateX.set(withSpring(0, { damping: 22, stiffness: 260 }));
+      }
+    });
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.get() }],
+    // Chetga surilgan sari so'nadi.
+    opacity: Math.max(0, 1 - Math.abs(translateX.get()) / (SWIPE_DISTANCE * 2.2)),
+  }));
+
+  const Icon = ICONS[item.variant];
+  const accent = palette[ACCENT[item.variant]];
+
   return (
-    <View
-      accessibilityRole="alert"
-      accessibilityLiveRegion="polite"
-      style={[
-        styles.card,
-        {
-          backgroundColor: palette["surface-elevated"],
-          borderColor: palette.border,
-          shadowColor: palette.shadow,
-        },
-      ]}
-    >
-      <View style={[styles.accent, { backgroundColor: palette[ACCENT[item.variant]] }]} />
-      <View style={styles.body}>
-        <Text style={[styles.message, { color: palette.foreground }]}>{item.message}</Text>
-        {item.description ? (
-          <Text style={[styles.description, { color: palette["muted-foreground"] }]}>
-            {item.description}
-          </Text>
-        ) : null}
-        {item.action || item.cancel ? (
-          <View style={styles.actions}>
-            {item.action ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => runAction(item.action!)}
-                style={[styles.actionButton, { backgroundColor: palette.primary }]}
-              >
-                <Text style={[styles.actionLabel, { color: palette["primary-foreground"] }]}>
-                  {item.action.label}
+    <GestureDetector gesture={pan}>
+      <Animated.View entering={FadeInUp.duration(220)} exiting={FadeOutUp.duration(160)}>
+        <Animated.View
+          accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
+          style={[
+            styles.card,
+            {
+              backgroundColor: palette["surface-elevated"],
+              borderColor: palette.border,
+              shadowColor: palette.shadow,
+            },
+            cardStyle,
+          ]}
+        >
+          {/* Bosib ham yo'q qilinadi — surish har doim ham qulay emas. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Xabarni yopish"
+            onPress={close}
+            style={styles.pressArea}
+          >
+            <View style={[styles.iconCircle, { backgroundColor: `${accent}22` }]}>
+              <Icon size={18} color={accent} />
+            </View>
+
+            <View style={styles.body}>
+              <Text style={styles.message} numberOfLines={3}>
+                {item.message}
+              </Text>
+              {item.description ? (
+                <Text variant="caption" tone="muted" numberOfLines={4}>
+                  {item.description}
                 </Text>
-              </Pressable>
-            ) : null}
-            {item.cancel ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => runAction(item.cancel!)}
-                style={[styles.actionButton, { backgroundColor: palette.secondary }]}
-              >
-                <Text style={[styles.actionLabel, { color: palette["secondary-foreground"] }]}>
-                  {item.cancel.label}
-                </Text>
-              </Pressable>
-            ) : null}
-          </View>
-        ) : null}
-      </View>
-    </View>
+              ) : null}
+            </View>
+          </Pressable>
+
+          {item.action || item.cancel ? (
+            <View style={styles.actions}>
+              {item.cancel ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => runAction(item.cancel!)}
+                  style={[styles.actionButton, { backgroundColor: palette.secondary }]}
+                >
+                  <Text style={[styles.actionLabel, { color: palette["secondary-foreground"] }]}>
+                    {item.cancel.label}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {item.action ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => runAction(item.action!)}
+                  style={[styles.actionButton, { backgroundColor: palette.primary }]}
+                >
+                  <Text style={[styles.actionLabel, { color: palette["primary-foreground"] }]}>
+                    {item.action.label}
+                  </Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+        </Animated.View>
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
-  host: {
-    position: "absolute",
-    left: 12,
-    right: 12,
-    gap: 8,
-    zIndex: 1000,
-  },
+  host: { position: "absolute", left: 12, right: 12, gap: 8 },
   card: {
-    flexDirection: "row",
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.md,
-    overflow: "hidden",
+    borderRadius: radius.lg,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
     shadowOpacity: 1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
   },
-  accent: { width: 4 },
-  body: { flex: 1, padding: 12, gap: 4 },
-  message: { fontSize: fontSize.lg, fontWeight: "600" },
-  description: { fontSize: fontSize.md, lineHeight: 20 },
-  actions: { flexDirection: "row", gap: 8, marginTop: 4 },
+  pressArea: { flexDirection: "row", alignItems: "center", gap: 10 },
+  iconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  body: { flex: 1, gap: 2 },
+  message: { fontSize: fontSize.md, fontWeight: "600" },
+  actions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
   actionButton: {
     minHeight: MIN_TOUCH_SIZE - 12,
     justifyContent: "center",

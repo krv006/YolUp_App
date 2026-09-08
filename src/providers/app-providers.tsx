@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
@@ -60,12 +61,26 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-          <ToastHost />
-        </QueryClientProvider>
-      </SafeAreaProvider>
+      {/*
+       * KeyboardProvider — klaviatura balandligini kadrma-kadr beradi.
+       *
+       * NEGA KERAK: `android/gradle.properties` da `edgeToEdgeEnabled=true`.
+       * Edge-to-edge yoqilganda Android 15+ klaviatura ochilganda OYNANI
+       * KICHRAYTIRMAYDI, RN ning o'z `KeyboardAvoidingView` i esa aynan
+       * shunga tayanadi — natijada input klaviatura ostida qolardi
+       * (chat kompozitori va BARCHA bottomsheetlar).
+       *
+       * Reanimated'ning `useAnimatedKeyboard` i 4-versiyada eskirgan va
+       * mualliflarning o'zi shu kutubxonaga yo'naltiradi.
+       */}
+      <KeyboardProvider>
+        <SafeAreaProvider>
+          <QueryClientProvider client={queryClient}>
+            {children}
+            <ToastHost />
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }

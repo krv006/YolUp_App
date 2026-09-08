@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+/*
+ * RN ning o'z `KeyboardAvoidingView` i EMAS.
+ *
+ * Androidda uning yagona ishlaydigan rejimi oynaning kichrayishiga
+ * tayanadi, `edgeToEdgeEnabled=true` bo'lganda esa Android 15+ oynani
+ * kichraytirmaydi va kompozitor klaviatura ostida qolib ketardi.
+ */
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
@@ -123,12 +131,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
           subject={conversation.subject ?? ""}
         />
       ) : (
-        <KeyboardAvoidingView
-          style={styles.body}
-          // iOS klaviaturani kontent USTIGA chiqaradi; Android oynani o'zi
-          // kichraytiradi, shuning uchun u yerda hech narsa qilmaymiz.
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
+        <KeyboardAvoidingView style={styles.body} behavior="padding">
           <MessageList
             messages={chat.messages.data}
             loading={chat.messages.isLoading}

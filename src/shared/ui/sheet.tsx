@@ -1,13 +1,15 @@
-import type { ReactNode } from "react";
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useEffect, type ReactNode } from "react";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  runOnJS,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { X } from "lucide-react-native";
 import { radius } from "./tokens";
@@ -23,20 +25,89 @@ export interface SheetProps {
   children: ReactNode;
 }
 
+/** Shu masofadan ko'p sudralsa yopiladi. */
+const CLOSE_DISTANCE = 120;
+/** Yoki shu tezlikdan tez uloqtirilsa — masofadan qat'i nazar. */
+const CLOSE_VELOCITY = 900;
+
 /**
  * Pastdan ochiladigan oyna — veb `Dialog` ning mobil o'rni.
  *
- * `@gorhom/bottom-sheet` ATAYLAB olinmadi: bu yerda sudrash bilan yopish,
- * bir nechta to'xtash nuqtasi yoki ro'yxat bilan integratsiya kerak emas —
- * oddiy `Modal` yetadi va bitta nativ bog'liqlik kam bo'ladi. Jonli darsda
- * (Faza 4) haqiqiy sudraladigan panel kerak bo'lsa, o'sha yerda kiritiladi.
+ * `@gorhom/bottom-sheet` ATAYLAB olinmadi: bu yerda bir nechta to'xtash
+ * nuqtasi yoki ro'yxat bilan chuqur integratsiya kerak emas. Sudrab yopish
+ * va klaviatura ishlovi quyida qo'lda yozilgan — bu bitta nativ
+ * bog'liqlikni kamaytiradi.
  *
- * Klaviatura hisobga olinadi: forma maydonlari ko'p bo'lgani uchun busiz
- * pastdagi tugma klaviatura ostida qolib ketardi.
+ * ┌─ KLAVIATURA ────────────────────────────────────────────────────────┐
+ * │ Ilgari `behavior={Platform.OS === "ios" ? "padding" : undefined}`   │
+ * │ turardi. Androiddagi `undefined` — "oynaning o'zi kichrayadi"       │
+ * │ degani, lekin `edgeToEdgeEnabled=true` bo'lgani uchun Android 15+   │
+ * │ oynani KICHRAYTIRMAYDI. Natijada input klaviatura ostida qolardi —  │
+ * │ va bu `Sheet` ni ishlatuvchi 22 ta faylning HAMMASIDA sodir bo'lardi.│
+ * │ Endi `react-native-keyboard-controller` ishlatiladi: u klaviatura   │
+ * │ balandligini edge-to-edge rejimida ham to'g'ri beradi.              │
+ * └─────────────────────────────────────────────────────────────────────┘
+ *
+ * ┌─ SUDRASH ───────────────────────────────────────────────────────────┐
+ * │ Ilgari tutqich shunchaki bo'yalgan to'rtburchak edi va yopish uchun │
+ * │ X tugmasini bosishga majbur qilardi. Endi butun oynani sudrash      │
+ * │ mumkin, LEKIN faqat ichki ro'yxat eng tepada turganda — aks holda   │
+ * │ ro'yxatni pastga aylantirmoqchi bo'lgan har harakat oynani yopib    │
+ * │ yuborardi.                                                          │
+ * └─────────────────────────────────────────────────────────────────────┘
  */
 export function Sheet({ open, onClose, title, description, children }: SheetProps) {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
+
+  const translateY = useSharedValue(0);
+  const scrollY = useSharedValue(0);
+
+  // Har ochilishda holat nolga qaytadi — aks holda oldingi safar sudralgan
+  // masofa saqlanib qolib, oyna yarmi ko'rinib ochilardi.
+  useEffect(() => {
+    if (open) {
+      translateY.set(0);
+      scrollY.set(0);
+    }
+  }, [open, translateY, scrollY]);
+
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.set(event.contentOffset.y);
+  });
+
+  const pan = Gesture.Pan()
+    // Ro'yxat bilan birga ishlaydi: qaysi biri qo'llanishini quyidagi
+    // shartlar hal qiladi, gesture'lar bir-birini bloklamaydi.
+    .simultaneousWithExternalGesture()
+    .onUpdate((event) => {
+      // Faqat PASTGA va faqat ro'yxat tepada turganda.
+      if (event.translationY > 0 && scrollY.get() <= 0) {
+        translateY.set(event.translationY);
+      }
+    })
+    .onEnd((event) => {
+      const farEnough = event.translationY > CLOSE_DISTANCE;
+      const fastEnough = event.velocityY > CLOSE_VELOCITY;
+
+      if ((farEnough || fastEnough) && scrollY.get() <= 0) {
+        // Oyna ekrandan chiqib ketmasin: `Modal` ning o'z yopilish
+        // animatsiyasi qolganini bajaradi, biz faqat uzatamiz.
+        translateY.set(withTiming(event.translationY, { duration: 0 }));
+        runOnJS(onClose)();
+      } else {
+        translateY.set(withSpring(0, { damping: 20, stiffness: 220 }));
+      }
+    });
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.get() }],
+  }));
+
+  // Sudralgan sari orqa fon shaffoflashadi — harakat "jonli" his qilinadi.
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: Math.max(0, 1 - translateY.get() / (CLOSE_DISTANCE * 2)),
+  }));
 
   return (
     <Modal
@@ -45,52 +116,58 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
       animationType="slide"
       onRequestClose={onClose}
       statusBarTranslucent
+      navigationBarTranslucent
     >
-      <KeyboardAvoidingView
-        style={styles.root}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Yopish"
-          style={[styles.backdrop, { backgroundColor: palette.overlay }]}
-          onPress={onClose}
-        />
+      <KeyboardAvoidingView style={styles.root} behavior="padding">
+        <Animated.View style={[styles.backdrop, backdropStyle]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Yopish"
+            style={[StyleSheet.absoluteFill, { backgroundColor: palette.overlay }]}
+            onPress={onClose}
+          />
+        </Animated.View>
 
-        <View
-          style={[
-            styles.sheet,
-            {
-              backgroundColor: palette["surface-elevated"],
-              borderColor: palette.border,
-              paddingBottom: insets.bottom + 16,
-            },
-          ]}
-        >
-          <View style={[styles.grabber, { backgroundColor: palette["border-strong"] }]} />
-
-          <View style={styles.head}>
-            <View style={styles.headBody}>
-              <Text variant="subheading">{title}</Text>
-              {description ? (
-                <Text variant="caption" tone="muted">
-                  {description}
-                </Text>
-              ) : null}
-            </View>
-            <IconButton accessibilityLabel="Yopish" onPress={onClose}>
-              <X size={20} color={palette["muted-foreground"]} />
-            </IconButton>
-          </View>
-
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.body}
+        <GestureDetector gesture={pan}>
+          <Animated.View
+            style={[
+              styles.sheet,
+              {
+                backgroundColor: palette["surface-elevated"],
+                borderColor: palette.border,
+                paddingBottom: insets.bottom + 16,
+              },
+              sheetStyle,
+            ]}
           >
-            {children}
-          </ScrollView>
-        </View>
+            <View style={[styles.grabber, { backgroundColor: palette["border-strong"] }]} />
+
+            <View style={styles.head}>
+              <View style={styles.headBody}>
+                <Text variant="subheading">{title}</Text>
+                {description ? (
+                  <Text variant="caption" tone="muted">
+                    {description}
+                  </Text>
+                ) : null}
+              </View>
+              <IconButton accessibilityLabel="Yopish" onPress={onClose}>
+                <X size={20} color={palette["muted-foreground"]} />
+              </IconButton>
+            </View>
+
+            <Animated.ScrollView
+              onScroll={scrollHandler}
+              scrollEventThrottle={16}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.body}
+            >
+              {children}
+            </Animated.ScrollView>
+          </Animated.View>
+        </GestureDetector>
       </KeyboardAvoidingView>
     </Modal>
   );

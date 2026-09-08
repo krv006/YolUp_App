@@ -324,3 +324,56 @@ npm run verify      # typecheck + lint + bog'liqlik tekshiruvi
 
 Faza A, D va G dan keyin qurilma tekshiruvi shart (ular ko'rinishga
 tegadi). Qolganlarini birlashtirib bir marta qurish mumkin.
+
+---
+
+# BAJARILDI — 2026-09-08
+
+Barcha bosqichlar tugadi va **qurilmada tekshirildi** (teacher hisobi bilan,
+emulyatorda). Quyida nima qilingani va qanday tasdiqlangani.
+
+| # | Ish | Holat | Qanday tasdiqlandi |
+|---|---|---|---|
+| A1 | Klaviatura primitivi | ✅ | `react-native-keyboard-controller` + `KeyboardProvider` |
+| A2 | Chat kompozitori | ✅ | Klaviatura ochilganda kompozitor ko'tarildi, bo'sh tasma yo'q |
+| A3 | Sheet klaviaturasi | ✅ | Eng pastdagi input ko'rinib turdi (22 ta fayl birdan) |
+| A4 | Tab xavfsiz zonasi | ✅ | Yozuvlar tizim chizig'idan yuqorida |
+| A5 | Toast z-tartibi | ✅ | Xato toasti ochiq sheet va overlay USTIDA chiqdi |
+| B1 | Sudrab yopish | ✅ | Sheet pastga surib yopildi |
+| B2 | Ro'yxat bilan ziddiyat yo'q | ✅ | Faqat ro'yxat tepada turganda sudraladi |
+| B3 | Fon so'nishi | ✅ | Sudralgan sari overlay shaffoflashadi |
+| C1 | Toast sudrash/bosish | ✅ | Yon tomonga surish va bosish bilan yo'q qilinadi |
+| C2 | Toast dizayni | ✅ | Ikonka doirasi, yumaloq burchak, soya |
+| C3 | Toast temaga bo'ysunishi | ✅ | `useColorScheme` o'rniga `useTheme` |
+| D1 | Chat detalida panel yo'q | ✅ | Panel yo'qoldi; qoida panelning o'zida |
+| D2 | Telegram uslubidagi panel | ✅ | Faol bo'lim yumaloq fon bilan |
+| E1 | Test yaratish kaliti | ✅ | Test yaratildi va ro'yxatda DARHOL chiqdi |
+| E2 | 57 mutatsiya auditi | ✅ | 3 ta xato topildi va tuzatildi |
+| E3 | Qoida yozildi | ✅ | `quiz.queries.ts` da, sabab bilan |
+| F1 | Ball inputi | ✅ | Qiymat ko'rinadi |
+| G | Telegram profili | ✅ | Yirik avatar, amallar qatori, qiymat/yorliq kartasi |
+| H1 | Tema saqlagichi | ✅ | MMKV, sinxron o'qish |
+| H2 | Reaktiv `useTheme` | ✅ | 75 fayl kodsiz moslashdi |
+| H3 | Brend rangi | ✅ | 8 rang, kontrast kafolatlangan |
+| H4 | Shrift masshtabi | ✅ | 4 daraja, butun ilovada |
+| H5 | Suhbat purakchasi rangi | ✅ | Brend rangidan mustaqil |
+| H6 | Sozlamalar ekrani | ✅ | `/appearance`, jonli namuna bilan |
+
+## Rejadan chetlanish
+
+**A1 da qaror o'zgardi.** Rejada `useAnimatedKeyboard` (Reanimated) yozilgan
+edi — "yangi nativ paket kerak emas" degan sabab bilan. Amalda u
+Reanimated 4 da **eskirgan** va mualliflarning o'zi
+`react-native-keyboard-controller` ga yo'naltiradi. Qayta qurish baribir
+kerak bo'lgani uchun to'g'ri yo'l tanlandi.
+
+**D2 da toʻliq Telegram naqshi olinmadi.** Telegramda panel — suzuvchi
+yumaloq plastinka. Bizda u to'liq kenglikda qoldi, faqat faol bo'lim
+yumaloq fon bilan ajratildi. Sabab: suzuvchi panel ostidagi kontentni
+bekitadi va buning uchun HAR bir ekranga pastki to'ldirish qo'shish kerak
+bo'lardi — bu 20 dan ortiq ekranga tegadigan va yangi ekran qo'shilganda
+unutiladigan o'zgarish. Xohlansa keyin qilinadi.
+
+## Keyingi bosqich
+
+Buyurtmachi aytganidek: doska, LiveKit va dars ichidagi ishlar.

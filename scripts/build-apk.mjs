@@ -71,7 +71,14 @@ try {
 }
 
 console.log("\n▸ 2/2  Release APK yig'ilmoqda…");
-const gradlew = WINDOWS ? "gradlew.bat" : "./gradlew";
+/*
+ * TO'LIQ YO'L bilan chaqiriladi.
+ *
+ * `shell: true` bilan buyruq cmd.exe orqali o'tadi va u yerda joriy
+ * katalogdagi `gradlew.bat` topilmay qoladi ("is not recognized as an
+ * internal or external command"), garchi `cwd` to'g'ri berilgan bo'lsa ham.
+ */
+const gradlew = join(ROOT, "android", WINDOWS ? "gradlew.bat" : "gradlew");
 run(gradlew, [
   "app:assembleRelease",
   `-PreactNativeArchitectures=${ABIS}`,

@@ -32,7 +32,7 @@ export interface TextProps extends RNTextProps {
 }
 
 export function Text({ variant = "body", tone = "default", style, ...rest }: TextProps) {
-  const { palette } = useTheme();
+  const { palette, fontScale } = useTheme();
 
   const color = {
     default: palette.foreground,
@@ -42,7 +42,33 @@ export function Text({ variant = "body", tone = "default", style, ...rest }: Tex
     onPrimary: palette["primary-foreground"],
   }[tone];
 
-  return <RNText style={[styles.base, VARIANTS[variant], { color }, style]} {...rest} />;
+  /*
+   * Shrift o'lchamini SHU YERDA ko'paytiramiz — bitta joyda.
+   *
+   * Uslublar avval yig'iladi (`flatten`), keyin natijaviy `fontSize`
+   * ko'paytiriladi. Shu sabab chaqiruvchi o'z o'lchamini bergan holat ham
+   * to'g'ri ishlaydi: masalan `<Text style={{ fontSize: 12 }}>` yoki
+   * `chipLabel` kabi StyleSheet qiymatlari — ular ham masshtablanadi.
+   * Agar ko'paytirish variantga qo'llanganda, chaqiruvchining uslubi uni
+   * bekor qilib, o'sha matnlar masshtabga bo'ysunmay qolardi.
+   *
+   * `lineHeight` ham birga ko'payadi, aks holda katta shriftda qatorlar
+   * bir-birining ustiga chiqib ketadi.
+   */
+  const merged = StyleSheet.flatten([VARIANTS[variant], style]) ?? {};
+  const scaled =
+    fontScale === 1
+      ? null
+      : {
+          ...(typeof merged.fontSize === "number"
+            ? { fontSize: Math.round(merged.fontSize * fontScale) }
+            : null),
+          ...(typeof merged.lineHeight === "number"
+            ? { lineHeight: Math.round(merged.lineHeight * fontScale) }
+            : null),
+        };
+
+  return <RNText style={[styles.base, merged, { color }, scaled]} {...rest} />;
 }
 
 const styles = StyleSheet.create({

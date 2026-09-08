@@ -57,7 +57,7 @@ export function MessageBubble({
         style={({ pressed }) => [
           styles.bubble,
           {
-            backgroundColor: outgoing ? palette.primary : palette.surface,
+            backgroundColor: outgoing ? palette["bubble-own"] : palette.surface,
             borderColor: outgoing ? "transparent" : palette.border,
             // Yuborilmagan xabar so'nik ko'rinadi — holat rang bilan ham
             // beriladi, faqat ikonka bilan emas.
@@ -77,7 +77,9 @@ export function MessageBubble({
             style={[
               styles.reply,
               {
-                borderLeftColor: outgoing ? palette["primary-foreground"] : palette["primary-text"],
+                borderLeftColor: outgoing
+                  ? palette["bubble-own-foreground"]
+                  : palette["primary-text"],
                 backgroundColor: outgoing ? "rgba(255,255,255,0.14)" : palette["primary-tint"],
               },
             ]}
@@ -85,7 +87,9 @@ export function MessageBubble({
             <Text
               variant="caption"
               numberOfLines={1}
-              style={{ color: outgoing ? palette["primary-foreground"] : palette["primary-text"] }}
+              style={{
+                color: outgoing ? palette["bubble-own-foreground"] : palette["primary-text"],
+              }}
             >
               {message.replyTo.author}
             </Text>
@@ -119,7 +123,9 @@ export function MessageBubble({
             <CheckCheck
               size={14}
               color={
-                message.status === "read" ? palette["primary-foreground"] : metaColor(true, palette)
+                message.status === "read"
+                  ? palette["bubble-own-foreground"]
+                  : metaColor(true, palette)
               }
             />
           ) : null}

@@ -4,6 +4,8 @@ export { DateField, SelectField, TimeField } from "./pickers";
 export type { DateFieldProps, SelectFieldProps, SelectOption, TimeFieldProps } from "./pickers";
 export { Sheet } from "./sheet";
 export type { SheetProps } from "./sheet";
+export { ACCENTS, DEFAULT_ACCENT, findAccent, readableOn, deriveAccentTokens } from "./accents";
+export type { Accent } from "./accents";
 export { Logo } from "./logo";
 export type { LogoProps } from "./logo";
 export { ConfirmSheet } from "./confirm-sheet";

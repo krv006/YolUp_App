@@ -7,13 +7,14 @@ import {
   History,
   Pencil,
   LogOut,
-  Moon,
+  Palette,
   ShieldCheck,
   Smartphone,
 } from "lucide-react-native";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
 import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
 import { useUnreadNotificationCount } from "@/modules/notification";
+import { useAppearanceStore } from "@/shared/model/theme.store";
 import { env, ROUTES } from "@/shared/config";
 import { formatDayTime } from "@/shared/lib";
 import {
@@ -21,6 +22,7 @@ import {
   Badge,
   Button,
   CountBadge,
+  findAccent,
   IconButton,
   ListItem,
   radius,
@@ -41,6 +43,18 @@ import {
 export function ProfilePage({ roleLabel }: { roleLabel: string }) {
   const router = useRouter();
   const { palette, scheme } = useTheme();
+  const appearanceMode = useAppearanceStore((state) => state.mode);
+  const accentId = useAppearanceStore((state) => state.accent);
+
+  // Qatorda hozirgi tanlov ko'rinib tursin — ekranga kirmasdan ham bilinadi.
+  const appearanceSummary = [
+    appearanceMode === "system"
+      ? `Tizim (${scheme === "dark" ? "qorong'i" : "yorug'"})`
+      : appearanceMode === "dark"
+        ? "Qorong'i"
+        : "Yorug'",
+    findAccent(accentId).label.toLowerCase(),
+  ].join(" · ");
   const { user, logout } = useAuth();
   const unread = useUnreadNotificationCount();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -114,9 +128,11 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
           />
           <Separator inset={52} />
           <ListItem
-            title="Mavzu"
-            subtitle={scheme === "dark" ? "Qorong'i (tizim sozlamasi)" : "Yorug' (tizim sozlamasi)"}
-            leading={<Moon size={20} color={palette["muted-foreground"]} />}
+            title="Ko'rinish"
+            subtitle={appearanceSummary}
+            leading={<Palette size={20} color={palette["muted-foreground"]} />}
+            chevron
+            onPress={() => router.push("/appearance")}
           />
         </View>
 

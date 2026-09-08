@@ -24,7 +24,10 @@ export function MessageText({ text, outgoing = false }: MessageTextProps) {
 
   return (
     <Text
-      tone={outgoing ? "onPrimary" : "default"}
+      // `tone` emas, to'g'ridan-to'g'ri rang: chiquvchi xabar purakchasi
+      // brend rangidan MUSTAQIL bo'lishi mumkin (foydalanuvchi tanlaydi),
+      // shuning uchun matn ham o'sha purakcha rangiga qarab tanlanadi.
+      style={outgoing ? { color: palette["bubble-own-foreground"] } : undefined}
       // Uzun xabarlar tanlanib nusxalanishi kerak (havola, kod, telefon raqami).
       selectable
     >
@@ -43,7 +46,7 @@ export function MessageText({ text, outgoing = false }: MessageTextProps) {
             onPress={openLink}
             style={[
               styles.link,
-              { color: outgoing ? palette["primary-foreground"] : palette["primary-text"] },
+              { color: outgoing ? palette["bubble-own-foreground"] : palette["primary-text"] },
             ]}
           >
             {token.value}

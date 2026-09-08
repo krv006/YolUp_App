@@ -67,6 +67,8 @@
   --tone-rose-bg: #ffedf1;
   --overlay: rgba(10, 14, 19, 0.55);
   --shadow: rgba(26, 31, 38, 0.12);
+  --bubble-own: #1a66e0;
+  --bubble-own-foreground: #ffffff;
 }
 
 .dark:root {
@@ -128,4 +130,6 @@
   --tone-rose-bg: #2a1418;
   --overlay: rgba(3, 5, 9, 0.7);
   --shadow: rgba(0, 0, 0, 0.5);
+  --bubble-own: #1a66e0;
+  --bubble-own-foreground: #ffffff;
 }

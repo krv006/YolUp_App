@@ -149,3 +149,20 @@ export function findGradient(id: string): Gradient | null {
 export function gradientForeground(colors: readonly [string, string]): string {
   return readableOn(mix(colors[0], colors[1], 0.5));
 }
+
+/**
+ * Rangli fon ustidagi YENGIL QATLAM (ichki karta, ajratuvchi chiziq, so'nik
+ * matn) uchun rang.
+ *
+ * NEGA KERAK: purakcha ichida `rgba(255,255,255,0.16)` kabi qiymatlar qat'iy
+ * yozilgan edi — ular purakcha TO'Q degan taxminga asoslanardi. Foydalanuvchi
+ * och rang tanlaganda (masalan kahrabo) oq qatlam fonga qo'shilib ketib,
+ * ichki elementlar ko'rinmay qolardi.
+ *
+ * @param foreground o'sha fon uchun `readableOn` bergan matn rangi
+ */
+export function overlayOn(foreground: string, alpha: number): string {
+  return foreground === "#ffffff"
+    ? `rgba(255,255,255,${alpha})`
+    : `rgba(0,0,0,${alpha})`;
+}

@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import Animated, {
   FadeInUp,
   FadeOutUp,
@@ -128,6 +132,10 @@ export const toast = Object.assign(
  * `visible` faqat toast BOR bo'lganda `true` bo'ladi: oyna aynan o'sha
  * paytda yaratiladi va shu sababli o'zidan oldin ochilgan oynalar ustida
  * turadi.
+ *
+ * Ichkarida yana `GestureHandlerRootView` bor: Modal alohida nativ oyna
+ * bo'lgani uchun ildizdagi o'ram bu yerga yetib bormaydi va usiz surib
+ * yo'q qilish ishlamaydi.
  */
 export function ToastHost() {
   const items = useToastStore((state) => state.items);
@@ -143,11 +151,13 @@ export function ToastHost() {
       // Tizim tugmasi toast'ni emas, ostidagi ekranni boshqarsin.
       onRequestClose={() => useToastStore.getState().dismiss()}
     >
-      <View pointerEvents="box-none" style={[styles.host, { top: insets.top + 10 }]}>
-        {items.map((item) => (
-          <ToastCard key={item.id} item={item} />
-        ))}
-      </View>
+      <GestureHandlerRootView style={styles.fill} pointerEvents="box-none">
+        <View pointerEvents="box-none" style={[styles.host, { top: insets.top + 10 }]}>
+          {items.map((item) => (
+            <ToastCard key={item.id} item={item} />
+          ))}
+        </View>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
@@ -195,6 +205,8 @@ function ToastCard({ item }: { item: ToastItem }) {
    * ekranni band qilib turardi va uni olib tashlashning iloji yo'q edi.
    */
   const pan = Gesture.Pan()
+    // Faqat yon tomonga harakat — tik surish ostidagi ekranga o'tsin.
+    .activeOffsetX([-12, 12])
     .onUpdate((event) => {
       translateX.set(event.translationX);
     })
@@ -287,6 +299,7 @@ function ToastCard({ item }: { item: ToastItem }) {
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   host: { position: "absolute", left: 12, right: 12, gap: 8 },
   card: {
     borderWidth: StyleSheet.hairlineWidth,

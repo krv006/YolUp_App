@@ -11,6 +11,7 @@ export {
   findAccent,
   findGradient,
   gradientForeground,
+  overlayOn,
   GRADIENTS,
   readableOn,
 } from "./accents";

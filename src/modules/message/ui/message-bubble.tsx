@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { CheckCheck, RefreshCw } from "lucide-react-native";
 import { formatMessageTime } from "@/shared/lib";
 import type { ChatMessage } from "@/shared/types";
-import { fontSize, GradientFill, radius, Text, useTheme } from "@/shared/ui";
+import { fontSize, GradientFill, overlayOn, radius, Text, useTheme } from "@/shared/ui";
 import { MessageAttachment } from "./message-attachment";
 import { MessageText } from "./message-text";
 
@@ -92,7 +92,9 @@ export function MessageBubble({
                 borderLeftColor: outgoing
                   ? palette["bubble-own-foreground"]
                   : palette["primary-text"],
-                backgroundColor: outgoing ? "rgba(255,255,255,0.14)" : palette["primary-tint"],
+                backgroundColor: outgoing
+                  ? overlayOn(palette["bubble-own-foreground"], 0.14)
+                  : palette["primary-tint"],
               },
             ]}
           >
@@ -164,7 +166,10 @@ export function MessageBubble({
 function metaColor(outgoing: boolean, palette: ReturnType<typeof useTheme>["palette"]): string {
   // Chiquvchi pufakchada fon to'q ko'k — oq matnning so'niq varianti kerak,
   // `muted-foreground` u yerda o'qilmaydi.
-  return outgoing ? "rgba(255,255,255,0.75)" : palette["muted-foreground"];
+  // Qat'iy oq EMAS: och rangli purakchada u ko'rinmay qolardi.
+  return outgoing
+    ? overlayOn(palette["bubble-own-foreground"], 0.75)
+    : palette["muted-foreground"];
 }
 
 const styles = StyleSheet.create({

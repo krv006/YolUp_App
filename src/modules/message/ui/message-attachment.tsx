@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { Download, FileText } from "lucide-react-native";
 import { downloadBlob, fileKindLabel, fileKindOf } from "@/shared/lib";
 import type { MessageAttachment as Attachment } from "@/shared/types";
-import { radius, Text, toast, useTheme } from "@/shared/ui";
+import { overlayOn, radius, Text, toast, useTheme } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
 
 /**
@@ -42,8 +42,16 @@ export function MessageAttachment({
     }
   }
 
-  const foreground = outgoing ? palette["primary-foreground"] : palette["primary-text"];
-  const background = outgoing ? "rgba(255,255,255,0.16)" : palette["primary-tint"];
+  /*
+   * Rang BREND rangidan emas, PURAKCHA rangidan olinadi.
+   *
+   * Ilgari `primary-foreground` ishlatilardi — u brend rangiga bog'liq.
+   * Foydalanuvchi purakchaga boshqa rang (yoki gradient) tanlaganda ikkisi
+   * mos kelmay qolardi: to'q purakcha ustidagi fayl nomi qora bo'lib
+   * o'qilmasdi.
+   */
+  const foreground = outgoing ? palette["bubble-own-foreground"] : palette["primary-text"];
+  const background = outgoing ? overlayOn(foreground, 0.16) : palette["primary-tint"];
 
   return (
     <Pressable

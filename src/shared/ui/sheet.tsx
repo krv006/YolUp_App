@@ -1,6 +1,10 @@
 import { useEffect, type ReactNode } from "react";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedScrollHandler,
@@ -55,6 +59,14 @@ const CLOSE_VELOCITY = 900;
  * │ ro'yxatni pastga aylantirmoqchi bo'lgan har harakat oynani yopib    │
  * │ yuborardi.                                                          │
  * └─────────────────────────────────────────────────────────────────────┘
+ *
+ * ┌─ NEGA ICHKARIDA YANA `GestureHandlerRootView` ────────────────────────┐
+ * │ RN `Modal` ALOHIDA nativ oyna yaratadi, gesture-handler esa har bir  │
+ * │ ildizda o'z o'ramini talab qiladi. `app-providers.tsx` dagi o'ram bu │
+ * │ oynaga YETIB BORMAYDI. Usiz `GestureDetector` jimgina ishlamaydi:    │
+ * │ xato chiqmaydi, shunchaki sudrash sezilmaydi — aynan shu sabab oyna  │
+ * │ dastlab qo'l bilan surilmagan edi.                                   │
+ * └─────────────────────────────────────────────────────────────────────┘
  */
 export function Sheet({ open, onClose, title, description, children }: SheetProps) {
   const { palette } = useTheme();
@@ -77,9 +89,13 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
   });
 
   const pan = Gesture.Pan()
-    // Ro'yxat bilan birga ishlaydi: qaysi biri qo'llanishini quyidagi
-    // shartlar hal qiladi, gesture'lar bir-birini bloklamaydi.
-    .simultaneousWithExternalGesture()
+    /*
+     * Faqat PASTGA sudralganda faollashadi va yuqoriga harakatda bekor
+     * bo'ladi — ya'ni ro'yxatni aylantirish gesture'i buzilmaydi.
+     * Usiz har qanday teginish oynani qimirlatib yuborardi.
+     */
+    .activeOffsetY(12)
+    .failOffsetY(-12)
     .onUpdate((event) => {
       // Faqat PASTGA va faqat ro'yxat tepada turganda.
       if (event.translationY > 0 && scrollY.get() <= 0) {
@@ -118,7 +134,8 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
       statusBarTranslucent
       navigationBarTranslucent
     >
-      <KeyboardAvoidingView style={styles.root} behavior="padding">
+      <GestureHandlerRootView style={styles.fill}>
+        <KeyboardAvoidingView style={styles.root} behavior="padding">
         <Animated.View style={[styles.backdrop, backdropStyle]}>
           <Pressable
             accessibilityRole="button"
@@ -168,12 +185,14 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
             </Animated.ScrollView>
           </Animated.View>
         </GestureDetector>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </GestureHandlerRootView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   root: { flex: 1, justifyContent: "flex-end" },
   backdrop: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0 },
   sheet: {

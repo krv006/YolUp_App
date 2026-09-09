@@ -33,6 +33,30 @@ function parseDate(value: string, fallback = new Date()): Date {
   return Number.isNaN(parsed.getTime()) ? fallback : parsed;
 }
 
+/**
+ * `HH:mm` ni BUGUNGI sanadagi `Date` ga aylantiradi.
+ *
+ * ┌─ NEGA BUGUN, 1970 EMAS ──────────────────────────────────────────────┐
+ * │ Ilgari bu yerda `new Date("1970-01-01T" + value)` turardi — vaqt     │
+ * │ uchun "neytral" sana sifatida. Neytral emas ekan: mintaqa siljishi   │
+ * │ YILLAR DAVOMIDA O'ZGARADI. Asia/Tashkent 1970 yilda UTC+6 edi,       │
+ * │ hozir UTC+5.                                                          │
+ * │                                                                       │
+ * │ Nativ tanlagich Date ni JORIY mintaqa qoidasi bilan o'qiydi, JS esa  │
+ * │ o'sha lahza uchun TARIXIY qoidani qo'llaydi — ikkalasi bir soatga    │
+ * │ farq qilardi. Natijada 19:00 tanlansa 18:00 saqlanardi.              │
+ * │                                                                       │
+ * │ Bugungi sana ishlatilganda ikkala tomon ham bitta, joriy siljishni   │
+ * │ qo'llaydi. Sana matnga umuman kirmaydi — faqat `HH:mm` saqlanadi.    │
+ * └───────────────────────────────────────────────────────────────────────┘
+ */
+function parseTime(value: string): Date {
+  const [hours, minutes] = (value || "18:30").split(":").map(Number);
+  const date = new Date();
+  date.setHours(Number.isFinite(hours) ? hours : 18, Number.isFinite(minutes) ? minutes : 30, 0, 0);
+  return date;
+}
+
 export interface DateFieldProps {
   label: string;
   /** `yyyy-MM-dd` */
@@ -100,7 +124,7 @@ export function TimeField({ label, value, onChange }: TimeFieldProps) {
       />
       {open ? (
         <DateTimePicker
-          value={parseDate(`1970-01-01T${value || "18:30"}:00`)}
+          value={parseTime(value)}
           mode="time"
           is24Hour
           display={Platform.OS === "ios" ? "spinner" : "default"}

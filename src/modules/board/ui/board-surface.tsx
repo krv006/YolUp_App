@@ -166,8 +166,15 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
     if (!formula.trim()) return;
     try {
       setSolution(await solve.mutateAsync(formula.trim()));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Formulani yechib bo'lmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

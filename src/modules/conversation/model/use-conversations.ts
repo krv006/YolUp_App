@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { Page } from "@/shared/api";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import { conversationApi } from "../api/conversation.api";
@@ -44,6 +45,7 @@ export function useRequestDirect() {
   return useMutation({
     mutationFn: (teacherId: string) => conversationApi.requestDirect(teacherId),
     onSuccess: () => client.invalidateQueries({ queryKey: conversationKeys.all }),
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 

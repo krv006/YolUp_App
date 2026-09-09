@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { boardApi } from "../api/board.api";
 import type { StrokeInput } from "../api/board.dto";
 
@@ -55,5 +56,8 @@ export function useGrantDraw(lessonId: string) {
 }
 
 export function useSolveFormula(lessonId: string) {
-  return useMutation({ mutationFn: (expression: string) => boardApi.solve(lessonId, expression) });
+  return useMutation({
+    mutationFn: (expression: string) => boardApi.solve(lessonId, expression),
+    onError: (error: Error) => toast.error(error.message),
+  });
 }

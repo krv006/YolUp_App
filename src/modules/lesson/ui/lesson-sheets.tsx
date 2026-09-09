@@ -11,7 +11,6 @@ import {
   Separator,
   Sheet,
   Text,
-  toast,
 } from "@/shared/ui";
 import { useFinishLesson, useLessonRatings, useRateLesson } from "../model/lesson.queries";
 import { StarRating } from "./star-rating";
@@ -108,8 +107,15 @@ export function FinishLessonSheet({
       await finish.mutateAsync({ id: lesson.id, recordingTitle: title.trim() || undefined });
       close();
       onFinished?.();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Darsni yakunlab bo'lmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

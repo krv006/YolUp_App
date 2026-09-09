@@ -37,6 +37,15 @@ export function useUpdateProfileMutation() {
     },
     // Server javobi global auth holatiga ko'chiriladi.
     onSuccess: (user) => useAuthStore.getState().setUser(user),
+    /*
+     * Xato xabari FAQAT shu yerdan chiqadi.
+     *
+     * Ilgari qism-qism edi: ba'zi mutatsiyada `onError` bor, ba'zisida
+     * yo'q, chaqiruvchi komponentlar esa `mutateAsync` ni try/catch ga
+     * o'rab har doim o'zi ham chiqarardi. Birinchi guruhda toast IKKI
+     * MARTA ko'rinardi.
+     */
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -46,6 +55,7 @@ export function useUpdateAvatarMutation() {
     mutationFn: async (avatar: File | null): Promise<AuthUser> =>
       mapUserDto(await authApi.updateAvatar(avatar)),
     onSuccess: (user) => useAuthStore.getState().setUser(user),
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 

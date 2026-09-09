@@ -15,7 +15,6 @@ import {
   Separator,
   Sheet,
   Text,
-  toast,
   useTheme,
 } from "@/shared/ui";
 
@@ -56,8 +55,15 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
     try {
       await createStudent.mutateAsync({ courseId, form });
       close();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Hisob yaratilmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

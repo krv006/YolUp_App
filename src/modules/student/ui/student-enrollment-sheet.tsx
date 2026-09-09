@@ -17,7 +17,6 @@ import {
   ScreenLoading,
   Sheet,
   Text,
-  toast,
   useTheme,
 } from "@/shared/ui";
 
@@ -66,8 +65,15 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
       if (room.directStatus === DIRECT_STATUS.ACTIVE) {
         router.push(`/student/chats/${room.id}`);
       }
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "So'rov yuborilmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

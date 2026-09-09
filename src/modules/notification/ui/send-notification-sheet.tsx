@@ -59,8 +59,15 @@ export function SendNotificationSheet({ open, onClose }: SendNotificationSheetPr
         userId: target === "user" ? selected?.id : null,
       });
       close();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Xabar yuborilmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

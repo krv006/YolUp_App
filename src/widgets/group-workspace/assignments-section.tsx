@@ -34,7 +34,6 @@ import {
   ScreenLoading,
   Sheet,
   Text,
-  toast,
   useTheme,
 } from "@/shared/ui";
 
@@ -273,8 +272,15 @@ function AssignmentSheet({
       });
       setFile(null);
       onClose();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Topshirib bo'lmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

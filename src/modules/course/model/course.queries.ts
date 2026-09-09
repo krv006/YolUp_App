@@ -109,6 +109,7 @@ export function useCreateEnrollment() {
       client.invalidateQueries({ queryKey: courseKeys.all });
       toast.success("Yozilish so‘rovi yuborildi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -142,6 +143,7 @@ export function useCreateCourseStudent() {
           : "O‘quvchi yaratildi, so‘rov yuborildi"
       );
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 

@@ -88,8 +88,15 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
     try {
       await updateAvatar.mutateAsync(toUploadFile(picked));
       toast.success("Profil rasmi yangilandi");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Rasmni yuklab bo'lmadi");
+    } catch {
+      /*
+       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
+       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
+       * MARTA ko'rinardi.
+       *
+       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
+       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
+       */
     }
   }
 

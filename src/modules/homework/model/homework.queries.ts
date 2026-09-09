@@ -89,6 +89,7 @@ export function useCreateAssignment() {
       client.invalidateQueries({ queryKey: homeworkKeys.all });
       toast.success("Vazifa yuborildi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -109,6 +110,7 @@ export function useSubmitHomework() {
       client.invalidateQueries({ queryKey: homeworkKeys.all });
       toast.success("Vazifa topshirildi, AI tekshiruvi boshlandi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -120,6 +122,7 @@ export function useDeleteAssignment() {
       client.invalidateQueries({ queryKey: homeworkKeys.all });
       toast.success("Vazifa o‘chirildi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 

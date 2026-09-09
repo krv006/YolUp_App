@@ -169,6 +169,7 @@ export function useCreateLessonSchedule() {
       }
       toast.error("Darslarni saqlab bo‘lmadi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -180,6 +181,7 @@ export function useUpdateLesson() {
       client.invalidateQueries({ queryKey: lessonKeys.all });
       toast.success("Dars yangilandi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -209,6 +211,7 @@ export function useFinishLesson() {
       client.invalidateQueries({ queryKey: lessonKeys.all });
       toast.success("Dars yakunlandi — yozuv guruh chatiga tushadi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -268,5 +271,6 @@ export function useRateLesson() {
       client.invalidateQueries({ queryKey: lessonKeys.all });
       toast.success("Bahoyingiz uchun rahmat!");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }

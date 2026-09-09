@@ -58,6 +58,7 @@ export function useRequestChildLink() {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("Bog‘lash so‘rovi yuborildi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -69,6 +70,7 @@ export function useCreateChild() {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("Bola hisobi yaratildi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -81,6 +83,7 @@ export function useRespondParentLink() {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("So‘rov yangilandi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -92,5 +95,6 @@ export function useSetParentConsent() {
       client.invalidateQueries({ queryKey: parentKeys.consents });
       toast.success("Maxfiylik ruxsati saqlandi");
     },
+    onError: (error: Error) => toast.error(error.message),
   });
 }

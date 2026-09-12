@@ -66,7 +66,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         foregroundImage: "./assets/android-icon-foreground.png",
         backgroundImage: "./assets/android-icon-background.png",
         monochromeImage: "./assets/android-icon-monochrome.png",
-        backgroundColor: "#1a66e0",
+        // Zaxira rang: `android-icon-background.png` ishlatilmagan holatda
+        // ko'rinadi. Brend gradientining o'rta tonini oldik, shunda ikkalasi
+        // bir-biridan keskin farq qilmaydi (`logo-mark.json` -> `brand`).
+        backgroundColor: "#4A66F0",
       },
       predictiveBackGestureEnabled: false,
       /*

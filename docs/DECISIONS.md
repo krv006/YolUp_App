@@ -434,19 +434,45 @@ o'zgartirish uchun bitta JSON tahrirlanadi va `npm run build:icons`
 ishga tushiriladi; SVG esa o'sha faylni to'g'ridan-to'g'ri o'qigani
 uchun avtomatik yangilanadi.
 
-**Belgi:** brend ko'k (`#1a66e0`) ustida oq "F" va undan ajralgan nuqta.
-Nuqta o'rta chiziq bilan bir o'qda — "fokus nuqtasi" ma'nosini beradi.
-Avvalgi ikonka Expo shablonining standart rasmi edi.
+**Belgi (2026-09-12 dan):** YolUp brendi — "Y" harfi va uning ichidan
+yuqoriga ko'tariluvchi strelka. Ranglar brend gradienti:
+`#6C4CF1 → #2F7BF5 → #22D3A5`. Avvalgi belgi Fokus davridagi oq "F" va
+nuqta edi (undan oldin esa Expo shablonining standart rasmi).
+
+**Belgining ikki ko'rinishi.** Logotip ikki qatlamdan iborat —
+`logo-mark.json` dagi `role`:
+
+| Qatlam | Nima |
+|---|---|
+| `body` | "Y" harfi: uchta yumaloq uchli qalin chiziq |
+| `cut` | strelka: egri chiziq + uchburchak uchi, "Y" ustidan o'tadi |
+
+Shundan ikki rasmiy forma chiqadi:
+
+- **Belgi** (shaffof fonda): "Y" gradient, strelka OQ. Logotipning asosiy ko'rinishi.
+- **Plitka** (launcher ikonkasi): gradient plitka, "Y" OQ, strelka ham OQ —
+  ular ingichka gradient hoshiya (`cutGap`) bilan ajraladi. Hoshiyasiz oq
+  strelka oq "Y" ichida ko'rinmay qolardi.
+
+Android adaptiv old qismida hoshiya shaffof bo'ladi va ostidagi gradient
+fon rasmi undan ko'rinib turadi — natijada plitka bilan bir xil chiqadi.
 
 **Texnik tafsilotlar:**
 
 - Rasterlash `pngjs` bilan, har piksel 4×4 nuqtada tekshiriladi
   (supersampling) — tashqi grafik kutubxona kerak emas.
+- Shakl turlari: `stroke` (yumaloq uchli siniq chiziq — nuqtadan kesmagacha
+  masofa bilan tekshiriladi) va `polygon` (nur tashlash usuli). Egri chiziq
+  Bezye egridan namuna olingan nuqtalar sifatida saqlanadi, shuning uchun
+  rasterlovchiga path parser kerak emas.
+- Gradient nuqtani gradient o'qiga proyeksiya qilib hisoblanadi; plitkada
+  o'q butun kvadrat bo'ylab, shaffof variantda belgining o'zi bo'ylab
+  cho'ziladi. `logo.tsx` ham aynan shu ikki holatni takrorlaydi.
 - Belgi chegara qutisi RENDER VAQTIDA hisoblanib markazlashtiriladi,
   shuning uchun JSON'dagi koordinatalarni qo'lda muvozanatlash shart emas.
 - `icon.png` — shaffofliksiz to'la kvadrat (Apple talabi: burchakni tizim
   o'zi yumaloqlaydi).
-- Adaptiv old qism belgisi 359×471 px — Android'ning 676 px xavfsiz
+- Adaptiv old qism belgisi 445×471 px — Android'ning 676 px xavfsiz
   zonasidan ancha kichik, ya'ni hech qanday niqobda kesilmaydi.
 - `splash-icon.png` — brend plitka ustida oq belgi: splash foni och
   (`#f5f7fa`) ham, to'q (`#0f1319`) ham bo'lishi mumkin, plitka

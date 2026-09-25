@@ -13,6 +13,11 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
+import {
+  TrendLineChart,
+  TrendStackedBarChart,
+  useDashboardTrends,
+} from "@/modules/analytics";
 import { useAttendancePage } from "@/modules/attendance";
 import { useAuth } from "@/modules/auth";
 import { useCoursePage } from "@/modules/course";
@@ -24,8 +29,11 @@ import {
 } from "@/modules/notification";
 import { can, PERMISSIONS } from "@/modules/permission";
 import { ROUTES } from "@/shared/config";
+import type { DashboardPeriod } from "@/shared/types";
 import {
   Button,
+  Chip,
+  ChipRow,
   CountBadge,
   IconButton,
   ListItem,
@@ -177,6 +185,8 @@ export function AdminDashboardPage() {
           ) : null}
         </View>
 
+        <TrendsSection />
+
         <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
           <Text variant="label" style={styles.cardTitle}>
             So'nggi kurslar
@@ -244,6 +254,118 @@ function Metric({
       <Text variant="caption" tone="muted">
         {label}
       </Text>
+    </View>
+  );
+}
+
+
+const PERIODS: { value: DashboardPeriod; label: string }[] = [
+  { value: "day", label: "Kun" },
+  { value: "week", label: "Hafta" },
+  { value: "month", label: "Oy" },
+  { value: "year", label: "Yil" },
+];
+
+/**
+ * Trend grafiklari — veb `admin-dashboard-page.tsx:166-232` ning mobil
+ * varianti.
+ *
+ * Vebda uchta grafik ikki ustunli to'rda yonma-yon turadi. Telefonda
+ * ular ketma-ket, chunki 600px kenglikdagi grafikni ikkiga bo'lsak hech
+ * narsa o'qilmaydi.
+ *
+ * ALOHIDA KOMPONENT: `useDashboardTrends` davr o'zgarganda qayta
+ * so'raydi. U panelning o'zida tursa, davr almashtirilganda BUTUN panel
+ * (kurslar, darslar, davomat ro'yxatlari bilan) qayta chizilardi.
+ */
+function TrendsSection() {
+  const { palette } = useTheme();
+  const [period, setPeriod] = useState<DashboardPeriod>("month");
+  const trends = useDashboardTrends(period);
+
+  const data = trends.data;
+
+  return (
+    <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
+      <Text variant="label" style={styles.cardTitle}>
+        Dinamika
+      </Text>
+
+      <ChipRow>
+        {PERIODS.map((item) => (
+          <Chip
+            key={item.value}
+            label={item.label}
+            selected={period === item.value}
+            onPress={() => setPeriod(item.value)}
+          />
+        ))}
+      </ChipRow>
+
+      {!data ? (
+        <Text variant="caption" tone="muted">
+          {trends.isError ? "Dinamikani yuklab bo'lmadi." : "Yuklanmoqda…"}
+        </Text>
+      ) : (
+        <>
+          <Text variant="caption" tone="muted">
+            Yangi o&apos;quvchilar
+          </Text>
+          <TrendLineChart
+            labels={data.labels}
+            series={[
+              {
+                key: "enroll",
+                name: "Yangi ro'yxatdan o'tish",
+                color: palette["chart-1"],
+                values: data.enrollments,
+                area: true,
+              },
+            ]}
+          />
+
+          <Text variant="caption" tone="muted">
+            Darslar holati
+          </Text>
+          <TrendStackedBarChart
+            labels={data.labels}
+            series={[
+              {
+                key: "completed",
+                name: "O'tkazilgan",
+                color: palette["chart-2"],
+                values: data.lessonsCompleted,
+              },
+              {
+                key: "cancelled",
+                name: "Bekor qilingan",
+                color: palette["chart-4"],
+                values: data.lessonsCancelled,
+              },
+            ]}
+          />
+
+          {/*
+            * `zeroBase={false}` — ball 0..100 oralig'ida va odatda 60..90
+            * atrofida bo'ladi. Noldan boshlasak, farq ko'rinmay ketardi.
+            */}
+          <Text variant="caption" tone="muted">
+            Testlar — o&apos;rtacha ball
+          </Text>
+          <TrendLineChart
+            zeroBase={false}
+            labels={data.labels}
+            series={[
+              {
+                key: "quiz",
+                name: "Test",
+                color: palette["chart-5"],
+                values: data.quizAvgScore,
+              },
+            ]}
+          />
+        </>
+      )}
     </View>
   );
 }

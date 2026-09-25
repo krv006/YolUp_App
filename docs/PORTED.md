@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-25 (quiz ko'rib chiqish + YolUp brendi)
+- **Oxirgi yangilanish:** 2026-09-25 (analytics bosqichi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -30,15 +30,23 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **121**
-- 🟡/🔴 moslashtirilgan: **78**
+- 🟢 NUSXA: **126**
+- 🟡/🔴 moslashtirilgan: **82**
 - 🆕 mobilga xos: **7**
-- Jami: **206**
+- Jami: **215**
 
 ## Fayllar
 
 | Mobil fayl | Toifa | Veb hash | Farq / izoh |
 |---|---|---|---|
+| `src/modules/analytics/api/analytics.api.ts` | 🟢 NUSXA | `71ec3ec8b1cc` | — |
+| `src/modules/analytics/api/analytics.dto.ts` | 🟢 NUSXA | `78b8d4599cb1` | — |
+| `src/modules/analytics/api/analytics.endpoints.ts` | 🟢 NUSXA | `9b926b9731e2` | — |
+| `src/modules/analytics/index.ts` | 🟡 MOSLASH | `e7064b45479a` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/analytics/lib/analytics.mappers.ts` | 🟢 NUSXA | `d75c309664ba` | — |
+| `src/modules/analytics/model/analytics.queries.ts` | 🟢 NUSXA | `53e4931cdf57` | — |
+| `src/modules/analytics/ui/trend-line-chart.tsx` | 🟡 MOSLASH | `3164201c6a1e` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish, qiymatlar grafik ostida |
+| `src/modules/analytics/ui/trend-stacked-bar-chart.tsx` | 🟡 MOSLASH | `96a4de5f614c` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish |
 | `src/modules/attendance/api/attendance.api.ts` | 🟢 NUSXA | `1e046237be37` | — |
 | `src/modules/attendance/api/attendance.dto.ts` | 🟢 NUSXA | `ba5a4336ddf1` | — |
 | `src/modules/attendance/api/attendance.endpoints.ts` | 🟢 NUSXA | `b5b26e5a5a85` | — |
@@ -193,6 +201,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/voice/ui/voice-room-bar.tsx` | 🟡 MOSLASH | `46d2b5212234` | mobil qobiq: xona ochish oynasi shu faylda (veb'da alohida dialog) |
 | `src/modules/voice/ui/voice-room-sheet.tsx` | 🟡 MOSLASH | `76f4b2d71876` | manba: veb `voice-room-dialog.tsx`; video plitkalari o'rniga ro'yxat, LiveKitRoom video={false} |
 | `src/pages/admin/admin-dashboard-page.tsx` | 🟡 MOSLASH | `f3de9850f257` | farq qayd etilmagan — tekshiring |
+| `src/pages/analytics/analytics-page.tsx` | 🟡 MOSLASH | `092cef5c60fa` | o'qituvchi jadvali (olti ustun) kartochkalarga aylandi — telefonda jadval o'qilmaydi |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |

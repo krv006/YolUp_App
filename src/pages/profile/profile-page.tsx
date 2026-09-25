@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import {
   Bell,
+  ChartLine,
   History,
   LogOut,
   Palette,
@@ -187,6 +188,22 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
               <Separator inset={52} />
             </>
           ) : null}
+          {/*
+            * Tahlil TAB emas, profil ichida.
+            *
+            * Veb'da u alohida marshrut (`/analytics`) va yon menyudan
+            * ochiladi. Mobilda tab o'rni cheklangan — o'quvchida beshtasi
+            * ham band. Tahlil har kuni ochiladigan bo'lim emas, shuning
+            * uchun u profilga qo'yildi, xuddi "Ko'rinish" kabi.
+            */}
+          <ListItem
+            title="Tahlil"
+            subtitle="Natijalaringiz va ko'rsatkichlaringiz"
+            leading={<ChartLine size={20} color={palette["muted-foreground"]} />}
+            chevron
+            onPress={() => router.push("/analytics")}
+          />
+          <Separator inset={52} />
           <ListItem
             title="Kirishlar tarixi"
             subtitle="Qaysi qurilma va IP'dan kirilgani"

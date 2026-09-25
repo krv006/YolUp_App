@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-25 (quiz import bosqichi)
+- **Oxirgi yangilanish:** 2026-09-25 (quiz tahrirlash bosqichi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -175,7 +175,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/lib/quiz-errors.ts` | 🟢 NUSXA | `da4cf7939388` | — |
 | `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
 | `src/modules/quiz/model/quiz.queries.ts` | 🟡 MOSLASH | `a079604c210e` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
-| `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); nom taklifi (combobox) va qoralama saqlash ko'chirilmadi; import natijasi `import-result-sheet` da |
+| `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); yaratish va tahrirlash vebdagidek BITTA komponentda; nom taklifi (combobox), qoralama saqlash va `QuizPreview` ko'chirilmadi; import natijasi `import-result-sheet` da |
 | `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
 | `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn |
 | `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |

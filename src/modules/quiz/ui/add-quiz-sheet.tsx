@@ -2,12 +2,13 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Download, FileUp, Link2, Plus } from "lucide-react-native";
 import { pickDocument, toUploadFile } from "@/shared/lib";
-import type { QuizFormValues } from "@/shared/types";
+import type { QuizDetail, QuizEditValues, QuizFormValues } from "@/shared/types";
 import {
   Button,
   DateField,
   Input,
   Separator,
+  radius,
   SelectField,
   Sheet,
   Text,
@@ -20,6 +21,7 @@ import { detectGoogleSource } from "../lib/google-import";
 import {
   createDraft,
   draftToFormValues,
+  questionToDraft,
   validateDraft,
   type QuestionDraft,
 } from "../lib/question-draft";
@@ -28,6 +30,8 @@ import {
   useDownloadQuizTemplate,
   useImportGoogleLink,
   useImportQuizDocx,
+  usePublishQuiz,
+  useUpdateQuiz,
 } from "../model/quiz.queries";
 import { draftErrorMessage, QuestionEditor } from "./question-editor";
 
@@ -42,6 +46,22 @@ const TEMPLATE_QUESTION_COUNT = 10;
  * tanlagich hamma faylni ko'rsatadi va foydalanuvchi backend qabul
  * qilmaydigan narsani tanlaydi.
  */
+/**
+ * ISO sanani `DateField` kutadigan `YYYY-MM-DD` ga keltiradi.
+ *
+ * Backend `due_at` ni vaqt bilan qaytaradi ("2026-09-30T23:59:00Z"),
+ * maydon esa faqat kunni ko'rsatadi. Vaqt qismini yuborishda qayta
+ * qo'shamiz (`T23:59`), shuning uchun bu yerda kesib tashlash xavfsiz.
+ */
+function toDateValue(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 const IMPORT_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -83,6 +103,22 @@ export interface AddQuizSheetProps {
    * sahifa ko'rsatadi.
    */
   onImported?: (result: ImportedQuiz) => void;
+  /**
+   * Berilsa — oyna TAHRIRLASH rejimida ochiladi (veb `editQuiz`).
+   *
+   * MUHIM: bu holatda oynani `key={quiz.id}` bilan va FAQAT ma'lumot
+   * kelgandan keyin chizish kerak (veb `teacher-quizzes-page.tsx:189`
+   * ham shunday qiladi). Maydonlarning boshlang'ich qiymati `useState`
+   * da, u esa faqat mount paytida hisoblanadi — oldindan chizilgan oyna
+   * bo'sh qolib ketadi.
+   */
+  editQuiz?: QuizDetail | null;
+  /**
+   * Testda urinishlar bor — savollar o'zgartirilmaydi.
+   * Ball va savollar o'zgarsa, topshirgan o'quvchilarning natijasi
+   * ma'nosini yo'qotadi.
+   */
+  questionsLocked?: boolean;
 }
 
 /**
@@ -113,14 +149,20 @@ export function AddQuizSheet({
   subjects,
   defaultCourseId,
   onImported,
+  editQuiz = null,
+  questionsLocked = false,
 }: AddQuizSheetProps) {
   const { palette } = useTheme();
   const create = useCreateQuiz();
+  const update = useUpdateQuiz();
+  const publish = usePublishQuiz();
   const importFile = useImportQuizDocx();
   const importGoogle = useImportGoogleLink();
   const downloadTemplate = useDownloadQuizTemplate();
 
   const subjectMode = Boolean(subjects);
+  const editing = Boolean(editQuiz);
+  const isDraft = editQuiz?.status === "draft";
 
   /*
    * Kurs HISOBLANADI, holatda saqlanmaydi (veb `quiz-create-dialog.tsx:89`).
@@ -137,12 +179,16 @@ export function AddQuizSheet({
     : selectedCourseId || defaultCourseId || courses[0]?.id || "";
 
   const [subject, setSubject] = useState("");
-  const [topic, setTopic] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueAt, setDueAt] = useState("");
-  const [opensAt, setOpensAt] = useState("");
-  const [questions, setQuestions] = useState<QuestionDraft[]>(() => [createDraft("single", newKey)]);
+  const [topic, setTopic] = useState(editQuiz?.topic ?? "");
+  const [title, setTitle] = useState(editQuiz?.title ?? "");
+  const [description, setDescription] = useState(editQuiz?.description ?? "");
+  const [dueAt, setDueAt] = useState(toDateValue(editQuiz?.dueAt));
+  const [opensAt, setOpensAt] = useState(toDateValue(editQuiz?.opensAt));
+  const [questions, setQuestions] = useState<QuestionDraft[]>(() =>
+    editQuiz
+      ? editQuiz.questions.map((question) => questionToDraft(question, newKey))
+      : [createDraft("single", newKey)]
+  );
   const [googleOpen, setGoogleOpen] = useState(false);
   const [googleUrl, setGoogleUrl] = useState("");
 
@@ -182,8 +228,9 @@ export function AddQuizSheet({
    * Rejimga qarab FAN yoki KURS talab qilinadi, ikkalasi emas.
    */
   function targetError(): string | null {
-    if (subjectMode && !subject.trim()) return "Fanni tanlang";
-    if (!subjectMode && !courseId) return "Kursni tanlang";
+    // Tahrirlashda fan/kurs o'zgarmaydi — faqat mavzu tekshiriladi.
+    if (!editing && subjectMode && !subject.trim()) return "Fanni tanlang";
+    if (!editing && !subjectMode && !courseId) return "Kursni tanlang";
     return topic.trim() ? null : "Mavzuni kiriting";
   }
 
@@ -196,6 +243,8 @@ export function AddQuizSheet({
   function validate(): string | null {
     const missingTarget = targetError();
     if (missingTarget) return missingTarget;
+    // Savollar qulflangan bo'lsa ular yuborilmaydi — tekshiruv ham keraksiz.
+    if (questionsLocked) return null;
     if (!questions.length) return "Kamida bitta savol qo'shing";
     for (const [index, draft] of questions.entries()) {
       const error = validateDraft(draft);
@@ -265,6 +314,30 @@ export function AddQuizSheet({
       return;
     }
 
+    if (editing) {
+      /*
+       * Tahrirlashda FAQAT o'zgarishi mumkin bo'lgan maydonlar ketadi
+       * (veb `quiz-create-dialog.tsx:292`). Fan va kurs yuborilmaydi —
+       * ular testning "manzili" va o'zgartirilmaydi.
+       */
+      const patch: QuizEditValues = {
+        topic: topic.trim(),
+        title: title.trim(),
+        description: description.trim(),
+        dueAt: dueAt ? `${dueAt}T23:59` : null,
+        opensAt: opensAt ? `${opensAt}T00:00` : null,
+        ...(questionsLocked ? {} : { questions: questions.map(draftToFormValues) }),
+      };
+
+      try {
+        await update.mutateAsync({ id: editQuiz!.id, values: patch });
+        close();
+      } catch {
+        // Xatoni mutatsiyaning `onError` i chiqaradi (izoh quyida).
+      }
+      return;
+    }
+
     const values: QuizFormValues = {
       // FAN rejimida `courseId` bo'sh — `mapQuizRequest` uni `null` ga aylantiradi.
       courseId,
@@ -296,10 +369,43 @@ export function AddQuizSheet({
     <Sheet
       open={open}
       onClose={close}
-      title="Yangi test"
-      description="Sakkiz xil savol turi: variantli, matnli, moslashtirish, tartiblash va boshqalar."
+      title={editing ? "Testni tahrirlash" : "Yangi test"}
+      description={
+        editing
+          ? "Mavzu, nom va savollarni o'zgartirishingiz mumkin."
+          : "Sakkiz xil savol turi: variantli, matnli, moslashtirish, tartiblash va boshqalar."
+      }
     >
-      {subjectMode ? (
+      {isDraft ? (
+        <View
+          style={[
+            styles.notice,
+            { backgroundColor: palette["primary-tint"], borderColor: palette["border-accent"] },
+          ]}
+        >
+          <Text variant="caption">
+            Bu test qoralama — o&apos;quvchilarga ko&apos;rinmaydi. To&apos;g&apos;ri javoblarni
+            to&apos;ldirib, &quot;E&apos;lon qilish&quot;ni bosing.
+          </Text>
+        </View>
+      ) : null}
+
+      {questionsLocked ? (
+        <View
+          style={[
+            styles.notice,
+            { backgroundColor: palette.muted, borderColor: palette.border },
+          ]}
+        >
+          <Text variant="caption">
+            Bu testda urinishlar bor — savollar o&apos;zgartirilmaydi. Faqat mavzu, nom va muddat
+            saqlanadi.
+          </Text>
+        </View>
+      ) : null}
+
+      {/* Fan va kurs testning "manzili" — tahrirlashda o'zgartirilmaydi. */}
+      {editing ? null : subjectMode ? (
         <SelectField
           label="Fan"
           placeholder="Fanni tanlang"
@@ -350,121 +456,136 @@ export function AddQuizSheet({
         </View>
       </View>
 
-      <Separator />
+      {/* Import faqat YANGI test uchun — mavjud testni fayl bilan almashtirmaymiz. */}
+      {editing ? null : (
+        <>
+        <Separator />
+
+        {/*
+          * TAYYOR FAYLDAN — veb `quiz-import-row` ning mobil varianti.
+          *
+          * Vebda bu yashirin `<input type="file">` va uni bosadigan tugma
+          * edi; mobilda fayl tanlagich tizim oynasi, shuning uchun tugmaning
+          * o'zi yetarli.
+          *
+          * Blok savollardan OLDIN turadi: import savollarni o'zi yasaydi,
+          * shuning uchun foydalanuvchi qo'lda yozishni boshlashidan oldin
+          * uni ko'rishi kerak.
+          */}
+        <Text variant="label">Tayyor fayldan</Text>
+        <Text variant="caption" tone="muted">
+          Savollar fayldan o'qiladi. Fan va mavzu baribir yuqorida to'ldirilishi kerak.
+        </Text>
+
+        <View style={styles.row}>
+          <View style={styles.half}>
+            <Button
+              title="Word / Excel"
+              variant="secondary"
+              loading={importFile.isPending}
+              disabled={importing}
+              icon={<FileUp size={16} color={palette["secondary-foreground"]} />}
+              onPress={() => void importFromFile()}
+            />
+          </View>
+          <View style={styles.half}>
+            <Button
+              title="Google havola"
+              variant="secondary"
+              disabled={importing}
+              icon={<Link2 size={16} color={palette["secondary-foreground"]} />}
+              onPress={() => setGoogleOpen((current) => !current)}
+            />
+          </View>
+        </View>
+
+        {googleOpen ? (
+          <>
+            <Input
+              label="Google Hujjat yoki Forma havolasi"
+              value={googleUrl}
+              onChangeText={setGoogleUrl}
+              placeholder="https://docs.google.com/document/..."
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+            />
+            <Text variant="caption" tone="muted">
+              Havola &quot;havolaga ega har kim ko'ra oladi&quot; qilib ochilgan bo'lsin.
+            </Text>
+            <Button
+              title="Havoladan import qilish"
+              loading={importGoogle.isPending}
+              disabled={importing || !googleUrl.trim()}
+              onPress={importFromGoogle}
+            />
+          </>
+        ) : null}
+
+        <Text variant="caption" tone="muted">
+          Shablon yuklab olish — to'ldirib, yuqoridagi tugma orqali qaytaring:
+        </Text>
+        <View style={styles.row}>
+          <View style={styles.half}>
+            <Button
+              title="Word shabloni"
+              variant="ghost"
+              disabled={downloadTemplate.isPending}
+              icon={<Download size={16} color={palette["primary-text"]} />}
+              onPress={() =>
+                downloadTemplate.mutate({ type: "docx", count: TEMPLATE_QUESTION_COUNT })
+              }
+            />
+          </View>
+          <View style={styles.half}>
+            <Button
+              title="Excel shabloni"
+              variant="ghost"
+              disabled={downloadTemplate.isPending}
+              icon={<Download size={16} color={palette["primary-text"]} />}
+              onPress={() =>
+                downloadTemplate.mutate({ type: "xlsx", count: TEMPLATE_QUESTION_COUNT })
+              }
+            />
+          </View>
+        </View>
+
+        <Separator />
+        </>
+      )}
 
       {/*
-        * TAYYOR FAYLDAN — veb `quiz-import-row` ning mobil varianti.
-        *
-        * Vebda bu yashirin `<input type="file">` va uni bosadigan tugma
-        * edi; mobilda fayl tanlagich tizim oynasi, shuning uchun tugmaning
-        * o'zi yetarli.
-        *
-        * Blok savollardan OLDIN turadi: import savollarni o'zi yasaydi,
-        * shuning uchun foydalanuvchi qo'lda yozishni boshlashidan oldin
-        * uni ko'rishi kerak.
+        * Qulflangan holatda savollar CHIZILMAYDI ham (veb ham shunday
+        * qiladi). Faqat o'chirib qo'yish yetarli emas: o'qituvchi
+        * o'zgartirmoqchi bo'lib urinib ko'radi va nima uchun ishlamayotganini
+        * tushunmaydi. Yuqoridagi izoh sababni aytadi.
         */}
-      <Text variant="label">Tayyor fayldan</Text>
-      <Text variant="caption" tone="muted">
-        Savollar fayldan o'qiladi. Fan va mavzu baribir yuqorida to'ldirilishi kerak.
-      </Text>
-
-      <View style={styles.row}>
-        <View style={styles.half}>
-          <Button
-            title="Word / Excel"
-            variant="secondary"
-            loading={importFile.isPending}
-            disabled={importing}
-            icon={<FileUp size={16} color={palette["secondary-foreground"]} />}
-            onPress={() => void importFromFile()}
-          />
-        </View>
-        <View style={styles.half}>
-          <Button
-            title="Google havola"
-            variant="secondary"
-            disabled={importing}
-            icon={<Link2 size={16} color={palette["secondary-foreground"]} />}
-            onPress={() => setGoogleOpen((current) => !current)}
-          />
-        </View>
-      </View>
-
-      {googleOpen ? (
+      {questionsLocked ? null : (
         <>
-          <Input
-            label="Google Hujjat yoki Forma havolasi"
-            value={googleUrl}
-            onChangeText={setGoogleUrl}
-            placeholder="https://docs.google.com/document/..."
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-          />
-          <Text variant="caption" tone="muted">
-            Havola &quot;havolaga ega har kim ko'ra oladi&quot; qilib ochilgan bo'lsin.
-          </Text>
+          <Text variant="label">Savollar</Text>
+
+          {questions.map((draft, index) => (
+            <QuestionEditor
+              key={draft.key}
+              draft={draft}
+              index={index}
+              canRemove={questions.length > 1}
+              newKey={newKey}
+              onChange={(update) => updateQuestion(draft.key, update)}
+              onRemove={() =>
+                setQuestions((current) => current.filter((item) => item.key !== draft.key))
+              }
+            />
+          ))}
+
           <Button
-            title="Havoladan import qilish"
-            loading={importGoogle.isPending}
-            disabled={importing || !googleUrl.trim()}
-            onPress={importFromGoogle}
+            title="Savol qo'shish"
+            variant="secondary"
+            icon={<Plus size={16} color={palette["secondary-foreground"]} />}
+            onPress={() => setQuestions((current) => [...current, createDraft("single", newKey)])}
           />
         </>
-      ) : null}
-
-      <Text variant="caption" tone="muted">
-        Shablon yuklab olish — to'ldirib, yuqoridagi tugma orqali qaytaring:
-      </Text>
-      <View style={styles.row}>
-        <View style={styles.half}>
-          <Button
-            title="Word shabloni"
-            variant="ghost"
-            disabled={downloadTemplate.isPending}
-            icon={<Download size={16} color={palette["primary-text"]} />}
-            onPress={() =>
-              downloadTemplate.mutate({ type: "docx", count: TEMPLATE_QUESTION_COUNT })
-            }
-          />
-        </View>
-        <View style={styles.half}>
-          <Button
-            title="Excel shabloni"
-            variant="ghost"
-            disabled={downloadTemplate.isPending}
-            icon={<Download size={16} color={palette["primary-text"]} />}
-            onPress={() =>
-              downloadTemplate.mutate({ type: "xlsx", count: TEMPLATE_QUESTION_COUNT })
-            }
-          />
-        </View>
-      </View>
-
-      <Separator />
-
-      <Text variant="label">Savollar</Text>
-
-      {questions.map((draft, index) => (
-        <QuestionEditor
-          key={draft.key}
-          draft={draft}
-          index={index}
-          canRemove={questions.length > 1}
-          newKey={newKey}
-          onChange={(update) => updateQuestion(draft.key, update)}
-          onRemove={() =>
-            setQuestions((current) => current.filter((item) => item.key !== draft.key))
-          }
-        />
-      ))}
-
-      <Button
-        title="Savol qo'shish"
-        variant="secondary"
-        icon={<Plus size={16} color={palette["secondary-foreground"]} />}
-        onPress={() => setQuestions((current) => [...current, createDraft("single", newKey)])}
-      />
+      )}
 
       {/*
         * Tugma ATAYLAB o'chirilmaydi.
@@ -478,11 +599,36 @@ export function AddQuizSheet({
         * maydoni bor: "Mavzu" va "Test nomi".
         */}
       <Button
-        title="Testni yaratish"
+        title={editing ? "Saqlash" : "Testni yaratish"}
         size="lg"
-        loading={create.isPending}
+        variant={isDraft ? "secondary" : "primary"}
+        loading={create.isPending || update.isPending}
         onPress={() => void submit()}
       />
+
+      {/*
+        * E'lon qilish faqat qoralamada. Tugma SAQLASHDAN keyin turadi,
+        * chunki tartib shunday: avval to'g'ri javoblarni to'ldirasiz,
+        * keyin e'lon qilasiz.
+        */}
+      {isDraft ? (
+        <Button
+          title="E'lon qilish"
+          size="lg"
+          loading={publish.isPending}
+          onPress={() => {
+            if (!editQuiz) return;
+            /*
+             * `usePublishQuiz` da `onError` yo'q (veb bilan bayt-bayt bir
+             * xil, o'zgartirilmaydi) — xato shu yerda ushlanadi.
+             */
+            publish.mutate(editQuiz.id, {
+              onSuccess: close,
+              onError: (error: Error) => toast.error(error.message),
+            });
+          }}
+        />
+      ) : null}
     </Sheet>
   );
 }
@@ -490,4 +636,9 @@ export function AddQuizSheet({
 const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 10 },
   half: { flex: 1 },
+  notice: {
+    padding: 12,
+    borderRadius: radius.sm,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
 });

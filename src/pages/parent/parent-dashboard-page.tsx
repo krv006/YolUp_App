@@ -18,6 +18,7 @@ import { ROUTES } from "@/shared/config";
 import {
   radius,
   Screen,
+  ScreenEmpty,
   ScreenError,
   ScreenLoading,
   Separator,
@@ -40,17 +41,38 @@ export function ParentDashboardPage() {
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
-  const { selectedChildId, selectedChild } = useSelectedChild();
+  const { children, childrenQuery, selectedChildId, selectedChild } = useSelectedChild();
 
   const dashboard = useParentDashboard(selectedChildId);
   const attendance = useAttendance(selectedChildId ? { student: selectedChildId } : {});
 
-  const loading = dashboard.isLoading || attendance.isLoading;
+  const loading = childrenQuery.isLoading || dashboard.isLoading || attendance.isLoading;
   const failed = dashboard.isError || attendance.isError;
 
   function refresh() {
     void dashboard.refetch();
     void attendance.refetch();
+  }
+
+  /*
+   * Farzand biriktirilmagan bo'lsa bu XATO emas.
+   *
+   * Avval so'rovlar baribir yuborilardi, backend esa o'quvchisiz so'rovni
+   * rad etardi — natijada yangi ota-ona hisobi birinchi ochilishda
+   * "Ma'lumotlarni yuklab bo'lmadi" degan qizil ekranni ko'rardi va nima
+   * qilishni bilmasdi. Endi unga nima qilish kerakligi aytiladi.
+   *
+   * Xuddi shu naqsh `parent-grades-page` va `parent-homework-page` da ham.
+   */
+  if (!childrenQuery.isLoading && children.length === 0) {
+    return (
+      <Screen>
+        <ScreenEmpty
+          title="Farzand biriktirilmagan"
+          description="'Farzand' bo'limiga o'ting va o'quvchining taklif kodi bilan uning hisobini ulang."
+        />
+      </Screen>
+    );
   }
 
   if (loading) {

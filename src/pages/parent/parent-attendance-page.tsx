@@ -2,7 +2,7 @@ import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { AttendanceList, useAttendance } from "@/modules/attendance";
 import { useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
-import { Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
+import { Screen, ScreenEmpty, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
 
 /**
  * Davomat va fokus jurnali — veb `parent-attendance-page.tsx` porti.
@@ -13,11 +13,32 @@ import { Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui"
  */
 export function ParentAttendancePage() {
   const { palette } = useTheme();
-  const { selectedChildId } = useSelectedChild();
+  const { children, childrenQuery, selectedChildId } = useSelectedChild();
 
   const attendance = useAttendance(selectedChildId ? { student: selectedChildId } : {});
 
-  if (attendance.isLoading) {
+  /*
+   * Farzand biriktirilmagan bo'lsa bu XATO emas.
+   *
+   * Avval so'rovlar baribir yuborilardi, backend esa o'quvchisiz so'rovni
+   * rad etardi — natijada yangi ota-ona hisobi birinchi ochilishda
+   * "Ma'lumotlarni yuklab bo'lmadi" degan qizil ekranni ko'rardi va nima
+   * qilishni bilmasdi. Endi unga nima qilish kerakligi aytiladi.
+   *
+   * Xuddi shu naqsh `parent-grades-page` va `parent-homework-page` da ham.
+   */
+  if (!childrenQuery.isLoading && children.length === 0) {
+    return (
+      <Screen>
+        <ScreenEmpty
+          title="Farzand biriktirilmagan"
+          description="'Farzand' bo'limiga o'ting va o'quvchining taklif kodi bilan uning hisobini ulang."
+        />
+      </Screen>
+    );
+  }
+
+  if (childrenQuery.isLoading || attendance.isLoading) {
     return (
       <Screen>
         <ScreenLoading label="Davomat yuklanmoqda…" />

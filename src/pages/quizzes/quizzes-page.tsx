@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { FileQuestion, History, Plus, Trash2 } from "lucide-react-native";
+import { FileQuestion, History, Pencil, Plus, Trash2 } from "lucide-react-native";
 import { useCourses, useSubjects } from "@/modules/course";
 import { useAuth } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
@@ -11,6 +11,8 @@ import {
   ImportResultSheet,
   useDeleteQuiz,
   usePublishQuiz,
+  useQuiz,
+  useQuizAttempts,
   useQuizzes,
   type ImportedQuiz,
 } from "@/modules/quiz";
@@ -51,6 +53,19 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
   const [imported, setImported] = useState<ImportedQuiz | null>(null);
   const publishQuiz = usePublishQuiz();
+
+  /*
+   * TAHRIRLASH — ro'yxatda faqat qisqa ma'lumot bor (`QuizSummary`),
+   * tahrirlash uchun esa savollar kerak. Shuning uchun avval batafsil
+   * ma'lumot yuklanadi va oyna FAQAT SHUNDAN KEYIN chiziladi
+   * (veb `teacher-quizzes-page.tsx:188` ham shunday qiladi).
+   *
+   * `key={editTarget}` ham shart: oyna maydonlari boshlang'ich qiymatini
+   * `useState` dan oladi, u esa faqat mount paytida hisoblanadi.
+   */
+  const [editTarget, setEditTarget] = useState<string | null>(null);
+  const editDetail = useQuiz(editTarget);
+  const editAttempts = useQuizAttempts(editTarget);
   const courses = useCourses();
   /*
    * Bu sahifada KURS konteksti yo'q — test FANGA biriktiriladi
@@ -125,6 +140,8 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
               onOpen={() => router.push(`${basePath}/${item.id}`)}
               onHistory={() => router.push(`${basePath}/${item.id}?tab=history`)}
               onDelete={isTeacher ? () => setDeleteTarget(item) : undefined}
+              onEdit={isTeacher ? () => setEditTarget(item.id) : undefined}
+              loadingEdit={editTarget === item.id}
               publishing={publishQuiz.isPending && publishQuiz.variables === item.id}
               onPublish={
                 isTeacher && item.status === "draft"
@@ -163,7 +180,25 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
         onImported={setImported}
       />
 
-      <ImportResultSheet result={imported} onClose={() => setImported(null)} />
+      <ImportResultSheet
+        result={imported}
+        onClose={() => setImported(null)}
+        onEdit={(quizId) => {
+          setImported(null);
+          setEditTarget(quizId);
+        }}
+      />
+
+      {editTarget && editDetail.data && !editAttempts.isLoading ? (
+        <AddQuizSheet
+          key={editTarget}
+          open
+          onClose={() => setEditTarget(null)}
+          courses={[]}
+          editQuiz={editDetail.data}
+          questionsLocked={(editAttempts.data ?? []).length > 0}
+        />
+      ) : null}
     </Screen>
   );
 }
@@ -174,6 +209,8 @@ function QuizRow({
   onOpen,
   onHistory,
   onDelete,
+  onEdit,
+  loadingEdit = false,
   onPublish,
   publishing = false,
 }: {
@@ -183,6 +220,10 @@ function QuizRow({
   onHistory: () => void;
   /** Faqat o'qituvchida — berilmasa tugma chizilmaydi. */
   onDelete?: () => void;
+  /** Faqat o'qituvchida. */
+  onEdit?: () => void;
+  /** Batafsil ma'lumot yuklanmoqda — tugma ikki marta bosilmasin. */
+  loadingEdit?: boolean;
   /** Faqat o'qituvchida va faqat QORALAMA testda. */
   onPublish?: () => void;
   publishing?: boolean;
@@ -207,6 +248,16 @@ function QuizRow({
         <IconButton accessibilityLabel="Urinishlar tarixi" onPress={onHistory}>
           <History size={18} color={palette["muted-foreground"]} />
         </IconButton>
+
+        {onEdit ? (
+          <IconButton
+            accessibilityLabel={`${quiz.title} testini tahrirlash`}
+            disabled={loadingEdit}
+            onPress={onEdit}
+          >
+            <Pencil size={18} color={palette["muted-foreground"]} />
+          </IconButton>
+        ) : null}
 
         {onDelete ? (
           <IconButton accessibilityLabel={`${quiz.title} testini o'chirish`} onPress={onDelete}>

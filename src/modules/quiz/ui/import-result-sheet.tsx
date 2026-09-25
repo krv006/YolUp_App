@@ -23,6 +23,8 @@ import { usePublishQuiz } from "../model/quiz.queries";
 export interface ImportResultSheetProps {
   result: ImportedQuiz | null;
   onClose: () => void;
+  /** Tahrirlash oynasini ochish — ogohlantirishlarni tuzatish uchun. */
+  onEdit?: (quizId: string) => void;
 }
 
 /** Veb `importWarning.*` kalitlarining matn ko'rinishi (DECISIONS §13). */
@@ -37,7 +39,7 @@ function warningMessage(warning: QuizImportWarning): string {
   return `${number}-savol: variantlar yetarli emas — tekshiring`;
 }
 
-export function ImportResultSheet({ result, onClose }: ImportResultSheetProps) {
+export function ImportResultSheet({ result, onClose, onEdit }: ImportResultSheetProps) {
   const { palette } = useTheme();
   const publish = usePublishQuiz();
 
@@ -92,9 +94,26 @@ export function ImportResultSheet({ result, onClose }: ImportResultSheetProps) {
         </Text>
       ))}
 
+      {/*
+        * Tahrirlash E'LON QILISHDAN OLDIN turadi: ogohlantirish bo'lsa,
+        * avval to'g'ri javoblarni to'ldirish kerak — e'lon qilingan test
+        * o'quvchilarga darrov ko'rinadi.
+        */}
+      {onEdit ? (
+        <Button
+          title="Savollarni tekshirish"
+          size="lg"
+          variant="secondary"
+          onPress={() => {
+            if (quiz) onEdit(quiz.id);
+          }}
+        />
+      ) : null}
+
       <Button
         title="E'lon qilish"
         size="lg"
+        variant={warnings.length ? "secondary" : "primary"}
         loading={publish.isPending}
         onPress={() => {
           if (!quiz) return;

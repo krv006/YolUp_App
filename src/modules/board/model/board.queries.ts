@@ -6,16 +6,11 @@ import type { StrokeInput } from "../api/board.dto";
 export const boardKeys = Object.freeze({
   all: ["board"] as const,
   state: (id: string) => ["board", id] as const,
+  periodicTable: ["board", "periodic-table"] as const,
 });
 
-/** WebSocket uzilgan holat uchun zaxira — kanal ishlaganda polling o'chadi. */
 const FALLBACK_POLL_MS = 2000;
 
-/**
- * Doska holati. Real-time kanal ulangan bo'lsa (`live = true`) polling kerak emas:
- * yangilanishlar `useBoardRealtime` orqali to'g'ridan-to'g'ri keshga tushadi
- * (docs/PROJECT.md §5.2 — "polling KERAK EMAS").
- */
 export function useBoard(lessonId: string, { enabled = true, live = false } = {}) {
   return useQuery({
     queryKey: boardKeys.state(lessonId),
@@ -25,12 +20,35 @@ export function useBoard(lessonId: string, { enabled = true, live = false } = {}
   });
 }
 
+export function usePeriodicTable(enabled = true) {
+  return useQuery({
+    queryKey: boardKeys.periodicTable,
+    queryFn: ({ signal }) => boardApi.getPeriodicTable({ signal }),
+    staleTime: Infinity,
+    enabled,
+  });
+}
+
 export function useAddStroke(lessonId: string) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ sheet, stroke }: { sheet: number; stroke: StrokeInput }) =>
       boardApi.addStroke(lessonId, sheet, stroke),
     onSuccess: () => client.invalidateQueries({ queryKey: boardKeys.state(lessonId) }),
+  });
+}
+
+export function useAddStrokes(lessonId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ sheet, strokes }: { sheet: number; strokes: StrokeInput[] }) => {
+      for (const stroke of strokes) {
+        await boardApi.addStroke(lessonId, sheet, stroke);
+      }
+      return strokes.length;
+    },
+    onSuccess: () => client.invalidateQueries({ queryKey: boardKeys.state(lessonId) }),
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -48,6 +66,7 @@ export function useEraseStrokes(lessonId: string) {
     mutationFn: ({ sheet, strokeIds, reason }: { sheet: number; strokeIds: string[]; reason: string }) =>
       boardApi.erase(lessonId, sheet, strokeIds, reason),
     onSuccess: () => client.invalidateQueries({ queryKey: boardKeys.state(lessonId) }),
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -56,8 +75,5 @@ export function useGrantDraw(lessonId: string) {
 }
 
 export function useSolveFormula(lessonId: string) {
-  return useMutation({
-    mutationFn: (expression: string) => boardApi.solve(lessonId, expression),
-    onError: (error: Error) => toast.error(error.message),
-  });
+  return useMutation({ mutationFn: (expression: string) => boardApi.solve(lessonId, expression) });
 }

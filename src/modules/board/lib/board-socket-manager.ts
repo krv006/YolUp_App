@@ -3,14 +3,6 @@ import type { StrokeDto, StrokeInput } from "../api/board.dto";
 
 export type { SocketState };
 
-/**
- * Doska kanalidan keladigan hodisalar — docs/PROJECT.md §5.2.
- *
- * `mic_request`/`mic_granted`/`camera_*`/`board_granted` doskaning o'ziga
- * aloqador emas, lekin dars davomida ochiq turgan yagona kanal shu bo'lgani
- * uchun backend ularni ham shu yerdan yuboradi (MIC_REQUEST_GRANT.md
- * §"Qanday ishlaydi", FRONTEND_TODO_CAMERA_BOARD.md).
- */
 export type BoardSocketEvent =
   | { type: "stroke"; sheet: number; stroke: StrokeDto }
   | { type: "erase"; sheet: number; strokeIds: string[]; by: string; reason: string }
@@ -87,12 +79,6 @@ export interface BoardSocketManagerInit {
   onState?: (state: SocketState) => void;
 }
 
-/**
- * Doska kanali — `wss://<domain>/ws/board/<lesson_id>/` (docs/PROJECT.md §5.2).
- *
- * Boshlang'ich holat REST `GET /board/<id>/` dan olinadi, keyin faqat shu kanal
- * orqali yangilanadi. Kanal ulanmasa `useBoard` pollingga qaytadi.
- */
 export class BoardSocketManager {
   private readonly socket: RealtimeSocket;
 
@@ -123,10 +109,6 @@ export class BoardSocketManager {
     this.socket.stop();
   }
 
-  /**
-   * Chizmani kanal orqali yuboradi. `false` qaytsa — ulanish yo'q,
-   * chaqiruvchi REST `POST .../stroke/` ga o'tadi (ikkalasi teng kuchli).
-   */
   sendStroke(sheet: number, stroke: StrokeInput): boolean {
     return this.socket.send({ type: "stroke", sheet, stroke });
   }

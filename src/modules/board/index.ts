@@ -34,6 +34,17 @@ export { useBoardChannel } from "./model/use-board-channel";
 export { useBoardRealtime } from "./model/use-board-realtime";
 export { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "./constants/board.constants";
 export { arrowHeadPoints, boxFromDrag, buildStroke, strokeKindOf } from "./lib/board.geometry";
+export { FORMULA_GROUPS } from "./lib/formula-palette";
+export type { FormulaGroup, FormulaTemplate } from "./lib/formula-palette";
+export { FLOW_GAP, FLOW_MARGIN, nextFlowPoint, nextTextPoint } from "./lib/board-flow";
+export {
+  bohrDiagramSize,
+  buildBohrStrokes,
+  buildElementCardStrokes,
+  elementCardHeight,
+} from "./lib/periodic-board";
+export type { PeriodicPlacement } from "./lib/periodic-board";
+export { hasRichFormatting, linesToPlainText, listMarkers } from "./lib/rich-text";
 export type { DrawKind } from "./lib/board.geometry";
 
 // --- Mobil UI ---
@@ -47,3 +58,6 @@ export type { BoardTool, BoardToolbarProps } from "./ui/board-toolbar";
 export { AwayStudentsNotice } from "./ui/away-students-notice";
 export type { AwayStudentsNoticeProps } from "./ui/away-students-notice";
 export { MathFieldSheet, MathMarkup } from "./ui/math-field-sheet";
+export { FormulaPalette, toPlainTemplate } from "./ui/formula-palette";
+export { PeriodicTableSheet } from "./ui/periodic-table-sheet";
+export type { PeriodicTableSheetProps } from "./ui/periodic-table-sheet";

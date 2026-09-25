@@ -1,18 +1,12 @@
 import type { Point, StrokeDto, StrokeKind, StrokeShapeDto } from "../api/board.dto";
 
-/** Marker qalamdan faqat shaffofligi bilan farq qiladi (docs/PROJECT.md §5.3). */
 export const MARKER_OPACITY = 0.4;
 
-/** Stroke DTO'sidan uning turini aniqlaydi — `type` yo'q bo'lsa qalam/marker. */
 export function strokeKindOf(stroke: StrokeShapeDto): StrokeKind {
   if (stroke.type) return stroke.type;
   return (stroke.opacity ?? 1) < 1 ? "marker" : "pen";
 }
 
-/**
- * Sudrash boshi va oxiridan to'g'ri burchakli qutini yasaydi.
- * Har tomonga sudrash mumkin bo'lgani uchun kenglik/balandlik doim musbat.
- */
 export function boxFromDrag([x1, y1]: Point, [x2, y2]: Point) {
   return {
     x: Math.min(x1, x2),
@@ -22,7 +16,6 @@ export function boxFromDrag([x1, y1]: Point, [x2, y2]: Point) {
   };
 }
 
-/** Sudrab chiziladigan asboblar. Matn va formula bosish bilan joylashtiriladi. */
 export type DrawKind = "pen" | "marker" | "line" | "arrow" | "rect" | "ellipse";
 
 export interface BuildStrokeInit {
@@ -34,13 +27,8 @@ export interface BuildStrokeInit {
   width: number;
 }
 
-/** Nuqta bilan tugagan sudrash — tasodifiy bosish, shakl yaratmaymiz. */
 const MIN_DRAG = 4;
 
-/**
- * Tanlangan asbob va sudrash natijasidan backend kutadigan stroke'ni yig'adi.
- * Matn va formula bu yerda emas — ular dialog orqali alohida qo'shiladi.
- */
 export function buildStroke({
   kind,
   from,
@@ -79,7 +67,6 @@ export function buildStroke({
   }
 }
 
-/** Strelka uchidagi ikki chiziqning SVG `points` qiymati. */
 export function arrowHeadPoints(x1: number, y1: number, x2: number, y2: number, size = 16): string {
   const angle = Math.atan2(y2 - y1, x2 - x1);
   const spread = Math.PI / 7;
@@ -92,7 +79,6 @@ export function polylinePoints(points: Point[] = []): string {
   return points.map((point) => point.join(",")).join(" ");
 }
 
-/** Bir nechta satrli matn bloki — SVG `<text>` avtomatik o'ramaydi. */
 export function textLines(stroke: Extract<StrokeDto, { type: "text" }>): string[] {
   return String(stroke.text ?? "").split("\n");
 }

@@ -1,4 +1,9 @@
-import type { BoardState, BoardStateDto } from "../api/board.dto";
+import type {
+  BoardState,
+  BoardStateDto,
+  PeriodicElement,
+  PeriodicElementDto,
+} from "../api/board.dto";
 
 export function mapBoardDto(dto: BoardStateDto): BoardState {
   return {
@@ -12,6 +17,7 @@ export function mapBoardDto(dto: BoardStateDto): BoardState {
     height: Number(dto.size?.[1] ?? 800),
     subject: dto.subject || "",
     mathEnabled: Boolean(dto.math_enabled),
+    chemistryEnabled: Boolean(dto.chemistry_enabled),
     awayStudents: (dto.away_students ?? []).map((item) => ({
       id: String(item.student_id),
       name: item.name || "O‘quvchi",
@@ -24,5 +30,28 @@ export function mapBoardDto(dto: BoardStateDto): BoardState {
       id: String(item.student_id),
       name: item.name || "O‘quvchi",
     })),
+  };
+}
+
+function formatMass(value: PeriodicElementDto["mass"]): string {
+  if (value == null || value === "") return "";
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return String(value);
+  return String(Math.round(parsed * 1000) / 1000);
+}
+
+export function mapPeriodicElementDto(dto: PeriodicElementDto): PeriodicElement {
+  const valence = Array.isArray(dto.valence) ? dto.valence.join(", ") : dto.valence;
+  return {
+    z: Number(dto.z),
+    symbol: dto.symbol,
+    name: dto.name,
+    mass: formatMass(dto.mass),
+    shells: (dto.shells ?? []).map(Number).filter((count) => Number.isFinite(count) && count > 0),
+    valence: valence == null ? "" : String(valence),
+    category: dto.category || "unknown",
+    period: dto.period == null ? null : Number(dto.period),
+    group: dto.group == null ? null : Number(dto.group),
+    appearance: dto.appearance || "",
   };
 }

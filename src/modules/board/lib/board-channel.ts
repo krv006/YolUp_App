@@ -11,18 +11,9 @@ interface Channel {
   state: SocketState;
 }
 
-/**
- * Dars bo'yicha ochiq doska kanallari.
- *
- * Kanal bitta bo'lishi SHART: doska paneli va mikrofon signallari bir xil
- * `/ws/board/<lesson_id>/` manzilidan foydalanadi. Har biri o'z ulanishini
- * ochsa, server har bir chizmani ikki marta yuborardi. Shuning uchun ulanish
- * shu yerda saqlanadi va obunachilar soni nolga tushganda yopiladi.
- */
 const channels = new Map<string, Channel>();
 
 export interface BoardChannelSubscription {
-  /** Chizmani kanal orqali yuboradi; ulanish yo'q bo'lsa `false`. */
   sendStroke: BoardSocketManager["sendStroke"];
   unsubscribe: () => void;
 }
@@ -58,7 +49,6 @@ export function subscribeToBoardChannel(
   const active = channel;
   active.events.add(onEvent);
   active.states.add(onState);
-  // Kanal allaqachon ulangan bo'lishi mumkin — yangi obunachi holatni darhol biladi.
   onState(active.state);
 
   return {

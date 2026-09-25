@@ -4,15 +4,6 @@ import type { StrokeInput } from "../api/board.dto";
 import { subscribeToBoardChannel } from "../lib/board-channel";
 import type { BoardSocketEvent } from "../lib/board-socket-manager";
 
-/**
- * Dars doska kanaliga obuna bo'ladi (docs/PROJECT.md §5.2).
- *
- * Ulanishning o'zi `board-channel` da saqlanadi: bir nechta chaqiruvchi —
- * doska paneli va mikrofon signallari — bitta WebSocket'ni bo'lishadi.
- *
- * `onEvent` har renderda yangi funksiya bo'lishi mumkin, shuning uchun u ref
- * orqali chaqiriladi: obuna faqat dars almashganda qayta quriladi.
- */
 export function useBoardChannel(
   lessonId: string,
   enabled: boolean,
@@ -40,7 +31,6 @@ export function useBoardChannel(
     };
   }, [enabled, lessonId]);
 
-  /** Kanal yopiq bo'lsa `false` — chaqiruvchi REST'ga o'tadi. */
   const sendStroke = useCallback(
     (sheet: number, stroke: StrokeInput) => Boolean(send.current?.(sheet, stroke)),
     []

@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **113**
-- 🟡/🔴 moslashtirilgan: **69**
+- 🟢 NUSXA: **116**
+- 🟡/🔴 moslashtirilgan: **72**
 - 🆕 mobilga xos: **5**
-- Jami: **187**
+- Jami: **193**
 
 ## Fayllar
 
@@ -60,21 +60,27 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/model/auth.schemas.ts` | 🟡 MOSLASH | `217cf656f39d` | createLoginSchema(t) fabrikalari o'rniga literal xabarlar; maydonlar bir xil (§13) |
 | `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi va til sinxroni yo'q; sessiya raqami olindi |
 | `src/modules/auth/model/use-auth.ts` | 🟢 NUSXA | `800d84e26e18` | — |
-| `src/modules/board/api/board.api.ts` | 🟢 NUSXA | `d3a43e4345ce` | — |
-| `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `25eef967ff8c` | — |
-| `src/modules/board/api/board.endpoints.ts` | 🟢 NUSXA | `c63f5b33771c` | — |
-| `src/modules/board/constants/board.constants.ts` | 🟢 NUSXA | `858e94561046` | — |
-| `src/modules/board/index.ts` | 🟡 MOSLASH | `d72cbbf550bf` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/board/lib/board-channel.ts` | 🟢 NUSXA | `739757b5515c` | — |
-| `src/modules/board/lib/board-socket-manager.ts` | 🟢 NUSXA | `fc2ed72d9657` | — |
-| `src/modules/board/lib/board.geometry.ts` | 🟢 NUSXA | `6b92de7b9d96` | — |
-| `src/modules/board/lib/board.mappers.ts` | 🟢 NUSXA | `a85262f5becd` | — |
-| `src/modules/board/model/board.queries.ts` | 🟢 NUSXA | `68694539eaf7` | — |
-| `src/modules/board/model/use-board-channel.ts` | 🟢 NUSXA | `d5b7970375ab` | — |
-| `src/modules/board/model/use-board-realtime.ts` | 🟢 NUSXA | `ba27436ef0f2` | — |
+| `src/modules/board/api/board.api.ts` | 🟢 NUSXA | `4c54b3d918f0` | — |
+| `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `cd6bcb474ec4` | — |
+| `src/modules/board/api/board.endpoints.ts` | 🟢 NUSXA | `6eaefaab2c55` | — |
+| `src/modules/board/constants/board.constants.ts` | 🟢 NUSXA | `2013dcc90778` | — |
+| `src/modules/board/index.ts` | 🟡 MOSLASH | `9e3000ef837b` | generatsiya: veb barrel minus `ui/` + mobil doska UI eksportlari |
+| `src/modules/board/lib/board-channel.ts` | 🟢 NUSXA | `561ddd1ea25e` | — |
+| `src/modules/board/lib/board-flow.ts` | 🟢 NUSXA | `dbc83be61980` | — |
+| `src/modules/board/lib/board-socket-manager.ts` | 🟢 NUSXA | `7f8a96915773` | — |
+| `src/modules/board/lib/board.geometry.ts` | 🟢 NUSXA | `cca6c3277bc2` | — |
+| `src/modules/board/lib/board.mappers.ts` | 🟢 NUSXA | `2ee309918189` | — |
+| `src/modules/board/lib/formula-palette.ts` | 🟢 NUSXA | `adae5f14b4f7` | — |
+| `src/modules/board/lib/periodic-board.ts` | 🟢 NUSXA | `d56c7a889fd5` | — |
+| `src/modules/board/lib/rich-text.ts` | 🟡 MOSLASH | `1723fd242bf7` | htmlToLines ko'chirilmadi (contenteditable + getComputedStyle); qolgan uchta sof funksiya bir xil |
+| `src/modules/board/model/board.queries.ts` | 🟢 NUSXA | `b33f7830a871` | — |
+| `src/modules/board/model/use-board-channel.ts` | 🟢 NUSXA | `734d17e2d1f4` | — |
+| `src/modules/board/model/use-board-realtime.ts` | 🟢 NUSXA | `d430aa8e9fe3` | — |
 | `src/modules/board/ui/away-students-notice.tsx` | 🟡 MOSLASH | `86e30eba5686` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `4821801d0b13` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |
+| `src/modules/board/ui/formula-palette.tsx` | 🟡 MOSLASH | `c3db89716ff5` | MathLive placeholder'lari (#0, #?) olib tashlanadi — mobilda LaTeX oddiy TextInput da yoziladi |
+| `src/modules/board/ui/periodic-table-sheet.tsx` | 🟡 MOSLASH | `f354893b6a1a` | manba: veb `periodic-table-dialog.tsx`; veb 18 ustunli panjara, mobilda qidiruvli ro'yxat — telefonda panjara o'qilmaydi |
 | `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `f5a23ee833bb` | — |
 | `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `5c8dcc87f71a` | — |
 | `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `d2176507c224` | — |

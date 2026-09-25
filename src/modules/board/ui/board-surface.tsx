@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
-import { ArrowLeft, FilePlus2, Sigma, Trash2, UserRoundCheck } from "lucide-react-native";
+import { Atom, ArrowLeft, FilePlus2, Sigma, Trash2, UserRoundCheck } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
 import type { FormulaSolutionDto, Point, StrokeShapeDto } from "../api/board.dto";
@@ -19,6 +19,7 @@ import { useBoardRealtime } from "../model/use-board-realtime";
 import { AwayStudentsNotice } from "./away-students-notice";
 import { BoardCanvas } from "./board-canvas";
 import { MathFieldSheet } from "./math-field-sheet";
+import { PeriodicTableSheet } from "./periodic-table-sheet";
 import { BoardToolbar, type BoardTool } from "./board-toolbar";
 import {
   Badge,
@@ -88,6 +89,7 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
   const [selected, setSelected] = useState<string | null>(null);
 
   const [placement, setPlacement] = useState<{ tool: "text" | "math"; point: Point } | null>(null);
+  const [periodicOpen, setPeriodicOpen] = useState(false);
   const [draftText, setDraftText] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -250,6 +252,16 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
           </IconButton>
         ) : null}
 
+        {/*
+          * Davriy jadval — FORMULA bilan bir xil shartda: u ham fan
+          * vositasi va faqat o'qituvchida ma'noga ega.
+          */}
+        {state.isTeacher ? (
+          <IconButton accessibilityLabel="Davriy jadval" onPress={() => setPeriodicOpen(true)}>
+            <Atom size={20} color={palette.foreground} />
+          </IconButton>
+        ) : null}
+
         {state.mathEnabled ? (
           <IconButton accessibilityLabel="Formula yordamchisi" onPress={() => setFormulaOpen(true)}>
             <Sigma size={20} color={palette.foreground} />
@@ -331,6 +343,16 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
       </Sheet>
 
       {/* Formula alohida oynada: u yozilayotgan LaTeX'ni jonli chizadi. */}
+      <PeriodicTableSheet
+        open={periodicOpen}
+        onClose={() => setPeriodicOpen(false)}
+        strokes={active?.strokes ?? []}
+        boardWidth={state.width}
+        boardHeight={state.height}
+        color={color}
+        onPlace={(next) => next.forEach((stroke) => commitStroke(stroke))}
+      />
+
       <MathFieldSheet
         open={placement?.tool === "math"}
         onClose={() => setPlacement(null)}

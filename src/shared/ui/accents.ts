@@ -16,9 +16,21 @@ export interface Accent {
   light: string;
   /** Qorong'i mavzuda asos rang — och fonda emas, to'q fonda ishlaydi. */
   dark: string;
+  /**
+   * Matn va halqa uchun alohida variant.
+   *
+   * NEGA KERAK: asos rang TUGMA FONI sifatida ishlatiladi va to'q bo'lishi
+   * mumkin. O'sha rangning o'zi qorong'i mavzuda MATN sifatida ishlatilsa,
+   * to'q fon ustida to'q matn chiqib o'qilmay qoladi (brend binafshasi
+   * #5d0cfe qorong'i fonda atigi 2.6:1). Berilmasa asos rang ishlatiladi.
+   */
+  lightText?: string;
+  darkText?: string;
 }
 
 export const ACCENTS: readonly Accent[] = [
+  // Veb bilan BITTA brend: Edu_Front theme.css dagi --primary va --primary-text.
+  { id: "brand", label: "Brend", light: "#5d0cfe", dark: "#5d0cfe", darkText: "#a98cff" },
   { id: "blue", label: "Ko'k", light: "#1a66e0", dark: "#4d91ff" },
   { id: "indigo", label: "Siyoh", light: "#4f46e5", dark: "#8b8cf9" },
   { id: "violet", label: "Binafsha", light: "#7c3aed", dark: "#a78bfa" },
@@ -29,7 +41,7 @@ export const ACCENTS: readonly Accent[] = [
   { id: "slate", label: "Kulrang", light: "#334155", dark: "#94a3b8" },
 ] as const;
 
-export const DEFAULT_ACCENT = "blue";
+export const DEFAULT_ACCENT = "brand";
 
 export function findAccent(id: string): Accent {
   return ACCENTS.find((accent) => accent.id === id) ?? ACCENTS[0];
@@ -101,6 +113,8 @@ export function deriveAccentTokens(
 } {
   const accent = findAccent(accentId);
   const base = scheme === "dark" ? accent.dark : accent.light;
+  // Matn/halqa uchun alohida variant berilgan bo'lsa o'sha, aks holda asos rang.
+  const text = (scheme === "dark" ? accent.darkText : accent.lightText) ?? base;
 
   return {
     primary: base,
@@ -108,11 +122,11 @@ export function deriveAccentTokens(
     "primary-foreground": readableOn(base),
     // Matn sifatida ishlatiladigan variant: qorong'i mavzuda asos rang
     // allaqachon yorug', yorug' mavzuda esa asosning o'zi yetarli to'q.
-    "primary-text": base,
+    "primary-text": text,
     "primary-tint": mix(base, background, scheme === "dark" ? 0.86 : 0.9),
     "primary-tint-strong": mix(base, background, scheme === "dark" ? 0.74 : 0.8),
     "primary-soft": mix(base, background, scheme === "dark" ? 0.68 : 0.74),
-    ring: base,
+    ring: text,
   };
 }
 

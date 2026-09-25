@@ -217,11 +217,21 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
         onPress={() => setQuestions((current) => [...current, createDraft("single", newKey)])}
       />
 
+      {/*
+        * Tugma ATAYLAB o'chirilmaydi.
+        *
+        * Avval u `!title.trim()` da o'chardi va bosilganda HECH NARSA
+        * bo'lmasdi — foydalanuvchi nima yetishmayotganini bilmasdi.
+        * Endi u har doim bosiladi va `validate()` aniq sababni aytadi
+        * ("Fanni tanlang", "3-savol: to'g'ri javobni belgilang").
+        *
+        * Bu ayniqsa muhim, chunki oynada bir-biriga o'xshash ikkita matn
+        * maydoni bor: "Mavzu" va "Test nomi".
+        */}
       <Button
         title="Testni yaratish"
         size="lg"
         loading={create.isPending}
-        disabled={!title.trim() || questions.length === 0}
         onPress={() => void submit()}
       />
     </Sheet>

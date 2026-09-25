@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Chip, ChipRow, MIN_TOUCH_SIZE, radius, useTheme } from "@/shared/ui";
 import { FORMULA_GROUPS } from "../lib/formula-palette";
-import { MathMarkup } from "./math-field-sheet";
+import { MathMarkup } from "./math-markup";
 
 /**
  * Formula shablonlari palitrasi.

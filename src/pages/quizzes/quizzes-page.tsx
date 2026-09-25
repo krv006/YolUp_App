@@ -3,10 +3,17 @@ import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { FileQuestion, History, Plus, Trash2 } from "lucide-react-native";
-import { useCourses } from "@/modules/course";
+import { useCourses, useSubjects } from "@/modules/course";
 import { useAuth } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
-import { AddQuizSheet, useDeleteQuiz, useQuizzes } from "@/modules/quiz";
+import {
+  AddQuizSheet,
+  ImportResultSheet,
+  useDeleteQuiz,
+  usePublishQuiz,
+  useQuizzes,
+  type ImportedQuiz,
+} from "@/modules/quiz";
 import { formatDayTime } from "@/shared/lib";
 import type { QuizSummary } from "@/shared/types";
 import {
@@ -20,6 +27,7 @@ import {
   ScreenError,
   ScreenLoading,
   Text,
+  toast,
   useTheme,
 } from "@/shared/ui";
 
@@ -41,7 +49,14 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const quizzes = useQuizzes(null);
   const removeQuiz = useDeleteQuiz();
   const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
+  const [imported, setImported] = useState<ImportedQuiz | null>(null);
+  const publishQuiz = usePublishQuiz();
   const courses = useCourses();
+  /*
+   * Bu sahifada KURS konteksti yo'q — test FANGA biriktiriladi
+   * (veb `teacher-quizzes-page.tsx:227` bilan bir xil).
+   */
+  const subjects = useSubjects(isTeacher);
 
   const courseTitleById = useMemo(
     () => new Map((courses.data ?? []).map((course) => [course.id, course.title])),
@@ -110,6 +125,19 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
               onOpen={() => router.push(`${basePath}/${item.id}`)}
               onHistory={() => router.push(`${basePath}/${item.id}?tab=history`)}
               onDelete={isTeacher ? () => setDeleteTarget(item) : undefined}
+              publishing={publishQuiz.isPending && publishQuiz.variables === item.id}
+              onPublish={
+                isTeacher && item.status === "draft"
+                  ? () =>
+                      /*
+                       * `usePublishQuiz` da `onError` yo'q (veb bilan
+                       * bayt-bayt bir xil). Xato shu yerda ushlanadi.
+                       */
+                      publishQuiz.mutate(item.id, {
+                        onError: (error: Error) => toast.error(error.message),
+                      })
+                  : undefined
+              }
             />
           )}
         />
@@ -130,8 +158,12 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
       <AddQuizSheet
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        courses={(courses.data ?? []).map((course) => ({ id: course.id, title: course.title }))}
+        courses={[]}
+        subjects={subjects.data ?? []}
+        onImported={setImported}
       />
+
+      <ImportResultSheet result={imported} onClose={() => setImported(null)} />
     </Screen>
   );
 }
@@ -142,6 +174,8 @@ function QuizRow({
   onOpen,
   onHistory,
   onDelete,
+  onPublish,
+  publishing = false,
 }: {
   quiz: QuizSummary;
   courseTitle: string;
@@ -149,6 +183,9 @@ function QuizRow({
   onHistory: () => void;
   /** Faqat o'qituvchida — berilmasa tugma chizilmaydi. */
   onDelete?: () => void;
+  /** Faqat o'qituvchida va faqat QORALAMA testda. */
+  onPublish?: () => void;
+  publishing?: boolean;
 }) {
   const { palette } = useTheme();
   const overdue = quiz.dueAt ? new Date(quiz.dueAt) < new Date() : false;
@@ -179,6 +216,13 @@ function QuizRow({
       </View>
 
       <View style={styles.cardFoot}>
+        {/*
+          * Qoralama belgisi MUDDATDAN muhimroq: qoralama test o'quvchilarga
+          * umuman ko'rinmaydi, shuning uchun o'qituvchi buni birinchi
+          * ko'rishi kerak. Import qilingan testlar aynan shunday keladi.
+          */}
+        {quiz.status === "draft" ? <Badge label="Qoralama" tone="warning" /> : null}
+
         {quiz.dueAt ? (
           <Badge
             label={`Muddat: ${formatDayTime(quiz.dueAt)}`}
@@ -190,12 +234,12 @@ function QuizRow({
 
         <Text
           accessibilityRole="button"
-          onPress={onOpen}
+          onPress={onPublish ?? onOpen}
           variant="label"
           tone="brand"
           style={styles.solve}
         >
-          Yechish
+          {onPublish ? (publishing ? "E'lon qilinmoqda…" : "E'lon qilish") : "Yechish"}
         </Text>
       </View>
     </View>

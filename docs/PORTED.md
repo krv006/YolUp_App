@@ -31,9 +31,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **113**
-- 🟡/🔴 moslashtirilgan: **68**
+- 🟡/🔴 moslashtirilgan: **69**
 - 🆕 mobilga xos: **5**
-- Jami: **186**
+- Jami: **187**
 
 ## Fayllar
 
@@ -169,6 +169,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
 | `src/modules/quiz/model/quiz.queries.ts` | 🟡 MOSLASH | `a079604c210e` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
 | `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn |
+| `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |

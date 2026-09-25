@@ -8,12 +8,11 @@ export const authKeys = Object.freeze({
   logins: (studentId: string | null) => ["auth", "logins", studentId] as const,
   teachers: ["auth", "teachers"] as const,
   teachersPending: ["auth", "teachers", "pending"] as const,
+  myRatings: ["auth", "ratings", "me"] as const,
+  teacherRatings: (id: string) => ["auth", "ratings", id] as const,
+  teacherStats: (id: string) => ["auth", "stats", id] as const,
 });
 
-/**
- * Kirishlar tarixi. `studentId` — ota-ona bolasining tarixini ko'rmoqchi bo'lganda.
- * Dialog yopiq turganda so'rov yuborilmasligi uchun `enabled` bilan boshqariladi.
- */
 export function useLoginHistory(studentId: string | null = null, enabled = true) {
   return useQuery({
     queryKey: authKeys.logins(studentId),
@@ -23,7 +22,30 @@ export function useLoginHistory(studentId: string | null = null, enabled = true)
   });
 }
 
-/** Admin: barcha o'qituvchilar, reyting bilan. */
+export function useMyRatings(enabled = true) {
+  return useQuery({
+    queryKey: authKeys.myRatings,
+    queryFn: ({ signal }) => authApi.getMyRatings({ signal, query: { page_size: 50 } }),
+    enabled,
+  });
+}
+
+export function useTeacherRatings(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: authKeys.teacherRatings(id ?? ""),
+    queryFn: ({ signal }) => authApi.getTeacherRatings(id as string, { signal, query: { page_size: 50 } }),
+    enabled: Boolean(id) && enabled,
+  });
+}
+
+export function useTeacherStats(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: authKeys.teacherStats(id ?? ""),
+    queryFn: ({ signal }) => authApi.getTeacherStats(id as string, { signal }),
+    enabled: Boolean(id) && enabled,
+  });
+}
+
 export function useTeachers() {
   return useQuery({
     queryKey: authKeys.teachers,
@@ -31,7 +53,6 @@ export function useTeachers() {
   });
 }
 
-/** Admin: hali tasdiqlanmagan o'qituvchilar. */
 export function usePendingTeachers() {
   return useQuery({
     queryKey: authKeys.teachersPending,

@@ -1,12 +1,22 @@
-import { normalizeMediaUrl } from "@/shared/api";
+import { normalizeMediaUrl, normalizePagination, type Page, type PaginationOptions } from "@/shared/api";
 import { normalizeRole } from "@/modules/permission";
 import type { Role } from "@/shared/constants";
-import type { AuthUser, Certificate, LoginCredentials } from "@/shared/types";
+import type {
+  AuthUser,
+  Certificate,
+  LinkedAccount,
+  LoginCredentials,
+  TeacherRating,
+  TeacherStats,
+} from "@/shared/types";
 import {
   certificateDtoSchema,
+  lessonRatingDtoSchema,
   loginRecordDtoSchema,
+  switchAccountResponseDtoSchema,
   tokenPairDtoSchema,
   userDtoSchema,
+  type LinkedAccountDto,
   type LoginRecord,
   type LoginRequestDto,
   type TokenPair,
@@ -22,7 +32,6 @@ export function mapTokenPairDto(dto: unknown): TokenPair {
   return { accessToken: parsed.access, refreshToken: parsed.refresh };
 }
 
-/** Ham `userDtoSchema.certificates` ichidagi elementlar, ham `POST .../certificates/` javobi uchun. */
 export function mapCertificateDto(dto: unknown): Certificate {
   const parsed = certificateDtoSchema.parse(dto);
   return {
@@ -33,7 +42,16 @@ export function mapCertificateDto(dto: unknown): Certificate {
   };
 }
 
-/** Zod bilan runtime validatsiya — backend shakli o'zgarsa darhol xato beradi. */
+function mapLinkedAccountDto(dto: LinkedAccountDto): LinkedAccount {
+  const name = [dto.first_name, dto.last_name].filter(Boolean).join(" ") || dto.username;
+  return {
+    id: dto.id,
+    username: dto.username,
+    name,
+    role: normalizeRole(dto.role) as Role,
+  };
+}
+
 export function mapUserDto(dto: unknown): AuthUser {
   const parsed = userDtoSchema.parse(dto);
   const name = [parsed.first_name, parsed.last_name].filter(Boolean).join(" ") || parsed.username;
@@ -46,7 +64,6 @@ export function mapUserDto(dto: unknown): AuthUser {
     role: normalizeRole(parsed.role) as Role,
     phone: parsed.phone ?? null,
     inviteCode: parsed.invite_code ?? null,
-    // `<img src>` uchun to'liq havola kerak — apiClient bazasi qo'llanadi.
     avatarUrl: normalizeMediaUrl(parsed.avatar),
     email: null,
     status: "online",
@@ -54,13 +71,20 @@ export function mapUserDto(dto: unknown): AuthUser {
     ratingCount: parsed.rating_count ?? null,
     isApproved: parsed.is_approved ?? null,
     certificates: parsed.certificates.map(mapCertificateDto),
+    preferredLanguage: parsed.preferred_language,
+    lessonReminderMinutes: parsed.lesson_reminder_minutes ?? null,
+    linkedAccounts: parsed.linked_accounts.map(mapLinkedAccountDto),
   };
 }
 
-/**
- * Kirishlar tarixi — backend paginatsiyasiz massiv qaytaradi, eng yangisi birinchi.
- * `at` + `ip` juftligi yozuvni bir xil qiladi, shuning uchun ro'yxat kaliti sifatida yetarli.
- */
+export function mapSwitchAccountResponse(dto: unknown): { tokens: TokenPair; user: AuthUser } {
+  const parsed = switchAccountResponseDtoSchema.parse(dto);
+  return {
+    tokens: { accessToken: parsed.access, refreshToken: parsed.refresh },
+    user: mapUserDto(parsed.user),
+  };
+}
+
 export function mapLoginRecords(dto: unknown): LoginRecord[] {
   return loginRecordDtoSchema
     .array()
@@ -74,4 +98,41 @@ export function mapLoginRecords(dto: unknown): LoginRecord[] {
       isNewIp: item.new_ip,
       isNewDevice: item.new_device,
     }));
+}
+
+export function mapTeacherRatings(dto: unknown, options?: PaginationOptions): Page<TeacherRating> {
+  const page = normalizePagination<unknown>(dto, options);
+  return {
+    ...page,
+    items: page.items.map((item) => {
+      const parsed = lessonRatingDtoSchema.parse(item);
+      const student = parsed.student ?? {};
+      const name = [student.first_name, student.last_name].filter(Boolean).join(" ");
+      return {
+        id: String(parsed.id),
+        lessonId: String(parsed.lesson),
+        studentName: name || student.username || "—",
+        studentUsername: student.username ?? "",
+        stars: Number(parsed.stars ?? 0),
+        description: parsed.description ?? "",
+        createdAt: parsed.created_at ?? "",
+      };
+    }),
+  };
+}
+
+export function mapTeacherStats(dto: unknown): TeacherStats {
+  const raw = (dto ?? {}) as Record<string, unknown>;
+  const num = (value: unknown) => (value === null || value === undefined ? null : Number(value));
+  return {
+    avgRating: num(raw.avg_rating),
+    ratingCount: Number(raw.rating_count ?? 0),
+    ratingBreakdown: (raw.rating_breakdown as Record<string, number>) ?? {},
+    courseCount: Number(raw.course_count ?? 0),
+    studentCount: Number(raw.student_count ?? 0),
+    lessonsFinished: Number(raw.lessons_finished ?? 0),
+    lessonsCancelled: Number(raw.lessons_cancelled ?? 0),
+    lessonsScheduled: Number(raw.lessons_scheduled ?? 0),
+    reliability: num(raw.reliability),
+  };
 }

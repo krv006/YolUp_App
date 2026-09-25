@@ -1,4 +1,3 @@
-/** DRF sahifalangan javob shakli. */
 export interface DrfPage<T> {
   count?: number;
   next?: string | null;
@@ -30,7 +29,6 @@ function getPageFromUrl(value: string | null | undefined): number | null {
   }
 }
 
-/** Massiv ham, DRF `{count, results}` ham bir xil `Page<T>` shakliga keltiriladi. */
 export function normalizePagination<T = unknown>(
   payload: unknown,
   { page = 1, pageSize = 20 }: PaginationOptions = {}

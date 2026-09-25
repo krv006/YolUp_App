@@ -1,11 +1,5 @@
 import type { ApiFieldErrors } from "./api-error";
 
-/**
- * Backend maydon xatolarini react-hook-form `setError` ga uzatadi.
- * `non_field_errors` — forma darajasidagi `root` xatosiga aylanadi.
- *
- * `TFieldName` generic — `UseFormSetError<TFieldValues>` bilan to‘g‘ridan-to‘g‘ri mos keladi.
- */
 export function applyApiFieldErrors<TFieldName extends string>(
   error: { fields?: ApiFieldErrors | null } | null | undefined,
   setError: (field: TFieldName, error: { type: string; message: string }) => void,

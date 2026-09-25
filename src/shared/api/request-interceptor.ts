@@ -1,6 +1,13 @@
 import { tokenStorage } from "./token-storage";
 import type { ResponseType } from "./api-response";
 
+/**
+ * Veb bu sarlavhani `getStoredLanguage()` dan oladi — u yerda uz/en/ru
+ * tanlash bor. Mobilda i18n hali yo'q (DECISIONS.md §13, §22), shuning uchun
+ * qiymat qat'iy. i18n qo'shilganda shu qator til saqlagichiga ulanadi.
+ */
+const APP_LANGUAGE = "uz";
+
 export type QueryValue = string | number | boolean | null | undefined | Array<string | number>;
 export type QueryParams = Record<string, QueryValue>;
 
@@ -14,9 +21,7 @@ export interface RequestOptions {
   timeoutMs?: number;
   responseType?: ResponseType;
   requestId?: string;
-  /** `Authorization` sarlavhasini qo‘shmaslik (login/refresh uchun). */
   skipAuth?: boolean;
-  /** 401 da avtomatik refresh qilmaslik (login/refresh uchun). */
   skipRefresh?: boolean;
 }
 
@@ -58,6 +63,7 @@ export function createRequestInit(
     credentials: options.credentials ?? "omit",
     headers: {
       ...defaultHeaders,
+      "Accept-Language": APP_LANGUAGE,
       ...(hasBody && !isRawBody ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.requestId ? { "X-Request-ID": options.requestId } : {}),

@@ -1,16 +1,20 @@
 import type { AppError } from "@/shared/api";
 import type { Role } from "@/shared/constants";
 
-/** O'qituvchi yuklagan sertifikat (`/auth/me/certificates/`). */
 export interface Certificate {
   id: string;
-  /** To'liq fayl havolasi (rasm yoki PDF). */
   file: string;
   title: string;
   createdAt: string;
 }
 
-/** `modules/auth` dagi `mapUserDto` qaytaradigan domen modeli. */
+export interface LinkedAccount {
+  id: string;
+  username: string;
+  name: string;
+  role: Role;
+}
+
 export interface AuthUser {
   id: string;
   username: string;
@@ -20,16 +24,38 @@ export interface AuthUser {
   role: Role;
   phone: string | null;
   inviteCode: string | null;
-  /** Profil rasmi (to'liq havola) — bo'lmasa harfli avatar ko'rsatiladi. */
   avatarUrl: string | null;
   email: string | null;
   status: string;
-  /** Faqat `role: teacher`da mazmunli — boshqa rollarda `null`. */
   avgRating: number | null;
   ratingCount: number | null;
-  /** Faqat o'qituvchida mazmunli — admin tasdiqlamaguncha `false`. */
   isApproved: boolean | null;
   certificates: Certificate[];
+  preferredLanguage: string;
+  lessonReminderMinutes: number | null;
+  linkedAccounts: LinkedAccount[];
+}
+
+export interface TeacherRating {
+  id: string;
+  lessonId: string;
+  studentName: string;
+  studentUsername: string;
+  stars: number;
+  description: string;
+  createdAt: string;
+}
+
+export interface TeacherStats {
+  avgRating: number | null;
+  ratingCount: number;
+  ratingBreakdown: Record<string, number>;
+  courseCount: number;
+  studentCount: number;
+  lessonsFinished: number;
+  lessonsCancelled: number;
+  lessonsScheduled: number;
+  reliability: number | null;
 }
 
 export type AuthStatus = "anonymous" | "initializing" | "authenticated" | "error";

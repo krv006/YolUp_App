@@ -1,8 +1,15 @@
 import { create } from "zustand";
-import { AppError, refreshTokenManager, tokenStorage } from "@/shared/api";
+import { AppError, announceSessionChange, refreshTokenManager, tokenStorage } from "@/shared/api";
+import type { TokenPair } from "@/shared/api";
 import type { AuthStatus, AuthUser, LoginCredentials } from "@/shared/types";
 import { authApi } from "../api/auth.api";
-import { mapLoginRequest, mapTokenPairDto, mapUserDto } from "../lib/auth.mappers";
+import type { RegisterRequestDto } from "../api/auth.dto";
+import {
+  mapLoginRequest,
+  mapSwitchAccountResponse,
+  mapTokenPairDto,
+  mapUserDto,
+} from "../lib/auth.mappers";
 import { configureAuthRefresh } from "../lib/auth-session";
 
 export const AUTH_STATUS = Object.freeze({
@@ -20,6 +27,13 @@ interface AuthState {
   /** Ilova ochilganda bir marta chaqiriladi: saqlangan token bo'lsa profilni tiklaydi. */
   bootstrap: () => Promise<void>;
   login: (credentials: LoginCredentials) => Promise<AuthUser>;
+  register: (dto: RegisterRequestDto) => Promise<AuthUser>;
+  /** Bog'langan boshqa hisobga o'tish (masalan ota-ona -> o'quvchi). */
+  switchAccount: (userId: string) => Promise<AuthUser>;
+  /** Bitta hisob ichida rolni almashtirish. */
+  switchRole: (role: string) => Promise<AuthUser>;
+  /** Server qaytargan yangi token+profil juftligini joriy sessiya qilib oladi. */
+  adoptSession: (response: unknown) => AuthUser;
   logout: () => Promise<void>;
   setUser: (user: AuthUser) => void;
   /** Tarmoq xatosidan keyin "Qayta urinish". */
@@ -40,6 +54,30 @@ function toAppError(error: unknown): AppError {
  * ham bitta so'rov yetarli, chaqiruvchilar bir xil natijani kutadi.
  */
 let pendingBootstrap: Promise<void> | null = null;
+
+/**
+ * Sessiya raqami. Har ochilish va yopilishda oshadi.
+ *
+ * NEGA KERAK: `login()` ikki bosqichdan iborat — avval token olinadi, keyin
+ * `me/` so'raladi. Shu orada foydalanuvchi hisobni almashtirsa yoki chiqsa,
+ * kechikib kelgan `me/` javobi ALLAQACHON eskirgan bo'ladi. Raqam mos
+ * kelmasa, javob jimgina tashlab yuboriladi va eski profil yangisining
+ * ustiga yozilmaydi.
+ */
+let sessionSeq = 0;
+
+function beginSession(tokens: TokenPair, persistent: boolean): number {
+  sessionSeq += 1;
+  announceSessionChange();
+  tokenStorage.setTokens(tokens, { persistent });
+  return sessionSeq;
+}
+
+function endSession(): void {
+  sessionSeq += 1;
+  tokenStorage.clearTokens();
+  announceSessionChange();
+}
 
 export const useAuthStore = create<AuthState>()((set, get) => ({
   user: null,
@@ -79,16 +117,49 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   async login(credentials) {
     try {
       const tokens = mapTokenPairDto(await authApi.login(mapLoginRequest(credentials)));
-      tokenStorage.setTokens(tokens, { persistent: credentials.remember !== false });
+      const seq = beginSession(tokens, credentials.remember !== false);
       const user = mapUserDto(await authApi.getCurrentUser());
+      if (seq !== sessionSeq) return user;
       set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
       return user;
     } catch (error) {
       // Yarim ochilgan sessiya qolmasin.
-      tokenStorage.clearTokens();
+      endSession();
       set({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });
       throw error;
     }
+  },
+
+  async register(dto) {
+    try {
+      const tokens = mapTokenPairDto(await authApi.register(dto));
+      const seq = beginSession(tokens, true);
+      const user = mapUserDto(await authApi.getCurrentUser());
+      if (seq !== sessionSeq) return user;
+      set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
+      return user;
+    } catch (error) {
+      endSession();
+      set({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });
+      throw error;
+    }
+  },
+
+  async switchAccount(userId) {
+    return get().adoptSession(await authApi.switchAccount(userId));
+  },
+
+  async switchRole(role) {
+    return get().adoptSession(await authApi.switchRole(role));
+  },
+
+  adoptSession(response) {
+    // "Meni eslab qol" tanlovi almashgandan keyin ham saqlanadi.
+    const persistent = tokenStorage.isPersistent();
+    const { tokens, user } = mapSwitchAccountResponse(response);
+    beginSession(tokens, persistent);
+    set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
+    return user;
   },
 
   /**
@@ -107,7 +178,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     } catch {
       // Sababi muhim emas — chiqish baribir davom etadi.
     } finally {
-      tokenStorage.clearTokens();
+      endSession();
       set({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });
     }
   },
@@ -125,15 +196,19 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 configureAuthRefresh();
 
 /*
- * 🟡 MOBIL FARQI (MOBILE_PLAN §4.2):
+ * 🟡 MOBIL FARQI (MOBILE_PLAN §4.2, DECISIONS §22):
  *
  * Veb versiya ikkita `window` hodisasiga obuna bo'lardi:
  *   1) `SESSION_EXPIRED_EVENT` — CustomEvent orqali kelardi. Mobilda global
  *      hodisa shinasi yo'q, shuning uchun refresh menejerining o'z obunasi
  *      ishlatiladi (interfeys mazmunan bir xil).
- *   2) `storage` — boshqa TABda chiqilsa bu tab ham yopilsin degan qoida.
- *      Mobilda tab tushunchasi yo'q, ilova bitta nusxada ishlaydi — bu
- *      obuna ataylab OLIB TASHLANDI, ekvivalenti yo'q.
+ *   2) `storage` — boshqa TABda hisob almashtirilsa bu tab ham ergashsin
+ *      degan qoida. Mobilda tab tushunchasi yo'q, ilova bitta nusxada
+ *      ishlaydi — bu obuna va u bilan kelgan `syncSessionFromOtherTab`
+ *      ataylab OLIB TASHLANDI, ekvivalenti yo'q.
+ *
+ * Veb'dagi til (i18n) sinxroni ham ko'chirilmadi — mobilda i18n hali yo'q
+ * (DECISIONS §13). Qo'shilganda `syncLanguageFromServer` shu yerga qaytadi.
  */
 refreshTokenManager.onSessionExpired(() => {
   useAuthStore.setState({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });

@@ -1,17 +1,23 @@
 import { z } from "zod";
 
-/** Auth — yagona modul, DTO'lar zod bilan runtime'da ham tekshiriladi. */
 export const tokenPairDtoSchema = z.object({
   access: z.string().min(1),
   refresh: z.string().min(1),
 });
 
-/** O'qituvchi sertifikati (`/auth/me/certificates/`) — `UserSerializer` ichida ham keladi. */
 export const certificateDtoSchema = z.object({
   id: z.string(),
   file: z.string(),
   title: z.string().nullable().default(""),
   created_at: z.string(),
+});
+
+export const linkedAccountDtoSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  first_name: z.string().default(""),
+  last_name: z.string().default(""),
+  role: z.string(),
 });
 
 export const userDtoSchema = z.object({
@@ -22,17 +28,16 @@ export const userDtoSchema = z.object({
   role: z.string(),
   phone: z.string().nullable().optional(),
   invite_code: z.string().nullable().optional(),
-  /** Profil rasmi — `PATCH /auth/me/` orqali yuklanadi. */
   avatar: z.string().nullable().optional(),
-  /** Faqat `role: teacher`da — boshqa rollarda `null` keladi. */
   avg_rating: z.number().nullable().optional(),
   rating_count: z.number().nullable().optional(),
-  /** Faqat o'qituvchida mazmunli — admin tasdiqlamaguncha `false`. */
   is_approved: z.boolean().nullable().optional(),
   certificates: z.array(certificateDtoSchema).optional().default([]),
+  preferred_language: z.string().default("uz"),
+  lesson_reminder_minutes: z.number().nullable().optional(),
+  linked_accounts: z.array(linkedAccountDtoSchema).optional().default([]),
 });
 
-/** `GET /api/v1/auth/logins/` — bitta kirish yozuvi (paginatsiyasiz massiv). */
 export const loginRecordDtoSchema = z.object({
   at: z.string(),
   ip: z.string().nullable().default(null),
@@ -41,17 +46,32 @@ export const loginRecordDtoSchema = z.object({
   new_device: z.boolean().default(false),
 });
 
+export const lessonRatingDtoSchema = z.object({
+  id: z.string(),
+  lesson: z.string(),
+  student: userDtoSchema.partial().extend({ id: z.string().optional() }),
+  stars: z.number(),
+  description: z.string().nullable().optional(),
+  created_at: z.string(),
+});
+
+export type LessonRatingDto = z.infer<typeof lessonRatingDtoSchema>;
+
+export const switchAccountResponseDtoSchema = tokenPairDtoSchema.extend({
+  user: userDtoSchema,
+});
+
 export type TokenPairDto = z.infer<typeof tokenPairDtoSchema>;
 export type AuthUserDto = z.infer<typeof userDtoSchema>;
+export type LinkedAccountDto = z.infer<typeof linkedAccountDtoSchema>;
 export type LoginRecordDto = z.infer<typeof loginRecordDtoSchema>;
 export type CertificateDto = z.infer<typeof certificateDtoSchema>;
+export type SwitchAccountResponseDto = z.infer<typeof switchAccountResponseDtoSchema>;
 
-/** Kirishlar tarixining domen ko'rinishi. */
 export interface LoginRecord {
   id: string;
   at: string;
   ip: string;
-  /** Foydalanuvchiga tushunarli qurilma nomi: "Chrome · Windows". */
   device: string;
   userAgent: string;
   isNewIp: boolean;
@@ -89,7 +109,6 @@ export interface ConsentRequestDto {
   granted: boolean;
 }
 
-/** Bola ota-ona so'roviga javobi. */
 export type LinkAction = "approve" | "decline";
 
 export interface RegisterFormValues {
@@ -110,9 +129,5 @@ export interface ProfileFormValues {
   firstName: string;
   lastName: string;
   phone?: string;
-  /**
-   * Login. Backend uni `PATCH /auth/me/` da qabul qiladi, lekin u YAGONA
-   * bo'lishi shart — band bo'lsa 400 qaytadi va forma xatoni ko'rsatadi.
-   */
   username?: string;
 }

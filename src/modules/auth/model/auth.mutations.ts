@@ -8,8 +8,8 @@ import { useAuthStore } from "./auth.store";
 
 export function useRegisterMutation() {
   return useMutation({
-    mutationFn: (values: RegisterFormValues) =>
-      authApi.register({
+    mutationFn: (values: RegisterFormValues): Promise<AuthUser> =>
+      useAuthStore.getState().register({
         username: values.username.trim(),
         password: values.password,
         first_name: values.firstName.trim(),
@@ -17,6 +17,18 @@ export function useRegisterMutation() {
         role: values.role,
         phone: values.phone?.trim() || "",
       }),
+  });
+}
+
+export function useSwitchAccountMutation() {
+  return useMutation({
+    mutationFn: (userId: string): Promise<AuthUser> => useAuthStore.getState().switchAccount(userId),
+  });
+}
+
+export function useSwitchRoleMutation() {
+  return useMutation({
+    mutationFn: (role: string): Promise<AuthUser> => useAuthStore.getState().switchRole(role),
   });
 }
 
@@ -29,40 +41,30 @@ export function useUpdateProfileMutation() {
           first_name: values.firstName.trim(),
           last_name: values.lastName.trim(),
           phone: values.phone?.trim() || "",
-          // Faqat haqiqatan o'zgargan bo'lsa yuboriladi — aks holda har
-          // saqlashda backend uni band deb hisoblab qolishi mumkin.
           ...(username ? { username } : {}),
         })
       );
     },
-    // Server javobi global auth holatiga ko'chiriladi.
     onSuccess: (user) => useAuthStore.getState().setUser(user),
-    /*
-     * Xato xabari FAQAT shu yerdan chiqadi.
-     *
-     * Ilgari qism-qism edi: ba'zi mutatsiyada `onError` bor, ba'zisida
-     * yo'q, chaqiruvchi komponentlar esa `mutateAsync` ni try/catch ga
-     * o'rab har doim o'zi ham chiqarardi. Birinchi guruhda toast IKKI
-     * MARTA ko'rinardi.
-     */
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
-/** Profil rasmi — `null` yuborilsa rasm o'chiriladi. */
+export function useUpdateLessonReminderMutation() {
+  return useMutation({
+    mutationFn: async (minutes: number): Promise<AuthUser> =>
+      mapUserDto(await authApi.updateLessonReminderMinutes(minutes)),
+    onSuccess: (user) => useAuthStore.getState().setUser(user),
+  });
+}
+
 export function useUpdateAvatarMutation() {
   return useMutation({
     mutationFn: async (avatar: File | null): Promise<AuthUser> =>
       mapUserDto(await authApi.updateAvatar(avatar)),
     onSuccess: (user) => useAuthStore.getState().setUser(user),
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
-/**
- * O'qituvchi o'ziga sertifikat qo'shadi. Javob — faqat bitta sertifikat
- * (butun user emas), shuning uchun store'dagi ro'yxatga qo'lda qo'shiladi.
- */
 export function useUploadCertificate() {
   return useMutation({
     mutationFn: async ({ file, title }: { file: File; title?: string }) =>

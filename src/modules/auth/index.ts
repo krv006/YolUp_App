@@ -25,7 +25,10 @@ export {
   authKeys,
   useApproveTeacher,
   useLoginHistory,
+  useMyRatings,
   usePendingTeachers,
+  useTeacherRatings,
+  useTeacherStats,
   useTeachers,
 } from "./model/auth.queries";
 export { describeUserAgent } from "./lib/describe-user-agent";
@@ -33,8 +36,11 @@ export { useAuth, useCurrentUser, useIsAuthenticated } from "./model/use-auth";
 export { loginSchema, registerSchema } from "./model/auth.schemas";
 export {
   useRegisterMutation,
+  useSwitchAccountMutation,
+  useSwitchRoleMutation,
   useDeleteCertificate,
   useUpdateAvatarMutation,
+  useUpdateLessonReminderMutation,
   useUpdateProfileMutation,
   useUploadCertificate,
 } from "./model/auth.mutations";
@@ -44,3 +50,8 @@ export { describeCreateError } from "./lib/teacher-approval";
 
 // --- Mobil UI ---
 export { ProfileEditSheet } from "./ui/profile-edit-sheet";
+export {
+  AccountSwitchSheet,
+  canSwitchAccounts,
+  roleLabelOf,
+} from "./ui/account-switch-sheet";

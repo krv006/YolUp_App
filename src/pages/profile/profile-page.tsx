@@ -11,10 +11,15 @@ import {
   ShieldCheck,
   Smartphone,
   Star,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
 import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
+import {
+  AccountSwitchSheet,
+  canSwitchAccounts,
+} from "@/modules/auth/ui/account-switch-sheet";
 import { useUnreadNotificationCount } from "@/modules/notification";
 import { useAppearanceStore } from "@/shared/model/theme.store";
 import { env, ROUTES } from "@/shared/config";
@@ -58,6 +63,7 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
   const unread = useUnreadNotificationCount();
   const [historyOpen, setHistoryOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
 
   const appearanceMode = useAppearanceStore((state) => state.mode);
   const accentId = useAppearanceStore((state) => state.accent);
@@ -160,6 +166,27 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
         ) : null}
 
         <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
+          {/*
+            * Hisob almashtirish faqat IMKONI BOR foydalanuvchida ko'rinadi:
+            * bog'langan hisobi bor yoki yangi rol ocha oladigan. Aks holda
+            * qator bosilganda bo'sh oyna chiqardi.
+            */}
+          {canSwitchAccounts(user) ? (
+            <>
+              <ListItem
+                title="Hisobni almashtirish"
+                subtitle={
+                  user?.linkedAccounts.length
+                    ? `${user.linkedAccounts.length} ta bog'langan hisob`
+                    : "Yangi rol ochish"
+                }
+                leading={<UsersRound size={20} color={palette["muted-foreground"]} />}
+                chevron
+                onPress={() => setSwitchOpen(true)}
+              />
+              <Separator inset={52} />
+            </>
+          ) : null}
           <ListItem
             title="Kirishlar tarixi"
             subtitle="Qaysi qurilma va IP'dan kirilgani"
@@ -193,6 +220,7 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
 
       <LoginHistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} />
       <ProfileEditSheet user={user} open={editOpen} onClose={() => setEditOpen(false)} />
+      <AccountSwitchSheet user={user} open={switchOpen} onClose={() => setSwitchOpen(false)} />
     </Screen>
   );
 }

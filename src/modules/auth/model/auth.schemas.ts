@@ -1,3 +1,10 @@
+/*
+ * 🟡 MOBIL FARQI (DECISIONS §13): veb bu sxemalarni `createLoginSchema(t)`
+ * ko'rinishidagi fabrikalarga aylantirdi — xato xabarlari i18n dan keladi.
+ * Mobilda i18n hali yo'q, shuning uchun matnlar literal qolgan va sxemalar
+ * oddiy obyekt. SHAKLI (maydonlar, cheklovlar) veb bilan AYNAN bir xil.
+ * i18n qo'shilganda shu fayl veb ko'rinishiga qaytariladi.
+ */
 import { z } from "zod";
 
 export const loginSchema = z.object({

@@ -50,7 +50,6 @@ export {
   groupLessonsByDay,
   resolveInitialMonth,
   toDayKey,
-  WEEKDAY_LABELS,
 } from "./lib/lesson-calendar";
 export type { CalendarDay } from "./lib/lesson-calendar";
 export {

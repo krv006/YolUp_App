@@ -23,6 +23,18 @@ export function lessonStatusMeta(status: LessonStatus): LessonStatusMeta {
   return STATUS_META[status] ?? FALLBACK;
 }
 
+/**
+ * Darsning mavzusi yozilganmi.
+ *
+ * Haftalik jadval bilan yaratilgan darslar MAVZUSIZ tug'iladi — o'qituvchi
+ * uni keyin, dars oldidan yozadi. Mavzusiz darsga kirib bo'lmaydi:
+ * o'quvchi ro'yxatda "Dars" degan bo'sh qatorni ko'rib, nima o'tilishini
+ * bilmay qolardi.
+ */
+export function hasLessonTopic(lesson: Lesson): boolean {
+  return Boolean(lesson.title?.trim());
+}
+
 /** Tugagan va bekor qilingan darsga qayta kirib bo'lmaydi. */
 export const CLOSED_LESSON_STATUSES: LessonStatus[] = ["finished", "cancelled"];
 

@@ -9,12 +9,6 @@ interface LessonViewState {
   setView: (view: LessonView) => void;
 }
 
-/**
- * Darslar bo'limidagi ko'rinish tanlovi.
- *
- * Foydalanuvchi har safar qayta tanlamasligi uchun saqlanadi; global holat
- * bo'lgani sababli zustand'da turadi (loyihada React Context ishlatilmaydi).
- */
 export const useLessonViewStore = create<LessonViewState>()(
   persist(
     (set) => ({

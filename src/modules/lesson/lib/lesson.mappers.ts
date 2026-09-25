@@ -20,7 +20,6 @@ import type {
   LessonRequestDto,
 } from "../api/lesson.dto";
 
-/** Baho hali yo'q darsda backend `null` yoki bo'sh satr qaytaradi — bu 0 emas. */
 function toAverage(value: number | string | null | undefined): number | null {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number(value);
@@ -32,8 +31,8 @@ export function mapLessonDto(dto: LessonDto): Lesson {
     id: String(dto.id),
     courseId: String(dto.course),
     courseTitle: dto.course_title,
-    title: dto.title,
-    topic: dto.title,
+    title: dto.title ?? "",
+    topic: dto.title ?? "",
     startsAt: dto.starts_at,
     durationMinutes: Number(dto.duration_min),
     duration: Number(dto.duration_min),
@@ -44,6 +43,7 @@ export function mapLessonDto(dto: LessonDto): Lesson {
     time: dto.starts_at?.slice(11, 16) ?? "",
     avgRating: toAverage(dto.avg_rating),
     ratingCount: Number(dto.rating_count ?? 0),
+    quizId: dto.quiz_id ?? null,
   };
 }
 
@@ -61,10 +61,8 @@ export function mapLessonRecordingDto(dto: LessonRecordingDto): LessonRecording 
 
   return {
     status,
-    // `stream_url` faqat `ready` bo'lganda keladi — ikkalasini ham talab qilamiz.
     ready: Boolean(dto.ready && dto.stream_url),
     title: dto.title || "Dars yozuvi",
-    // `<video src>` uchun to'liq havola kerak — apiClient bazasi qo'llanadi.
     streamUrl: normalizeMediaUrl(dto.stream_url),
     createdAt: dto.created_at ?? null,
     endedAt: dto.ended_at ?? null,
@@ -87,7 +85,6 @@ export function mapLessonRatingDto(dto: LessonRatingDto): LessonRating {
   };
 }
 
-/** Ro'yxat massiv ham, DRF sahifasi ham bo'lishi mumkin — ikkalasi ham bir shaklga keladi. */
 export function mapLessonRatingList(dto: unknown): LessonRating[] {
   return normalizePagination<LessonRatingDto>(dto).items.map(mapLessonRatingDto);
 }
@@ -106,5 +103,6 @@ export function mapLessonRequest(form: LessonFormInput): LessonRequestDto {
     title: form.topic ?? form.title ?? "",
     starts_at: startsAt,
     duration_min: Number(form.duration ?? form.durationMinutes ?? 45),
+    ...(form.quizId === undefined ? {} : { quiz: form.quizId || null }),
   };
 }

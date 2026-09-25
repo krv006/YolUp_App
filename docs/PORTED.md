@@ -6,7 +6,7 @@
 
 - **Manba:** `Edu_Front` — port endi BOSQICHMA-BOSQICH ketmoqda, shuning uchun
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
-  holatini bildiradi. Poydevor (shared + auth), chat va kurs domeni `eb02cd7` da,
+  holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
 - **Oxirgi yangilanish:** 2026-09-25 (shared + auth bosqichi)
 - **Drift tekshiruvi:** `npm run check-sync`
@@ -30,8 +30,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **111**
-- 🟡/🔴 moslashtirilgan: **66**
+- 🟢 NUSXA: **110**
+- 🟡/🔴 moslashtirilgan: **67**
 - 🆕 mobilga xos: **5**
 - Jami: **182**
 
@@ -101,16 +101,16 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `c6134f9edb5c` | — |
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `0ec6144f32c9` | — |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `b1cd81660536` | farq qayd etilmagan — tekshiring |
-| `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `f93d64607dd8` | — |
-| `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `d7972958badd` | — |
-| `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `d87faa16509a` | — |
-| `src/modules/lesson/index.ts` | 🟡 MOSLASH | `94e8eab0526e` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/lesson/lib/lesson-calendar.ts` | 🟢 NUSXA | `38ad28e08fca` | — |
-| `src/modules/lesson/lib/lesson-schedule.ts` | 🟢 NUSXA | `3dd4b69e50c8` | — |
-| `src/modules/lesson/lib/lesson-status.ts` | 🟢 NUSXA | `459e0c63484a` | — |
-| `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `e4595502465f` | — |
-| `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `32243c91e8da` | — |
-| `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `9a44b4a54d5d` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
+| `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `3f7f3900f46d` | — |
+| `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `ab15866473ba` | — |
+| `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `b137e01f8817` | — |
+| `src/modules/lesson/index.ts` | 🟡 MOSLASH | `e1bf55fd0f0f` | generatsiya: veb barrel minus `ui/`; WEEKDAY_LABELS mobil UI fayliga ko'chdi |
+| `src/modules/lesson/lib/lesson-calendar.ts` | 🟢 NUSXA | `76769eb5a69d` | — |
+| `src/modules/lesson/lib/lesson-schedule.ts` | 🟢 NUSXA | `2a3c243d16ae` | — |
+| `src/modules/lesson/lib/lesson-status.ts` | 🟡 MOSLASH | `43afd26367df` | useLessonStatusMeta(i18n) o'rniga literal lessonStatusMeta; hasLessonTopic olindi (§13) |
+| `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `afbcc4e0feff` | — |
+| `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `31172199c0d6` | — |
+| `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `54d2b67dd248` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `520a875a379e` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |

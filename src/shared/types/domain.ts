@@ -172,7 +172,7 @@ export interface Lesson {
   time: string;
   avgRating: number | null;
   ratingCount: number;
-  // KUTMOQDA (port bosqichi): quizId: string | null;
+  quizId: string | null;
 }
 
 export interface LessonRating {

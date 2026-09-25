@@ -22,6 +22,20 @@ export interface TabDefinition {
  */
 const PILL_RADIUS = 22;
 
+/**
+ * Faol plastinkaning yon bo'shlig'i — BO'LIM SONIGA qarab.
+ *
+ * Qat'iy 14 qolganda ota-onadagi oltita bo'lim yorlig'i qisqarib ketardi
+ * ("Davo…", "Reyti…"): ekran eni teng bo'linadi va har bo'limga ~63dp
+ * qoladi, undan 28dp ni bo'shliq yeb qo'yardi. To'rt bo'limda esa keng
+ * bo'shliq plastinkani chiroyli ko'rsatadi, shuning uchun u saqlanadi.
+ */
+function pillPadding(count: number): number {
+  if (count >= 6) return 4;
+  if (count === 5) return 8;
+  return 14;
+}
+
 /*
  * Panel proplarining tipi `Tabs` ning O'ZIDAN chiqariladi.
  *
@@ -173,6 +187,7 @@ function RoleTabBar({
             <View
               style={[
                 styles.itemInner,
+                { paddingHorizontal: pillPadding(state.routes.length) },
                 focused && {
                   backgroundColor: palette["primary-tint"],
                   borderRadius: PILL_RADIUS,
@@ -226,7 +241,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 1,
     paddingVertical: 6,
-    paddingHorizontal: 14,
+    // Yon bo'shliq pillPadding() dan keladi — bo'lim soniga bog'liq.
   },
   label: { fontSize: fontSize["2xs"], fontWeight: "600" },
 });

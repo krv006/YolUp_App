@@ -16,7 +16,6 @@ export const API_ERROR_CODES = Object.freeze({
 
 export type ApiErrorCode = (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES];
 
-/** Backend maydon xatolari: `{ username: "Band" }` yoki `{ username: ["Band"] }`. */
 export type ApiFieldErrors = Record<string, string | string[]>;
 
 const STATUS_CODES: Record<number, ApiErrorCode> = {
@@ -68,7 +67,6 @@ export class AppError extends Error {
   }
 }
 
-/** Eski nom — yangi kodda `AppError` ishlating. */
 export const ApiError = AppError;
 export type ApiError = AppError;
 

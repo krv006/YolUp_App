@@ -16,8 +16,10 @@ export { normalizeMediaUrl } from "./media-url";
 export { getSocketClosePolicy, RealtimeSocket } from "./realtime-socket";
 export type { RealtimeSocketInit, SocketClosePolicy, SocketState } from "./realtime-socket";
 export {
+  announceSessionChange,
   refreshTokenManager,
   RefreshTokenManager,
+  SESSION_CHANGED_EVENT,
   SESSION_EXPIRED_EVENT,
 } from "./refresh-token-manager";
 export type { RefreshHandler } from "./refresh-token-manager";

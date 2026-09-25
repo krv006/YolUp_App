@@ -1,4 +1,19 @@
 #!/usr/bin/env node
+/*
+ * ⚠️ BOSQICHMA-BOSQICH PORT PAYTIDA ISHLATMANG.
+ *
+ * Bu skript manifestni JORIY veb holatiga qarab to'liq qayta yozadi. U
+ * "katta portlash" (hammasi bir vaqtda ko'chiriladi) uchun yozilgan.
+ *
+ * Hozir port bosqichlarga bo'lingan: shared+auth ko'chirildi, quiz, chat,
+ * doska va boshqalar hali eski holatda. Skript ishga tushirilsa, o'sha
+ * ko'chirilmagan fayllarga ham yangi hash qo'yiladi va ular "moslashtirilgan"
+ * deb belgilanadi — natijada `check-sync` driftni KO'RSATMAY qo'yadi, ya'ni
+ * ko'chirish qarzi yashirinadi.
+ *
+ * Har bosqichda faqat O'SHA bosqich qatorlari qo'lda yangilanadi. Port
+ * tugagach bu skript yana yaroqli bo'ladi.
+ */
 /**
  * `docs/PORTED.md` manifestini yasaydi.
  *
@@ -32,7 +47,12 @@ const ADAPTED = {
   "src/shared/lib/download.ts": ["🔴 QAYTA", "<a download> -> expo-file-system + Share; ASYNC bo'ldi"],
   "src/shared/lib/sanitize-html.ts": ["🔴 QAYTA", "DOMPurify -> regex; WebView CSP bilan birga"],
   "src/shared/lib/index.ts": ["🟡 MOSLASH", "barrel + app-state/network eksportlari"],
-  "src/modules/auth/model/auth.store.ts": ["🟡 MOSLASH", "window hodisalari -> refreshTokenManager.onSessionExpired; `storage` obunasi olib tashlandi (tab yo'q)"],
+  "src/modules/auth/model/auth.store.ts": ["🟡 MOSLASH", "window hodisalari -> refreshTokenManager.onSessionExpired; `storage` obunasi va til sinxroni olib tashlandi (tab ham, i18n ham yo'q)"],
+  "src/modules/auth/model/auth.schemas.ts": ["🟡 MOSLASH", "createLoginSchema(t) fabrikalari o'rniga literal xabarlar; maydon va cheklovlar bir xil (§13)"],
+  "src/shared/types/domain.ts": ["🟡 MOSLASH", "quiz/lesson/course maydonlari `KUTMOQDA` izohida — o'z port bosqichida ochiladi"],
+  "src/shared/lib/date.ts": ["🟡 MOSLASH", "i18n locale va t() o'rniga o'zbekcha literal (§13)"],
+  "src/shared/lib/file-kind.ts": ["🟡 MOSLASH", "fileKindLabel i18n o'rniga o'zbekcha literal (§13)"],
+  "src/shared/api/request-interceptor.ts": ["🟡 MOSLASH", "Accept-Language til saqlagichi o'rniga qat'iy \"uz\" (§13)"],
   "src/modules/lesson/model/lesson.queries.ts": ["🟡 MOSLASH", "useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda)"],
   "src/modules/message/model/use-chat.ts": ["🟡 MOSLASH", "react-router-dom useNavigate -> expo-router useRouter"],
   "src/modules/live/lib/use-focus-tracker.ts": ["🔴 QAYTA", "visibilitychange/blur -> AppState; iOS `inactive` filtrlanadi"],

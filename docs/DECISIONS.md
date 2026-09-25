@@ -511,3 +511,98 @@ kerak. Aks holda telefon "ilova o'rnatilmadi" deydi.
 **Windows'dagi to'siq:** `expo prebuild` `android/` ni o'chirib qaytadan
 yaratadi. Android Studio o'sha papkani ochib tursa, Windows o'chirishga
 ruxsat bermaydi (`EBUSY`). Qurishdan oldin Android Studio yopilishi kerak.
+
+---
+
+## 22. Veb bilan qayta sinxronlash — BOSQICHMA-BOSQICH
+
+**Sana:** 2026-09-25 · **Holat:** Qabul qilindi
+
+Port nuqtasidan (`1e53492`, 4-sentabr) keyin veb 181 ta commit oldinga
+ketdi: 343 fayl, `+16 943 / −4 072` qator. Ko'chirilgan 177 fayldan
+**144 tasi** veb tomonda o'zgargan.
+
+**Qaror:** hammasi birdan emas, modul-modul ko'chiriladi. Har bosqich —
+alohida branch va alohida PR.
+
+**Nega birdan emas:** 17 ming qatorlik o'zgarishni bitta PR'da ko'rib
+chiqib bo'lmaydi. Yiqilsa, sabab qaysi modulda ekani ham aniqlanmaydi.
+Bundan tashqari veb'da uchta BUTUNLAY YANGI modul bor (`analytics`,
+`mock-test`, `voice`) — ular mobilda yo'q va o'z ekranlarini talab qiladi.
+
+**Tartib:** poydevor (shared + auth) birinchi, chunki qolgan hamma narsa
+unga tayanadi. Keyingilar: chat, dars, test, doska, push.
+
+### Manifest bilan nima bo'ladi
+
+`docs/PORTED.md` har faylning port paytidagi veb hash'ini saqlaydi.
+Bosqichma-bosqich portda endi **yagona manba commit'i yo'q**: poydevor
+`eb02cd7` da, qolganlari hali `1e53492` da.
+
+⚠️ **`npm run build:ported` bu davrda ishlatilmaydi.** U manifestni joriy
+veb holatiga qarab to'liq qayta yozadi va hali ko'chirilmagan fayllarga ham
+yangi hash qo'yadi — natijada `check-sync` driftni ko'rsatmay qo'yadi va
+ko'chirish qarzi YASHIRINADI. Har bosqichda faqat o'sha bosqich qatorlari
+qo'lda yangilanadi. Sabab skriptning o'z boshida ham yozilgan.
+
+### `domain.ts` va "KUTMOQDA" izohlari
+
+`shared/types/domain.ts` — qatlamlararo shartnoma, uni bo'lib ko'chirib
+bo'lmaydi. Lekin u bilan birga quiz, lesson va course uchun YANGI MAJBURIY
+maydonlar keladi (`type`, `topic`, `subjectLabel`, `quizId`, ...), ularni
+to'ldiradigan mapperlar esa o'z bosqichlarida ko'chiriladi.
+
+Shuning uchun o'sha maydonlar `// KUTMOQDA (port bosqichi):` deb izohga
+olindi. Har bosqichda tegishli qatorlar ochiladi; hammasi yopilgach fayl
+yana 🟢 NUSXA bo'ladi.
+
+**Rad etilgan yo'l:** maydonlarni `?:` qilib ixtiyoriy qoldirish. Shakli
+veb bilan bir xil ko'rinardi, lekin ma'nosi boshqa bo'lardi va "bu maydon
+haqiqatan ixtiyoriymi yoki hali ko'chirilmaganmi" degan savol kodda
+ko'rinmay ketardi. Izoh esa ochiq turadi va grep bilan topiladi.
+
+### i18n — veb yolg'iz o'tib ketdi
+
+§13 da yozilgan edi: *"ikkinchi til rejaga kirganda ikkalasi BIR VAQTDA
+o'tishi kerak"*. Amalda veb yolg'iz o'tdi — `uz / en / ru`, 88 ta faylda
+`t()`, backendda `preferred_language`.
+
+**Qaror:** mobil hozircha o'zbekcha qoladi, i18n ALOHIDA bosqich sifatida
+keyinroq qilinadi. Poydevor porti bilan aralashtirilmaydi — u mustaqil va
+katta ish.
+
+Shu sababli uchta joy veb'dan ataylab farq qiladi:
+
+| Fayl | Veb | Mobil |
+|---|---|---|
+| `shared/lib/date.ts` | `i18n.t()` + locale almashtirish | o'zbekcha literal, `uz` lokali |
+| `shared/lib/file-kind.ts` | `i18n.t("fileKind.*")` | o'zbekcha literal |
+| `shared/api/request-interceptor.ts` | `Accept-Language: getStoredLanguage()` | qat'iy `"uz"` |
+| `auth/model/auth.schemas.ts` | `createLoginSchema(t)` fabrikasi | literal xabarli oddiy sxema |
+| `auth/model/auth.store.ts` | `syncLanguageFromServer` | yo'q |
+
+Backend `preferred_language` ni baribir qaytaradi va mobil uni o'qiydi —
+faqat ishlatmaydi. i18n qo'shilganda shu besh joy ulanadi.
+
+### Sessiya almashganda kesh TOZALANADI
+
+Veb `switchAccount` / `switchRole` qo'shdi va ular bilan birga
+`SESSION_CHANGED_EVENT` keldi. Mobilda global hodisa shinasi yo'q,
+shuning uchun `refreshTokenManager.onSessionChange` obunasi ishlatiladi
+va `providers/query-client.ts` unga ulanadi.
+
+**Bu bezak emas, majburiy:** hisob almashtirilganda foydalanuvchi tizimda
+qoladi, lekin BOSHQA odam bo'ladi. Kesh tozalanmasa, yangi hisob bir necha
+soniya davomida eski hisobning suhbatlari va baholarini ko'radi.
+
+Veb'dan yana bir tuzatish olindi: refresh jarayoni davomida token o'zgargan
+bo'lsa (ya'ni shu orada hisob almashgan), eski so'rovning xatosi YANGI
+sessiyani o'chirmaydi.
+
+### Ma'lum kamchilik (shu bosqichda tuzatilmadi)
+
+Farzandi yo'q ota-ona hisobida `parent-dashboard-page` "Ma'lumotlarni
+yuklab bo'lmadi" deb xato ko'rsatadi: `useParentDashboard` va
+`useAttendance` shartsiz chaqiriladi. To'g'ri xulq — bo'sh holat
+(`ScreenEmpty`) va "farzand qo'shing" taklifi. Bu ota-ona bosqichida
+tuzatiladi.

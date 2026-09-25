@@ -1,10 +1,3 @@
-/**
- * `User-Agent` satrini "Chrome · Windows" ko'rinishiga keltiradi.
- *
- * Maqsad — foydalanuvchiga "bu men edimmi?" degan savolga javob berish, shuning uchun
- * aniq versiyalar emas, faqat brauzer va OS nomi ko'rsatiladi. Tanilmagan satr
- * o'zgarishsiz qaytadi (backend `curl/8.17.0` kabi qiymatlarni ham yozadi).
- */
 
 const BROWSERS: Array<[RegExp, string]> = [
   [/\bEdg[ei]?\//i, "Edge"],
@@ -31,7 +24,6 @@ export function describeUserAgent(userAgent: string | null | undefined): string 
   const value = userAgent?.trim();
   if (!value) return "Noma’lum qurilma";
 
-  // Edge/Opera ham "Chrome/" ni o'z ichiga oladi — jadval tartibi shuni hisobga oladi.
   const browser = match(value, BROWSERS);
   const system = match(value, SYSTEMS);
 

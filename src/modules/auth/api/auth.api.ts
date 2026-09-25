@@ -1,6 +1,6 @@
-import { apiClient, type RequestOptions } from "@/shared/api";
+import { apiClient, normalizePagination, type RequestOptions } from "@/shared/api";
 import { authEndpoints } from "./auth.endpoints";
-import { mapLoginRecords } from "../lib/auth.mappers";
+import { mapLoginRecords, mapTeacherRatings, mapTeacherStats } from "../lib/auth.mappers";
 import type {
   AuthUserDto,
   CertificateDto,
@@ -10,17 +10,11 @@ import type {
   LoginRequestDto,
   RefreshRequestDto,
   RegisterRequestDto,
+  SwitchAccountResponseDto,
   TokenPairDto,
 } from "./auth.dto";
 
 export const authApi = {
-  // login/refresh — Authorization sarlavhasisiz va 401 da qayta urinishsiz yuboriladi.
-  /**
-   * Sessiyani server tomonda yopadi — refresh token bekor qilinadi.
-   *
-   * `skipRefresh`: access token allaqachon eskirgan bo'lsa, 401 ni ushlab
-   * yangilashga urinish ma'nosiz — biz baribir chiqmoqchimiz.
-   */
   logout(refreshToken: string | null) {
     return apiClient.post(
       authEndpoints.logout,
@@ -46,17 +40,40 @@ export const authApi = {
   updateCurrentUser(dto: Partial<RegisterRequestDto>) {
     return apiClient.patch<AuthUserDto>(authEndpoints.me, dto);
   },
-  /**
-   * Profil rasmi — multipart, shuning uchun alohida chaqiruv.
-   * Bo'sh `File` yuborilmaydi: rasmni o'chirish uchun bo'sh satr yuboriladi.
-   */
+  updateLanguage(language: string) {
+    return apiClient.patch<AuthUserDto>(authEndpoints.me, { preferred_language: language });
+  },
+  async getMyRatings(options?: RequestOptions) {
+    return mapTeacherRatings(await apiClient.get(authEndpoints.myRatings, options), options?.query);
+  },
+
+  async getTeacherRatings(id: string, options?: RequestOptions) {
+    return mapTeacherRatings(await apiClient.get(authEndpoints.teacherRatings(id), options), options?.query);
+  },
+
+  async getTeacherStats(id: string, options?: RequestOptions) {
+    return mapTeacherStats(await apiClient.get(authEndpoints.teacherStats(id), options));
+  },
+
+  updateLessonReminderMinutes(minutes: number) {
+    return apiClient.patch<AuthUserDto>(authEndpoints.me, { lesson_reminder_minutes: minutes });
+  },
   updateAvatar(avatar: File | null) {
     const body = new FormData();
     body.set("avatar", avatar ?? "");
     return apiClient.patch<AuthUserDto>(authEndpoints.me, body);
   },
   register(dto: RegisterRequestDto) {
-    return apiClient.post(authEndpoints.register, dto, { skipAuth: true, skipRefresh: true });
+    return apiClient.post<TokenPairDto>(authEndpoints.register, dto, {
+      skipAuth: true,
+      skipRefresh: true,
+    });
+  },
+  switchAccount(id: string) {
+    return apiClient.post<SwitchAccountResponseDto>(authEndpoints.switchAccount(id), {});
+  },
+  switchRole(role: string) {
+    return apiClient.post<SwitchAccountResponseDto>(authEndpoints.switchRole, { role });
   },
   createChild(dto: CreateChildRequestDto) {
     return apiClient.post(authEndpoints.children, dto);
@@ -76,7 +93,6 @@ export const authApi = {
   setConsent(dto: ConsentRequestDto) {
     return apiClient.post(authEndpoints.consents, dto);
   },
-  /** `studentId` berilsa — ota-ona bolasining kirishlar tarixini oladi. */
   async getLogins(studentId: string | null, options?: RequestOptions) {
     return mapLoginRecords(
       await apiClient.get(authEndpoints.logins, {
@@ -85,18 +101,21 @@ export const authApi = {
       })
     );
   },
-  /** Admin: barcha o'qituvchilar (`avg_rating`/`rating_count` bilan). */
-  getTeachers(options?: RequestOptions) {
-    return apiClient.get<AuthUserDto[]>(authEndpoints.teachers, options);
+  async getTeachers(options?: RequestOptions) {
+    const page = normalizePagination<AuthUserDto>(
+      await apiClient.get(authEndpoints.teachers, { ...options, query: { page_size: 100, ...options?.query } })
+    );
+    return page.items;
   },
-  /** Admin: hali tasdiqlanmagan o'qituvchilar. */
-  getPendingTeachers(options?: RequestOptions) {
-    return apiClient.get<AuthUserDto[]>(authEndpoints.teachersPending, options);
+  async getPendingTeachers(options?: RequestOptions) {
+    const page = normalizePagination<AuthUserDto>(
+      await apiClient.get(authEndpoints.teachersPending, { ...options, query: { page_size: 100, ...options?.query } })
+    );
+    return page.items;
   },
   approveTeacher(id: string) {
     return apiClient.post<AuthUserDto>(authEndpoints.teacherApprove(id), {});
   },
-  /** O'qituvchi o'zi uchun sertifikat yuklaydi — rasm yoki PDF. */
   uploadCertificate(file: File, title?: string) {
     const body = new FormData();
     body.set("file", file);

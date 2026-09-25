@@ -12,7 +12,6 @@ export async function readApiResponse(
   return response.text().catch(() => null);
 }
 
-/** Backend `{ success: true, data }` konvertini ochadi; boshqa shakllarni o‘zgarishsiz qaytaradi. */
 export function unwrapApiResponse(payload: unknown): unknown {
   if (payload && typeof payload === "object" && (payload as { success?: unknown }).success === true) {
     return (payload as { data: unknown }).data;

@@ -5,6 +5,7 @@ export const STORAGE_KEYS = Object.freeze({
   STUDENT_CONVERSATION_PANEL_WIDTH: "fokus_student_conversation_width",
   PARENT_SELECTED_CHILD: "fokus_parent_selected_child",
   THEME: "fokus_theme",
+  LANGUAGE: "fokus_language",
   LESSON_VIEW: "fokus_lesson_view",
   CONVERSATION_FILTER: "fokus_conversation_filter",
 });

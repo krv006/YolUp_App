@@ -1,10 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 import { AUTH_STATUS, useAuthStore } from "./auth.store";
 
-/**
- * Auth global holati — zustand. Provider ham, Context ham yo'q.
- * Faqat kerakli maydonlarni tanlang, shunda ortiqcha render bo'lmaydi.
- */
 export function useAuth() {
   return useAuthStore(
     useShallow((state) => ({
@@ -20,7 +16,6 @@ export function useAuth() {
   );
 }
 
-/** Faqat foydalanuvchi kerak bo'lganda — eng arzon selektor. */
 export function useCurrentUser() {
   return useAuthStore((state) => state.user);
 }

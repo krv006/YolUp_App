@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Plus } from "lucide-react-native";
-import { useSubjects } from "@/modules/course";
 import type { QuizFormValues } from "@/shared/types";
 import {
   Button,
@@ -42,8 +41,13 @@ function newKey(): string {
 export interface AddQuizSheetProps {
   open: boolean;
   onClose: () => void;
-  /** O'qituvchining o'z kurslari. */
+  /** O'qituvchining o'z kurslari — KURS rejimida ishlatiladi. */
   courses: readonly { id: string; title: string }[];
+  /**
+   * Fanlar ro'yxati. Berilsa — oyna FAN rejimiga o'tadi (veb `subjectMode`).
+   * Berilmasa — KURS rejimi.
+   */
+  subjects?: readonly { value: string; label: string }[];
   /** Oldindan tanlangan kurs (guruh ichidan ochilganda). */
   defaultCourseId?: string;
 }
@@ -51,20 +55,50 @@ export interface AddQuizSheetProps {
 /**
  * Test yaratish — veb `quiz-create-dialog.tsx` ning mobil varianti.
  *
+ * IKKI REJIM, veb bilan bir xil (`quiz-create-dialog.tsx:88-89`):
+ *
+ *   · FAN rejimi (`subjects` berilgan) — test KURSGA emas, FANGA
+ *     biriktiriladi. Testlar sahifasidan ochilganda shu rejim ishlaydi:
+ *     u yerda kurs konteksti umuman yo'q. Backendga `course: null` ketadi.
+ *   · KURS rejimi (`subjects` berilmagan) — test aniq bir guruhga
+ *     biriktiriladi, fan so'ralmaydi.
+ *
+ * Ikkalasi bir vaqtda talab qilinmaydi.
+ *
  * Savol qoralamasi va uning tekshiruvi ko'chirilgan `lib/question-draft.ts`
  * da: sakkizta savol turi, ularning har biri uchun alohida qoidalar va
  * formaga o'tkazish. Bu fayl faqat oyna qobig'i — test darajasidagi
- * maydonlar (kurs, fan, mavzu, sana) va savollar ro'yxati.
+ * maydonlar va savollar ro'yxati.
  *
  * Tekshiruv YUBORISHDAN OLDIN qilinadi va sabab ko'rsatiladi: backend
  * xatosi "400 Bad Request" dan foydaliroq.
  */
-export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQuizSheetProps) {
+export function AddQuizSheet({
+  open,
+  onClose,
+  courses,
+  subjects,
+  defaultCourseId,
+}: AddQuizSheetProps) {
   const { palette } = useTheme();
   const create = useCreateQuiz();
-  const subjects = useSubjects(open);
 
-  const [courseId, setCourseId] = useState(defaultCourseId ?? courses[0]?.id ?? "");
+  const subjectMode = Boolean(subjects);
+
+  /*
+   * Kurs HISOBLANADI, holatda saqlanmaydi (veb `quiz-create-dialog.tsx:89`).
+   *
+   * Avval u `useState(courses[0]?.id ?? "")` edi va shu sababli buzilgan edi:
+   * oyna sahifa bilan birga, `open={false}` holatida mount bo'ladi — o'shanda
+   * kurslar hali yuklanmagan va ro'yxat bo'sh. `useState` ning boshlang'ich
+   * qiymati faqat BIR MARTA hisoblanadi, shuning uchun kurslar kelganda ham
+   * qiymat "" bo'lib qolardi va "Kursni tanlang" xatosi chiqaverardi.
+   */
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const courseId = subjectMode
+    ? ""
+    : selectedCourseId || defaultCourseId || courses[0]?.id || "";
+
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [title, setTitle] = useState("");
@@ -85,6 +119,7 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
   }
 
   function reset() {
+    setSelectedCourseId("");
     setSubject("");
     setTopic("");
     setTitle("");
@@ -99,12 +134,25 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
     onClose();
   }
 
-  /** Yuborishdan oldingi tekshiruv — sabab aniq ko'rsatiladi. */
+  /**
+   * Testning "manzili" — veb `targetError()` (quiz-create-dialog.tsx:230).
+   * Rejimga qarab FAN yoki KURS talab qilinadi, ikkalasi emas.
+   */
+  function targetError(): string | null {
+    if (subjectMode && !subject.trim()) return "Fanni tanlang";
+    if (!subjectMode && !courseId) return "Kursni tanlang";
+    return topic.trim() ? null : "Mavzuni kiriting";
+  }
+
+  /**
+   * Yuborishdan oldingi tekshiruv — sabab aniq ko'rsatiladi.
+   *
+   * "Test nomi" ATAYLAB tekshirilmaydi: veb ham uni talab qilmaydi
+   * (`quizDisplayTitle` bo'sh nomni mavzu bilan almashtiradi).
+   */
   function validate(): string | null {
-    if (!courseId) return "Kursni tanlang";
-    if (!subject.trim()) return "Fanni tanlang";
-    if (!topic.trim()) return "Mavzuni kiriting";
-    if (!title.trim()) return "Test nomini kiriting";
+    const missingTarget = targetError();
+    if (missingTarget) return missingTarget;
     if (!questions.length) return "Kamida bitta savol qo'shing";
     for (const [index, draft] of questions.entries()) {
       const error = validateDraft(draft);
@@ -121,8 +169,9 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
     }
 
     const values: QuizFormValues = {
+      // FAN rejimida `courseId` bo'sh — `mapQuizRequest` uni `null` ga aylantiradi.
       courseId,
-      subject: subject.trim(),
+      subject: subjectMode ? subject.trim() : undefined,
       topic: topic.trim(),
       title: title.trim(),
       description: description.trim(),
@@ -153,17 +202,22 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
       title="Yangi test"
       description="Sakkiz xil savol turi: variantli, matnli, moslashtirish, tartiblash va boshqalar."
     >
-      {courses.length > 1 ? (
-        <SelectField label="Kurs" value={courseId} options={courseOptions} onChange={setCourseId} />
+      {subjectMode ? (
+        <SelectField
+          label="Fan"
+          placeholder="Fanni tanlang"
+          value={subject}
+          options={(subjects ?? []).map((item) => ({ value: item.value, label: item.label }))}
+          onChange={setSubject}
+        />
+      ) : courses.length > 1 ? (
+        <SelectField
+          label="Kurs"
+          value={courseId}
+          options={courseOptions}
+          onChange={setSelectedCourseId}
+        />
       ) : null}
-
-      <SelectField
-        label="Fan"
-        placeholder="Fanni tanlang"
-        value={subject}
-        options={(subjects.data ?? []).map((item) => ({ value: item.value, label: item.label }))}
-        onChange={setSubject}
-      />
 
       <Input
         label="Mavzu"
@@ -172,11 +226,16 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
         placeholder="Masalan: Kvadrat tenglamalar"
       />
 
+      {/*
+        * "Mavzu" va "Test nomi" bir-biriga o'xshaydi va chalkashtiriladi.
+        * Shuning uchun nom maydoni ochiq-oydin IXTIYORIY deb belgilangan —
+        * veb ham uni talab qilmaydi, bo'sh qolsa mavzu nom bo'lib ishlaydi.
+        */}
       <Input
-        label="Test nomi"
+        label="Test nomi — ixtiyoriy"
         value={title}
         onChangeText={setTitle}
-        placeholder="Masalan: 1-bob nazorati"
+        placeholder="Bo'sh qolsa mavzu nom bo'ladi"
       />
       <Input
         label="Tavsif — ixtiyoriy"

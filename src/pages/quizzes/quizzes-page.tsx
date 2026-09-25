@@ -3,7 +3,7 @@ import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { FileQuestion, History, Plus, Trash2 } from "lucide-react-native";
-import { useCourses } from "@/modules/course";
+import { useCourses, useSubjects } from "@/modules/course";
 import { useAuth } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
 import { AddQuizSheet, useDeleteQuiz, useQuizzes } from "@/modules/quiz";
@@ -42,6 +42,11 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const removeQuiz = useDeleteQuiz();
   const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
   const courses = useCourses();
+  /*
+   * Bu sahifada KURS konteksti yo'q — test FANGA biriktiriladi
+   * (veb `teacher-quizzes-page.tsx:227` bilan bir xil).
+   */
+  const subjects = useSubjects(isTeacher);
 
   const courseTitleById = useMemo(
     () => new Map((courses.data ?? []).map((course) => [course.id, course.title])),
@@ -130,7 +135,8 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
       <AddQuizSheet
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        courses={(courses.data ?? []).map((course) => ({ id: course.id, title: course.title }))}
+        courses={[]}
+        subjects={subjects.data ?? []}
       />
     </Screen>
   );

@@ -7,6 +7,7 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
+import { VoiceRoomBar } from "@/modules/voice";
 import { Chip, ChipRow } from "@/shared/ui";
 import { AssignmentsSection } from "./assignments-section";
 import { AttendanceSection } from "./attendance-section";
@@ -82,6 +83,14 @@ export function GroupWorkspaceSection({
 }) {
   return (
     <View style={styles.root}>
+      {/*
+        * Ovozli suhbat DARSLAR bo'limining tepasida.
+        *
+        * Veb'da u ish maydonining doimiy chizig'i, lekin telefonda har
+        * bo'limda takrorlansa joy yeb qo'yadi. Darslar — guruhning asosiy
+        * bo'limi, shuning uchun xona shu yerda ko'rinadi.
+        */}
+      {tab === "lessons" ? <VoiceRoomBar courseId={courseId} isTeacher={isTeacher} /> : null}
       {tab === "lessons" ? <LessonsSection courseId={courseId} isTeacher={isTeacher} /> : null}
       {tab === "assignments" ? (
         <AssignmentsSection courseId={courseId} isTeacher={isTeacher} subject={subject} />

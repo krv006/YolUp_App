@@ -31,6 +31,7 @@ export {
   useEnrollStudent,
   useRespondCourseRequest,
   useSearchCourseStudents,
+  useSubjects,
   useUnenrollStudent,
   useUpdateCourse,
 } from "./model/course.queries";

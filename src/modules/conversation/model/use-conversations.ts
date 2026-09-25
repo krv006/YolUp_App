@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import type { Page } from "@/shared/api";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import { conversationApi } from "../api/conversation.api";
@@ -14,13 +13,6 @@ export function useConversations(role: ConversationRole = "teacher") {
   });
 }
 
-/**
- * Yon paneldagi ro'yxatdan bitta suhbatni oladi.
- *
- * Ro'yxat ham, detal ham `mapConversationDto` orqali bir xil shaklga keladi,
- * shuning uchun chat sahifasi detal so'rovi kelguncha shu nusxani ko'rsatib
- * turishi mumkin — skeleton umuman chiqmaydi.
- */
 export function readCachedConversation(
   client: QueryClient,
   id: string | undefined,
@@ -31,7 +23,6 @@ export function readCachedConversation(
   return page?.items.find((item) => item.id === id);
 }
 
-/** `enabled` — o'qituvchilar ro'yxati faqat dialog ochilganda kerak. */
 export function useTeachersForDirect(enabled = true) {
   return useQuery({
     queryKey: ["conversations", "teachers"],
@@ -45,11 +36,9 @@ export function useRequestDirect() {
   return useMutation({
     mutationFn: (teacherId: string) => conversationApi.requestDirect(teacherId),
     onSuccess: () => client.invalidateQueries({ queryKey: conversationKeys.all }),
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
-/** Guruh chat rasmini o'rnatish (o'qituvchi). */
 export function useSetRoomImage() {
   const client = useQueryClient();
   return useMutation({

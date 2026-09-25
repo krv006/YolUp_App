@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from "react-native";
-import { CheckCheck, RefreshCw } from "lucide-react-native";
+import { CheckCheck, GraduationCap, RefreshCw } from "lucide-react-native";
 import { formatMessageTime } from "@/shared/lib";
+import { ROLES } from "@/shared/constants";
 import type { ChatMessage } from "@/shared/types";
 import { fontSize, GradientFill, overlayOn, radius, Text, useTheme } from "@/shared/ui";
 import { MessageAttachment } from "./message-attachment";
@@ -33,6 +34,7 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const { palette, bubbleGradient } = useTheme();
   const outgoing = message.senderId === currentUserId;
+  const isTeacherSender = message.senderRole === ROLES.TEACHER;
   // Gradient faqat O'Z xabarlarimizga qo'llanadi — kelgan xabar purakchasi
   // har doim neytral fonda qoladi, aks holda ikkalasi ajralib turmasdi.
   const gradient = outgoing ? bubbleGradient : null;
@@ -79,9 +81,26 @@ export function MessageBubble({
         {gradient ? <GradientFill colors={gradient} /> : null}
 
         {!outgoing && showSender && message.senderName ? (
-          <Text variant="caption" tone="brand" style={styles.sender}>
-            {message.senderName}
-          </Text>
+          /*
+           * Guruhda O'QITUVCHI xabari ko'zga darhol tashlanishi kerak:
+           * o'quvchi uchun vazifa va e'lon aynan undan keladi. Veb ham shu
+           * farqni qo'yadi (`message-sender-name.is-teacher`) — rang
+           * `tone-violet-fg`, yonida bitiruv qalpog'i ikonkasi.
+           */
+          <View style={styles.senderRow}>
+            {isTeacherSender ? (
+              <GraduationCap size={12} color={palette["tone-violet-fg"]} />
+            ) : null}
+            <Text
+              variant="caption"
+              style={[
+                styles.sender,
+                { color: isTeacherSender ? palette["tone-violet-fg"] : palette["primary-text"] },
+              ]}
+            >
+              {message.senderName}
+            </Text>
+          </View>
         ) : null}
 
         {message.replyTo ? (
@@ -186,7 +205,8 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     gap: 3,
   },
-  sender: { fontWeight: "600" },
+  senderRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  sender: { fontWeight: "700" },
   reply: {
     borderLeftWidth: 3,
     paddingLeft: 8,

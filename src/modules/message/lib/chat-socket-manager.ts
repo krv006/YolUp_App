@@ -11,12 +11,6 @@ export interface ChatSocketManagerInit {
   onState?: (state: SocketState) => void;
 }
 
-/**
- * Chat kanali — `wss://<domain>/ws/chat/<room_id>/` (docs/PROJECT.md §5.1).
- *
- * Ulanish, qayta urinish va token yangilash `RealtimeSocket` da; bu yerda faqat
- * chat shartnomasi: xabarni parse qilish va "yozmoqda" signalini throttle qilish.
- */
 export class ChatSocketManager {
   private readonly socket: RealtimeSocket;
   private lastTypingAt = 0;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Calendar, Check, ChevronDown, Clock } from "lucide-react-native";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
@@ -151,17 +151,51 @@ export interface SelectFieldProps {
   options: readonly SelectOption[];
   onChange: (value: string) => void;
   placeholder?: string;
+  /**
+   * Ro'yxat ustida qidiruv maydoni. Berilmasa, variant soni
+   * `SEARCH_THRESHOLD` dan oshganda O'ZI yoqiladi.
+   */
+  searchable?: boolean;
 }
+
+/**
+ * Shu sondan ko'p variant bo'lsa qidiruv o'zi paydo bo'ladi.
+ *
+ * Sabab: fanlar ro'yxati backenddan 20 dan ortiq element bilan keladi va
+ * uni aylantirib chiqish uzoq. Qisqa ro'yxatlarda (masalan 3 ta rol)
+ * qidiruv faqat joy egallaydi.
+ */
+const SEARCH_THRESHOLD = 8;
 
 /**
  * Ro'yxatdan tanlash. Nativ `Picker` ATAYLAB ishlatilmadi: u Android va
  * iOS'da butunlay boshqacha ko'rinadi va uzun yorliqlarni kesib tashlaydi
  * (dars nomlari uzun bo'ladi). O'rniga to'liq ekranli ro'yxat.
  */
-export function SelectField({ label, value, options, onChange, placeholder }: SelectFieldProps) {
+export function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+  placeholder,
+  searchable,
+}: SelectFieldProps) {
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const selected = options.find((option) => option.value === value);
+  const withSearch = searchable ?? options.length > SEARCH_THRESHOLD;
+
+  const visible = query.trim()
+    ? options.filter((option) => option.label.toLowerCase().includes(query.trim().toLowerCase()))
+    : options;
+
+  function close() {
+    setOpen(false);
+    // Qidiruv keyingi ochilishda tozalangan bo'lsin — aks holda foydalanuvchi
+    // qisqargan ro'yxatni ko'rib, "variantlar yo'qolibdi" deb o'ylaydi.
+    setQuery("");
+  }
 
   return (
     <View style={styles.group}>
@@ -173,12 +207,12 @@ export function SelectField({ label, value, options, onChange, placeholder }: Se
         onPress={() => setOpen(true)}
       />
 
-      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+      <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Yopish"
           style={[styles.backdrop, { backgroundColor: palette.overlay }]}
-          onPress={() => setOpen(false)}
+          onPress={close}
         >
           <Pressable
             onPress={() => undefined}
@@ -191,8 +225,32 @@ export function SelectField({ label, value, options, onChange, placeholder }: Se
             <Text variant="subheading" style={styles.sheetTitle}>
               {label}
             </Text>
-            <ScrollView>
-              {options.map((option) => {
+            {withSearch ? (
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Qidirish"
+                placeholderTextColor={palette["muted-foreground"]}
+                autoCorrect={false}
+                style={[
+                  styles.search,
+                  {
+                    backgroundColor: palette["surface-subtle"],
+                    borderColor: palette.border,
+                    color: palette.foreground,
+                  },
+                ]}
+              />
+            ) : null}
+
+            {visible.length === 0 ? (
+              <Text variant="caption" tone="muted" style={styles.empty}>
+                Mos variant topilmadi
+              </Text>
+            ) : null}
+
+            <ScrollView keyboardShouldPersistTaps="handled">
+              {visible.map((option) => {
                 const active = option.value === value;
                 return (
                   <Pressable
@@ -201,7 +259,7 @@ export function SelectField({ label, value, options, onChange, placeholder }: Se
                     accessibilityState={{ selected: active }}
                     onPress={() => {
                       onChange(option.value);
-                      setOpen(false);
+                      close();
                     }}
                     style={({ pressed }) => [
                       styles.option,
@@ -281,6 +339,16 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 24,
   },
+  search: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    minHeight: MIN_TOUCH_SIZE,
+    paddingHorizontal: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radius.md,
+    fontSize: fontSize.lg,
+  },
+  empty: { paddingHorizontal: 16, paddingBottom: 12 },
   grabber: { alignSelf: "center", width: 40, height: 4, borderRadius: 2, marginBottom: 10 },
   sheetTitle: { paddingHorizontal: 16, paddingBottom: 8 },
   option: {

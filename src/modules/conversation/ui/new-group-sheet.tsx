@@ -3,13 +3,14 @@ import { StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Sparkles } from "lucide-react-native";
-import { useCourseRequests, useRespondCourseRequest } from "@/modules/course";
+import { useCourseRequests, useRespondCourseRequest, useSubjects } from "@/modules/course";
 import type { Conversation } from "@/shared/types";
 import {
   Avatar,
   Button,
   Input,
   radius,
+  SelectField,
   Separator,
   Sheet,
   Text,
@@ -38,6 +39,12 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
   const client = useQueryClient();
 
   const [form, setForm] = useState({ name: "", subject: "", description: "" });
+  // Ro'yxat faqat oyna ochiq bo'lganda so'raladi (yarim soat keshlanadi).
+  const subjects = useSubjects(open);
+  const subjectOptions = (subjects.data ?? []).map((item) => ({
+    value: item.value,
+    label: item.label,
+  }));
 
   const requests = useCourseRequests({ page_size: 20 }, open);
   const respond = useRespondCourseRequest();
@@ -123,11 +130,20 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
         value={form.name}
         onChangeText={(value) => update("name", value)}
       />
-      <Input
+      {/*
+        * Fan ERKIN MATN emas, ro'yxatdan tanlanadi.
+        *
+        * Sabab: backend fanni kalit sifatida saqlaydi va hisobotlarni shunga
+        * qarab guruhlaydi. Erkin matnda "Ingliz tili", "ingliz tili" va
+        * "Ingliz Tili" uch xil fan bo'lib ketardi. Ro'yxat uzun bo'lgani
+        * uchun `SelectField` qidiruvni o'zi ochadi.
+        */}
+      <SelectField
         label="Fan"
-        placeholder="Masalan: Ingliz tili"
+        placeholder="Fanni tanlang"
         value={form.subject}
-        onChangeText={(value) => update("subject", value)}
+        options={subjectOptions}
+        onChange={(value) => update("subject", value)}
       />
       <Input
         label="Qisqa tavsif"

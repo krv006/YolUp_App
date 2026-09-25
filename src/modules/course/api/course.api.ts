@@ -14,6 +14,7 @@ import type {
   CourseFormInput,
   CourseStudentSearchDto,
   EnrollmentAction,
+  SubjectOptionDto,
   EnrollmentDto,
   EnrollPayload,
 } from "./course.dto";
@@ -37,6 +38,10 @@ export const courseApi = {
   async getCatalog(options: RequestOptions = {}) {
     return mapCoursePage(await apiClient.get(courseEndpoints.catalog, options), options.query);
   },
+  async getSubjects(options: RequestOptions = {}) {
+    const payload = await apiClient.get<unknown>(courseEndpoints.subjects, options);
+    return normalizePagination<SubjectOptionDto>(payload).items.filter((item) => item?.value);
+  },
   async getById(id: string, options?: RequestOptions) {
     return mapCourseDto(await apiClient.get<CourseDto>(courseEndpoints.detail(id), options));
   },
@@ -55,7 +60,6 @@ export const courseApi = {
   async getStudents(id: string, options: RequestOptions = {}) {
     return mapEnrollmentPage(await apiClient.get(courseEndpoints.students(id), options), options.query);
   },
-  /** O'qituvchi username bo'yicha bazadan qidiradi (EduTech.docx talabi). */
   async searchStudents(
     id: string,
     query: string,
@@ -73,25 +77,11 @@ export const courseApi = {
   async enroll(id: string, payload: EnrollPayload = {}) {
     return mapEnrollmentDto(await apiClient.post<EnrollmentDto>(courseEndpoints.enroll(id), payload));
   },
-  /**
-   * Yangi o'quvchi hisobini yaratib, darhol shu kursga yozadi.
-   *
-   * O'quvchi o'zi ro'yxatdan o'ta olmaydi — hisobni ota-ona yoki o'qituvchi
-   * yaratadi (`POST /auth/children/`).
-   *
-   * `POST /auth/children/` javob shakli hujjatlashtirilmagan (schema'da
-   * "No response body"), shuning uchun `id` javobdan olinadi, kelmasa —
-   * yangi hisob username bo'yicha qidirib topiladi. Ikkalasi ham
-   * bo'lmasa, hisob yaratilgani aytiladi: o'qituvchi uni qo'lda qo'sha oladi.
-   */
   async createStudent(courseId: string, dto: CreateChildRequestDto): Promise<Enrollment> {
     let created: { id?: string | number } | null;
     try {
       created = await apiClient.post<{ id?: string | number } | null>(authEndpoints.children, dto);
     } catch (error) {
-      // Backend bu endpointni hozircha faqat OTA-ONAGA ochgan (sinovda 403).
-      // Xom xabar "Sizning rolingizda ruxsat yo'q" — o'qituvchi buni o'z
-      // xatosi deb o'ylamasligi uchun sababni ochiq aytamiz.
       if (error instanceof AppError && error.status === 403) {
         throw new AppError({
           code: API_ERROR_CODES.FORBIDDEN,

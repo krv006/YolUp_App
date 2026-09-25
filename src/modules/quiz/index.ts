@@ -53,3 +53,5 @@ export type { AddQuizSheetProps } from "./ui/add-quiz-sheet";
 export { ImportResultSheet } from "./ui/import-result-sheet";
 export type { ImportResultSheetProps } from "./ui/import-result-sheet";
 
+export { QuizPreviewSheet } from "./ui/quiz-preview-sheet";
+export type { QuizPreviewSheetProps } from "./ui/quiz-preview-sheet";

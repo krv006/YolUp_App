@@ -419,68 +419,61 @@ ortiqcha dasturlarni yopish yoki AVD'ga ko'proq RAM berish kerak.
 
 ## 20. Logotip va launcher ikonkasi
 
-**Qaror:** logo QO'LDA chizilmaydi — geometriyasi
-`src/shared/ui/logo-mark.json` da saqlanadi va undan ikki narsa
-chiqariladi:
+**Qaror:** logo QO'LDA chizilmaydi — yagona manba `assets/y-logo.svg`
+va undan uch narsa chiqariladi (`npm run build:icons`):
 
-| Kim o'qiydi | Nima chiqadi |
+| Nima chiqadi | Qayerga |
 |---|---|
-| `scripts/build-icons.mjs` | `assets/*.png` — launcher, splash, favicon |
-| `src/shared/ui/logo.tsx` | ilova ichidagi SVG `<Logo />` |
+| `assets/*.png` | launcher, adaptiv, monoxrom, splash, favicon |
+| `src/shared/ui/logo-svg.ts` | SVG matni TS doimiysi sifatida |
+| `<Logo />` uni `SvgXml` bilan chizadi | ilova ichidagi logo |
 
 **Nega shunday:** aks holda telefondagi ikonka bilan ekrandagi logo asta
 ajralib ketadi — biri yangilanadi, ikkinchisi unutiladi. Endi belgini
-o'zgartirish uchun bitta JSON tahrirlanadi va `npm run build:icons`
-ishga tushiriladi; SVG esa o'sha faylni to'g'ridan-to'g'ri o'qigani
-uchun avtomatik yangilanadi.
+almashtirish uchun bitta SVG fayl qo'yiladi va bitta buyruq ishlatiladi.
 
-**Belgi (2026-09-12 dan):** YolUp brendi — "Y" harfi va uning ichidan
-yuqoriga ko'tariluvchi strelka. Ranglar brend gradienti:
-`#6C4CF1 → #2F7BF5 → #22D3A5`. Avvalgi belgi Fokus davridagi oq "F" va
-nuqta edi (undan oldin esa Expo shablonining standart rasmi).
+**Nega SVG matn sifatida saqlanadi:** React Native `.svg` ni
+to'g'ridan-to'g'ri import qila olmaydi — buning uchun alohida Metro
+transformeri kerak bo'lardi. Transformer butun Metro quvuriga ta'sir
+qiladi, port davomida esa qurilma sozlamalariga tegmaslik afzal.
+Shuning uchun SVG matni generatsiya qilinadi. `logo-svg.ts` QO'LDA
+tahrirlanmaydi.
 
-**Belgining ikki ko'rinishi.** Logotip ikki qatlamdan iborat —
-`logo-mark.json` dagi `role`:
+**Belgi (2026-09-25 dan):** haqiqiy brend fayli — gradientli "Y" harfi
+va uning ichidan yuqoriga ko'tariluvchi strelka. Gradient ko'k-binafshadan
+yashil-firuzagacha (`#5D0CFE → #0CA5FE → #03E7B4`).
 
-| Qatlam | Nima |
-|---|---|
-| `body` | "Y" harfi: uchta yumaloq uchli qalin chiziq |
-| `cut` | strelka: egri chiziq + uchburchak uchi, "Y" ustidan o'tadi |
+Bungacha belgi `src/shared/ui/logo-mark.json` dagi SODDALASHTIRILGAN
+geometriyadan (to'g'ri chiziq va ko'pburchak) chizilardi — u haqiqiy
+brend fayli yo'q paytdagi o'rinbosar edi. Endi u fayl o'chirildi.
 
-Shundan ikki rasmiy forma chiqadi:
+**Strelka — teshik, alohida qatlam emas.** SVG ichida strelka shaklning
+o'yig'i, ustiga qo'yilgan oq chizma emas. Buning ikki foydasi bor:
 
-- **Belgi** (shaffof fonda): "Y" gradient, strelka OQ. Logotipning asosiy ko'rinishi.
-- **Plitka** (launcher ikonkasi): gradient plitka, "Y" OQ, strelka ham OQ —
-  ular ingichka gradient hoshiya (`cutGap`) bilan ajraladi. Hoshiyasiz oq
-  strelka oq "Y" ichida ko'rinmay qolardi.
-
-Android adaptiv old qismida hoshiya shaffof bo'ladi va ostidagi gradient
-fon rasmi undan ko'rinib turadi — natijada plitka bilan bir xil chiqadi.
+- rasterlangan rasmning ALFA kanali o'zi to'g'ri siluet beradi, shuning
+  uchun monoxrom ikonka (Android 13+ "themed icons") qo'shimcha
+  ishlamasdan chiqadi;
+- strelka har qanday fonda fon rangini ko'rsatadi, ya'ni oq "Y" ustida
+  oq strelka ko'rinmay qolish muammosi umuman yo'q (avvalgi belgida
+  buning uchun maxsus `cutGap` hoshiya kerak edi).
 
 **Texnik tafsilotlar:**
 
-- Rasterlash `pngjs` bilan, har piksel 4×4 nuqtada tekshiriladi
-  (supersampling) — tashqi grafik kutubxona kerak emas.
-- Shakl turlari: `stroke` (yumaloq uchli siniq chiziq — nuqtadan kesmagacha
-  masofa bilan tekshiriladi) va `polygon` (nur tashlash usuli). Egri chiziq
-  Bezye egridan namuna olingan nuqtalar sifatida saqlanadi, shuning uchun
-  rasterlovchiga path parser kerak emas.
-- Gradient nuqtani gradient o'qiga proyeksiya qilib hisoblanadi; plitkada
-  o'q butun kvadrat bo'ylab, shaffof variantda belgining o'zi bo'ylab
-  cho'ziladi. `logo.tsx` ham aynan shu ikki holatni takrorlaydi.
-- Belgi chegara qutisi RENDER VAQTIDA hisoblanib markazlashtiriladi,
-  shuning uchun JSON'dagi koordinatalarni qo'lda muvozanatlash shart emas.
-- `icon.png` — shaffofliksiz to'la kvadrat (Apple talabi: burchakni tizim
-  o'zi yumaloqlaydi).
-- Adaptiv old qism belgisi 445×471 px — Android'ning 676 px xavfsiz
-  zonasidan ancha kichik, ya'ni hech qanday niqobda kesilmaydi.
-- `splash-icon.png` — brend plitka ustida oq belgi: splash foni och
-  (`#f5f7fa`) ham, to'q (`#0f1319`) ham bo'lishi mumkin, plitka
-  ikkalasida ham ko'rinadi.
+- Rasterlash `@resvg/resvg-js` bilan (devDependency, faqat skript
+  uchun). Avvalgi `pngjs` supersampling rasterlovchisi haqiqiy SVG'ni —
+  Bezye egrilari, chiziqli va radial gradientlar, clip-path — chiza
+  olmasdi. `pngjs` hamon ishlatiladi, lekin faqat tayyor piksellarni
+  kanvasga joylashtirish uchun.
+- `icon.png` — shaffofliksiz, OQ fon (Apple talabi: burchakni tizim o'zi
+  yumaloqlaydi). Fon oq, chunki belgining o'zi rangli — rangli fon bilan
+  urishib qolardi.
+- Adaptiv old qism belgisi kanvasning 0.46 ulushida — Android niqobi
+  tashqi ~1/3 ni kesib tashlashi mumkin.
+- `splash-icon.png` — shaffof, plitkasiz: gradientning eng to'q rangi ham
+  (`#5D0CFE`) to'q fonda (`#0f1319`) ajralib turadi.
+- C2PA metama'lumoti (~7KB) `logo-svg.ts` ga tushmaydi — u faqat fayl
+  kelib chiqishi haqidagi ma'lumot va chizishda ishlatilmaydi.
 
----
-
-## 21. Telefonga APK: arxitektura, variant va imzolash
 
 **Qaror:** telefonga mo'ljallangan APK `npm run apk` bilan quriladi.
 
@@ -490,7 +483,7 @@ ishlamasdi:
 | Muammo | Oqibati | Yechim |
 |---|---|---|
 | `-PreactNativeArchitectures=x86_64` | APK hech qanday telefonga o'rnatilmaydi (u emulyator arxitekturasi) | `arm64-v8a,armeabi-v7a` |
-| `APP_VARIANT` berilmagan | paket `uz.fokus.edu.dev`, nomi "Fokus (Dev)" | `production` |
+| `APP_VARIANT` berilmagan | paket `uz.yolup.edu.dev`, nomi "YolUp (Dev)" | `production` |
 | debug kaliti bilan imzolash | do'konga yaramaydi; kalit har mashinada boshqacha | haqiqiy keystore |
 
 **Imzolash — nega config plugin:** `android/` git'da yo'q va

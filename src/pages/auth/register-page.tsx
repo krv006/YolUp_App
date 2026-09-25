@@ -64,7 +64,7 @@ export function RegisterPage() {
       <View style={styles.header}>
         <Logo size={48} variant="tile" />
         <Text variant="title">Ro'yxatdan o'tish</Text>
-        <Text tone="muted">Fokus platformasida yangi hisob oching.</Text>
+        <Text tone="muted">YolUp platformasida yangi hisob oching.</Text>
       </View>
 
       <View style={styles.form}>

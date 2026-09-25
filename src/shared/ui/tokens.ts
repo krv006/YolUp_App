@@ -1,7 +1,7 @@
 import palette from "./palette.json";
 
 /**
- * Fokus dizayn tokenlari — veb `src/shared/styles/theme.css` ning porti.
+ * YolUp dizayn tokenlari — veb `src/shared/styles/theme.css` ning porti.
  *
  * Rang qiymatlari `palette.json` da (yagona manba); shu fayl ularni tiplaydi
  * va JS'dan foydalanish uchun ochadi. `className` orqali ishlatilganda

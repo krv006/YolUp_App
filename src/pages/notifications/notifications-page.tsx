@@ -121,7 +121,7 @@ export function NotificationsPage() {
       <Sheet
         open={Boolean(detail)}
         onClose={() => setDetail(null)}
-        title={detail?.sender?.name ?? "Fokus"}
+        title={detail?.sender?.name ?? "YolUp"}
         description={detail ? formatDayTime(detail.createdAt) : undefined}
       >
         {detail ? <HtmlView html={detail.html} /> : null}
@@ -147,7 +147,7 @@ function NotificationRow({ item, onPress }: { item: InboxNotification; onPress: 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${item.sender?.name ?? "Fokus"}: ${preview}`}
+      accessibilityLabel={`${item.sender?.name ?? "YolUp"}: ${preview}`}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
@@ -166,7 +166,7 @@ function NotificationRow({ item, onPress }: { item: InboxNotification; onPress: 
       <View style={styles.body}>
         <View style={styles.rowHead}>
           <Text variant="label" numberOfLines={1} style={styles.sender}>
-            {item.sender?.name ?? "Fokus"}
+            {item.sender?.name ?? "YolUp"}
           </Text>
           <Text variant="caption" tone="muted">
             {formatDayTime(item.createdAt)}

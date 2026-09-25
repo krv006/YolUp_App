@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-25 (quiz tahrirlash bosqichi)
+- **Oxirgi yangilanish:** 2026-09-25 (quiz ko'rib chiqish + YolUp brendi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -31,9 +31,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **121**
-- 🟡/🔴 moslashtirilgan: **77**
-- 🆕 mobilga xos: **6**
-- Jami: **204**
+- 🟡/🔴 moslashtirilgan: **78**
+- 🆕 mobilga xos: **7**
+- Jami: **206**
 
 ## Fayllar
 
@@ -177,6 +177,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/model/quiz.queries.ts` | 🟡 MOSLASH | `a079604c210e` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
 | `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); yaratish va tahrirlash vebdagidek BITTA komponentda; nom taklifi (combobox), qoralama saqlash va `QuizPreview` ko'chirilmadi; import natijasi `import-result-sheet` da |
 | `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
+| `src/modules/quiz/ui/quiz-preview-sheet.tsx` | 🟡 MOSLASH | `6f6e9fee7e8e` | vebda yonma-yon ustun (`quiz-page-split`), mobilda talab bo'yicha ochiladigan oyna; mantiq bir xil — o'sha `draftToStudentQuestion` + `QuestionAnswerInput` |
 | `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn |
 | `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |
@@ -238,6 +239,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/checkbox.tsx` | 🟡 MOSLASH | `073b5898e69d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/input.tsx` | 🟡 MOSLASH | `52da1927077d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/palette.json` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
+| `src/shared/ui/logo-svg.ts` | 🆕 MOBIL | `—` | avtomatik yaratiladi: `assets/y-logo.svg` -> `npm run build:icons` |
 | `src/shared/ui/sheet.tsx` | 🟡 MOSLASH | `ef338bb871e5` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |

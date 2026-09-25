@@ -25,7 +25,7 @@ import { writeFileSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const PACKAGE = process.env.APP_ID ?? "uz.fokus.edu.dev";
+const PACKAGE = process.env.APP_ID ?? "uz.yolup.edu.dev";
 const PORT = process.env.RCT_METRO_PORT ?? "8081";
 const PREFS = `/data/data/${PACKAGE}/shared_prefs/${PACKAGE}_preferences.xml`;
 

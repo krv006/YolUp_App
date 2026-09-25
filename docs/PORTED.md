@@ -6,8 +6,8 @@
 
 - **Manba:** `Edu_Front` — port endi BOSQICHMA-BOSQICH ketmoqda, shuning uchun
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
-  holatini bildiradi. Poydevor (shared + auth) `eb02cd7` da, qolganlari
-  hali `1e53492` da.
+  holatini bildiradi. Poydevor (shared + auth), chat va kurs domeni `eb02cd7` da,
+  qolganlari hali `1e53492` da.
 - **Oxirgi yangilanish:** 2026-09-25 (shared + auth bosqichi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
@@ -30,8 +30,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **112**
-- 🟡/🔴 moslashtirilgan: **65**
+- 🟢 NUSXA: **111**
+- 🟡/🔴 moslashtirilgan: **66**
 - 🆕 mobilga xos: **5**
 - Jami: **182**
 
@@ -75,23 +75,23 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/ui/away-students-notice.tsx` | 🟡 MOSLASH | `86e30eba5686` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `4821801d0b13` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |
-| `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `979cd2dfe197` | — |
-| `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `1de00c8a66ce` | — |
-| `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `6ceb4a4484a7` | — |
-| `src/modules/conversation/constants/direct-status.ts` | 🟢 NUSXA | `298e8e510aae` | — |
-| `src/modules/conversation/index.ts` | 🟡 MOSLASH | `6fce98588dbd` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/conversation/lib/conversation.mappers.ts` | 🟢 NUSXA | `9debbcf93559` | — |
-| `src/modules/conversation/model/conversation-filter.store.ts` | 🟢 NUSXA | `c072b4693565` | — |
+| `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `f5a23ee833bb` | — |
+| `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `5c8dcc87f71a` | — |
+| `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `d2176507c224` | — |
+| `src/modules/conversation/constants/direct-status.ts` | 🟡 MOSLASH | `32913399a614` | useDirectStatusLabel(i18n) o'rniga literal directStatusLabel; qiymatlar bir xil (§13) |
+| `src/modules/conversation/index.ts` | 🟡 MOSLASH | `ef1ec60cb465` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/conversation/lib/conversation.mappers.ts` | 🟢 NUSXA | `f4b89ddbc7ed` | — |
+| `src/modules/conversation/model/conversation-filter.store.ts` | 🟢 NUSXA | `ea649aac1e44` | — |
 | `src/modules/conversation/model/conversation.keys.ts` | 🟢 NUSXA | `8dedfc078009` | — |
-| `src/modules/conversation/model/use-conversations.ts` | 🟢 NUSXA | `047e6d098c68` | — |
+| `src/modules/conversation/model/use-conversations.ts` | 🟢 NUSXA | `90900fd9fd03` | — |
 | `src/modules/conversation/ui/chat-header.tsx` | 🟡 MOSLASH | `106599ec34ab` | farq qayd etilmagan — tekshiring |
 | `src/modules/conversation/ui/conversation-item.tsx` | 🟡 MOSLASH | `e68e12cace5f` | farq qayd etilmagan — tekshiring |
-| `src/modules/course/api/course.api.ts` | 🟢 NUSXA | `0d1f74fef20d` | — |
-| `src/modules/course/api/course.dto.ts` | 🟢 NUSXA | `c8ade40bb51b` | — |
-| `src/modules/course/api/course.endpoints.ts` | 🟢 NUSXA | `e43774c4459d` | — |
-| `src/modules/course/index.ts` | 🟡 MOSLASH | `baeab53df443` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/course/lib/course.mappers.ts` | 🟢 NUSXA | `407e3fae5e0b` | — |
-| `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `d3e112864d54` | — |
+| `src/modules/course/api/course.api.ts` | 🟢 NUSXA | `8fbd108a1c56` | — |
+| `src/modules/course/api/course.dto.ts` | 🟢 NUSXA | `d0339a2b6a33` | — |
+| `src/modules/course/api/course.endpoints.ts` | 🟢 NUSXA | `bf3b8d1efe8e` | — |
+| `src/modules/course/index.ts` | 🟡 MOSLASH | `080e7a1ce1f7` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/course/lib/course.mappers.ts` | 🟢 NUSXA | `358e9f4394b4` | — |
+| `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
 | `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `76b69e7671a1` | — |
 | `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `8047e05bc7da` | — |
 | `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
@@ -126,15 +126,15 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/live/model/live.queries.ts` | 🟢 NUSXA | `3c140339b7b0` | — |
 | `src/modules/live/model/use-camera-signals.ts` | 🟢 NUSXA | `1228853f5af6` | — |
 | `src/modules/live/model/use-mic-signals.ts` | 🟢 NUSXA | `0bfe2f48ef49` | — |
-| `src/modules/message/api/message.api.ts` | 🟢 NUSXA | `b5f453550de6` | — |
-| `src/modules/message/api/message.dto.ts` | 🟢 NUSXA | `71e170c44c16` | — |
-| `src/modules/message/api/message.endpoints.ts` | 🟢 NUSXA | `8427678cbb4f` | — |
+| `src/modules/message/api/message.api.ts` | 🟢 NUSXA | `7b3783375bd9` | — |
+| `src/modules/message/api/message.dto.ts` | 🟢 NUSXA | `56135a06aec4` | — |
+| `src/modules/message/api/message.endpoints.ts` | 🟢 NUSXA | `a059ec7ac8e3` | — |
 | `src/modules/message/index.ts` | 🟡 MOSLASH | `a1065d5cb63f` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/message/lib/chat-socket-manager.ts` | 🟢 NUSXA | `631eeb6226d8` | — |
-| `src/modules/message/lib/linkify.ts` | 🟢 NUSXA | `9d4c4f8ff708` | — |
-| `src/modules/message/lib/message.mappers.ts` | 🟢 NUSXA | `6252760113bd` | — |
+| `src/modules/message/lib/chat-socket-manager.ts` | 🟢 NUSXA | `db09bb03f1a0` | — |
+| `src/modules/message/lib/linkify.ts` | 🟢 NUSXA | `5a21a96293c4` | — |
+| `src/modules/message/lib/message.mappers.ts` | 🟢 NUSXA | `2c43593d1edf` | — |
 | `src/modules/message/model/message.keys.ts` | 🟢 NUSXA | `fadd16224f37` | — |
-| `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `8e0e288f1631` | react-router-dom useNavigate -> expo-router useRouter |
+| `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `e0e9c5b75b8d` | react-router useNavigate -> expo-router; "guruhdan chiqarildingiz" matni literal (§13) |
 | `src/modules/message/ui/message-attachment.tsx` | 🟡 MOSLASH | `e5c7e28f553a` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-bubble.tsx` | 🟡 MOSLASH | `2cefe5cc619f` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2d0725ac8b8a` | farq qayd etilmagan — tekshiring |

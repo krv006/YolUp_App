@@ -14,7 +14,17 @@ export const courseKeys = Object.freeze({
   students: (id: string, params: QueryParams = {}) => ["courses", id, "students", params] as const,
   searchStudents: (id: string, query: string) => ["courses", id, "search-students", query] as const,
   requests: ["courses", "requests"] as const,
+  subjects: ["courses", "subjects"] as const,
 });
+
+export function useSubjects(enabled = true) {
+  return useQuery({
+    queryKey: courseKeys.subjects,
+    queryFn: ({ signal }) => courseApi.getSubjects({ signal }),
+    staleTime: 30 * 60 * 1000,
+    enabled,
+  });
+}
 
 export function useCourses(params: QueryParams = {}) {
   return useQuery({
@@ -31,7 +41,6 @@ export function useCoursePage(params: QueryParams = {}) {
   });
 }
 
-/** `enabled` — katalog faqat dialog ochilganda kerak. */
 export function useCourseCatalog(params: QueryParams = {}, enabled = true) {
   return useQuery({
     queryKey: courseKeys.catalog(params),
@@ -72,7 +81,6 @@ export function useCreateCourse() {
       client.invalidateQueries({ queryKey: courseKeys.all });
       toast.success("Kurs yaratildi");
     },
-    // Admin hali tasdiqlamagan o'qituvchi kurs yarata olmaydi (403) — sabab aniq ko'rsatiladi.
     onError: (error) => toast.error(describeCreateError(error)),
   });
 }
@@ -109,11 +117,9 @@ export function useCreateEnrollment() {
       client.invalidateQueries({ queryKey: courseKeys.all });
       toast.success("Yozilish so‘rovi yuborildi");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
-/** O‘qituvchi username bo‘yicha bazadan qidiradi (EduTech.docx talabi) — kamida 2 belgi. */
 export function useSearchCourseStudents(courseId: string | null, query: string) {
   const term = query.trim();
   return useQuery({
@@ -124,12 +130,6 @@ export function useSearchCourseStudents(courseId: string | null, query: string) 
   });
 }
 
-/**
- * Yangi o'quvchi hisobi + shu kursga yozish (bitta amal).
- *
- * Xato `onError` da toast qilinmaydi — forma uni maydon ostida ko'rsatadi,
- * chunki xatolar odatda kiritilgan ma'lumotga tegishli ("username band").
- */
 export function useCreateCourseStudent() {
   const client = useQueryClient();
   return useMutation({
@@ -143,7 +143,6 @@ export function useCreateCourseStudent() {
           : "O‘quvchi yaratildi, so‘rov yuborildi"
       );
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 

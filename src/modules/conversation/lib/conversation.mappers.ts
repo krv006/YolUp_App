@@ -39,7 +39,6 @@ export function mapConversationDto(dto: ChatRoomDto): Conversation {
     typing: false,
     avatarTone: toneFor(dto.id),
     memberCount: 0,
-    // `<img src>` uchun to'liq havola kerak — apiClient bazasi qo'llanadi.
     imageUrl: normalizeMediaUrl(dto.image_url),
   };
 }

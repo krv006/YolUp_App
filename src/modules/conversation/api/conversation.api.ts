@@ -18,7 +18,6 @@ export const conversationApi = {
   async getById(id: string, options?: RequestOptions) {
     return mapConversationDto(await apiClient.get<ChatRoomDto>(conversationEndpoints.detail(id), options));
   },
-  /** Backend kurs yaratilganda guruh chatini avtomatik ochadi — shu sabab kurs orqali yaratamiz. */
   async createGroup(payload: CourseFormInput): Promise<Conversation> {
     const course = await courseApi.create(payload);
     const rooms = await this.getAll();
@@ -31,7 +30,6 @@ export const conversationApi = {
     }
     return room;
   },
-  /** Guruh chat rasmi — faqat o'qituvchi, faqat o'z kurs guruhida. */
   async setRoomImage(roomId: string, image: File): Promise<Conversation> {
     const body = new FormData();
     body.set("image", image);

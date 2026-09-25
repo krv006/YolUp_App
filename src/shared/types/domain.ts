@@ -113,7 +113,7 @@ export interface Course {
   id: string;
   title: string;
   subject: string;
-  // KUTMOQDA (port bosqichi): subjectLabel: string;
+  subjectLabel: string;
   description: string;
   teacher: string;
   teacherUser: DomainUser | null;

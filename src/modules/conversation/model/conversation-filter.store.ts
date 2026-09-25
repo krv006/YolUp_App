@@ -5,10 +5,6 @@ import type { Conversation } from "@/shared/types";
 
 export type ConversationFilter = "all" | "direct" | "group" | "unread";
 
-/**
- * Filtr sharti — ro'yxat ham, hisoblagichlar ham shundan foydalanadi,
- * shuning uchun ular hech qachon bir-biriga zid bo'lmaydi.
- */
 export function matchesConversationFilter(
   conversation: Conversation,
   filter: ConversationFilter
@@ -23,17 +19,6 @@ interface ConversationFilterState {
   setFilter: (filter: ConversationFilter) => void;
 }
 
-/**
- * Suhbatlar ro'yxatidagi bo'lim tanlovi (Barchasi / Shaxsiy / Guruhlar / O'qilmagan).
- *
- * Ataylab komponentdan TASHQARIDA saqlanadi: suhbat ochilganda sahifa bo'lagi
- * lazy yuklanadi va shu payt butun daraxt `Suspense` fallback'iga almashadi —
- * panel qayta mount bo'lib, `useState` dagi tanlov yo'qolardi ("Shaxsiy"dan
- * chat tanlansa "Barchasi"ga qaytib ketardi).
- *
- * Saqlanishi qo'shimcha foyda ham beradi: sahifa yangilangandan keyin ham
- * foydalanuvchi o'sha bo'limda qoladi.
- */
 export const useConversationFilterStore = create<ConversationFilterState>()(
   persist(
     (set) => ({

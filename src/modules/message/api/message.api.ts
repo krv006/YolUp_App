@@ -4,7 +4,6 @@ import { messageEndpoints } from "./message.endpoints";
 import type { MessageDto } from "./message.dto";
 import { mapMessageDto } from "../lib/message.mappers";
 
-/** Backendda mavjud bo‘lmagan amallar mock bilan yashirilmaydi — ochiq xato qaytaradi. */
 const unsupported = (label: string): Promise<never> =>
   Promise.reject(
     new AppError({ code: API_ERROR_CODES.NOT_FOUND, message: label + " backend API’da mavjud emas" })
@@ -29,13 +28,11 @@ export const messageApi = {
         message: "Chat fayl yuborish backendda mavjud emas",
       });
     }
-    // Backendda reply_to maydoni yo‘q — javob matn ichiga prefiks bilan yoziladi.
     const text = payload.replyTo
       ? `↪ ${payload.replyTo.author}: ${payload.replyTo.text.replace(/\n/g, " ")}\n${payload.text}`
       : payload.text;
     return mapMessageDto(await apiClient.post<MessageDto>(messageEndpoints.send(roomId), { text }));
   },
-  /** Biriktirma auth talab qiladi, shuning uchun blob sifatida olinadi. */
   downloadFile(messageId: string, options?: RequestOptions) {
     return apiClient.get<Blob>(messageEndpoints.file(messageId), {
       ...options,

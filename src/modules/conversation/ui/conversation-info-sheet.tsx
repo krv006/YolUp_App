@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import { Bell, BellOff, Camera, Check, Copy, Pencil, Trash2, UserRound } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
-import { useCourse, useDeleteCourse, useUpdateCourse } from "@/modules/course";
+import { useCourse, useDeleteCourse, useSubjects, useUpdateCourse } from "@/modules/course";
 import { pickImage, storage, toUploadFile } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
 import {
@@ -12,6 +12,7 @@ import {
   Badge,
   Button,
   Input,
+  SelectField,
   Separator,
   Sheet,
   Text,
@@ -55,6 +56,8 @@ export function ConversationInfoSheet({
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ title: "", subject: "", description: "" });
+  // Faqat tahrir rejimida so'raladi — oddiy ko'rish uchun kerak emas.
+  const subjects = useSubjects(editing);
 
   // `null` — panel yopiq: aks holda har chat ochilganda ortiqcha so'rov ketardi.
   const course = useCourse(open ? conversation.courseId : null);
@@ -145,7 +148,14 @@ export function ConversationInfoSheet({
       {editing ? (
         <>
           <Input label="Kurs nomi" value={form.title} onChangeText={(value) => setForm((c) => ({ ...c, title: value }))} />
-          <Input label="Fan" value={form.subject} onChangeText={(value) => setForm((c) => ({ ...c, subject: value }))} />
+          {/* Fan ro'yxatdan tanlanadi — sabab `new-group-sheet.tsx` da. */}
+          <SelectField
+            label="Fan"
+            placeholder="Fanni tanlang"
+            value={form.subject}
+            options={(subjects.data ?? []).map((item) => ({ value: item.value, label: item.label }))}
+            onChange={(value) => setForm((c) => ({ ...c, subject: value }))}
+          />
           <Input
             label="Tavsif"
             value={form.description}

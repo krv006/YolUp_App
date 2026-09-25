@@ -2,6 +2,7 @@ export const courseEndpoints = Object.freeze({
   list: "/api/v1/courses/",
   detail: (id: string) => `/api/v1/courses/${id}/`,
   catalog: "/api/v1/courses/catalog/",
+  subjects: "/api/v1/courses/subjects/",
   students: (id: string) => `/api/v1/courses/${id}/students/`,
   searchStudents: (id: string) => `/api/v1/courses/${id}/search-students/`,
   enroll: (id: string) => `/api/v1/courses/${id}/enroll/`,

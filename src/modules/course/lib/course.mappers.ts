@@ -4,7 +4,6 @@ import type { CourseDto, CourseFormInput, CourseRequestDto, EnrollmentDto } from
 
 const TONES = ["violet", "blue", "emerald", "amber", "rose"] as const;
 
-/** ID'ning birinchi belgisidan barqaror rang tanlaydi — har render bir xil chiqadi. */
 function toneFor(id: unknown): string {
   return TONES[Math.abs(String(id).charCodeAt(0) || 0) % TONES.length];
 }
@@ -14,7 +13,8 @@ export function mapCourseDto(dto: CourseDto): Course {
   return {
     id: String(dto.id),
     title: dto.title,
-    subject: dto.subject || "Umumiy",
+    subject: dto.subject || "",
+    subjectLabel: dto.subject_label || dto.subject || "",
     description: dto.description || "",
     teacher:
       [teacher.first_name, teacher.last_name].filter(Boolean).join(" ") ||
@@ -26,7 +26,6 @@ export function mapCourseDto(dto: CourseDto): Course {
     status: dto.my_status ?? "joined",
     enrollmentStatus: dto.my_status ?? null,
     isActive: dto.is_active !== false,
-    // Maydon eski backendda yo'q — bo'lmasa "til fani emas" deb qaraladi.
     isLanguageSubject: Boolean(dto.is_language_subject),
     createdAt: dto.created_at ?? null,
     color: toneFor(dto.id),

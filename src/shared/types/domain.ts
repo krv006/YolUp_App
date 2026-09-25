@@ -1,17 +1,3 @@
-/*
- * 🟡 MOBIL FARQI — BOSQICHMA-BOSQICH PORT.
- *
- * Bu fayl veb `src/shared/types/domain.ts` dan ko'chirildi, LEKIN quiz,
- * lesson va course uchun kelgan bir nechta YANGI MAJBURIY maydon vaqtincha
- * izohga olingan ("KUTMOQDA" deb belgilangan).
- *
- * NEGA: ularni to'ldiradigan mapperlar o'z modullari bilan birga, keyingi
- * bosqichlarda ko'chiriladi. Majburiy qilib qoldirilsa, hali ko'chirilmagan
- * mapperlar tiplarga mos kelmay qoladi va loyiha umuman qurilmaydi.
- *
- * Har bosqichda tegishli qatorlar izohdan chiqariladi. Hammasi yopilgach bu
- * fayl yana 🟢 NUSXA bo'ladi va shu izoh olib tashlanadi.
- */
 import type { TeacherStats } from "./auth";
 
 export type AvatarTone = "violet" | "blue" | "emerald" | "amber" | "rose";
@@ -351,14 +337,14 @@ export interface QuizAnswerKey {
 
 export interface QuizQuestion {
   id: string;
-  // KUTMOQDA (port bosqichi): type: QuizQuestionType;
+  type: QuizQuestionType;
   text: string;
   points: number;
   order: number;
   options: QuizOption[];
-  // KUTMOQDA (port bosqichi): matchLeft: QuizChoiceItem[];
-  // KUTMOQDA (port bosqichi): matchRight: QuizChoiceItem[];
-  // KUTMOQDA (port bosqichi): blankCount: number;
+  matchLeft: QuizChoiceItem[];
+  matchRight: QuizChoiceItem[];
+  blankCount: number;
   answerKey?: QuizAnswerKey;
 }
 
@@ -377,12 +363,12 @@ export type QuizStatus = "draft" | "published";
 export interface QuizSummary {
   id: string;
   courseId: string;
-  // KUTMOQDA (port bosqichi): subject: string;
-  // KUTMOQDA (port bosqichi): subjectLabel: string;
+  subject: string;
+  subjectLabel: string;
   lessonId: string | null;
   title: string;
-  // KUTMOQDA (port bosqichi): topic: string;
-  // KUTMOQDA (port bosqichi): status: QuizStatus;
+  topic: string;
+  status: QuizStatus;
   description: string;
   dueAt: string | null;
   opensAt: string | null;
@@ -397,15 +383,15 @@ export interface QuizDetail extends QuizSummary {
 export interface QuizAttemptAnswer {
   questionId: string;
   questionText: string;
-  // KUTMOQDA (port bosqichi): questionType: QuizQuestionType;
+  questionType: QuizQuestionType;
   selectedOptionId: string | null;
   selectedOptionText: string | null;
   isCorrect: boolean;
   correctOption: { id: string; text: string } | null;
-  // KUTMOQDA (port bosqichi): points: number | null;
-  // KUTMOQDA (port bosqichi): earnedPoints: number | null;
-  // KUTMOQDA (port bosqichi): givenDisplay: string | null;
-  // KUTMOQDA (port bosqichi): correctDisplay: string | null;
+  points: number | null;
+  earnedPoints: number | null;
+  givenDisplay: string | null;
+  correctDisplay: string | null;
 }
 
 export interface QuizAttemptSummary {
@@ -423,7 +409,7 @@ export interface QuizAttemptResult extends QuizAttemptSummary {
 }
 
 export interface QuizQuestionFormValues {
-  // KUTMOQDA (port bosqichi): type: QuizQuestionType;
+  type: QuizQuestionType;
   text: string;
   points: number;
   options: Array<{ text: string; isCorrect: boolean }>;
@@ -448,7 +434,7 @@ export interface QuizEditValues {
 export interface QuizFormValues {
   courseId: string;
   subject?: string;
-  // KUTMOQDA (port bosqichi): topic: string;
+  topic: string;
   status?: QuizStatus;
   lessonId?: string | null;
   title: string;

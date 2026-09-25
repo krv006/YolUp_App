@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **110**
-- 🟡/🔴 moslashtirilgan: **67**
+- 🟢 NUSXA: **113**
+- 🟡/🔴 moslashtirilgan: **68**
 - 🆕 mobilga xos: **5**
-- Jami: **182**
+- Jami: **186**
 
 ## Fayllar
 
@@ -159,12 +159,16 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/permission/lib/can.ts` | 🟢 NUSXA | `9f3189dc554c` | — |
 | `src/modules/permission/lib/has-role.ts` | 🟢 NUSXA | `d5aa99b1c50d` | — |
 | `src/modules/permission/ui/permission-guard.tsx` | 🟡 MOSLASH | `4c2702ba4a5d` | farq qayd etilmagan — tekshiring |
-| `src/modules/quiz/api/quiz.api.ts` | 🟢 NUSXA | `9bad6c757187` | — |
-| `src/modules/quiz/api/quiz.dto.ts` | 🟢 NUSXA | `3646b0daa593` | — |
-| `src/modules/quiz/api/quiz.endpoints.ts` | 🟢 NUSXA | `0c5a2be7325e` | — |
-| `src/modules/quiz/index.ts` | 🟡 MOSLASH | `2e12a1ad6be0` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `46aaa6e0ed2a` | — |
-| `src/modules/quiz/model/quiz.queries.ts` | 🟢 NUSXA | `df7f8e9f416a` | — |
+| `src/modules/quiz/api/quiz.api.ts` | 🟢 NUSXA | `43fa08b4de71` | — |
+| `src/modules/quiz/api/quiz.dto.ts` | 🟢 NUSXA | `bfcdf1623e35` | — |
+| `src/modules/quiz/api/quiz.endpoints.ts` | 🟢 NUSXA | `ba6af768960e` | — |
+| `src/modules/quiz/index.ts` | 🟡 MOSLASH | `af1ba44d864b` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/quiz/lib/answer-value.ts` | 🟢 NUSXA | `724d9951d2f2` | — |
+| `src/modules/quiz/lib/question-draft.ts` | 🟢 NUSXA | `c91791787e92` | — |
+| `src/modules/quiz/lib/quiz-errors.ts` | 🟢 NUSXA | `da4cf7939388` | — |
+| `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
+| `src/modules/quiz/model/quiz.queries.ts` | 🟡 MOSLASH | `a079604c210e` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
+| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
@@ -206,7 +210,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/lib/utils.ts` | 🟢 NUSXA | `4dd93deacc31` | — |
 | `src/shared/types/auth.ts` | 🟢 NUSXA | `231c2b789a1f` | — |
 | `src/shared/types/chat.ts` | 🟢 NUSXA | `69dedcbdcc16` | — |
-| `src/shared/types/domain.ts` | 🟡 MOSLASH | `cd4ce09bfc06` | quiz/lesson/course maydonlari `KUTMOQDA` izohida — o'z port bosqichida ochiladi |
+| `src/shared/types/domain.ts` | 🟢 NUSXA | `cd4ce09bfc06` | — |
 | `src/shared/types/dto.ts` | 🟢 NUSXA | `626467937625` | — |
 | `src/shared/types/index.ts` | 🟢 NUSXA | `b85973e9c7af` | — |
 | `src/shared/ui/avatar.tsx` | 🟡 MOSLASH | `8f4429737fdb` | farq qayd etilmagan — tekshiring |

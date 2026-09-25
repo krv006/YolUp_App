@@ -30,13 +30,23 @@ export {
   quizKeys,
   useCreateQuiz,
   useDeleteQuiz,
+  useDownloadQuizTemplate,
+  useImportGoogleLink,
+  useImportQuizDocx,
+  usePublishQuiz,
   useQuiz,
   useQuizAttempts,
+  useQuizDetailLoader,
   useQuizzes,
   useSubmitQuizAttempt,
+  useUpdateQuiz,
 } from "./model/quiz.queries";
+export { blankTextForDisplay, emptyAnswer, stableShuffle } from "./lib/answer-value";
+export { quizErrorMessage } from "./lib/quiz-errors";
 
 // --- Mobil UI ---
+export { QuestionAnswerInput } from "./ui/question-answer-input";
+export type { QuestionAnswerInputProps } from "./ui/question-answer-input";
 export { AddQuizSheet } from "./ui/add-quiz-sheet";
 export type { AddQuizSheetProps } from "./ui/add-quiz-sheet";
 

@@ -178,7 +178,17 @@ export function AddQuizSheet({ open, onClose, courses, defaultCourseId }: AddQui
       description: description.trim(),
       dueAt: dueAt ? `${dueAt}T23:59` : null,
       opensAt: opensAt ? `${opensAt}T00:00` : null,
+      // Hozircha faqat BITTA to'g'ri javobli savol yaratiladi.
+      //
+      // Backend endi sakkiz xil turni qabul qiladi (single, multiple,
+      // true_false, numeric, text, matching, ordering, fill_blank) va
+      // o'quvchi ularning hammasini MOBILDA YECHA OLADI. Yaratish tomoni
+      // esa alohida bosqichda keladi — u to'liq savol muharririni talab
+      // qiladi (veb'da 481 qator). Shu vaqtgacha bu oyna eski, sodda
+      // ko'rinishda ishlayveradi.
+      topic: "",
       questions: questions.map((question) => ({
+        type: "single" as const,
         text: question.text.trim(),
         points: Number(question.points) || 1,
         options: question.options

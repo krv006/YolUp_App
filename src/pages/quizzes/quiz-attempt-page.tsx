@@ -2,9 +2,9 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Check, CircleAlert, X } from "lucide-react-native";
-import { useQuiz, useQuizAttempts, useSubmitQuizAttempt } from "@/modules/quiz";
+import { emptyAnswer, QuestionAnswerInput, useQuiz, useQuizAttempts, useSubmitQuizAttempt } from "@/modules/quiz";
 import { formatDayTime } from "@/shared/lib";
-import type { QuizAttemptResult, QuizQuestion } from "@/shared/types";
+import type { QuizAnswerValue, QuizAttemptResult, QuizQuestion } from "@/shared/types";
 import {
   Badge,
   Button,
@@ -20,7 +20,34 @@ import {
   useTheme,
 } from "@/shared/ui";
 
-type Answers = Record<string, string | null>;
+type Answers = Record<string, QuizAnswerValue>;
+
+/**
+ * Javob berilganmi — har tur uchun alohida.
+ *
+ * Bir xil tekshiruv ishlamaydi: `single` da bitta id, `multiple` da
+ * massiv, `ordering` da esa qiymat DOIM to'la bo'ladi (tartib boshidan
+ * beriladi), ya'ni u har doim javoblangan hisoblanadi.
+ */
+function isAnswered(value: QuizAnswerValue): boolean {
+  switch (value.type) {
+    case "single":
+      return value.optionId !== null;
+    case "multiple":
+      return value.optionIds.length > 0;
+    case "true_false":
+      return value.value !== null;
+    case "numeric":
+    case "text":
+      return value.value.trim() !== "";
+    case "matching":
+      return Object.keys(value.pairs).length > 0;
+    case "fill_blank":
+      return value.values.some((entry) => entry.trim() !== "");
+    default:
+      return true;
+  }
+}
 
 /**
  * Testni yechish va urinishlar tarixi — bitta to'liq ekran.
@@ -48,7 +75,9 @@ export function QuizAttemptPage() {
     [quiz.data?.questions]
   );
 
-  const answeredCount = questions.filter((question) => answers[question.id]).length;
+  const answeredCount = questions.filter((question) =>
+    isAnswered(answers[question.id] ?? emptyAnswer(question))
+  ).length;
   const allAnswered = questions.length > 0 && answeredCount === questions.length;
 
   function goBack() {
@@ -58,9 +87,11 @@ export function QuizAttemptPage() {
 
   async function send() {
     if (!quizId) return;
+    // Javobsiz savol ham yuboriladi — server uni xato deb hisoblaydi.
+    // Veb ham shunday qiladi, aks holda urinish yarim qolardi.
     const payload = questions.map((question) => ({
       questionId: question.id,
-      selectedOptionId: answers[question.id] ?? null,
+      answer: answers[question.id] ?? emptyAnswer(question),
     }));
     const attempt = await submit.mutateAsync({ quizId, answers: payload });
     setResult(attempt);
@@ -142,9 +173,9 @@ export function QuizAttemptPage() {
                   key={question.id}
                   index={index + 1}
                   question={question}
-                  selected={answers[question.id] ?? null}
-                  onSelect={(optionId) =>
-                    setAnswers((current) => ({ ...current, [question.id]: optionId }))
+                  value={answers[question.id] ?? emptyAnswer(question)}
+                  onChange={(value) =>
+                    setAnswers((current) => ({ ...current, [question.id]: value }))
                   }
                 />
               ))
@@ -178,13 +209,13 @@ export function QuizAttemptPage() {
 function QuestionCard({
   index,
   question,
-  selected,
-  onSelect,
+  value,
+  onChange,
 }: {
   index: number;
   question: QuizQuestion;
-  selected: string | null;
-  onSelect: (optionId: string) => void;
+  value: QuizAnswerValue;
+  onChange: (value: QuizAnswerValue) => void;
 }) {
   const { palette } = useTheme();
 
@@ -199,37 +230,7 @@ function QuestionCard({
       <Text variant="label">{question.text}</Text>
 
       <View style={styles.options}>
-        {question.options.map((option) => {
-          const active = selected === option.id;
-          return (
-            <Pressable
-              key={option.id}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              onPress={() => onSelect(option.id)}
-              style={({ pressed }) => [
-                styles.option,
-                {
-                  borderColor: active ? palette.primary : palette.border,
-                  backgroundColor: active ? palette["primary-tint"] : palette.surface,
-                  opacity: pressed ? 0.85 : 1,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.radio,
-                  { borderColor: active ? palette.primary : palette["border-strong"] },
-                ]}
-              >
-                {active ? (
-                  <View style={[styles.radioDot, { backgroundColor: palette.primary }]} />
-                ) : null}
-              </View>
-              <Text style={styles.optionText}>{option.text}</Text>
-            </Pressable>
-          );
-        })}
+        <QuestionAnswerInput question={question} value={value} onChange={onChange} />
       </View>
     </View>
   );

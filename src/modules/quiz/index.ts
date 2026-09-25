@@ -5,6 +5,7 @@
  * domen qatlami to'liq, `ui/` eksportlari olib tashlangan — mobil UI alohida
  * yoziladi va o'z fayllaridan import qilinadi.
  */
+export type { ImportedQuiz } from "./api/quiz.api";
 export { quizApi } from "./api/quiz.api";
 export { quizEndpoints } from "./api/quiz.endpoints";
 export type {
@@ -49,4 +50,6 @@ export { QuestionAnswerInput } from "./ui/question-answer-input";
 export type { QuestionAnswerInputProps } from "./ui/question-answer-input";
 export { AddQuizSheet } from "./ui/add-quiz-sheet";
 export type { AddQuizSheetProps } from "./ui/add-quiz-sheet";
+export { ImportResultSheet } from "./ui/import-result-sheet";
+export type { ImportResultSheetProps } from "./ui/import-result-sheet";
 

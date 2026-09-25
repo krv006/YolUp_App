@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-25 (shared + auth bosqichi)
+- **Oxirgi yangilanish:** 2026-09-25 (quiz import bosqichi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **120**
-- 🟡/🔴 moslashtirilgan: **76**
-- 🆕 mobilga xos: **5**
-- Jami: **201**
+- 🟢 NUSXA: **121**
+- 🟡/🔴 moslashtirilgan: **77**
+- 🆕 mobilga xos: **6**
+- Jami: **204**
 
 ## Fayllar
 
@@ -169,11 +169,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/api/quiz.dto.ts` | 🟢 NUSXA | `bfcdf1623e35` | — |
 | `src/modules/quiz/api/quiz.endpoints.ts` | 🟢 NUSXA | `ba6af768960e` | — |
 | `src/modules/quiz/index.ts` | 🟡 MOSLASH | `af1ba44d864b` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/quiz/lib/google-import.ts` | 🟢 NUSXA | `d89ca84726fc` | — |
 | `src/modules/quiz/lib/answer-value.ts` | 🟢 NUSXA | `724d9951d2f2` | — |
 | `src/modules/quiz/lib/question-draft.ts` | 🟢 NUSXA | `c91791787e92` | — |
 | `src/modules/quiz/lib/quiz-errors.ts` | 🟢 NUSXA | `da4cf7939388` | — |
 | `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
 | `src/modules/quiz/model/quiz.queries.ts` | 🟡 MOSLASH | `a079604c210e` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
+| `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); nom taklifi (combobox) va qoralama saqlash ko'chirilmadi; import natijasi `import-result-sheet` da |
+| `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
 | `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn |
 | `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |

@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **116**
-- 🟡/🔴 moslashtirilgan: **72**
+- 🟢 NUSXA: **120**
+- 🟡/🔴 moslashtirilgan: **76**
 - 🆕 mobilga xos: **5**
-- Jami: **193**
+- Jami: **201**
 
 ## Fayllar
 
@@ -180,6 +180,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/student/model/student.queries.ts` | 🟢 NUSXA | `e507a2f33021` | — |
+| `src/modules/voice/api/voice.api.ts` | 🟢 NUSXA | `c779868ae383` | — |
+| `src/modules/voice/api/voice.dto.ts` | 🟢 NUSXA | `3d82a1415023` | — |
+| `src/modules/voice/api/voice.endpoints.ts` | 🟢 NUSXA | `21c1eee7370f` | — |
+| `src/modules/voice/index.ts` | 🟡 MOSLASH | `303c4f6a682a` | generatsiya: veb barrel minus `ui/` + mobil UI eksportlari |
+| `src/modules/voice/lib/voice.mappers.ts` | 🟢 NUSXA | `1ea078f239f3` | — |
+| `src/modules/voice/model/voice.queries.ts` | 🟡 MOSLASH | `34c755e07c59` | toast matnlari i18n o'rniga literal (§13) |
+| `src/modules/voice/ui/voice-room-bar.tsx` | 🟡 MOSLASH | `46d2b5212234` | mobil qobiq: xona ochish oynasi shu faylda (veb'da alohida dialog) |
+| `src/modules/voice/ui/voice-room-sheet.tsx` | 🟡 MOSLASH | `76f4b2d71876` | manba: veb `voice-room-dialog.tsx`; video plitkalari o'rniga ro'yxat, LiveKitRoom video={false} |
 | `src/pages/admin/admin-dashboard-page.tsx` | 🟡 MOSLASH | `f3de9850f257` | farq qayd etilmagan — tekshiring |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |

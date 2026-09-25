@@ -20,11 +20,6 @@ import {
   mapLessonRequest,
 } from "../lib/lesson.mappers";
 
-/**
- * Baholash API hali barcha muhitlarga chiqarilmagan — o'sha yerda Django
- * marshrutni topa olmaydi va HTML 404 qaytaradi. Bu server xatosi emas,
- * shuning uchun UI baholashni butunlay yashiradi.
- */
 function isMissingRatingApi(error: unknown): boolean {
   return (
     error instanceof AppError &&
@@ -45,27 +40,6 @@ export const lessonApi = {
   async update(id: string, form: LessonFormInput) {
     return mapLessonDto(await apiClient.patch<LessonDto>(lessonEndpoints.detail(id), mapLessonRequest(form)));
   },
-  /**
-   * Takrorlanuvchi jadval — har sana uchun alohida `POST /lessons/`.
-   *
-   * Backendda ommaviy yaratish endpointi yo'q, shuning uchun so'rovlar shu
-   * yerdan yuboriladi. Ular 4 tadan guruhlanadi: 40 ta darsni ketma-ket
-   * yuborish ~16 soniya olardi, hammasini birdan yuborish esa serverni
-   * keraksiz yuklaydi.
-   *
-   * Amal ATOMIK EMAS — bir nechtasi muvaffaqiyatsiz bo'lsa, qolganlari
-   * yaratilgan holicha qoladi, shuning uchun natijada xatolar ham qaytadi.
-   */
-  /**
-   * Haftalik jadval — server tomonda (docs/STAFF_API.md §2).
-   *
-   * Server amalni atomik bajaradi va o'qituvchining BARCHA kurslari bo'yicha
-   * vaqt to'qnashuvini tekshiradi — bu mijoz tomonida umuman imkonsiz, chunki
-   * `GET /lessons/` boshqa o'qituvchining darslarini ko'rsatmaydi.
-   *
-   * Endpoint hali barcha muhitlarga chiqarilmagan: 404 kelsa, chaqiruvchi
-   * eski (mijoz tomonidagi) usulga qaytadi, shuning uchun `null` qaytariladi.
-   */
   async createSchedule(
     courseId: string,
     payload: LessonScheduleRequestDto
@@ -112,7 +86,6 @@ export const lessonApi = {
     await apiClient.delete(lessonEndpoints.detail(id));
     return id;
   },
-  /** `recordingTitle` — o'qituvchi video yozuvga beradigan nom (bo'sh bo'lsa dars nomi olinadi). */
   async finish(id: string, recordingTitle?: string) {
     const title = recordingTitle?.trim();
     return mapLessonDto(
@@ -122,7 +95,6 @@ export const lessonApi = {
       )
     );
   },
-  /** Yozuv yo'q bo'lsa backend 404 qaytaradi — bu xato emas, shunchaki `null`. */
   async getRecording(id: string, options?: RequestOptions) {
     try {
       const dto = await apiClient.get<LessonRecordingDto>(lessonEndpoints.recording(id), options);
@@ -142,7 +114,6 @@ export const lessonApi = {
     formData.append("chunk", chunk, `lesson-${id}-${Date.now()}.webm`);
     if (startedAt) formData.append("started_at", startedAt);
     await apiClient.post<void>(lessonEndpoints.recordingAudio(id), formData, {
-      // 10 MB gacha bo‘lgan chunk sekin tarmoqda standart so‘rovdan uzoqroq ketishi mumkin.
       timeoutMs: 60_000,
     });
   },
@@ -154,26 +125,18 @@ export const lessonApi = {
     formData.append("chunk", chunk, `lesson-${id}-${Date.now()}.webm`);
     if (startedAt) formData.append("started_at", startedAt);
     await apiClient.post<void>(lessonEndpoints.recordingVideo(id), formData, {
-      // Video bo‘lagi (50 MB gacha) audio bo‘lagidan sezilarli katta bo‘lishi mumkin.
       timeoutMs: 120_000,
     });
   },
   async finalizeRecordingVideo(id: string) {
     await apiClient.post<void>(lessonEndpoints.finalizeRecordingVideo(id));
   },
-  /**
-   * Dars bahosi. Backend faqat tugagan darsni va faqat shu kursga yozilgan
-   * o'quvchini qabul qiladi — qolgan hollarda 400/403 keladi va xabar formada
-   * ko'rsatiladi.
-   */
   async rate(id: string, input: LessonRatingInput) {
     try {
       const dto = await apiClient.post<LessonRatingDto | null>(
         lessonEndpoints.rate(id),
         mapLessonRatingRequest(input)
       );
-      // Javob shakli hujjatlashtirilmagan: baho obyekti kelsa ishlatamiz, aks holda
-      // ro'yxat baribir qayta so'raladi.
       return dto && typeof dto === "object" && "stars" in dto ? mapLessonRatingDto(dto) : null;
     } catch (error) {
       if (isMissingRatingApi(error)) {
@@ -187,7 +150,6 @@ export const lessonApi = {
       throw error;
     }
   },
-  /** `null` — baholash API bu muhitda mavjud emas (chaqiruvchi bo'limni yashiradi). */
   async getRatings(id: string, options?: RequestOptions) {
     try {
       return mapLessonRatingList(await apiClient.get(lessonEndpoints.ratings(id), options));

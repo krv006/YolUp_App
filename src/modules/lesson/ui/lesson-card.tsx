@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Clock, Pencil, PlayCircle, Square, Star, Trash2, Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
-import { isLessonClosed, lessonStatusMeta } from "../lib/lesson-status";
+import { hasLessonTopic, isLessonClosed, lessonStatusMeta } from "../lib/lesson-status";
 
 export interface LessonCardProps {
   lesson: Lesson;
@@ -48,12 +48,19 @@ export function LessonCard({
   const meta = lessonStatusMeta(lesson.status);
   const closed = isLessonClosed(lesson);
 
+  // Mavzusiz darsga kirib bo'lmaydi — sabab `hasLessonTopic` izohida.
+  const missingTopic = !hasLessonTopic(lesson);
+
   return (
     <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
       <View style={styles.head}>
         <View style={styles.headBody}>
-          <Text variant="label" numberOfLines={2}>
-            {lesson.title || lesson.topic || "Dars"}
+          <Text
+            variant="label"
+            numberOfLines={2}
+            style={missingTopic ? { color: palette["warning-strong"] } : undefined}
+          >
+            {missingTopic ? "Mavzu yozilmagan" : lesson.title || lesson.topic}
           </Text>
           <Text variant="caption" tone="muted" numberOfLines={1}>
             {lesson.courseTitle}
@@ -80,7 +87,7 @@ export function LessonCard({
       </View>
 
       <View style={styles.actions}>
-        {lesson.status === "live" && onJoin ? (
+        {lesson.status === "live" && onJoin && !missingTopic ? (
           <Action
             label="Darsga kirish"
             tone="danger"
@@ -89,7 +96,7 @@ export function LessonCard({
           />
         ) : null}
 
-        {lesson.status === "scheduled" && onJoin ? (
+        {lesson.status === "scheduled" && onJoin && !missingTopic ? (
           <Action
             label="Kirish"
             tone="primary"

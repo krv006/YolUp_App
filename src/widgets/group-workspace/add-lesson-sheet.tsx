@@ -41,14 +41,33 @@ export interface AddLessonSheetProps {
   editing?: Lesson | null;
 }
 
+/**
+ * `yyyy-MM-dd` — MAHALLIY vaqt bo'yicha.
+ *
+ * `toISOString()` UTC qaytaradi. O'zbekiston UTC+5, ya'ni kechqurun soat
+ * 19:00 dan keyin u ERTANGI kunni emas, KECHAGI kunni beradi va
+ * "bugun" deb tanlangan sana bir kun orqaga suriladi.
+ */
+function toDateValue(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 function todayString(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toDateValue(new Date());
+}
+
+/** `HH:mm` — hozirgi mahalliy vaqt. */
+function nowTimeString(): string {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 }
 
 function monthLaterString(): string {
   const date = new Date();
   date.setMonth(date.getMonth() + 1);
-  return date.toISOString().slice(0, 10);
+  return toDateValue(date);
 }
 
 /**
@@ -78,7 +97,7 @@ export function AddLessonSheet({
   // oynani `key={editing?.id ?? "new"}` bilan qayta yaratadi, shuning uchun
   // effekt kerak emas — state bir marta shu yerdan boshlanadi.
   const [topic, setTopic] = useState(editing?.title ?? editing?.topic ?? "");
-  const [date, setDate] = useState(editing?.date ?? "");
+  const [date, setDate] = useState(editing?.date ?? todayString());
   const [time, setTime] = useState(editing?.time ?? "18:30");
   const [duration, setDuration] = useState(String(editing?.durationMinutes ?? 45));
   const [repeat, setRepeat] = useState(false);
@@ -135,7 +154,8 @@ export function AddLessonSheet({
   }
 
   async function submit() {
-    if (!topic.trim() || !time) return;
+    if (!time || startsInPast || invalidRange) return;
+    if (!repeat && !topic.trim()) return;
     try {
       if (editing) {
         if (!date) {
@@ -192,6 +212,26 @@ export function AddLessonSheet({
     }
   }
 
+  /*
+   * SANA VA VAQT CHEKLOVLARI.
+   *
+   * Tekshiruv so'rov yuborilgunga qadar, tanlash paytida ko'rinadi —
+   * o'qituvchi formani to'ldirib bo'lib, serverdan rad javob olishi
+   * noto'g'ri bo'lardi.
+   *
+   * ESKI DARSNI TAHRIRLASH istisno: o'tib ketgan darsning mavzusini
+   * yoki davomiyligini tuzatish mumkin bo'lishi kerak, aks holda
+   * o'tmishdagi yozuvni umuman tahrirlab bo'lmasdi.
+   */
+  const today = todayString();
+  const editingPast = Boolean(editing) && date < today;
+  const startsInPast =
+    !repeat &&
+    !editingPast &&
+    Boolean(date) &&
+    (date < today || (date === today && time < nowTimeString()));
+  const invalidRange = repeat && Boolean(to) && to < from;
+
   const conflicts = repeat ? scheduleConflicts : singleConflicts;
   const pending = create.isPending || createSchedule.isPending || update.isPending;
 
@@ -206,12 +246,19 @@ export function AddLessonSheet({
           : "Bitta dars yoki takrorlanuvchi haftalik jadval."
       }
     >
-      <Input
-        label="Mavzu"
-        placeholder="Masalan: Kvadrat tenglamalar"
-        value={topic}
-        onChangeText={setTopic}
-      />
+      {repeat ? (
+        <Text variant="caption" tone="muted">
+          Har bir darsning mavzusi keyin ro'yxatdan alohida yoziladi — shuning uchun bu
+          yerda mavzu so'ralmaydi.
+        </Text>
+      ) : (
+        <Input
+          label="Mavzu"
+          placeholder="Masalan: Kvadrat tenglamalar"
+          value={topic}
+          onChangeText={setTopic}
+        />
+      )}
 
       <View style={styles.row}>
         <View style={styles.half}>
@@ -229,7 +276,14 @@ export function AddLessonSheet({
 
       {/* Mavjud darsni haftalik jadvalga aylantirib bo'lmaydi. */}
       {editing ? null : (
-        <Checkbox checked={repeat} onChange={setRepeat} label="Har hafta takrorlansin" />
+        <Checkbox
+          checked={repeat}
+          onChange={(next) => {
+            setRepeat(next);
+            if (next) setTopic("");
+          }}
+          label="Har hafta takrorlansin"
+        />
       )}
 
       {repeat ? (
@@ -248,10 +302,20 @@ export function AddLessonSheet({
 
           <View style={styles.row}>
             <View style={styles.half}>
-              <DateField label="Boshlanish" value={from} onChange={setFrom} />
+              <DateField
+                label="Boshlanish"
+                value={from}
+                minimumDate={new Date(today)}
+                onChange={(value) => {
+                  setFrom(value);
+                  // Boshlanish keyinga surilsa tugash sanasi ham ergashadi,
+                  // aks holda oraliq teskari bo'lib qolardi.
+                  setTo((current) => (current && current < value ? value : current));
+                }}
+              />
             </View>
             <View style={styles.half}>
-              <DateField label="Tugash" value={to} onChange={setTo} />
+              <DateField label="Tugash" value={to} minimumDate={new Date(from || today)} onChange={setTo} />
             </View>
           </View>
 
@@ -260,8 +324,32 @@ export function AddLessonSheet({
           </Text>
         </>
       ) : (
-        <DateField label="Sana" value={date} onChange={setDate} />
+        <DateField
+          label="Sana"
+          value={date}
+          minimumDate={editingPast ? undefined : new Date(today)}
+          onChange={setDate}
+        />
       )}
+
+      {startsInPast ? (
+        <View style={[styles.warning, { backgroundColor: palette["destructive-soft"] }]}>
+          <TriangleAlert size={16} color={palette["destructive-strong"]} />
+          <Text variant="caption" style={{ flex: 1, color: palette["destructive-strong"] }}>
+            O'tib ketgan vaqtga dars yaratib bo'lmaydi — hozir soat {nowTimeString()}.
+            Boshqa sana yoki vaqtni tanlang.
+          </Text>
+        </View>
+      ) : null}
+
+      {invalidRange ? (
+        <View style={[styles.warning, { backgroundColor: palette["destructive-soft"] }]}>
+          <TriangleAlert size={16} color={palette["destructive-strong"]} />
+          <Text variant="caption" style={{ flex: 1, color: palette["destructive-strong"] }}>
+            Tugash sanasi boshlanishdan oldin bo'la olmaydi.
+          </Text>
+        </View>
+      ) : null}
 
       {conflicts.length > 0 ? (
         <View style={[styles.warning, { backgroundColor: palette["warning-soft"] }]}>
@@ -276,7 +364,11 @@ export function AddLessonSheet({
         title={editing ? "Saqlash" : repeat ? `${dates.length} ta dars yaratish` : "Dars yaratish"}
         size="lg"
         loading={pending}
-        disabled={!topic.trim() || (repeat ? dates.length === 0 : !date)}
+        disabled={
+          startsInPast ||
+          invalidRange ||
+          (repeat ? dates.length === 0 : !topic.trim() || !date)
+        }
         onPress={() => void submit()}
       />
     </Sheet>

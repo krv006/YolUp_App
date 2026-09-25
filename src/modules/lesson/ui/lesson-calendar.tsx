@@ -4,7 +4,22 @@ import { addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { IconButton, radius, Text, useTheme } from "@/shared/ui";
-import { buildMonthGrid, formatMonthTitle, WEEKDAY_LABELS } from "../lib/lesson-calendar";
+import {
+  buildMonthGrid,
+  formatMonthTitle,
+} from "../lib/lesson-calendar";
+
+/*
+ * Hafta dushanbadan boshlanadi — O'zbekistondagi odat.
+ *
+ * Bu ro'yxat AVVAL `lib/lesson-calendar.ts` da edi. Veb uni i18n'ga
+ * ko'chirdi (`t("calendar.weekdays")`), mobilda esa i18n hali yo'q
+ * (DECISIONS §13). Uni ko'chirilgan lib fayliga qaytarib qo'ysak, o'sha
+ * fayl veb bilan bayt-bayt bir xil bo'lmay qolardi va har port'da qo'lda
+ * birlashtirish kerak bo'lardi. Shuning uchun u MOBIL UI fayliga
+ * ko'chirildi — bu fayl baribir mobilga xos.
+ */
+const WEEKDAY_LABELS = ["Du", "Se", "Chor", "Pay", "Jum", "Shan", "Yak"] as const;
 
 export interface LessonCalendarProps {
   lessons: Lesson[];

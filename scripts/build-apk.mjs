@@ -12,7 +12,7 @@
  *     quradi, ~5 GB xotira so'raydi va demon halok bo'ladi (DECISIONS §18).
  *
  *  3. VARIANT. Standart holatda loyiha `development` variantida quriladi —
- *     paket `uz.fokus.edu.dev`, nomi "Fokus (Dev)". Telefondagi haqiqiy
+ *     paket `uz.yolup.edu.dev`, nomi "YolUp (Dev)". Telefondagi haqiqiy
  *     ilova uchun `production` kerak.
  *
  *  4. PREBUILD. Ikonka, splash va imzolash `android/` ichiga aynan

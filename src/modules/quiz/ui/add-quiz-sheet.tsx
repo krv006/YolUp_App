@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Download, FileUp, Link2, Plus } from "lucide-react-native";
+import { Download, Eye, FileUp, Link2, Plus } from "lucide-react-native";
 import { pickDocument, toUploadFile } from "@/shared/lib";
 import type { QuizDetail, QuizEditValues, QuizFormValues } from "@/shared/types";
 import {
@@ -34,6 +34,7 @@ import {
   useUpdateQuiz,
 } from "../model/quiz.queries";
 import { draftErrorMessage, QuestionEditor } from "./question-editor";
+import { QuizPreviewSheet } from "./quiz-preview-sheet";
 
 /** Shablondagi namuna savollar soni — veb `quiz-create-dialog.tsx:32`. */
 const TEMPLATE_QUESTION_COUNT = 10;
@@ -189,6 +190,7 @@ export function AddQuizSheet({
       ? editQuiz.questions.map((question) => questionToDraft(question, newKey))
       : [createDraft("single", newKey)]
   );
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [googleOpen, setGoogleOpen] = useState(false);
   const [googleUrl, setGoogleUrl] = useState("");
 
@@ -598,6 +600,28 @@ export function AddQuizSheet({
         * Bu ayniqsa muhim, chunki oynada bir-biriga o'xshash ikkita matn
         * maydoni bor: "Mavzu" va "Test nomi".
         */}
+      {/*
+        * Vebda o'quvchi ko'rinishi YONMA-YON ustunda doim turadi. Telefonda
+        * ustun yo'q, shuning uchun u talab bo'yicha ochiladi — lekin
+        * ko'rinishning o'zi bir xil, chunki ikkalasi ham AYNAN o'sha
+        * `QuestionAnswerInput` ni chizadi.
+        */}
+      {questionsLocked ? null : (
+        <Button
+          title="O'quvchi ko'rinishi"
+          variant="ghost"
+          icon={<Eye size={16} color={palette["primary-text"]} />}
+          onPress={() => setPreviewOpen(true)}
+        />
+      )}
+
+      <QuizPreviewSheet
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        title={title}
+        questions={questions}
+      />
+
       <Button
         title={editing ? "Saqlash" : "Testni yaratish"}
         size="lg"

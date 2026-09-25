@@ -15,7 +15,7 @@ import { z } from "zod";
  */
 
 const envSchema = z.object({
-  appName: z.string().trim().min(1).default("Fokus"),
+  appName: z.string().trim().min(1).default("YolUp"),
   appEnv: z.enum(["development", "staging", "production"]).default("development"),
   apiUrl: z.string().trim().url("apiUrl absolyut URL bo'lishi kerak (mobilda proxy yo'q)"),
   wsUrl: z

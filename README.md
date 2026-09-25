@@ -43,9 +43,9 @@ nativ modullar kerak — Expo Go ularni ko'tarmaydi.
 uchalasi bitta telefonda yonma-yon turadi:
 
 ```bash
-APP_VARIANT=development npm start   # uz.fokus.edu.dev
-APP_VARIANT=staging     npm start   # uz.fokus.edu.staging
-APP_VARIANT=production  npm start   # uz.fokus.edu
+APP_VARIANT=development npm start   # uz.yolup.edu.dev
+APP_VARIANT=staging     npm start   # uz.yolup.edu.staging
+APP_VARIANT=production  npm start   # uz.yolup.edu
 ```
 
 API manzilini almashtirish:

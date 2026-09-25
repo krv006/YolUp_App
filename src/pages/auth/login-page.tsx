@@ -49,7 +49,7 @@ export function LoginPage() {
     <Screen scroll avoidKeyboard>
       <View style={styles.header}>
         <Logo size={64} variant="tile" />
-        <Text variant="title">Fokus</Text>
+        <Text variant="title">YolUp</Text>
         <Text tone="muted">Onlayn ta'lim platformasi</Text>
       </View>
 

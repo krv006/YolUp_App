@@ -1,7 +1,7 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
 /**
- * Fokus mobil ilova konfiguratsiyasi.
+ * YolUp mobil ilova konfiguratsiyasi.
  *
  * Uch muhit (`APP_VARIANT`) alohida bundle ID oladi — shunda dev, staging va
  * prod bitta telefonda yonma-yon tura oladi va tester qaysi build ekanini
@@ -16,12 +16,12 @@ type Variant = "development" | "staging" | "production";
 const VARIANT = (process.env.APP_VARIANT ?? "development") as Variant;
 
 const VARIANTS: Record<Variant, { name: string; idSuffix: string }> = {
-  development: { name: "Fokus (Dev)", idSuffix: ".dev" },
-  staging: { name: "Fokus (Beta)", idSuffix: ".staging" },
-  production: { name: "Fokus", idSuffix: "" },
+  development: { name: "YolUp (Dev)", idSuffix: ".dev" },
+  staging: { name: "YolUp (Beta)", idSuffix: ".staging" },
+  production: { name: "YolUp", idSuffix: "" },
 };
 
-const BASE_ID = "uz.fokus.edu";
+const BASE_ID = "uz.yolup.edu";
 
 /** Prod backend — mobil veb proxy'siz to'g'ridan-to'g'ri uradi (MOBILE_PLAN §11 #4). */
 const DEFAULT_API_URL = "https://edu.thesofmebel.uz";
@@ -33,10 +33,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   return {
     ...config,
     name: variant.name,
-    slug: "fokus",
+    slug: "yolup",
     version: "0.1.0",
     orientation: "portrait",
-    scheme: "fokus",
+    scheme: "yolup",
     userInterfaceStyle: "automatic",
     icon: "./assets/icon.png",
     ios: {
@@ -125,7 +125,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     // qilardi. Faza 1 da ROUTES tiplanganidan keyin yoqiladi.
     experiments: { typedRoutes: false },
     extra: {
-      appName: "Fokus",
+      appName: "YolUp",
       appEnv: VARIANT,
       apiUrl: process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_URL,
       wsUrl: process.env.EXPO_PUBLIC_WS_URL ?? DEFAULT_WS_URL,

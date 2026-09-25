@@ -36,7 +36,7 @@ import {
  * bo'lmaydi; bo'sh joy sintaksisi o'rniga izoh bilan tushuntiriladi.
  */
 
-const TYPE_LABELS: Record<QuizQuestionType, string> = {
+export const TYPE_LABELS: Record<QuizQuestionType, string> = {
   single: "Bitta to'g'ri javob",
   multiple: "Bir nechta to'g'ri javob",
   true_false: "To'g'ri / noto'g'ri",

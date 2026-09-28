@@ -9,6 +9,7 @@ import {
   FileUp,
   ImageIcon,
   Paperclip,
+  Pencil,
   Plus,
   Trash2,
 } from "lucide-react-native";
@@ -65,6 +66,7 @@ export function AssignmentsSection({
   const assignments = useAssignments(courseId);
   const removeAssignment = useDeleteAssignment();
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
+  const [editTarget, setEditTarget] = useState<Assignment | null>(null);
   // Darslar faqat o'qituvchiga kerak — vazifani tugagan darsga bog'lash uchun.
   const lessons = useLessons({ course: courseId, page_size: 100 }, isTeacher && Boolean(courseId));
   const [selected, setSelected] = useState<Assignment | null>(null);
@@ -126,14 +128,22 @@ export function AssignmentsSection({
                 <Paperclip size={16} color={palette["muted-foreground"]} />
               ) : null}
 
-              {/* O'chirish — kartani ochib yubormasligi uchun alohida tugma. */}
+              {/* Tahrirlash va o'chirish — kartani ochib yubormasligi uchun alohida. */}
               {isTeacher ? (
-                <IconButton
-                  accessibilityLabel={`${assignment.title} vazifasini o'chirish`}
-                  onPress={() => setDeleteTarget(assignment)}
-                >
-                  <Trash2 size={17} color={palette.destructive} />
-                </IconButton>
+                <>
+                  <IconButton
+                    accessibilityLabel={`${assignment.title} vazifasini tahrirlash`}
+                    onPress={() => setEditTarget(assignment)}
+                  >
+                    <Pencil size={17} color={palette["muted-foreground"]} />
+                  </IconButton>
+                  <IconButton
+                    accessibilityLabel={`${assignment.title} vazifasini o'chirish`}
+                    onPress={() => setDeleteTarget(assignment)}
+                  >
+                    <Trash2 size={17} color={palette.destructive} />
+                  </IconButton>
+                </>
               ) : null}
             </View>
 
@@ -184,6 +194,24 @@ export function AssignmentsSection({
         lessons={lessons.data ?? []}
         isLanguageSubject={/til|language|ingliz|english/i.test(subject)}
       />
+
+      {/*
+        * Tahrirlash oynasi ALOHIDA va `key` bilan: maydonlar boshlang'ich
+        * qiymatini `useState` dan oladi, u esa faqat mount paytida
+        * hisoblanadi. Bitta oynani qayta ishlatsak, ikkinchi vazifani
+        * ochganda birinchisining qiymatlari qolib ketardi.
+        */}
+      {editTarget ? (
+        <AddAssignmentSheet
+          key={editTarget.id}
+          open
+          onClose={() => setEditTarget(null)}
+          courseId={courseId}
+          lessons={lessons.data ?? []}
+          isLanguageSubject={/til|language|ingliz|english/i.test(subject)}
+          assignment={editTarget}
+        />
+      ) : null}
       <SubmissionReviewSheet assignment={reviewOf} onClose={() => setReviewOf(null)} />
     </>
   );

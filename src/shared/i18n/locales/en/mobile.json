@@ -425,7 +425,10 @@
     "oquvchilar_yuklanmoqda": "Loading students…",
     "oquvchi_yoq": "No students",
     "bu_guruhga_hali_hech_kim_yozilmagan": "Nobody has joined this group yet.",
-    "kursdan_chiqarish": "Remove from course"
+    "kursdan_chiqarish": "Remove from course",
+    "vazifani_tahrirlash": "Edit assignment",
+    "saqlash": "Save",
+    "tahrirlash": "Edit"
   },
   "lesson": {
     "oldingi_oy": "Previous month",

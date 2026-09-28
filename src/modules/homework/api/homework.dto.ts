@@ -1,6 +1,5 @@
 import type { SubmissionStatus } from "@/shared/types";
 
-/** Gemini savolma-savol tahlili (docs/PROJECT.md §6) — barcha matnlar o'zbekcha. */
 export interface AiQuestionDto {
   question_number?: number;
   question?: string;
@@ -45,15 +44,9 @@ export interface SubmissionDto {
   result?: AiResultDto | null;
 }
 
-/**
- * O‘qituvchining AI bahosini tuzatishi
- * (`POST /homework/submissions/{id}/review/`). Har uchala maydon ixtiyoriy —
- * faqat o‘zgartirilgani yuboriladi.
- */
 export interface SubmissionReviewInput {
   overallScore?: number | null;
   grade?: string;
-  /** AI natijasining TO‘LIQ tahrirlangan JSON’i (serverdan kelgan shaklda). */
   result?: Record<string, unknown> | null;
 }
 
@@ -68,6 +61,7 @@ export interface AssignmentDto {
   course_id: string | number;
   course_title: string;
   subject: string;
+  subject_label?: string;
   title: string;
   description?: string;
   body?: string;
@@ -75,7 +69,6 @@ export interface AssignmentDto {
   has_attachment?: boolean;
   due_at: string | null;
   skill_key?: string;
-  /** Vazifa qaysi TUGAGAN darsga tegishli (docs/STAFF_API.md §8). Bo'lmasligi mumkin. */
   lesson_id?: string | number | null;
   lesson_title?: string | null;
   created_at: string;
@@ -85,12 +78,6 @@ export interface AssignmentDto {
   stats?: AssignmentStatsDto | null;
 }
 
-/**
- * `GET /api/v1/homework/report/` javobi — backend bu shaklni hujjatlashtirmagan,
- * shuning uchun bir nechta ehtimoliy maydon nomi (alias) qabul qilinadi
- * (`lib/homework.mappers.ts#mapHomeworkReportDto`). Haqiqiy javobni ko'rgach
- * ortiqcha aliaslarni olib tashlang.
- */
 export interface HomeworkCourseReportDto {
   course_id?: string | number;
   id?: string | number;
@@ -116,7 +103,6 @@ export type HomeworkReportDto =
       total?: HomeworkCourseReportDto;
     };
 
-/** `AddAssignmentDialog` yuboradigan forma. */
 export interface AssignmentFormInput {
   courseId: string | null;
   title: string;
@@ -124,7 +110,6 @@ export interface AssignmentFormInput {
   body?: string;
   dueAt?: string;
   skillKey?: string;
-  /** Tugagan darsga bog'lash — ixtiyoriy. */
   lessonId?: string | null;
   extraInstructions?: string;
   file?: File | null;

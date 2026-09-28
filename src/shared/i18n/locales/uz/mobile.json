@@ -638,7 +638,10 @@
     "oquvchilar_yuklanmoqda": "O'quvchilar yuklanmoqda…",
     "oquvchi_yoq": "O'quvchi yo'q",
     "bu_guruhga_hali_hech_kim_yozilmagan": "Bu guruhga hali hech kim yozilmagan.",
-    "kursdan_chiqarish": "Kursdan chiqarish"
+    "kursdan_chiqarish": "Kursdan chiqarish",
+    "vazifani_tahrirlash": "Vazifani tahrirlash",
+    "saqlash": "Saqlash",
+    "tahrirlash": "Tahrirlash"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Ekran ulashish uchun ruxsat so'rash",

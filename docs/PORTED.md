@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-28 (i18n: uz/en/ru)
+- **Oxirgi yangilanish:** 2026-09-28 (homework qayta sinxronlandi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -109,14 +109,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/index.ts` | 🟡 MOSLASH | `080e7a1ce1f7` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/course/lib/course.mappers.ts` | 🟢 NUSXA | `358e9f4394b4` | — |
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
-| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `76b69e7671a1` | — |
-| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `8047e05bc7da` | — |
+| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `36fced141fe9` | — |
+| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `4cee08dbcf0f` | — |
 | `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
 | `src/modules/homework/constants/homework.constants.ts` | 🟢 NUSXA | `fccf69310542` | — |
 | `src/modules/homework/index.ts` | 🟡 MOSLASH | `3c108061ccd7` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `707bc7bdd871` | — |
-| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `c6134f9edb5c` | — |
-| `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `0ec6144f32c9` | — |
+| `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `c8327541f59b` | — |
+| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `f460f43aa2fb` | — |
+| `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `078c98e9912a` | — |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `b1cd81660536` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `3f7f3900f46d` | — |
 | `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `ab15866473ba` | — |

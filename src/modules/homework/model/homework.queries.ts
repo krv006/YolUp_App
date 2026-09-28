@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { downloadBlob } from "@/shared/lib";
 import type { Submission } from "@/shared/types";
@@ -17,7 +18,6 @@ export const homeworkKeys = Object.freeze({
   report: (studentId?: string | null) => ["homework", "report", studentId ?? "me"] as const,
 });
 
-/** AI tekshiruvi `checking` holatida ekan polling davom etadi, ammo cheklangan vaqt ichida. */
 export function getHomeworkPollingInterval(
   submission: Submission | undefined,
   elapsedMs: number,
@@ -68,11 +68,6 @@ export function useSubmission(
   });
 }
 
-/**
- * O'quvchining reytingi. `studentId` berilmasa backend joriy foydalanuvchini
- * oladi (o'quvchi o'zinikini ko'radi); ota-ona bog'langan bolasi uchun
- * `enabled` odatda `selectedChildId` borligiga qarab beriladi.
- */
 export function useHomeworkReport(studentId?: string | null, enabled = true) {
   return useQuery({
     queryKey: homeworkKeys.report(studentId),
@@ -82,18 +77,34 @@ export function useHomeworkReport(studentId?: string | null, enabled = true) {
 }
 
 export function useCreateAssignment() {
+  const { t } = useTranslation("homework");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (form: AssignmentFormInput) => homeworkApi.createAssignment(form),
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: homeworkKeys.all });
-      toast.success("Vazifa yuborildi");
+    onSuccess: (item) => {
+      client.invalidateQueries({ queryKey: homeworkKeys.assignments(item.courseId) });
+      toast.success(t("toast.assignmentCreated"));
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useUpdateAssignment() {
+  const { t } = useTranslation("homework");
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, form }: { id: string; form: AssignmentFormInput }) =>
+      homeworkApi.updateAssignment(id, form),
+    onSuccess: (item) => {
+      client.invalidateQueries({ queryKey: homeworkKeys.assignments(item.courseId) });
+      toast.success(t("toast.assignmentUpdated"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useSubmitHomework() {
+  const { t } = useTranslation("homework");
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -108,44 +119,40 @@ export function useSubmitHomework() {
     onSuccess: (submission) => {
       if (submission) client.setQueryData(homeworkKeys.submission(submission.id), submission);
       client.invalidateQueries({ queryKey: homeworkKeys.all });
-      toast.success("Vazifa topshirildi, AI tekshiruvi boshlandi");
+      toast.success(t("toast.submitted"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useDeleteAssignment() {
+  const { t } = useTranslation("homework");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => homeworkApi.deleteAssignment(id),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: homeworkKeys.all });
-      toast.success("Vazifa o‘chirildi");
+      toast.success(t("toast.assignmentDeleted"));
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useRecheckSubmission() {
+  const { t } = useTranslation("homework");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => homeworkApi.recheck(id),
     onSuccess: (submission) => {
       if (submission) client.setQueryData(homeworkKeys.submission(submission.id), submission);
       client.invalidateQueries({ queryKey: homeworkKeys.all });
-      toast.success("Qayta tekshirish boshlandi");
+      toast.success(t("toast.rechecking"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
-/**
- * O‘qituvchi AI bahosini tuzatadi.
- *
- * Javob — yangilangan topshiriq, shuning uchun keshga to‘g‘ridan-to‘g‘ri
- * yoziladi: oyna qayta so‘rov kutmasdan yangi bahoni ko‘rsatadi.
- */
 export function useReviewSubmission() {
+  const { t } = useTranslation("homework");
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: SubmissionReviewInput }) =>
@@ -153,14 +160,12 @@ export function useReviewSubmission() {
     onSuccess: (submission) => {
       if (submission) client.setQueryData(homeworkKeys.submission(submission.id), submission);
       client.invalidateQueries({ queryKey: homeworkKeys.all });
-      toast.success("Baho yangilandi");
+      toast.success(t("toast.gradeUpdated"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
-// Fayllar auth talab qiladi — to‘g‘ridan-to‘g‘ri /media/ URL ishlatilmaydi
-// (docs/README §Frontend integratsiyasi).
 export function useDownloadAssignmentFile() {
   return useMutation({
     mutationFn: async ({ id, fileName }: { id: string; fileName?: string }) =>

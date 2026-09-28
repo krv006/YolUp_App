@@ -39,15 +39,21 @@ import {
  * ro'yxatdan suhbatga o'tiladi, orqaga surish bilan qaytiladi (§6.3).
  */
 
-const FILTERS: readonly { id: ConversationFilter; label: string }[] = [
-  { id: "all", label: "Barchasi" },
-  { id: "direct", label: "Shaxsiy" },
-  { id: "group", label: "Guruhlar" },
-  { id: "unread", label: "O'qilmagan" },
+/*
+ * Yorliqlar KALIT bilan — ro'yxat modul darajasida, hook chaqirib
+ * bo'lmaydi. Uchtasi vebning `chat` lug'atidan (`panel.filters.*`),
+ * "Guruhlar" esa u yerda yo'q, shuning uchun `mobile` bo'limida.
+ */
+const FILTERS: readonly { id: ConversationFilter; labelKey: string; ns: "chat" | "mobile" }[] = [
+  { id: "all", labelKey: "panel.filters.all", ns: "chat" },
+  { id: "direct", labelKey: "panel.filters.direct", ns: "chat" },
+  { id: "group", labelKey: "chats.guruhlar", ns: "mobile" },
+  { id: "unread", labelKey: "panel.filters.unread", ns: "chat" },
 ];
 
 export function ChatsPage({ role }: { role: ConversationRole }) {
   const { t } = useTranslation("mobile");
+  const { t: tc } = useTranslation("chat");
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -139,8 +145,13 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
         )}
 
         <ChipRow>
-          {FILTERS.map(({ id, label }) => (
-            <Chip key={id} label={label} selected={filter === id} onPress={() => setFilter(id)} />
+          {FILTERS.map(({ id, labelKey, ns }) => (
+            <Chip
+              key={id}
+              label={ns === "chat" ? tc(labelKey) : t(labelKey)}
+              selected={filter === id}
+              onPress={() => setFilter(id)}
+            />
           ))}
         </ChipRow>
       </View>

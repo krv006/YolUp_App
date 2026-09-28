@@ -77,7 +77,8 @@
     "dark": "Тёмная",
     "system": "Системная ({{scheme}})",
     "lightLower": "светлая",
-    "darkLower": "тёмная"
+    "darkLower": "тёмная",
+    "systemShort": "Системная"
   },
   "roles": {
     "student": "Ученик",
@@ -607,7 +608,8 @@
     "kursga_yozilganingizdan_keyin_guruh_chatlari": "Групповые чаты появятся здесь после записи на курс.",
     "suhbatlar": "Чаты",
     "suhbat_ochilmoqda": "Открытие чата…",
-    "suhbat_topilmadi": "Чат не найден"
+    "suhbat_topilmadi": "Чат не найден",
+    "guruhlar": "Группы"
   },
   "homeplaceholderpage": {
     "tsx": {

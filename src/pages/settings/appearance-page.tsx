@@ -42,10 +42,15 @@ const LANGUAGES = SUPPORTED_LANGUAGES.map((value) => ({
   label: LANGUAGE_LABELS[value],
 }));
 
-const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Yorug'", icon: Sun },
-  { value: "dark", label: "Qorong'i", icon: Moon },
-  { value: "system", label: "Tizim", icon: Smartphone },
+/*
+ * Yorliqlar KALIT bilan: ro'yxat modul darajasida, u yerda hook
+ * chaqirib bo'lmaydi. Tarjima chizish paytida qilinadi — xuddi
+ * `RoleTabs` dagi bo'limlar kabi.
+ */
+const MODES: { value: ThemeMode; labelKey: string; icon: typeof Sun }[] = [
+  { value: "light", labelKey: "theme.light", icon: Sun },
+  { value: "dark", labelKey: "theme.dark", icon: Moon },
+  { value: "system", labelKey: "theme.systemShort", icon: Smartphone },
 ];
 
 /**
@@ -96,7 +101,7 @@ export function AppearancePage() {
         {/* ── Mavzu ── */}
         <Section title={t("settings.mavzu")} hint={t("settings.qurilma_sozlamasiga_ergashish_yoki_qolda_tan")}>
           <View style={styles.segment}>
-            {MODES.map(({ value, label, icon: Icon }) => {
+            {MODES.map(({ value, labelKey, icon: Icon }) => {
               const active = mode === value;
               return (
                 <Pressable
@@ -124,7 +129,7 @@ export function AppearancePage() {
                       fontWeight: "600",
                     }}
                   >
-                    {label}
+                    {t(labelKey)}
                   </Text>
                 </Pressable>
               );

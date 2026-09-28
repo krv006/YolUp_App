@@ -77,7 +77,8 @@
     "dark": "Dark",
     "system": "System ({{scheme}})",
     "lightLower": "light",
-    "darkLower": "dark"
+    "darkLower": "dark",
+    "systemShort": "System"
   },
   "roles": {
     "student": "Student",
@@ -607,7 +608,8 @@
     "kursga_yozilganingizdan_keyin_guruh_chatlari": "Group chats appear here once you enrol in a course.",
     "suhbatlar": "Chats",
     "suhbat_ochilmoqda": "Opening conversation…",
-    "suhbat_topilmadi": "Conversation not found"
+    "suhbat_topilmadi": "Conversation not found",
+    "guruhlar": "Groups"
   },
   "homeplaceholderpage": {
     "tsx": {

@@ -77,7 +77,8 @@
     "dark": "Qorong'i",
     "system": "Tizim ({{scheme}})",
     "lightLower": "yorug'",
-    "darkLower": "qorong'i"
+    "darkLower": "qorong'i",
+    "systemShort": "Tizim"
   },
   "roles": {
     "student": "O'quvchi",
@@ -441,7 +442,8 @@
     "kursga_yozilganingizdan_keyin_guruh_chatlari": "Kursga yozilganingizdan keyin guruh chatlari shu yerda paydo bo'ladi.",
     "suhbatlar": "Suhbatlar",
     "suhbat_ochilmoqda": "Suhbat ochilmoqda…",
-    "suhbat_topilmadi": "Suhbat topilmadi"
+    "suhbat_topilmadi": "Suhbat topilmadi",
+    "guruhlar": "Guruhlar"
   },
   "homeplaceholderpage": {
     "tsx": {

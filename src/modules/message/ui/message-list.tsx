@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import type { ChatMessage } from "@/shared/types";
@@ -36,17 +37,18 @@ export function MessageList({
   currentUserId = null,
   typingName = null,
 }: MessageListProps) {
+  const { t } = useTranslation("mobile");
   const rows = useMemo(() => buildMessageRows(messages ?? []), [messages]);
 
   if (loading) return <MessagesSkeleton />;
 
   if (error) {
-    return <ScreenError message="Xabarlar yuklanmadi" onRetry={onRetry} />;
+    return <ScreenError message={t("message.xabarlar_yuklanmadi")} onRetry={onRetry} />;
   }
 
   if (rows.length === 0) {
     return (
-      <ScreenEmpty title="Xabarlar yo'q" description="Birinchi xabarni yozib suhbatni boshlang." />
+      <ScreenEmpty title={t("message.xabarlar_yoq")} description={t("message.birinchi_xabarni_yozib_suhbatni_boshlang")} />
     );
   }
 
@@ -126,10 +128,11 @@ function MessageRowView({
 
 /** Uch nuqta animatsiyasiz — statik matn low-end qurilmada arzonroq. */
 function TypingIndicator({ name }: { name: string }) {
+  const { t } = useTranslation("mobile");
   return (
     <View style={styles.typing}>
       <Text variant="caption" tone="muted">
-        {name.split(" ")[0]} yozmoqda…
+        {t("message.yozmoqda", { name: name.split(" ")[0] })}
       </Text>
     </View>
   );

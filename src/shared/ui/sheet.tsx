@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import {
   Gesture,
@@ -69,6 +70,7 @@ const CLOSE_VELOCITY = 900;
  * └─────────────────────────────────────────────────────────────────────┘
  */
 export function Sheet({ open, onClose, title, description, children }: SheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -139,7 +141,7 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
         <Animated.View style={[styles.backdrop, backdropStyle]}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Yopish"
+            accessibilityLabel={t("shared.yopish")}
             style={[StyleSheet.absoluteFill, { backgroundColor: palette.overlay }]}
             onPress={onClose}
           />
@@ -168,7 +170,7 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
                   </Text>
                 ) : null}
               </View>
-              <IconButton accessibilityLabel="Yopish" onPress={onClose}>
+              <IconButton accessibilityLabel={t("shared.yopish")} onPress={onClose}>
                 <X size={20} color={palette["muted-foreground"]} />
               </IconButton>
             </View>

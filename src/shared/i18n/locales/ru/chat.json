@@ -1,0 +1,161 @@
+{
+  "emptyState": {
+    "title": "Выберите беседу",
+    "description": "Выберите беседу слева, чтобы просмотреть сообщения и продолжить переписку.",
+    "openConversations": "Открыть беседы"
+  },
+  "header": {
+    "backAria": "Назад к списку бесед",
+    "openInfoAria": "Открыть информацию — {{title}}",
+    "memberCount": "{{count}} учеников",
+    "online": "Сейчас в сети",
+    "recentlyActive": "Недавно был(а) в сети"
+  },
+  "directStatus": {
+    "pending": "Запрос ожидает",
+    "active": "Личная переписка",
+    "blocked": "Заблокирован",
+    "notSent": "Запрос не отправлен"
+  },
+  "info": {
+    "groupSubjectFallback": "Группа курса",
+    "profileInfo": "Информация о профиле",
+    "memberCount": "{{count}} учеников",
+    "changeGroupImageAria": "Изменить фото группы",
+    "groupImageUpdated": "Фото группы обновлено",
+    "muteOn": "Включить звук",
+    "muteOff": "Отключить звук",
+    "mutedOn": "Уведомления отключены",
+    "mutedOff": "Уведомления включены",
+    "editCourse": "Редактировать курс",
+    "aboutGroup": "О ГРУППЕ",
+    "aboutDirect": "ИНФОРМАЦИЯ",
+    "groupDescriptionFallback": "Групповой чат курса",
+    "usernameHint": "Юзернейм · нажмите, чтобы скопировать",
+    "usernameCopied": "Юзернейм скопирован",
+    "teacherSection": "УЧИТЕЛЬ",
+    "loading": "Загрузка…",
+    "noInfo": "Нет информации",
+    "acceptConversation": "Принять беседу",
+    "conversationAccepted": "Беседа принята",
+    "blockUser": "Заблокировать пользователя",
+    "conversationBlocked": "Беседа заблокирована",
+    "deleteCourse": "Удалить курс",
+    "editCourseTitle": "Редактировать курс",
+    "editCourseDescription": "Обновите название, предмет и описание курса.",
+    "courseName": "Название курса",
+    "subject": "Предмет",
+    "description": "Описание",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "deleteCourseTitle": "Удалить курс",
+    "deleteCourseDescription": "«{{title}}» и связанные с ним данные будут удалены безвозвратно."
+  },
+  "item": {
+    "liveNow": "Идёт урок",
+    "typing": "печатает..."
+  },
+  "newDialog": {
+    "title": "Новый курс и группа",
+    "description": "После создания курса сервер автоматически откроет его групповой чат.",
+    "pendingEnrollments": "ОЖИДАЮЩИЕ ЗАЯВКИ",
+    "decline": "Отклонить",
+    "approve": "Принять",
+    "createdToast": "Курс и групповой чат созданы",
+    "noteTitle": "Новое учебное пространство",
+    "noteDescription": "Чат, уроки, задания и ученики — всё в одном курсе.",
+    "courseNameLabel": "Название курса",
+    "courseNamePlaceholder": "Например: Английский — Intermediate",
+    "subjectLabel": "Предмет",
+    "descriptionLabel": "Краткое описание",
+    "descriptionPlaceholder": "Цель и направление курса...",
+    "cancel": "Отмена",
+    "create": "Создать курс"
+  },
+  "list": {
+    "today": "Сегодня",
+    "loadError": "Не удалось загрузить сообщения",
+    "loadErrorHint": "Повторите попытку через некоторое время.",
+    "retry": "Повторить"
+  },
+  "composer": {
+    "editingLabel": "Редактирование сообщения",
+    "youLabel": "Вы",
+    "replyFallback": "Ответ",
+    "cancelEditAria": "Отменить редактирование",
+    "cancelReplyAria": "Отменить ответ",
+    "removeAttachmentAria": "Убрать прикреплённый файл",
+    "fileTooLarge": "Размер файла не должен превышать 20 МБ",
+    "fileAttached": "Файл прикреплён",
+    "attachAria": "Прикрепить файл",
+    "editPlaceholder": "Отредактируйте сообщение...",
+    "sendPlaceholder": "Напишите сообщение...",
+    "textAria": "Текст сообщения",
+    "emojiAria": "Выбрать эмодзи",
+    "saveEditAria": "Сохранить отредактированное сообщение",
+    "sendAria": "Отправить сообщение"
+  },
+  "actionsMenu": {
+    "closeAria": "Закрыть меню сообщения",
+    "reactionsAria": "Выбрать реакцию",
+    "addReactionAria": "Добавить реакцию {{emoji}}",
+    "reply": "Ответить",
+    "edit": "Редактировать",
+    "deleteForMe": "Удалить у себя",
+    "deleteForEveryone": "Удалить у всех"
+  },
+  "bubble": {
+    "edited": "изменено",
+    "retry": "Отправить снова",
+    "reactionsAria": "Реакции на сообщение"
+  },
+  "text": {
+    "viewRecording": "Посмотреть видеозапись"
+  },
+  "typing": {
+    "suffix": "печатает"
+  },
+  "attachment": {
+    "openAria": "{{name}} — открыть",
+    "openSuffix": "открыть"
+  },
+  "removedFromGroup": "Вы были удалены из этой группы",
+  "directPage": {
+    "messageEdited": "Сообщение изменено",
+    "actionFailed": "Не удалось выполнить действие с сообщением",
+    "actionFailedRetry": "Не удалось выполнить действие с сообщением. Попробуйте снова.",
+    "messageDeleted": "Сообщение удалено",
+    "deletedForEveryone": "Сообщение удалено у всех",
+    "deletedForMe": "Сообщение удалено у вас",
+    "deleteFailed": "Не удалось удалить сообщение"
+  },
+  "panel": {
+    "listAria": "Список бесед",
+    "filtersAria": "Типы бесед",
+    "filters": {
+      "all": "Все",
+      "direct": "Личные",
+      "group": "Группы",
+      "unread": "Непрочитанные"
+    },
+    "searchPlaceholder": "Поиск бесед",
+    "searchAria": "Поиск бесед",
+    "openSearchAria": "Открыть поиск",
+    "closeSearchAria": "Закрыть поиск",
+    "searchButton": "Поиск",
+    "accountAria": "Меню профиля",
+    "loadError": "Не удалось загрузить беседы",
+    "loadErrorHint": "Проверьте интернет-соединение и попробуйте снова.",
+    "retry": "Повторить",
+    "peopleLabel": "ЛЮДИ",
+    "emptyTitle": "Беседы не найдены",
+    "emptyHint": "Попробуйте изменить поисковый запрос или фильтр.",
+    "clearFilters": "Очистить фильтры",
+    "newGroupAria": "Создать новую группу или беседу",
+    "findTeacherAria": "Найти учителя или курс",
+    "assignmentGroupNotFound": "Группа задания не найдена",
+    "assignmentOpenFailed": "Не удалось открыть задание",
+    "directOpened": "Беседа открыта",
+    "directRequestSent": "Запрос отправлен — ожидайте подтверждения учителя"
+  }
+}

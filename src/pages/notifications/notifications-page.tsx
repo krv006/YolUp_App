@@ -1,4 +1,5 @@
 import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { FlashList } from "@shopify/flash-list";
 import { useState } from "react";
 import { useRouter } from "expo-router";
@@ -38,6 +39,7 @@ import {
  * u kelajakda alohida tafsilot ekranida ko'rsatiladi.
  */
 export function NotificationsPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const inbox = useNotificationInbox();
@@ -72,7 +74,7 @@ export function NotificationsPage() {
   if (inbox.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Xabarlar yuklanmoqda…" />
+        <ScreenLoading label={t("notifications.xabarlar_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -80,7 +82,7 @@ export function NotificationsPage() {
   if (inbox.isError) {
     return (
       <Screen>
-        <ScreenError message="Xabarlarni yuklab bo'lmadi" onRetry={() => void inbox.refetch()} />
+        <ScreenError message={t("notifications.xabarlarni_yuklab_bolmadi")} onRetry={() => void inbox.refetch()} />
       </Screen>
     );
   }
@@ -90,16 +92,16 @@ export function NotificationsPage() {
   return (
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel="Orqaga" onPress={goBack}>
+        <IconButton accessibilityLabel={t("notifications.orqaga")} onPress={goBack}>
           <ArrowLeft size={22} color={palette.foreground} />
         </IconButton>
         <Text variant="subheading" style={styles.title}>
-          Bildirishnomalar
+          {t("notifications.bildirishnomalar")}
         </Text>
       </View>
 
       {items.length === 0 ? (
-        <ScreenEmpty title="Xabar yo'q" description="Yangi xabarlar shu yerda ko'rinadi." />
+        <ScreenEmpty title={t("notifications.xabar_yoq")} description={t("notifications.yangi_xabarlar_shu_yerda_korinadi")} />
       ) : (
         <FlashList
           data={items}
@@ -128,7 +130,7 @@ export function NotificationsPage() {
 
         {detail?.link ? (
           <Button
-            title="Ochish"
+            title={t("notifications.ochish")}
             onPress={() => {
               openLink(detail.link);
               setDetail(null);

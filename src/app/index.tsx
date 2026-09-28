@@ -1,4 +1,5 @@
 import { Redirect } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { resolveHomeRoute, useAuth } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import { Screen, ScreenError, ScreenLoading } from "@/shared/ui";
@@ -11,12 +12,13 @@ import { Screen, ScreenError, ScreenLoading } from "@/shared/ui";
  * yerda holat allaqachon ANIQ: yo authenticated, yo anonymous, yo xato.
  */
 export default function IndexRoute() {
+  const { t } = useTranslation("mobile");
   const { user, isAuthenticated, isInitializing, initializationError, retrySession } = useAuth();
 
   if (isInitializing) {
     return (
       <Screen>
-        <ScreenLoading label="Sessiya tekshirilmoqda…" />
+        <ScreenLoading label={t("app.sessiya_tekshirilmoqda")} />
       </Screen>
     );
   }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
@@ -43,6 +44,7 @@ import {
  * marshruti (`quizzes/<id>`), orqaga qaytish esa aniq harakat.
  */
 export function QuizzesPage({ basePath }: { basePath: string }) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -81,7 +83,7 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   if (quizzes.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Testlar yuklanmoqda…" />
+        <ScreenLoading label={t("quizzes.testlar_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -104,11 +106,11 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
         <Text variant="heading">Testlar</Text>
         <Text variant="caption" tone="muted">
-          Vaqt chegarasi yo'q — cheklanmagan qayta urinish.
+          {t("quizzes.vaqt_chegarasi_yoq_cheklanmagan_qayta_urinis")}
         </Text>
         {isTeacher ? (
           <Button
-            title="Test yaratish"
+            title={t("quizzes.test_yaratish")}
             variant="secondary"
             icon={<Plus size={16} color={palette["secondary-foreground"]} />}
             onPress={() => setCreateOpen(true)}
@@ -118,8 +120,8 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
 
       {list.length === 0 ? (
         <ScreenEmpty
-          title="Hali test yo'q"
-          description="O'qituvchi test qo'shganda shu yerda ko'rinadi."
+          title={t("quizzes.hali_test_yoq")}
+          description={t("quizzes.oqituvchi_test_qoshganda_shu_yerda_korinadi")}
         />
       ) : (
         <FlashList
@@ -163,7 +165,7 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
       <ConfirmSheet
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="Testni o'chirish"
+        title={t("quizzes.testni_ochirish")}
         description={`"${deleteTarget?.title ?? ""}" va uning urinishlari o'chadi.`}
         loading={removeQuiz.isPending}
         onConfirm={() => {
@@ -228,6 +230,7 @@ function QuizRow({
   onPublish?: () => void;
   publishing?: boolean;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const overdue = quiz.dueAt ? new Date(quiz.dueAt) < new Date() : false;
 
@@ -245,7 +248,7 @@ function QuizRow({
             {courseTitle} · {quiz.questionCount} ta savol
           </Text>
         </View>
-        <IconButton accessibilityLabel="Urinishlar tarixi" onPress={onHistory}>
+        <IconButton accessibilityLabel={t("quizzes.urinishlar_tarixi")} onPress={onHistory}>
           <History size={18} color={palette["muted-foreground"]} />
         </IconButton>
 
@@ -272,7 +275,7 @@ function QuizRow({
           * umuman ko'rinmaydi, shuning uchun o'qituvchi buni birinchi
           * ko'rishi kerak. Import qilingan testlar aynan shunday keladi.
           */}
-        {quiz.status === "draft" ? <Badge label="Qoralama" tone="warning" /> : null}
+        {quiz.status === "draft" ? <Badge label={t("quizzes.qoralama")} tone="warning" /> : null}
 
         {quiz.dueAt ? (
           <Badge
@@ -280,7 +283,7 @@ function QuizRow({
             tone={overdue ? "danger" : "neutral"}
           />
         ) : (
-          <Badge label="Muddat yo'q" tone="neutral" />
+          <Badge label={t("quizzes.muddat_yoq")} tone="neutral" />
         )}
 
         <Text

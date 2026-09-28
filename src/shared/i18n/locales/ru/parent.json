@@ -1,0 +1,112 @@
+{
+  "selector": {
+    "label": "Ребёнок",
+    "noChild": "Ребёнок не привязан"
+  },
+  "dashboard": {
+    "loading": "Загрузка панели родителя",
+    "loadError": "Не удалось загрузить данные",
+    "retry": "Повторить",
+    "noChildTitle": "Ребёнок пока не привязан",
+    "noChildDescription": "Как только вы привяжете аккаунт ребёнка, здесь появятся его посещаемость, занятия и домашние задания. Для привязки попросите у ребёнка код приглашения.",
+    "noChildAction": "Привязать ребёнка",
+    "eyebrow": "КАБИНЕТ РОДИТЕЛЯ",
+    "greeting": "Доброе утро, {{name}}! 👋",
+    "subtitleWithChild": "Учебный процесс {{name}}.",
+    "subtitleNoChild": "Следите за учебным процессом вашего ребёнка.",
+    "recentActivityEyebrow": "ПОСЛЕДНЯЯ АКТИВНОСТЬ",
+    "attendanceTitle": "Посещаемость",
+    "allAttendance": "Вся посещаемость",
+    "emptyAttendance": "Посещаемость для выбранного ребёнка не найдена."
+  },
+  "children": {
+    "loading": "Загрузка детей",
+    "loadError": "Не удалось загрузить список детей",
+    "retry": "Повторить",
+    "eyebrow": "ПРОФИЛЬ СЕМЬИ",
+    "title": "Мои дети",
+    "subtitle": "Привязанные аккаунты учеников и разрешения конфиденциальности.",
+    "linkChild": "Привязать ученика",
+    "createChild": "Аккаунт ребёнка",
+    "selected": "Выбран",
+    "verified": "Подтверждён",
+    "lessonsUnit": "уроков",
+    "minutesUnit": "минут",
+    "lastActivity": "Последняя активность",
+    "emptyTitle": "Ребёнок ещё не привязан",
+    "emptyDescription": "Введите код ученика или создайте новый аккаунт.",
+    "consentEyebrow": "КОНФИДЕНЦИАЛЬНОСТЬ",
+    "consentTitle": "Разрешения для {{name}}",
+    "loginsHistory": "История входов",
+    "consentOn": "Включено",
+    "consentOff": "Выключено",
+    "consentLoadError": "Не удалось загрузить разрешения.",
+    "consentKinds": {
+      "recording": { "label": "Запись урока", "description": "Разрешение на запись урока" },
+      "camera": { "label": "Камера", "description": "Использование камеры на живом уроке" },
+      "analytics": { "label": "Анализ активности", "description": "Анализ посещаемости, внимания и фокуса" }
+    },
+    "linkDialog": {
+      "title": "Привязать ученика",
+      "description": "Введите код приглашения FK-... из профиля ученика.",
+      "codeLabel": "Код приглашения",
+      "codePlaceholder": "FK-XXXX",
+      "cancel": "Отмена",
+      "submit": "Отправить запрос"
+    },
+    "childDialog": {
+      "title": "Создать аккаунт ребёнка",
+      "description": "Созданный ученик автоматически привязывается к вам.",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "username": "Логин",
+      "tempPassword": "Временный пароль",
+      "cancel": "Отмена",
+      "submit": "Создать аккаунт"
+    },
+    "genericError": "Ошибка",
+    "loginHistoryStudentFallback": "Ученик",
+    "loginHistoryTitle": "{{name}} — история входов",
+    "loginHistoryDescription": "С какого устройства и IP входили в аккаунт вашего ребёнка."
+  },
+  "attendance": {
+    "loading": "Загрузка посещаемости",
+    "loadError": "Не удалось загрузить посещаемость",
+    "retry": "Повторить",
+    "eyebrow": "НАБЛЮДЕНИЕ",
+    "title": "История посещаемости",
+    "subtitleWithChild": "Время входа и выхода {{name}} с уроков.",
+    "subtitleNoChild": "Данные о посещаемости вашего ребёнка.",
+    "report": "Отчёт",
+    "searchPlaceholder": "Поиск по уроку или ученику",
+    "recordsCount": "{{count}} записей",
+    "awaySuffix": " · отвлекался {{duration}}"
+  },
+  "homework": {
+    "notSubmitted": "Не сдано",
+    "openResultAria": "Открыть результат",
+    "checking": "Проверяется",
+    "openCheckingAria": "Открыть статус проверки",
+    "checkError": "Ошибка проверки",
+    "openErrorAria": "Открыть детали ошибки",
+    "noChildTitle": "Ребёнок не выбран",
+    "noChildDescription": "Сначала привяжите аккаунт ученика.",
+    "loading": "Загрузка заданий",
+    "loadError": "Не удалось загрузить задания",
+    "retry": "Повторить",
+    "eyebrow": "ЗАДАНИЯ",
+    "subtitle": "Сдачи и результаты проверки.",
+    "noDue": "Без срока",
+    "emptyTitle": "Задания не найдены",
+    "resultDialogTitle": "{{name}} — результат проверки"
+  },
+  "report": {
+    "noChildTitle": "Ребёнок не выбран",
+    "noChildDescription": "Сначала привяжите аккаунт ученика.",
+    "loading": "Загрузка рейтинга",
+    "eyebrow": "РЕЙТИНГ",
+    "loadError": "Не удалось загрузить рейтинг",
+    "retry": "Повторить",
+    "subtitle": "Задания и оценки по каждому предмету."
+  }
+}

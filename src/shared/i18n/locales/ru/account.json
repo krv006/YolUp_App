@@ -1,0 +1,81 @@
+{
+  "menu": {
+    "profile": { "label": "Данные профиля", "description": "Просмотр личных данных" },
+    "logins": { "label": "История входов", "description": "Журнал по устройствам и IP" },
+    "notifications": { "label": "Уведомления", "description": "Сообщения и напоминания" },
+    "settings": { "label": "Настройки", "description": "Параметры платформы" }
+  },
+  "roleFallback": "Учитель",
+  "workspaceFallback": "Рабочее пространство учителя",
+  "closeMenuAria": "Закрыть меню",
+  "closeAria": "Закрыть",
+  "menuAria": "Меню — {{role}}",
+  "sectionsAria": "Разделы аккаунта",
+  "online": "В сети",
+  "sessionSecure": "Сессия сохраняется безопасно",
+  "logout": "Выйти из системы",
+  "version": "YolUp · v1.0",
+  "profileDialog": {
+    "title": "Профиль — {{role}}",
+    "description": "Реальные данные профиля с сервера.",
+    "verified": "Профиль подтверждён",
+    "changeAvatarAria": "Изменить фото профиля",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "username": "Логин",
+    "usernameNote": "Логин должен быть уникальным. Если измените его, в следующий раз входите с новым логином.",
+    "phone": "Телефон",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "usernameLabel": "Username · копировать",
+    "phoneLabel": "Телефон · копировать",
+    "notApproved": "Ваш аккаунт ещё не подтверждён администратором — создание курсов и уроков временно недоступно.",
+    "certificates": "Сертификаты",
+    "upload": "Загрузить",
+    "certificateFallback": "Сертификат",
+    "deleteCertificateAria": "Удалить {{title}}",
+    "noCertificates": "Сертификаты пока не загружены.",
+    "editButton": "Редактировать профиль"
+  },
+  "ratingsDialog": {
+    "title": "Мои оценки",
+    "description": "Оценки и отзывы учеников за уроки.",
+    "loading": "Загрузка оценок",
+    "loadError": "Не удалось загрузить оценки",
+    "retry": "Повторить",
+    "empty": "Оценок пока нет.",
+    "starsAria": "{{count}} звёзд"
+  },
+  "settingsDialog": {
+    "title": "Настройки",
+    "description": "Язык интерфейса, режим оформления и уведомления.",
+    "languageLabel": "Язык",
+    "themeLabel": "Тема",
+    "pushLabel": "Уведомления браузера",
+    "pushOn": "Включены",
+    "pushOff": "Включить",
+    "pushUnsupported": "Этот браузер не поддерживает",
+    "pushBlocked": "Уведомления заблокированы в настройках браузера — сначала разрешите их там.",
+    "reminderLabel": "Напоминание об уроке",
+    "reminderOption": "за {{count}} минут"
+  },
+  "roleSwitcher": {
+    "triggerAria": "Другие ваши аккаунты",
+    "panelAria": "Другие ваши аккаунты",
+    "otherAccounts": "ДРУГИЕ ВАШИ АККАУНТЫ",
+    "openRoles": "ОТКРЫТЬ ДРУГУЮ РОЛЬ",
+    "openHint": "Откроется автоматически, без регистрации",
+    "switchHint": "Нажмите на аккаунт, чтобы сразу перейти в него — без пароля.",
+    "switched": "Вы вошли как {{name}}",
+    "failed": "Не удалось переключить аккаунт"
+  },
+  "toast": {
+    "copied": "{{label}} скопирован",
+    "copyFailed": "Не удалось скопировать",
+    "avatarUpdated": "Фото профиля обновлено",
+    "profileUpdated": "Профиль обновлён",
+    "profileSaveFailed": "Не удалось сохранить профиль",
+    "usernameLabelShort": "Username",
+    "phoneLabelShort": "Телефон"
+  }
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import type { Lesson } from "@/shared/types";
 import { formatDayTime } from "@/shared/lib";
@@ -30,6 +31,7 @@ export function RateLessonSheet({
   lesson: Lesson | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const [stars, setStars] = useState(5);
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
@@ -57,7 +59,7 @@ export function RateLessonSheet({
     <Sheet
       open={Boolean(lesson)}
       onClose={close}
-      title="Darsni baholang"
+      title={t("lesson.darsni_baholang")}
       description={lesson?.title}
     >
       <View style={styles.center}>
@@ -65,15 +67,15 @@ export function RateLessonSheet({
       </View>
 
       <Input
-        label="Izoh (ixtiyoriy)"
-        placeholder="Dars sizga qanday o'tdi?"
+        label={t("lesson.izoh_ixtiyoriy")}
+        placeholder={t("lesson.dars_sizga_qanday_otdi")}
         value={description}
         onChangeText={setDescription}
         multiline
         error={error || undefined}
       />
 
-      <Button title="Yuborish" size="lg" loading={rate.isPending} onPress={() => void submit()} />
+      <Button title={t("lesson.yuborish")} size="lg" loading={rate.isPending} onPress={() => void submit()} />
     </Sheet>
   );
 }
@@ -93,6 +95,7 @@ export function FinishLessonSheet({
   onClose: () => void;
   onFinished?: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const [title, setTitle] = useState("");
   const finish = useFinishLesson();
 
@@ -123,21 +126,21 @@ export function FinishLessonSheet({
     <Sheet
       open={Boolean(lesson)}
       onClose={close}
-      title="Darsni yakunlash"
-      description="Yakunlangach doska PDF'i va video yozuv guruh chatiga tushadi."
+      title={t("lesson.darsni_yakunlash")}
+      description={t("lesson.yakunlangach_doska_pdfi_va_video_yozuv_guruh")}
     >
       <Input
-        label="Yozuv nomi"
+        label={t("lesson.yozuv_nomi")}
         placeholder={lesson?.title ?? "Dars nomi"}
         value={title}
         onChangeText={setTitle}
       />
       <Text variant="caption" tone="muted">
-        Bo'sh qoldirsangiz dars nomi ishlatiladi.
+        {t("lesson.bosh_qoldirsangiz_dars_nomi_ishlatiladi")}
       </Text>
 
       <Button
-        title="Darsni yakunlash"
+        title={t("lesson.darsni_yakunlash")}
         variant="danger"
         size="lg"
         loading={finish.isPending}
@@ -158,19 +161,20 @@ export function LessonRatingsSheet({
   lesson: Lesson | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const ratings = useLessonRatings(lesson?.id ?? null, Boolean(lesson));
 
   return (
     <Sheet
       open={Boolean(lesson)}
       onClose={onClose}
-      title="Dars baholari"
+      title={t("lesson.dars_baholari")}
       description={lesson?.title}
     >
-      {ratings.isLoading ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+      {ratings.isLoading ? <ScreenLoading label={t("lesson.yuklanmoqda")} /> : null}
 
       {!ratings.isLoading && (ratings.data ?? []).length === 0 ? (
-        <ScreenEmpty title="Hali baho yo'q" description="O'quvchilar baholagach shu yerda ko'rinadi." />
+        <ScreenEmpty title={t("lesson.hali_baho_yoq")} description={t("lesson.oquvchilar_baholagach_shu_yerda_korinadi")} />
       ) : null}
 
       {(ratings.data ?? []).map((rating, index) => (

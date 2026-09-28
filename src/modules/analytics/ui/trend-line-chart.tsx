@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from "react-native-svg";
 import { Text, useTheme } from "@/shared/ui";
@@ -52,6 +53,7 @@ const PLOT_H = H - PAD_T - PAD_B;
  * to'silib qolardi.
  */
 export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: TrendLineChartProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
   const [width, setWidth] = useState(0);
@@ -214,7 +216,7 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
         </View>
       ) : (
         <Text variant="caption" tone="muted">
-          Qiymatlarni ko&apos;rish uchun grafikni bosing.
+          {t("analytics.qiymatlarni_ko_rish_uchun_grafikni_bosi")}
         </Text>
       )}
 

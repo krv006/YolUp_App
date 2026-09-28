@@ -1,0 +1,114 @@
+{
+  "status": {
+    "loading": "Loading board…",
+    "retry": "Retry",
+    "canDraw": "You can draw",
+    "viewOnly": "View only",
+    "canDrawTitle": "You have permission to draw on the board",
+    "viewOnlyTitle": "You don't have permission to draw — ask the teacher",
+    "liveConnectedTitle": "Real-time connected",
+    "liveDisconnectedTitle": "Syncing in slow mode",
+    "live": "Live",
+    "slowMode": "Slow mode"
+  },
+  "sheet": {
+    "addSheet": "Sheet"
+  },
+  "permission": {
+    "grantButton": "Grant"
+  },
+  "solver": {
+    "button": "Solver"
+  },
+  "tools": {
+    "erase": "Eraser",
+    "pen": "Pen",
+    "marker": "Marker",
+    "line": "Line",
+    "arrow": "Arrow",
+    "rect": "Rectangle",
+    "ellipse": "Ellipse",
+    "text": "Text",
+    "math": "Formula",
+    "toolbarAria": "Board tools",
+    "colorLabel": "Color {{value}}",
+    "widthLabel": "Thickness {{value}}"
+  },
+  "inline": {
+    "formula": "Formula",
+    "text": "Text",
+    "placeholder": "Type text…",
+    "textAria": "Write text on the board",
+    "cancelAria": "Cancel",
+    "addAria": "Add to board",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bulletList": "Bulleted list",
+    "numberedList": "Numbered list",
+    "formatAria": "Text formatting"
+  },
+  "eraseDialog": {
+    "title": "Delete element",
+    "description": "Enter a reason for deletion, for the audit log.",
+    "reasonLabel": "Reason",
+    "cancel": "Cancel",
+    "confirm": "Delete",
+    "deleted": "Element deleted"
+  },
+  "grantDialog": {
+    "title": "Board drawing permission",
+    "description": "Choose which student to grant permission to.",
+    "granted": "{{name}} can now draw on the board",
+    "noStudents": "No students found."
+  },
+  "formulaDialog": {
+    "title": "Formula solver",
+    "description": "E.g.: 2x^2 - 5x + 3 = 0",
+    "formulaLabel": "Formula",
+    "solve": "Solve",
+    "place": "Add to board",
+    "solveError": "Couldn't solve the formula"
+  },
+  "away": {
+    "title": "Left the lesson"
+  },
+  "periodic": {
+    "button": "Periodic table",
+    "title": "Periodic table",
+    "description": "Pick an element to see its structure and Bohr model.",
+    "loading": "Loading the table",
+    "loadError": "Could not load the periodic table",
+    "searchPlaceholder": "Element, symbol or number",
+    "pickHint": "Pick an element to see the details.",
+    "atomicNumber": "Atomic number: {{count}}",
+    "mass": "Mass: {{value}}",
+    "valence": "Valence",
+    "period": "Period",
+    "group": "Group",
+    "shells": "Electron shells",
+    "noShells": "No shell data for this element.",
+    "placeCard": "Put on the board",
+    "placeBohr": "Draw the Bohr model",
+    "electronLabel": "e",
+    "electronSuffix": "e"
+  },
+  "palette": {
+    "aria": "Equation builder",
+    "groups": {
+      "fraction": "Fraction",
+      "script": "Script",
+      "radical": "Radical",
+      "integral": "Integral",
+      "largeOperator": "Large operator",
+      "bracket": "Bracket",
+      "function": "Function",
+      "accent": "Accent",
+      "limit": "Limit & log",
+      "operator": "Operator",
+      "matrix": "Matrix",
+      "symbol": "Symbols",
+      "chemistry": "Chemistry"
+    }
+  }
+}

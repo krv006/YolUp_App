@@ -1,0 +1,25 @@
+{
+  "roles": {
+    "teacher": "Учитель",
+    "student": "Ученик",
+    "parent": "Родитель"
+  },
+  "parent": {
+    "dashboard": "Главная",
+    "children": "Дети",
+    "attendance": "Посещаемость",
+    "homework": "Задания",
+    "grades": "Рейтинг"
+  },
+  "rail": {
+    "sectionsLabel": "Разделы",
+    "openProfileMenu": "Открыть меню профиля",
+    "chat": "Чат",
+    "schedule": "Календарь",
+    "workspace": "Workspace",
+    "resizeHandle": "Изменить ширину панели чатов",
+    "teacherWorkspace": "Рабочее пространство учителя",
+    "studentWorkspace": "Рабочее пространство ученика",
+    "parentWorkspace": "Кабинет родителя"
+  }
+}

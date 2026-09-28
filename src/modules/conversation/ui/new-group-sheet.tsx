@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
@@ -34,6 +35,7 @@ export interface NewGroupSheetProps {
  *   2) yangi kurs yaratish — backend uning guruh chatini avtomatik ochadi
  */
 export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
   const client = useQueryClient();
@@ -56,7 +58,7 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
       setForm({ name: "", subject: "", description: "" });
       onClose();
       router.push(`/teacher/chats/${room.id}`);
-      toast.success("Kurs va guruh chat yaratildi");
+      toast.success(t("conversation.kurs_va_guruh_chat_yaratildi"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -71,13 +73,13 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
     <Sheet
       open={open}
       onClose={onClose}
-      title="Yangi kurs va guruh"
-      description="Kurs yaratilganda backend uning guruh chatini avtomatik ochadi."
+      title={t("conversation.yangi_kurs_va_guruh")}
+      description={t("conversation.kurs_yaratilganda_backend_uning_guruh_chatin")}
     >
       {pending.length > 0 ? (
         <>
           <Text variant="caption" tone="muted">
-            KUTILAYOTGAN YOZILISHLAR
+            {t("conversation.kutilayotgan_yozilishlar")}
           </Text>
           {pending.map((request, index) => (
             <View key={request.id}>
@@ -93,14 +95,14 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
                   </Text>
                 </View>
                 <Button
-                  title="Rad"
+                  title={t("conversation.rad")}
                   variant="secondary"
                   fullWidth={false}
                   loading={respond.isPending}
                   onPress={() => respond.mutate({ enrollmentId: request.id, action: "decline" })}
                 />
                 <Button
-                  title="Qabul"
+                  title={t("conversation.qabul")}
                   fullWidth={false}
                   loading={respond.isPending}
                   onPress={() => respond.mutate({ enrollmentId: request.id, action: "approve" })}
@@ -116,17 +118,17 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
         <Sparkles size={17} color={palette["primary-text"]} />
         <View style={styles.noteBody}>
           <Text variant="label" tone="brand">
-            Yangi o'quv maydoni
+            {t("conversation.yangi_oquv_maydoni")}
           </Text>
           <Text variant="caption" tone="muted">
-            Chat, darslar, vazifalar va o'quvchilar bitta kursda.
+            {t("conversation.chat_darslar_vazifalar_va_oquvchilar_bitta_k")}
           </Text>
         </View>
       </View>
 
       <Input
-        label="Kurs nomi"
-        placeholder="Masalan: Ingliz tili — Intermediate"
+        label={t("conversation.kurs_nomi")}
+        placeholder={t("conversation.masalan_ingliz_tili_intermediate")}
         value={form.name}
         onChangeText={(value) => update("name", value)}
       />
@@ -139,22 +141,22 @@ export function NewGroupSheet({ open, onClose }: NewGroupSheetProps) {
         * uchun `SelectField` qidiruvni o'zi ochadi.
         */}
       <SelectField
-        label="Fan"
-        placeholder="Fanni tanlang"
+        label={t("conversation.fan")}
+        placeholder={t("conversation.fanni_tanlang")}
         value={form.subject}
         options={subjectOptions}
         onChange={(value) => update("subject", value)}
       />
       <Input
-        label="Qisqa tavsif"
-        placeholder="Kurs maqsadi va yo'nalishi…"
+        label={t("conversation.qisqa_tavsif")}
+        placeholder={t("conversation.kurs_maqsadi_va_yonalishi")}
         value={form.description}
         onChangeText={(value) => update("description", value)}
         multiline
       />
 
       <Button
-        title="Kurs yaratish"
+        title={t("conversation.kurs_yaratish")}
         size="lg"
         loading={create.isPending}
         disabled={!form.name.trim() || !form.subject.trim()}

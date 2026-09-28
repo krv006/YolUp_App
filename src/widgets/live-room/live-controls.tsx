@@ -1,4 +1,5 @@
 import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useLocalParticipant, useLocalParticipantPermissions } from "@livekit/react-native";
 import {
   Hand,
@@ -55,6 +56,7 @@ export function LiveControls({
   onRequestShare,
   shareRequesting,
 }: LiveControlsProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const permissions = useLocalParticipantPermissions();
   const { localParticipant } = useLocalParticipant();
@@ -83,13 +85,13 @@ export function LiveControls({
    */
   async function toggleShare() {
     if (Platform.OS === "ios") {
-      toast.info("Ekran ulashish iOS'da hali mavjud emas");
+      toast.info(t("liveroom.ekran_ulashish_iosda_hali_mavjud_emas"));
       return;
     }
     try {
       await localParticipant.setScreenShareEnabled(!shareOn);
     } catch {
-      toast.error("Ekranni ulashib bo'lmadi");
+      toast.error(t("liveroom.ekranni_ulashib_bolmadi"));
     }
   }
 
@@ -159,7 +161,7 @@ export function LiveControls({
         />
       ) : (
         <RequestButton
-          label="Ekran ulashish uchun ruxsat so'rash"
+          label={t("liveroom.ekran_ulashish_uchun_ruxsat_sorash")}
           waiting={false}
           disabled={shareRequesting || isTeacher}
           onPress={onRequestShare}
@@ -169,7 +171,7 @@ export function LiveControls({
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Darsdan chiqish"
+        accessibilityLabel={t("liveroom.darsdan_chiqish")}
         onPress={onLeave}
         style={({ pressed }) => [
           styles.control,
@@ -262,9 +264,10 @@ function RequestButton({
 
 /** Token mikrofonni umuman taqiqlagan holat — sababi ko'rinsin (veb bilan bir xil). */
 export function MicBlockedNotice() {
+  const { t } = useTranslation("mobile");
   return (
     <Text variant="caption" tone="muted" style={styles.notice}>
-      Server tokenida mikrofon ruxsati yo'q — texnik jamoaga xabar bering.
+      {t("liveroom.server_tokenida_mikrofon_ruxsati_yoq_texnik_")}
     </Text>
   );
 }

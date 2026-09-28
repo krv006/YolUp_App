@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { LiveKitRoom, useRoomContext } from "@livekit/react-native";
 import { RoomEvent, type Participant } from "livekit-client";
@@ -31,6 +32,7 @@ export interface VoiceRoomSheetProps {
 }
 
 export function VoiceRoomSheet({ open, room, token, onClose }: VoiceRoomSheetProps) {
+  const { t } = useTranslation("mobile");
   const leave = useLeaveVoiceRoom();
 
   function close() {
@@ -43,7 +45,7 @@ export function VoiceRoomSheet({ open, room, token, onClose }: VoiceRoomSheetPro
       open={open}
       onClose={close}
       title={room.title || "Ovozli suhbat"}
-      description="Faqat mikrofon. Chiqsangiz, xona ro'yxatdan yo'qolmaydi."
+      description={t("voice.faqat_mikrofon_chiqsangiz_xona_royxatdan_yoq")}
     >
       <LiveKitRoom
         serverUrl={token.serverUrl}
@@ -69,6 +71,7 @@ function RoomBody({
   isModerator: boolean;
   onLeave: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const livekit = useRoomContext();
   const [micOn, setMicOn] = useState(true);
@@ -143,12 +146,12 @@ function RoomBody({
                   trailing={
                     <View style={styles.row}>
                       <Button
-                        title="Tasdiqlash"
+                        title={t("voice.tasdiqlash")}
                         icon={<Check size={14} color={palette["primary-foreground"]} />}
                         onPress={() => answer.mutate({ requestId: request.id, approve: true })}
                       />
                       <Button
-                        title="Rad etish"
+                        title={t("voice.rad_etish")}
                         variant="secondary"
                         icon={<X size={14} color={palette["secondary-foreground"]} />}
                         onPress={() => answer.mutate({ requestId: request.id, approve: false })}
@@ -177,17 +180,17 @@ function RoomBody({
 
       {isModerator ? (
         <Button
-          title="Xonani yopish"
+          title={t("voice.xonani_yopish")}
           variant="danger"
           loading={closeRoom.isPending}
           onPress={() => closeRoom.mutate(room.id, { onSuccess: onLeave })}
         />
       ) : null}
 
-      <Button title="Chiqish" variant="secondary" onPress={onLeave} />
+      <Button title={t("voice.chiqish")} variant="secondary" onPress={onLeave} />
 
       {room.accessMode === "invite_only" ? (
-        <Badge label="Taklif asosida" tone="neutral" />
+        <Badge label={t("voice.taklif_asosida")} tone="neutral" />
       ) : null}
     </View>
   );

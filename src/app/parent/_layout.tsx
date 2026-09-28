@@ -19,12 +19,12 @@ import { ROLES } from "@/shared/constants";
  * qisqartirib ko'rsatiladi ("Farzan…").
  */
 const TABS = [
-  { name: "dashboard", label: "Asosiy", icon: Home },
-  { name: "children", label: "Farzand", icon: UsersRound },
-  { name: "attendance", label: "Davomat", icon: CalendarCheck2 },
-  { name: "homework", label: "Vazifa", icon: ListChecks },
-  { name: "grades", label: "Reyting", icon: Trophy },
-  { name: "profile", label: "Profil", icon: UserRound },
+  { name: "dashboard", labelKey: "tabs.overview", icon: Home },
+  { name: "children", labelKey: "tabs.children", icon: UsersRound },
+  { name: "attendance", labelKey: "tabs.attendance", icon: CalendarCheck2 },
+  { name: "homework", labelKey: "tabs.homework", icon: ListChecks },
+  { name: "grades", labelKey: "tabs.rating", icon: Trophy },
+  { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
 export default function ParentLayout() {

@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { radius, Button, Sheet, Text, toast, useTheme } from "@/shared/ui";
 import type { QuizImportWarning } from "@/shared/types";
 import type { ImportedQuiz } from "../api/quiz.api";
@@ -40,6 +41,7 @@ function warningMessage(warning: QuizImportWarning): string {
 }
 
 export function ImportResultSheet({ result, onClose, onEdit }: ImportResultSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const publish = usePublishQuiz();
 
@@ -62,7 +64,7 @@ export function ImportResultSheet({ result, onClose, onEdit }: ImportResultSheet
     <Sheet
       open={Boolean(result)}
       onClose={onClose}
-      title="Test import qilindi"
+      title={t("quiz.test_import_qilindi")}
       description={`${quiz?.questions.length ?? 0} ta savol olindi.`}
     >
       <View
@@ -101,7 +103,7 @@ export function ImportResultSheet({ result, onClose, onEdit }: ImportResultSheet
         */}
       {onEdit ? (
         <Button
-          title="Savollarni tekshirish"
+          title={t("quiz.savollarni_tekshirish")}
           size="lg"
           variant="secondary"
           onPress={() => {
@@ -111,7 +113,7 @@ export function ImportResultSheet({ result, onClose, onEdit }: ImportResultSheet
       ) : null}
 
       <Button
-        title="E'lon qilish"
+        title={t("quiz.elon_qilish")}
         size="lg"
         variant={warnings.length ? "secondary" : "primary"}
         loading={publish.isPending}
@@ -129,7 +131,7 @@ export function ImportResultSheet({ result, onClose, onEdit }: ImportResultSheet
         }}
       />
 
-      <Button title="Keyinroq" variant="ghost" onPress={onClose} />
+      <Button title={t("quiz.keyinroq")} variant="ghost" onPress={onClose} />
     </Sheet>
   );
 }

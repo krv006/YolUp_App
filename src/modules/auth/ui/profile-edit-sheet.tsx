@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { Camera, FileUp, Trash2 } from "lucide-react-native";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
@@ -39,6 +40,7 @@ export interface ProfileEditSheetProps {
  * bo'lim umuman ko'rsatilmaydi.
  */
 export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   const updateProfile = useUpdateProfileMutation();
@@ -64,7 +66,7 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
     setErrors({});
     try {
       await updateProfile.mutateAsync(form);
-      toast.success("Profil saqlandi");
+      toast.success(t("auth.profil_saqlandi"));
       onClose();
     } catch (caught) {
       const error = caught as AppError;
@@ -87,7 +89,7 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
     if (!picked) return;
     try {
       await updateAvatar.mutateAsync(toUploadFile(picked));
-      toast.success("Profil rasmi yangilandi");
+      toast.success(t("auth.profil_rasmi_yangilandi"));
     } catch {
       /*
        * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
@@ -107,11 +109,11 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title="Profil" description="Ma'lumotlaringizni yangilang.">
+    <Sheet open={open} onClose={onClose} title={t("auth.profil")} description={t("auth.malumotlaringizni_yangilang")}>
       <View style={styles.avatarRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Profil rasmini o'zgartirish"
+          accessibilityLabel={t("auth.profil_rasmini_ozgartirish")}
           onPress={() => void changeAvatar()}
           style={styles.avatarHit}
         >
@@ -127,7 +129,7 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
 
         {user?.avatarUrl ? (
           <Button
-            title="Rasmni o'chirish"
+            title={t("auth.rasmni_ochirish")}
             variant="ghost"
             fullWidth={false}
             loading={updateAvatar.isPending}
@@ -138,41 +140,41 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
       </View>
 
       <Input
-        label="Ism"
+        label={t("auth.ism")}
         value={form.firstName}
         onChangeText={(value) => update("firstName", value)}
         autoCapitalize="words"
         error={errors.firstName}
       />
       <Input
-        label="Familiya"
+        label={t("auth.familiya")}
         value={form.lastName}
         onChangeText={(value) => update("lastName", value)}
         autoCapitalize="words"
         error={errors.lastName}
       />
       <Input
-        label="Login"
+        label={t("auth.login")}
         value={form.username ?? ""}
         onChangeText={(value) => update("username", value)}
         error={errors.username}
       />
       <Input
-        label="Telefon"
+        label={t("auth.telefon")}
         value={form.phone ?? ""}
         onChangeText={(value) => update("phone", value)}
         keyboardType="phone-pad"
         error={errors.phone}
       />
 
-      <Button title="Saqlash" loading={updateProfile.isPending} onPress={() => void save()} />
+      <Button title={t("auth.saqlash")} loading={updateProfile.isPending} onPress={() => void save()} />
 
       {isTeacher ? (
         <>
           <Separator />
           <Text variant="label">Sertifikatlar</Text>
           <Text variant="caption" tone="muted">
-            Administrator hisobingizni tasdiqlashda shularga qaraydi.
+            {t("auth.administrator_hisobingizni_tasdiqlashda_shul")}
           </Text>
 
           {(user?.certificates ?? []).map((certificate) => (
@@ -186,7 +188,7 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
                 </Text>
               </View>
               <IconButton
-                accessibilityLabel="Sertifikatni o'chirish"
+                accessibilityLabel={t("auth.sertifikatni_ochirish")}
                 disabled={deleteCertificate.isPending}
                 onPress={() => deleteCertificate.mutate(certificate.id)}
               >
@@ -197,12 +199,12 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
 
           {(user?.certificates ?? []).length === 0 ? (
             <Text variant="caption" tone="muted">
-              Hali sertifikat yuklanmagan.
+              {t("auth.hali_sertifikat_yuklanmagan")}
             </Text>
           ) : null}
 
           <Button
-            title="Sertifikat yuklash"
+            title={t("auth.sertifikat_yuklash")}
             variant="secondary"
             loading={uploadCertificate.isPending}
             icon={<FileUp size={16} color={palette["secondary-foreground"]} />}

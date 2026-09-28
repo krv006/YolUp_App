@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
@@ -27,6 +28,7 @@ export function LessonsSection({
   courseId: string;
   isTeacher?: boolean;
 }) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const [addOpen, setAddOpen] = useState(false);
@@ -37,7 +39,7 @@ export function LessonsSection({
   const lessons = useLessons({ course: courseId, page_size: 100 }, Boolean(courseId));
   const remove = useDeleteLesson();
 
-  if (lessons.isLoading) return <ScreenLoading label="Darslar yuklanmoqda…" />;
+  if (lessons.isLoading) return <ScreenLoading label={t("groupworkspace.darslar_yuklanmoqda")} />;
 
   const items = lessons.data ?? [];
 
@@ -46,7 +48,7 @@ export function LessonsSection({
       <ScrollView contentContainerStyle={styles.list}>
         {isTeacher ? (
           <Button
-            title="Dars qo'shish"
+            title={t("groupworkspace.dars_qoshish")}
             variant="secondary"
             icon={<Plus size={16} color={palette["secondary-foreground"]} />}
             onPress={() => setAddOpen(true)}
@@ -54,7 +56,7 @@ export function LessonsSection({
         ) : null}
 
         {items.length === 0 ? (
-          <ScreenEmpty title="Dars yo'q" description="Bu guruhda hali dars rejalashtirilmagan." />
+          <ScreenEmpty title={t("groupworkspace.dars_yoq")} description={t("groupworkspace.bu_guruhda_hali_dars_rejalashtirilmagan")} />
         ) : (
           items.map((lesson: Lesson) => (
             <LessonCard
@@ -98,7 +100,7 @@ export function LessonsSection({
       <ConfirmSheet
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="Darsni o'chirish"
+        title={t("groupworkspace.darsni_ochirish")}
         description={`"${deleteTarget?.title ?? ""}" qayta tiklanmaydi.`}
         loading={remove.isPending}
         onConfirm={() => {

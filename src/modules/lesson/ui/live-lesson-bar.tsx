@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { Button, radius, Text, useTheme } from "@/shared/ui";
@@ -21,6 +22,7 @@ export interface LiveLessonBarProps {
  * Dars bo'lmasa umuman chizilmaydi: chat balandligi bekorga qisqarmaydi.
  */
 export function LiveLessonBar({ lesson, onJoin }: LiveLessonBarProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   if (!lesson) return null;
@@ -34,7 +36,7 @@ export function LiveLessonBar({ lesson, onJoin }: LiveLessonBarProps) {
 
       <View style={styles.body}>
         <Text variant="label" style={{ color: palette["destructive-strong"] }}>
-          Dars ketmoqda
+          {t("lesson.dars_ketmoqda")}
         </Text>
         <Text variant="caption" tone="muted" numberOfLines={1}>
           {lesson.title || lesson.topic || lesson.courseTitle}
@@ -42,7 +44,7 @@ export function LiveLessonBar({ lesson, onJoin }: LiveLessonBarProps) {
       </View>
 
       <Button
-        title="Qo'shilish"
+        title={t("lesson.qoshilish")}
         variant="danger"
         fullWidth={false}
         icon={<Video size={15} color={palette["destructive-foreground"]} />}

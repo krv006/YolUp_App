@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { CheckCheck, GraduationCap, RefreshCw } from "lucide-react-native";
 import { formatMessageTime } from "@/shared/lib";
 import { ROLES } from "@/shared/constants";
@@ -32,6 +33,7 @@ export function MessageBubble({
   onLongPress,
   onRetryMessage,
 }: MessageBubbleProps) {
+  const { t } = useTranslation("mobile");
   const { palette, bubbleGradient } = useTheme();
   const outgoing = message.senderId === currentUserId;
   const isTeacherSender = message.senderRole === ROLES.TEACHER;
@@ -173,7 +175,7 @@ export function MessageBubble({
           >
             <RefreshCw size={13} color={palette["destructive-strong"]} />
             <Text variant="caption" tone="danger">
-              Qayta yuborish
+              {t("message.qayta_yuborish")}
             </Text>
           </Pressable>
         ) : null}

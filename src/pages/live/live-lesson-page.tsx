@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
@@ -48,6 +49,7 @@ interface PreJoinChoices {
  * FIFO navbat kechikishi -> LiveKit ulanish.
  */
 export function LiveLessonPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
 
@@ -123,7 +125,7 @@ export function LiveLessonPage() {
   if (token.isLoading || lesson.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Darsga ulanmoqda…" />
+        <ScreenLoading label={t("live.darsga_ulanmoqda")} />
       </Screen>
     );
   }
@@ -159,7 +161,7 @@ export function LiveLessonPage() {
   if (!readyToConnect) {
     return (
       <Screen>
-        <ScreenLoading label="Navbat kutilmoqda…" />
+        <ScreenLoading label={t("live.navbat_kutilmoqda")} />
       </Screen>
     );
   }
@@ -198,6 +200,7 @@ function PreJoin({
   onJoin: (choices: PreJoinChoices) => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [audio, setAudio] = useState(false);
   const [video, setVideo] = useState(false);
@@ -209,12 +212,12 @@ function PreJoin({
         <Text tone="muted">Darsga kirishdan oldin mikrofon va kamerani tanlang.</Text>
 
         {!micAllowed ? (
-          <Badge label="Mikrofon o'qituvchi ruxsatidan keyin ochiladi" tone="warning" />
+          <Badge label={t("live.mikrofon_oqituvchi_ruxsatidan_keyin_ochiladi")} tone="warning" />
         ) : null}
 
         <View style={styles.toggles}>
           <Toggle
-            label="Mikrofon"
+            label={t("live.mikrofon")}
             enabled={audio}
             disabled={!micAllowed}
             onToggle={() => setAudio((value) => !value)}
@@ -222,7 +225,7 @@ function PreJoin({
             offIcon={<MicOff size={22} color={palette["muted-foreground"]} />}
           />
           <Toggle
-            label="Kamera"
+            label={t("live.kamera")}
             enabled={video}
             onToggle={() => setVideo((value) => !value)}
             onIcon={<Video size={22} color={palette["primary-foreground"]} />}
@@ -230,8 +233,8 @@ function PreJoin({
           />
         </View>
 
-        <Button title="Darsga kirish" size="lg" onPress={() => onJoin({ audio, video })} />
-        <Button title="Bekor qilish" variant="secondary" onPress={onCancel} />
+        <Button title={t("live.darsga_kirish")} size="lg" onPress={() => onJoin({ audio, video })} />
+        <Button title={t("live.bekor_qilish")} variant="secondary" onPress={onCancel} />
       </View>
     </Screen>
   );
@@ -287,6 +290,7 @@ function Toggle({
  * fokus jurnaliga tushadi.
  */
 function AttentionCheckDialog({ lessonId, enabled }: { lessonId: string; enabled: boolean }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const check = useAttentionCheck(lessonId, enabled);
   const answer = useAnswerAttention(lessonId);
@@ -304,10 +308,10 @@ function AttentionCheckDialog({ lessonId, enabled }: { lessonId: string; enabled
         >
           <Text variant="subheading">Siz shu yerdamisiz?</Text>
           <Text tone="muted">
-            Darsda ekaningizni tasdiqlang. Javob bermasangiz bu davomat hisobotiga tushadi.
+            {t("live.darsda_ekaningizni_tasdiqlang_javob_bermasan")}
           </Text>
           <Button
-            title="Ha, shu yerdaman"
+            title={t("live.ha_shu_yerdaman")}
             size="lg"
             loading={answer.isPending}
             onPress={() => {

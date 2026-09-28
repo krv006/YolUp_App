@@ -1,4 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useMyAnalytics } from "@/modules/analytics";
@@ -52,20 +53,21 @@ function StatCard({ value, label }: { value: string; label: string }) {
 }
 
 function StudentView({ data }: { data: StudentAnalytics }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   return (
     <>
       <View style={styles.statGrid}>
-        <StatCard value={String(data.attemptCount)} label="Urinishlar" />
-        <StatCard value={percent(data.avgPercentage)} label="O'rtacha natija" />
+        <StatCard value={String(data.attemptCount)} label={t("analytics.urinishlar")} />
+        <StatCard value={percent(data.avgPercentage)} label={t("analytics.ortacha_natija")} />
       </View>
 
       <Text variant="label">So&apos;nggi urinishlar</Text>
 
       {data.recentAttempts.length === 0 ? (
         <Text variant="caption" tone="muted">
-          Hali test yechilmagan.
+          {t("analytics.hali_test_yechilmagan")}
         </Text>
       ) : (
         data.recentAttempts.map((item) => (
@@ -105,25 +107,26 @@ function StudentView({ data }: { data: StudentAnalytics }) {
 }
 
 function TeacherView({ data }: { data: TeacherAnalytics }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const { overall } = data;
 
   return (
     <>
       <View style={styles.statGrid}>
-        <StatCard value={rating(overall.avgRating)} label="O'rtacha baho" />
-        <StatCard value={String(overall.ratingCount)} label="Baholar soni" />
-        <StatCard value={String(overall.courseCount)} label="Kurslar" />
-        <StatCard value={String(overall.studentCount)} label="O'quvchilar" />
-        <StatCard value={String(overall.lessonsFinished)} label="O'tilgan darslar" />
-        <StatCard value={percent(overall.reliability)} label="Ishonchlilik" />
+        <StatCard value={rating(overall.avgRating)} label={t("analytics.ortacha_baho")} />
+        <StatCard value={String(overall.ratingCount)} label={t("analytics.baholar_soni")} />
+        <StatCard value={String(overall.courseCount)} label={t("analytics.kurslar")} />
+        <StatCard value={String(overall.studentCount)} label={t("analytics.oquvchilar")} />
+        <StatCard value={String(overall.lessonsFinished)} label={t("analytics.otilgan_darslar")} />
+        <StatCard value={percent(overall.reliability)} label={t("analytics.ishonchlilik")} />
       </View>
 
       <Text variant="label">Kurslar bo&apos;yicha</Text>
 
       {data.courses.length === 0 ? (
         <Text variant="caption" tone="muted">
-          Kurs topilmadi.
+          {t("analytics.kurs_topilmadi")}
         </Text>
       ) : (
         data.courses.map((course) => (
@@ -140,11 +143,11 @@ function TeacherView({ data }: { data: TeacherAnalytics }) {
               * shuning uchun "nom — qiymat" juftliklari ikki ustunda.
               */}
             <View style={styles.metrics}>
-              <Metric label="O'quvchilar" value={course.studentCount?.toString() ?? "—"} />
-              <Metric label="O'rtacha baho" value={rating(course.avgRating)} />
-              <Metric label="Test o'rtachasi" value={percent(course.quizAvgPercentage)} />
-              <Metric label="Davomat" value={percent(course.attendanceRate)} />
-              <Metric label="Ishonchlilik" value={percent(course.reliability)} />
+              <Metric label={t("analytics.oquvchilar")} value={course.studentCount?.toString() ?? "—"} />
+              <Metric label={t("analytics.ortacha_baho")} value={rating(course.avgRating)} />
+              <Metric label={t("analytics.test_ortachasi")} value={percent(course.quizAvgPercentage)} />
+              <Metric label={t("analytics.davomat")} value={percent(course.attendanceRate)} />
+              <Metric label={t("analytics.ishonchlilik")} value={percent(course.reliability)} />
             </View>
           </View>
         ))
@@ -165,6 +168,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 export function AnalyticsPage() {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
   const analytics = useMyAnalytics();
@@ -175,7 +179,7 @@ export function AnalyticsPage() {
    * yo'q edi.
    */
   const back = (
-    <IconButton accessibilityLabel="Orqaga" onPress={() => router.back()}>
+    <IconButton accessibilityLabel={t("analytics.orqaga")} onPress={() => router.back()}>
       <ArrowLeft size={20} color={palette["muted-foreground"]} />
     </IconButton>
   );
@@ -183,8 +187,8 @@ export function AnalyticsPage() {
   if (analytics.isLoading) {
     return (
       <Screen>
-        <ScreenHeader title="Tahlil" leading={back} />
-        <ScreenLoading label="Tahlil yuklanmoqda…" />
+        <ScreenHeader title={t("analytics.tahlil")} leading={back} />
+        <ScreenLoading label={t("analytics.tahlil_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -192,7 +196,7 @@ export function AnalyticsPage() {
   if (analytics.isError || !analytics.data) {
     return (
       <Screen>
-        <ScreenHeader title="Tahlil" leading={back} />
+        <ScreenHeader title={t("analytics.tahlil")} leading={back} />
         <ScreenError
           message={analytics.error?.message ?? "Tahlilni yuklab bo'lmadi"}
           onRetry={() => void analytics.refetch()}
@@ -214,8 +218,8 @@ export function AnalyticsPage() {
         }
       >
         <ScreenHeader
-          title="Tahlil"
-          subtitle="Natijalaringiz va ko'rsatkichlaringiz."
+          title={t("analytics.tahlil")}
+          subtitle={t("analytics.natijalaringiz_va_korsatkichlaringiz")}
           leading={back}
         />
 

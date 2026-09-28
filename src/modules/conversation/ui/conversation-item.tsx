@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { UsersRound, Video } from "lucide-react-native";
 import { formatConversationTime } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
@@ -22,6 +23,7 @@ export interface ConversationItemProps {
  * bilishi kerak.
  */
 export function ConversationItem({ conversation, onPress, live = false }: ConversationItemProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   return (
@@ -72,7 +74,7 @@ export function ConversationItem({ conversation, onPress, live = false }: Conver
                 style={{ color: palette["destructive-strong"] }}
                 numberOfLines={1}
               >
-                Dars ketmoqda
+                {t("conversation.dars_ketmoqda")}
               </Text>
             </View>
           ) : (

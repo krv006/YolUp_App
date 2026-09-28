@@ -1,0 +1,112 @@
+{
+  "selector": {
+    "label": "Farzand",
+    "noChild": "Farzand ulanmagan"
+  },
+  "dashboard": {
+    "loading": "Ota-ona paneli yuklanmoqda",
+    "loadError": "Ma'lumotlarni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "noChildTitle": "Hali farzand biriktirilmagan",
+    "noChildDescription": "Farzandingiz hisobini ulaganingizdan so'ng bu yerda uning davomati, darslari va uy vazifalari ko'rinadi. Ulash uchun farzandingizdan taklif kodini so'rang.",
+    "noChildAction": "Farzandni ulash",
+    "eyebrow": "OTA-ONA KABINETI",
+    "greeting": "Xayrli tong, {{name}}! 👋",
+    "subtitleWithChild": "{{name}}ning ta'lim jarayoni.",
+    "subtitleNoChild": "Farzandingizning ta'lim jarayonini kuzatib boring.",
+    "recentActivityEyebrow": "SO'NGGI FAOLLIK",
+    "attendanceTitle": "Davomat",
+    "allAttendance": "Barcha davomat",
+    "emptyAttendance": "Tanlangan farzand uchun davomat topilmadi."
+  },
+  "children": {
+    "loading": "Farzandlar yuklanmoqda",
+    "loadError": "Farzandlar ro'yxatini yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "eyebrow": "OILA PROFILI",
+    "title": "Farzandlarim",
+    "subtitle": "Biriktirilgan o'quvchi hisoblari va maxfiylik ruxsatlari.",
+    "linkChild": "O'quvchini ulash",
+    "createChild": "Bola hisobi",
+    "selected": "Tanlangan",
+    "verified": "Tasdiqlangan",
+    "lessonsUnit": "dars",
+    "minutesUnit": "daqiqa",
+    "lastActivity": "So'nggi faollik",
+    "emptyTitle": "Farzand hali ulanmagan",
+    "emptyDescription": "O'quvchi kodini kiriting yoki yangi hisob yarating.",
+    "consentEyebrow": "MAXFIYLIK",
+    "consentTitle": "{{name}} uchun ruxsatlar",
+    "loginsHistory": "Kirishlar tarixi",
+    "consentOn": "Yoqilgan",
+    "consentOff": "O'chiq",
+    "consentLoadError": "Ruxsatlarni yuklab bo'lmadi.",
+    "consentKinds": {
+      "recording": { "label": "Dars yozuvi", "description": "Darsni yozib olishga ruxsat" },
+      "camera": { "label": "Kamera", "description": "Jonli darsda kameradan foydalanish" },
+      "analytics": { "label": "Faollik tahlili", "description": "Davomat, diqqat va fokus tahlili" }
+    },
+    "linkDialog": {
+      "title": "O'quvchini ulash",
+      "description": "O'quvchi profilidagi FK-... taklif kodini kiriting.",
+      "codeLabel": "Taklif kodi",
+      "codePlaceholder": "FK-XXXX",
+      "cancel": "Bekor",
+      "submit": "So'rov yuborish"
+    },
+    "childDialog": {
+      "title": "Bola hisobini yaratish",
+      "description": "Yaratilgan o'quvchi sizga avtomatik ulanadi.",
+      "firstName": "Ism",
+      "lastName": "Familiya",
+      "username": "Login",
+      "tempPassword": "Vaqtinchalik parol",
+      "cancel": "Bekor",
+      "submit": "Hisob yaratish"
+    },
+    "genericError": "Xatolik",
+    "loginHistoryStudentFallback": "O'quvchi",
+    "loginHistoryTitle": "{{name}} — kirishlar tarixi",
+    "loginHistoryDescription": "Farzandingiz hisobiga qaysi qurilma va IP'dan kirilgani."
+  },
+  "attendance": {
+    "loading": "Davomat yuklanmoqda",
+    "loadError": "Davomatni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "eyebrow": "KUZATUV",
+    "title": "Davomat tarixi",
+    "subtitleWithChild": "{{name}}ning darsga kirish va chiqish vaqtlari.",
+    "subtitleNoChild": "Farzandingizning davomat ma'lumotlari.",
+    "report": "Hisobot",
+    "searchPlaceholder": "Dars yoki o'quvchini qidirish",
+    "recordsCount": "{{count}} ta yozuv",
+    "awaySuffix": " · {{duration}} chalg'igan"
+  },
+  "homework": {
+    "notSubmitted": "Topshirilmagan",
+    "openResultAria": "Natijani ochish",
+    "checking": "Tekshirilmoqda",
+    "openCheckingAria": "Tekshiruv holatini ochish",
+    "checkError": "Tekshiruv xatosi",
+    "openErrorAria": "Xatolik tafsilotini ochish",
+    "noChildTitle": "Farzand tanlanmagan",
+    "noChildDescription": "Avval o'quvchi hisobini ulang.",
+    "loading": "Vazifalar yuklanmoqda",
+    "loadError": "Vazifalarni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "eyebrow": "VAZIFALAR",
+    "subtitle": "Topshiriqlar va tekshiruv natijalari.",
+    "noDue": "Muddat yo'q",
+    "emptyTitle": "Vazifa topilmadi",
+    "resultDialogTitle": "{{name}} — tekshiruv natijasi"
+  },
+  "report": {
+    "noChildTitle": "Farzand tanlanmagan",
+    "noChildDescription": "Avval o'quvchi hisobini ulang.",
+    "loading": "Reyting yuklanmoqda",
+    "eyebrow": "REYTING",
+    "loadError": "Reytingni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "subtitle": "Har bir fan bo'yicha vazifalar va baholar."
+  }
+}

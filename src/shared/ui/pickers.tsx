@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Calendar, Check, ChevronDown, Clock } from "lucide-react-native";
@@ -180,6 +181,7 @@ export function SelectField({
   placeholder,
   searchable,
 }: SelectFieldProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -210,7 +212,7 @@ export function SelectField({
       <Modal visible={open} transparent animationType="slide" onRequestClose={close}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Yopish"
+          accessibilityLabel={t("shared.yopish")}
           style={[styles.backdrop, { backgroundColor: palette.overlay }]}
           onPress={close}
         >
@@ -229,7 +231,7 @@ export function SelectField({
               <TextInput
                 value={query}
                 onChangeText={setQuery}
-                placeholder="Qidirish"
+                placeholder={t("shared.qidirish")}
                 placeholderTextColor={palette["muted-foreground"]}
                 autoCorrect={false}
                 style={[
@@ -245,7 +247,7 @@ export function SelectField({
 
             {visible.length === 0 ? (
               <Text variant="caption" tone="muted" style={styles.empty}>
-                Mos variant topilmadi
+                {t("shared.mos_variant_topilmadi")}
               </Text>
             ) : null}
 

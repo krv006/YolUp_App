@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
 import { ReportPage } from "@/pages/report/report-page";
@@ -12,14 +13,15 @@ import { Screen, ScreenEmpty } from "@/shared/ui";
  * qatori qo'shiladi.
  */
 export function ParentGradesPage() {
+  const { t } = useTranslation("mobile");
   const { selectedChild, selectedChildId } = useSelectedChild();
 
   if (!selectedChild) {
     return (
       <Screen>
         <ScreenEmpty
-          title="Farzand tanlanmagan"
-          description="Avval 'Farzandlar' bo'limida o'quvchi hisobini ulang."
+          title={t("parent.farzand_tanlanmagan")}
+          description={t("parent.avval_farzandlar_bolimida_oquvchi_hisobini_u")}
         />
       </Screen>
     );

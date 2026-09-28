@@ -1,0 +1,92 @@
+{
+  "language": {
+    "switcherLabel": "Язык",
+    "uz": "Узбекский",
+    "en": "Английский",
+    "ru": "Русский"
+  },
+  "actions": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "submit": "Отправить",
+    "close": "Закрыть",
+    "back": "Назад",
+    "retry": "Повторить",
+    "logout": "Выйти"
+  },
+  "portal": {
+    "home": "Главная",
+    "defaultUser": "Пользователь",
+    "openNav": "Открыть навигацию",
+    "navLabel": "Навигация — {{role}}"
+  },
+  "fileKind": {
+    "pdf": "PDF-документ",
+    "image": "Изображение",
+    "video": "Видео",
+    "audio": "Аудио",
+    "other": "Файл"
+  },
+  "fileViewer": {
+    "opening": "Открывается…",
+    "openError": "Не удалось открыть файл",
+    "unsupported": "Этот тип файла нельзя просмотреть в браузере.",
+    "platformOnlyNote": "Файл можно просмотреть только на платформе",
+    "close": "Закрыть"
+  },
+  "date": {
+    "yesterday": "Вчера",
+    "hourUnit": "ч",
+    "minuteUnit": "м",
+    "secondUnit": "с"
+  },
+  "formPickers": {
+    "months": [
+      "Январь",
+      "Февраль",
+      "Март",
+      "Апрель",
+      "Май",
+      "Июнь",
+      "Июль",
+      "Август",
+      "Сентябрь",
+      "Октябрь",
+      "Ноябрь",
+      "Декабрь"
+    ],
+    "weekdays": [
+      "Пн",
+      "Вт",
+      "Ср",
+      "Чт",
+      "Пт",
+      "Сб",
+      "Вс"
+    ],
+    "selectPlaceholder": "Выберите",
+    "selectHeading": "Выбор",
+    "chooseDate": "Выберите дату",
+    "chooseDateTime": "Выберите дату и время",
+    "chooseTime": "Выберите время",
+    "prevMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "adjustTimeAria": "Настроить время",
+    "increaseHourAria": "Увеличить час",
+    "decreaseHourAria": "Уменьшить час",
+    "increaseMinuteAria": "Увеличить минуту",
+    "decreaseMinuteAria": "Уменьшить минуту",
+    "hourLabel": "Час",
+    "minuteLabel": "Минута",
+    "presetTimesAria": "Готовые варианты времени",
+    "minuteUnit": "мин",
+    "presetDurationsAria": "Готовые варианты продолжительности",
+    "dueTimeSection": "Время сдачи",
+    "clear": "Очистить",
+    "today": "Сегодня",
+    "done": "Готово",
+    "schedule": "Расписание",
+    "searchPlaceholder": "Поиск",
+    "searchEmpty": "Ничего не найдено"
+  }
+}

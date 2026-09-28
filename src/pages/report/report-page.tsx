@@ -1,4 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useHomeworkReport } from "@/modules/homework";
 import { HomeworkReportView } from "@/modules/homework/ui/homework-report-view";
 import { Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
@@ -10,13 +11,14 @@ import { Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui"
  * `?student=` parametrini shunday qabul qiladi).
  */
 export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const report = useHomeworkReport(studentId ?? undefined);
 
   if (report.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Reyting yuklanmoqda…" />
+        <ScreenLoading label={t("report.reyting_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -46,7 +48,7 @@ export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
       >
         <Text variant="heading">Mening natijalarim</Text>
         <Text variant="caption" tone="muted" style={styles.subtitle}>
-          Har bir fan bo'yicha vazifalar va baholaringiz.
+          {t("report.har_bir_fan_boyicha_vazifalar_va_baholaringi")}
         </Text>
         <HomeworkReportView report={report.data} />
       </ScrollView>

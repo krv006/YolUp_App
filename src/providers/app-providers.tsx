@@ -10,6 +10,15 @@ import { useAuthStore } from "@/modules/auth";
 import { ToastHost } from "@/shared/ui";
 import { queryClient } from "./query-client";
 
+/*
+ * i18n ATAYLAB shu yerda — yon ta'sir uchun import qilinadi.
+ *
+ * `i18next.init()` modul yuklanganda bir marta ishlaydi va tilni MMKV'dan
+ * sinxron oladi. Agar u komponent ichida (`useEffect`) chaqirilsa,
+ * birinchi kadr tarjimasiz chizilib, keyin almashardi — matn "sakrardi".
+ */
+import "@/shared/i18n";
+
 /**
  * Veb `src/app/providers/app-providers.tsx` ning mobil varianti.
  *

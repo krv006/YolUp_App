@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { Search, Send, UserRoundX } from "lucide-react-native";
 import { useCourseStudents } from "@/modules/course";
@@ -30,6 +31,7 @@ export interface LessonInviteSheetProps {
  * kiradi (veb'dagi izoh bilan bir xil).
  */
 export function LessonInviteSheet({ lessonId, courseId, open, onClose }: LessonInviteSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [search, setSearch] = useState("");
 
@@ -53,20 +55,20 @@ export function LessonInviteSheet({ lessonId, courseId, open, onClose }: LessonI
         setSearch("");
         onClose();
       }}
-      title="Darsga taklif qilish"
-      description="Taklif — bu ogohlantirish; o'quvchi darsga o'zi kiradi."
+      title={t("live.darsga_taklif_qilish")}
+      description={t("live.taklif_bu_ogohlantirish_oquvchi_darsga_ozi_k")}
     >
       <Input
-        placeholder="O'quvchi qidirish"
+        placeholder={t("live.oquvchi_qidirish")}
         icon={<Search size={18} color={palette["muted-foreground"]} />}
         value={search}
         onChangeText={setSearch}
       />
 
-      {students.isLoading ? <ScreenLoading label="Ro'yxat yuklanmoqda…" /> : null}
+      {students.isLoading ? <ScreenLoading label={t("live.royxat_yuklanmoqda")} /> : null}
 
       {!students.isLoading && visible.length === 0 ? (
-        <ScreenEmpty title="O'quvchi topilmadi" />
+        <ScreenEmpty title={t("live.oquvchi_topilmadi")} />
       ) : null}
 
       {visible.map((student, index) => (
@@ -84,7 +86,7 @@ export function LessonInviteSheet({ lessonId, courseId, open, onClose }: LessonI
             </View>
 
             <Button
-              title="Taklif"
+              title={t("live.taklif")}
               fullWidth={false}
               loading={invite.isPending}
               icon={<Send size={15} color={palette["primary-foreground"]} />}

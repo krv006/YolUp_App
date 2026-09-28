@@ -1,0 +1,161 @@
+{
+  "emptyState": {
+    "title": "Choose a conversation",
+    "description": "Pick a conversation on the left to view and continue messaging.",
+    "openConversations": "Open conversations"
+  },
+  "header": {
+    "backAria": "Back to conversations",
+    "openInfoAria": "Open {{title}} info",
+    "memberCount": "{{count}} students",
+    "online": "Online now",
+    "recentlyActive": "Recently active"
+  },
+  "directStatus": {
+    "pending": "Request pending",
+    "active": "Direct message",
+    "blocked": "Blocked",
+    "notSent": "No request sent"
+  },
+  "info": {
+    "groupSubjectFallback": "Course group",
+    "profileInfo": "Profile info",
+    "memberCount": "{{count}} students",
+    "changeGroupImageAria": "Change group photo",
+    "groupImageUpdated": "Group photo updated",
+    "muteOn": "Unmute",
+    "muteOff": "Mute",
+    "mutedOn": "Notifications muted",
+    "mutedOff": "Notifications unmuted",
+    "editCourse": "Edit course",
+    "aboutGroup": "ABOUT GROUP",
+    "aboutDirect": "INFO",
+    "groupDescriptionFallback": "Course group chat",
+    "usernameHint": "Username · tap to copy",
+    "usernameCopied": "Username copied",
+    "teacherSection": "TEACHER",
+    "loading": "Loading…",
+    "noInfo": "No info",
+    "acceptConversation": "Accept conversation",
+    "conversationAccepted": "Conversation accepted",
+    "blockUser": "Block user",
+    "conversationBlocked": "Conversation blocked",
+    "deleteCourse": "Delete course",
+    "editCourseTitle": "Edit course",
+    "editCourseDescription": "Update the course name, subject and description.",
+    "courseName": "Course name",
+    "subject": "Subject",
+    "description": "Description",
+    "cancel": "Cancel",
+    "save": "Save",
+    "deleteCourseTitle": "Delete course",
+    "deleteCourseDescription": "\"{{title}}\" and its related data cannot be restored."
+  },
+  "item": {
+    "liveNow": "Lesson in progress",
+    "typing": "typing..."
+  },
+  "newDialog": {
+    "title": "New course & group",
+    "description": "Once the course is created, the backend automatically opens its group chat.",
+    "pendingEnrollments": "PENDING ENROLLMENTS",
+    "decline": "Decline",
+    "approve": "Approve",
+    "createdToast": "Course and group chat created",
+    "noteTitle": "A new learning space",
+    "noteDescription": "Chat, lessons, homework and students, all in one course.",
+    "courseNameLabel": "Course name",
+    "courseNamePlaceholder": "E.g. English — Intermediate",
+    "subjectLabel": "Subject",
+    "descriptionLabel": "Short description",
+    "descriptionPlaceholder": "The course's goal and direction...",
+    "cancel": "Cancel",
+    "create": "Create course"
+  },
+  "list": {
+    "today": "Today",
+    "loadError": "Couldn't load messages",
+    "loadErrorHint": "Please try again shortly.",
+    "retry": "Retry"
+  },
+  "composer": {
+    "editingLabel": "Editing message",
+    "youLabel": "You",
+    "replyFallback": "Reply",
+    "cancelEditAria": "Cancel editing",
+    "cancelReplyAria": "Cancel reply",
+    "removeAttachmentAria": "Remove attached file",
+    "fileTooLarge": "File size must not exceed 20 MB",
+    "fileAttached": "File attached",
+    "attachAria": "Attach file",
+    "editPlaceholder": "Edit your message...",
+    "sendPlaceholder": "Type a message...",
+    "textAria": "Message text",
+    "emojiAria": "Choose emoji",
+    "saveEditAria": "Save edited message",
+    "sendAria": "Send message"
+  },
+  "actionsMenu": {
+    "closeAria": "Close message menu",
+    "reactionsAria": "Choose a reaction",
+    "addReactionAria": "Add {{emoji}} reaction",
+    "reply": "Reply",
+    "edit": "Edit",
+    "deleteForMe": "Delete for me",
+    "deleteForEveryone": "Delete for everyone"
+  },
+  "bubble": {
+    "edited": "edited",
+    "retry": "Resend",
+    "reactionsAria": "Message reactions"
+  },
+  "text": {
+    "viewRecording": "View the video recording"
+  },
+  "typing": {
+    "suffix": "typing"
+  },
+  "attachment": {
+    "openAria": "{{name}} — open",
+    "openSuffix": "open"
+  },
+  "removedFromGroup": "You were removed from this group",
+  "directPage": {
+    "messageEdited": "Message edited",
+    "actionFailed": "Couldn't complete the message action",
+    "actionFailedRetry": "Couldn't complete the message action. Please try again.",
+    "messageDeleted": "Message deleted",
+    "deletedForEveryone": "Message deleted for everyone",
+    "deletedForMe": "Message deleted for you",
+    "deleteFailed": "Couldn't delete the message"
+  },
+  "panel": {
+    "listAria": "Conversation list",
+    "filtersAria": "Conversation types",
+    "filters": {
+      "all": "All",
+      "direct": "Direct",
+      "group": "Groups",
+      "unread": "Unread"
+    },
+    "searchPlaceholder": "Search conversations",
+    "searchAria": "Search conversations",
+    "openSearchAria": "Open search",
+    "closeSearchAria": "Close search",
+    "searchButton": "Search",
+    "accountAria": "Profile menu",
+    "loadError": "Couldn't load conversations",
+    "loadErrorHint": "Check your internet connection and try again.",
+    "retry": "Retry",
+    "peopleLabel": "PEOPLE",
+    "emptyTitle": "No conversations found",
+    "emptyHint": "Try a different search term or filter.",
+    "clearFilters": "Clear filters",
+    "newGroupAria": "Create a new group or conversation",
+    "findTeacherAria": "Find a teacher or course",
+    "assignmentGroupNotFound": "Assignment group not found",
+    "assignmentOpenFailed": "Couldn't open the assignment",
+    "directOpened": "Conversation opened",
+    "directRequestSent": "Request sent — waiting for the teacher's approval"
+  }
+}

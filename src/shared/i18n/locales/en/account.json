@@ -1,0 +1,81 @@
+{
+  "menu": {
+    "profile": { "label": "Profile info", "description": "View your personal information" },
+    "logins": { "label": "Login history", "description": "Log by device and IP" },
+    "notifications": { "label": "Notifications", "description": "Messages and reminders" },
+    "settings": { "label": "Settings", "description": "Platform settings" }
+  },
+  "roleFallback": "Teacher",
+  "workspaceFallback": "Teacher workspace",
+  "closeMenuAria": "Close menu",
+  "closeAria": "Close",
+  "menuAria": "{{role}} menu",
+  "sectionsAria": "Account sections",
+  "online": "Online",
+  "sessionSecure": "Your session is stored securely",
+  "logout": "Log out",
+  "version": "YolUp · v1.0",
+  "profileDialog": {
+    "title": "{{role}} profile",
+    "description": "Actual profile data from the backend.",
+    "verified": "Verified profile",
+    "changeAvatarAria": "Change profile picture",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "username": "Username",
+    "usernameNote": "The username must be unique. If you change it, you'll sign in with the new one next time.",
+    "phone": "Phone",
+    "cancel": "Cancel",
+    "save": "Save",
+    "usernameLabel": "Username · copy",
+    "phoneLabel": "Phone · copy",
+    "notApproved": "Your account hasn't been approved by an administrator yet — creating courses and lessons is temporarily disabled.",
+    "certificates": "Certificates",
+    "upload": "Upload",
+    "certificateFallback": "Certificate",
+    "deleteCertificateAria": "Delete {{title}}",
+    "noCertificates": "No certificates uploaded yet.",
+    "editButton": "Edit profile"
+  },
+  "ratingsDialog": {
+    "title": "My ratings",
+    "description": "Ratings and feedback students left for your lessons.",
+    "loading": "Loading ratings",
+    "loadError": "Could not load ratings",
+    "retry": "Retry",
+    "empty": "No ratings yet.",
+    "starsAria": "{{count}} stars"
+  },
+  "settingsDialog": {
+    "title": "Settings",
+    "description": "Interface language, appearance and notifications.",
+    "languageLabel": "Language",
+    "themeLabel": "Theme",
+    "pushLabel": "Browser notifications",
+    "pushOn": "On",
+    "pushOff": "Turn on",
+    "pushUnsupported": "Not supported in this browser",
+    "pushBlocked": "Notifications are blocked in your browser settings — allow them there first.",
+    "reminderLabel": "Lesson reminder",
+    "reminderOption": "{{count}} minutes before"
+  },
+  "roleSwitcher": {
+    "triggerAria": "Your other accounts",
+    "panelAria": "Your other accounts",
+    "otherAccounts": "YOUR OTHER ACCOUNTS",
+    "openRoles": "SWITCH TO ANOTHER ROLE",
+    "openHint": "Opens automatically, no registration needed",
+    "switchHint": "Tap an account to switch to it instantly, no password needed.",
+    "switched": "Signed in as {{name}}",
+    "failed": "Could not switch the account"
+  },
+  "toast": {
+    "copied": "{{label}} copied",
+    "copyFailed": "Couldn't copy",
+    "avatarUpdated": "Profile picture updated",
+    "profileUpdated": "Profile updated",
+    "profileSaveFailed": "Couldn't save the profile",
+    "usernameLabelShort": "Username",
+    "phoneLabelShort": "Phone"
+  }
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Check, Clock3, Megaphone } from "lucide-react-native";
 import { formatDateTime } from "@/shared/lib";
@@ -29,6 +30,7 @@ export interface SentNotificationsSheetProps {
  * Qatorni bosganda KIM o'qigani ochiladi.
  */
 export function SentNotificationsSheet({ open, onClose }: SentNotificationsSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [detailId, setDetailId] = useState<string | null>(null);
 
@@ -38,10 +40,10 @@ export function SentNotificationsSheet({ open, onClose }: SentNotificationsSheet
   // Modul o'rnatilmagan muhitda (404) panel bo'sh emas, sabab bilan yopiladi.
   if (sent.isError) {
     return (
-      <Sheet open={open} onClose={onClose} title="Yuborilgan xabarlar">
+      <Sheet open={open} onClose={onClose} title={t("notification.yuborilgan_xabarlar")}>
         <ScreenEmpty
-          title="Ma'lumot yo'q"
-          description="Bildirishnoma moduli bu muhitda mavjud emas."
+          title={t("notification.malumot_yoq")}
+          description={t("notification.bildirishnoma_moduli_bu_muhitda_mavjud_emas")}
         />
       </Sheet>
     );
@@ -56,13 +58,13 @@ export function SentNotificationsSheet({ open, onClose }: SentNotificationsSheet
         setDetailId(null);
         onClose();
       }}
-      title="Yuborilgan xabarlar"
-      description="Qatorni bosing — kim o'qigani ochiladi."
+      title={t("notification.yuborilgan_xabarlar")}
+      description={t("notification.qatorni_bosing_kim_oqigani_ochiladi")}
     >
-      {sent.isLoading ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+      {sent.isLoading ? <ScreenLoading label={t("notification.yuklanmoqda")} /> : null}
 
       {!sent.isLoading && items.length === 0 ? (
-        <ScreenEmpty title="Hali xabar yuborilmagan" />
+        <ScreenEmpty title={t("notification.hali_xabar_yuborilmagan")} />
       ) : null}
 
       {items.map((item, index) => {
@@ -99,7 +101,7 @@ export function SentNotificationsSheet({ open, onClose }: SentNotificationsSheet
 
             {open ? (
               <View style={styles.recipients}>
-                {recipients.isLoading ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+                {recipients.isLoading ? <ScreenLoading label={t("notification.yuklanmoqda")} /> : null}
                 {(recipients.data ?? []).map((person) => (
                   <View key={person.id} style={styles.recipient}>
                     <Avatar name={person.name} size="sm" />

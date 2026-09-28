@@ -1,0 +1,101 @@
+{
+  "schedulePage": {
+    "eyebrow": "CALENDAR",
+    "title": "My lessons",
+    "subtitle": "All your groups' lessons in one place.",
+    "loading": "Loading calendar",
+    "loadError": "Couldn't load lessons",
+    "retry": "Retry",
+    "empty": "No lessons scheduled yet."
+  },
+  "status": {
+    "scheduled": "Scheduled",
+    "live": "Live",
+    "finished": "Finished",
+    "cancelled": "Cancelled",
+    "unknown": "Unknown"
+  },
+  "list": {
+    "empty": "No lessons scheduled yet.",
+    "dayCount": "{{count}}",
+    "durationMinutes": "{{count}} min",
+    "missingTopic": "No topic set"
+  },
+  "calendar": {
+    "todayButton": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "lessonsCount": "{{count}} lessons",
+    "dayCellAria": "{{date}} — {{count}} lessons",
+    "noLessonsThisDay": "No lessons on this day.",
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  },
+  "actions": {
+    "join": "Join",
+    "view": "View",
+    "joinDisabledTitle": "This lesson's time has already passed",
+    "joinNeedsTopic": "Add a lesson topic first",
+    "finish": "Finish",
+    "rate": "Rate",
+    "editAria": "Edit lesson",
+    "deleteAria": "Delete lesson",
+    "ratingsAria": "Lesson ratings — {{count}}"
+  },
+  "viewSwitch": {
+    "list": "List",
+    "calendar": "Calendar",
+    "aria": "Lessons view"
+  },
+  "finishDialog": {
+    "title": "Finish lesson",
+    "description": "Finish the lesson \"{{title}}\"? It will close once the last audio chunk is safely uploaded.",
+    "cancel": "Cancel",
+    "confirm": "Finish"
+  },
+  "rateDialog": {
+    "title": "Rate the lesson",
+    "description": "\"{{title}}\" — your feedback for the teacher."
+  },
+  "ratingForm": {
+    "notFinished": "You can rate once the lesson is finished.",
+    "disabled": "Rating isn't enabled on the server yet.",
+    "thanks": "Your rating has been received",
+    "starsOfMax": "{{stars}} / 5",
+    "chooseStars": "Choose a rating",
+    "commentLabel": "Comment",
+    "commentPlaceholder": "How did the lesson go? What did the teacher do well, what could improve?",
+    "notAnonymous": "Ratings aren't anonymous — the teacher can see who wrote it.",
+    "later": "Later",
+    "submit": "Submit rating"
+  },
+  "ratingsDialog": {
+    "title": "Lesson ratings",
+    "description": "What students think about \"{{title}}\".",
+    "countSuffix": "{{count}} ratings",
+    "loadError": "Couldn't load ratings.",
+    "retry": "Retry",
+    "empty": "No one has rated this lesson yet.",
+    "disabled": "Rating isn't enabled on the server yet."
+  },
+  "starRating": {
+    "aria": "Lesson rating",
+    "starAria": "{{count}} stars",
+    "averageTitle": "Average rating: {{value}} / {{max}}"
+  },
+  "liveBar": {
+    "inProgress": "Lesson in progress",
+    "join": "Join"
+  },
+  "recording": {
+    "none": "No video recording for this lesson.",
+    "failed": "An error occurred while preparing the recording.",
+    "recording": "The lesson is being recorded — it will appear here once finished.",
+    "merging": "Merging audio and video — this may take a moment.",
+    "preparing": "Preparing the recording — it will open here once ready.",
+    "platformOnly": "Only playable on the platform",
+    "delete": "Delete",
+    "deleteDialogTitle": "Delete recording",
+    "deleteDialogDescription": "The video will be permanently deleted and cannot be restored.",
+    "cancel": "Cancel"
+  }
+}

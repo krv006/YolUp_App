@@ -1,0 +1,121 @@
+{
+  "dashboard": {
+    "eyebrow": "АДМИНИСТРАТОР",
+    "welcome": "Добро пожаловать, {{name}}",
+    "subtitle": "Общий обзор курсов, учителей и учеников.",
+    "teachersLink": "Учителя",
+    "logout": "Выйти",
+    "loading": "Загрузка панели управления",
+    "loadError": "Не удалось загрузить данные",
+    "retry": "Повторить",
+    "periods": {
+      "day": "День",
+      "week": "Неделя",
+      "month": "Месяц",
+      "year": "Год"
+    },
+    "periodNoun": {
+      "day": "день",
+      "week": "неделю",
+      "month": "месяц",
+      "year": "год"
+    },
+    "kpi": {
+      "activeStudents": "Активные ученики",
+      "activeTeachers": "Активные учителя",
+      "activeCourses": "Активные курсы",
+      "lessonsCompleted": "Проведённые уроки",
+      "lessonsCancelledCaption": "отменено {{count}} · за {{noun}}",
+      "attendance": "Средняя посещаемость",
+      "attendanceCaption": "за {{noun}}",
+      "rating": "Средний рейтинг уроков",
+      "ratingCaption": "из {{count}} оценок"
+    },
+    "charts": {
+      "periodCaption": "За выбранный период",
+      "enrollTitle": "Новые ученики",
+      "enrollLegend": "Новая запись",
+      "lessonsTitle": "Статус уроков",
+      "completedLegend": "Проведено",
+      "cancelledLegend": "Отменено",
+      "quizTitle": "Тесты — средний балл",
+      "quizCaption": "За выбранный период · шкала 0–100",
+      "quizLegend": "Тест"
+    },
+    "tables": {
+      "topCoursesTitle": "Лучшие курсы",
+      "topCoursesSubtitle": "По количеству учеников",
+      "topTeachersTitle": "Лучшие учителя",
+      "topTeachersSubtitle": "По рейтингу",
+      "colCourse": "Курс",
+      "colTeacher": "Учитель",
+      "colStudents": "Ученики",
+      "colRating": "Рейтинг",
+      "colAttendance": "Посещаемость",
+      "colCourses": "Курсы",
+      "colLessonsThisMonth": "Уроки (за месяц)",
+      "colReliability": "Активность",
+      "noCourses": "Активные курсы не найдены.",
+      "noTeachers": "Активные учителя не найдены."
+    }
+  },
+  "stats": {
+    "title": "{{name}} — статистика",
+    "description": "Общие показатели по оценкам, курсам и урокам.",
+    "loading": "Загрузка статистики",
+    "loadError": "Не удалось загрузить статистику",
+    "retry": "Повторить",
+    "open": "Статистика",
+    "openAria": "Открыть статистику: {{name}}",
+    "avgRating": "Средняя оценка",
+    "ratingCount": "Всего оценок",
+    "courseCount": "Курсы",
+    "studentCount": "Ученики",
+    "lessonsFinished": "Проведено уроков",
+    "lessonsScheduled": "Запланировано",
+    "lessonsCancelled": "Отменено",
+    "reliability": "Надёжность",
+    "breakdown": "РАСПРЕДЕЛЕНИЕ ОЦЕНОК",
+    "comments": "ПОСЛЕДНИЕ ОТЗЫВЫ"
+  },
+  "teachers": {
+    "eyebrow": "АДМИНИСТРАТОР",
+    "title": "Учителя",
+    "subtitle": "Рейтинг и статус подтверждения.",
+    "backToDashboard": "Панель управления",
+    "pendingEyebrow": "ТРЕБУЕТСЯ ПОДТВЕРЖДЕНИЕ",
+    "pendingTitle": "Новые учителя",
+    "loading": "Загрузка",
+    "approve": "Подтвердить",
+    "noPending": "Нет учителей, ожидающих подтверждения.",
+    "allEyebrow": "ВСЕ",
+    "allTitle": "Все учителя",
+    "noTeachers": "Учителя не найдены.",
+    "viewLabel": "Вид",
+    "viewPending": "Ждут подтверждения ({{count}})",
+    "viewAll": "Все учителя ({{count}})"
+  },
+  "storage": {
+    "eyebrow": "ХРАНИЛИЩЕ",
+    "title": "Видеозаписи",
+    "loading": "Загрузка",
+    "totalVideos": "Всего {{count}} видео",
+    "teacher": "Учитель",
+    "videoCount": "Видео",
+    "empty": "Видеозаписей пока нет."
+  },
+  "monitoring": {
+    "eyebrow": "СЕРВЕР",
+    "title": "Состояние сервера",
+    "scopeNote": "Только CPU и RAM самого backend-контейнера.",
+    "loading": "Загрузка измерений",
+    "cpu": "CPU",
+    "memory": "Память",
+    "memoryUsed": "Использовано памяти",
+    "measuredAt": "Последнее измерение",
+    "noSamples": "Измерений пока нет.",
+    "hours": "{{count}} ч",
+    "peakLabel": "Пиковая нагрузка",
+    "pointNote": "{{count}} точек"
+  }
+}

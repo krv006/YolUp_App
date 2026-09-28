@@ -1,0 +1,25 @@
+{
+  "roles": {
+    "teacher": "O'qituvchi",
+    "student": "O'quvchi",
+    "parent": "Ota-ona"
+  },
+  "parent": {
+    "dashboard": "Asosiy",
+    "children": "Farzandlar",
+    "attendance": "Davomat",
+    "homework": "Vazifalar",
+    "grades": "Reyting"
+  },
+  "rail": {
+    "sectionsLabel": "Bo'limlar",
+    "openProfileMenu": "Profil menyusini ochish",
+    "chat": "Chat",
+    "schedule": "Kalendar",
+    "workspace": "Workspace",
+    "resizeHandle": "Suhbatlar paneli kengligini o'zgartirish",
+    "teacherWorkspace": "O'qituvchi ish maydoni",
+    "studentWorkspace": "O'quvchi ish maydoni",
+    "parentWorkspace": "Ota-ona kabineti"
+  }
+}

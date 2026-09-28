@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import type { QuizAnswerValue } from "@/shared/types";
 import { Badge, radius, Sheet, Text, useTheme } from "@/shared/ui";
@@ -30,6 +31,7 @@ export interface QuizPreviewSheetProps {
 }
 
 export function QuizPreviewSheet({ open, onClose, title, questions }: QuizPreviewSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [answers, setAnswers] = useState<Record<string, QuizAnswerValue>>({});
 
@@ -38,11 +40,11 @@ export function QuizPreviewSheet({ open, onClose, title, questions }: QuizPrevie
       open={open}
       onClose={onClose}
       title={title.trim() || "Nomsiz test"}
-      description="O'quvchi shu ko'rinishda yechadi. Bu yerdagi javoblar saqlanmaydi."
+      description={t("quiz.oquvchi_shu_korinishda_yechadi_bu_yerdagi_ja")}
     >
       {questions.length === 0 ? (
         <Text variant="caption" tone="muted">
-          Hali savol yo&apos;q — savol qo&apos;shsangiz shu yerda ko&apos;rinadi.
+          {t("quiz.hali_savol_yo_q_savol_qo_shsangiz")}
         </Text>
       ) : null}
 

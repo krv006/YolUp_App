@@ -1,4 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { AttendanceList, useAttendance } from "@/modules/attendance";
 import { useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
@@ -12,6 +13,7 @@ import { Screen, ScreenEmpty, ScreenError, ScreenLoading, Text, useTheme } from 
  * kartochkaga aylandi va fokus tafsiloti bosilganda pastdan ochiladi.
  */
 export function ParentAttendancePage() {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const { children, childrenQuery, selectedChildId } = useSelectedChild();
 
@@ -31,8 +33,8 @@ export function ParentAttendancePage() {
     return (
       <Screen>
         <ScreenEmpty
-          title="Farzand biriktirilmagan"
-          description="'Farzand' bo'limiga o'ting va o'quvchining taklif kodi bilan uning hisobini ulang."
+          title={t("parent.farzand_biriktirilmagan")}
+          description={t("parent.farzand_bolimiga_oting_va_oquvchining_taklif")}
         />
       </Screen>
     );
@@ -41,7 +43,7 @@ export function ParentAttendancePage() {
   if (childrenQuery.isLoading || attendance.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Davomat yuklanmoqda…" />
+        <ScreenLoading label={t("parent.davomat_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -50,7 +52,7 @@ export function ParentAttendancePage() {
     return (
       <Screen>
         <ScreenError
-          message="Davomatni yuklab bo'lmadi"
+          message={t("parent.davomatni_yuklab_bolmadi")}
           onRetry={() => void attendance.refetch()}
         />
       </Screen>
@@ -72,7 +74,7 @@ export function ParentAttendancePage() {
         <View style={styles.head}>
           <Text variant="heading">Davomat</Text>
           <Text variant="caption" tone="muted">
-            Har bir darsdagi ishtirok, diqqat va fokus ko'rsatkichlari.
+            {t("parent.har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko")}
           </Text>
         </View>
 

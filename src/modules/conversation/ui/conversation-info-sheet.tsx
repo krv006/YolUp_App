@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
@@ -44,6 +45,7 @@ export function ConversationInfoSheet({
   open,
   onClose,
 }: ConversationInfoSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
   const { user } = useAuth();
@@ -78,7 +80,7 @@ export function ConversationInfoSheet({
     if (!value) return;
     await Clipboard.setStringAsync(`@${value}`);
     setCopied(true);
-    toast.success("Username nusxalandi");
+    toast.success(t("conversation.username_nusxalandi"));
     setTimeout(() => setCopied(false), 1400);
   }
 
@@ -101,7 +103,7 @@ export function ConversationInfoSheet({
     setRoomImage.mutate(
       { roomId: conversation.id, image: toUploadFile(picked) },
       {
-        onSuccess: () => toast.success("Guruh rasmi yangilandi"),
+        onSuccess: () => toast.success(t("conversation.guruh_rasmi_yangilandi")),
         onError: (error: Error) => toast.error(error.message),
       }
     );
@@ -147,23 +149,23 @@ export function ConversationInfoSheet({
     >
       {editing ? (
         <>
-          <Input label="Kurs nomi" value={form.title} onChangeText={(value) => setForm((c) => ({ ...c, title: value }))} />
+          <Input label={t("conversation.kurs_nomi")} value={form.title} onChangeText={(value) => setForm((c) => ({ ...c, title: value }))} />
           {/* Fan ro'yxatdan tanlanadi — sabab `new-group-sheet.tsx` da. */}
           <SelectField
-            label="Fan"
-            placeholder="Fanni tanlang"
+            label={t("conversation.fan")}
+            placeholder={t("conversation.fanni_tanlang")}
             value={form.subject}
             options={(subjects.data ?? []).map((item) => ({ value: item.value, label: item.label }))}
             onChange={(value) => setForm((c) => ({ ...c, subject: value }))}
           />
           <Input
-            label="Tavsif"
+            label={t("conversation.tavsif")}
             value={form.description}
             onChangeText={(value) => setForm((c) => ({ ...c, description: value }))}
             multiline
           />
-          <Button title="Saqlash" loading={updateCourse.isPending} onPress={saveCourse} />
-          <Button title="Bekor qilish" variant="ghost" onPress={() => setEditing(false)} />
+          <Button title={t("conversation.saqlash")} loading={updateCourse.isPending} onPress={saveCourse} />
+          <Button title={t("conversation.bekor_qilish")} variant="ghost" onPress={() => setEditing(false)} />
         </>
       ) : (
         <>
@@ -177,7 +179,7 @@ export function ConversationInfoSheet({
             {/* Guruh rasmini faqat kurs egasi almashtira oladi. */}
             {teacherGroup ? (
               <Button
-                title="Rasmni o'zgartirish"
+                title={t("conversation.rasmni_ozgartirish")}
                 variant="ghost"
                 fullWidth={false}
                 loading={setRoomImage.isPending}
@@ -210,7 +212,7 @@ export function ConversationInfoSheet({
             />
             {teacherGroup ? (
               <Button
-                title="Tahrirlash"
+                title={t("conversation.tahrirlash")}
                 variant="secondary"
                 fullWidth={false}
                 icon={<Pencil size={15} color={palette["secondary-foreground"]} />}
@@ -225,7 +227,7 @@ export function ConversationInfoSheet({
           {isGroup ? (
             <>
               <Text variant="caption" tone="muted">
-                GURUH HAQIDA
+                {t("conversation.guruh_haqida")}
               </Text>
               <Text>{conversation.description || "Kurs guruh chati"}</Text>
             </>
@@ -248,7 +250,7 @@ export function ConversationInfoSheet({
           {isGroup && !teacherGroup ? (
             <>
               <Text variant="caption" tone="muted">
-                O'QITUVCHI
+                {t("conversation.oqituvchi")}
               </Text>
               {course.data ? (
                 <View style={styles.teacher}>
@@ -266,15 +268,15 @@ export function ConversationInfoSheet({
           {/* Backend DirectStatusEnum: pending | active | blocked. */}
           {!isGroup && user?.role === "TEACHER" && conversation.directStatus === DIRECT_STATUS.PENDING ? (
             <>
-              <Badge label="Yangi so'rov" tone="warning" />
+              <Badge label={t("conversation.yangi_sorov")} tone="warning" />
               <Button
-                title="Suhbatni qabul qilish"
+                title={t("conversation.suhbatni_qabul_qilish")}
                 loading={respond.isPending}
                 icon={<Check size={16} color={palette["primary-foreground"]} />}
                 onPress={() => respondDirect("accept")}
               />
               <Button
-                title="Bloklash"
+                title={t("conversation.bloklash")}
                 variant="danger"
                 loading={respond.isPending}
                 onPress={() => respondDirect("block")}
@@ -286,7 +288,7 @@ export function ConversationInfoSheet({
             <>
               <Separator />
               <Button
-                title="Kursni o'chirish"
+                title={t("conversation.kursni_ochirish")}
                 variant="danger"
                 loading={deleteCourse.isPending}
                 icon={<Trash2 size={16} color={palette["destructive-foreground"]} />}

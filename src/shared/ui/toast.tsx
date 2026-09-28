@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, StyleSheet, View } from "react-native";
 import {
   Gesture,
@@ -179,6 +180,7 @@ const ACCENT: Record<ToastVariant, "success" | "destructive" | "warning" | "prim
 };
 
 function ToastCard({ item }: { item: ToastItem }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const dismiss = useToastStore((state) => state.dismiss);
   const translateX = useSharedValue(0);
@@ -246,7 +248,7 @@ function ToastCard({ item }: { item: ToastItem }) {
           {/* Bosib ham yo'q qilinadi — surish har doim ham qulay emas. */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Xabarni yopish"
+            accessibilityLabel={t("shared.xabarni_yopish")}
             onPress={close}
             style={styles.pressArea}
           >

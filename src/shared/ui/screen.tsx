@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -101,12 +102,13 @@ export function ScreenError({
   message?: string;
   onRetry?: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   return (
     <View style={styles.center}>
       <Text variant="subheading" style={styles.centered}>
         {message}
       </Text>
-      {onRetry ? <Button title="Qayta urinish" variant="secondary" fullWidth={false} onPress={onRetry} /> : null}
+      {onRetry ? <Button title={t("shared.qayta_urinish")} variant="secondary" fullWidth={false} onPress={onRetry} /> : null}
     </View>
   );
 }

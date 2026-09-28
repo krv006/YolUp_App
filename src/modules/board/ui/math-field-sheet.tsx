@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button, Input, Sheet, Text } from "@/shared/ui";
 import { FormulaPalette } from "./formula-palette";
@@ -31,6 +32,7 @@ export interface MathFieldSheetProps {
  * (`MathMarkup`), ya'ni o'quvchi hamma narsani ko'radi.
  */
 export function MathFieldSheet({ open, onClose, onSubmit }: MathFieldSheetProps) {
+  const { t } = useTranslation("mobile");
   const [latex, setLatex] = useState("");
 
   function close() {
@@ -42,11 +44,11 @@ export function MathFieldSheet({ open, onClose, onSubmit }: MathFieldSheetProps)
     <Sheet
       open={open}
       onClose={close}
-      title="Formula qo'shish"
-      description="LaTeX ko'rinishida yozing — pastda ko'rinishi chiqadi."
+      title={t("board.formula_qoshish")}
+      description={t("board.latex_korinishida_yozing_pastda_korinishi_ch")}
     >
       <Input
-        label="LaTeX"
+        label={t("board.latex")}
         placeholder="\\frac{a}{b} yoki x^2 + y^2 = z^2"
         value={latex}
         onChangeText={setLatex}
@@ -63,12 +65,12 @@ export function MathFieldSheet({ open, onClose, onSubmit }: MathFieldSheetProps)
       <FormulaPalette onInsert={(snippet) => setLatex((current) => current + snippet)} />
 
       <Text variant="caption" tone="muted">
-        Ko'rinishi:
+        {t("board.korinishi")}
       </Text>
       <MathMarkup latex={latex} />
 
       <Button
-        title="Doskaga qo'yish"
+        title={t("board.doskaga_qoyish")}
         size="lg"
         disabled={!latex.trim()}
         onPress={() => {

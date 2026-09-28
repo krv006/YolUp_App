@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Check, Search, Send, Users } from "lucide-react-native";
 import {
@@ -29,6 +30,7 @@ export interface SendNotificationSheetProps {
  * bilan tozalaydi va telefonda rich-text tahrirlash noqulay.
  */
 export function SendNotificationSheet({ open, onClose }: SendNotificationSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [target, setTarget] = useState<NotificationTarget>("all");
   const [description, setDescription] = useState("");
@@ -49,7 +51,7 @@ export function SendNotificationSheet({ open, onClose }: SendNotificationSheetPr
   async function submit() {
     if (!description.trim()) return;
     if (target === "user" && !selected) {
-      toast.error("Foydalanuvchini tanlang");
+      toast.error(t("notification.foydalanuvchini_tanlang"));
       return;
     }
     try {
@@ -75,12 +77,12 @@ export function SendNotificationSheet({ open, onClose }: SendNotificationSheetPr
     <Sheet
       open={open}
       onClose={close}
-      title="Xabar yuborish"
-      description="Barcha foydalanuvchilarga yoki bittasiga."
+      title={t("notification.xabar_yuborish")}
+      description={t("notification.barcha_foydalanuvchilarga_yoki_bittasiga")}
     >
       <View style={styles.targets}>
-        <Chip label="Hammaga" selected={target === "all"} onPress={() => setTarget("all")} />
-        <Chip label="Bitta odamga" selected={target === "user"} onPress={() => setTarget("user")} />
+        <Chip label={t("notification.hammaga")} selected={target === "all"} onPress={() => setTarget("all")} />
+        <Chip label={t("notification.bitta_odamga")} selected={target === "user"} onPress={() => setTarget("user")} />
       </View>
 
       {target === "user" ? (
@@ -97,21 +99,21 @@ export function SendNotificationSheet({ open, onClose }: SendNotificationSheetPr
                 variant="caption"
                 tone="danger"
               >
-                O'zgartirish
+                {t("notification.ozgartirish")}
               </Text>
             </View>
           ) : (
             <>
               <Input
-                label="Foydalanuvchi qidirish"
-                placeholder="Ism yoki login (kamida 2 belgi)"
+                label={t("notification.foydalanuvchi_qidirish")}
+                placeholder={t("notification.ism_yoki_login_kamida_2_belgi")}
                 icon={<Search size={18} color={palette["muted-foreground"]} />}
                 value={query}
                 onChangeText={setQuery}
               />
 
               {users.isLoading && query.trim().length >= 2 ? (
-                <ScreenLoading label="Qidirilmoqda…" />
+                <ScreenLoading label={t("notification.qidirilmoqda")} />
               ) : null}
 
               {(users.data ?? []).map((user, index) => (
@@ -142,14 +144,14 @@ export function SendNotificationSheet({ open, onClose }: SendNotificationSheetPr
         <View style={[styles.allNotice, { backgroundColor: palette["primary-tint"] }]}>
           <Users size={16} color={palette["primary-text"]} />
           <Text variant="caption" tone="brand">
-            Xabar barcha foydalanuvchilarga yuboriladi.
+            {t("notification.xabar_barcha_foydalanuvchilarga_yuboriladi")}
           </Text>
         </View>
       )}
 
       <Input
-        label="Xabar matni"
-        placeholder="Xabaringizni yozing…"
+        label={t("notification.xabar_matni")}
+        placeholder={t("notification.xabaringizni_yozing")}
         value={description}
         onChangeText={setDescription}
         multiline
@@ -157,7 +159,7 @@ export function SendNotificationSheet({ open, onClose }: SendNotificationSheetPr
       />
 
       <Button
-        title="Yuborish"
+        title={t("notification.yuborish")}
         size="lg"
         loading={send.isPending}
         disabled={!description.trim() || (target === "user" && !selected)}

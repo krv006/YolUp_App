@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Choice } from "@/modules/quiz";
 import { Badge, Button, ConfirmSheet, radius, Text, useTheme } from "@/shared/ui";
@@ -44,6 +45,7 @@ export interface MockTestRunnerProps {
  *     ikkalasi bitta CSS klassini bo'lishadi.
  */
 export function MockTestRunner({ mockTestId, attempt, onFinished, onCancel }: MockTestRunnerProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const submit = useSubmitMockTest();
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -124,10 +126,10 @@ export function MockTestRunner({ mockTestId, attempt, onFinished, onCancel }: Mo
 
         <View style={styles.barActions}>
           <View style={styles.half}>
-            <Button title="To'xtatish" variant="secondary" onPress={() => setCancelOpen(true)} />
+            <Button title={t("mocktest.toxtatish")} variant="secondary" onPress={() => setCancelOpen(true)} />
           </View>
           <View style={styles.half}>
-            <Button title="Topshirish" loading={submit.isPending} onPress={() => void handleSubmit()} />
+            <Button title={t("mocktest.topshirish")} loading={submit.isPending} onPress={() => void handleSubmit()} />
           </View>
         </View>
       </View>
@@ -175,8 +177,8 @@ export function MockTestRunner({ mockTestId, attempt, onFinished, onCancel }: Mo
       <ConfirmSheet
         open={cancelOpen}
         onClose={() => setCancelOpen(false)}
-        title="Imtihonni to'xtatish"
-        description="Javoblaringiz yuborilmaydi va urinish bekor bo'ladi."
+        title={t("mocktest.imtihonni_toxtatish")}
+        description={t("mocktest.javoblaringiz_yuborilmaydi_va_urinish_bekor_")}
         onConfirm={() => {
           setCancelOpen(false);
           onCancel();

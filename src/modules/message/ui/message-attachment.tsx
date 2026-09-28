@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { Download, FileText } from "lucide-react-native";
 import { downloadBlob, fileKindLabel, fileKindOf } from "@/shared/lib";
@@ -24,6 +25,7 @@ export function MessageAttachment({
   attachment: Attachment;
   outgoing?: boolean;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [busy, setBusy] = useState(false);
   const kind = fileKindOf(attachment.mimeType, attachment.name);
@@ -34,7 +36,7 @@ export function MessageAttachment({
     try {
       const blob = await messageApi.downloadFile(attachment.messageId);
       const saved = await downloadBlob(blob, attachment.name);
-      if (!saved) toast.error("Faylni ochib bo'lmadi");
+      if (!saved) toast.error(t("message.faylni_ochib_bolmadi"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Faylni yuklab bo'lmadi");
     } finally {

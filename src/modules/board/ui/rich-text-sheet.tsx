@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { Button, Chip, ChipRow, Input, radius, Sheet, Text, useTheme } from "@/shared/ui";
 import type { TextLineDto, TextListKind } from "../api/board.dto";
@@ -54,6 +55,7 @@ function toDto(lines: readonly DraftLine[]): TextLineDto[] {
 }
 
 export function RichTextSheet({ open, onClose, onSubmit }: RichTextSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [lines, setLines] = useState<DraftLine[]>(() => [newLine()]);
 
@@ -75,8 +77,8 @@ export function RichTextSheet({ open, onClose, onSubmit }: RichTextSheetProps) {
     <Sheet
       open={open}
       onClose={close}
-      title="Matn qo'shish"
-      description="Har qatorni alohida formatlash mumkin."
+      title={t("board.matn_qoshish")}
+      description={t("board.har_qatorni_alohida_formatlash_mumkin")}
     >
       {lines.map((line, index) => (
         <View
@@ -87,35 +89,35 @@ export function RichTextSheet({ open, onClose, onSubmit }: RichTextSheetProps) {
             label={`${index + 1}-qator`}
             value={line.text}
             onChangeText={(text) => update(line.key, { text })}
-            placeholder="Matn"
+            placeholder={t("board.matn")}
             autoFocus={index === 0}
           />
 
           <ChipRow>
             <Chip
-              label="Qalin"
+              label={t("board.qalin")}
               selected={line.bold}
               onPress={() => update(line.key, { bold: !line.bold })}
             />
             <Chip
-              label="Kursiv"
+              label={t("board.kursiv")}
               selected={line.italic}
               onPress={() => update(line.key, { italic: !line.italic })}
             />
             <Chip
-              label="Tagi chizilgan"
+              label={t("board.tagi_chizilgan")}
               selected={line.underline}
               onPress={() => update(line.key, { underline: !line.underline })}
             />
             <Chip
-              label="Belgi"
+              label={t("board.belgi")}
               selected={line.list === "bullet"}
               onPress={() =>
                 update(line.key, { list: line.list === "bullet" ? undefined : "bullet" })
               }
             />
             <Chip
-              label="Raqam"
+              label={t("board.raqam")}
               selected={line.list === "number"}
               onPress={() =>
                 update(line.key, { list: line.list === "number" ? undefined : "number" })
@@ -130,20 +132,20 @@ export function RichTextSheet({ open, onClose, onSubmit }: RichTextSheetProps) {
               tone="danger"
               onPress={() => setLines((current) => current.filter((item) => item.key !== line.key))}
             >
-              Qatorni o&apos;chirish
+              {t("board.qatorni_o_chirish")}
             </Text>
           ) : null}
         </View>
       ))}
 
       <Button
-        title="Qator qo'shish"
+        title={t("board.qator_qoshish")}
         variant="secondary"
         onPress={() => setLines((current) => [...current, newLine()])}
       />
 
       <Button
-        title="Doskaga qo'yish"
+        title={t("board.doskaga_qoyish")}
         size="lg"
         disabled={!canSubmit}
         onPress={() => {

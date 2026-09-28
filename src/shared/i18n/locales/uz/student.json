@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "loading": "O'quvchi paneli yuklanmoqda",
+    "loadError": "Ma'lumotlarni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "eyebrow": "O'QUVCHI KABINETI",
+    "greeting": "Xayrli kun, {{name}}! 👋",
+    "subtitle": "Bugungi darslar va vazifalaringiz bir joyda.",
+    "nextLessonEyebrow": "KEYINGI DARS",
+    "nextLessonTitle": "Bugungi reja",
+    "schedule": "Jadval",
+    "enterCourse": "Kursga kirish",
+    "noPlannedLesson": "Rejalashtirilgan dars yo'q.",
+    "assignmentsEyebrow": "VAZIFALAR",
+    "upcomingDeadlines": "Yaqin muddatlar",
+    "all": "Barchasi"
+  },
+  "groupWorkspace": {
+    "tabs": {
+      "chat": "Chat",
+      "lessons": "Darslar",
+      "assignments": "Vazifalar"
+    },
+    "sendFailed": "Xabar yuborilmadi",
+    "replyFallback": "Javob",
+    "lessons": {
+      "eyebrow": "KURS DARSLARI",
+      "title": "Darslar"
+    },
+    "assignments": {
+      "eyebrow": "KURS VAZIFALARI",
+      "title": "Vazifalar",
+      "downloadAria": "Vazifa faylini yuklab olish",
+      "downloadFallback": "Vazifa faylini yuklab olish",
+      "scoreSuffix": "ball",
+      "checkError": "Tekshiruv xatosi",
+      "checking": "Tekshirilmoqda…",
+      "openResultAria": "Natijani ochish",
+      "quizBadge": "Test",
+      "quizQuestions": "{{count}} ta savol",
+      "quizSolve": "Yechish",
+      "quizHistoryAria": "Urinishlar tarixi",
+      "overdueLabel": "Muddat tugagan",
+      "dueLabel": "Muddat",
+      "noDue": "Muddat yo'q",
+      "missed": "Topshirilmagan",
+      "submit": "Topshirish",
+      "empty": "Vazifa yo'q.",
+      "submitDialogDescription": "Topshiriq faylini yuklang (maksimal 25 MB).",
+      "chooseFile": "Fayl tanlash",
+      "send": "Yuborish",
+      "deadlinePassed": "Topshirish muddati tugagan",
+      "resultDialogTitle": "Vazifangiz bo'yicha natija"
+    }
+  },
+  "enrollmentDialog": {
+    "title": "Yangi muloqot",
+    "description": "O'qituvchiga so'rov yuboring yoki ochiq kursga qo'shiling.",
+    "parentRequestsEyebrow": "OTA-ONA SO'ROVLARI",
+    "wantsToLink": "profilga bog'lanmoqchi",
+    "decline": "Rad etish",
+    "approve": "Tasdiqlash",
+    "writeToTeacherEyebrow": "O'QITUVCHIGA YOZISH",
+    "openChat": "Ochish",
+    "requestChat": "So'rov",
+    "joinCoursesEyebrow": "KURSLARGA QO'SHILISH",
+    "studentsSuffix": "{{count}} o'quvchi",
+    "pending": "Kutilmoqda",
+    "enrolled": "A'zo",
+    "join": "Qo'shilish",
+    "noOpenCourses": "Hozircha ochiq kurs yo'q.",
+    "loadError": "Ma'lumotlarni yuklab bo'lmadi"
+  }
+}

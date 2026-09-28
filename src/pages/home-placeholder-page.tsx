@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { env, ROUTES } from "@/shared/config";
@@ -12,6 +13,7 @@ import { Button, Screen, Text, useTheme } from "@/shared/ui";
  * Faza 1–3 da har rol o'z haqiqiy ekranlarini oladi va bu sahifa o'chadi.
  */
 export function HomePlaceholderPage({ area }: { area: string }) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { user, logout } = useAuth();
   const { palette } = useTheme();
@@ -29,11 +31,11 @@ export function HomePlaceholderPage({ area }: { area: string }) {
       </View>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
-        <Row label="Login" value={user?.username ?? "—"} />
-        <Row label="Rol" value={user?.role ?? "—"} />
-        <Row label="ID" value={user?.id ?? "—"} />
-        <Row label="Muhit" value={env.appEnv} />
-        <Row label="API" value={env.apiUrl} />
+        <Row label={t("homeplaceholderpage.tsx.login")} value={user?.username ?? "—"} />
+        <Row label={t("homeplaceholderpage.tsx.rol")} value={user?.role ?? "—"} />
+        <Row label={t("homeplaceholderpage.tsx.id")} value={user?.id ?? "—"} />
+        <Row label={t("homeplaceholderpage.tsx.muhit")} value={env.appEnv} />
+        <Row label={t("homeplaceholderpage.tsx.api")} value={env.apiUrl} />
       </View>
 
       <View style={styles.note}>
@@ -43,7 +45,7 @@ export function HomePlaceholderPage({ area }: { area: string }) {
         </Text>
       </View>
 
-      <Button title="Chiqish" variant="secondary" onPress={() => void signOut()} />
+      <Button title={t("homeplaceholderpage.tsx.chiqish")} variant="secondary" onPress={() => void signOut()} />
     </Screen>
   );
 }

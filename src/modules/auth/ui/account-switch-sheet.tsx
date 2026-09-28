@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { UserRoundPlus } from "lucide-react-native";
 import { ROLES, type Role } from "@/shared/constants";
@@ -65,6 +66,7 @@ export function AccountSwitchSheet({
   open: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
   const switchAccount = useSwitchAccountMutation();
@@ -101,8 +103,8 @@ export function AccountSwitchSheet({
     <Sheet
       open={open}
       onClose={onClose}
-      title="Hisobni almashtirish"
-      description="Qayta login qilish shart emas — parol so'ralmaydi."
+      title={t("auth.hisobni_almashtirish")}
+      description={t("auth.qayta_login_qilish_shart_emas_parol_soralmay")}
     >
       {linkedAccounts.length > 0 ? (
         <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
@@ -129,7 +131,7 @@ export function AccountSwitchSheet({
       {missingRoles.length > 0 ? (
         <>
           <Text variant="caption" tone="muted" style={styles.caption}>
-            Yangi hisob ochish — u joriy hisobingizga bog'lanadi
+            {t("auth.yangi_hisob_ochish_u_joriy_hisobingizga_bogl")}
           </Text>
           <View
             style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}

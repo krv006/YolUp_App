@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
@@ -68,6 +69,7 @@ export interface BoardSurfaceProps {
  * qaytadi — bu ham veb bilan bir xil.
  */
 export function BoardSurface({ lessonId, courseId = null, embedded = false }: BoardSurfaceProps) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -212,7 +214,7 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
   if (board.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Doska yuklanmoqda…" />
+        <ScreenLoading label={t("board.doska_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -220,7 +222,7 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
   if (board.isError || !state) {
     return (
       <Screen>
-        <ScreenError message="Doskani ochib bo'lmadi" onRetry={() => void board.refetch()} />
+        <ScreenError message={t("board.doskani_ochib_bolmadi")} onRetry={() => void board.refetch()} />
       </Screen>
     );
   }
@@ -229,7 +231,7 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
     <Screen padded={false}>
       {embedded ? null : (
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel="Orqaga" onPress={goBack}>
+        <IconButton accessibilityLabel={t("board.orqaga")} onPress={goBack}>
           <ArrowLeft size={22} color={palette.foreground} />
         </IconButton>
         <View style={styles.headBody}>
@@ -239,10 +241,10 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
           </Text>
         </View>
 
-        {!canDraw ? <Badge label="Faqat ko'rish" tone="neutral" /> : null}
+        {!canDraw ? <Badge label={t("board.faqat_korish")} tone="neutral" /> : null}
 
         {selected ? (
-          <IconButton accessibilityLabel="Tanlanganni o'chirish" onPress={() => setReasonOpen(true)}>
+          <IconButton accessibilityLabel={t("board.tanlanganni_ochirish")} onPress={() => setReasonOpen(true)}>
             <Trash2 size={20} color={palette.destructive} />
           </IconButton>
         ) : null}
@@ -252,25 +254,25 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
           * vositasi va faqat o'qituvchida ma'noga ega.
           */}
         {state.isTeacher ? (
-          <IconButton accessibilityLabel="Davriy jadval" onPress={() => setPeriodicOpen(true)}>
+          <IconButton accessibilityLabel={t("board.davriy_jadval")} onPress={() => setPeriodicOpen(true)}>
             <Atom size={20} color={palette.foreground} />
           </IconButton>
         ) : null}
 
         {state.mathEnabled ? (
-          <IconButton accessibilityLabel="Formula yordamchisi" onPress={() => setFormulaOpen(true)}>
+          <IconButton accessibilityLabel={t("board.formula_yordamchisi")} onPress={() => setFormulaOpen(true)}>
             <Sigma size={20} color={palette.foreground} />
           </IconButton>
         ) : null}
 
         {state.isTeacher && courseId ? (
-          <IconButton accessibilityLabel="Chizishga ruxsat" onPress={() => setGrantOpen(true)}>
+          <IconButton accessibilityLabel={t("board.chizishga_ruxsat")} onPress={() => setGrantOpen(true)}>
             <UserRoundCheck size={20} color={palette.foreground} />
           </IconButton>
         ) : null}
 
         {state.isTeacher ? (
-          <IconButton accessibilityLabel="Yangi varaq" onPress={() => addSheet.mutate()}>
+          <IconButton accessibilityLabel={t("board.yangi_varaq")} onPress={() => addSheet.mutate()}>
             <FilePlus2 size={20} color={palette.foreground} />
           </IconButton>
         ) : null}
@@ -360,10 +362,10 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
       <Sheet
         open={grantOpen}
         onClose={() => setGrantOpen(false)}
-        title="Chizishga ruxsat"
-        description="Tanlangan o'quvchi doskada chiza oladi."
+        title={t("board.chizishga_ruxsat")}
+        description={t("board.tanlangan_oquvchi_doskada_chiza_oladi")}
       >
-        {members.isLoading ? <ScreenLoading label="O'quvchilar yuklanmoqda…" /> : null}
+        {members.isLoading ? <ScreenLoading label={t("board.oquvchilar_yuklanmoqda")} /> : null}
 
         {(members.data?.items ?? []).map(({ student }, index) => (
           <View key={student.id}>
@@ -385,7 +387,7 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
 
         {!members.isLoading && !members.data?.items?.length ? (
           <Text variant="caption" tone="muted">
-            O'quvchi topilmadi.
+            {t("board.oquvchi_topilmadi")}
           </Text>
         ) : null}
       </Sheet>
@@ -394,17 +396,17 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
       <Sheet
         open={formulaOpen}
         onClose={() => setFormulaOpen(false)}
-        title="Formula yordamchisi"
-        description="Masalan: 2x^2 - 5x + 3 = 0"
+        title={t("board.formula_yordamchisi")}
+        description={t("board.masalan_2x_2_5x_3_0")}
       >
         <Input
-          label="Formula"
+          label={t("board.formula")}
           value={formula}
           onChangeText={(value) => {
             setFormula(value);
             setSolution(null);
           }}
-          placeholder="2x^2 - 5x + 3 = 0"
+          placeholder={t("board.2x_2_5x_3_0")}
           autoFocus
         />
 
@@ -423,25 +425,25 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
         ) : null}
 
         <Button
-          title="Yechish"
+          title={t("board.yechish")}
           variant="secondary"
           loading={solve.isPending}
           disabled={!formula.trim()}
           onPress={() => void solveFormula()}
         />
 
-        {solution && canDraw ? <Button title="Doskaga qo'yish" onPress={placeSolution} /> : null}
+        {solution && canDraw ? <Button title={t("board.doskaga_qoyish")} onPress={placeSolution} /> : null}
       </Sheet>
 
       <Sheet
         open={reasonOpen}
         onClose={() => setReasonOpen(false)}
-        title="O'chirish sababi"
-        description="Sabab majburiy — u dars jurnaliga yoziladi."
+        title={t("board.ochirish_sababi")}
+        description={t("board.sabab_majburiy_u_dars_jurnaliga_yoziladi")}
       >
-        <Input value={reason} onChangeText={setReason} placeholder="Masalan: xato yozildi" autoFocus />
+        <Input value={reason} onChangeText={setReason} placeholder={t("board.masalan_xato_yozildi")} autoFocus />
         <Button
-          title="O'chirish"
+          title={t("board.ochirish")}
           variant="danger"
           disabled={!reason.trim()}
           loading={erase.isPending}

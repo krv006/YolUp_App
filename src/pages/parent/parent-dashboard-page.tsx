@@ -1,4 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import {
   CalendarCheck2,
@@ -38,6 +39,7 @@ const METRIC_TONES = ["violet", "amber", "emerald", "rose"] as const;
 
 /** Ota-ona paneli — veb `parent-dashboard-page.tsx` porti. */
 export function ParentDashboardPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -68,8 +70,8 @@ export function ParentDashboardPage() {
     return (
       <Screen>
         <ScreenEmpty
-          title="Farzand biriktirilmagan"
-          description="'Farzand' bo'limiga o'ting va o'quvchining taklif kodi bilan uning hisobini ulang."
+          title={t("parent.farzand_biriktirilmagan")}
+          description={t("parent.farzand_bolimiga_oting_va_oquvchining_taklif")}
         />
       </Screen>
     );
@@ -78,7 +80,7 @@ export function ParentDashboardPage() {
   if (loading) {
     return (
       <Screen>
-        <ScreenLoading label="Panel yuklanmoqda…" />
+        <ScreenLoading label={t("parent.panel_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -86,7 +88,7 @@ export function ParentDashboardPage() {
   if (failed) {
     return (
       <Screen>
-        <ScreenError message="Ma'lumotlarni yuklab bo'lmadi" onRetry={refresh} />
+        <ScreenError message={t("parent.malumotlarni_yuklab_bolmadi")} onRetry={refresh} />
       </Screen>
     );
   }
@@ -142,7 +144,7 @@ export function ParentDashboardPage() {
         <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
           <View style={styles.cardHead}>
             <Text variant="label" style={styles.cardTitle}>
-              So'nggi davomat
+              {t("parent.songgi_davomat")}
             </Text>
             <Text
               accessibilityRole="button"
@@ -150,14 +152,14 @@ export function ParentDashboardPage() {
               variant="caption"
               tone="brand"
             >
-              Barchasi
+              {t("parent.barchasi")}
             </Text>
             <ChevronRight size={15} color={palette["primary-text"]} />
           </View>
 
           {recent.length === 0 ? (
             <Text variant="caption" tone="muted">
-              Tanlangan farzand uchun davomat topilmadi.
+              {t("parent.tanlangan_farzand_uchun_davomat_topilmadi")}
             </Text>
           ) : (
             recent.map((item, index) => (

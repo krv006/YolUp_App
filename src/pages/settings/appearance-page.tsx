@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { ArrowLeft, Check, Moon, Smartphone, Sun } from "lucide-react-native";
 import {
@@ -8,6 +9,7 @@ import {
   useAppearanceStore,
   type ThemeMode,
 } from "@/shared/model/theme.store";
+import { SUPPORTED_LANGUAGES, useLanguageStore, type AppLanguage } from "@/shared/model";
 import {
   ACCENTS,
   Button,
@@ -23,10 +25,32 @@ import {
   useTheme,
 } from "@/shared/ui";
 
-const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
-  { value: "light", label: "Yorug'", icon: Sun },
-  { value: "dark", label: "Qorong'i", icon: Moon },
-  { value: "system", label: "Tizim", icon: Smartphone },
+/*
+ * Til nomlari O'Z TILIDA yoziladi va tarjima QILINMAYDI: "Русский" ni
+ * o'zbekchada "Rus tili" deb ko'rsatsak, rus tilidagi foydalanuvchi uni
+ * tanimay qolishi mumkin. Bu — tilni tanlash ro'yxatlarining odatdagi
+ * qoidasi.
+ */
+const LANGUAGE_LABELS: Record<AppLanguage, string> = {
+  uz: "O'zbekcha",
+  en: "English",
+  ru: "Русский",
+};
+
+const LANGUAGES = SUPPORTED_LANGUAGES.map((value) => ({
+  value,
+  label: LANGUAGE_LABELS[value],
+}));
+
+/*
+ * Yorliqlar KALIT bilan: ro'yxat modul darajasida, u yerda hook
+ * chaqirib bo'lmaydi. Tarjima chizish paytida qilinadi — xuddi
+ * `RoleTabs` dagi bo'limlar kabi.
+ */
+const MODES: { value: ThemeMode; labelKey: string; icon: typeof Sun }[] = [
+  { value: "light", labelKey: "theme.light", icon: Sun },
+  { value: "dark", labelKey: "theme.dark", icon: Moon },
+  { value: "system", labelKey: "theme.systemShort", icon: Smartphone },
 ];
 
 /**
@@ -38,8 +62,11 @@ const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
  * tanlaydi, ko'r-ko'rona emas.
  */
 export function AppearancePage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
+  const language = useLanguageStore((state) => state.language);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
   const {
     mode,
     accent,
@@ -62,19 +89,19 @@ export function AppearancePage() {
   return (
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel="Orqaga" onPress={goBack}>
+        <IconButton accessibilityLabel={t("settings.orqaga")} onPress={goBack}>
           <ArrowLeft size={22} color={palette.foreground} />
         </IconButton>
         <Text variant="subheading" style={styles.headTitle}>
-          Ko'rinish
+          {t("settings.korinish")}
         </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         {/* ── Mavzu ── */}
-        <Section title="Mavzu" hint="Qurilma sozlamasiga ergashish yoki qo'lda tanlash.">
+        <Section title={t("settings.mavzu")} hint={t("settings.qurilma_sozlamasiga_ergashish_yoki_qolda_tan")}>
           <View style={styles.segment}>
-            {MODES.map(({ value, label, icon: Icon }) => {
+            {MODES.map(({ value, labelKey, icon: Icon }) => {
               const active = mode === value;
               return (
                 <Pressable
@@ -102,6 +129,43 @@ export function AppearancePage() {
                       fontWeight: "600",
                     }}
                   >
+                    {t(labelKey)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Section>
+
+        <Separator />
+
+        {/* ── Til ── */}
+        <Section title={t("settings.til")} hint={t("settings.ilova_matnlari_shu_tilda_korsatiladi")}>
+          <View style={styles.segment}>
+            {LANGUAGES.map(({ value, label }) => {
+              const active = language === value;
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => setLanguage(value)}
+                  style={({ pressed }) => [
+                    styles.segmentItem,
+                    {
+                      backgroundColor: active ? palette["primary-tint"] : palette.surface,
+                      borderColor: active ? palette.primary : palette.border,
+                    },
+                    pressed && { opacity: 0.85 },
+                  ]}
+                >
+                  <Text
+                    variant="caption"
+                    style={{
+                      color: active ? palette["primary-text"] : palette["muted-foreground"],
+                      fontWeight: "600",
+                    }}
+                  >
                     {label}
                   </Text>
                 </Pressable>
@@ -114,8 +178,8 @@ export function AppearancePage() {
 
         {/* ── Brend rangi ── */}
         <Section
-          title="Asosiy rang"
-          hint="Tugmalar, havolalar va faol bo'limlar shu rangda bo'ladi."
+          title={t("settings.asosiy_rang")}
+          hint={t("settings.tugmalar_havolalar_va_faol_bolimlar_shu_rang")}
         >
           <ColorSwatches selected={accent} onSelect={setAccent} />
         </Section>
@@ -124,8 +188,8 @@ export function AppearancePage() {
 
         {/* ── Suhbat ── */}
         <Section
-          title="Suhbat"
-          hint="Xabar matni o'lchami va o'z xabarlaringiz rangi. Bu sozlamalar faqat suhbatga tegishli."
+          title={t("settings.suhbat")}
+          hint={t("settings.xabar_matni_olchami_va_oz_xabarlaringiz_rang")}
         >
           <View style={styles.fontRow}>
             {/*
@@ -142,7 +206,7 @@ export function AppearancePage() {
                 max={MAX_MESSAGE_SCALE}
                 step={MESSAGE_SCALE_STEP}
                 onChange={setMessageScale}
-                label="Xabar matni o'lchami"
+                label={t("settings.xabar_matni_olchami")}
                 formatValue={(v) => `${Math.round(v * 100)} foiz`}
               />
             </View>
@@ -157,7 +221,7 @@ export function AppearancePage() {
             extra={
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Asosiy rang"
+                accessibilityLabel={t("settings.asosiy_rang")}
                 accessibilityState={{ selected: bubbleAccent === null && !bubbleGradient }}
                 onPress={() => setBubbleAccent(null)}
                 style={[
@@ -173,21 +237,21 @@ export function AppearancePage() {
                 ]}
               >
                 <Text variant="caption" tone="muted" style={styles.autoLabel}>
-                  Asosiy
+                  {t("settings.asosiy")}
                 </Text>
               </Pressable>
             }
           />
 
           <Text variant="caption" tone="muted">
-            Aralash ranglar
+            {t("settings.aralash_ranglar")}
           </Text>
           <GradientSwatches selected={bubbleGradient} onSelect={setBubbleGradient} />
 
           <ChatPreview />
         </Section>
 
-        <Button title="Standart holatga qaytarish" variant="secondary" onPress={reset} />
+        <Button title={t("settings.standart_holatga_qaytarish")} variant="secondary" onPress={reset} />
       </ScrollView>
     </Screen>
   );
@@ -294,6 +358,7 @@ function GradientSwatches({
 
 /** Tanlangan ranglar suhbatda qanday ko'rinishini shu yerda ko'rsatamiz. */
 function ChatPreview() {
+  const { t } = useTranslation("mobile");
   const { palette, bubbleGradient } = useTheme();
 
   return (
@@ -322,7 +387,7 @@ function ChatPreview() {
         >
           {bubbleGradient ? <GradientFill colors={bubbleGradient} /> : null}
           <Text variant="caption" style={{ color: palette["bubble-own-foreground"] }}>
-            Soat 15:00 da boshlaymiz.
+            {t("settings.soat_15_00_da_boshlaymiz")}
           </Text>
         </View>
       </View>

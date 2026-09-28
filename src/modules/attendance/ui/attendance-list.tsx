@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { ChevronDown, ChevronRight, Clock3, ShieldAlert, UsersRound } from "lucide-react-native";
 import { formatDateTime, formatDuration } from "@/shared/lib";
@@ -45,6 +46,7 @@ function rateTone(rate: number | null): BadgeTone {
  * ko'rmoqchi bo'ladi.
  */
 export function AttendanceList({ rows, emptyLabel }: AttendanceListProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const groups = useMemo(() => groupAttendanceByLesson(rows), [rows]);
   const [openId, setOpenId] = useState<string | null>(() => groups[0]?.lessonId ?? null);
@@ -114,7 +116,7 @@ export function AttendanceList({ rows, emptyLabel }: AttendanceListProps) {
       <Sheet
         open={Boolean(focusTarget)}
         onClose={() => setFocusTarget(null)}
-        title="Fokus jurnali"
+        title={t("attendance.fokus_jurnali")}
         description={focusTarget ? `${focusTarget.child} · ${focusTarget.lesson}` : undefined}
       >
         {focusTarget ? <FocusDetail focus={focusTarget.focus} /> : null}
@@ -124,6 +126,7 @@ export function AttendanceList({ rows, emptyLabel }: AttendanceListProps) {
 }
 
 function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () => void }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const rate = attentionRate(row.attentionAnswered, row.attentionTotal);
 
@@ -144,7 +147,7 @@ function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () 
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Fokus jurnalini ochish"
+          accessibilityLabel={t("attendance.fokus_jurnalini_ochish")}
           disabled={row.focus.exits === 0}
           onPress={onOpenFocus}
           style={({ pressed }) => [
@@ -183,6 +186,7 @@ function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () 
 
 /** Fokus tafsiloti — ota-ona ekranidagi bilan bir xil ko'rinish. */
 function FocusDetail({ focus }: { focus: FocusJournal }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   return (
@@ -191,15 +195,15 @@ function FocusDetail({ focus }: { focus: FocusJournal }) {
         <View style={[styles.alert, { backgroundColor: palette["destructive-soft"] }]}>
           <ShieldAlert size={16} color={palette["destructive-strong"]} />
           <Text variant="caption" style={{ flex: 1, color: palette["destructive-strong"] }}>
-            Chiqishlar soni chegaradan oshgan — ota-onaga xabar yuborilgan.
+            {t("attendance.chiqishlar_soni_chegaradan_oshgan_ota_onaga_")}
           </Text>
         </View>
       ) : null}
 
       <View style={styles.focusStats}>
-        <Metric label="Chiqishlar" value={String(focus.exits)} />
-        <Metric label="Jami yo'qlik" value={formatDuration(focus.awaySeconds)} />
-        <Metric label="Eng uzun" value={formatDuration(focus.longestSeconds)} />
+        <Metric label={t("attendance.chiqishlar")} value={String(focus.exits)} />
+        <Metric label={t("attendance.jami_yoqlik")} value={formatDuration(focus.awaySeconds)} />
+        <Metric label={t("attendance.eng_uzun")} value={formatDuration(focus.longestSeconds)} />
       </View>
 
       <Text variant="label">Tafsilot</Text>

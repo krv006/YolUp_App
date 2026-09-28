@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { Search, UserPlus } from "lucide-react-native";
 import {
@@ -35,6 +36,7 @@ const EMPTY_STUDENT = { username: "", password: "", first_name: "", last_name: "
  * aks holda har harfda so'rov ketardi.
  */
 export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
@@ -74,30 +76,30 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
     <Sheet
       open={open}
       onClose={close}
-      title="O'quvchi qo'shish"
-      description="Mavjud o'quvchini qidiring yoki yangi hisob yarating."
+      title={t("groupworkspace.oquvchi_qoshish")}
+      description={t("groupworkspace.mavjud_oquvchini_qidiring_yoki_yangi_hisob_y")}
     >
       {creating ? (
         <>
           <Input
-            label="Ism"
+            label={t("groupworkspace.ism")}
             value={form.first_name}
             onChangeText={(value) => setForm((current) => ({ ...current, first_name: value }))}
             autoCapitalize="words"
           />
           <Input
-            label="Familiya"
+            label={t("groupworkspace.familiya")}
             value={form.last_name}
             onChangeText={(value) => setForm((current) => ({ ...current, last_name: value }))}
             autoCapitalize="words"
           />
           <Input
-            label="Login"
+            label={t("groupworkspace.login")}
             value={form.username}
             onChangeText={(value) => setForm((current) => ({ ...current, username: value }))}
           />
           <Input
-            label="Vaqtinchalik parol"
+            label={t("groupworkspace.vaqtinchalik_parol")}
             secure
             value={form.password}
             onChangeText={(value) => setForm((current) => ({ ...current, password: value }))}
@@ -108,18 +110,18 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
             }
           />
           <Button
-            title="Yaratish va qo'shish"
+            title={t("groupworkspace.yaratish_va_qoshish")}
             loading={createStudent.isPending}
             disabled={!canCreate}
             onPress={() => void createAndEnroll()}
           />
-          <Button title="Qidiruvga qaytish" variant="ghost" onPress={() => setCreating(false)} />
+          <Button title={t("groupworkspace.qidiruvga_qaytish")} variant="ghost" onPress={() => setCreating(false)} />
         </>
       ) : (
         <>
           <Input
-            label="Qidiruv"
-            placeholder="Ism yoki login (kamida 2 belgi)"
+            label={t("groupworkspace.qidiruv")}
+            placeholder={t("groupworkspace.ism_yoki_login_kamida_2_belgi")}
             icon={<Search size={18} color={palette["muted-foreground"]} />}
             value={query}
             onChangeText={setQuery}
@@ -127,12 +129,12 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
           />
 
           {results.isLoading && query.trim().length >= 2 ? (
-            <ScreenLoading label="Qidirilmoqda…" />
+            <ScreenLoading label={t("groupworkspace.qidirilmoqda")} />
           ) : null}
 
           {query.trim().length >= 2 && (results.data ?? []).length === 0 && !results.isLoading ? (
             <Text variant="caption" tone="muted">
-              Hech kim topilmadi.
+              {t("groupworkspace.hech_kim_topilmadi")}
             </Text>
           ) : null}
 
@@ -156,7 +158,7 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
                   />
                 ) : (
                   <Button
-                    title="Qo'shish"
+                    title={t("groupworkspace.qoshish")}
                     fullWidth={false}
                     loading={enroll.isPending}
                     onPress={() => enroll.mutate({ courseId, studentId: student.id })}
@@ -167,7 +169,7 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
           ))}
 
           <Button
-            title="Yangi o'quvchi hisobi yaratish"
+            title={t("groupworkspace.yangi_oquvchi_hisobi_yaratish")}
             variant="secondary"
             icon={<UserPlus size={16} color={palette["secondary-foreground"]} />}
             onPress={() => setCreating(true)}

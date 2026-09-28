@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Redirect } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { hasRole } from "@/modules/permission";
@@ -18,12 +19,13 @@ import { Screen, ScreenLoading } from "@/shared/ui";
  */
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { t } = useTranslation("mobile");
   const { isAuthenticated, isInitializing } = useAuth();
 
   if (isInitializing) {
     return (
       <Screen>
-        <ScreenLoading label="Sessiya tekshirilmoqda…" />
+        <ScreenLoading label={t("shared.sessiya_tekshirilmoqda")} />
       </Screen>
     );
   }

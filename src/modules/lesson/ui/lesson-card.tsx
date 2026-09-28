@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Clock, Pencil, PlayCircle, Square, Star, Trash2, Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
@@ -44,6 +45,7 @@ export function LessonCard({
   onEdit,
   onDelete,
 }: LessonCardProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const meta = lessonStatusMeta(lesson.status);
   const closed = isLessonClosed(lesson);
@@ -89,7 +91,7 @@ export function LessonCard({
       <View style={styles.actions}>
         {lesson.status === "live" && onJoin && !missingTopic ? (
           <Action
-            label="Darsga kirish"
+            label={t("lesson.darsga_kirish")}
             tone="danger"
             icon={<Video size={16} color={palette["destructive-foreground"]} />}
             onPress={() => onJoin(lesson)}
@@ -98,7 +100,7 @@ export function LessonCard({
 
         {lesson.status === "scheduled" && onJoin && !missingTopic ? (
           <Action
-            label="Kirish"
+            label={t("lesson.kirish")}
             tone="primary"
             icon={<Video size={16} color={palette["primary-foreground"]} />}
             onPress={() => onJoin(lesson)}
@@ -107,7 +109,7 @@ export function LessonCard({
 
         {closed && onRecording ? (
           <Action
-            label="Yozuvni ko'rish"
+            label={t("lesson.yozuvni_korish")}
             tone="secondary"
             icon={<PlayCircle size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onRecording(lesson)}
@@ -116,7 +118,7 @@ export function LessonCard({
 
         {lesson.status === "finished" && onRate ? (
           <Action
-            label="Baholash"
+            label={t("lesson.baholash")}
             tone="secondary"
             icon={<Star size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onRate(lesson)}
@@ -125,7 +127,7 @@ export function LessonCard({
 
         {lesson.status === "live" && onFinish ? (
           <Action
-            label="Yakunlash"
+            label={t("lesson.yakunlash")}
             tone="secondary"
             icon={<Square size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onFinish(lesson)}
@@ -139,7 +141,7 @@ export function LessonCard({
          */}
         {lesson.status === "scheduled" && onEdit ? (
           <Action
-            label="Tahrirlash"
+            label={t("lesson.tahrirlash")}
             tone="secondary"
             icon={<Pencil size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onEdit(lesson)}
@@ -148,7 +150,7 @@ export function LessonCard({
 
         {lesson.status === "scheduled" && onDelete ? (
           <Action
-            label="O'chirish"
+            label={t("lesson.ochirish")}
             tone="secondary"
             icon={<Trash2 size={16} color={palette.destructive} />}
             onPress={() => onDelete(lesson)}
@@ -158,7 +160,7 @@ export function LessonCard({
         {/* Baholarni ko'rish faqat baho qo'yilgan tugagan darsda ma'noli. */}
         {lesson.status === "finished" && onRatings && lesson.ratingCount > 0 ? (
           <Action
-            label="Baholar"
+            label={t("lesson.baholar")}
             tone="secondary"
             icon={<Star size={16} color={palette["secondary-foreground"]} />}
             onPress={() => onRatings(lesson)}

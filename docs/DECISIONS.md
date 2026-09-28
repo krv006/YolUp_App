@@ -179,7 +179,7 @@ ota-onaga yolg'on signal ketardi.
 
 ## 13. i18n KIRITILMADI — ongli qaror
 
-**Sana:** Faza 1 · **Holat:** Qabul qilindi, qayta ko'rib chiqiladi
+**Sana:** Faza 1 · **Holat:** ⚠️ BEKOR QILINDI (2026-09-28) — §23 ga qarang
 
 `MOBILE_PLAN.md` §18.10 "matn literal emas, `t()` — birinchi kundan" degan
 edi. Amalda bu bajarilmadi va sababi shu yerda yozilgan.
@@ -570,7 +570,7 @@ Shu sababli uchta joy veb'dan ataylab farq qiladi:
 |---|---|---|
 | `shared/lib/date.ts` | `i18n.t()` + locale almashtirish | o'zbekcha literal, `uz` lokali |
 | `shared/lib/file-kind.ts` | `i18n.t("fileKind.*")` | o'zbekcha literal |
-| `shared/api/request-interceptor.ts` | `Accept-Language: getStoredLanguage()` | qat'iy `"uz"` |
+| `shared/api/request-interceptor.ts` | `Accept-Language: getStoredLanguage()` | ~~qat'iy `"uz"`~~ → endi bir xil (§23) |
 | `auth/model/auth.schemas.ts` | `createLoginSchema(t)` fabrikasi | literal xabarli oddiy sxema |
 | `auth/model/auth.store.ts` | `syncLanguageFromServer` | yo'q |
 
@@ -599,3 +599,59 @@ yuklab bo'lmadi" deb xato ko'rsatadi: `useParentDashboard` va
 `useAttendance` shartsiz chaqiriladi. To'g'ri xulq — bo'sh holat
 (`ScreenEmpty`) va "farzand qo'shing" taklifi. Bu ota-ona bosqichida
 tuzatiladi.
+
+---
+
+## 23. i18n QO'SHILDI — §13 bekor qilindi
+
+**Sana:** 2026-09-28 · **Holat:** Qabul qilindi
+
+§13 "i18n kiritilmadi" degan edi va uning sababi to'g'ri edi: ko'chirilgan
+domen qatlami o'zbekcha literal qaytarardi, ya'ni ilovaning yarmi `t()`,
+yarmi literal bo'lib qolardi.
+
+Endi bu qaror bekor qilinadi — **uch til qo'shildi: `uz / en / ru`**.
+
+**Nima o'zgardi:** vebning 17 ta lug'at fayli uchala tilda BAYT-BAYT
+ko'chirildi. Ya'ni §13 dagi "yarmi literal" xavfi yo'qoldi: domen
+qatlamining matnlari ham tarjima qilingan holda keladi.
+
+**Tuzilishi:**
+
+| Nima | Qayerda |
+|---|---|
+| Vebdan ko'chirilgan 17 bo'lim | `locales/{uz,en,ru}/*.json` — 🟢 tegilmaydi |
+| Mobilga xos matnlar | `locales/{uz,en,ru}/mobile.json` — 585 kalit |
+| Til do'koni | `shared/model/language.store.ts` |
+| Sozlash | `shared/i18n/i18n.ts` |
+
+Mobilga xos matnlar ALOHIDA bo'limda (`mobile`) — shunda ko'chirilgan
+lug'atlar o'zgarishsiz qoladi va keyingi portda qo'lda birlashtirish kerak
+bo'lmaydi.
+
+**Kalitlar matndan hosil qilingan** (`quiz.testni_yaratish`), chunki 535 ta
+matnga qo'lda nom o'ylash ham uzoq, ham nomuvofiq chiqardi. Bo'lim
+prefiksi bilan birga ular kodda o'qiganda tushunarli.
+
+**Qurilma tili** birinchi ishga tushirishda hisobga olinadi (vebda bunday
+qadam yo'q). `expo-localization` ATAYLAB qo'shilmadi — u nativ modul va
+ilovani qaytadan yig'ishni talab qilardi; qurilma tili `Intl` dan olinadi,
+Hermes'da u allaqachon yoqilgan.
+
+**`persist` oraliq qatlami ishlatilmadi:** veb til do'konini zustand
+`persist` bilan `localStorage` ga yozadi. Mobilda boshqa do'konlar kabi
+MMKV bilan qo'lda saqlanadi va sinxron o'qiladi — til birinchi kadrdayoq
+to'g'ri bo'ladi.
+
+**Lug'atlar qo'lda import qilinadi:** veb `import.meta.glob` ishlatadi, u
+Vite'ning imkoniyati va Metro'da yo'q. Ro'yxat `i18n.ts` da ochiq turadi —
+yangi bo'lim qo'shilganda uni uchala tilga ham qo'shish esda qoladi.
+
+**Natija:** yuqoridagi "i18n — veb yolg'iz o'tib ketdi" bo'limidagi besh
+farqdan biri yopildi: `request-interceptor.ts` endi veb bilan bayt-bayt
+bir xil. Qolganlari (`date.ts`, `file-kind.ts`, `auth.schemas.ts`,
+`auth.store.ts`) hali literal va keyingi bosqichda ulanadi.
+
+⚠️ **Ingliz va rus tarjimalari TEKSHIRILMAGAN.** Ularni men yozdim; matn
+o'quvchi va ota-onalarga boradi, shuning uchun ona tilida gapiradigan odam
+ko'zdan kechirishi kerak.

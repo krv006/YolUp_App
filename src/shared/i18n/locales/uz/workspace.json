@@ -1,0 +1,47 @@
+{
+  "eyebrow": "ISH MAYDONI",
+  "title": "Workspace",
+  "subtitle": "Kundalik ishingiz uchun bo'limlar shu yerda to'planadi.",
+  "soon": "Tez orada",
+  "cards": {
+    "quizzes": {
+      "title": "Test",
+      "description": "Testlar yaratish, yechish va natijalarni ko'rish."
+    },
+    "analytics": {
+      "title": "Tahlil",
+      "description": "Natijalar va faollik bo'yicha ko'rsatkichlar."
+    },
+    "ai": {
+      "title": "AI",
+      "description": "Sun'iy intellekt yordamchisi bilan ishlash."
+    },
+    "mock": {
+      "title": "Mock Test",
+      "description": "Imtihon sharoitida sinov testini yechish."
+    }
+  },
+  "analytics": {
+    "eyebrow": "SHAXSIY TAHLIL",
+    "title": "Tahlil",
+    "subtitle": "Natijalaringiz va ko'rsatkichlaringiz.",
+    "loading": "Tahlil yuklanmoqda",
+    "loadError": "Tahlilni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "attemptCount": "Urinishlar",
+    "avgPercentage": "O'rtacha natija",
+    "recentAttempts": "SO'NGGI URINISHLAR",
+    "noAttempts": "Hali test yechilmagan.",
+    "avgRating": "O'rtacha baho",
+    "ratingCount": "Baholar soni",
+    "courseCount": "Kurslar",
+    "studentCount": "O'quvchilar",
+    "lessonsFinished": "O'tilgan darslar",
+    "reliability": "Ishonchlilik",
+    "byCourse": "KURSLAR BO'YICHA",
+    "course": "Kurs",
+    "quizAvg": "Test o'rtachasi",
+    "attendance": "Davomat",
+    "noCourses": "Kurs topilmadi."
+  }
+}

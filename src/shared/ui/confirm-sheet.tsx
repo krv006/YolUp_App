@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Button } from "./button";
 import { Sheet } from "./sheet";
 
@@ -31,10 +32,11 @@ export function ConfirmSheet({
   loading = false,
   onConfirm,
 }: ConfirmSheetProps) {
+  const { t } = useTranslation("mobile");
   return (
     <Sheet open={open} onClose={onClose} title={title} description={description}>
       <View style={styles.actions}>
-        <Button title="Bekor" variant="secondary" onPress={onClose} />
+        <Button title={t("shared.bekor")} variant="secondary" onPress={onClose} />
         <Button title={confirmLabel} variant="danger" loading={loading} onPress={onConfirm} />
       </View>
     </Sheet>

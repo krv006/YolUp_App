@@ -1,0 +1,112 @@
+{
+  "selector": {
+    "label": "Child",
+    "noChild": "No child linked"
+  },
+  "dashboard": {
+    "loading": "Loading the parent dashboard",
+    "loadError": "Couldn't load the data",
+    "retry": "Retry",
+    "noChildTitle": "No child linked yet",
+    "noChildDescription": "Once you link your child's account, their attendance, lessons and homework will show up here. Ask your child for their invite code to get started.",
+    "noChildAction": "Link a child",
+    "eyebrow": "PARENT DASHBOARD",
+    "greeting": "Good day, {{name}}! 👋",
+    "subtitleWithChild": "{{name}}'s learning progress.",
+    "subtitleNoChild": "Keep track of your child's learning progress.",
+    "recentActivityEyebrow": "RECENT ACTIVITY",
+    "attendanceTitle": "Attendance",
+    "allAttendance": "All attendance",
+    "emptyAttendance": "No attendance found for the selected child."
+  },
+  "children": {
+    "loading": "Loading children",
+    "loadError": "Couldn't load the list of children",
+    "retry": "Retry",
+    "eyebrow": "FAMILY PROFILE",
+    "title": "My children",
+    "subtitle": "Linked student accounts and privacy permissions.",
+    "linkChild": "Link a student",
+    "createChild": "Child account",
+    "selected": "Selected",
+    "verified": "Verified",
+    "lessonsUnit": "lessons",
+    "minutesUnit": "minutes",
+    "lastActivity": "Last activity",
+    "emptyTitle": "No child linked yet",
+    "emptyDescription": "Enter a student code or create a new account.",
+    "consentEyebrow": "PRIVACY",
+    "consentTitle": "Permissions for {{name}}",
+    "loginsHistory": "Login history",
+    "consentOn": "On",
+    "consentOff": "Off",
+    "consentLoadError": "Couldn't load permissions.",
+    "consentKinds": {
+      "recording": { "label": "Lesson recording", "description": "Permission to record the lesson" },
+      "camera": { "label": "Camera", "description": "Use the camera during a live lesson" },
+      "analytics": { "label": "Activity analytics", "description": "Attendance, attention, and focus analytics" }
+    },
+    "linkDialog": {
+      "title": "Link a student",
+      "description": "Enter the FK-... invite code from the student's profile.",
+      "codeLabel": "Invite code",
+      "codePlaceholder": "FK-XXXX",
+      "cancel": "Cancel",
+      "submit": "Send request"
+    },
+    "childDialog": {
+      "title": "Create a child account",
+      "description": "The created student is linked to you automatically.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "username": "Username",
+      "tempPassword": "Temporary password",
+      "cancel": "Cancel",
+      "submit": "Create account"
+    },
+    "genericError": "Error",
+    "loginHistoryStudentFallback": "Student",
+    "loginHistoryTitle": "{{name}} — login history",
+    "loginHistoryDescription": "Which device and IP your child's account was accessed from."
+  },
+  "attendance": {
+    "loading": "Loading attendance",
+    "loadError": "Couldn't load attendance",
+    "retry": "Retry",
+    "eyebrow": "MONITORING",
+    "title": "Attendance history",
+    "subtitleWithChild": "{{name}}'s lesson join and leave times.",
+    "subtitleNoChild": "Your child's attendance data.",
+    "report": "Report",
+    "searchPlaceholder": "Search by lesson or student",
+    "recordsCount": "{{count}} records",
+    "awaySuffix": " · {{duration}} distracted"
+  },
+  "homework": {
+    "notSubmitted": "Not submitted",
+    "openResultAria": "Open result",
+    "checking": "Being checked",
+    "openCheckingAria": "Open check status",
+    "checkError": "Check error",
+    "openErrorAria": "Open error details",
+    "noChildTitle": "No child selected",
+    "noChildDescription": "First link a student account.",
+    "loading": "Loading assignments",
+    "loadError": "Couldn't load assignments",
+    "retry": "Retry",
+    "eyebrow": "ASSIGNMENTS",
+    "subtitle": "Submissions and check results.",
+    "noDue": "No due date",
+    "emptyTitle": "No assignments found",
+    "resultDialogTitle": "{{name}} — check result"
+  },
+  "report": {
+    "noChildTitle": "No child selected",
+    "noChildDescription": "First link a student account.",
+    "loading": "Loading rating",
+    "eyebrow": "RATING",
+    "loadError": "Couldn't load the rating",
+    "retry": "Retry",
+    "subtitle": "Assignments and grades per subject."
+  }
+}

@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react-native";
 import {
   Button,
@@ -89,6 +90,7 @@ export function QuestionEditor({
   onChange,
   onRemove,
 }: QuestionEditorProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   // Tekshiruv yozilayotganda BEZOVTA QILMASIN: javob hali kiritilmagan
   // bo'lsa xato ko'rsatilmaydi, faqat shakl xatolari chiqadi.
@@ -134,21 +136,21 @@ export function QuestionEditor({
           {index + 1}-savol
         </Text>
         {canRemove ? (
-          <IconButton accessibilityLabel="Savolni o'chirish" onPress={onRemove}>
+          <IconButton accessibilityLabel={t("quiz.savolni_ochirish")} onPress={onRemove}>
                 {<Trash2 size={16} color={palette["destructive-strong"]} />}
               </IconButton>
         ) : null}
       </View>
 
       <SelectField
-        label="Savol turi"
+        label={t("quiz.savol_turi")}
         value={draft.type}
         options={QUESTION_TYPE_ORDER.map((type) => ({ value: type, label: TYPE_LABELS[type] }))}
         onChange={(next) => onChange((current) => changeDraftType(current, next as QuizQuestionType, newKey))}
       />
 
       <Input
-        label="Savol matni"
+        label={t("quiz.savol_matni")}
         placeholder={
           draft.type === "fill_blank"
             ? "Poytaxt — {{Toshkent}}"
@@ -167,7 +169,7 @@ export function QuestionEditor({
       ) : null}
 
       <Input
-        label="Ball"
+        label={t("quiz.ball")}
         value={draft.points}
         keyboardType="number-pad"
         containerStyle={styles.points}
@@ -182,7 +184,7 @@ export function QuestionEditor({
               {isChoice ? (
                 <Pressable
                   accessibilityRole={draft.type === "single" ? "radio" : "checkbox"}
-                  accessibilityLabel="To'g'ri javob sifatida belgilash"
+                  accessibilityLabel={t("quiz.togri_javob_sifatida_belgilash")}
                   accessibilityState={{ selected: draft.correctKeys.includes(option.key) }}
                   onPress={() => toggleCorrect(option.key)}
                   style={[
@@ -213,17 +215,17 @@ export function QuestionEditor({
 
               {isOrdering ? (
                 <>
-                  <IconButton accessibilityLabel="Yuqoriga" onPress={() => moveOption(position, position - 1)}>
+                  <IconButton accessibilityLabel={t("quiz.yuqoriga")} onPress={() => moveOption(position, position - 1)}>
                 {<ArrowUp size={16} color={palette["muted-foreground"]} />}
               </IconButton>
-                  <IconButton accessibilityLabel="Pastga" onPress={() => moveOption(position, position + 1)}>
+                  <IconButton accessibilityLabel={t("quiz.pastga")} onPress={() => moveOption(position, position + 1)}>
                 {<ArrowDown size={16} color={palette["muted-foreground"]} />}
               </IconButton>
                 </>
               ) : null}
 
               {draft.options.length > 2 ? (
-                <IconButton accessibilityLabel="Variantni o'chirish" onPress={() =>
+                <IconButton accessibilityLabel={t("quiz.variantni_ochirish")} onPress={() =>
                     onChange((current) => ({
                       ...current,
                       options: current.options.filter((item) => item.key !== option.key),
@@ -269,7 +271,7 @@ export function QuestionEditor({
       {draft.type === "numeric" ? (
         <>
           <Input
-            label="To'g'ri javob (son)"
+            label={t("quiz.togri_javob_son")}
             value={draft.acceptedAnswers[0] ?? ""}
             keyboardType="numbers-and-punctuation"
             onChangeText={(value) =>
@@ -277,8 +279,8 @@ export function QuestionEditor({
             }
           />
           <Input
-            label="Ruxsat etilgan xatolik"
-            placeholder="Masalan: 0.01 — bo'sh qoldirsa aniq moslik talab qilinadi"
+            label={t("quiz.ruxsat_etilgan_xatolik")}
+            placeholder={t("quiz.masalan_0_01_bosh_qoldirsa_aniq_moslik_talab")}
             value={draft.tolerance}
             keyboardType="numbers-and-punctuation"
             onChangeText={(tolerance) => onChange((current) => ({ ...current, tolerance }))}
@@ -292,7 +294,7 @@ export function QuestionEditor({
           {draft.acceptedAnswers.map((answer, position) => (
             <View key={position} style={styles.optionRow}>
               <Input
-                placeholder="To'g'ri javob varianti"
+                placeholder={t("quiz.togri_javob_varianti")}
                 value={answer}
                 containerStyle={styles.grow}
                 onChangeText={(value) =>
@@ -304,7 +306,7 @@ export function QuestionEditor({
                 }
               />
               {draft.acceptedAnswers.length > 1 ? (
-                <IconButton accessibilityLabel="Variantni o'chirish" onPress={() =>
+                <IconButton accessibilityLabel={t("quiz.variantni_ochirish")} onPress={() =>
                     onChange((current) => ({
                       ...current,
                       acceptedAnswers: current.acceptedAnswers.filter((_, i) => i !== position),
@@ -316,7 +318,7 @@ export function QuestionEditor({
             </View>
           ))}
           <Button
-            title="Variant qo'shish"
+            title={t("quiz.variant_qoshish")}
             variant="secondary"
             icon={<Plus size={14} color={palette["secondary-foreground"]} />}
             onPress={() =>
@@ -329,7 +331,7 @@ export function QuestionEditor({
           <Checkbox
             checked={draft.caseSensitive}
             onChange={(caseSensitive) => onChange((current) => ({ ...current, caseSensitive }))}
-            label="Katta-kichik harf farqlansin"
+            label={t("quiz.katta_kichik_harf_farqlansin")}
           />
         </View>
       ) : null}
@@ -340,7 +342,7 @@ export function QuestionEditor({
           {draft.pairs.map((pair, position) => (
             <View key={pair.key} style={styles.optionRow}>
               <Input
-                placeholder="Chap"
+                placeholder={t("quiz.chap")}
                 value={pair.left}
                 containerStyle={styles.grow}
                 onChangeText={(left) =>
@@ -353,7 +355,7 @@ export function QuestionEditor({
                 }
               />
               <Input
-                placeholder="O'ng"
+                placeholder={t("quiz.ong")}
                 value={pair.right}
                 containerStyle={styles.grow}
                 onChangeText={(right) =>
@@ -366,7 +368,7 @@ export function QuestionEditor({
                 }
               />
               {draft.pairs.length > 2 ? (
-                <IconButton accessibilityLabel="Juftlikni o'chirish" onPress={() =>
+                <IconButton accessibilityLabel={t("quiz.juftlikni_ochirish")} onPress={() =>
                     onChange((current) => ({
                       ...current,
                       pairs: current.pairs.filter((_, i) => i !== position),
@@ -378,7 +380,7 @@ export function QuestionEditor({
             </View>
           ))}
           <Button
-            title="Juftlik qo'shish"
+            title={t("quiz.juftlik_qoshish")}
             variant="secondary"
             icon={<Plus size={14} color={palette["secondary-foreground"]} />}
             onPress={() =>

@@ -1,0 +1,121 @@
+{
+  "dashboard": {
+    "eyebrow": "ADMINISTRATOR",
+    "welcome": "Welcome, {{name}}",
+    "subtitle": "An overview of courses, teachers, and students.",
+    "teachersLink": "Teachers",
+    "logout": "Log out",
+    "loading": "Loading dashboard",
+    "loadError": "Couldn't load the data",
+    "retry": "Retry",
+    "periods": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "periodNoun": {
+      "day": "day",
+      "week": "week",
+      "month": "month",
+      "year": "year"
+    },
+    "kpi": {
+      "activeStudents": "Active students",
+      "activeTeachers": "Active teachers",
+      "activeCourses": "Active courses",
+      "lessonsCompleted": "Lessons held",
+      "lessonsCancelledCaption": "{{count}} cancelled · this {{noun}}",
+      "attendance": "Average attendance",
+      "attendanceCaption": "this {{noun}}",
+      "rating": "Average lesson rating",
+      "ratingCaption": "from {{count}} ratings"
+    },
+    "charts": {
+      "periodCaption": "For the selected period",
+      "enrollTitle": "New students",
+      "enrollLegend": "New enrollments",
+      "lessonsTitle": "Lesson status",
+      "completedLegend": "Held",
+      "cancelledLegend": "Cancelled",
+      "quizTitle": "Quizzes — average score",
+      "quizCaption": "For the selected period · 0–100 scale",
+      "quizLegend": "Quiz"
+    },
+    "tables": {
+      "topCoursesTitle": "Top courses",
+      "topCoursesSubtitle": "By number of students",
+      "topTeachersTitle": "Top teachers",
+      "topTeachersSubtitle": "By rating",
+      "colCourse": "Course",
+      "colTeacher": "Teacher",
+      "colStudents": "Students",
+      "colRating": "Rating",
+      "colAttendance": "Attendance",
+      "colCourses": "Courses",
+      "colLessonsThisMonth": "Lessons (this month)",
+      "colReliability": "Reliability",
+      "noCourses": "No active courses found.",
+      "noTeachers": "No active teachers found."
+    }
+  },
+  "stats": {
+    "title": "{{name}} — statistics",
+    "description": "Overall figures for ratings, courses and lessons.",
+    "loading": "Loading statistics",
+    "loadError": "Could not load statistics",
+    "retry": "Retry",
+    "open": "Statistics",
+    "openAria": "Open statistics for {{name}}",
+    "avgRating": "Average rating",
+    "ratingCount": "Ratings",
+    "courseCount": "Courses",
+    "studentCount": "Students",
+    "lessonsFinished": "Lessons held",
+    "lessonsScheduled": "Scheduled",
+    "lessonsCancelled": "Cancelled",
+    "reliability": "Reliability",
+    "breakdown": "RATING BREAKDOWN",
+    "comments": "RECENT FEEDBACK"
+  },
+  "teachers": {
+    "eyebrow": "ADMINISTRATOR",
+    "title": "Teachers",
+    "subtitle": "Rating and approval status.",
+    "backToDashboard": "Dashboard",
+    "pendingEyebrow": "NEEDS APPROVAL",
+    "pendingTitle": "New teachers",
+    "loading": "Loading",
+    "approve": "Approve",
+    "noPending": "No teachers awaiting approval.",
+    "allEyebrow": "ALL",
+    "allTitle": "All teachers",
+    "noTeachers": "No teachers found.",
+    "viewLabel": "View",
+    "viewPending": "Awaiting approval ({{count}})",
+    "viewAll": "All teachers ({{count}})"
+  },
+  "storage": {
+    "eyebrow": "STORAGE",
+    "title": "Video recordings",
+    "loading": "Loading",
+    "totalVideos": "{{count}} videos in total",
+    "teacher": "Teacher",
+    "videoCount": "Videos",
+    "empty": "No recordings yet."
+  },
+  "monitoring": {
+    "eyebrow": "SERVER",
+    "title": "Server health",
+    "scopeNote": "CPU and RAM of the backend container only.",
+    "loading": "Loading samples",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "memoryUsed": "Memory used",
+    "measuredAt": "Last sample",
+    "noSamples": "No samples yet.",
+    "hours": "{{count}}h",
+    "peakLabel": "Busiest moment",
+    "pointNote": "{{count}} points"
+  }
+}

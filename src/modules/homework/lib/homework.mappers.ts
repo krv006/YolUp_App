@@ -62,7 +62,7 @@ export function mapAssignmentDto(dto: AssignmentDto): Assignment {
     id: String(dto.id),
     courseId: String(dto.course_id),
     courseTitle: dto.course_title,
-    subject: dto.subject,
+    subject: dto.subject_label || dto.subject,
     title: dto.title,
     description: dto.description || "",
     body: dto.body || "",
@@ -123,11 +123,6 @@ function mapCourseReportDto(dto: HomeworkCourseReportDto): CourseHomeworkReport 
   };
 }
 
-/**
- * `overall` (yagona umumiy ko'rsatkich) backend qaytarsa o'sha ishlatiladi,
- * aks holda kurslar ro'yxatidan hisoblanadi — o'rtacha ball topshirilgan
- * vazifalar soniga qarab tortilgan (ko'p vazifali fan natijaga ko'proq ta'sir qiladi).
- */
 export function mapHomeworkReportDto(dto: HomeworkReportDto | null | undefined): HomeworkReport {
   const rows: HomeworkCourseReportDto[] = Array.isArray(dto) ? dto : (dto?.courses ?? dto?.results ?? []);
   const courses = rows.map(mapCourseReportDto);
@@ -147,7 +142,6 @@ export function mapHomeworkReportDto(dto: HomeworkReportDto | null | undefined):
   return { courses, overall: summarize(assignedCount, submittedCount, averageScore) };
 }
 
-/** Vazifa multipart bilan yuboriladi — matn ham, biriktirilgan fayl ham bitta so'rovda. */
 export function mapAssignmentRequest(form: AssignmentFormInput): FormData {
   const data = new FormData();
   data.set("course_id", String(form.courseId ?? ""));
@@ -156,7 +150,6 @@ export function mapAssignmentRequest(form: AssignmentFormInput): FormData {
   data.set("body", form.body || form.description || "");
   if (form.dueAt) data.set("due_at", form.dueAt);
   if (form.skillKey) data.set("skill_key", form.skillKey);
-  // Faqat TUGAGAN darsga bog'lasa bo'ladi — aks holda backend 400 qaytaradi.
   if (form.lessonId) data.set("lesson_id", form.lessonId);
   if (form.extraInstructions) data.set("extra_instructions", form.extraInstructions);
   if (form.file) data.set("attachment", form.file);

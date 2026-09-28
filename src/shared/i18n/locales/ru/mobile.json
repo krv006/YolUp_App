@@ -425,7 +425,10 @@
     "oquvchilar_yuklanmoqda": "Загрузка учеников…",
     "oquvchi_yoq": "Нет учеников",
     "bu_guruhga_hali_hech_kim_yozilmagan": "В эту группу пока никто не записан.",
-    "kursdan_chiqarish": "Исключить из курса"
+    "kursdan_chiqarish": "Исключить из курса",
+    "vazifani_tahrirlash": "Редактировать задание",
+    "saqlash": "Сохранить",
+    "tahrirlash": "Редактировать"
   },
   "lesson": {
     "oldingi_oy": "Предыдущий месяц",

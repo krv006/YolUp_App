@@ -1,4 +1,5 @@
 import { AppError, API_ERROR_CODES } from "@/shared/api";
+import { i18n } from "@/shared/i18n";
 import {
   ASSIGNMENT_EXTENSIONS,
   HOMEWORK_EXTENSIONS,
@@ -8,9 +9,7 @@ import {
 const AUDIO_EXTENSIONS = ["mp3", "wav", "m4a", "ogg"];
 
 export interface ValidateHomeworkFileOptions {
-  /** O‘qituvchi biriktiradigan fayl — boshqa kengaytmalar ro‘yxati. */
   assignment?: boolean;
-  /** Speaking vazifasi — audio ham qabul qilinadi. */
   speaking?: boolean;
 }
 
@@ -21,8 +20,8 @@ export function validateHomeworkFile(
   if (!file) {
     throw new AppError({
       code: API_ERROR_CODES.VALIDATION_ERROR,
-      message: "Faylni tanlang",
-      fields: { file: "Fayl majburiy" },
+      message: i18n.t("homework:validation.chooseFile"),
+      fields: { file: i18n.t("homework:validation.fileRequired") },
     });
   }
 
@@ -32,20 +31,23 @@ export function validateHomeworkFile(
   if (!allowed.includes(extension)) {
     throw new AppError({
       code: API_ERROR_CODES.VALIDATION_ERROR,
-      message: "Fayl turi qo‘llab-quvvatlanmaydi",
-      fields: { file: "Mumkin: " + allowed.join(", ") },
+      message: i18n.t("homework:validation.unsupportedType"),
+      fields: { file: i18n.t("homework:validation.allowedTypes", { types: allowed.join(", ") }) },
     });
   }
 
   if (AUDIO_EXTENSIONS.includes(extension) && !speaking) {
     throw new AppError({
       code: API_ERROR_CODES.VALIDATION_ERROR,
-      message: "Audio faqat Speaking vazifasi uchun",
+      message: i18n.t("homework:validation.audioOnlySpeaking"),
     });
   }
 
   if (file.size > HOMEWORK_MAX_FILE_SIZE) {
-    throw new AppError({ code: API_ERROR_CODES.FILE_TOO_LARGE, message: "Fayl 25 MB dan katta" });
+    throw new AppError({
+      code: API_ERROR_CODES.FILE_TOO_LARGE,
+      message: i18n.t("homework:validation.fileTooLarge"),
+    });
   }
 
   return true;

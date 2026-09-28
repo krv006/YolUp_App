@@ -33,11 +33,16 @@ export const homeworkApi = {
       await apiClient.post<AssignmentDto>(homeworkEndpoints.assignments, mapAssignmentRequest(form))
     );
   },
+  async updateAssignment(id: string, form: AssignmentFormInput) {
+    if (form.file) validateHomeworkFile(form.file, { assignment: true });
+    return mapAssignmentDto(
+      await apiClient.patch<AssignmentDto>(homeworkEndpoints.assignment(id), mapAssignmentRequest(form))
+    );
+  },
   async deleteAssignment(id: string) {
     await apiClient.delete(homeworkEndpoints.assignment(id));
     return id;
   },
-  /** Fayllar auth talab qiladi — /media/ URL to‘g‘ridan-to‘g‘ri ishlatilmaydi. */
   async downloadAssignment(id: string, options?: RequestOptions) {
     return apiClient.get<Blob>(homeworkEndpoints.assignmentFile(id), { ...options, responseType: "blob" });
   },
@@ -58,10 +63,6 @@ export const homeworkApi = {
   async recheck(id: string) {
     return mapSubmissionDto(await apiClient.post<SubmissionDto>(homeworkEndpoints.recheck(id), {}));
   },
-  /**
-   * O‘qituvchi AI bahosini tuzatadi. Faqat berilgan maydonlar yuboriladi:
-   * bo‘sh qoldirilgani serverdagi qiymatni o‘chirib yubormasligi kerak.
-   */
   async review(id: string, input: SubmissionReviewInput) {
     const body: Record<string, unknown> = {};
     if (input.overallScore !== undefined) body.overall_score = input.overallScore;
@@ -69,11 +70,6 @@ export const homeworkApi = {
     if (input.result !== undefined) body.result = input.result;
     return mapSubmissionDto(await apiClient.post<SubmissionDto>(homeworkEndpoints.review(id), body));
   },
-  /**
-   * Reyting: har kurs bo'yicha berilgan/topshirilgan/o'rtacha ball.
-   * `studentId` — ota-ona bog'langan bolasinikini so'raganda; o'quvchi
-   * o'zinikini so'rasa berilmaydi (backend joriy foydalanuvchini oladi).
-   */
   async getReport(studentId?: string | null, options: RequestOptions = {}) {
     const dto = await apiClient.get<HomeworkReportDto>(homeworkEndpoints.report, {
       ...options,

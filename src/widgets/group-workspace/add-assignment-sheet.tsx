@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { FileUp, Paperclip } from "lucide-react-native";
-import { useCreateAssignment } from "@/modules/homework";
-import type { Lesson } from "@/shared/types";
+import { useCreateAssignment, useUpdateAssignment } from "@/modules/homework";
+import type { Assignment, Lesson } from "@/shared/types";
 import { pickDocument, toUploadFile, type PickedFile } from "@/shared/lib";
 import {
   Button,
@@ -26,6 +26,14 @@ export interface AddAssignmentSheetProps {
   lessons: Lesson[];
   /** Til fanida "tekshiruv turi" (writing/reading/…) tanlovi ochiladi. */
   isLanguageSubject?: boolean;
+  /**
+   * Berilsa — oyna TAHRIRLASH rejimida ochiladi.
+   *
+   * Oynani `key={assignment.id}` bilan va faqat shu qiymat tayyor
+   * bo'lgandan keyin chizish kerak: maydonlar boshlang'ich qiymatini
+   * `useState` dan oladi, u esa faqat mount paytida hisoblanadi.
+   */
+  assignment?: Assignment | null;
 }
 
 /** Veb `SKILL_OPTIONS` bilan bir xil (docs/STAFF_API.md §2). */
@@ -52,18 +60,28 @@ export function AddAssignmentSheet({
   courseId,
   lessons,
   isLanguageSubject = false,
+  assignment = null,
 }: AddAssignmentSheetProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const create = useCreateAssignment();
+  const update = useUpdateAssignment();
+  const editing = Boolean(assignment);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(assignment?.title ?? "");
+  const [description, setDescription] = useState(assignment?.description ?? "");
+  /*
+   * Baholash izohi TAHRIRLASHDA bo'sh boshlanadi: backend uni
+   * `Assignment` javobida qaytarmaydi, ya'ni eski qiymatni bilib
+   * bo'lmaydi. Bo'sh qoldirilsa o'zgarmaydi — yozilsa almashadi.
+   */
   const [grading, setGrading] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [dueTime, setDueTime] = useState("23:59");
-  const [skillKey, setSkillKey] = useState("");
-  const [lessonId, setLessonId] = useState("");
+  const [dueDate, setDueDate] = useState(assignment?.dueAt ? assignment.dueAt.slice(0, 10) : "");
+  const [dueTime, setDueTime] = useState(
+    assignment?.dueAt ? assignment.dueAt.slice(11, 16) : "23:59"
+  );
+  const [skillKey, setSkillKey] = useState(assignment?.skillKey ?? "");
+  const [lessonId, setLessonId] = useState(assignment?.lessonId ?? "");
   const [file, setFile] = useState<PickedFile | null>(null);
 
   /** Backend faqat TUGAGAN darsni qabul qiladi — eng yangisi tepada. */
@@ -98,20 +116,24 @@ export function AddAssignmentSheet({
 
   async function submit() {
     if (!title.trim() || !description.trim()) return;
+
+    const values = {
+      courseId,
+      title: title.trim(),
+      description: description.trim(),
+      body: description.trim(),
+      // Muddat sana + vaqtdan yig'iladi; sana yo'q bo'lsa umuman yuborilmaydi.
+      dueAt: dueDate ? `${dueDate}T${dueTime || "23:59"}` : undefined,
+      // Til fani bo'lmasa tanlov ko'rsatilmagan — eskirgan qiymat ketmasin.
+      skillKey: isLanguageSubject ? skillKey : "",
+      lessonId: lessonId || null,
+      extraInstructions: grading.trim(),
+      file: file ? toUploadFile(file) : null,
+    };
+
     try {
-      await create.mutateAsync({
-        courseId,
-        title: title.trim(),
-        description: description.trim(),
-        body: description.trim(),
-        // Muddat sana + vaqtdan yig'iladi; sana yo'q bo'lsa umuman yuborilmaydi.
-        dueAt: dueDate ? `${dueDate}T${dueTime || "23:59"}` : undefined,
-        // Til fani bo'lmasa tanlov ko'rsatilmagan — eskirgan qiymat ketmasin.
-        skillKey: isLanguageSubject ? skillKey : "",
-        lessonId: lessonId || null,
-        extraInstructions: grading.trim(),
-        file: file ? toUploadFile(file) : null,
-      });
+      if (assignment) await update.mutateAsync({ id: assignment.id, form: values });
+      else await create.mutateAsync(values);
       close();
     } catch {
       /*
@@ -129,7 +151,7 @@ export function AddAssignmentSheet({
     <Sheet
       open={open}
       onClose={close}
-      title={t("groupworkspace.yangi_vazifa")}
+      title={editing ? t("groupworkspace.vazifani_tahrirlash") : t("groupworkspace.yangi_vazifa")}
       description={t("groupworkspace.topshiriq_muddat_va_kerakli_fayllarni_bir_jo")}
     >
       <Input
@@ -208,9 +230,9 @@ export function AddAssignmentSheet({
       />
 
       <Button
-        title={t("groupworkspace.vazifani_yuborish")}
+        title={editing ? t("groupworkspace.saqlash") : t("groupworkspace.vazifani_yuborish")}
         size="lg"
-        loading={create.isPending}
+        loading={create.isPending || update.isPending}
         disabled={!title.trim() || !description.trim()}
         onPress={() => void submit()}
       />

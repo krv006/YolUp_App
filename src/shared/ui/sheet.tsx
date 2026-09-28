@@ -59,6 +59,13 @@ const CLOSE_VELOCITY = 900;
  * │ mumkin, LEKIN faqat ichki ro'yxat eng tepada turganda — aks holda   │
  * │ ro'yxatni pastga aylantirmoqchi bo'lgan har harakat oynani yopib    │
  * │ yuborardi.                                                          │
+ * │                                                                     │
+ * │ Sudrash ro'yxat bilan BIR VAQTDA tanilishi shart                    │
+ * │ (`simultaneousWithExternalGesture`). Usiz Pan faollashganda ichki   │
+ * │ `ScrollView` ning nativ gesture'i BEKOR qilinardi: ro'yxat pastga   │
+ * │ aylantirilgach, barmoqni pastga tortish Pan'ni faollashtirardi,     │
+ * │ Pan esa `scrollY > 0` bo'lgani uchun hech narsa qilmasdi — natijada │
+ * │ OYNA UMUMAN AYLANMAY QOLARDI (22 ta oynaning hammasida).            │
  * └─────────────────────────────────────────────────────────────────────┘
  *
  * ┌─ NEGA ICHKARIDA YANA `GestureHandlerRootView` ────────────────────────┐
@@ -76,6 +83,15 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
 
   const translateY = useSharedValue(0);
   const scrollY = useSharedValue(0);
+  /*
+   * Sudrash boshlangandan beri ro'yxatni aylantirishga "sarflangan" masofa.
+   *
+   * Bitta harakat ichida foydalanuvchi avval ro'yxatni tepaga aylantirib,
+   * keyin oynani sudrashi mumkin. `translationY` esa harakat BOSHIDAN
+   * hisoblanadi, shuning uchun usiz ro'yxat tepaga yetgan lahzada oyna
+   * to'satdan sakrab tushardi.
+   */
+  const dragBase = useSharedValue(0);
 
   // Har ochilishda holat nolga qaytadi — aks holda oldingi safar sudralgan
   // masofa saqlanib qolib, oyna yarmi ko'rinib ochilardi.
@@ -83,12 +99,23 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
     if (open) {
       translateY.set(0);
       scrollY.set(0);
+      dragBase.set(0);
     }
-  }, [open, translateY, scrollY]);
+  }, [open, translateY, scrollY, dragBase]);
 
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.set(event.contentOffset.y);
   });
+
+  /*
+   * Ro'yxatning NATIV aylantirish gesture'i.
+   *
+   * Sudrash u bilan bir vaqtda tanilishi uchun kerak. `ref` o'rniga
+   * `Gesture.Native()` olingan: `useAnimatedRef` gesture-handler kutadigan
+   * ref turiga to'g'ri kelmaydi va uni faqat cast bilan berish mumkin
+   * bo'lardi.
+   */
+  const scrollGesture = Gesture.Native();
 
   const pan = Gesture.Pan()
     /*
@@ -98,20 +125,32 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
      */
     .activeOffsetY(12)
     .failOffsetY(-12)
+    // Ro'yxat o'z ishini davom ettirsin — izohi yuqorida, "SUDRASH" da.
+    .simultaneousWithExternalGesture(scrollGesture)
+    .onBegin(() => {
+      dragBase.set(0);
+    })
     .onUpdate((event) => {
-      // Faqat PASTGA va faqat ro'yxat tepada turganda.
-      if (event.translationY > 0 && scrollY.get() <= 0) {
-        translateY.set(event.translationY);
+      /*
+       * Ro'yxat hali tepada emas: bu harakat AYLANTIRISH, sudrash emas.
+       * Oyna qimirlamaydi, faqat boshlanish nuqtasi suriladi.
+       */
+      if (scrollY.get() > 0) {
+        dragBase.set(event.translationY);
+        translateY.set(0);
+        return;
       }
+      translateY.set(Math.max(0, event.translationY - dragBase.get()));
     })
     .onEnd((event) => {
-      const farEnough = event.translationY > CLOSE_DISTANCE;
+      const dragged = event.translationY - dragBase.get();
+      const farEnough = dragged > CLOSE_DISTANCE;
       const fastEnough = event.velocityY > CLOSE_VELOCITY;
 
       if ((farEnough || fastEnough) && scrollY.get() <= 0) {
         // Oyna ekrandan chiqib ketmasin: `Modal` ning o'z yopilish
         // animatsiyasi qolganini bajaradi, biz faqat uzatamiz.
-        translateY.set(withTiming(event.translationY, { duration: 0 }));
+        translateY.set(withTiming(dragged, { duration: 0 }));
         runOnJS(onClose)();
       } else {
         translateY.set(withSpring(0, { damping: 20, stiffness: 220 }));
@@ -175,16 +214,18 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
               </IconButton>
             </View>
 
-            <Animated.ScrollView
-              onScroll={scrollHandler}
-              scrollEventThrottle={16}
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="interactive"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.body}
-            >
-              {children}
-            </Animated.ScrollView>
+            <GestureDetector gesture={scrollGesture}>
+              <Animated.ScrollView
+                onScroll={scrollHandler}
+                scrollEventThrottle={16}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="interactive"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.body}
+              >
+                {children}
+              </Animated.ScrollView>
+            </GestureDetector>
           </Animated.View>
         </GestureDetector>
         </KeyboardAvoidingView>

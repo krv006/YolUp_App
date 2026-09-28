@@ -110,6 +110,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/index.ts` | 🟡 MOSLASH | `080e7a1ce1f7` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/course/lib/course.mappers.ts` | 🟢 NUSXA | `358e9f4394b4` | — |
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
+| `src/modules/course/ui/add-student-sheet.tsx` | 🟡 MOSLASH | `23417d755aae` | manba: veb `add-student-dialog.tsx`; dialog o'rniga pastdan ochiladigan oyna, qidiruv debounce'siz (ro'yxat kichik) |
+| `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `67f8017c22aa` | veb bilan bir joyda — suhbat ma'lumoti oynasida; o'chirishni tasdiqlash `ConfirmSheet` bilan |
 | `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `36fced141fe9` | — |
 | `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `4cee08dbcf0f` | — |
 | `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
@@ -265,11 +267,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/input.tsx` | 🟡 MOSLASH | `52da1927077d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/palette.json` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/logo-svg.ts` | 🆕 MOBIL | `—` | avtomatik yaratiladi: `assets/y-logo.svg` -> `npm run build:icons` |
-| `src/shared/ui/sheet.tsx` | 🟡 MOSLASH | `ef338bb871e5` | farq qayd etilmagan — tekshiring |
+| `src/shared/ui/sheet.tsx` | 🟡 MOSLASH | `ef338bb871e5` | veb `Dialog` o'rni; sudrab yopish va klaviatura ishlovi qo'lda, sudrash ro'yxat bilan bir vaqtda tanilishi shart |
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
-| `src/widgets/group-workspace/group-workspace.tsx` | 🟡 MOSLASH | `17d7db1ac265` | farq qayd etilmagan — tekshiring |
-| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `770a6277c18c` | farq qayd etilmagan — tekshiring |
+| `src/widgets/group-workspace/group-workspace.tsx` | 🟡 MOSLASH | `17d7db1ac265` | tablar veb bilan teng: suhbat, darslar, vazifalar, davomat. O'quvchilar tab EMAS — ma'lumot oynasida (`CourseMembersSection`) |
+| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `770a6277c18c` | yolg'iz ishtirokchi oynasi butun maydonni egallaydi (vebda setka doim); tizim panellari uchun safe-area |
 
 ## Ataylab ko'chirilmagan
 

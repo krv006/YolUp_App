@@ -160,7 +160,16 @@ export function AddStudentSheet({ open, onClose, courseId }: AddStudentSheetProp
                   <Button
                     title={t("groupworkspace.qoshish")}
                     fullWidth={false}
-                    loading={enroll.isPending}
+                    /*
+                     * Kutish belgisi FAQAT bosilgan qatorda.
+                     *
+                     * `enroll.isPending` bitta mutatsiyaga tegishli, qatorga
+                     * emas — u yolg'iz ishlatilganda ro'yxatdagi HAMMA tugma
+                     * bir vaqtda aylanardi va qaysi o'quvchi qo'shilayotgani
+                     * ko'rinmasdi. Veb ham `variables` bilan solishtiradi
+                     * (`add-student-dialog.tsx:74`).
+                     */
+                    loading={enroll.isPending && enroll.variables?.studentId === student.id}
                     onPress={() => enroll.mutate({ courseId, studentId: student.id })}
                   />
                 )}

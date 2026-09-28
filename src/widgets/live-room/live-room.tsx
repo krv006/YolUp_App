@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useConnectionState,
   useLocalParticipant,
@@ -149,17 +150,20 @@ export function LiveRoom({
     }
   }
 
+  const insets = useSafeAreaInsets();
   const cameraTracks = useTracks([Track.Source.Camera], { onlySubscribed: false });
   const screenTracks = useTracks([Track.Source.ScreenShare], { onlySubscribed: false });
   const screenTrack = screenTracks[0];
 
   /**
-   * Setka ustunlari: 2 ta ishtirokchigacha — bitta katta oyna, keyin ikkita
-   * ustun. Telefonda uchtadan ortiq ustun yuz tanib bo'lmaydigan darajada
-   * kichik chiqadi.
+   * Setka ustunlari: ikkitadan ko'p bo'lsa ikki ustun. Telefonda uchtadan
+   * ortiq ustun yuz tanib bo'lmaydigan darajada kichik chiqadi.
+   *
+   * BITTA ishtirokchida setka umuman ishlatilmaydi — oyna butun maydonni
+   * egallaydi (pastdagi `solo` ga qarang).
    */
-  const columns = cameraTracks.length <= 1 ? 1 : 2;
-  const tileWidth = (width - 16 - (columns - 1) * 8) / columns;
+  const tileWidth = (width - 16 - 8) / 2;
+  const solo = cameraTracks.length === 1 ? cameraTracks[0] : undefined;
 
   const label = CONNECTION_LABELS[connection] ?? "";
   const offline = connection !== ConnectionState.Connected;
@@ -170,7 +174,7 @@ export function LiveRoom({
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: palette.background }]}>
+    <View style={[styles.root, { backgroundColor: palette.background, paddingTop: insets.top }]}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
         <View style={styles.headBody}>
           <Text variant="label" numberOfLines={1}>
@@ -213,16 +217,32 @@ export function LiveRoom({
             </View>
           ) : null}
 
-          <ScrollView contentContainerStyle={styles.grid}>
-            {cameraTracks.map((track) => (
+          {/*
+           * Bitta ishtirokchi — oyna BUTUN maydonni egallaydi.
+           *
+           * Ilgari bu yerda ham setka ishlatilardi va oyna `3/4` nisbatda
+           * qolib, ostida ekranning yarmicha bo'm-bo'sh qora joy turardi.
+           */}
+          {solo ? (
+            <View style={styles.solo}>
               <CameraTile
-                key={track.participant.identity + (track.publication?.trackSid ?? "")}
-                track={track}
-                width={tileWidth}
-                speaking={speakingIds.has(track.participant.identity)}
+                track={solo}
+                fill
+                speaking={speakingIds.has(solo.participant.identity)}
               />
-            ))}
-          </ScrollView>
+            </View>
+          ) : (
+            <ScrollView contentContainerStyle={styles.grid}>
+              {cameraTracks.map((track) => (
+                <CameraTile
+                  key={track.participant.identity + (track.publication?.trackSid ?? "")}
+                  track={track}
+                  width={tileWidth}
+                  speaking={speakingIds.has(track.participant.identity)}
+                />
+              ))}
+            </ScrollView>
+          )}
 
           {/*
            * Ism-watermark (PROJECT.md §11 #2). Skrinshot chiqsa ham kim
@@ -278,6 +298,7 @@ export function LiveRoom({
       ) : null}
 
       <LiveControls
+        bottomInset={insets.bottom}
         isTeacher={isTeacher}
         onLeave={onLeave}
         onRequestMic={micSignals.requestMic}
@@ -303,10 +324,13 @@ export function LiveRoom({
 function CameraTile({
   track,
   width,
+  fill = false,
   speaking,
 }: {
   track: TrackReferenceOrPlaceholder;
-  width: number;
+  width?: number;
+  /** Setka o'rniga butun maydonni egallaydi — yolg'iz ishtirokchi holati. */
+  fill?: boolean;
   speaking: boolean;
 }) {
   const { palette } = useTheme();
@@ -317,9 +341,9 @@ function CameraTile({
   return (
     <View
       style={[
-        styles.tile,
+        fill ? styles.tileFill : styles.tile,
         {
-          width,
+          width: fill ? undefined : width,
           backgroundColor: palette["surface-elevated"],
           // Gapirayotgan ishtirokchi ajralib tursin — mobilda ovoz manbasini
           // topish qiyin, chunki oynalar kichik.
@@ -377,7 +401,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8, padding: 8 },
+  solo: { flex: 1, padding: 8 },
   tile: { aspectRatio: 3 / 4, borderRadius: radius.md, overflow: "hidden" },
+  tileFill: { flex: 1, borderRadius: radius.md, overflow: "hidden" },
   tileVideo: { width: "100%", height: "100%" },
   tilePlaceholder: { flex: 1, alignItems: "center", justifyContent: "center" },
   tileLabel: {

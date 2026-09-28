@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import {
   Bell,
   ChartLine,
+  ClipboardCheck,
   History,
   LogOut,
   Palette,
@@ -16,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
+import { ROLES } from "@/shared/constants";
 import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
 import {
   AccountSwitchSheet,
@@ -204,6 +206,22 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
             onPress={() => router.push("/analytics")}
           />
           <Separator inset={52} />
+          {/*
+            * Mock test faqat O'QUVCHIDA — vebda ham shunday
+            * (`app-router.tsx:187`). O'qituvchi imtihon yechmaydi.
+            */}
+          {user?.role === ROLES.STUDENT ? (
+            <>
+              <ListItem
+                title="Mock Test"
+                subtitle="Vaqt chegarali imtihon simulyatsiyasi"
+                leading={<ClipboardCheck size={20} color={palette["muted-foreground"]} />}
+                chevron
+                onPress={() => router.push("/mock-tests")}
+              />
+              <Separator inset={52} />
+            </>
+          ) : null}
           <ListItem
             title="Kirishlar tarixi"
             subtitle="Qaysi qurilma va IP'dan kirilgani"

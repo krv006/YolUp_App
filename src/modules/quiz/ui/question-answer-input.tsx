@@ -228,7 +228,16 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
   );
 }
 
-function Choice({
+/*
+ * EKSPORT QILINADI (vebda bu yo'q).
+ *
+ * Vebda variant tugmasi `quiz-attempt-option` CSS klassi bilan chiziladi
+ * va uni mock test ham AYNAN shu klass bilan qayta ishlatadi. Mobilda CSS
+ * klassi yo'q, shuning uchun komponentning o'zi eksport qilinadi —
+ * aks holda ikkinchi nusxa yozilardi va ikki joyda ikki xil ko'rinishga
+ * ajralib ketardi.
+ */
+export function Choice({
   label,
   selected,
   shape,

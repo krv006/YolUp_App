@@ -1,5 +1,17 @@
 import { StyleSheet, View } from "react-native";
-import { useSelectedChild } from "@/modules/parent";
+/*
+ * Do'kon TO'G'RIDAN-TO'G'RI o'z faylidan olinadi, modul barrel'idan emas.
+ *
+ * Barrel shu faylni eksport qiladi; agar biz ham barrel'dan olsak,
+ * aylanma bog'liqlik hosil bo'ladi:
+ *
+ *   parent/index.ts -> ui/child-selector.tsx -> parent/index.ts
+ *
+ * Metro buni ogohlantirish bilan ko'rsatardi. Bunday halqada modul
+ * tartibiga qarab qiymat `undefined` bo'lib qolishi mumkin — doskada
+ * aynan shunday xato bo'lgan edi (`math-field-sheet` <-> `formula-palette`).
+ */
+import { useSelectedChild } from "../model/selected-child.store";
 import { Avatar, Chip, ChipRow, Text } from "@/shared/ui";
 
 /**

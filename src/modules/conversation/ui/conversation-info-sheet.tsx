@@ -6,6 +6,7 @@ import * as Clipboard from "expo-clipboard";
 import { Bell, BellOff, Camera, Check, Copy, Pencil, Trash2, UserRound } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { useCourse, useDeleteCourse, useSubjects, useUpdateCourse } from "@/modules/course";
+import { CourseMembersSection } from "@/modules/course/ui/course-members-section";
 import { pickImage, storage, toUploadFile } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
 import {
@@ -33,9 +34,12 @@ export interface ConversationInfoSheetProps {
 /**
  * Suhbat ma'lumoti — veb `conversation-info-panel.tsx` ning mobil varianti.
  *
- * Guruhda: rasm (faqat kurs egasi), tavsif, o'qituvchi, tahrirlash va
- * o'chirish. Shaxsiy suhbatda: username nusxalash va (o'qituvchida)
- * so'rovni qabul qilish yoki bloklash.
+ * Guruhda: rasm (faqat kurs egasi), tavsif, O'QUVCHILAR RO'YXATI,
+ * o'qituvchi, tahrirlash va o'chirish. Shaxsiy suhbatda: username
+ * nusxalash va (o'qituvchida) so'rovni qabul qilish yoki bloklash.
+ *
+ * O'quvchilar ro'yxati aynan SHU YERDA, veb'dagi kabi
+ * (`conversation-info-panel.tsx:186`) — sabab `CourseMembersSection` da.
  *
  * "Ovozsiz" belgisi MAHALLIY (MMKV) — backend'da bunday sozlama yo'q,
  * veb'da ham u `localStorage` da saqlanadi.
@@ -246,6 +250,14 @@ export function ConversationInfoSheet({
               onPress={() => void copyUsername()}
             />
           )}
+
+          {/* O'quvchilar — faqat kurs egasiga: boshqarish tugmalari bor. */}
+          {teacherGroup && conversation.courseId ? (
+            <>
+              <Separator />
+              <CourseMembersSection courseId={conversation.courseId} canManage />
+            </>
+          ) : null}
 
           {/* O'qituvchi — kurs egasiga o'z ismini ko'rsatishdan ma'no yo'q. */}
           {isGroup && !teacherGroup ? (

@@ -634,14 +634,17 @@
     "bildirishnomalar": "Уведомления"
   },
   "shared": {
-    "sessiya_tekshirilmoqda": "Проверка сессии…",
-    "onlayn": "В сети",
     "bekor": "Отмена",
-    "yopish": "Закрыть",
-    "qidirish": "Поиск",
+    "daqiqa": "Минута",
     "mos_variant_topilmadi": "Подходящий вариант не найден",
+    "onlayn": "В сети",
     "qayta_urinish": "Повторить",
-    "xabarni_yopish": "Закрыть сообщение"
+    "qidirish": "Поиск",
+    "sessiya_tekshirilmoqda": "Проверка сессии…",
+    "soat": "Час",
+    "tanlash": "Выбрать",
+    "xabarni_yopish": "Закрыть сообщение",
+    "yopish": "Закрыть"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Запросить разрешение на демонстрацию экрана",

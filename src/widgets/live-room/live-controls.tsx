@@ -29,6 +29,8 @@ import { MIN_TOUCH_SIZE, radius, Text, toast, useTheme } from "@/shared/ui";
  */
 
 export interface LiveControlsProps {
+  /** Tizim navigatsiya paneli balandligi — tugmalar uning tagida qolmasin. */
+  bottomInset?: number;
   isTeacher: boolean;
   onLeave: () => void;
   /** O'quvchi mikrofon so'rovi. */
@@ -45,6 +47,7 @@ export interface LiveControlsProps {
 }
 
 export function LiveControls({
+  bottomInset = 0,
   isTeacher,
   onLeave,
   onRequestMic,
@@ -96,7 +99,23 @@ export function LiveControls({
   }
 
   return (
-    <View style={[styles.bar, { backgroundColor: palette.surface, borderTopColor: palette.border }]}>
+    <View
+      style={[
+        styles.bar,
+        {
+          backgroundColor: palette.surface,
+          borderTopColor: palette.border,
+          /*
+           * Tizim paneli tagiga qo'shimcha bo'shliq.
+           *
+           * Ekran `edgeToEdgeEnabled` rejimida chiziladi, ya'ni bu chiziq
+           * navigatsiya paneli OSTIGA tushardi va "chiqish" tugmasi
+           * tasodifan "orqaga" bilan birga bosilardi.
+           */
+          paddingBottom: 10 + bottomInset,
+        },
+      ]}
+    >
       {canSpeak ? (
         <ControlButton
           label={micOn ? "Mikrofonni o'chirish" : "Mikrofonni yoqish"}
@@ -176,7 +195,11 @@ export function LiveControls({
         style={({ pressed }) => [
           styles.control,
           styles.leave,
-          { backgroundColor: palette.destructive, opacity: pressed ? 0.85 : 1 },
+          {
+            backgroundColor: palette.destructive,
+            borderColor: palette.destructive,
+            opacity: pressed ? 0.85 : 1,
+          },
         ]}
       >
         <PhoneOff size={20} color={palette["destructive-foreground"]} />
@@ -207,6 +230,7 @@ function ControlButton({
         styles.control,
         {
           backgroundColor: active ? palette.primary : palette.secondary,
+          borderColor: active ? palette.primary : palette["border-strong"],
           opacity: pressed ? 0.85 : 1,
         },
       ]}
@@ -246,6 +270,7 @@ function RequestButton({
         styles.control,
         {
           backgroundColor: waiting ? palette["warning-soft"] : palette.secondary,
+          borderColor: waiting ? palette["warning-strong"] : palette["border-strong"],
           opacity: disabled && !waiting ? 0.45 : pressed ? 0.85 : 1,
         },
       ]}
@@ -278,7 +303,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
-    paddingVertical: 10,
+    paddingTop: 10,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   control: {
@@ -287,6 +312,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
+    /*
+     * Chegara: qorong'i mavzuda `secondary` fon chiziqning O'Z foni bilan
+     * deyarli bir xil chiqadi va o'chiq tugmalar umuman tugmaga
+     * o'xshamasdi — ekranda faqat yoqilganlari ko'rinardi.
+     */
+    borderWidth: StyleSheet.hairlineWidth,
   },
   leave: { marginLeft: 8 },
   corner: { position: "absolute", right: 8, bottom: 8 },

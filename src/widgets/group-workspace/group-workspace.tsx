@@ -4,7 +4,6 @@ import {
   CalendarDays,
   CheckCircle2,
   ListChecks,
-  UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
 import { VoiceRoomBar } from "@/modules/voice";
@@ -12,9 +11,8 @@ import { Chip, ChipRow } from "@/shared/ui";
 import { AssignmentsSection } from "./assignments-section";
 import { AttendanceSection } from "./attendance-section";
 import { LessonsSection } from "./lessons-section";
-import { StudentsSection } from "./students-section";
 
-export type GroupTab = "chat" | "lessons" | "assignments" | "students" | "attendance";
+export type GroupTab = "chat" | "lessons" | "assignments" | "attendance";
 
 interface TabDefinition {
   id: GroupTab;
@@ -23,12 +21,17 @@ interface TabDefinition {
   teacherOnly?: boolean;
 }
 
-/** Veb `group-workspace.tsx` / `student-group-workspace.tsx` dagi bo'limlar. */
+/**
+ * Veb `group-workspace.tsx` / `student-group-workspace.tsx` dagi bo'limlar.
+ *
+ * "O'quvchilar" BO'LIM EMAS — u guruh nomi bosilganda ochiladigan ma'lumot
+ * oynasida turadi (`CourseMembersSection`), veb'dagi kabi. Veb'da ham tablar
+ * faqat shu to'rttasi.
+ */
 const TABS: readonly TabDefinition[] = [
   { id: "chat", label: "Suhbat", icon: BookOpen },
   { id: "lessons", label: "Darslar", icon: CalendarDays },
   { id: "assignments", label: "Vazifalar", icon: ListChecks },
-  { id: "students", label: "O'quvchilar", icon: UsersRound, teacherOnly: true },
   { id: "attendance", label: "Davomat", icon: CheckCircle2, teacherOnly: true },
 ];
 
@@ -95,7 +98,6 @@ export function GroupWorkspaceSection({
       {tab === "assignments" ? (
         <AssignmentsSection courseId={courseId} isTeacher={isTeacher} subject={subject} />
       ) : null}
-      {tab === "students" ? <StudentsSection courseId={courseId} /> : null}
       {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}
     </View>
   );

@@ -634,14 +634,17 @@
     "bildirishnomalar": "Notifications"
   },
   "shared": {
-    "sessiya_tekshirilmoqda": "Checking session…",
-    "onlayn": "Online",
     "bekor": "Cancel",
-    "yopish": "Close",
-    "qidirish": "Search",
+    "daqiqa": "Minute",
     "mos_variant_topilmadi": "No matching option",
+    "onlayn": "Online",
     "qayta_urinish": "Try again",
-    "xabarni_yopish": "Dismiss message"
+    "qidirish": "Search",
+    "sessiya_tekshirilmoqda": "Checking session…",
+    "soat": "Hour",
+    "tanlash": "Select",
+    "xabarni_yopish": "Dismiss message",
+    "yopish": "Close"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Request permission to share the screen",

@@ -569,14 +569,17 @@
     "soat_15_00_da_boshlaymiz": "Soat 15:00 da boshlaymiz."
   },
   "shared": {
-    "sessiya_tekshirilmoqda": "Sessiya tekshirilmoqda…",
-    "onlayn": "Onlayn",
     "bekor": "Bekor",
-    "yopish": "Yopish",
-    "qidirish": "Qidirish",
+    "daqiqa": "Daqiqa",
     "mos_variant_topilmadi": "Mos variant topilmadi",
+    "onlayn": "Onlayn",
     "qayta_urinish": "Qayta urinish",
-    "xabarni_yopish": "Xabarni yopish"
+    "qidirish": "Qidirish",
+    "sessiya_tekshirilmoqda": "Sessiya tekshirilmoqda…",
+    "soat": "Soat",
+    "tanlash": "Tanlash",
+    "xabarni_yopish": "Xabarni yopish",
+    "yopish": "Yopish"
   },
   "groupworkspace": {
     "yangi_vazifa": "Yangi vazifa",

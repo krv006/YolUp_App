@@ -12,6 +12,7 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
+import { useCourse } from "@/modules/course";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
 import { LiveLessonBar, useLiveLessons } from "@/modules/lesson";
@@ -49,7 +50,29 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const [infoOpen, setInfoOpen] = useState(false);
 
   const chat = useChat(conversationId, { role, senderId: user?.id ?? null });
-  const conversation = chat.conversation.data;
+  const raw = chat.conversation.data;
+
+  /*
+   * Guruh ma'lumoti KURSDAN to'ldiriladi — veb ham shunday qiladi
+   * (`group-workspace.tsx:132-140`).
+   *
+   * Suhbatlar ro'yxati beradigan obyektda `memberCount` yo'q, shuning uchun
+   * sarlavhada har doim "0 ishtirokchi" turardi — guruhda to'rtta o'quvchi
+   * bo'lsa ham. Nom, fan va tavsif ham shu yerda yangilanadi: kurs tahrir
+   * qilingach sarlavha darhol ergashsin.
+   */
+  const course = useCourse(raw?.courseId ?? null);
+  const conversation = useMemo(() => {
+    if (!raw) return undefined;
+    if (raw.type !== "group" || !course.data) return raw;
+    return {
+      ...raw,
+      title: course.data.title || raw.title,
+      subject: course.data.subject ?? raw.subject,
+      description: course.data.description ?? raw.description,
+      memberCount: course.data.studentCount,
+    };
+  }, [raw, course.data]);
 
   /** Shu kursda dars ketyaptimi — sarlavhadagi tugma shunga qarab chiqadi. */
   const liveLessons = useLiveLessons(Boolean(user)).data;

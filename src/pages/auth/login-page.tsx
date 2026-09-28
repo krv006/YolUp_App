@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockKeyhole, UserRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
@@ -21,6 +22,9 @@ export function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { palette } = useTheme();
+  const { t } = useTranslation("mobile");
+  /* Veb `auth` lug'ati — matnlar allaqachon uch tilda tayyor. */
+  const { t: ta } = useTranslation("auth");
 
   const {
     control,
@@ -50,7 +54,7 @@ export function LoginPage() {
       <View style={styles.header}>
         <Logo size={64} variant="tile" />
         <Text variant="title">YolUp</Text>
-        <Text tone="muted">Onlayn ta'lim platformasi</Text>
+        <Text tone="muted">{t("auth.tagline")}</Text>
       </View>
 
       <View style={styles.form}>
@@ -59,8 +63,8 @@ export function LoginPage() {
           name="login"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Login"
-              placeholder="Loginingizni kiriting"
+              label={ta("form.login")}
+              placeholder={ta("form.loginPlaceholder")}
               icon={<UserRound size={18} color={palette["muted-foreground"]} />}
               textContentType="username"
               autoComplete="username"
@@ -78,8 +82,8 @@ export function LoginPage() {
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="Parol"
-              placeholder="Parolingizni kiriting"
+              label={ta("form.password")}
+              placeholder={ta("form.passwordPlaceholder")}
               icon={<LockKeyhole size={18} color={palette["muted-foreground"]} />}
               secure
               textContentType="password"
@@ -101,7 +105,7 @@ export function LoginPage() {
             <Checkbox
               checked={value !== false}
               onChange={onChange}
-              label="Meni eslab qolish"
+              label={ta("form.rememberMe")}
             />
           )}
         />
@@ -121,7 +125,7 @@ export function LoginPage() {
           </View>
         ) : null}
 
-        <Button title="Kirish" size="lg" loading={isSubmitting} onPress={handleSubmit(submit)} />
+        <Button title={ta("form.submit")} size="lg" loading={isSubmitting} onPress={handleSubmit(submit)} />
 
         <Text
           accessibilityRole="button"
@@ -130,7 +134,7 @@ export function LoginPage() {
           tone="brand"
           style={styles.link}
         >
-          Hisobingiz yo'qmi? Ro'yxatdan o'tish
+          {t("auth.noAccount")}
         </Text>
       </View>
     </Screen>

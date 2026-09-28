@@ -12,11 +12,11 @@ import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
 
 const TABS = [
-  { name: "chats", label: "Suhbatlar", icon: MessagesSquare },
-  { name: "schedule", label: "Jadval", icon: CalendarDays },
-  { name: "quizzes", label: "Testlar", icon: ListChecks },
-  { name: "report", label: "Reyting", icon: Trophy },
-  { name: "profile", label: "Profil", icon: UserRound },
+  { name: "chats", labelKey: "tabs.chats", icon: MessagesSquare },
+  { name: "schedule", labelKey: "tabs.schedule", icon: CalendarDays },
+  { name: "quizzes", labelKey: "tabs.quizzes", icon: ListChecks },
+  { name: "report", labelKey: "tabs.rating", icon: Trophy },
+  { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
 export default function StudentLayout() {

@@ -1,1 +1,25 @@
-{}
+{
+  "tabs": {
+    "chats": "Suhbatlar",
+    "schedule": "Jadval",
+    "quizzes": "Testlar",
+    "rating": "Reyting",
+    "profile": "Profil",
+    "overview": "Asosiy",
+    "children": "Farzand",
+    "attendance": "Davomat",
+    "homework": "Vazifa"
+  },
+  "auth": {
+    "tagline": "Onlayn ta'lim platformasi",
+    "noAccount": "Hisobingiz yo'qmi? Ro'yxatdan o'tish",
+    "registerTitle": "Ro'yxatdan o'tish",
+    "registerHint": "YolUp platformasida yangi hisob oching.",
+    "accountType": "Hisob turi",
+    "phoneOptional": "Telefon (ixtiyoriy)",
+    "phonePlaceholder": "+998 90 123 45 67",
+    "min3": "Kamida 3 ta belgi",
+    "min8": "Kamida 8 ta belgi",
+    "haveAccount": "Hisobingiz bormi? Kirish"
+  }
+}

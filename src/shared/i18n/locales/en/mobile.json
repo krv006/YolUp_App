@@ -1,1 +1,25 @@
-{}
+{
+  "tabs": {
+    "chats": "Chats",
+    "schedule": "Schedule",
+    "quizzes": "Quizzes",
+    "rating": "Rating",
+    "profile": "Profile",
+    "overview": "Overview",
+    "children": "Children",
+    "attendance": "Attendance",
+    "homework": "Homework"
+  },
+  "auth": {
+    "tagline": "Online learning platform",
+    "noAccount": "No account? Sign up",
+    "registerTitle": "Sign up",
+    "registerHint": "Create a new account on YolUp.",
+    "accountType": "Account type",
+    "phoneOptional": "Phone (optional)",
+    "phonePlaceholder": "+998 90 123 45 67",
+    "min3": "At least 3 characters",
+    "min8": "At least 8 characters",
+    "haveAccount": "Already have an account? Sign in"
+  }
+}

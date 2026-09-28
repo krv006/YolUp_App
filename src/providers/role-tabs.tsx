@@ -3,12 +3,20 @@ import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { LucideIcon } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { fontSize, radius, Text, useTheme } from "@/shared/ui";
 
 export interface TabDefinition {
   /** Marshrut fayli nomi: `chats`, `schedule`, … */
   name: string;
-  label: string;
+  /**
+   * Tarjima KALITI, tayyor matn emas.
+   *
+   * Bo'limlar ro'yxati layout fayllarida modul darajasida e'lon qilinadi,
+   * u yerda esa hook chaqirib bo'lmaydi. Shuning uchun tarjima shu
+   * komponentda, chizish paytida qilinadi.
+   */
+  labelKey: string;
   icon: LucideIcon;
 }
 
@@ -65,6 +73,7 @@ export function RoleTabs({
   hidden?: readonly string[];
 }) {
   const { palette } = useTheme();
+  const { t } = useTranslation("mobile");
   const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.icon]));
 
   return (
@@ -75,8 +84,8 @@ export function RoleTabs({
         sceneStyle: { backgroundColor: palette.background },
       }}
     >
-      {tabs.map(({ name, label }) => (
-        <Tabs.Screen key={name} name={name} options={{ title: label }} />
+      {tabs.map(({ name, labelKey }) => (
+        <Tabs.Screen key={name} name={name} options={{ title: t(labelKey) }} />
       ))}
 
       {hidden.map((name) => (

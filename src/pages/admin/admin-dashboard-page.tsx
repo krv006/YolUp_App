@@ -327,7 +327,7 @@ function TrendsSection() {
             ]}
           />
 
-          <Text variant="caption" tone="muted">
+          <Text variant="caption" tone="muted" style={styles.chartTitle}>
             {t("admin.darslar_holati")}
           </Text>
           <TrendStackedBarChart
@@ -352,7 +352,7 @@ function TrendsSection() {
             * `zeroBase={false}` — ball 0..100 oralig'ida va odatda 60..90
             * atrofida bo'ladi. Noldan boshlasak, farq ko'rinmay ketardi.
             */}
-          <Text variant="caption" tone="muted">
+          <Text variant="caption" tone="muted" style={styles.chartTitle}>
             {t("admin.testlar_o_rtacha_ball")}
           </Text>
           <TrendLineChart
@@ -374,6 +374,12 @@ function TrendsSection() {
 }
 
 const styles = StyleSheet.create({
+  /*
+   * Grafik sarlavhasi oldingi grafikning IZOHIDAN ajralib tursin.
+   * Bo'shliqsiz ular yopishib qolardi va izoh pastdagi grafikka
+   * tegishlidek ko'rinardi — telefonda sinaganda ko'rindi.
+   */
+  chartTitle: { marginTop: 18 },
   body: { padding: 16, gap: 14, paddingBottom: 40 },
   head: { flexDirection: "row", alignItems: "center", gap: 8, paddingTop: 8 },
   headBody: { flex: 1, gap: 2 },

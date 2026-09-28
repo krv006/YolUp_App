@@ -45,7 +45,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/analytics/index.ts` | 🟡 MOSLASH | `e7064b45479a` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/analytics/lib/analytics.mappers.ts` | 🟢 NUSXA | `d75c309664ba` | — |
 | `src/modules/analytics/model/analytics.queries.ts` | 🟢 NUSXA | `53e4931cdf57` | — |
-| `src/modules/analytics/ui/trend-line-chart.tsx` | 🟡 MOSLASH | `3164201c6a1e` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish, qiymatlar grafik ostida |
+| `src/modules/analytics/ui/trend-line-chart.tsx` | 🟡 MOSLASH | `3164201c6a1e` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish, qiymatlar grafik ostida; o'q belgisi kichik oraliqda kasr bilan (vebda har doim yaxlitlanadi va "1 1 0 0 0" chiqardi) |
 | `src/modules/analytics/ui/trend-stacked-bar-chart.tsx` | 🟡 MOSLASH | `96a4de5f614c` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish |
 | `src/modules/attendance/api/attendance.api.ts` | 🟢 NUSXA | `1e046237be37` | — |
 | `src/modules/attendance/api/attendance.dto.ts` | 🟢 NUSXA | `ba5a4336ddf1` | — |

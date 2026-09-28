@@ -1,9 +1,6 @@
-/*
- * 🟡 MOBIL FARQI (DECISIONS §13): toast matnlari i18n o'rniga literal.
- * Mantiq, kalitlar va kesh yangilash tartibi veb bilan aynan bir xil.
- */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { voiceApi } from "../api/voice.api";
 import type { VoiceRoomFormValues } from "../api/voice.dto";
 
@@ -29,12 +26,13 @@ export function useActiveVoiceRoom(courseId: string | null, enabled = true) {
 }
 
 export function useCreateVoiceRoom() {
+  const { t } = useTranslation("voice");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (form: VoiceRoomFormValues) => voiceApi.create(form),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: voiceKeys.all });
-      toast.success("Ovozli xona ochildi");
+      toast.success(t("toast.created"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -56,21 +54,23 @@ export function useLeaveVoiceRoom() {
 }
 
 export function useCloseVoiceRoom() {
+  const { t } = useTranslation("voice");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (roomId: string) => voiceApi.close(roomId),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: voiceKeys.all });
-      toast.success("Xona yopildi");
+      toast.success(t("toast.closed"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useRequestVoiceJoin() {
+  const { t } = useTranslation("voice");
   return useMutation({
     mutationFn: (roomId: string) => voiceApi.requestJoin(roomId),
-    onSuccess: () => toast.success("So'rov yuborildi — tasdiqlashini kuting"),
+    onSuccess: () => toast.success(t("toast.requestSent")),
     onError: (error: Error) => toast.error(error.message),
   });
 }

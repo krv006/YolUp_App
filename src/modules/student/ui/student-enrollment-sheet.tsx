@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { BookOpen, MessageCircle, UsersRound } from "lucide-react-native";
 import {
   DIRECT_STATUS,
-  directStatusLabel,
+  useDirectStatusLabel,
   useRequestDirect,
   useTeachersForDirect,
   type DirectTeacher,
@@ -41,6 +41,7 @@ export interface StudentEnrollmentSheetProps {
  */
 export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheetProps) {
   const { t } = useTranslation("mobile");
+  const directStatusLabel = useDirectStatusLabel();
   const router = useRouter();
   const { palette } = useTheme();
 

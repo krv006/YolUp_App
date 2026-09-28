@@ -1,5 +1,17 @@
 import { create } from "zustand";
-import { storage } from "@/shared/lib";
+/*
+ * Saqlagich O'Z FAYLIDAN olinadi, `@/shared/lib` barrel'idan emas.
+ *
+ * Barrel `date.ts` ni ham eksport qiladi, u esa `@/shared/i18n` ni
+ * import qiladi — natijada halqa hosil bo'lardi:
+ *
+ *   date.ts -> shared/i18n -> language.store -> shared/lib -> date.ts
+ *
+ * Bunda `i18n.ts` ishga tushganda `useLanguageStore` hali `undefined`
+ * bo'lib, ilova "Cannot read property 'getState' of undefined" bilan
+ * qulardi.
+ */
+import { storage } from "@/shared/lib/storage";
 
 /**
  * Ilova tili.

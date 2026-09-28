@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
-import { registerSchema, useAuth, useRegisterMutation } from "@/modules/auth";
+import { createRegisterSchema, useAuth, useRegisterMutation } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import type { RegisterFormValues } from "@/modules/auth";
 import { Button, Chip, ChipRow, Input, Logo, Screen, Text, toast, useTheme } from "@/shared/ui";
@@ -25,6 +25,8 @@ const ROLE_OPTIONS: { id: RegisterFormValues["role"]; label: string }[] = [
  */
 export function RegisterPage() {
   const { t } = useTranslation("mobile");
+  /* Veb `auth` lug'ati — forma xato matnlari o'sha yerdan. */
+  const { t: ta } = useTranslation("auth");
   const router = useRouter();
   const { palette } = useTheme();
   const { login } = useAuth();
@@ -36,7 +38,7 @@ export function RegisterPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(ta)),
     defaultValues: {
       username: "",
       password: "",

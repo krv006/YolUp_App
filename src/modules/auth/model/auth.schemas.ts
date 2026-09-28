@@ -1,23 +1,21 @@
-/*
- * 🟡 MOBIL FARQI (DECISIONS §13): veb bu sxemalarni `createLoginSchema(t)`
- * ko'rinishidagi fabrikalarga aylantirdi — xato xabarlari i18n dan keladi.
- * Mobilda i18n hali yo'q, shuning uchun matnlar literal qolgan va sxemalar
- * oddiy obyekt. SHAKLI (maydonlar, cheklovlar) veb bilan AYNAN bir xil.
- * i18n qo'shilganda shu fayl veb ko'rinishiga qaytariladi.
- */
 import { z } from "zod";
+import type { TFunction } from "i18next";
 
-export const loginSchema = z.object({
-  login: z.string().trim().min(1, "Loginni kiriting"),
-  password: z.string().min(1, "Parolni kiriting"),
-  remember: z.boolean().optional(),
-});
+export function createLoginSchema(t: TFunction<"auth">) {
+  return z.object({
+    login: z.string().trim().min(1, t("validation.loginRequired")),
+    password: z.string().min(1, t("validation.passwordRequired")),
+    remember: z.boolean().optional(),
+  });
+}
 
-export const registerSchema = z.object({
-  username: z.string().trim().min(3, "Login kamida 3 ta belgidan iborat bo‘lsin"),
-  password: z.string().min(8, "Parol kamida 8 ta belgidan iborat bo‘lsin"),
-  firstName: z.string().trim().min(1, "Ismni kiriting"),
-  lastName: z.string().trim().min(1, "Familiyani kiriting"),
-  phone: z.string().trim().optional(),
-  role: z.enum(["teacher", "parent", "student"]),
-});
+export function createRegisterSchema(t: TFunction<"auth">) {
+  return z.object({
+    username: z.string().trim().min(3, t("validation.usernameMinLength")),
+    password: z.string().min(8, t("validation.passwordMinLength")),
+    firstName: z.string().trim().min(1, t("validation.firstNameRequired")),
+    lastName: z.string().trim().min(1, t("validation.lastNameRequired")),
+    phone: z.string().trim().optional(),
+    role: z.enum(["teacher", "parent", "student"]),
+  });
+}

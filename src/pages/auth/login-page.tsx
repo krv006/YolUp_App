@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
-import { loginSchema, resolveHomeRoute, useAuth } from "@/modules/auth";
+import { createLoginSchema, resolveHomeRoute, useAuth } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import type { LoginCredentials } from "@/shared/types";
 import { Button, Checkbox, Input, Logo, Screen, Text, useTheme } from "@/shared/ui";
@@ -32,7 +32,7 @@ export function LoginPage() {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(ta)),
     defaultValues: { login: "", password: "", remember: true },
   });
 

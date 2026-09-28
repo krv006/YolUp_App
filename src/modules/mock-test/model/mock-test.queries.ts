@@ -1,11 +1,6 @@
-/*
- * 🟡 MOBIL FARQI (DECISIONS §13): veb bu yerda toast matnlarini i18n dan
- * oladi (`useTranslation("mocktest")`). Mobilda i18n hali yo'q, shuning
- * uchun matnlar literal. Mantiq, kalitlar va kesh yangilash tartibi
- * AYNAN bir xil.
- */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { mockTestApi } from "../api/mock-test.api";
 import type { MockSubmitInput, MockTestFormValues } from "../api/mock-test.dto";
 
@@ -33,24 +28,26 @@ export function useMockTest(id: string | null) {
 }
 
 export function useCreateMockTest() {
+  const { t } = useTranslation("mocktest");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (form: MockTestFormValues) => mockTestApi.create(form),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: mockTestKeys.all });
-      toast.success("Mock test yaratildi");
+      toast.success(t("toast.created"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useDeleteMockTest() {
+  const { t } = useTranslation("mocktest");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => mockTestApi.remove(id),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: mockTestKeys.all });
-      toast.success("Mock test o'chirildi");
+      toast.success(t("toast.deleted"));
     },
     onError: (error: Error) => toast.error(error.message),
   });

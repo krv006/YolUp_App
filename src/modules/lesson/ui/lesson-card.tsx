@@ -3,7 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Clock, Pencil, PlayCircle, Square, Star, Trash2, Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
-import { hasLessonTopic, isLessonClosed, lessonStatusMeta } from "../lib/lesson-status";
+import {
+  hasLessonTopic,
+  isLessonClosed,
+  useLessonStatusMeta,
+  type LessonStatusMeta,
+} from "../lib/lesson-status";
 
 export interface LessonCardProps {
   lesson: Lesson;
@@ -20,8 +25,8 @@ export interface LessonCardProps {
   onDelete?: (lesson: Lesson) => void;
 }
 
-/** Veb `lessonStatusMeta` ohangini mobil `Badge` ohangiga bog'laydi. */
-const TONE: Record<ReturnType<typeof lessonStatusMeta>["tone"], BadgeTone> = {
+/** Veb `useLessonStatusMeta` ohangini mobil `Badge` ohangiga bog'laydi. */
+const TONE: Record<LessonStatusMeta["tone"], BadgeTone> = {
   scheduled: "brand",
   live: "danger",
   finished: "neutral",
@@ -47,6 +52,7 @@ export function LessonCard({
 }: LessonCardProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
+  const lessonStatusMeta = useLessonStatusMeta();
   const meta = lessonStatusMeta(lesson.status);
   const closed = isLessonClosed(lesson);
 

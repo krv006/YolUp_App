@@ -85,8 +85,6 @@
     "parent": "Ota-ona"
   },
   "analytics": {
-    "qiymatlarni_ko_apos_rish_uchun_grafikni_bosi": "Qiymatlarni ko&apos;rish uchun grafikni bosing.",
-    "qiymatlarni_ko_apos_rish_uchun_ustunni_bosin": "Qiymatlarni ko&apos;rish uchun ustunni bosing.",
     "urinishlar": "Urinishlar",
     "ortacha_natija": "O'rtacha natija",
     "ortacha_baho": "O'rtacha baho",
@@ -102,7 +100,9 @@
     "tahlil_yuklanmoqda": "Tahlil yuklanmoqda…",
     "natijalaringiz_va_korsatkichlaringiz": "Natijalaringiz va ko'rsatkichlaringiz.",
     "hali_test_yechilmagan": "Hali test yechilmagan.",
-    "kurs_topilmadi": "Kurs topilmadi."
+    "kurs_topilmadi": "Kurs topilmadi.",
+    "qiymatlarni_ko_rish_uchun_grafikni_bosi": "Qiymatlarni ko'rish uchun grafikni bosing.",
+    "qiymatlarni_ko_rish_uchun_ustunni_bosin": "Qiymatlarni ko'rish uchun ustunni bosing."
   },
   "app": {
     "sahifa_topilmadi": "Sahifa topilmadi",
@@ -165,7 +165,7 @@
     "belgi": "Belgi",
     "raqam": "Raqam",
     "qator_qoshish": "Qator qo'shish",
-    "qatorni_o_apos_chirish": "Qatorni o&apos;chirish"
+    "qatorni_o_chirish": "Qatorni o'chirish"
   },
   "conversation": {
     "suhbatlar_royxatiga_qaytish": "Suhbatlar ro'yxatiga qaytish",
@@ -301,7 +301,7 @@
     "yuklanmoqda": "Yuklanmoqda…",
     "bir_nechta_test_birlashtirilgan_vaqt_chegara": "Bir nechta test birlashtirilgan, vaqt chegarali imtihon.",
     "boshlash": "Boshlash",
-    "hozircha_mock_test_yo_apos_q": "Hozircha mock test yo&apos;q."
+    "hozircha_mock_test_yo_q": "Hozircha mock test yo'q."
   },
   "notification": {
     "xabar_yuborish": "Xabar yuborish",
@@ -346,7 +346,7 @@
     "elon_qilish": "E'lon qilish",
     "havola_google_hujjat_yoki_google_forma_havol": "Havola Google Hujjat yoki Google Forma havolasi bo'lishi kerak",
     "savollar_fayldan_oqiladi_fan_va_mavzu_baribi": "Savollar fayldan o'qiladi. Fan va mavzu baribir yuqorida to'ldirilishi kerak.",
-    "havola_quot_havolaga_ega_har_kim_kora_oladi_": "Havola &quot;havolaga ega har kim ko'ra oladi&quot; qilib ochilgan bo'lsin.",
+    "havola_quot_havolaga_ega_har_kim_kora_oladi_": "Havola \"havolaga ega har kim ko'ra oladi\" qilib ochilgan bo'lsin.",
     "shablon_yuklab_olish_toldirib_yuqoridagi_tug": "Shablon yuklab olish — to'ldirib, yuqoridagi tugma orqali qaytaring:",
     "test_import_qilindi": "Test import qilindi",
     "savollarni_tekshirish": "Savollarni tekshirish",
@@ -373,7 +373,7 @@
     "juftlikni_ochirish": "Juftlikni o'chirish",
     "juftlik_qoshish": "Juftlik qo'shish",
     "oquvchi_shu_korinishda_yechadi_bu_yerdagi_ja": "O'quvchi shu ko'rinishda yechadi. Bu yerdagi javoblar saqlanmaydi.",
-    "hali_savol_yo_apos_q_savol_qo_apos_shsangiz_": "Hali savol yo&apos;q — savol qo&apos;shsangiz shu yerda ko&apos;rinadi."
+    "hali_savol_yo_q_savol_qo_shsangiz": "Hali savol yo'q — savol qo'shsangiz shu yerda ko'rinadi."
   },
   "student": {
     "yangi_muloqot": "Yangi muloqot",
@@ -420,15 +420,15 @@
     "songgi_kurslar": "So'nggi kurslar",
     "kurs_topilmadi": "Kurs topilmadi.",
     "dinamika": "Dinamika",
-    "yangi_o_apos_quvchilar": "Yangi o&apos;quvchilar",
     "darslar_holati": "Darslar holati",
-    "testlar_o_apos_rtacha_ball": "Testlar — o&apos;rtacha ball",
     "oqituvchilar_yuklanmoqda": "O'qituvchilar yuklanmoqda…",
     "orqaga": "Orqaga",
     "tasdiqlash": "Tasdiqlash",
     "tasdiqlangan": "Tasdiqlangan",
     "kutmoqda": "Kutmoqda",
-    "oqituvchi_topilmadi": "O'qituvchi topilmadi."
+    "oqituvchi_topilmadi": "O'qituvchi topilmadi.",
+    "yangi_o_quvchilar": "Yangi o'quvchilar",
+    "testlar_o_rtacha_ball": "Testlar — o'rtacha ball"
   },
   "chats": {
     "suhbat_qidirish": "Suhbat qidirish",

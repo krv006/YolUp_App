@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import type { Lesson } from "@/shared/types";
 import { IconButton, radius, Text, useTheme } from "@/shared/ui";
 import {
@@ -13,14 +13,10 @@ import {
 /*
  * Hafta dushanbadan boshlanadi — O'zbekistondagi odat.
  *
- * Bu ro'yxat AVVAL `lib/lesson-calendar.ts` da edi. Veb uni i18n'ga
- * ko'chirdi (`t("calendar.weekdays")`), mobilda esa i18n hali yo'q
- * (DECISIONS §13). Uni ko'chirilgan lib fayliga qaytarib qo'ysak, o'sha
- * fayl veb bilan bayt-bayt bir xil bo'lmay qolardi va har port'da qo'lda
- * birlashtirish kerak bo'lardi. Shuning uchun u MOBIL UI fayliga
- * ko'chirildi — bu fayl baribir mobilga xos.
+ * Kun nomlari VEBNING `lesson` lug'atidan olinadi
+ * (`calendar.weekdays`) — u yerda uchala til ham tayyor. Ro'yxat avval
+ * shu faylda literal edi, chunki mobilda i18n yo'q edi.
  */
-const WEEKDAY_LABELS = ["Du", "Se", "Chor", "Pay", "Jum", "Shan", "Yak"] as const;
 
 export interface LessonCalendarProps {
   lessons: Lesson[];
@@ -36,7 +32,7 @@ export interface LessonCalendarProps {
  * faqat NUQTA ko'rsatadi va tanlangan kunning darslari panjara OSTIDA
  * to'liq kartochka bilan chiqadi.
  *
- * Panjara mantiqi (`buildMonthGrid`, `WEEKDAY_LABELS`) 🟢 veb'dan
+ * Panjara mantiqi (`buildMonthGrid`) 🟢 veb'dan
  * ko'chirilgan — hafta dushanbadan boshlanishi ham shu yerdan keladi.
  */
 export function LessonCalendar({
@@ -47,6 +43,9 @@ export function LessonCalendar({
   onSelectDay,
 }: LessonCalendarProps) {
   const { t } = useTranslation("mobile");
+  /* Kun nomlari vebning `lesson` lug'atida — uchala til tayyor. */
+  const { t: tl } = useTranslation("lesson");
+  const weekdays = tl("calendar.weekdays", { returnObjects: true }) as string[];
   const { palette } = useTheme();
   const days = useMemo(() => buildMonthGrid(month, lessons), [month, lessons]);
 
@@ -71,7 +70,7 @@ export function LessonCalendar({
       </View>
 
       <View style={styles.weekRow}>
-        {WEEKDAY_LABELS.map((label) => (
+        {weekdays.map((label) => (
           <View key={label} style={styles.cell}>
             <Text variant="caption" tone="muted">
               {label}

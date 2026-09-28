@@ -44,7 +44,7 @@ export function QuizPreviewSheet({ open, onClose, title, questions }: QuizPrevie
     >
       {questions.length === 0 ? (
         <Text variant="caption" tone="muted">
-          {t("quiz.hali_savol_yo_apos_q_savol_qo_apos_shsangiz_")}
+          {t("quiz.hali_savol_yo_q_savol_qo_shsangiz")}
         </Text>
       ) : null}
 

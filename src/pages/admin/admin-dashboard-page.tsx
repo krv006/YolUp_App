@@ -312,7 +312,7 @@ function TrendsSection() {
       ) : (
         <>
           <Text variant="caption" tone="muted">
-            {t("admin.yangi_o_apos_quvchilar")}
+            {t("admin.yangi_o_quvchilar")}
           </Text>
           <TrendLineChart
             labels={data.labels}
@@ -353,7 +353,7 @@ function TrendsSection() {
             * atrofida bo'ladi. Noldan boshlasak, farq ko'rinmay ketardi.
             */}
           <Text variant="caption" tone="muted">
-            {t("admin.testlar_o_apos_rtacha_ball")}
+            {t("admin.testlar_o_rtacha_ball")}
           </Text>
           <TrendLineChart
             zeroBase={false}

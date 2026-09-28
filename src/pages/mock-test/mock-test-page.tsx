@@ -121,7 +121,7 @@ export function MockTestPage() {
 
         {items.length === 0 ? (
           <Text variant="caption" tone="muted">
-            {t("mocktest.hozircha_mock_test_yo_apos_q")}
+            {t("mocktest.hozircha_mock_test_yo_q")}
           </Text>
         ) : (
           items.map((item) => (

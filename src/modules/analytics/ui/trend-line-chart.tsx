@@ -216,7 +216,7 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
         </View>
       ) : (
         <Text variant="caption" tone="muted">
-          {t("analytics.qiymatlarni_ko_apos_rish_uchun_grafikni_bosi")}
+          {t("analytics.qiymatlarni_ko_rish_uchun_grafikni_bosi")}
         </Text>
       )}
 

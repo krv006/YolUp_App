@@ -132,7 +132,7 @@ export function RichTextSheet({ open, onClose, onSubmit }: RichTextSheetProps) {
               tone="danger"
               onPress={() => setLines((current) => current.filter((item) => item.key !== line.key))}
             >
-              {t("board.qatorni_o_apos_chirish")}
+              {t("board.qatorni_o_chirish")}
             </Text>
           ) : null}
         </View>

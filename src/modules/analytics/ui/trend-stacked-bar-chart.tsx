@@ -161,7 +161,7 @@ export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartPro
         </View>
       ) : (
         <Text variant="caption" tone="muted">
-          {t("analytics.qiymatlarni_ko_apos_rish_uchun_ustunni_bosin")}
+          {t("analytics.qiymatlarni_ko_rish_uchun_ustunni_bosin")}
         </Text>
       )}
 

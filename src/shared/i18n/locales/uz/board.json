@@ -1,0 +1,114 @@
+{
+  "status": {
+    "loading": "Doska yuklanmoqda…",
+    "retry": "Qayta urinish",
+    "canDraw": "Chizish mumkin",
+    "viewOnly": "Faqat ko'rish",
+    "canDrawTitle": "Sizda doskada chizish ruxsati bor",
+    "viewOnlyTitle": "Sizda doskada chizish ruxsati yo'q — o'qituvchidan so'rang",
+    "liveConnectedTitle": "Real-time ulangan",
+    "liveDisconnectedTitle": "Sinxronlash sekin rejimda",
+    "live": "Jonli",
+    "slowMode": "Sekin rejim"
+  },
+  "sheet": {
+    "addSheet": "Sahifa"
+  },
+  "permission": {
+    "grantButton": "Ruxsat"
+  },
+  "solver": {
+    "button": "Yechuvchi"
+  },
+  "tools": {
+    "erase": "Lastik",
+    "pen": "Qalam",
+    "marker": "Marker",
+    "line": "Chiziq",
+    "arrow": "Strelka",
+    "rect": "To'rtburchak",
+    "ellipse": "Ellips",
+    "text": "Matn",
+    "math": "Formula",
+    "toolbarAria": "Doska asboblari",
+    "colorLabel": "Rang {{value}}",
+    "widthLabel": "Qalinlik {{value}}"
+  },
+  "inline": {
+    "formula": "Formula",
+    "text": "Matn",
+    "placeholder": "Matn yozing…",
+    "textAria": "Doskaga matn yozish",
+    "cancelAria": "Bekor qilish",
+    "addAria": "Doskaga qo'shish",
+    "bold": "Qalin",
+    "italic": "Kursiv",
+    "underline": "Tagiga chizish",
+    "bulletList": "Belgili ro'yxat",
+    "numberedList": "Raqamli ro'yxat",
+    "formatAria": "Matnni formatlash"
+  },
+  "eraseDialog": {
+    "title": "Elementni o'chirish",
+    "description": "Audit uchun o'chirish sababini kiriting.",
+    "reasonLabel": "Sabab",
+    "cancel": "Bekor",
+    "confirm": "O'chirish",
+    "deleted": "Element o'chirildi"
+  },
+  "grantDialog": {
+    "title": "Doskada chizish ruxsati",
+    "description": "Ruxsat beriladigan o'quvchini tanlang.",
+    "granted": "{{name}} doskada chiza oladi",
+    "noStudents": "O'quvchi topilmadi."
+  },
+  "formulaDialog": {
+    "title": "Formula yordamchisi",
+    "description": "Masalan: 2x^2 - 5x + 3 = 0",
+    "formulaLabel": "Formula",
+    "solve": "Yechish",
+    "place": "Doskaga qo'yish",
+    "solveError": "Formulani yechib bo'lmadi"
+  },
+  "away": {
+    "title": "Darsdan chiqqan"
+  },
+  "periodic": {
+    "button": "Davriy jadval",
+    "title": "Davriy jadval",
+    "description": "Elementni tanlang — tuzilishi va Bor modeli ko'rinadi.",
+    "loading": "Jadval yuklanmoqda",
+    "loadError": "Davriy jadvalni yuklab bo'lmadi",
+    "searchPlaceholder": "Element, belgi yoki raqam",
+    "pickHint": "Batafsil ma'lumot uchun elementni tanlang.",
+    "atomicNumber": "Atom raqami: {{count}}",
+    "mass": "Massa: {{value}}",
+    "valence": "Valentlik",
+    "period": "Davr",
+    "group": "Guruh",
+    "shells": "Elektron qatlamlari",
+    "noShells": "Bu element uchun elektron qatlamlari ma'lumoti yo'q.",
+    "placeCard": "Doskaga qo'yish",
+    "placeBohr": "Bor modelini chizish",
+    "electronLabel": "e",
+    "electronSuffix": "e"
+  },
+  "palette": {
+    "aria": "Formula konstruktori",
+    "groups": {
+      "fraction": "Drob",
+      "script": "Indeks",
+      "radical": "Radikal",
+      "integral": "Integral",
+      "largeOperator": "Katta operator",
+      "bracket": "Qavs",
+      "function": "Funksiya",
+      "accent": "Diakritik",
+      "limit": "Limit va log",
+      "operator": "Operator",
+      "matrix": "Matritsa",
+      "symbol": "Belgilar",
+      "chemistry": "Kimyo"
+    }
+  }
+}

@@ -8,6 +8,7 @@ import {
   useAppearanceStore,
   type ThemeMode,
 } from "@/shared/model/theme.store";
+import { SUPPORTED_LANGUAGES, useLanguageStore, type AppLanguage } from "@/shared/model";
 import {
   ACCENTS,
   Button,
@@ -22,6 +23,23 @@ import {
   Text,
   useTheme,
 } from "@/shared/ui";
+
+/*
+ * Til nomlari O'Z TILIDA yoziladi va tarjima QILINMAYDI: "Русский" ni
+ * o'zbekchada "Rus tili" deb ko'rsatsak, rus tilidagi foydalanuvchi uni
+ * tanimay qolishi mumkin. Bu — tilni tanlash ro'yxatlarining odatdagi
+ * qoidasi.
+ */
+const LANGUAGE_LABELS: Record<AppLanguage, string> = {
+  uz: "O'zbekcha",
+  en: "English",
+  ru: "Русский",
+};
+
+const LANGUAGES = SUPPORTED_LANGUAGES.map((value) => ({
+  value,
+  label: LANGUAGE_LABELS[value],
+}));
 
 const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
   { value: "light", label: "Yorug'", icon: Sun },
@@ -40,6 +58,8 @@ const MODES: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
 export function AppearancePage() {
   const router = useRouter();
   const { palette } = useTheme();
+  const language = useLanguageStore((state) => state.language);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
   const {
     mode,
     accent,
@@ -95,6 +115,43 @@ export function AppearancePage() {
                     size={18}
                     color={active ? palette["primary-text"] : palette["muted-foreground"]}
                   />
+                  <Text
+                    variant="caption"
+                    style={{
+                      color: active ? palette["primary-text"] : palette["muted-foreground"],
+                      fontWeight: "600",
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Section>
+
+        <Separator />
+
+        {/* ── Til ── */}
+        <Section title="Til" hint="Ilova matnlari shu tilda ko'rsatiladi.">
+          <View style={styles.segment}>
+            {LANGUAGES.map(({ value, label }) => {
+              const active = language === value;
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => setLanguage(value)}
+                  style={({ pressed }) => [
+                    styles.segmentItem,
+                    {
+                      backgroundColor: active ? palette["primary-tint"] : palette.surface,
+                      borderColor: active ? palette.primary : palette.border,
+                    },
+                    pressed && { opacity: 0.85 },
+                  ]}
+                >
                   <Text
                     variant="caption"
                     style={{

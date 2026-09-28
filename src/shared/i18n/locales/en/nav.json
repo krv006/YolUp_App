@@ -1,0 +1,25 @@
+{
+  "roles": {
+    "teacher": "Teacher",
+    "student": "Student",
+    "parent": "Parent"
+  },
+  "parent": {
+    "dashboard": "Overview",
+    "children": "Children",
+    "attendance": "Attendance",
+    "homework": "Homework",
+    "grades": "Rating"
+  },
+  "rail": {
+    "sectionsLabel": "Sections",
+    "openProfileMenu": "Open profile menu",
+    "chat": "Chat",
+    "schedule": "Calendar",
+    "workspace": "Workspace",
+    "resizeHandle": "Resize the conversation panel",
+    "teacherWorkspace": "Teacher workspace",
+    "studentWorkspace": "Student workspace",
+    "parentWorkspace": "Parent workspace"
+  }
+}

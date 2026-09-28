@@ -1,0 +1,121 @@
+{
+  "dashboard": {
+    "eyebrow": "ADMINISTRATOR",
+    "welcome": "Xush kelibsiz, {{name}}",
+    "subtitle": "Kurslar, o'qituvchilar va o'quvchilar bo'yicha umumiy ko'rinish.",
+    "teachersLink": "O'qituvchilar",
+    "logout": "Chiqish",
+    "loading": "Boshqaruv paneli yuklanmoqda",
+    "loadError": "Ma'lumotlarni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "periods": {
+      "day": "Kun",
+      "week": "Hafta",
+      "month": "Oy",
+      "year": "Yil"
+    },
+    "periodNoun": {
+      "day": "kun",
+      "week": "hafta",
+      "month": "oy",
+      "year": "yil"
+    },
+    "kpi": {
+      "activeStudents": "Faol o'quvchilar",
+      "activeTeachers": "Faol o'qituvchilar",
+      "activeCourses": "Faol kurslar",
+      "lessonsCompleted": "O'tkazilgan darslar",
+      "lessonsCancelledCaption": "{{count}} ta bekor qilindi · bu {{noun}}",
+      "attendance": "O'rtacha davomat",
+      "attendanceCaption": "bu {{noun}}",
+      "rating": "O'rtacha dars reytingi",
+      "ratingCaption": "{{count}} ta bahodan"
+    },
+    "charts": {
+      "periodCaption": "Tanlangan davr bo'yicha",
+      "enrollTitle": "Yangi o'quvchilar",
+      "enrollLegend": "Yangi ro'yxatdan o'tish",
+      "lessonsTitle": "Darslar holati",
+      "completedLegend": "O'tkazilgan",
+      "cancelledLegend": "Bekor qilingan",
+      "quizTitle": "Testlar — o'rtacha ball",
+      "quizCaption": "Tanlangan davr bo'yicha · 0–100 shkalada",
+      "quizLegend": "Test"
+    },
+    "tables": {
+      "topCoursesTitle": "Top kurslar",
+      "topCoursesSubtitle": "O'quvchilar soni bo'yicha",
+      "topTeachersTitle": "Top o'qituvchilar",
+      "topTeachersSubtitle": "Reyting bo'yicha",
+      "colCourse": "Kurs",
+      "colTeacher": "O'qituvchi",
+      "colStudents": "O'quvchi",
+      "colRating": "Reyting",
+      "colAttendance": "Davomat",
+      "colCourses": "Kurslar",
+      "colLessonsThisMonth": "Darslar (bu oy)",
+      "colReliability": "Faollik",
+      "noCourses": "Faol kurs topilmadi.",
+      "noTeachers": "Faol o'qituvchi topilmadi."
+    }
+  },
+  "stats": {
+    "title": "{{name}} — statistika",
+    "description": "Baholar, kurslar va darslar bo'yicha umumiy ko'rsatkichlar.",
+    "loading": "Statistika yuklanmoqda",
+    "loadError": "Statistikani yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "open": "Statistika",
+    "openAria": "{{name}} statistikasini ochish",
+    "avgRating": "O'rtacha baho",
+    "ratingCount": "Baholar soni",
+    "courseCount": "Kurslar",
+    "studentCount": "O'quvchilar",
+    "lessonsFinished": "O'tilgan darslar",
+    "lessonsScheduled": "Rejalashtirilgan",
+    "lessonsCancelled": "Bekor qilingan",
+    "reliability": "Ishonchlilik",
+    "breakdown": "BAHOLAR TAQSIMOTI",
+    "comments": "SO'NGGI IZOHLAR"
+  },
+  "teachers": {
+    "eyebrow": "ADMINISTRATOR",
+    "title": "O'qituvchilar",
+    "subtitle": "Reyting va tasdiqlash holati.",
+    "backToDashboard": "Boshqaruv paneli",
+    "pendingEyebrow": "TASDIQLANISHI KERAK",
+    "pendingTitle": "Yangi o'qituvchilar",
+    "loading": "Yuklanmoqda",
+    "approve": "Tasdiqlash",
+    "noPending": "Tasdiqlanishi kerak bo'lgan o'qituvchi yo'q.",
+    "allEyebrow": "BARCHASI",
+    "allTitle": "Barcha o'qituvchilar",
+    "noTeachers": "O'qituvchi topilmadi.",
+    "viewLabel": "Ko'rinish",
+    "viewPending": "Tasdiqlanishi kerak ({{count}})",
+    "viewAll": "Barcha o'qituvchilar ({{count}})"
+  },
+  "storage": {
+    "eyebrow": "SAQLASH",
+    "title": "Video yozuvlar",
+    "loading": "Yuklanmoqda",
+    "totalVideos": "Jami {{count}} ta video",
+    "teacher": "O'qituvchi",
+    "videoCount": "Videolar",
+    "empty": "Hali video yozuv yo'q."
+  },
+  "monitoring": {
+    "eyebrow": "SERVER",
+    "title": "Server holati",
+    "scopeNote": "Faqat backend konteynerining o'z CPU va RAM ko'rsatkichlari.",
+    "loading": "O'lchov yuklanmoqda",
+    "cpu": "CPU",
+    "memory": "Xotira",
+    "memoryUsed": "Ishlatilgan xotira",
+    "measuredAt": "Oxirgi o'lchov",
+    "noSamples": "Hali o'lchov yo'q.",
+    "hours": "{{count}} soat",
+    "peakLabel": "Eng band vaqt",
+    "pointNote": "{{count}} ta nuqta"
+  }
+}

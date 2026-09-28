@@ -1,0 +1,81 @@
+{
+  "menu": {
+    "profile": { "label": "Profil ma'lumotlari", "description": "Shaxsiy ma'lumotlarni ko'rish" },
+    "logins": { "label": "Kirishlar tarixi", "description": "Qurilma va IP bo'yicha jurnal" },
+    "notifications": { "label": "Bildirishnomalar", "description": "Xabarlar va eslatmalar" },
+    "settings": { "label": "Sozlamalar", "description": "Platforma parametrlari" }
+  },
+  "roleFallback": "O'qituvchi",
+  "workspaceFallback": "Teacher workspace",
+  "closeMenuAria": "Menyuni yopish",
+  "closeAria": "Yopish",
+  "menuAria": "{{role}} menyusi",
+  "sectionsAria": "Hisob bo'limlari",
+  "online": "Onlayn",
+  "sessionSecure": "Sessiya xavfsiz saqlanmoqda",
+  "logout": "Tizimdan chiqish",
+  "version": "YolUp · v1.0",
+  "profileDialog": {
+    "title": "{{role}} profili",
+    "description": "Backenddagi haqiqiy profil ma'lumotlari.",
+    "verified": "Tasdiqlangan profil",
+    "changeAvatarAria": "Profil rasmini o'zgartirish",
+    "firstName": "Ism",
+    "lastName": "Familiya",
+    "username": "Login",
+    "usernameNote": "Login yagona bo'lishi kerak. O'zgartirsangiz, keyingi safar shu login bilan kirasiz.",
+    "phone": "Telefon",
+    "cancel": "Bekor",
+    "save": "Saqlash",
+    "usernameLabel": "Username · nusxalash",
+    "phoneLabel": "Telefon · nusxalash",
+    "notApproved": "Hisobingiz hali administrator tomonidan tasdiqlanmagan — kurs va dars yaratish vaqtincha yopiq.",
+    "certificates": "Sertifikatlar",
+    "upload": "Yuklash",
+    "certificateFallback": "Sertifikat",
+    "deleteCertificateAria": "{{title}}ni o'chirish",
+    "noCertificates": "Hali sertifikat yuklanmagan.",
+    "editButton": "Profilni tahrirlash"
+  },
+  "ratingsDialog": {
+    "title": "Baholarim",
+    "description": "O'quvchilar dars uchun qo'ygan baholari va izohlari.",
+    "loading": "Baholar yuklanmoqda",
+    "loadError": "Baholarni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "empty": "Hali baho qo'yilmagan.",
+    "starsAria": "{{count}} yulduz"
+  },
+  "settingsDialog": {
+    "title": "Sozlamalar",
+    "description": "Interfeys tili, ko'rinish rejimi va bildirishnomalar.",
+    "languageLabel": "Til",
+    "themeLabel": "Mavzu",
+    "pushLabel": "Brauzer bildirishnomalari",
+    "pushOn": "Yoqilgan",
+    "pushOff": "Yoqish",
+    "pushUnsupported": "Bu brauzer qo'llab-quvvatlamaydi",
+    "pushBlocked": "Bildirishnomalar brauzer sozlamalarida bloklangan — avval o'sha yerdan ruxsat bering.",
+    "reminderLabel": "Dars eslatmasi",
+    "reminderOption": "{{count}} daqiqa oldin"
+  },
+  "roleSwitcher": {
+    "triggerAria": "Boshqa akkauntlaringiz",
+    "panelAria": "Boshqa akkauntlaringiz",
+    "otherAccounts": "BOSHQA AKKAUNTLARINGIZ",
+    "openRoles": "BOSHQA ROLGA O'TISH",
+    "openHint": "Ro'yxatdan o'tishsiz avtomatik ochiladi",
+    "switchHint": "Akkauntga bosilsa, parolsiz darhol o'sha akkauntga o'tasiz.",
+    "switched": "{{name}} sifatida kirdingiz",
+    "failed": "Hisobni almashtirib bo'lmadi"
+  },
+  "toast": {
+    "copied": "{{label}} nusxalandi",
+    "copyFailed": "Nusxalash amalga oshmadi",
+    "avatarUpdated": "Profil rasmi yangilandi",
+    "profileUpdated": "Profil yangilandi",
+    "profileSaveFailed": "Profilni saqlab bo'lmadi",
+    "usernameLabelShort": "Username",
+    "phoneLabelShort": "Telefon"
+  }
+}

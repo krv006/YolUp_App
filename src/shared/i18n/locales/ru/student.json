@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "loading": "Загрузка панели ученика",
+    "loadError": "Не удалось загрузить данные",
+    "retry": "Повторить",
+    "eyebrow": "КАБИНЕТ УЧЕНИКА",
+    "greeting": "Доброго дня, {{name}}! 👋",
+    "subtitle": "Сегодняшние уроки и задания в одном месте.",
+    "nextLessonEyebrow": "СЛЕДУЮЩИЙ УРОК",
+    "nextLessonTitle": "План на сегодня",
+    "schedule": "Расписание",
+    "enterCourse": "Перейти к курсу",
+    "noPlannedLesson": "Запланированных уроков нет.",
+    "assignmentsEyebrow": "ЗАДАНИЯ",
+    "upcomingDeadlines": "Ближайшие сроки",
+    "all": "Все"
+  },
+  "groupWorkspace": {
+    "tabs": {
+      "chat": "Чат",
+      "lessons": "Уроки",
+      "assignments": "Задания"
+    },
+    "sendFailed": "Не удалось отправить сообщение",
+    "replyFallback": "Ответ",
+    "lessons": {
+      "eyebrow": "УРОКИ КУРСА",
+      "title": "Уроки"
+    },
+    "assignments": {
+      "eyebrow": "ЗАДАНИЯ КУРСА",
+      "title": "Задания",
+      "downloadAria": "Скачать файл задания",
+      "downloadFallback": "Скачать файл задания",
+      "scoreSuffix": "баллов",
+      "checkError": "Ошибка проверки",
+      "checking": "Проверяется…",
+      "openResultAria": "Открыть результат",
+      "quizBadge": "Тест",
+      "quizQuestions": "Вопросов: {{count}}",
+      "quizSolve": "Решить",
+      "quizHistoryAria": "История попыток",
+      "overdueLabel": "Срок истёк",
+      "dueLabel": "Срок",
+      "noDue": "Без срока",
+      "missed": "Не сдано",
+      "submit": "Сдать",
+      "empty": "Заданий нет.",
+      "submitDialogDescription": "Загрузите файл задания (максимум 25 МБ).",
+      "chooseFile": "Выбрать файл",
+      "send": "Отправить",
+      "deadlinePassed": "Срок сдачи истёк",
+      "resultDialogTitle": "Результат вашего задания"
+    }
+  },
+  "enrollmentDialog": {
+    "title": "Новое общение",
+    "description": "Отправьте запрос учителю или присоединитесь к открытому курсу.",
+    "parentRequestsEyebrow": "ЗАПРОСЫ РОДИТЕЛЕЙ",
+    "wantsToLink": "хочет привязаться к профилю",
+    "decline": "Отклонить",
+    "approve": "Подтвердить",
+    "writeToTeacherEyebrow": "НАПИСАТЬ УЧИТЕЛЮ",
+    "openChat": "Открыть",
+    "requestChat": "Запрос",
+    "joinCoursesEyebrow": "ПРИСОЕДИНИТЬСЯ К КУРСАМ",
+    "studentsSuffix": "{{count}} учеников",
+    "pending": "Ожидание",
+    "enrolled": "Участник",
+    "join": "Присоединиться",
+    "noOpenCourses": "Открытых курсов пока нет.",
+    "loadError": "Не удалось загрузить данные"
+  }
+}

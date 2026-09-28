@@ -1,0 +1,92 @@
+{
+  "language": {
+    "switcherLabel": "Language",
+    "uz": "Uzbek",
+    "en": "English",
+    "ru": "Russian"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "close": "Close",
+    "back": "Back",
+    "retry": "Retry",
+    "logout": "Log out"
+  },
+  "portal": {
+    "home": "Home",
+    "defaultUser": "User",
+    "openNav": "Open navigation",
+    "navLabel": "{{role}} navigation"
+  },
+  "fileKind": {
+    "pdf": "PDF document",
+    "image": "Image",
+    "video": "Video",
+    "audio": "Audio",
+    "other": "File"
+  },
+  "fileViewer": {
+    "opening": "Opening…",
+    "openError": "Couldn't open the file",
+    "unsupported": "This file type can't be viewed in the browser.",
+    "platformOnlyNote": "This file can only be viewed on the platform",
+    "close": "Close"
+  },
+  "date": {
+    "yesterday": "Yesterday",
+    "hourUnit": "h",
+    "minuteUnit": "m",
+    "secondUnit": "s"
+  },
+  "formPickers": {
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "weekdays": [
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa",
+      "Su"
+    ],
+    "selectPlaceholder": "Select",
+    "selectHeading": "Choose",
+    "chooseDate": "Choose a date",
+    "chooseDateTime": "Choose date and time",
+    "chooseTime": "Choose a time",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "adjustTimeAria": "Adjust time",
+    "increaseHourAria": "Increase hour",
+    "decreaseHourAria": "Decrease hour",
+    "increaseMinuteAria": "Increase minute",
+    "decreaseMinuteAria": "Decrease minute",
+    "hourLabel": "Hour",
+    "minuteLabel": "Minute",
+    "presetTimesAria": "Preset times",
+    "minuteUnit": "min",
+    "presetDurationsAria": "Preset durations",
+    "dueTimeSection": "Due time",
+    "clear": "Clear",
+    "today": "Today",
+    "done": "Done",
+    "schedule": "Schedule",
+    "searchPlaceholder": "Search",
+    "searchEmpty": "Nothing found"
+  }
+}

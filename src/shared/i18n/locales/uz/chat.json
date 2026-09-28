@@ -1,0 +1,161 @@
+{
+  "emptyState": {
+    "title": "Suhbatni tanlang",
+    "description": "Xabarlarni ko'rish va davom ettirish uchun chap tomondagi suhbatlardan birini tanlang.",
+    "openConversations": "Suhbatlarni ochish"
+  },
+  "header": {
+    "backAria": "Suhbatlar ro'yxatiga qaytish",
+    "openInfoAria": "{{title}} ma'lumotlarini ochish",
+    "memberCount": "{{count}} o'quvchi",
+    "online": "Hozir onlayn",
+    "recentlyActive": "Yaqinda faol edi"
+  },
+  "directStatus": {
+    "pending": "So'rov kutilmoqda",
+    "active": "Shaxsiy suhbat",
+    "blocked": "Bloklangan",
+    "notSent": "So'rov yuborilmagan"
+  },
+  "info": {
+    "groupSubjectFallback": "Kurs guruhi",
+    "profileInfo": "Profil ma'lumotlari",
+    "memberCount": "{{count}} o'quvchi",
+    "changeGroupImageAria": "Guruh rasmini o'zgartirish",
+    "groupImageUpdated": "Guruh rasmi yangilandi",
+    "muteOn": "Ovozni yoqish",
+    "muteOff": "Ovozsiz qilish",
+    "mutedOn": "Bildirishnomalar ovozsiz qilindi",
+    "mutedOff": "Bildirishnomalar ovozi yoqildi",
+    "editCourse": "Kursni tahrirlash",
+    "aboutGroup": "GURUH HAQIDA",
+    "aboutDirect": "MA'LUMOT",
+    "groupDescriptionFallback": "Kurs guruh chati",
+    "usernameHint": "Username · nusxalash uchun bosing",
+    "usernameCopied": "Username nusxalandi",
+    "teacherSection": "O'QITUVCHI",
+    "loading": "Yuklanmoqda…",
+    "noInfo": "Ma'lumot yo'q",
+    "acceptConversation": "Suhbatni qabul qilish",
+    "conversationAccepted": "Suhbat qabul qilindi",
+    "blockUser": "Foydalanuvchini bloklash",
+    "conversationBlocked": "Suhbat bloklandi",
+    "deleteCourse": "Kursni o'chirish",
+    "editCourseTitle": "Kursni tahrirlash",
+    "editCourseDescription": "Kurs nomi, fan va tavsifini yangilang.",
+    "courseName": "Guruh nomi",
+    "subject": "Fan",
+    "description": "Tavsif",
+    "cancel": "Bekor",
+    "save": "Saqlash",
+    "deleteCourseTitle": "Kursni o'chirish",
+    "deleteCourseDescription": "\"{{title}}\" va unga bog'liq ma'lumotlar qayta tiklanmaydi."
+  },
+  "item": {
+    "liveNow": "Dars ketmoqda",
+    "typing": "yozmoqda..."
+  },
+  "newDialog": {
+    "title": "Yangi kurs va guruh",
+    "description": "Kurs yaratilganda backend uning guruh chatini avtomatik ochadi.",
+    "pendingEnrollments": "KUTILAYOTGAN YOZILISHLAR",
+    "decline": "Rad etish",
+    "approve": "Qabul qilish",
+    "createdToast": "Kurs va guruh chat yaratildi",
+    "noteTitle": "Yangi o'quv maydoni",
+    "noteDescription": "Chat, darslar, vazifalar va o'quvchilar bitta kursda.",
+    "courseNameLabel": "Guruh nomi",
+    "courseNamePlaceholder": "Masalan: Ingliz tili — Intermediate",
+    "subjectLabel": "Fan",
+    "descriptionLabel": "Qisqa tavsif",
+    "descriptionPlaceholder": "Kurs maqsadi va yo'nalishi...",
+    "cancel": "Bekor qilish",
+    "create": "Kurs yaratish"
+  },
+  "list": {
+    "today": "Bugun",
+    "loadError": "Xabarlar yuklanmadi",
+    "loadErrorHint": "Bir ozdan so'ng yana urinib ko'ring.",
+    "retry": "Qayta urinish"
+  },
+  "composer": {
+    "editingLabel": "Xabarni tahrirlash",
+    "youLabel": "Siz",
+    "replyFallback": "Javob",
+    "cancelEditAria": "Tahrirlashni bekor qilish",
+    "cancelReplyAria": "Replyni bekor qilish",
+    "removeAttachmentAria": "Biriktirilgan faylni olib tashlash",
+    "fileTooLarge": "Fayl hajmi 20 MB dan oshmasligi kerak",
+    "fileAttached": "Fayl biriktirildi",
+    "attachAria": "Fayl biriktirish",
+    "editPlaceholder": "Xabarni tahrirlang...",
+    "sendPlaceholder": "Xabar yozing...",
+    "textAria": "Xabar matni",
+    "emojiAria": "Emoji tanlash",
+    "saveEditAria": "Tahrirlangan xabarni saqlash",
+    "sendAria": "Xabarni yuborish"
+  },
+  "actionsMenu": {
+    "closeAria": "Xabar menyusini yopish",
+    "reactionsAria": "Reaksiya tanlash",
+    "addReactionAria": "{{emoji}} reaksiyasini qo'shish",
+    "reply": "Javob berish",
+    "edit": "Tahrirlash",
+    "deleteForMe": "Men uchun o'chirish",
+    "deleteForEveryone": "Hamma uchun o'chirish"
+  },
+  "bubble": {
+    "edited": "tahrirlangan",
+    "retry": "Qayta yuborish",
+    "reactionsAria": "Xabar reaksiyalari"
+  },
+  "text": {
+    "viewRecording": "Video yozuvni ko'rish"
+  },
+  "typing": {
+    "suffix": "yozmoqda"
+  },
+  "attachment": {
+    "openAria": "{{name}} — ochish",
+    "openSuffix": "ochish"
+  },
+  "removedFromGroup": "Siz bu guruhdan chiqarildingiz",
+  "directPage": {
+    "messageEdited": "Xabar tahrirlandi",
+    "actionFailed": "Xabar amalini bajarib bo'lmadi",
+    "actionFailedRetry": "Xabar amalini bajarib bo'lmadi. Qayta urinib ko'ring.",
+    "messageDeleted": "Xabar o'chirildi",
+    "deletedForEveryone": "Xabar hamma uchun o'chirildi",
+    "deletedForMe": "Xabar siz uchun o'chirildi",
+    "deleteFailed": "Xabarni o'chirib bo'lmadi"
+  },
+  "panel": {
+    "listAria": "Suhbatlar ro'yxati",
+    "filtersAria": "Suhbat turlari",
+    "filters": {
+      "all": "Barchasi",
+      "direct": "Shaxsiy",
+      "group": "Guruhlar",
+      "unread": "O'qilmagan"
+    },
+    "searchPlaceholder": "Suhbatlarni qidirish",
+    "searchAria": "Suhbatlarni qidirish",
+    "openSearchAria": "Qidiruvni ochish",
+    "closeSearchAria": "Qidiruvni yopish",
+    "searchButton": "Qidirish",
+    "accountAria": "Profil menyusi",
+    "loadError": "Suhbatlarni yuklab bo'lmadi",
+    "loadErrorHint": "Internet aloqasini tekshirib, qayta urinib ko'ring.",
+    "retry": "Qayta urinish",
+    "peopleLabel": "ODAMLAR",
+    "emptyTitle": "Suhbat topilmadi",
+    "emptyHint": "Qidiruv so'zi yoki filterni o'zgartirib ko'ring.",
+    "clearFilters": "Filtrlarni tozalash",
+    "newGroupAria": "Yangi guruh yoki suhbat yaratish",
+    "findTeacherAria": "O'qituvchi yoki kurs topish",
+    "assignmentGroupNotFound": "Vazifa guruhi topilmadi",
+    "assignmentOpenFailed": "Vazifani ochib bo'lmadi",
+    "directOpened": "Suhbat ochildi",
+    "directRequestSent": "So'rov yuborildi — o'qituvchi tasdiqlashi kerak"
+  }
+}

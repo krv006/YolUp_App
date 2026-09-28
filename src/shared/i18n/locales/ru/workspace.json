@@ -1,0 +1,47 @@
+{
+  "eyebrow": "РАБОЧЕЕ ПРОСТРАНСТВО",
+  "title": "Workspace",
+  "subtitle": "Разделы для ежедневной работы собраны здесь.",
+  "soon": "Скоро",
+  "cards": {
+    "quizzes": {
+      "title": "Тест",
+      "description": "Создание и прохождение тестов, просмотр результатов."
+    },
+    "analytics": {
+      "title": "Аналитика",
+      "description": "Показатели по результатам и активности."
+    },
+    "ai": {
+      "title": "AI",
+      "description": "Работа с ИИ-помощником."
+    },
+    "mock": {
+      "title": "Mock Test",
+      "description": "Пробный тест в условиях экзамена."
+    }
+  },
+  "analytics": {
+    "eyebrow": "ЛИЧНАЯ АНАЛИТИКА",
+    "title": "Аналитика",
+    "subtitle": "Ваши результаты и показатели.",
+    "loading": "Загрузка аналитики",
+    "loadError": "Не удалось загрузить аналитику",
+    "retry": "Повторить",
+    "attemptCount": "Попытки",
+    "avgPercentage": "Средний результат",
+    "recentAttempts": "ПОСЛЕДНИЕ ПОПЫТКИ",
+    "noAttempts": "Тесты ещё не пройдены.",
+    "avgRating": "Средняя оценка",
+    "ratingCount": "Всего оценок",
+    "courseCount": "Курсы",
+    "studentCount": "Ученики",
+    "lessonsFinished": "Проведено уроков",
+    "reliability": "Надёжность",
+    "byCourse": "ПО КУРСАМ",
+    "course": "Курс",
+    "quizAvg": "Среднее по тестам",
+    "attendance": "Посещаемость",
+    "noCourses": "Курсы не найдены."
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "dashboard": {
+    "loading": "Loading the student dashboard",
+    "loadError": "Couldn't load the data",
+    "retry": "Retry",
+    "eyebrow": "STUDENT DASHBOARD",
+    "greeting": "Good day, {{name}}! 👋",
+    "subtitle": "Today's lessons and assignments, all in one place.",
+    "nextLessonEyebrow": "NEXT LESSON",
+    "nextLessonTitle": "Today's plan",
+    "schedule": "Schedule",
+    "enterCourse": "Go to course",
+    "noPlannedLesson": "No lesson planned.",
+    "assignmentsEyebrow": "ASSIGNMENTS",
+    "upcomingDeadlines": "Upcoming deadlines",
+    "all": "All"
+  },
+  "groupWorkspace": {
+    "tabs": {
+      "chat": "Chat",
+      "lessons": "Lessons",
+      "assignments": "Assignments"
+    },
+    "sendFailed": "Couldn't send the message",
+    "replyFallback": "Reply",
+    "lessons": {
+      "eyebrow": "COURSE LESSONS",
+      "title": "Lessons"
+    },
+    "assignments": {
+      "eyebrow": "COURSE ASSIGNMENTS",
+      "title": "Assignments",
+      "downloadAria": "Download the assignment file",
+      "downloadFallback": "Download the assignment file",
+      "scoreSuffix": "pts",
+      "checkError": "Check error",
+      "checking": "Being checked…",
+      "openResultAria": "Open result",
+      "quizBadge": "Quiz",
+      "quizQuestions": "{{count}} questions",
+      "quizSolve": "Solve",
+      "quizHistoryAria": "Attempt history",
+      "overdueLabel": "Past due",
+      "dueLabel": "Due",
+      "noDue": "No due date",
+      "missed": "Not submitted",
+      "submit": "Submit",
+      "empty": "No assignments.",
+      "submitDialogDescription": "Upload the assignment file (25 MB max).",
+      "chooseFile": "Choose file",
+      "send": "Send",
+      "deadlinePassed": "The submission deadline has passed",
+      "resultDialogTitle": "Your assignment result"
+    }
+  },
+  "enrollmentDialog": {
+    "title": "New conversation",
+    "description": "Send a request to a teacher or join an open course.",
+    "parentRequestsEyebrow": "PARENT REQUESTS",
+    "wantsToLink": "wants to link to your profile",
+    "decline": "Decline",
+    "approve": "Approve",
+    "writeToTeacherEyebrow": "MESSAGE A TEACHER",
+    "openChat": "Open",
+    "requestChat": "Request",
+    "joinCoursesEyebrow": "JOIN COURSES",
+    "studentsSuffix": "{{count}} students",
+    "pending": "Pending",
+    "enrolled": "Enrolled",
+    "join": "Join",
+    "noOpenCourses": "No open courses yet.",
+    "loadError": "Couldn't load the data"
+  }
+}

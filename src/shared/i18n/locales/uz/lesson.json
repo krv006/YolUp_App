@@ -1,0 +1,101 @@
+{
+  "schedulePage": {
+    "eyebrow": "KALENDAR",
+    "title": "Mening darslarim",
+    "subtitle": "Barcha guruhlaringizdagi mashg'ulotlar bir joyda.",
+    "loading": "Kalendar yuklanmoqda",
+    "loadError": "Darslarni yuklab bo'lmadi",
+    "retry": "Qayta urinish",
+    "empty": "Hali dars rejalashtirilmagan."
+  },
+  "status": {
+    "scheduled": "Rejalashtirilgan",
+    "live": "Jonli efirda",
+    "finished": "Tugagan",
+    "cancelled": "Bekor qilingan",
+    "unknown": "Noma'lum"
+  },
+  "list": {
+    "empty": "Hali dars rejalashtirilmagan.",
+    "dayCount": "{{count}} ta",
+    "durationMinutes": "{{count}} daqiqa",
+    "missingTopic": "Mavzu yozilmagan"
+  },
+  "calendar": {
+    "todayButton": "Bugun",
+    "prevMonth": "Oldingi oy",
+    "nextMonth": "Keyingi oy",
+    "lessonsCount": "{{count}} ta dars",
+    "dayCellAria": "{{date}} — {{count}} ta dars",
+    "noLessonsThisDay": "Bu kunda dars yo'q.",
+    "weekdays": ["Du", "Se", "Chor", "Pay", "Jum", "Shan", "Yak"]
+  },
+  "actions": {
+    "join": "Kirish",
+    "view": "Ko'rish",
+    "joinDisabledTitle": "Bu darsning vaqti allaqachon o'tib ketgan",
+    "joinNeedsTopic": "Avval dars mavzusini yozing",
+    "finish": "Yakunlash",
+    "rate": "Baholash",
+    "editAria": "Darsni tahrirlash",
+    "deleteAria": "Darsni o'chirish",
+    "ratingsAria": "Dars baholari — {{count}} ta"
+  },
+  "viewSwitch": {
+    "list": "Ro'yxat",
+    "calendar": "Kalendar",
+    "aria": "Darslar ko'rinishi"
+  },
+  "finishDialog": {
+    "title": "Darsni yakunlash",
+    "description": "\"{{title}}\" darsini yakunlamoqchimisiz? Oxirgi audio bo'lagi xavfsiz yuborilgach dars yopiladi.",
+    "cancel": "Bekor",
+    "confirm": "Yakunlash"
+  },
+  "rateDialog": {
+    "title": "Darsni baholang",
+    "description": "\"{{title}}\" — o'qituvchi uchun fikringiz."
+  },
+  "ratingForm": {
+    "notFinished": "Dars tugagach baholay olasiz.",
+    "disabled": "Baholash serverda hali yoqilmagan.",
+    "thanks": "Bahoyingiz qabul qilingan",
+    "starsOfMax": "{{stars}} / 5",
+    "chooseStars": "Yulduzni tanlang",
+    "commentLabel": "Izoh",
+    "commentPlaceholder": "Dars qanday o'tdi? O'qituvchida nima yoqdi, nimani yaxshilash mumkin?",
+    "notAnonymous": "Baho anonim emas — o'qituvchi kim yozganini ko'radi.",
+    "later": "Keyinroq",
+    "submit": "Bahoni yuborish"
+  },
+  "ratingsDialog": {
+    "title": "Dars baholari",
+    "description": "\"{{title}}\" bo'yicha o'quvchilar fikri.",
+    "countSuffix": "{{count}} ta baho",
+    "loadError": "Baholarni yuklab bo'lmadi.",
+    "retry": "Qayta urinish",
+    "empty": "Bu darsni hali hech kim baholamagan.",
+    "disabled": "Baholash serverda hali yoqilmagan."
+  },
+  "starRating": {
+    "aria": "Dars bahosi",
+    "starAria": "{{count}} yulduz",
+    "averageTitle": "O'rtacha baho: {{value}} / {{max}}"
+  },
+  "liveBar": {
+    "inProgress": "Dars ketmoqda",
+    "join": "Qo'shilish"
+  },
+  "recording": {
+    "none": "Bu darsda video yozuv yo'q.",
+    "failed": "Yozuvni tayyorlashda xatolik yuz berdi.",
+    "recording": "Dars yozib olinmoqda — tugagach shu yerda ochiladi.",
+    "merging": "Audio va video birlashtirilmoqda — bu biroz vaqt olishi mumkin.",
+    "preparing": "Yozuv tayyorlanmoqda — tayyor bo'lishi bilan shu yerda ochiladi.",
+    "platformOnly": "Faqat platformada ochiladi",
+    "delete": "O'chirish",
+    "deleteDialogTitle": "Yozuvni o'chirish",
+    "deleteDialogDescription": "Video butunlay o'chadi va qayta tiklab bo'lmaydi.",
+    "cancel": "Bekor"
+  }
+}

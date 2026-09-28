@@ -1,9 +1,5 @@
-/*
- * 🟡 MOBIL FARQI (DECISIONS §13): veb bu yerda toast matnlarini i18n dan
- * oladi (`useTranslation("quiz")`). Mobilda i18n hali yo'q, shuning uchun
- * matnlar literal. Mantiq, kalitlar va kesh yangilash tartibi AYNAN bir xil.
- */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { downloadBlob } from "@/shared/lib";
 import type { QuizEditValues, QuizFormValues } from "@/shared/types";
@@ -44,44 +40,48 @@ export function useQuizDetailLoader() {
 }
 
 export function useCreateQuiz() {
+  const { t } = useTranslation("quiz");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (form: QuizFormValues) => quizApi.create(form),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: quizKeys.all });
-      toast.success("Test yaratildi");
+      toast.success(t("toast.created"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useUpdateQuiz() {
+  const { t } = useTranslation("quiz");
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ id, values }: { id: string; values: QuizEditValues }) => quizApi.update(id, values),
     onSuccess: (quiz) => {
       client.invalidateQueries({ queryKey: quizKeys.all });
       client.setQueryData(quizKeys.detail(quiz.id), quiz);
-      toast.success("Test yangilandi");
+      toast.success(t("toast.updated"));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useImportQuizDocx() {
+  const { t } = useTranslation("quiz");
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({ file, request }: { file: File; request: QuizImportRequest }) =>
       quizApi.importDocx(file, request),
     onSuccess: (result) => {
       client.invalidateQueries({ queryKey: quizKeys.all });
-      toast.success(`${result.quiz.questions.length} ta savol topildi — tekshirib chiqing`);
+      toast.success(t("toast.importSuccess", { count: result.quiz.questions.length }));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useImportGoogleLink() {
+  const { t } = useTranslation("quiz");
   const client = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -95,41 +95,44 @@ export function useImportGoogleLink() {
     }) => quizApi.importGoogleLink(source, url, request),
     onSuccess: (result) => {
       client.invalidateQueries({ queryKey: quizKeys.all });
-      toast.success(`${result.quiz.questions.length} ta savol topildi — tekshirib chiqing`);
+      toast.success(t("toast.importSuccess", { count: result.quiz.questions.length }));
     },
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function usePublishQuiz() {
+  const { t } = useTranslation("quiz");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => quizApi.publish(id),
     onSuccess: (quiz) => {
       client.invalidateQueries({ queryKey: quizKeys.all });
       client.setQueryData(quizKeys.detail(quiz.id), quiz);
-      toast.success("Test e'lon qilindi");
+      toast.success(t("toast.published"));
     },
   });
 }
 
 export function useDownloadQuizTemplate() {
+  const { t } = useTranslation("quiz");
   return useMutation({
     mutationFn: ({ type, count }: { type: "docx" | "xlsx"; count: number }) =>
       quizApi.downloadTemplate(type, count).then((blob) =>
-        downloadBlob(blob, `test-shabloni.${type}`)
+        downloadBlob(blob, t("createDialog.templateFileName", { ext: type }))
       ),
     onError: (error: Error) => toast.error(error.message),
   });
 }
 
 export function useDeleteQuiz() {
+  const { t } = useTranslation("quiz");
   const client = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => quizApi.remove(id),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: quizKeys.all });
-      toast.success("Test o'chirildi");
+      toast.success(t("toast.deleted"));
     },
     onError: (error: Error) => toast.error(error.message),
   });

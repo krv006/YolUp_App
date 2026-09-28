@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-28 (homework qayta sinxronlandi)
+- **Oxirgi yangilanish:** 2026-09-28 (i18n tufayli ajralgan fayllar qaytarildi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **132**
-- 🟡/🔴 moslashtirilgan: **91**
-- 🆕 mobilga xos: **7**
-- Jami: **230**
+- 🟢 NUSXA: **141**
+- 🟡/🔴 moslashtirilgan: **85**
+- 🆕 mobilga xos: **8**
+- Jami: **234**
 
 ## Fayllar
 
@@ -65,7 +65,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/lib/teacher-approval.ts` | 🟢 NUSXA | `6cfe7eb8db46` | — |
 | `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `a9b35eac9e38` | — |
 | `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `3ff520568a17` | — |
-| `src/modules/auth/model/auth.schemas.ts` | 🟡 MOSLASH | `217cf656f39d` | createLoginSchema(t) fabrikalari o'rniga literal xabarlar; maydonlar bir xil (§13) |
+| `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `217cf656f39d` | — |
 | `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi va til sinxroni yo'q; sessiya raqami olindi |
 | `src/modules/auth/model/use-auth.ts` | 🟢 NUSXA | `800d84e26e18` | — |
 | `src/modules/board/api/board.api.ts` | 🟢 NUSXA | `4c54b3d918f0` | — |
@@ -95,7 +95,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `f5a23ee833bb` | — |
 | `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `5c8dcc87f71a` | — |
 | `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `d2176507c224` | — |
-| `src/modules/conversation/constants/direct-status.ts` | 🟡 MOSLASH | `32913399a614` | useDirectStatusLabel(i18n) o'rniga literal directStatusLabel; qiymatlar bir xil (§13) |
+| `src/modules/conversation/constants/direct-status.ts` | 🟢 NUSXA | `32913399a614` | — |
 | `src/modules/conversation/index.ts` | 🟡 MOSLASH | `ef1ec60cb465` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/conversation/lib/conversation.mappers.ts` | 🟢 NUSXA | `f4b89ddbc7ed` | — |
 | `src/modules/conversation/model/conversation-filter.store.ts` | 🟢 NUSXA | `ea649aac1e44` | — |
@@ -124,7 +124,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/index.ts` | 🟡 MOSLASH | `e1bf55fd0f0f` | generatsiya: veb barrel minus `ui/`; WEEKDAY_LABELS mobil UI fayliga ko'chdi |
 | `src/modules/lesson/lib/lesson-calendar.ts` | 🟢 NUSXA | `76769eb5a69d` | — |
 | `src/modules/lesson/lib/lesson-schedule.ts` | 🟢 NUSXA | `2a3c243d16ae` | — |
-| `src/modules/lesson/lib/lesson-status.ts` | 🟡 MOSLASH | `43afd26367df` | useLessonStatusMeta(i18n) o'rniga literal lessonStatusMeta; hasLessonTopic olindi (§13) |
+| `src/modules/lesson/lib/lesson-status.ts` | 🟢 NUSXA | `43afd26367df` | — |
 | `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `afbcc4e0feff` | — |
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `31172199c0d6` | — |
 | `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `54d2b67dd248` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
@@ -162,7 +162,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/mock-test/api/mock-test.endpoints.ts` | 🟢 NUSXA | `9edd0d4f1b42` | — |
 | `src/modules/mock-test/index.ts` | 🟡 MOSLASH | `0cbb12363162` | generatsiya: veb barrel minus `ui/`; `MockTestCreateDialog` ko'chirilmadi — vebda ham chaqiruvchisi yo'q |
 | `src/modules/mock-test/lib/mock-test.mappers.ts` | 🟢 NUSXA | `93fb33497b26` | — |
-| `src/modules/mock-test/model/mock-test.queries.ts` | 🟡 MOSLASH | `353ffb03cda3` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
+| `src/modules/mock-test/model/mock-test.queries.ts` | 🟢 NUSXA | `353ffb03cda3` | — |
 | `src/modules/mock-test/ui/mock-test-runner.tsx` | 🟡 MOSLASH | `256c436b888c` | vaqt mantiqi o'zgarishsiz; soat va tugmalar yuqorida qotirilgan, "To'xtatish" tasdiq so'raydi, variant tugmasi quiz modulidan (`Choice`) |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `980ff0a9d175` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `b1a8ffe524dc` | — |
@@ -192,7 +192,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/lib/question-draft.ts` | 🟢 NUSXA | `c91791787e92` | — |
 | `src/modules/quiz/lib/quiz-errors.ts` | 🟢 NUSXA | `da4cf7939388` | — |
 | `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
-| `src/modules/quiz/model/quiz.queries.ts` | 🟡 MOSLASH | `a079604c210e` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
+| `src/modules/quiz/model/quiz.queries.ts` | 🟢 NUSXA | `a079604c210e` | — |
 | `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); yaratish va tahrirlash vebdagidek BITTA komponentda; nom taklifi (combobox), qoralama saqlash va `QuizPreview` ko'chirilmadi; import natijasi `import-result-sheet` da |
 | `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
 | `src/modules/quiz/ui/quiz-preview-sheet.tsx` | 🟡 MOSLASH | `6f6e9fee7e8e` | vebda yonma-yon ustun (`quiz-page-split`), mobilda talab bo'yicha ochiladigan oyna; mantiq bir xil — o'sha `draftToStudentQuestion` + `QuestionAnswerInput` |
@@ -207,7 +207,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/voice/api/voice.endpoints.ts` | 🟢 NUSXA | `21c1eee7370f` | — |
 | `src/modules/voice/index.ts` | 🟡 MOSLASH | `303c4f6a682a` | generatsiya: veb barrel minus `ui/` + mobil UI eksportlari |
 | `src/modules/voice/lib/voice.mappers.ts` | 🟢 NUSXA | `1ea078f239f3` | — |
-| `src/modules/voice/model/voice.queries.ts` | 🟡 MOSLASH | `34c755e07c59` | toast matnlari i18n o'rniga literal (§13) |
+| `src/modules/voice/model/voice.queries.ts` | 🟢 NUSXA | `34c755e07c59` | — |
 | `src/modules/voice/ui/voice-room-bar.tsx` | 🟡 MOSLASH | `46d2b5212234` | mobil qobiq: xona ochish oynasi shu faylda (veb'da alohida dialog) |
 | `src/modules/voice/ui/voice-room-sheet.tsx` | 🟡 MOSLASH | `76f4b2d71876` | manba: veb `voice-room-dialog.tsx`; video plitkalari o'rniga ro'yxat, LiveKitRoom video={false} |
 | `src/pages/admin/admin-dashboard-page.tsx` | 🟡 MOSLASH | `f3de9850f257` | farq qayd etilmagan — tekshiring |
@@ -243,9 +243,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/i18n/locales/**` | 🟢 NUSXA | `—` | 17 bo'lim × 3 til, vebdan bayt-bayt; `mobile.json` mobilga xos |
 | `src/shared/model/language.store.ts` | 🔴 QAYTA | `0f01a0cbc3c6` | zustand `persist` (localStorage) o'rniga MMKV; qurilma tili `Intl` dan |
 | `src/shared/lib/app-state.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
-| `src/shared/lib/date.ts` | 🟡 MOSLASH | `13624ad3dcd2` | i18n locale va t() o'rniga o'zbekcha literal (§13) |
+| `src/shared/lib/date.ts` | 🟢 NUSXA | `13624ad3dcd2` | — |
 | `src/shared/lib/download.ts` | 🔴 QAYTA | `af194a763a11` | <a download> -> expo-file-system + Share; ASYNC bo'ldi |
-| `src/shared/lib/file-kind.ts` | 🟡 MOSLASH | `6d217a6b4891` | fileKindLabel i18n o'rniga o'zbekcha literal (§13) |
+| `src/shared/lib/file-kind.ts` | 🟢 NUSXA | `6d217a6b4891` | — |
 | `src/shared/lib/index.ts` | 🟡 MOSLASH | `862ec0c8861c` | barrel + app-state/network eksportlari |
 | `src/shared/lib/network.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/lib/sanitize-html.ts` | 🔴 QAYTA | `0fffa4bdbf6c` | DOMPurify -> regex; WebView CSP bilan birga |

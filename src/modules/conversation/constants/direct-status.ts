@@ -1,4 +1,5 @@
-/** Backend DirectStatusEnum (/api/schema/): pending | active | blocked. */
+import { useTranslation } from "react-i18next";
+
 export const DIRECT_STATUS = Object.freeze({
   PENDING: "pending",
   ACTIVE: "active",
@@ -7,15 +8,10 @@ export const DIRECT_STATUS = Object.freeze({
 
 export type DirectStatusValue = (typeof DIRECT_STATUS)[keyof typeof DIRECT_STATUS];
 
-export const DIRECT_STATUS_LABELS: Readonly<Record<DirectStatusValue, string>> = Object.freeze({
-  [DIRECT_STATUS.PENDING]: "So‘rov kutilmoqda",
-  [DIRECT_STATUS.ACTIVE]: "Shaxsiy suhbat",
-  [DIRECT_STATUS.BLOCKED]: "Bloklangan",
-});
-
-export function directStatusLabel(
-  status: DirectStatusValue | null | undefined,
-  fallback = "So‘rov yuborilmagan"
-): string {
-  return (status && DIRECT_STATUS_LABELS[status]) ?? fallback;
+export function useDirectStatusLabel() {
+  const { t } = useTranslation("chat");
+  return (status: DirectStatusValue | null | undefined, fallback?: string): string => {
+    if (!status) return fallback ?? t("directStatus.notSent");
+    return t(`directStatus.${status}`, fallback ?? t("directStatus.notSent"));
+  };
 }

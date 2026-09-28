@@ -21,7 +21,7 @@ import {
   useTheme,
 } from "@/shared/ui";
 import type { DirectAction } from "../api/conversation.dto";
-import { DIRECT_STATUS, directStatusLabel } from "../constants/direct-status";
+import { DIRECT_STATUS, useDirectStatusLabel } from "../constants/direct-status";
 import { useRespondDirect, useSetRoomImage } from "../model/use-conversations";
 
 export interface ConversationInfoSheetProps {
@@ -46,6 +46,7 @@ export function ConversationInfoSheet({
   onClose,
 }: ConversationInfoSheetProps) {
   const { t } = useTranslation("mobile");
+  const directStatusLabel = useDirectStatusLabel();
   const { palette } = useTheme();
   const router = useRouter();
   const { user } = useAuth();

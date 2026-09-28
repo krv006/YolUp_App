@@ -7,7 +7,7 @@
  */
 export { conversationApi } from "./api/conversation.api";
 export type { ChatRoomDto, DirectAction, DirectTeacher, DirectTeacherDto } from "./api/conversation.dto";
-export { DIRECT_STATUS, DIRECT_STATUS_LABELS, directStatusLabel } from "./constants/direct-status";
+export { DIRECT_STATUS, useDirectStatusLabel } from "./constants/direct-status";
 export { mapConversationDto, mapConversationPage, mapTeacherDto } from "./lib/conversation.mappers";
 export { conversationKeys } from "./model/conversation.keys";
 export {

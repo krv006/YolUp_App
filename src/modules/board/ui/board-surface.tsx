@@ -5,7 +5,7 @@ import { useKeepAwake } from "expo-keep-awake";
 import { Atom, ArrowLeft, FilePlus2, Sigma, Trash2, UserRoundCheck } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
-import type { FormulaSolutionDto, Point, StrokeShapeDto } from "../api/board.dto";
+import type { FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
 import { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "../constants/board.constants";
 import {
   useAddSheet,
@@ -19,6 +19,7 @@ import { useBoardRealtime } from "../model/use-board-realtime";
 import { AwayStudentsNotice } from "./away-students-notice";
 import { BoardCanvas } from "./board-canvas";
 import { MathFieldSheet } from "./math-field-sheet";
+import { RichTextSheet } from "./rich-text-sheet";
 import { PeriodicTableSheet } from "./periodic-table-sheet";
 import { BoardToolbar, type BoardTool } from "./board-toolbar";
 import {
@@ -90,7 +91,6 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
 
   const [placement, setPlacement] = useState<{ tool: "text" | "math"; point: Point } | null>(null);
   const [periodicOpen, setPeriodicOpen] = useState(false);
-  const [draftText, setDraftText] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [grantOpen, setGrantOpen] = useState(false);
@@ -132,32 +132,27 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
       color,
     });
     setPlacement(null);
-    setDraftText("");
   }
 
-  function placeText() {
-    if (!placement || !draftText.trim()) return;
-    commitStroke(
-      placement.tool === "math"
-        ? {
-            type: "math",
-            latex: draftText.trim(),
-            x: placement.point[0],
-            y: placement.point[1],
-            size: BOARD_TEXT_SIZE,
-            color,
-          }
-        : {
-            type: "text",
-            text: draftText.trim(),
-            x: placement.point[0],
-            y: placement.point[1],
-            size: BOARD_TEXT_SIZE,
-            color,
-          }
-    );
+  /**
+   * Formatlangan matnni doskaga qo'yadi.
+   *
+   * `text` ham, `lines` ham yuboriladi — veb ham ikkalasini saqlaydi:
+   * `lines` formatni, `text` esa formatni tushunmaydigan joylar (qidiruv,
+   * eski mijozlar) uchun oddiy ko'rinishni beradi.
+   */
+  function placeRichText(lines: TextLineDto[], plainText: string) {
+    if (!placement) return;
+    commitStroke({
+      type: "text",
+      text: plainText,
+      lines,
+      x: placement.point[0],
+      y: placement.point[1],
+      size: BOARD_TEXT_SIZE,
+      color,
+    });
     setPlacement(null);
-    setDraftText("");
   }
 
   /**
@@ -312,7 +307,7 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
         onCommit={commitStroke}
         onPlacePoint={(point) => {
           if (tool !== "text" && tool !== "math") return;
-          setDraftText("");
+          // Qoralama endi oynaning o'zida — bu yerda tozalash kerak emas.
           setPlacement({ tool, point });
         }}
         onSelectStroke={setSelected}
@@ -333,14 +328,11 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
         disabled={!canDraw}
       />
 
-      <Sheet
+      <RichTextSheet
         open={placement?.tool === "text"}
         onClose={() => setPlacement(null)}
-        title="Matn qo'shish"
-      >
-        <Input value={draftText} onChangeText={setDraftText} placeholder="Matn" multiline autoFocus />
-        <Button title="Qo'shish" disabled={!draftText.trim()} onPress={placeText} />
-      </Sheet>
+        onSubmit={placeRichText}
+      />
 
       {/* Formula alohida oynada: u yozilayotgan LaTeX'ni jonli chizadi. */}
       <PeriodicTableSheet

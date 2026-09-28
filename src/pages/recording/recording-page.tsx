@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -33,6 +34,7 @@ import {
  * keshlamaymiz: eskirgan URL bilan pleer ochilsa video umuman yuklanmaydi.
  */
 export function RecordingPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
@@ -55,7 +57,7 @@ export function RecordingPage() {
   if (lesson.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Dars yuklanmoqda…" />
+        <ScreenLoading label={t("recording.dars_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -76,7 +78,7 @@ export function RecordingPage() {
   return (
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel="Orqaga" onPress={goBack}>
+        <IconButton accessibilityLabel={t("recording.orqaga")} onPress={goBack}>
           <ArrowLeft size={22} color={palette.foreground} />
         </IconButton>
         <Text variant="subheading" numberOfLines={1} style={styles.title}>
@@ -84,7 +86,7 @@ export function RecordingPage() {
         </Text>
 
         {canDelete ? (
-          <IconButton accessibilityLabel="Video yozuvni o'chirish" onPress={() => setConfirmOpen(true)}>
+          <IconButton accessibilityLabel={t("recording.video_yozuvni_ochirish")} onPress={() => setConfirmOpen(true)}>
             <Trash2 size={20} color={palette.destructive} />
           </IconButton>
         ) : null}
@@ -93,8 +95,8 @@ export function RecordingPage() {
       <ConfirmSheet
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
-        title="Video yozuvni o'chirish"
-        description="Yozuv butunlay o'chadi va qayta tiklanmaydi."
+        title={t("recording.video_yozuvni_ochirish")}
+        description={t("recording.yozuv_butunlay_ochadi_va_qayta_tiklanmaydi")}
         loading={removeRecording.isPending}
         onConfirm={() =>
           removeRecording.mutate(lessonId ?? "", { onSuccess: () => setConfirmOpen(false) })
@@ -152,15 +154,16 @@ function RecordingPlayer({
   error: string | null;
   loading: boolean;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
-  if (loading) return <ScreenLoading label="Yozuv holati tekshirilmoqda…" />;
+  if (loading) return <ScreenLoading label={t("recording.yozuv_holati_tekshirilmoqda")} />;
 
   if (error || status === "failed") {
     return (
       <View style={[styles.placeholder, { backgroundColor: palette["destructive-soft"] }]}>
         <Text variant="label" style={{ color: palette["destructive-strong"] }}>
-          Yozuvni tayyorlab bo'lmadi
+          {t("recording.yozuvni_tayyorlab_bolmadi")}
         </Text>
         <Text variant="caption" tone="muted" style={styles.placeholderText}>
           {error || "O'qituvchiga murojaat qiling."}
@@ -228,9 +231,10 @@ function MetaItem({ icon, label }: { icon: React.ReactNode; label: string }) {
 
 /** Yozuv o'chirilgan bo'lsa ko'rsatiladi (o'qituvchi o'chirishi mumkin). */
 export function RecordingMissing() {
+  const { t } = useTranslation("mobile");
   return (
     <Screen>
-      <ScreenEmpty title="Yozuv topilmadi" description="Bu dars uchun yozuv mavjud emas." />
+      <ScreenEmpty title={t("recording.yozuv_topilmadi")} description={t("recording.bu_dars_uchun_yozuv_mavjud_emas")} />
     </Screen>
   );
 }

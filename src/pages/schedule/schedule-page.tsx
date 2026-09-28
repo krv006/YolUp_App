@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { CalendarDays, List } from "lucide-react-native";
@@ -38,6 +39,7 @@ import {
  * MMKV'da saqlanadi — foydalanuvchi tanlovi ilova yopilgach ham qoladi.
  */
 export function SchedulePage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -76,7 +78,7 @@ export function SchedulePage() {
   if (lessons.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Kalendar yuklanmoqda…" />
+        <ScreenLoading label={t("schedule.kalendar_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -97,15 +99,15 @@ export function SchedulePage() {
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
         <Text variant="heading">Mening darslarim</Text>
         <View style={styles.switch}>
-          <Chip label="Kalendar" selected={view === "calendar"} onPress={() => setView("calendar")} />
-          <Chip label="Ro'yxat" selected={view === "list"} onPress={() => setView("list")} />
+          <Chip label={t("schedule.kalendar")} selected={view === "calendar"} onPress={() => setView("calendar")} />
+          <Chip label={t("schedule.royxat")} selected={view === "list"} onPress={() => setView("list")} />
         </View>
       </View>
 
       {items.length === 0 ? (
         <ScreenEmpty
-          title="Hali dars rejalashtirilmagan"
-          description="Kursga yozilganingizdan keyin darslar shu yerda ko'rinadi."
+          title={t("schedule.hali_dars_rejalashtirilmagan")}
+          description={t("schedule.kursga_yozilganingizdan_keyin_darslar_shu_ye")}
         />
       ) : (
         <ScrollView
@@ -137,7 +139,7 @@ export function SchedulePage() {
 
               {dayLessons.length === 0 ? (
                 <Text variant="caption" tone="muted" style={styles.dayEmpty}>
-                  Bu kunda dars yo'q.
+                  {t("schedule.bu_kunda_dars_yoq")}
                 </Text>
               ) : (
                 dayLessons.map((lesson) => (

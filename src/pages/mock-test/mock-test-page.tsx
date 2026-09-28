@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ArrowLeft, ClipboardCheck, Timer } from "lucide-react-native";
@@ -33,6 +34,7 @@ import {
  * tasodifan bosish urinishni yo'q qilardi.
  */
 export function MockTestPage() {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
   const list = useMockTests();
@@ -58,7 +60,7 @@ export function MockTestPage() {
   }
 
   const back = (
-    <IconButton accessibilityLabel="Orqaga" onPress={() => router.back()}>
+    <IconButton accessibilityLabel={t("mocktest.orqaga")} onPress={() => router.back()}>
       <ArrowLeft size={20} color={palette["muted-foreground"]} />
     </IconButton>
   );
@@ -66,8 +68,8 @@ export function MockTestPage() {
   if (list.isLoading) {
     return (
       <Screen>
-        <ScreenHeader title="Mock Test" leading={back} />
-        <ScreenLoading label="Yuklanmoqda…" />
+        <ScreenHeader title={t("mocktest.mock_test")} leading={back} />
+        <ScreenLoading label={t("mocktest.yuklanmoqda")} />
       </Screen>
     );
   }
@@ -75,7 +77,7 @@ export function MockTestPage() {
   if (list.isError) {
     return (
       <Screen>
-        <ScreenHeader title="Mock Test" leading={back} />
+        <ScreenHeader title={t("mocktest.mock_test")} leading={back} />
         <ScreenError
           message={list.error?.message ?? "Mock testlarni yuklab bo'lmadi"}
           onRetry={() => void list.refetch()}
@@ -99,8 +101,8 @@ export function MockTestPage() {
         }
       >
         <ScreenHeader
-          title="Mock Test"
-          subtitle="Bir nechta test birlashtirilgan, vaqt chegarali imtihon."
+          title={t("mocktest.mock_test")}
+          subtitle={t("mocktest.bir_nechta_test_birlashtirilgan_vaqt_chegara")}
           leading={back}
         />
 
@@ -119,7 +121,7 @@ export function MockTestPage() {
 
         {items.length === 0 ? (
           <Text variant="caption" tone="muted">
-            Hozircha mock test yo&apos;q.
+            {t("mocktest.hozircha_mock_test_yo_apos_q")}
           </Text>
         ) : (
           items.map((item) => (
@@ -150,7 +152,7 @@ export function MockTestPage() {
               </View>
 
               <Button
-                title="Boshlash"
+                title={t("mocktest.boshlash")}
                 loading={start.isPending && start.variables === item.id}
                 disabled={start.isPending}
                 onPress={() => {

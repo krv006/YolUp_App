@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
@@ -46,6 +47,7 @@ const FILTERS: readonly { id: ConversationFilter; label: string }[] = [
 ];
 
 export function ChatsPage({ role }: { role: ConversationRole }) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { user } = useAuth();
@@ -96,7 +98,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
           <View style={styles.searchRow}>
             <View style={styles.searchInput}>
               <Input
-                placeholder="Suhbat qidirish"
+                placeholder={t("chats.suhbat_qidirish")}
                 icon={<Search size={18} color={palette["muted-foreground"]} />}
                 value={search}
                 onChangeText={setSearch}
@@ -105,7 +107,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
               />
             </View>
             <IconButton
-              accessibilityLabel="Qidiruvni yopish"
+              accessibilityLabel={t("chats.qidiruvni_yopish")}
               onPress={() => {
                 setSearch("");
                 setSearchOpen(false);
@@ -117,13 +119,13 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
         ) : (
           <View style={styles.titleRow}>
             <Text variant="heading" style={styles.title}>
-              Suhbatlar
+              {t("chats.suhbatlar")}
             </Text>
-            <IconButton accessibilityLabel="Qidirish" onPress={() => setSearchOpen(true)}>
+            <IconButton accessibilityLabel={t("chats.qidirish")} onPress={() => setSearchOpen(true)}>
               <Search size={20} color={palette["muted-foreground"]} />
             </IconButton>
             <IconButton
-              accessibilityLabel="Bildirishnomalar"
+              accessibilityLabel={t("chats.bildirishnomalar")}
               onPress={() => router.push("/notifications")}
             >
               <Bell size={20} color={palette["muted-foreground"]} />
@@ -204,6 +206,7 @@ function ChatsList({
   onOpen,
   hasFilter,
 }: ChatsListProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   if (isLoading) return <ChatsSkeleton />;
@@ -219,11 +222,11 @@ function ChatsList({
 
   if (conversations.length === 0) {
     return hasFilter ? (
-      <ScreenEmpty title="Hech narsa topilmadi" description="Qidiruv yoki filtrni o'zgartiring." />
+      <ScreenEmpty title={t("chats.hech_narsa_topilmadi")} description={t("chats.qidiruv_yoki_filtrni_ozgartiring")} />
     ) : (
       <ScreenEmpty
-        title="Suhbatlar yo'q"
-        description="Kursga yozilganingizdan keyin guruh chatlari shu yerda paydo bo'ladi."
+        title={t("chats.suhbatlar_yoq")}
+        description={t("chats.kursga_yozilganingizdan_keyin_guruh_chatlari")}
       />
     );
   }

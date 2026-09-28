@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   useConnectionState,
@@ -68,6 +69,7 @@ export function LiveRoom({
   isTeacher,
   onLeave,
 }: LiveRoomProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const { user } = useAuth();
   const { width } = useWindowDimensions();
@@ -139,9 +141,9 @@ export function LiveRoom({
         reliable: true,
         topic: signal.topic,
       });
-      toast.success("Ekran ulashish so'rovi o'qituvchiga yuborildi");
+      toast.success(t("liveroom.ekran_ulashish_sorovi_oqituvchiga_yuborildi"));
     } catch {
-      toast.error("So'rovni yuborib bo'lmadi");
+      toast.error(t("liveroom.sorovni_yuborib_bolmadi"));
     } finally {
       setSharePending(false);
     }
@@ -178,18 +180,18 @@ export function LiveRoom({
             {label} · {participants.length} ishtirokchi
           </Text>
         </View>
-        {screenTrack ? <Badge label="Ekran ulashilmoqda" tone="brand" /> : null}
+        {screenTrack ? <Badge label={t("liveroom.ekran_ulashilmoqda")} tone="brand" /> : null}
 
         {isTeacher ? (
-          <IconButton accessibilityLabel="Darsga taklif qilish" onPress={() => setInviteOpen(true)}>
+          <IconButton accessibilityLabel={t("liveroom.darsga_taklif_qilish")} onPress={() => setInviteOpen(true)}>
             <UserRoundPlus size={20} color={palette.foreground} />
           </IconButton>
         ) : null}
       </View>
 
       <ChipRow>
-        <Chip label="Video" selected={tab === "video"} onPress={() => setTab("video")} />
-        <Chip label="Doska" selected={tab === "board"} onPress={() => setTab("board")} />
+        <Chip label={t("liveroom.video")} selected={tab === "video"} onPress={() => setTab("video")} />
+        <Chip label={t("liveroom.doska")} selected={tab === "board"} onPress={() => setTab("board")} />
         <Chip
           label={`Ishtirokchilar (${participants.length})`}
           selected={tab === "people"}
@@ -262,7 +264,7 @@ export function LiveRoom({
                */}
               {isTeacher && !participant.isLocal ? (
                 <Button
-                  title="Ruxsat"
+                  title={t("liveroom.ruxsat")}
                   variant="secondary"
                   fullWidth={false}
                   loading={allowShare.isPending}

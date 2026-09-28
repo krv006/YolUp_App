@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import {
   Circle,
   Highlighter,
@@ -63,6 +64,7 @@ export function BoardToolbar({
   mathEnabled,
   disabled = false,
 }: BoardToolbarProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const tools = TOOLS.filter((item) => !item.mathOnly || mathEnabled);
 
@@ -164,7 +166,7 @@ export function BoardToolbar({
 
       {disabled ? (
         <Text variant="caption" tone="muted" style={styles.notice}>
-          Chizish uchun o'qituvchidan ruxsat so'rang.
+          {t("board.chizish_uchun_oqituvchidan_ruxsat_sorang")}
         </Text>
       ) : null}
     </View>

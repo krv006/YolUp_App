@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import type { Point, StrokeDto, StrokeInput } from "../api/board.dto";
 import { Button, Input, MIN_TOUCH_SIZE, radius, Sheet, Text, useTheme } from "@/shared/ui";
@@ -48,6 +49,7 @@ export function PeriodicTableSheet({
   color,
   onPlace,
 }: PeriodicTableSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const elements = usePeriodicTable(open);
   const [query, setQuery] = useState("");
@@ -80,11 +82,11 @@ export function PeriodicTableSheet({
     <Sheet
       open={open}
       onClose={onClose}
-      title="Davriy jadval"
-      description="Elementni tanlang — tuzilishi va Bor modeli ko'rinadi."
+      title={t("board.davriy_jadval")}
+      description={t("board.elementni_tanlang_tuzilishi_va_bor_modeli_ko")}
     >
       <Input
-        placeholder="Element, belgi yoki raqam"
+        placeholder={t("board.element_belgi_yoki_raqam")}
         value={query}
         onChangeText={setQuery}
         autoCapitalize="none"
@@ -92,13 +94,13 @@ export function PeriodicTableSheet({
 
       {elements.isLoading ? (
         <Text variant="caption" tone="muted">
-          Jadval yuklanmoqda…
+          {t("board.jadval_yuklanmoqda")}
         </Text>
       ) : null}
 
       {elements.isError ? (
         <Text variant="caption" style={{ color: palette["destructive-strong"] }}>
-          Davriy jadvalni yuklab bo'lmadi
+          {t("board.davriy_jadvalni_yuklab_bolmadi")}
         </Text>
       ) : null}
 
@@ -152,7 +154,7 @@ export function PeriodicTableSheet({
           ) : null}
 
           <Button
-            title="Doskaga qo'yish"
+            title={t("board.doskaga_qoyish")}
             onPress={() =>
               place(
                 (origin) => buildElementCardStrokes(selected, placement, origin),
@@ -162,7 +164,7 @@ export function PeriodicTableSheet({
           />
           {selected.shells.length ? (
             <Button
-              title="Bor modelini chizish"
+              title={t("board.bor_modelini_chizish")}
               variant="secondary"
               onPress={() =>
                 place(
@@ -175,7 +177,7 @@ export function PeriodicTableSheet({
         </View>
       ) : (
         <Text variant="caption" tone="muted">
-          Batafsil ma'lumot uchun elementni tanlang.
+          {t("board.batafsil_malumot_uchun_elementni_tanlang")}
         </Text>
       )}
     </Sheet>

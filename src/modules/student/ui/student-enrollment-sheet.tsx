@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { BookOpen, MessageCircle, UsersRound } from "lucide-react-native";
 import {
@@ -39,6 +40,7 @@ export interface StudentEnrollmentSheetProps {
  * ham shunday, aks holda har sahifa ochilishida uchta ortiqcha so'rov ketardi.
  */
 export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheetProps) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
 
@@ -83,10 +85,10 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
     <Sheet
       open={open}
       onClose={onClose}
-      title="Yangi muloqot"
-      description="O'qituvchiga so'rov yuboring yoki ochiq kursga qo'shiling."
+      title={t("student.yangi_muloqot")}
+      description={t("student.oqituvchiga_sorov_yuboring_yoki_ochiq_kursga")}
     >
-      {loading ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+      {loading ? <ScreenLoading label={t("student.yuklanmoqda")} /> : null}
 
       {pendingLinks.length > 0 ? (
         <>
@@ -104,14 +106,14 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
               </View>
               <View style={styles.linkActions}>
                 <Button
-                  title="Rad"
+                  title={t("student.rad")}
                   variant="secondary"
                   fullWidth={false}
                   loading={respondLink.isPending}
                   onPress={() => respondLink.mutate({ id: link.id, action: "decline" })}
                 />
                 <Button
-                  title="Tasdiq"
+                  title={t("student.tasdiq")}
                   fullWidth={false}
                   loading={respondLink.isPending}
                   onPress={() => respondLink.mutate({ id: link.id, action: "approve" })}
@@ -125,7 +127,7 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
       <SectionLabel>O'qituvchiga yozish</SectionLabel>
       {(teachers.data ?? []).length === 0 && !loading ? (
         <Text variant="caption" tone="muted">
-          Mavjud o'qituvchi topilmadi.
+          {t("student.mavjud_oqituvchi_topilmadi")}
         </Text>
       ) : null}
       {(teachers.data ?? []).map((teacher) => (
@@ -155,7 +157,7 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
       <SectionLabel>Kurslarga qo'shilish</SectionLabel>
       {(catalog.data?.items ?? []).length === 0 && !loading ? (
         <Text variant="caption" tone="muted">
-          Hozircha ochiq kurs yo'q.
+          {t("student.hozircha_ochiq_kurs_yoq")}
         </Text>
       ) : null}
       {(catalog.data?.items ?? []).map((course) => (

@@ -59,5 +59,8 @@
     "student": "Ученик",
     "teacher": "Учитель",
     "parent": "Родитель"
+  },
+  "message": {
+    "yozmoqda": "{{name}} печатает…"
   }
 }

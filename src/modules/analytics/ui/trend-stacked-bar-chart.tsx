@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Svg, { Line, Path, Rect, Text as SvgText } from "react-native-svg";
 import { Text, useTheme } from "@/shared/ui";
@@ -42,6 +43,7 @@ function topRoundedRectPath(x: number, y: number, w: number, h: number, r: numbe
  * sichqoncha o'rniga bosish (izohi `trend-line-chart.tsx` da).
  */
 export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
   const [width, setWidth] = useState(0);
@@ -159,7 +161,7 @@ export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartPro
         </View>
       ) : (
         <Text variant="caption" tone="muted">
-          Qiymatlarni ko&apos;rish uchun ustunni bosing.
+          {t("analytics.qiymatlarni_ko_apos_rish_uchun_ustunni_bosin")}
         </Text>
       )}
 

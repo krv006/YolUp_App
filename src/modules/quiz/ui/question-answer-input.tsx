@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ArrowDown, ArrowUp, Check } from "lucide-react-native";
 import type { QuizAnswerValue, QuizQuestion } from "@/shared/types";
 import {
@@ -37,6 +38,7 @@ export interface QuestionAnswerInputProps {
 }
 
 export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswerInputProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   if (value.type === "single") {
@@ -101,7 +103,7 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
   if (value.type === "numeric") {
     return (
       <Input
-        placeholder="Son kiriting"
+        placeholder={t("quiz.son_kiriting")}
         value={value.value}
         keyboardType="numbers-and-punctuation"
         onChangeText={(next) => onChange({ type: "numeric", value: next })}
@@ -112,7 +114,7 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
   if (value.type === "text") {
     return (
       <Input
-        placeholder="Javobingizni yozing"
+        placeholder={t("quiz.javobingizni_yozing")}
         value={value.value}
         multiline
         onChangeText={(next) => onChange({ type: "text", value: next })}
@@ -129,7 +131,7 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
             <Text style={styles.matchLeft}>{left.text || "…"}</Text>
             <SelectField
               label=""
-              placeholder="Tanlang"
+              placeholder={t("quiz.tanlang")}
               value={value.pairs[left.id] ?? ""}
               options={options}
               onChange={(next) => {
@@ -174,7 +176,7 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
             <Text style={styles.orderText}>{byId.get(id)?.text || "…"}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Yuqoriga"
+              accessibilityLabel={t("quiz.yuqoriga")}
               disabled={position === 0}
               onPress={() => move(position, position - 1)}
               style={styles.arrow}
@@ -186,7 +188,7 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Pastga"
+              accessibilityLabel={t("quiz.pastga")}
               disabled={position === order.length - 1}
               onPress={() => move(position, position + 1)}
               style={styles.arrow}

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { LockKeyhole, Phone, UserRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
@@ -23,6 +24,7 @@ const ROLE_OPTIONS: { id: RegisterFormValues["role"]; label: string }[] = [
  * login ekraniga qaytarib, parolni qayta yozdirish ortiqcha ishqalanish.
  */
 export function RegisterPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { login } = useAuth();
@@ -93,29 +95,29 @@ export function RegisterPage() {
         <Field
           control={control}
           name="firstName"
-          label="Ism"
+          label={t("auth.ism")}
           autoCapitalize="words"
           error={errors.firstName?.message}
         />
         <Field
           control={control}
           name="lastName"
-          label="Familiya"
+          label={t("auth.familiya")}
           autoCapitalize="words"
           error={errors.lastName?.message}
         />
         <Field
           control={control}
           name="username"
-          label="Login"
-          placeholder="Kamida 3 ta belgi"
+          label={t("auth.login")}
+          placeholder={t("auth.kamida_3_ta_belgi")}
           icon={<UserRound size={18} color={palette["muted-foreground"]} />}
           error={errors.username?.message}
         />
         <Field
           control={control}
           name="phone"
-          label="Telefon (ixtiyoriy)"
+          label={t("auth.telefon_ixtiyoriy")}
           placeholder="+998 90 123 45 67"
           keyboardType="phone-pad"
           icon={<Phone size={18} color={palette["muted-foreground"]} />}
@@ -124,15 +126,15 @@ export function RegisterPage() {
         <Field
           control={control}
           name="password"
-          label="Parol"
-          placeholder="Kamida 8 ta belgi"
+          label={t("auth.parol")}
+          placeholder={t("auth.kamida_8_ta_belgi")}
           secure
           icon={<LockKeyhole size={18} color={palette["muted-foreground"]} />}
           error={errors.password?.message}
         />
 
         <Button
-          title="Ro'yxatdan o'tish"
+          title={t("auth.royxatdan_otish")}
           size="lg"
           loading={isSubmitting || register.isPending}
           onPress={handleSubmit(submit)}
@@ -145,7 +147,7 @@ export function RegisterPage() {
           tone="brand"
           style={styles.link}
         >
-          Hisobingiz bormi? Kirish
+          {t("auth.hisobingiz_bormi_kirish")}
         </Text>
       </View>
     </Screen>

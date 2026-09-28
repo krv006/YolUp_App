@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { Download, Eye, FileUp, Link2, Plus } from "lucide-react-native";
 import { pickDocument, toUploadFile } from "@/shared/lib";
@@ -153,6 +154,7 @@ export function AddQuizSheet({
   editQuiz = null,
   questionsLocked = false,
 }: AddQuizSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const create = useCreateQuiz();
   const update = useUpdateQuiz();
@@ -299,7 +301,7 @@ export function AddQuizSheet({
 
     const source = detectGoogleSource(googleUrl);
     if (!source) {
-      toast.error("Havola Google Hujjat yoki Google Forma havolasi bo'lishi kerak");
+      toast.error(t("quiz.havola_google_hujjat_yoki_google_forma_havol"));
       return;
     }
 
@@ -409,15 +411,15 @@ export function AddQuizSheet({
       {/* Fan va kurs testning "manzili" — tahrirlashda o'zgartirilmaydi. */}
       {editing ? null : subjectMode ? (
         <SelectField
-          label="Fan"
-          placeholder="Fanni tanlang"
+          label={t("quiz.fan")}
+          placeholder={t("quiz.fanni_tanlang")}
           value={subject}
           options={(subjects ?? []).map((item) => ({ value: item.value, label: item.label }))}
           onChange={setSubject}
         />
       ) : courses.length > 1 ? (
         <SelectField
-          label="Kurs"
+          label={t("quiz.kurs")}
           value={courseId}
           options={courseOptions}
           onChange={setSelectedCourseId}
@@ -425,10 +427,10 @@ export function AddQuizSheet({
       ) : null}
 
       <Input
-        label="Mavzu"
+        label={t("quiz.mavzu")}
         value={topic}
         onChangeText={setTopic}
-        placeholder="Masalan: Kvadrat tenglamalar"
+        placeholder={t("quiz.masalan_kvadrat_tenglamalar")}
       />
 
       {/*
@@ -437,13 +439,13 @@ export function AddQuizSheet({
         * veb ham uni talab qilmaydi, bo'sh qolsa mavzu nom bo'lib ishlaydi.
         */}
       <Input
-        label="Test nomi — ixtiyoriy"
+        label={t("quiz.test_nomi_ixtiyoriy")}
         value={title}
         onChangeText={setTitle}
-        placeholder="Bo'sh qolsa mavzu nom bo'ladi"
+        placeholder={t("quiz.bosh_qolsa_mavzu_nom_boladi")}
       />
       <Input
-        label="Tavsif — ixtiyoriy"
+        label={t("quiz.tavsif_ixtiyoriy")}
         value={description}
         onChangeText={setDescription}
         multiline
@@ -451,10 +453,10 @@ export function AddQuizSheet({
 
       <View style={styles.row}>
         <View style={styles.half}>
-          <DateField label="Ochilish" value={opensAt} onChange={setOpensAt} optional />
+          <DateField label={t("quiz.ochilish")} value={opensAt} onChange={setOpensAt} optional />
         </View>
         <View style={styles.half}>
-          <DateField label="Muddat" value={dueAt} onChange={setDueAt} optional />
+          <DateField label={t("quiz.muddat")} value={dueAt} onChange={setDueAt} optional />
         </View>
       </View>
 
@@ -476,13 +478,13 @@ export function AddQuizSheet({
           */}
         <Text variant="label">Tayyor fayldan</Text>
         <Text variant="caption" tone="muted">
-          Savollar fayldan o'qiladi. Fan va mavzu baribir yuqorida to'ldirilishi kerak.
+          {t("quiz.savollar_fayldan_oqiladi_fan_va_mavzu_baribi")}
         </Text>
 
         <View style={styles.row}>
           <View style={styles.half}>
             <Button
-              title="Word / Excel"
+              title={t("quiz.word_excel")}
               variant="secondary"
               loading={importFile.isPending}
               disabled={importing}
@@ -492,7 +494,7 @@ export function AddQuizSheet({
           </View>
           <View style={styles.half}>
             <Button
-              title="Google havola"
+              title={t("quiz.google_havola")}
               variant="secondary"
               disabled={importing}
               icon={<Link2 size={16} color={palette["secondary-foreground"]} />}
@@ -504,7 +506,7 @@ export function AddQuizSheet({
         {googleOpen ? (
           <>
             <Input
-              label="Google Hujjat yoki Forma havolasi"
+              label={t("quiz.google_hujjat_yoki_forma_havolasi")}
               value={googleUrl}
               onChangeText={setGoogleUrl}
               placeholder="https://docs.google.com/document/..."
@@ -513,10 +515,10 @@ export function AddQuizSheet({
               keyboardType="url"
             />
             <Text variant="caption" tone="muted">
-              Havola &quot;havolaga ega har kim ko'ra oladi&quot; qilib ochilgan bo'lsin.
+              {t("quiz.havola_quot_havolaga_ega_har_kim_kora_oladi_")}
             </Text>
             <Button
-              title="Havoladan import qilish"
+              title={t("quiz.havoladan_import_qilish")}
               loading={importGoogle.isPending}
               disabled={importing || !googleUrl.trim()}
               onPress={importFromGoogle}
@@ -525,12 +527,12 @@ export function AddQuizSheet({
         ) : null}
 
         <Text variant="caption" tone="muted">
-          Shablon yuklab olish — to'ldirib, yuqoridagi tugma orqali qaytaring:
+          {t("quiz.shablon_yuklab_olish_toldirib_yuqoridagi_tug")}
         </Text>
         <View style={styles.row}>
           <View style={styles.half}>
             <Button
-              title="Word shabloni"
+              title={t("quiz.word_shabloni")}
               variant="ghost"
               disabled={downloadTemplate.isPending}
               icon={<Download size={16} color={palette["primary-text"]} />}
@@ -541,7 +543,7 @@ export function AddQuizSheet({
           </View>
           <View style={styles.half}>
             <Button
-              title="Excel shabloni"
+              title={t("quiz.excel_shabloni")}
               variant="ghost"
               disabled={downloadTemplate.isPending}
               icon={<Download size={16} color={palette["primary-text"]} />}
@@ -581,7 +583,7 @@ export function AddQuizSheet({
           ))}
 
           <Button
-            title="Savol qo'shish"
+            title={t("quiz.savol_qoshish")}
             variant="secondary"
             icon={<Plus size={16} color={palette["secondary-foreground"]} />}
             onPress={() => setQuestions((current) => [...current, createDraft("single", newKey)])}
@@ -608,7 +610,7 @@ export function AddQuizSheet({
         */}
       {questionsLocked ? null : (
         <Button
-          title="O'quvchi ko'rinishi"
+          title={t("quiz.oquvchi_korinishi")}
           variant="ghost"
           icon={<Eye size={16} color={palette["primary-text"]} />}
           onPress={() => setPreviewOpen(true)}
@@ -637,7 +639,7 @@ export function AddQuizSheet({
         */}
       {isDraft ? (
         <Button
-          title="E'lon qilish"
+          title={t("quiz.elon_qilish")}
           size="lg"
           loading={publish.isPending}
           onPress={() => {

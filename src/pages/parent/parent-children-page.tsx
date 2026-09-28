@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import {
   Camera,
@@ -50,6 +51,7 @@ const CONSENT_KINDS: { id: ConsentKind; label: string; description: string; icon
 const EMPTY_CHILD = { username: "", password: "", first_name: "", last_name: "" };
 
 export function ParentChildrenPage() {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const childrenQuery = useParentChildren();
   const consents = useParentConsents();
@@ -68,7 +70,7 @@ export function ParentChildrenPage() {
       await requestLink.mutateAsync(inviteCode.trim().toUpperCase());
       setInviteCode("");
       setLinkOpen(false);
-      toast.success("So'rov yuborildi — farzandingiz tasdiqlashi kerak");
+      toast.success(t("parent.sorov_yuborildi_farzandingiz_tasdiqlashi_ker"));
     } catch {
       /*
        * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
@@ -86,7 +88,7 @@ export function ParentChildrenPage() {
       await createChild.mutateAsync(child);
       setChild(EMPTY_CHILD);
       setChildOpen(false);
-      toast.success("Hisob yaratildi");
+      toast.success(t("parent.hisob_yaratildi"));
     } catch {
       /*
        * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
@@ -110,7 +112,7 @@ export function ParentChildrenPage() {
   if (childrenQuery.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Farzandlar yuklanmoqda…" />
+        <ScreenLoading label={t("parent.farzandlar_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -119,7 +121,7 @@ export function ParentChildrenPage() {
     return (
       <Screen>
         <ScreenError
-          message="Farzandlar ro'yxatini yuklab bo'lmadi"
+          message={t("parent.farzandlar_royxatini_yuklab_bolmadi")}
           onRetry={() => void childrenQuery.refetch()}
         />
       </Screen>
@@ -143,13 +145,13 @@ export function ParentChildrenPage() {
         <View style={styles.head}>
           <Text variant="heading">Farzandlarim</Text>
           <Text variant="caption" tone="muted">
-            Biriktirilgan o'quvchi hisoblari va maxfiylik ruxsatlari.
+            {t("parent.biriktirilgan_oquvchi_hisoblari_va_maxfiylik")}
           </Text>
         </View>
 
         <View style={styles.actions}>
           <Button
-            title="O'quvchini ulash"
+            title={t("parent.oquvchini_ulash")}
             variant="secondary"
             fullWidth={false}
             icon={<Link2 size={16} color={palette["secondary-foreground"]} />}
@@ -157,7 +159,7 @@ export function ParentChildrenPage() {
             style={styles.action}
           />
           <Button
-            title="Bola hisobi"
+            title={t("parent.bola_hisobi")}
             fullWidth={false}
             icon={<Plus size={16} color={palette["primary-foreground"]} />}
             onPress={() => setChildOpen(true)}
@@ -167,8 +169,8 @@ export function ParentChildrenPage() {
 
         {children.length === 0 ? (
           <ScreenEmpty
-            title="Farzand hali ulanmagan"
-            description="O'quvchi taklif kodini kiriting yoki yangi hisob yarating."
+            title={t("parent.farzand_hali_ulanmagan")}
+            description={t("parent.oquvchi_taklif_kodini_kiriting_yoki_yangi_hi")}
           />
         ) : (
           children.map((item) => {
@@ -223,7 +225,7 @@ export function ParentChildrenPage() {
           >
             <Text variant="label">{selectedChild.name} uchun ruxsatlar</Text>
             <Text variant="caption" tone="muted">
-              Bu ruxsatlarni istalgan payt qaytarib olishingiz mumkin.
+              {t("parent.bu_ruxsatlarni_istalgan_payt_qaytarib_olishi")}
             </Text>
 
             {CONSENT_KINDS.map(({ id, label, description, icon: Icon }) => {
@@ -256,7 +258,7 @@ export function ParentChildrenPage() {
 
             {consents.isError ? (
               <Text variant="caption" tone="danger">
-                Ruxsatlarni yuklab bo'lmadi.
+                {t("parent.ruxsatlarni_yuklab_bolmadi")}
               </Text>
             ) : null}
           </View>
@@ -266,19 +268,19 @@ export function ParentChildrenPage() {
       <Sheet
         open={linkOpen}
         onClose={() => setLinkOpen(false)}
-        title="O'quvchini ulash"
-        description="O'quvchi profilidagi FK-... taklif kodini kiriting."
+        title={t("parent.oquvchini_ulash")}
+        description={t("parent.oquvchi_profilidagi_fk_taklif_kodini_kiritin")}
       >
         <Input
-          label="Taklif kodi"
-          placeholder="FK-XXXX"
+          label={t("parent.taklif_kodi")}
+          placeholder={t("parent.fk_xxxx")}
           value={inviteCode}
           onChangeText={setInviteCode}
           autoCapitalize="characters"
           autoFocus
         />
         <Button
-          title="So'rov yuborish"
+          title={t("parent.sorov_yuborish")}
           loading={requestLink.isPending}
           disabled={inviteCode.trim().length === 0}
           onPress={() => void submitLink()}
@@ -288,28 +290,28 @@ export function ParentChildrenPage() {
       <Sheet
         open={childOpen}
         onClose={() => setChildOpen(false)}
-        title="Bola hisobini yaratish"
-        description="Yaratilgan o'quvchi sizga avtomatik ulanadi."
+        title={t("parent.bola_hisobini_yaratish")}
+        description={t("parent.yaratilgan_oquvchi_sizga_avtomatik_ulanadi")}
       >
         <Input
-          label="Ism"
+          label={t("parent.ism")}
           value={child.first_name}
           onChangeText={(value) => setChild((current) => ({ ...current, first_name: value }))}
           autoCapitalize="words"
         />
         <Input
-          label="Familiya"
+          label={t("parent.familiya")}
           value={child.last_name}
           onChangeText={(value) => setChild((current) => ({ ...current, last_name: value }))}
           autoCapitalize="words"
         />
         <Input
-          label="Login"
+          label={t("parent.login")}
           value={child.username}
           onChangeText={(value) => setChild((current) => ({ ...current, username: value }))}
         />
         <Input
-          label="Vaqtinchalik parol"
+          label={t("parent.vaqtinchalik_parol")}
           secure
           value={child.password}
           onChangeText={(value) => setChild((current) => ({ ...current, password: value }))}
@@ -321,7 +323,7 @@ export function ParentChildrenPage() {
           }
         />
         <Button
-          title="Hisob yaratish"
+          title={t("parent.hisob_yaratish")}
           loading={createChild.isPending}
           disabled={
             !child.first_name.trim() ||

@@ -1,4 +1,5 @@
 import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
 import { Copy, Reply } from "lucide-react-native";
@@ -23,13 +24,14 @@ export interface MessageActionsSheetProps {
  * shuning uchun oddiy `Modal` yetadi va bitta bog'liqlik kam bo'ladi.
  */
 export function MessageActionsSheet({ message, onClose, onReply }: MessageActionsSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
 
   async function copyText() {
     if (!message) return;
     await Clipboard.setStringAsync(message.text);
-    toast.success("Nusxalandi");
+    toast.success(t("message.nusxalandi"));
     onClose();
   }
 
@@ -44,7 +46,7 @@ export function MessageActionsSheet({ message, onClose, onReply }: MessageAction
       {/* Tashqariga bosilganda yopiladi — mobilda kutilgan xulq. */}
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Yopish"
+        accessibilityLabel={t("message.yopish")}
         style={[styles.backdrop, { backgroundColor: palette.overlay }]}
         onPress={onClose}
       >
@@ -70,7 +72,7 @@ export function MessageActionsSheet({ message, onClose, onReply }: MessageAction
 
           <Action
             icon={<Reply size={20} color={palette.foreground} />}
-            label="Javob berish"
+            label={t("message.javob_berish")}
             onPress={() => {
               if (message) onReply(message);
               onClose();
@@ -78,7 +80,7 @@ export function MessageActionsSheet({ message, onClose, onReply }: MessageAction
           />
           <Action
             icon={<Copy size={20} color={palette.foreground} />}
-            label="Nusxalash"
+            label={t("message.nusxalash")}
             onPress={() => void copyText()}
             disabled={!message?.text}
           />

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { AttendanceList, useAttendance } from "@/modules/attendance";
 import { useLessons } from "@/modules/lesson";
@@ -13,6 +14,7 @@ import { ScreenLoading, Text } from "@/shared/ui";
  * bilan aynan bir xil yondashuv.
  */
 export function AttendanceSection({ courseId }: { courseId: string }) {
+  const { t } = useTranslation("mobile");
   const lessons = useLessons({ course: courseId, page_size: 100 }, Boolean(courseId));
   const attendance = useAttendance({ page_size: 200 });
 
@@ -27,7 +29,7 @@ export function AttendanceSection({ courseId }: { courseId: string }) {
   );
 
   if (lessons.isLoading || attendance.isLoading) {
-    return <ScreenLoading label="Davomat yuklanmoqda…" />;
+    return <ScreenLoading label={t("groupworkspace.davomat_yuklanmoqda")} />;
   }
 
   return (

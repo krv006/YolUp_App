@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { TriangleAlert } from "lucide-react-native";
 import {
@@ -88,6 +89,7 @@ export function AddLessonSheet({
   existingLessons,
   editing = null,
 }: AddLessonSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const create = useCreateLesson();
   const update = useUpdateLesson();
@@ -159,7 +161,7 @@ export function AddLessonSheet({
     try {
       if (editing) {
         if (!date) {
-          toast.error("Sanani tanlang");
+          toast.error(t("groupworkspace.sanani_tanlang"));
           return;
         }
         await update.mutateAsync({
@@ -172,7 +174,7 @@ export function AddLessonSheet({
 
       if (repeat) {
         if (dates.length === 0) {
-          toast.error("Tanlangan oraliqda birorta ham kun topilmadi");
+          toast.error(t("groupworkspace.tanlangan_oraliqda_birorta_ham_kun_topilmadi"));
           return;
         }
         await createSchedule.mutateAsync({
@@ -188,7 +190,7 @@ export function AddLessonSheet({
         });
       } else {
         if (!date) {
-          toast.error("Sanani tanlang");
+          toast.error(t("groupworkspace.sanani_tanlang"));
           return;
         }
         await create.mutateAsync({
@@ -253,8 +255,8 @@ export function AddLessonSheet({
         </Text>
       ) : (
         <Input
-          label="Mavzu"
-          placeholder="Masalan: Kvadrat tenglamalar"
+          label={t("groupworkspace.mavzu")}
+          placeholder={t("groupworkspace.masalan_kvadrat_tenglamalar")}
           value={topic}
           onChangeText={setTopic}
         />
@@ -262,11 +264,11 @@ export function AddLessonSheet({
 
       <View style={styles.row}>
         <View style={styles.half}>
-          <TimeField label="Vaqt" value={time} onChange={setTime} />
+          <TimeField label={t("groupworkspace.vaqt")} value={time} onChange={setTime} />
         </View>
         <View style={styles.half}>
           <Input
-            label="Davomiyligi (daq)"
+            label={t("groupworkspace.davomiyligi_daq")}
             value={duration}
             onChangeText={setDuration}
             keyboardType="number-pad"
@@ -282,7 +284,7 @@ export function AddLessonSheet({
             setRepeat(next);
             if (next) setTopic("");
           }}
-          label="Har hafta takrorlansin"
+          label={t("groupworkspace.har_hafta_takrorlansin")}
         />
       )}
 
@@ -303,7 +305,7 @@ export function AddLessonSheet({
           <View style={styles.row}>
             <View style={styles.half}>
               <DateField
-                label="Boshlanish"
+                label={t("groupworkspace.boshlanish")}
                 value={from}
                 minimumDate={new Date(today)}
                 onChange={(value) => {
@@ -315,7 +317,7 @@ export function AddLessonSheet({
               />
             </View>
             <View style={styles.half}>
-              <DateField label="Tugash" value={to} minimumDate={new Date(from || today)} onChange={setTo} />
+              <DateField label={t("groupworkspace.tugash")} value={to} minimumDate={new Date(from || today)} onChange={setTo} />
             </View>
           </View>
 
@@ -325,7 +327,7 @@ export function AddLessonSheet({
         </>
       ) : (
         <DateField
-          label="Sana"
+          label={t("groupworkspace.sana")}
           value={date}
           minimumDate={editingPast ? undefined : new Date(today)}
           onChange={setDate}
@@ -346,7 +348,7 @@ export function AddLessonSheet({
         <View style={[styles.warning, { backgroundColor: palette["destructive-soft"] }]}>
           <TriangleAlert size={16} color={palette["destructive-strong"]} />
           <Text variant="caption" style={{ flex: 1, color: palette["destructive-strong"] }}>
-            Tugash sanasi boshlanishdan oldin bo'la olmaydi.
+            {t("groupworkspace.tugash_sanasi_boshlanishdan_oldin_bola_olmay")}
           </Text>
         </View>
       ) : null}

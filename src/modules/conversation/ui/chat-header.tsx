@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Video } from "lucide-react-native";
 import type { Conversation } from "@/shared/types";
 import { Avatar, IconButton, Text, useTheme } from "@/shared/ui";
@@ -27,6 +28,7 @@ export function ChatHeader({
   onJoinLive,
   socketOffline,
 }: ChatHeaderProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   const subtitle = socketOffline
@@ -44,7 +46,7 @@ export function ChatHeader({
         { backgroundColor: palette.surface, borderBottomColor: palette.border },
       ]}
     >
-      <IconButton accessibilityLabel="Suhbatlar ro'yxatiga qaytish" onPress={onBack}>
+      <IconButton accessibilityLabel={t("conversation.suhbatlar_royxatiga_qaytish")} onPress={onBack}>
         <ArrowLeft size={22} color={palette.foreground} />
       </IconButton>
 
@@ -78,7 +80,7 @@ export function ChatHeader({
       </Pressable>
 
       {onJoinLive ? (
-        <IconButton accessibilityLabel="Jonli darsga kirish" onPress={onJoinLive}>
+        <IconButton accessibilityLabel={t("conversation.jonli_darsga_kirish")} onPress={onJoinLive}>
           <Video size={22} color={palette.destructive} />
         </IconButton>
       ) : null}

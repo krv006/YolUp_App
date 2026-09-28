@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import {
   Camera,
@@ -59,6 +60,7 @@ export function AssignmentsSection({
   /** Kurs fani — til fanlarida vazifaga "tekshiruv turi" tanlovi qo'shiladi. */
   subject?: string;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const assignments = useAssignments(courseId);
   const removeAssignment = useDeleteAssignment();
@@ -70,7 +72,7 @@ export function AssignmentsSection({
   const [addOpen, setAddOpen] = useState(false);
   const [reviewOf, setReviewOf] = useState<Assignment | null>(null);
 
-  if (assignments.isLoading) return <ScreenLoading label="Vazifalar yuklanmoqda…" />;
+  if (assignments.isLoading) return <ScreenLoading label={t("groupworkspace.vazifalar_yuklanmoqda")} />;
 
   const items = assignments.data ?? [];
 
@@ -79,7 +81,7 @@ export function AssignmentsSection({
       <ScrollView contentContainerStyle={styles.list}>
         {isTeacher ? (
           <Button
-            title="Vazifa qo'shish"
+            title={t("groupworkspace.vazifa_qoshish")}
             variant="secondary"
             icon={<Plus size={16} color={palette["secondary-foreground"]} />}
             onPress={() => setAddOpen(true)}
@@ -88,7 +90,7 @@ export function AssignmentsSection({
 
         {items.length === 0 ? (
           <ScreenEmpty
-            title="Vazifa yo'q"
+            title={t("groupworkspace.vazifa_yoq")}
             description={
               isTeacher
                 ? "Birinchi vazifani qo'shing."
@@ -159,7 +161,7 @@ export function AssignmentsSection({
       <ConfirmSheet
         open={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
-        title="Vazifani o'chirish"
+        title={t("groupworkspace.vazifani_ochirish")}
         description={`"${deleteTarget?.title ?? ""}" va unga bog'liq topshiriqlar o'chadi.`}
         loading={removeAssignment.isPending}
         onConfirm={() => {
@@ -199,6 +201,7 @@ function SubmissionPill({
   submission: Submission;
   onOpen: (submission: Submission) => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const live = useSubmission(submission.id, { poll: submission.status === "checking" });
   const data = live.data ?? submission;
@@ -228,7 +231,7 @@ function SubmissionPill({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Natijani ochish"
+      accessibilityLabel={t("groupworkspace.natijani_ochish")}
       onPress={() => onOpen(data)}
       style={({ pressed }) => [
         styles.pill,
@@ -252,6 +255,7 @@ function AssignmentSheet({
   onClose: () => void;
   onOpenResult: (submission: Submission) => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [file, setFile] = useState<PickedFile | null>(null);
   const submit = useSubmitHomework();
@@ -317,7 +321,7 @@ function AssignmentSheet({
 
           {assignment.mySubmission ? (
             <Button
-              title="Natijani ko'rish"
+              title={t("groupworkspace.natijani_korish")}
               variant="secondary"
               onPress={() => {
                 onOpenResult(assignment.mySubmission as Submission);
@@ -333,17 +337,17 @@ function AssignmentSheet({
           </Text>
 
           <View style={styles.pickers}>
-            <IconButton accessibilityLabel="Fayl tanlash" onPress={() => void choose(pickDocument)}>
+            <IconButton accessibilityLabel={t("groupworkspace.fayl_tanlash")} onPress={() => void choose(pickDocument)}>
               <FileUp size={22} color={palette["primary-text"]} />
             </IconButton>
             <IconButton
-              accessibilityLabel="Galereyadan rasm"
+              accessibilityLabel={t("groupworkspace.galereyadan_rasm")}
               onPress={() => void choose(() => pickImage("library"))}
             >
               <ImageIcon size={22} color={palette["primary-text"]} />
             </IconButton>
             <IconButton
-              accessibilityLabel="Kameradan suratga olish"
+              accessibilityLabel={t("groupworkspace.kameradan_suratga_olish")}
               onPress={() => void choose(() => pickImage("camera"))}
             >
               <Camera size={22} color={palette["primary-text"]} />
@@ -362,13 +366,13 @@ function AssignmentSheet({
                 variant="caption"
                 tone="danger"
               >
-                O'chirish
+                {t("groupworkspace.ochirish")}
               </Text>
             </View>
           ) : null}
 
           <Button
-            title="Topshirish"
+            title={t("groupworkspace.topshirish")}
             size="lg"
             disabled={!file}
             loading={submit.isPending}

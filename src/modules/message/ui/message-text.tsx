@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Linking, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { PlayCircle } from "lucide-react-native";
@@ -36,6 +37,7 @@ const RECORDING_PATH = /^\/recordings\//;
  * aks holda bir xil narsa ikki marta ko'rinadi.
  */
 export function MessageText({ text, outgoing = false }: MessageTextProps) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const tokens = useMemo(() => tokenizeMessageText(text), [text]);
@@ -92,7 +94,7 @@ export function MessageText({ text, outgoing = false }: MessageTextProps) {
         <Pressable
           key={`recording-${index}`}
           accessibilityRole="button"
-          accessibilityLabel="Dars yozuvini ko'rish"
+          accessibilityLabel={t("message.dars_yozuvini_korish")}
           onPress={() => router.push(token.href)}
           style={({ pressed }) => [
             styles.chip,
@@ -115,7 +117,7 @@ export function MessageText({ text, outgoing = false }: MessageTextProps) {
               color: outgoing ? palette["bubble-own"] : palette["primary-text"],
             }}
           >
-            Yozuvni ko'rish
+            {t("message.yozuvni_korish")}
           </Text>
         </Pressable>
       ))}

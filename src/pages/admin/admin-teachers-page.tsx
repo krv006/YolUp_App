@@ -1,4 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { ArrowLeft, ShieldCheck } from "lucide-react-native";
 import { useApproveTeacher, usePendingTeachers, useTeachers } from "@/modules/auth";
@@ -24,6 +25,7 @@ import {
  * shuning uchun kutayotganlar ro'yxati tepada va ajratib ko'rsatiladi.
  */
 export function AdminTeachersPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
 
@@ -39,7 +41,7 @@ export function AdminTeachersPage() {
   if (pending.isLoading || teachers.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="O'qituvchilar yuklanmoqda…" />
+        <ScreenLoading label={t("admin.oqituvchilar_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -50,11 +52,11 @@ export function AdminTeachersPage() {
   return (
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel="Orqaga" onPress={goBack}>
+        <IconButton accessibilityLabel={t("admin.orqaga")} onPress={goBack}>
           <ArrowLeft size={22} color={palette.foreground} />
         </IconButton>
         <Text variant="subheading" style={styles.title}>
-          O'qituvchilar
+          {t("admin.oqituvchilar")}
         </Text>
       </View>
 
@@ -92,7 +94,7 @@ export function AdminTeachersPage() {
                   teacher={teacher}
                   action={
                     <Button
-                      title="Tasdiqlash"
+                      title={t("admin.tasdiqlash")}
                       fullWidth={false}
                       loading={approve.isPending}
                       onPress={() => approve.mutate(teacher.id)}
@@ -116,9 +118,9 @@ export function AdminTeachersPage() {
                 teacher={teacher}
                 action={
                   teacher.isApproved ? (
-                    <Badge label="Tasdiqlangan" tone="success" />
+                    <Badge label={t("admin.tasdiqlangan")} tone="success" />
                   ) : (
-                    <Badge label="Kutmoqda" tone="warning" />
+                    <Badge label={t("admin.kutmoqda")} tone="warning" />
                   )
                 }
               />
@@ -127,7 +129,7 @@ export function AdminTeachersPage() {
 
           {all.length === 0 ? (
             <Text variant="caption" tone="muted">
-              O'qituvchi topilmadi.
+              {t("admin.oqituvchi_topilmadi")}
             </Text>
           ) : null}
         </View>

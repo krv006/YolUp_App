@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { CheckCircle2, Clock3, ListChecks } from "lucide-react-native";
 import { HomeworkResultSheet } from "@/modules/homework/ui/homework-result-sheet";
@@ -19,6 +20,7 @@ import {
 
 /** Farzandning vazifalari va AI tekshiruvi — veb `parent-homework-page.tsx` porti. */
 export function ParentHomeworkPage() {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const { selectedChild, selectedChildId } = useSelectedChild();
   const homework = useParentHomework(selectedChildId);
@@ -28,8 +30,8 @@ export function ParentHomeworkPage() {
     return (
       <Screen>
         <ScreenEmpty
-          title="Farzand tanlanmagan"
-          description="Avval 'Farzandlar' bo'limida o'quvchi hisobini ulang."
+          title={t("parent.farzand_tanlanmagan")}
+          description={t("parent.avval_farzandlar_bolimida_oquvchi_hisobini_u")}
         />
       </Screen>
     );
@@ -38,7 +40,7 @@ export function ParentHomeworkPage() {
   if (homework.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Vazifalar yuklanmoqda…" />
+        <ScreenLoading label={t("parent.vazifalar_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -71,14 +73,14 @@ export function ParentHomeworkPage() {
         <View style={styles.head}>
           <Text variant="heading">{selectedChild.name}</Text>
           <Text variant="caption" tone="muted">
-            Topshiriqlar va tekshiruv natijalari.
+            {t("parent.topshiriqlar_va_tekshiruv_natijalari")}
           </Text>
         </View>
 
         <ChildSelector />
 
         {items.length === 0 ? (
-          <ScreenEmpty title="Vazifa topilmadi" />
+          <ScreenEmpty title={t("parent.vazifa_topilmadi")} />
         ) : (
           items.map((item) => (
             <View
@@ -122,10 +124,11 @@ function SubmissionPill({
   submission: Submission | null;
   onOpen: (submission: Submission) => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   if (!submission) {
-    return <Badge label="Topshirilmagan" tone="neutral" />;
+    return <Badge label={t("parent.topshirilmagan")} tone="neutral" />;
   }
 
   const content =
@@ -140,12 +143,12 @@ function SubmissionPill({
       <>
         <Clock3 size={14} color={palette["warning-strong"]} />
         <Text variant="caption" style={{ color: palette["warning-strong"] }}>
-          Tekshirilmoqda
+          {t("parent.tekshirilmoqda")}
         </Text>
       </>
     ) : (
       <Text variant="caption" style={{ color: palette["destructive-strong"] }}>
-        Tekshiruv xatosi
+        {t("parent.tekshiruv_xatosi")}
       </Text>
     );
 
@@ -159,7 +162,7 @@ function SubmissionPill({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Natijani ochish"
+      accessibilityLabel={t("parent.natijani_ochish")}
       onPress={() => onOpen(submission)}
       style={({ pressed }) => [styles.pill, { backgroundColor: background, opacity: pressed ? 0.85 : 1 }]}
     >

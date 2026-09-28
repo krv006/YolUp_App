@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
@@ -54,6 +55,7 @@ import {
  * Chiqarilmagani faqat KENG jadvallar: to'liq kurs boshqaruvi veb'da qoladi.
  */
 export function AdminDashboardPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { user, logout } = useAuth();
@@ -82,7 +84,7 @@ export function AdminDashboardPage() {
   if (loading) {
     return (
       <Screen>
-        <ScreenLoading label="Panel yuklanmoqda…" />
+        <ScreenLoading label={t("admin.panel_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -104,13 +106,13 @@ export function AdminDashboardPage() {
             <View style={styles.eyebrow}>
               <ShieldCheck size={13} color={palette["primary-text"]} />
               <Text variant="caption" tone="brand">
-                ADMINISTRATOR
+                {t("admin.administrator")}
               </Text>
             </View>
             <Text variant="heading">{user?.name}</Text>
           </View>
           <IconButton
-            accessibilityLabel="Bildirishnomalar"
+            accessibilityLabel={t("admin.bildirishnomalar")}
             onPress={() => router.push("/notifications")}
           >
             <Bell size={20} color={palette["muted-foreground"]} />
@@ -129,7 +131,7 @@ export function AdminDashboardPage() {
         {hasError ? (
           <View style={[styles.notice, { backgroundColor: palette["warning-soft"] }]}>
             <Text variant="caption" style={{ color: palette["warning-strong"] }}>
-              Ayrim ma'lumotlarni yuklash uchun ruxsat yetarli emas.
+              {t("admin.ayrim_malumotlarni_yuklash_uchun_ruxsat_yeta")}
             </Text>
           </View>
         ) : null}
@@ -138,27 +140,27 @@ export function AdminDashboardPage() {
           <Metric
             icon={BookOpen}
             value={courses.data?.total ?? courses.data?.items.length ?? 0}
-            label="Kurslar"
+            label={t("admin.kurslar")}
             tone="blue"
           />
           <Metric
             icon={CalendarDays}
             value={lessons.data?.total ?? lessons.data?.items.length ?? 0}
-            label="Darslar"
+            label={t("admin.darslar")}
             tone="violet"
           />
           <Metric
             icon={CheckCircle2}
             value={attendance.data?.total ?? attendance.data?.items.length ?? 0}
-            label="Davomat"
+            label={t("admin.davomat")}
             tone="emerald"
           />
         </View>
 
         <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
           <ListItem
-            title="O'qituvchilar"
-            subtitle="Tasdiqlash va reyting"
+            title={t("admin.oqituvchilar")}
+            subtitle={t("admin.tasdiqlash_va_reyting")}
             leading={<UsersRound size={20} color={palette["muted-foreground"]} />}
             chevron
             onPress={() => router.push(ROUTES.admin.teachers)}
@@ -167,16 +169,16 @@ export function AdminDashboardPage() {
             <>
               <Separator inset={52} />
               <ListItem
-                title="Xabar yuborish"
-                subtitle="Barcha yoki tanlangan foydalanuvchilarga"
+                title={t("admin.xabar_yuborish")}
+                subtitle={t("admin.barcha_yoki_tanlangan_foydalanuvchilarga")}
                 leading={<Send size={20} color={palette["muted-foreground"]} />}
                 chevron
                 onPress={() => setSendOpen(true)}
               />
               <Separator inset={52} />
               <ListItem
-                title="Yuborilgan xabarlar"
-                subtitle="Kim o'qigani bilan"
+                title={t("admin.yuborilgan_xabarlar")}
+                subtitle={t("admin.kim_oqigani_bilan")}
                 leading={<Megaphone size={20} color={palette["muted-foreground"]} />}
                 chevron
                 onPress={() => setSentOpen(true)}
@@ -189,7 +191,7 @@ export function AdminDashboardPage() {
 
         <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
           <Text variant="label" style={styles.cardTitle}>
-            So'nggi kurslar
+            {t("admin.songgi_kurslar")}
           </Text>
           {(courses.data?.items ?? []).map((course, index) => (
             <View key={course.id}>
@@ -211,13 +213,13 @@ export function AdminDashboardPage() {
           ))}
           {(courses.data?.items ?? []).length === 0 ? (
             <Text variant="caption" tone="muted">
-              Kurs topilmadi.
+              {t("admin.kurs_topilmadi")}
             </Text>
           ) : null}
         </View>
 
         <Button
-          title="Chiqish"
+          title={t("admin.chiqish")}
           variant="secondary"
           icon={<LogOut size={16} color={palette["secondary-foreground"]} />}
           onPress={() => void signOut()}
@@ -279,6 +281,7 @@ const PERIODS: { value: DashboardPeriod; label: string }[] = [
  * (kurslar, darslar, davomat ro'yxatlari bilan) qayta chizilardi.
  */
 function TrendsSection() {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [period, setPeriod] = useState<DashboardPeriod>("month");
   const trends = useDashboardTrends(period);
@@ -288,7 +291,7 @@ function TrendsSection() {
   return (
     <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
       <Text variant="label" style={styles.cardTitle}>
-        Dinamika
+        {t("admin.dinamika")}
       </Text>
 
       <ChipRow>
@@ -309,7 +312,7 @@ function TrendsSection() {
       ) : (
         <>
           <Text variant="caption" tone="muted">
-            Yangi o&apos;quvchilar
+            {t("admin.yangi_o_apos_quvchilar")}
           </Text>
           <TrendLineChart
             labels={data.labels}
@@ -325,7 +328,7 @@ function TrendsSection() {
           />
 
           <Text variant="caption" tone="muted">
-            Darslar holati
+            {t("admin.darslar_holati")}
           </Text>
           <TrendStackedBarChart
             labels={data.labels}
@@ -350,7 +353,7 @@ function TrendsSection() {
             * atrofida bo'ladi. Noldan boshlasak, farq ko'rinmay ketardi.
             */}
           <Text variant="caption" tone="muted">
-            Testlar — o&apos;rtacha ball
+            {t("admin.testlar_o_apos_rtacha_ball")}
           </Text>
           <TrendLineChart
             zeroBase={false}

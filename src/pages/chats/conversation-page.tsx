@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 /*
  * RN ning o'z `KeyboardAvoidingView` i EMAS.
@@ -35,6 +36,7 @@ import { Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
  * boshqaradi. Bu yerda faqat ko'rinish.
  */
 export function ConversationPage({ role }: { role: ConversationRole }) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { palette } = useTheme();
@@ -71,7 +73,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   if (chat.conversation.isLoading && !conversation) {
     return (
       <Screen>
-        <ScreenLoading label="Suhbat ochilmoqda…" />
+        <ScreenLoading label={t("chats.suhbat_ochilmoqda")} />
       </Screen>
     );
   }
@@ -80,7 +82,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
     return (
       <Screen>
         <ScreenError
-          message="Suhbat topilmadi"
+          message={t("chats.suhbat_topilmadi")}
           onRetry={() => void chat.conversation.refetch()}
         />
       </Screen>

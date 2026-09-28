@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Link } from "expo-router";
 import { ROUTES } from "@/shared/config";
 import { Screen, ScreenEmpty, Text } from "@/shared/ui";
@@ -11,16 +12,17 @@ import { Screen, ScreenEmpty, Text } from "@/shared/ui";
  * BACKEND 403 qaytarganda va chuqur havola orqali ochiladi.
  */
 export default function ForbiddenRoute() {
+  const { t } = useTranslation("mobile");
   return (
     <Screen>
       <ScreenEmpty
-        title="Bu bo'limga ruxsat yo'q"
-        description="Hisobingiz ushbu sahifani ko'rish huquqiga ega emas."
+        title={t("app.bu_bolimga_ruxsat_yoq")}
+        description={t("app.hisobingiz_ushbu_sahifani_korish_huquqiga_eg")}
       />
       <View style={styles.actions}>
         <Link href={ROUTES.root}>
           <Text tone="brand" variant="label">
-            Bosh sahifaga qaytish
+            {t("app.bosh_sahifaga_qaytish")}
           </Text>
         </Link>
       </View>

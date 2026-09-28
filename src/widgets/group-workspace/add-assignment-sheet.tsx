@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { FileUp, Paperclip } from "lucide-react-native";
 import { useCreateAssignment } from "@/modules/homework";
@@ -52,6 +53,7 @@ export function AddAssignmentSheet({
   lessons,
   isLanguageSubject = false,
 }: AddAssignmentSheetProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const create = useCreateAssignment();
 
@@ -127,19 +129,19 @@ export function AddAssignmentSheet({
     <Sheet
       open={open}
       onClose={close}
-      title="Yangi vazifa"
-      description="Topshiriq, muddat va kerakli fayllarni bir joyda yuboring."
+      title={t("groupworkspace.yangi_vazifa")}
+      description={t("groupworkspace.topshiriq_muddat_va_kerakli_fayllarni_bir_jo")}
     >
       <Input
-        label="Vazifa nomi"
-        placeholder="Masalan: Kvadrat tenglamalar — 5 ta misol"
+        label={t("groupworkspace.vazifa_nomi")}
+        placeholder={t("groupworkspace.masalan_kvadrat_tenglamalar_5_ta_misol")}
         value={title}
         onChangeText={setTitle}
       />
 
       <Input
-        label="Vazifa matni"
-        placeholder="Misollar, savollar, ko'rsatmalar…"
+        label={t("groupworkspace.vazifa_matni")}
+        placeholder={t("groupworkspace.misollar_savollar_korsatmalar")}
         value={description}
         onChangeText={setDescription}
         multiline
@@ -147,7 +149,7 @@ export function AddAssignmentSheet({
       />
 
       <View style={styles.attachRow}>
-        <IconButton accessibilityLabel="Fayl biriktirish" onPress={() => void attach()}>
+        <IconButton accessibilityLabel={t("groupworkspace.fayl_biriktirish")} onPress={() => void attach()}>
           <FileUp size={22} color={palette["primary-text"]} />
         </IconButton>
         {file ? (
@@ -162,29 +164,29 @@ export function AddAssignmentSheet({
               variant="caption"
               tone="danger"
             >
-              O'chirish
+              {t("groupworkspace.ochirish")}
             </Text>
           </View>
         ) : (
           <Text variant="caption" tone="muted">
-            PDF, DOCX yoki rasm biriktirish (ixtiyoriy)
+            {t("groupworkspace.pdf_docx_yoki_rasm_biriktirish_ixtiyoriy")}
           </Text>
         )}
       </View>
 
       <View style={styles.row}>
         <View style={styles.half}>
-          <DateField label="Muddat" value={dueDate} onChange={setDueDate} optional />
+          <DateField label={t("groupworkspace.muddat")} value={dueDate} onChange={setDueDate} optional />
         </View>
         <View style={styles.half}>
-          <TimeField label="Vaqt" value={dueTime} onChange={setDueTime} />
+          <TimeField label={t("groupworkspace.vaqt")} value={dueTime} onChange={setDueTime} />
         </View>
       </View>
 
       {/* Tekshiruv turi faqat til fanida ma'noli. */}
       {isLanguageSubject ? (
         <SelectField
-          label="Tekshiruv turi"
+          label={t("groupworkspace.tekshiruv_turi")}
           value={skillKey}
           options={SKILL_OPTIONS}
           onChange={setSkillKey}
@@ -192,21 +194,21 @@ export function AddAssignmentSheet({
       ) : null}
 
       <SelectField
-        label="Qaysi dars uchun"
+        label={t("groupworkspace.qaysi_dars_uchun")}
         value={lessonId}
         options={lessonOptions}
         onChange={setLessonId}
       />
 
       <Input
-        label="Baholash izohi — ixtiyoriy"
-        placeholder="Masalan: har bir misol 2 balldan"
+        label={t("groupworkspace.baholash_izohi_ixtiyoriy")}
+        placeholder={t("groupworkspace.masalan_har_bir_misol_2_balldan")}
         value={grading}
         onChangeText={setGrading}
       />
 
       <Button
-        title="Vazifani yuborish"
+        title={t("groupworkspace.vazifani_yuborish")}
         size="lg"
         loading={create.isPending}
         disabled={!title.trim() || !description.trim()}

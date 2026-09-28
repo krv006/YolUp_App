@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { CircleAlert, Clock3, Lightbulb } from "lucide-react-native";
 import type { AiQuestion, Submission } from "@/shared/types";
 import {
@@ -27,11 +28,12 @@ export interface HomeworkResultSheetProps {
  * kutilmagan shakl ekranni yiqitmaydi.
  */
 export function HomeworkResultSheet({ submission, onClose }: HomeworkResultSheetProps) {
+  const { t } = useTranslation("mobile");
   return (
     <Sheet
       open={Boolean(submission)}
       onClose={onClose}
-      title="Tekshiruv natijasi"
+      title={t("homework.tekshiruv_natijasi")}
       description={submission?.fileName}
     >
       {submission ? <ResultBody submission={submission} /> : null}
@@ -40,13 +42,14 @@ export function HomeworkResultSheet({ submission, onClose }: HomeworkResultSheet
 }
 
 function ResultBody({ submission }: { submission: Submission }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   if (submission.status === "checking") {
     return (
       <View style={styles.center}>
         <Clock3 size={28} color={palette["muted-foreground"]} />
-        <ScreenLoading label="AI ishingizni tekshirmoqda…" />
+        <ScreenLoading label={t("homework.ai_ishingizni_tekshirmoqda")} />
         <Text variant="caption" tone="muted" style={styles.centerText}>
           Bu bir necha daqiqa olishi mumkin. Ekranni yopib turishingiz mumkin —
           natija tayyor bo'lgach shu yerda ko'rinadi.
@@ -73,14 +76,14 @@ function ResultBody({ submission }: { submission: Submission }) {
       <View style={[styles.score, { backgroundColor: palette["primary-tint"] }]}>
         <View style={styles.scoreBody}>
           <Text variant="caption" tone="muted">
-            Umumiy natija
+            {t("homework.umumiy_natija")}
           </Text>
           <Text variant="title">{submission.overallScore ?? "—"}</Text>
         </View>
         <Badge label={submission.grade || "Baholanmagan"} tone={gradeTone(submission.overallScore)} />
       </View>
 
-      {submission.isLate ? <Badge label="Kech topshirilgan" tone="warning" /> : null}
+      {submission.isLate ? <Badge label={t("homework.kech_topshirilgan")} tone="warning" /> : null}
 
       {result?.summary ? (
         <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
@@ -88,10 +91,10 @@ function ResultBody({ submission }: { submission: Submission }) {
             <Lightbulb size={16} color={palette["primary-text"]} />
             <Text variant="label">Xulosa</Text>
           </View>
-          <ListBlock title="Kuchli tomonlar" items={result.summary.strengths} />
-          <ListBlock title="Zaif tomonlar" items={result.summary.weaknesses} />
-          <ListBlock title="Takrorlash kerak" items={result.summary.topicsToReview} />
-          <ListBlock title="Tavsiyalar" items={result.summary.recommendations} />
+          <ListBlock title={t("homework.kuchli_tomonlar")} items={result.summary.strengths} />
+          <ListBlock title={t("homework.zaif_tomonlar")} items={result.summary.weaknesses} />
+          <ListBlock title={t("homework.takrorlash_kerak")} items={result.summary.topicsToReview} />
+          <ListBlock title={t("homework.tavsiyalar")} items={result.summary.recommendations} />
         </View>
       ) : null}
 
@@ -103,6 +106,7 @@ function ResultBody({ submission }: { submission: Submission }) {
 }
 
 function QuestionBlock({ index, question }: { index: number; question: AiQuestion }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   return (
@@ -119,15 +123,15 @@ function QuestionBlock({ index, question }: { index: number; question: AiQuestio
       {question.question ? <Text variant="label">{question.question}</Text> : null}
 
       {question.studentAnswer ? (
-        <Field label="Sizning javobingiz" value={question.studentAnswer} />
+        <Field label={t("homework.sizning_javobingiz")} value={question.studentAnswer} />
       ) : null}
       {question.correctAnswer ? (
-        <Field label="To'g'ri javob" value={question.correctAnswer} tone="success" />
+        <Field label={t("homework.togri_javob")} value={question.correctAnswer} tone="success" />
       ) : null}
-      {question.analysis ? <Field label="Tahlil" value={question.analysis} /> : null}
+      {question.analysis ? <Field label={t("homework.tahlil")} value={question.analysis} /> : null}
 
-      <ListBlock title="Xatolar" items={question.mistakes} />
-      <ListBlock title="Tavsiyalar" items={question.suggestions} />
+      <ListBlock title={t("homework.xatolar")} items={question.mistakes} />
+      <ListBlock title={t("homework.tavsiyalar")} items={question.suggestions} />
     </View>
   );
 }

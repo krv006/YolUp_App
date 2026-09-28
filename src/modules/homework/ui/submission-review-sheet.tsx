@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { CheckCircle2, Clock3, Download, RefreshCw } from "lucide-react-native";
 import type { Assignment, Submission } from "@/shared/types";
@@ -36,6 +37,7 @@ export interface SubmissionReviewSheetProps {
  * (`domain.ts` dagi izoh).
  */
 export function SubmissionReviewSheet({ assignment, onClose }: SubmissionReviewSheetProps) {
+  const { t } = useTranslation("mobile");
   const [selected, setSelected] = useState<Submission | null>(null);
 
   /*
@@ -63,10 +65,10 @@ export function SubmissionReviewSheet({ assignment, onClose }: SubmissionReviewS
           : undefined
       }
     >
-      {detail.isLoading && !assignment ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+      {detail.isLoading && !assignment ? <ScreenLoading label={t("homework.yuklanmoqda")} /> : null}
 
       {data && data.submissions.length === 0 ? (
-        <ScreenEmpty title="Hali topshirilmagan" description="O'quvchilar topshirgach shu yerda ko'rinadi." />
+        <ScreenEmpty title={t("homework.hali_topshirilmagan")} description={t("homework.oquvchilar_topshirgach_shu_yerda_korinadi")} />
       ) : null}
 
       {(data?.submissions ?? []).map((submission, index) => (
@@ -92,6 +94,7 @@ function SubmissionRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const review = useReviewSubmission();
   const recheck = useRecheckSubmission();
@@ -150,7 +153,7 @@ function SubmissionRow({
         <View style={styles.detail}>
           <View style={styles.actions}>
             <Button
-              title="Faylni ochish"
+              title={t("homework.faylni_ochish")}
               variant="secondary"
               fullWidth={false}
               loading={busy}
@@ -160,7 +163,7 @@ function SubmissionRow({
               }
             />
             <Button
-              title="Qayta tekshirish"
+              title={t("homework.qayta_tekshirish")}
               variant="ghost"
               fullWidth={false}
               loading={recheck.isPending}
@@ -173,14 +176,14 @@ function SubmissionRow({
             <View style={styles.note}>
               <Clock3 size={14} color={palette["warning-strong"]} />
               <Text variant="caption" tone="muted">
-                AI tekshiruvi tugagach baho o'zi yangilanadi.
+                {t("homework.ai_tekshiruvi_tugagach_baho_ozi_yangilanadi")}
               </Text>
             </View>
           ) : null}
 
           {submission.result?.summary ? (
             <Text variant="caption" tone="muted">
-              AI xulosasi natija oynasida to'liq ko'rinadi.
+              {t("homework.ai_xulosasi_natija_oynasida_toliq_korinadi")}
             </Text>
           ) : null}
 
@@ -215,6 +218,7 @@ function GradeForm({
   saving: boolean;
   onSave: (score: string, grade: string) => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [score, setScore] = useState(initialScore);
   const [grade, setGrade] = useState(initialGrade);
@@ -224,7 +228,7 @@ function GradeForm({
       <View style={styles.gradeRow}>
         <View style={styles.scoreField}>
           <Input
-            label="Ball"
+            label={t("homework.ball")}
             value={score}
             onChangeText={setScore}
             keyboardType="number-pad"
@@ -232,12 +236,12 @@ function GradeForm({
           />
         </View>
         <View style={styles.gradeField}>
-          <Input label="Baho" value={grade} onChangeText={setGrade} placeholder="A'lo" />
+          <Input label={t("homework.baho")} value={grade} onChangeText={setGrade} placeholder={t("homework.alo")} />
         </View>
       </View>
 
       <Button
-        title="Bahoni saqlash"
+        title={t("homework.bahoni_saqlash")}
         loading={saving}
         icon={<CheckCircle2 size={16} color={palette["primary-foreground"]} />}
         onPress={() => onSave(score, grade)}

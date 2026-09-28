@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboardState } from "react-native-keyboard-controller";
@@ -33,6 +34,7 @@ export function MessageComposer({
   disabled = false,
   disabledReason,
 }: MessageComposerProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
   /*
@@ -112,7 +114,7 @@ export function MessageComposer({
               {replyTo.text}
             </Text>
           </View>
-          <IconButton accessibilityLabel="Javobni bekor qilish" onPress={onCancelReply}>
+          <IconButton accessibilityLabel={t("message.javobni_bekor_qilish")} onPress={onCancelReply}>
             <X size={18} color={palette["muted-foreground"]} />
           </IconButton>
         </View>
@@ -128,7 +130,7 @@ export function MessageComposer({
               borderColor: palette.border,
             },
           ]}
-          placeholder="Xabar yozing…"
+          placeholder={t("message.xabar_yozing")}
           placeholderTextColor={palette["muted-foreground"]}
           value={text}
           onChangeText={handleChange}
@@ -136,13 +138,13 @@ export function MessageComposer({
           // iOS'da `multiline` bilan `blurOnSubmit=false` bo'lmasa Enter
           // klaviaturani yopib yuboradi.
           blurOnSubmit={false}
-          accessibilityLabel="Xabar matni"
+          accessibilityLabel={t("message.xabar_matni")}
           maxLength={4000}
         />
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Yuborish"
+          accessibilityLabel={t("message.yuborish")}
           accessibilityState={{ disabled: !canSend }}
           disabled={!canSend}
           onPress={send}

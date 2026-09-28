@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Plus, UserMinus } from "lucide-react-native";
 import { useCourseStudents, useUnenrollStudent } from "@/modules/course";
@@ -21,12 +22,13 @@ import { AddStudentSheet } from "./add-student-sheet";
  * Qo'shish, ro'yxat va kursdan chiqarish — veb bilan teng.
  */
 export function StudentsSection({ courseId }: { courseId: string }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [addOpen, setAddOpen] = useState(false);
   const unenroll = useUnenrollStudent();
   const students = useCourseStudents(courseId, { page_size: 100 });
 
-  if (students.isLoading) return <ScreenLoading label="O'quvchilar yuklanmoqda…" />;
+  if (students.isLoading) return <ScreenLoading label={t("groupworkspace.oquvchilar_yuklanmoqda")} />;
 
   // `getStudents` sahifalangan javob qaytaradi (`Page<Enrollment>`),
   // ro'yxatning o'zi `items` ichida.
@@ -37,7 +39,7 @@ export function StudentsSection({ courseId }: { courseId: string }) {
       <ScrollView contentContainerStyle={styles.list}>
         <View style={styles.addRow}>
           <Button
-            title="O'quvchi qo'shish"
+            title={t("groupworkspace.oquvchi_qoshish")}
             variant="secondary"
             icon={<Plus size={16} color={palette["secondary-foreground"]} />}
             onPress={() => setAddOpen(true)}
@@ -45,7 +47,7 @@ export function StudentsSection({ courseId }: { courseId: string }) {
         </View>
 
         {items.length === 0 ? (
-          <ScreenEmpty title="O'quvchi yo'q" description="Bu guruhga hali hech kim yozilmagan." />
+          <ScreenEmpty title={t("groupworkspace.oquvchi_yoq")} description={t("groupworkspace.bu_guruhga_hali_hech_kim_yozilmagan")} />
         ) : null}
 
         {items.map((enrollment, index) => (
@@ -62,7 +64,7 @@ export function StudentsSection({ courseId }: { courseId: string }) {
                 </Text>
               </View>
               <IconButton
-                accessibilityLabel="Kursdan chiqarish"
+                accessibilityLabel={t("groupworkspace.kursdan_chiqarish")}
                 disabled={unenroll.isPending}
                 onPress={() => unenroll.mutate({ courseId, studentId: enrollment.student.id })}
               >

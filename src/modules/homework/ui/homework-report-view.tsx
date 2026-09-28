@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import type { HomeworkReport, HomeworkReportSummary } from "@/shared/types";
 import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
 
@@ -11,14 +12,15 @@ import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
  * qadamida, tendensiya grafigi kerak bo'lganda kiritiladi.
  */
 export function HomeworkReportView({ report }: { report: HomeworkReport }) {
+  const { t } = useTranslation("mobile");
   return (
     <View style={styles.wrapper}>
-      <SummaryCard title="Barcha fanlar" summary={report.overall} highlight />
+      <SummaryCard title={t("homework.barcha_fanlar")} summary={report.overall} highlight />
 
       {report.courses.length > 0 ? (
         <>
           <Text variant="label" style={styles.sectionTitle}>
-            Fanlar bo'yicha
+            {t("homework.fanlar_boyicha")}
           </Text>
           {report.courses.map((course) => (
             <SummaryCard key={course.courseId} title={course.courseTitle} summary={course} />
@@ -46,6 +48,7 @@ function SummaryCard({
   summary: HomeworkReportSummary;
   highlight?: boolean;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
   return (
@@ -69,9 +72,9 @@ function SummaryCard({
       </View>
 
       <View style={styles.metrics}>
-        <Metric label="Berilgan" value={String(summary.assignedCount)} />
-        <Metric label="Topshirilgan" value={String(summary.submittedCount)} />
-        <Metric label="Topshirish" value={`${Math.round(summary.submissionRate)}%`} />
+        <Metric label={t("homework.berilgan")} value={String(summary.assignedCount)} />
+        <Metric label={t("homework.topshirilgan")} value={String(summary.submittedCount)} />
+        <Metric label={t("homework.topshirish")} value={`${Math.round(summary.submissionRate)}%`} />
       </View>
 
       {/* Progress chizig'i — foizni bir qarashda ko'rsatadi. */}

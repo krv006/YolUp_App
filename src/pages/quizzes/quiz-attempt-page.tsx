@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Check, CircleAlert, X } from "lucide-react-native";
@@ -58,6 +59,7 @@ function isAnswered(value: QuizAnswerValue): boolean {
  * o'zida ochiladi — alohida marshrut qo'shish ortiqcha bo'lardi.
  */
 export function QuizAttemptPage() {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const { quizId, tab } = useLocalSearchParams<{ quizId: string; tab?: string }>();
@@ -100,7 +102,7 @@ export function QuizAttemptPage() {
   if (quiz.isLoading) {
     return (
       <Screen>
-        <ScreenLoading label="Test yuklanmoqda…" />
+        <ScreenLoading label={t("quizzes.test_yuklanmoqda")} />
       </Screen>
     );
   }
@@ -108,7 +110,7 @@ export function QuizAttemptPage() {
   if (quiz.isError || !quiz.data) {
     return (
       <Screen>
-        <ScreenError message="Testni yuklab bo'lmadi" onRetry={() => void quiz.refetch()} />
+        <ScreenError message={t("quizzes.testni_yuklab_bolmadi")} onRetry={() => void quiz.refetch()} />
       </Screen>
     );
   }
@@ -116,7 +118,7 @@ export function QuizAttemptPage() {
   return (
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel="Orqaga" onPress={goBack}>
+        <IconButton accessibilityLabel={t("quizzes.orqaga")} onPress={goBack}>
           <ArrowLeft size={22} color={palette.foreground} />
         </IconButton>
         <View style={styles.headBody}>
@@ -166,7 +168,7 @@ export function QuizAttemptPage() {
             ) : null}
 
             {questions.length === 0 ? (
-              <ScreenEmpty title="Bu testda savol yo'q" />
+              <ScreenEmpty title={t("quizzes.bu_testda_savol_yoq")} />
             ) : (
               questions.map((question, index) => (
                 <QuestionCard
@@ -187,12 +189,12 @@ export function QuizAttemptPage() {
                   <View style={styles.warning}>
                     <CircleAlert size={15} color={palette.warning} />
                     <Text variant="caption" tone="muted">
-                      Javob berilmagan savollar xato deb hisoblanadi.
+                      {t("quizzes.javob_berilmagan_savollar_xato_deb_hisoblana")}
                     </Text>
                   </View>
                 ) : null}
                 <Button
-                  title="Topshirish"
+                  title={t("quizzes.topshirish")}
                   size="lg"
                   loading={submit.isPending}
                   onPress={() => void send()}
@@ -243,6 +245,7 @@ function AttemptResult({
   result: QuizAttemptResult;
   onRetake: () => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const percent = result.maxScore > 0 ? Math.round((result.score / result.maxScore) * 100) : 0;
 
@@ -250,7 +253,7 @@ function AttemptResult({
     <>
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
         <Text variant="caption" tone="muted">
-          Natijangiz
+          {t("quizzes.natijangiz")}
         </Text>
         <Text variant="title">
           {result.score} / {result.maxScore}
@@ -291,7 +294,7 @@ function AttemptResult({
         </View>
       ))}
 
-      <Button title="Qayta yechish" variant="secondary" onPress={onRetake} />
+      <Button title={t("quizzes.qayta_yechish")} variant="secondary" onPress={onRetake} />
     </>
   );
 }
@@ -303,11 +306,12 @@ function AttemptsHistory({
   loading: boolean;
   items: { id: string; score: number; maxScore: number; createdAt: string; studentName: string }[];
 }) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
 
-  if (loading) return <ScreenLoading label="Tarix yuklanmoqda…" />;
+  if (loading) return <ScreenLoading label={t("quizzes.tarix_yuklanmoqda")} />;
   if (items.length === 0) {
-    return <ScreenEmpty title="Urinishlar yo'q" description="Testni birinchi marta yeching." />;
+    return <ScreenEmpty title={t("quizzes.urinishlar_yoq")} description={t("quizzes.testni_birinchi_marta_yeching")} />;
   }
 
   return (

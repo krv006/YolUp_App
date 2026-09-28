@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
@@ -45,6 +46,7 @@ export function LessonCalendar({
   selectedKey,
   onSelectDay,
 }: LessonCalendarProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const days = useMemo(() => buildMonthGrid(month, lessons), [month, lessons]);
 
@@ -52,7 +54,7 @@ export function LessonCalendar({
     <View style={[styles.wrapper, { backgroundColor: palette.card, borderColor: palette.border }]}>
       <View style={styles.head}>
         <IconButton
-          accessibilityLabel="Oldingi oy"
+          accessibilityLabel={t("lesson.oldingi_oy")}
           onPress={() => onMonthChange(subMonths(month, 1))}
         >
           <ChevronLeft size={20} color={palette.foreground} />
@@ -61,7 +63,7 @@ export function LessonCalendar({
           {formatMonthTitle(month)}
         </Text>
         <IconButton
-          accessibilityLabel="Keyingi oy"
+          accessibilityLabel={t("lesson.keyingi_oy")}
           onPress={() => onMonthChange(addMonths(month, 1))}
         >
           <ChevronRight size={20} color={palette.foreground} />

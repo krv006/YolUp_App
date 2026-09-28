@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { Mic, Plus } from "lucide-react-native";
 import type { VoiceRoom, VoiceToken } from "@/shared/types";
@@ -35,6 +36,7 @@ export interface VoiceRoomBarProps {
 }
 
 export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const { active } = useActiveVoiceRoom(courseId);
   const join = useJoinVoiceRoom();
@@ -56,7 +58,7 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
   function submitCreate() {
     if (!courseId) return;
     if (!title.trim()) {
-      toast.error("Xona nomini kiriting");
+      toast.error(t("voice.xona_nomini_kiriting"));
       return;
     }
     create.mutate(
@@ -84,21 +86,21 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
           </Text>
         </View>
         {room?.accessMode === "invite_only" ? (
-          <Badge label="Taklif asosida" tone="neutral" />
+          <Badge label={t("voice.taklif_asosida")} tone="neutral" />
         ) : null}
       </View>
 
       {live && room ? (
         <View style={styles.actions}>
           <Button
-            title="Qo'shilish"
+            title={t("voice.qoshilish")}
             loading={join.isPending}
             style={styles.grow}
             onPress={() => enter(room)}
           />
           {room.accessMode === "invite_only" ? (
             <Button
-              title="Kirish so'rovi"
+              title={t("voice.kirish_sorovi")}
               variant="secondary"
               loading={requestJoin.isPending}
               style={styles.grow}
@@ -108,7 +110,7 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
         </View>
       ) : isTeacher ? (
         <Button
-          title="Xona ochish"
+          title={t("voice.xona_ochish")}
           variant="secondary"
           icon={<Plus size={16} color={palette["secondary-foreground"]} />}
           onPress={() => setCreateOpen(true)}
@@ -118,17 +120,17 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
       <Sheet
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        title="Ovozli xona"
-        description="Faqat mikrofon — kamera va ekran ulashish yo'q."
+        title={t("voice.ovozli_xona")}
+        description={t("voice.faqat_mikrofon_kamera_va_ekran_ulashish_yoq")}
       >
         <Input
-          label="Xona nomi"
-          placeholder="Masalan: Kechqurungi muhokama"
+          label={t("voice.xona_nomi")}
+          placeholder={t("voice.masalan_kechqurungi_muhokama")}
           value={title}
           onChangeText={setTitle}
         />
         <SelectField
-          label="Kirish"
+          label={t("voice.kirish")}
           value={accessMode}
           options={[
             { value: "open", label: "Ochiq — guruh a'zolari kira oladi" },
@@ -141,7 +143,7 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
             ? "Guruhning istalgan a'zosi to'g'ridan-to'g'ri kira oladi."
             : "O'quvchilar so'rov yuboradi, siz tasdiqlaysiz."}
         </Text>
-        <Button title="Ochish" size="lg" loading={create.isPending} onPress={submitCreate} />
+        <Button title={t("voice.ochish")} size="lg" loading={create.isPending} onPress={submitCreate} />
       </Sheet>
 
       {joined ? (

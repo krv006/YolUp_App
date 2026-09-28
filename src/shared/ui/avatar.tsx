@@ -1,4 +1,5 @@
 import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { useTranslation } from "react-i18next";
 import { initials } from "@/shared/lib";
 import type { PresenceStatus } from "@/shared/types";
 import { useTheme } from "./theme";
@@ -34,6 +35,7 @@ function normalizeTone(tone: string | undefined): AvatarTone {
 }
 
 export function Avatar({ name, tone, size = "md", status, src, style }: AvatarProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const metrics = SIZES[size];
   const resolved = normalizeTone(tone);
@@ -69,7 +71,7 @@ export function Avatar({ name, tone, size = "md", status, src, style }: AvatarPr
 
       {status === "online" ? (
         <View
-          accessibilityLabel="Onlayn"
+          accessibilityLabel={t("shared.onlayn")}
           style={[
             styles.dot,
             {

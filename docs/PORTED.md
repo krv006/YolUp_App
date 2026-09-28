@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-28 (i18n tufayli ajralgan fayllar qaytarildi)
+- **Oxirgi yangilanish:** 2026-09-28 (parent + notification qayta sinxronlandi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -45,7 +45,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/analytics/index.ts` | 🟡 MOSLASH | `e7064b45479a` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/analytics/lib/analytics.mappers.ts` | 🟢 NUSXA | `d75c309664ba` | — |
 | `src/modules/analytics/model/analytics.queries.ts` | 🟢 NUSXA | `53e4931cdf57` | — |
-| `src/modules/analytics/ui/trend-line-chart.tsx` | 🟡 MOSLASH | `3164201c6a1e` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish, qiymatlar grafik ostida |
+| `src/modules/analytics/ui/trend-line-chart.tsx` | 🟡 MOSLASH | `3164201c6a1e` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish, qiymatlar grafik ostida; o'q belgisi kichik oraliqda kasr bilan (vebda har doim yaxlitlanadi va "1 1 0 0 0" chiqardi) |
 | `src/modules/analytics/ui/trend-stacked-bar-chart.tsx` | 🟡 MOSLASH | `96a4de5f614c` | hisob-kitob bir xil; `<svg>` -> `react-native-svg`, sichqoncha -> bosish |
 | `src/modules/attendance/api/attendance.api.ts` | 🟢 NUSXA | `1e046237be37` | — |
 | `src/modules/attendance/api/attendance.dto.ts` | 🟢 NUSXA | `ba5a4336ddf1` | — |
@@ -165,14 +165,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/mock-test/model/mock-test.queries.ts` | 🟢 NUSXA | `353ffb03cda3` | — |
 | `src/modules/mock-test/ui/mock-test-runner.tsx` | 🟡 MOSLASH | `256c436b888c` | vaqt mantiqi o'zgarishsiz; soat va tugmalar yuqorida qotirilgan, "To'xtatish" tasdiq so'raydi, variant tugmasi quiz modulidan (`Choice`) |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `980ff0a9d175` | — |
-| `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `b1a8ffe524dc` | — |
-| `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `23a2b0dd4313` | — |
+| `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `6f1a801dfa71` | — |
+| `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `5aa2ccfada89` | — |
 | `src/modules/notification/index.ts` | 🟡 MOSLASH | `96ef103beb1c` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/notification/lib/notification-socket-manager.ts` | 🟢 NUSXA | `b7bb0bd24385` | — |
-| `src/modules/notification/lib/notification.mappers.ts` | 🟢 NUSXA | `47800889edef` | — |
+| `src/modules/notification/lib/notification-socket-manager.ts` | 🟢 NUSXA | `c8aa876d78e0` | — |
+| `src/modules/notification/lib/notification.mappers.ts` | 🟢 NUSXA | `e91371f2ab65` | — |
 | `src/modules/notification/model/notification.queries.ts` | 🟢 NUSXA | `c33aeb3c92fe` | — |
 | `src/modules/notification/model/use-notification-feed.ts` | 🟢 NUSXA | `a4e4ba829fc0` | — |
-| `src/modules/parent/api/parent.api.ts` | 🟢 NUSXA | `ecfaf2de446e` | — |
+| `src/modules/parent/api/parent.api.ts` | 🟢 NUSXA | `c944f05ed9d5` | — |
 | `src/modules/parent/api/parent.dto.ts` | 🟢 NUSXA | `daad031b5dac` | — |
 | `src/modules/parent/index.ts` | 🟡 MOSLASH | `f7f9585ba037` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/parent/lib/parent.mappers.ts` | 🟢 NUSXA | `d8fb049f6581` | — |

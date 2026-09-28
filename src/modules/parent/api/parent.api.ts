@@ -1,4 +1,4 @@
-import { apiClient, type RequestOptions } from "@/shared/api";
+import { apiClient, normalizePagination, type RequestOptions } from "@/shared/api";
 import { attendanceApi } from "@/modules/attendance";
 import { courseApi } from "@/modules/course";
 import { homeworkApi } from "@/modules/homework";
@@ -28,30 +28,30 @@ function mapConsentDto(item: ConsentDto): Consent {
 
 export const parentApi = {
   async getLinks(options?: RequestOptions) {
-    const items = await apiClient.get<ParentLinkDto[]>(authEndpoints.links, options);
-    return items.map(mapParentLinkDto);
+    const page = normalizePagination<ParentLinkDto>(
+      await apiClient.get(authEndpoints.links, { ...options, query: { page_size: 100, ...options?.query } })
+    );
+    return page.items.map(mapParentLinkDto);
   },
 
-  /** Faqat tasdiqlangan bog'lanishlar — rozilik modeli (docs/ARCHITECTURE.md §5). */
   async getChildren(options?: RequestOptions) {
-    const [links, attendancePage] = await Promise.all([
-      this.getLinks(options),
-      attendanceApi.getAll({ ...options, query: { page_size: 100 } }),
-    ]);
-    return links
-      .filter((item) => item.status === "approved")
-      .map((link) => mapChildFromLink(link, attendancePage.items));
+    const links = await this.getLinks(options);
+    const approved = links.filter((item) => item.status === "approved");
+    if (!approved.length) return [];
+    const attendancePage = await attendanceApi.getAll({ ...options, query: { page_size: 100 } });
+    return approved.map((link) => mapChildFromLink(link, attendancePage.items));
   },
 
   async getDashboard(options: ParentDashboardOptions = {}) {
     const { selectedChildId, ...requestOptions } = options;
-    const [links, attendancePage] = await Promise.all([
-      this.getLinks(requestOptions),
-      attendanceApi.getAll({
-        ...requestOptions,
-        query: { page_size: 100, ...(selectedChildId ? { student: selectedChildId } : {}) },
-      }),
-    ]);
+    const links = await this.getLinks(requestOptions);
+    if (!links.some((item) => item.status === "approved")) {
+      return createParentDashboard(links, []);
+    }
+    const attendancePage = await attendanceApi.getAll({
+      ...requestOptions,
+      query: { page_size: 100, ...(selectedChildId ? { student: selectedChildId } : {}) },
+    });
     return createParentDashboard(links, attendancePage.items);
   },
 
@@ -72,8 +72,10 @@ export const parentApi = {
   },
 
   async getConsents(options?: RequestOptions) {
-    const items = await apiClient.get<ConsentDto[]>(authEndpoints.consents, options);
-    return items.map(mapConsentDto);
+    const page = normalizePagination<ConsentDto>(
+      await apiClient.get(authEndpoints.consents, { ...options, query: { page_size: 100, ...options?.query } })
+    );
+    return page.items.map(mapConsentDto);
   },
 
   async setConsent(dto: SetConsentInput) {
@@ -85,10 +87,6 @@ export const parentApi = {
     return mapConsentDto(item);
   },
 
-  /**
-   * Backendda "farzandimning vazifalari" endpointi yo'q — kurslar bo'yicha yig'iladi
-   * va har bir vazifaning topshiriqlaridan tanlangan bolaniki ajratiladi.
-   */
   async getHomework(selectedChildId: string, options: RequestOptions = {}): Promise<Assignment[]> {
     const coursePage = await courseApi.getAll({ ...options, query: { page_size: 100 } });
     const assignments = (

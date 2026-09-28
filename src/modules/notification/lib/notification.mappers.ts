@@ -19,7 +19,6 @@ function displayName(user: UserDto | null | undefined): string {
   return [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || "Tizim";
 }
 
-/** Ikkala maydon ham kelgandagina havola bo‘ladi — yarmi bilan hech qayerga bormaymiz. */
 export function mapNotificationLink(
   type: string | null | undefined,
   id: string | null | undefined
@@ -42,9 +41,9 @@ export function mapInboxNotificationDto(dto: NotificationRecipientDto): InboxNot
     id: String(dto.id),
     notificationId: String(dto.notification?.id ?? dto.id),
     sender: mapSender(dto.notification?.sender),
-    // HTML shu yerda bir marta tozalanadi — UI xom matnni umuman ko'rmaydi.
     html: sanitizeHtml(dto.notification?.description ?? ""),
     targetType: dto.notification?.target_type ?? "user",
+    kind: dto.notification?.kind ?? null,
     isRead: Boolean(dto.is_read),
     readAt: dto.read_at ?? null,
     link: mapNotificationLink(dto.notification?.link_type, dto.notification?.link_id),
@@ -88,7 +87,6 @@ export function mapSendRequest(input: SendNotificationInput): SendNotificationDt
   return {
     description: input.description.trim(),
     target_type: input.targetType,
-    // `user_id` faqat bitta foydalanuvchiga yuborilganda yuboriladi.
     ...(input.targetType === "user" && input.userId ? { user_id: input.userId } : {}),
   };
 }

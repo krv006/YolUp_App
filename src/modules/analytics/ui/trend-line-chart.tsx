@@ -73,6 +73,18 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
     PAD_T + PLOT_H - ((value - niceMin) / (niceMax - niceMin || 1)) * PLOT_H;
 
   const gridValues = [0, 0.25, 0.5, 0.75, 1].map((fraction) => niceMin + (niceMax - niceMin) * fraction);
+
+  /*
+   * O'q belgisining ANIQLIGI oraliqqa qarab tanlanadi.
+   *
+   * Veb har doim `Math.round` qiladi. Oraliq kichik bo'lsa (masalan test
+   * o'rtachasi hali yig'ilmagan va hammasi 0 atrofida), beshta belgi bir
+   * xil songa yaxlitlanib "1 1 0 0 0" bo'lib chiqadi — telefonda buzuq
+   * ko'rinadi. Hisob-kitob o'zgarmaydi, faqat YOZILISHI.
+   */
+  const span = Math.abs(niceMax - niceMin);
+  const axisLabel = (value: number) =>
+    span < 5 ? String(Number(value.toFixed(1))) : String(Math.round(value));
   const xStep = n <= 8 ? 1 : Math.ceil(n / 7);
 
   // SVG ekran kengligiga cho'ziladi — balandlik nisbatni saqlaydi.
@@ -107,7 +119,7 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
               fontSize={10}
               fill={palette["muted-foreground"]}
             >
-              {`${Math.round(value)}${unit}`}
+              {`${axisLabel(value)}${unit}`}
             </SvgText>
           ))}
 

@@ -11,6 +11,7 @@ import {
 } from "@shopify/react-native-skia";
 import type { Point, StrokeDto, StrokeShapeDto } from "../api/board.dto";
 import { arrowHeadPoints, strokeKindOf } from "../lib/board.geometry";
+import { RichTextStroke } from "./rich-text-stroke";
 
 /**
  * Bitta stroke'ni Skia'da chizadi.
@@ -132,9 +133,28 @@ export const BoardStroke = memo(function BoardStroke({
   }
 
   if (stroke.type === "text" && font) {
+    const size = stroke.size ?? 20;
+
+    /*
+     * Formatlangan matn (qalin, kursiv, ro'yxat) alohida chiziladi —
+     * veb ham `lines` bo'lsa o'shani afzal ko'radi (`board-stroke.tsx:23`).
+     * `lines` bo'lmasa oddiy `text` ga qaytamiz.
+     */
+    if (stroke.lines?.length) {
+      return (
+        <RichTextStroke
+          lines={stroke.lines}
+          x={stroke.x}
+          y={stroke.y}
+          size={size}
+          color={color}
+          opacity={selected ? 0.45 : 1}
+        />
+      );
+    }
+
     // Ko'p qatorli matn: Skia `\n` ni o'zi ajratmaydi.
     const lines = String(stroke.text ?? "").split("\n");
-    const size = stroke.size ?? 20;
     return (
       <Group opacity={selected ? 0.45 : 1}>
         {lines.map((line, index) => (

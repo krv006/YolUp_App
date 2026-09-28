@@ -32,8 +32,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 - 🟢 NUSXA: **141**
 - 🟡/🔴 moslashtirilgan: **85**
-- 🆕 mobilga xos: **8**
-- Jami: **234**
+- 🆕 mobilga xos: **9**
+- Jami: **235**
 
 ## Fayllar
 
@@ -87,6 +87,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/ui/away-students-notice.tsx` | 🟡 MOSLASH | `86e30eba5686` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/bohr-model.tsx` | 🔴 QAYTA | `f70cf5b9dfcf` | veb three.js/WebGL bilan 3D chizadi; mobilda Skia bilan 2D — `expo-gl`+`expo-three` faqat shu oynacha uchun og'ir, tekis aylanada esa elektronlarni sanash osonroq |
 | `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `8e850d9e1b06` | SVG o'rniga Skia tugunlari; shakl mantig'i (`strokeKindOf`, `arrowHeadPoints`) veb'dan; formatlangan matn `rich-text-stroke.tsx` ga ajratilgan |
+| `src/modules/board/ui/board-font.ts` | 🆕 MOBIL | `—` | Skia shrift oilasi; vebda brauzer shriftni o'zi tanlaydi, Skia'da oila nomi aniq berilishi shart |
 | `src/modules/board/ui/rich-text-stroke.tsx` | 🟡 MOSLASH | `8e850d9e1b06` | veb `board-stroke.tsx` dagi `lines` shoxi; Skia'da har run uchun `matchFont` va qo'lda joylashtirish, tagiga chizish qo'lda `Rect` bilan |
 | `src/modules/board/ui/rich-text-sheet.tsx` | 🔴 QAYTA | `dfebccfb5ed6` | veb `rich-text-input.tsx` (contenteditable + execCommand) RN'da mumkin emas; format QATOR darajasida qo'yiladi va `TextLineDto` to'g'ridan-to'g'ri quriladi |
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |

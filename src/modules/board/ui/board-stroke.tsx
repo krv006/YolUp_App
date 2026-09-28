@@ -1,16 +1,17 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   Circle,
   Group,
   Path,
   Rect,
+  matchFont,
   Skia,
   Text as SkiaText,
-  useFont,
   type SkFont,
 } from "@shopify/react-native-skia";
 import type { Point, StrokeDto, StrokeShapeDto } from "../api/board.dto";
 import { arrowHeadPoints, strokeKindOf } from "../lib/board.geometry";
+import { BOARD_FONT_FAMILY } from "./board-font";
 import { RichTextStroke } from "./rich-text-stroke";
 
 /**
@@ -181,8 +182,19 @@ export const BoardStroke = memo(function BoardStroke({
 
 /** Matn strokelari uchun tizim shrifti — bir marta yuklanadi. */
 export function useBoardFont(size = 20) {
-  // `null` — Skia tizim shriftini oladi (maxsus shrift fayli kerak emas).
-  return useFont(null, size);
+  /*
+   * `matchFont`, `useFont(null, …)` EMAS.
+   *
+   * `useFont(null, size)` hujjatga ko'ra tizim shriftini beradi, lekin
+   * Androidda u `null` qaytaradi. Natijada `stroke.type === "text" && font`
+   * sharti hech qachon bajarilmasdi va DOSKADA MATN UMUMAN CHIZILMASDI —
+   * na oddiy, na formatlangan. Stroke serverda saqlanardi, ekranda esa
+   * ko'rinmasdi, ya'ni xato jim edi.
+   *
+   * `matchFont` tizim shriftini sinxron beradi va hech qachon `null`
+   * qaytarmaydi (`rich-text-stroke.tsx` allaqachon shundan foydalanadi).
+   */
+  return useMemo(() => matchFont({ fontFamily: BOARD_FONT_FAMILY, fontSize: size }), [size]);
 }
 
 /** Tanlash uchun: bosilgan nuqta shu stroke ustidami? */

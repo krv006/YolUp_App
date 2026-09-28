@@ -8,6 +8,7 @@ import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
 import type { FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
 import { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "../constants/board.constants";
+import { hasRichFormatting } from "../lib/rich-text";
 import {
   useAddSheet,
   useAddStroke,
@@ -122,10 +123,32 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
     if (!realtime.sendStroke(sheet, stroke)) addStroke.mutate({ sheet, stroke });
   }
 
+  /**
+   * MATN va FORMULA — HTTP orqali, soket orqali EMAS.
+   *
+   * Soket kanali faqat chizma strokelarini (qalam, shakl) qabul qiladi:
+   * matn yuborilsa `send` "yuborildi" deb qaytaradi, lekin server uni
+   * saqlamaydi va stroke jimgina yo'qoladi. Buni telefonda topdik —
+   * qalam chizig'i qayta yuklashdan keyin qoladi, matn esa yo'qoladi.
+   *
+   * Veb ham matnni `addStroke.mutate` bilan yuboradi
+   * (`board-panel.tsx:137`), soket orqali emas.
+   *
+   * Xato bu yerda ko'rsatiladi: `useAddStroke` da `onError` yo'q (u veb
+   * bilan bayt-bayt bir xil), shuning uchun aks holda xato yana jim
+   * qolardi.
+   */
+  function commitTextStroke(stroke: StrokeShapeDto) {
+    addStroke.mutate(
+      { sheet, stroke },
+      { onError: (error: Error) => toast.error(error.message) }
+    );
+  }
+
   /** Formula: matn state'iga tayanmaydi — qiymat to'g'ridan-to'g'ri keladi. */
   function placeMath(latex: string) {
     if (!placement) return;
-    commitStroke({
+    commitTextStroke({
       type: "math",
       latex,
       x: placement.point[0],
@@ -145,10 +168,19 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
    */
   function placeRichText(lines: TextLineDto[], plainText: string) {
     if (!placement) return;
-    commitStroke({
+    commitTextStroke({
       type: "text",
       text: plainText,
-      lines,
+      /*
+       * `lines` FAQAT haqiqiy format bo'lganda yuboriladi — veb ham
+       * shunday qiladi (`board-panel.tsx:133`).
+       *
+       * Ilgari u har doim yuborilardi, hatto hamma bayroq `false`
+       * bo'lganda ham. Backend bunday strokeni QABUL QILMASDI va u
+       * jimgina yo'qolardi: soket orqali ketgani uchun xato ham
+       * ko'rinmasdi. Ya'ni oddiy matn doskaga umuman tushmasdi.
+       */
+      ...(hasRichFormatting(lines) ? { lines } : {}),
       x: placement.point[0],
       y: placement.point[1],
       size: BOARD_TEXT_SIZE,

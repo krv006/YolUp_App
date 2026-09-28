@@ -10,6 +10,7 @@ import {
 } from "@shopify/react-native-skia";
 import { useDerivedValue } from "react-native-reanimated";
 import { useTheme } from "@/shared/ui";
+import { BOARD_FONT_FAMILY } from "./board-font";
 
 /**
  * Bor atom modeli — veb `bohr-model.tsx` ning mobil varianti.
@@ -67,7 +68,7 @@ export function BohrModel({ shells, symbol }: BohrModelProps) {
   }, [center, shells.length]);
 
   const symbolFont = useMemo(
-    () => matchFont({ fontSize: 20, fontWeight: "700" }),
+    () => matchFont({ fontFamily: BOARD_FONT_FAMILY, fontSize: 20, fontWeight: "700" }),
     []
   );
 

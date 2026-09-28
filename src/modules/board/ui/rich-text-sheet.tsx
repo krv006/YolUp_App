@@ -107,6 +107,15 @@ export function RichTextSheet({ open, onClose, onSubmit }: RichTextSheetProps) {
               selected={line.underline}
               onPress={() => update(line.key, { underline: !line.underline })}
             />
+          </ChipRow>
+
+          {/*
+            * Ro'yxat belgilari ALOHIDA qatorda. Beshtasi bitta qatorga
+            * sig'masdi va oxirgisi ("Raqam") gorizontal aylantirish ortida
+            * yashirinib qolardi. Ular mazmunan ham boshqa narsa: yuqoridagi
+            * uchtasi matn ko'rinishi, bu ikkitasi qator turi.
+            */}
+          <ChipRow>
             <Chip
               label="Belgi"
               selected={line.list === "bullet"}

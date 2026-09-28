@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-28 (doska: Bor modeli)
+- **Oxirgi yangilanish:** 2026-09-28 (i18n: uz/en/ru)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **130**
-- 🟡/🔴 moslashtirilgan: **89**
+- 🟢 NUSXA: **132**
+- 🟡/🔴 moslashtirilgan: **91**
 - 🆕 mobilga xos: **7**
-- Jami: **226**
+- Jami: **230**
 
 ## Fayllar
 
@@ -238,6 +238,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/constants/index.ts` | 🟢 NUSXA | `c06257bbb1f3` | — |
 | `src/shared/constants/roles.ts` | 🟢 NUSXA | `2f90f03f91dc` | — |
 | `src/shared/constants/storage-keys.ts` | 🟢 NUSXA | `f381330fe63a` | — |
+| `src/shared/i18n/i18n.ts` | 🟡 MOSLASH | `d2d2d9a67a3a` | `import.meta.glob` (Vite) o'rniga qo'lda import; `mobile` bo'limi qo'shilgan; suspense o'chirilgan |
+| `src/shared/i18n/intl-locale.ts` | 🟢 NUSXA | `b3f6b40c5b6f` | — |
+| `src/shared/i18n/locales/**` | 🟢 NUSXA | `—` | 17 bo'lim × 3 til, vebdan bayt-bayt; `mobile.json` mobilga xos |
+| `src/shared/model/language.store.ts` | 🔴 QAYTA | `0f01a0cbc3c6` | zustand `persist` (localStorage) o'rniga MMKV; qurilma tili `Intl` dan |
 | `src/shared/lib/app-state.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/lib/date.ts` | 🟡 MOSLASH | `13624ad3dcd2` | i18n locale va t() o'rniga o'zbekcha literal (§13) |
 | `src/shared/lib/download.ts` | 🔴 QAYTA | `af194a763a11` | <a download> -> expo-file-system + Share; ASYNC bo'ldi |

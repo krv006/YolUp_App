@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-25 (analytics bosqichi)
+- **Oxirgi yangilanish:** 2026-09-28 (mock-test bosqichi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **126**
-- 🟡/🔴 moslashtirilgan: **82**
+- 🟢 NUSXA: **130**
+- 🟡/🔴 moslashtirilgan: **86**
 - 🆕 mobilga xos: **7**
-- Jami: **215**
+- Jami: **223**
 
 ## Fayllar
 
@@ -154,6 +154,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2d0725ac8b8a` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-list.tsx` | 🟡 MOSLASH | `06013405aa64` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-text.tsx` | 🟡 MOSLASH | `61a4de2c8e42` | farq qayd etilmagan — tekshiring |
+| `src/modules/mock-test/api/mock-test.api.ts` | 🟢 NUSXA | `1062c395d3bf` | — |
+| `src/modules/mock-test/api/mock-test.dto.ts` | 🟢 NUSXA | `dba8c2ecbbd2` | — |
+| `src/modules/mock-test/api/mock-test.endpoints.ts` | 🟢 NUSXA | `9edd0d4f1b42` | — |
+| `src/modules/mock-test/index.ts` | 🟡 MOSLASH | `0cbb12363162` | generatsiya: veb barrel minus `ui/`; `MockTestCreateDialog` ko'chirilmadi — vebda ham chaqiruvchisi yo'q |
+| `src/modules/mock-test/lib/mock-test.mappers.ts` | 🟢 NUSXA | `93fb33497b26` | — |
+| `src/modules/mock-test/model/mock-test.queries.ts` | 🟡 MOSLASH | `353ffb03cda3` | toast matnlari i18n o'rniga literal; mantiq va kesh kalitlari bir xil (§13) |
+| `src/modules/mock-test/ui/mock-test-runner.tsx` | 🟡 MOSLASH | `256c436b888c` | vaqt mantiqi o'zgarishsiz; soat va tugmalar yuqorida qotirilgan, "To'xtatish" tasdiq so'raydi, variant tugmasi quiz modulidan (`Choice`) |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `980ff0a9d175` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `b1a8ffe524dc` | — |
 | `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `23a2b0dd4313` | — |
@@ -186,7 +193,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); yaratish va tahrirlash vebdagidek BITTA komponentda; nom taklifi (combobox), qoralama saqlash va `QuizPreview` ko'chirilmadi; import natijasi `import-result-sheet` da |
 | `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
 | `src/modules/quiz/ui/quiz-preview-sheet.tsx` | 🟡 MOSLASH | `6f6e9fee7e8e` | vebda yonma-yon ustun (`quiz-page-split`), mobilda talab bo'yicha ochiladigan oyna; mantiq bir xil — o'sha `draftToStudentQuestion` + `QuestionAnswerInput` |
-| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn |
+| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn; `Choice` eksport qilingan — mock test uni qayta ishlatadi (vebda ular CSS klassini bo'lishadi) |
 | `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
@@ -206,6 +213,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
+| `src/pages/mock-test/mock-test-page.tsx` | 🟡 MOSLASH | `a45a9695e196` | ro'yxat va yechish bir marshrutda (veb kabi), lekin marshrut tab tashqarisida — imtihon paytida boshqa tabga bosish urinishni yo'q qilardi |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | farq qayd etilmagan — tekshiring |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |

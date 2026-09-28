@@ -16,6 +16,7 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
 import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
@@ -59,7 +60,8 @@ import {
  * bo'sh "—" belgilar qo'yish ekranni to'ldirgandek ko'rsatadi, aslida esa
  * foydalanuvchini chalg'itadi.
  */
-export function ProfilePage({ roleLabel }: { roleLabel: string }) {
+export function ProfilePage({ roleKey }: { roleKey: string }) {
+  const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette, scheme } = useTheme();
   const { user, logout } = useAuth();
@@ -74,10 +76,12 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
   // Qatorda hozirgi tanlov ko'rinib tursin — ekranga kirmasdan ham bilinadi.
   const appearanceSummary = [
     appearanceMode === "system"
-      ? `Tizim (${scheme === "dark" ? "qorong'i" : "yorug'"})`
+      ? t("theme.system", {
+          scheme: scheme === "dark" ? t("theme.darkLower") : t("theme.lightLower"),
+        })
       : appearanceMode === "dark"
-        ? "Qorong'i"
-        : "Yorug'",
+        ? t("theme.dark")
+        : t("theme.light"),
     findAccent(accentId).label.toLowerCase(),
   ].join(" · ");
 
@@ -88,11 +92,11 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
 
   /** Faqat qiymati BOR maydonlar. Bo'sh qator chizilmaydi. */
   const facts: { value: string; label: string }[] = [
-    user?.phone ? { value: user.phone, label: "Telefon" } : null,
-    user?.username ? { value: `@${user.username}`, label: "Foydalanuvchi nomi" } : null,
+    user?.phone ? { value: user.phone, label: t("profile.phone") } : null,
+    user?.username ? { value: `@${user.username}`, label: t("profile.username") } : null,
     user?.email ? { value: user.email, label: "Email" } : null,
     user?.inviteCode
-      ? { value: user.inviteCode, label: "Taklif kodi — ota-ona shu kod bilan ulanadi" }
+      ? { value: user.inviteCode, label: t("profile.inviteCode") }
       : null,
   ].filter((item): item is { value: string; label: string } => item !== null);
 
@@ -107,7 +111,7 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
           </Text>
 
           <View style={styles.heroMeta}>
-            <Badge label={roleLabel} tone="brand" />
+            <Badge label={t(roleKey)} tone="brand" />
             {/* Reyting faqat o'qituvchida mazmunli va faqat baho bo'lsa. */}
             {user?.avgRating != null && (user.ratingCount ?? 0) > 0 ? (
               <View style={styles.rating}>
@@ -124,17 +128,17 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
         <View style={styles.actions}>
           <ActionButton
             icon={Pencil}
-            label="Tahrirlash"
+            label={t("profile.edit")}
             onPress={() => setEditOpen(true)}
           />
           <ActionButton
             icon={Palette}
-            label="Ko'rinish"
+            label={t("profile.appearance")}
             onPress={() => router.push("/appearance")}
           />
           <ActionButton
             icon={Bell}
-            label="Xabarlar"
+            label={t("profile.notifications")}
             badge={unread.data ?? 0}
             onPress={() => router.push("/notifications")}
           />
@@ -177,11 +181,11 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
           {canSwitchAccounts(user) ? (
             <>
               <ListItem
-                title="Hisobni almashtirish"
+                title={t("profile.switchAccount")}
                 subtitle={
                   user?.linkedAccounts.length
-                    ? `${user.linkedAccounts.length} ta bog'langan hisob`
-                    : "Yangi rol ochish"
+                    ? t("profile.linkedAccounts", { count: user.linkedAccounts.length })
+                    : t("profile.newRole")
                 }
                 leading={<UsersRound size={20} color={palette["muted-foreground"]} />}
                 chevron
@@ -199,8 +203,8 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
             * uchun u profilga qo'yildi, xuddi "Ko'rinish" kabi.
             */}
           <ListItem
-            title="Tahlil"
-            subtitle="Natijalaringiz va ko'rsatkichlaringiz"
+            title={t("profile.analytics")}
+            subtitle={t("profile.analyticsHint")}
             leading={<ChartLine size={20} color={palette["muted-foreground"]} />}
             chevron
             onPress={() => router.push("/analytics")}
@@ -213,8 +217,8 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
           {user?.role === ROLES.STUDENT ? (
             <>
               <ListItem
-                title="Mock Test"
-                subtitle="Vaqt chegarali imtihon simulyatsiyasi"
+                title={t("profile.mockTest")}
+                subtitle={t("profile.mockTestHint")}
                 leading={<ClipboardCheck size={20} color={palette["muted-foreground"]} />}
                 chevron
                 onPress={() => router.push("/mock-tests")}
@@ -223,15 +227,15 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
             </>
           ) : null}
           <ListItem
-            title="Kirishlar tarixi"
-            subtitle="Qaysi qurilma va IP'dan kirilgani"
+            title={t("profile.loginHistory")}
+            subtitle={t("profile.loginHistoryHint")}
             leading={<History size={20} color={palette["muted-foreground"]} />}
             chevron
             onPress={() => setHistoryOpen(true)}
           />
           <Separator inset={52} />
           <ListItem
-            title="Ko'rinish"
+            title={t("profile.appearance")}
             subtitle={appearanceSummary}
             leading={<Palette size={20} color={palette["muted-foreground"]} />}
             chevron
@@ -239,14 +243,14 @@ export function ProfilePage({ roleLabel }: { roleLabel: string }) {
           />
           <Separator inset={52} />
           <ListItem
-            title="Ilova"
+            title={t("profile.app")}
             subtitle={`${Constants.expoConfig?.version ?? "0.0.0"} · ${env.appEnv}`}
             leading={<Smartphone size={20} color={palette["muted-foreground"]} />}
           />
         </View>
 
         <Button
-          title="Chiqish"
+          title={t("profile.signOut")}
           variant="secondary"
           icon={<LogOut size={16} color={palette["secondary-foreground"]} />}
           onPress={() => void signOut()}
@@ -307,6 +311,7 @@ function ActionButton({
  * foydalanuvchi darhol sezishi kerak.
  */
 function LoginHistorySheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t } = useTranslation("mobile");
   // `enabled: open` — tarix faqat oyna ochilganda so'raladi.
   const history = useLoginHistory(null, open);
 
@@ -314,10 +319,10 @@ function LoginHistorySheet({ open, onClose }: { open: boolean; onClose: () => vo
     <Sheet
       open={open}
       onClose={onClose}
-      title="Kirishlar tarixi"
-      description="Hisobingizga qaysi qurilma va IP'dan kirilgani."
+      title={t("profile.loginHistory")}
+      description={t("profile.loginHistoryFull")}
     >
-      {history.isLoading ? <ScreenLoading label="Yuklanmoqda…" /> : null}
+      {history.isLoading ? <ScreenLoading label={t("common.loading")} /> : null}
 
       {(history.data ?? []).map((record, index) => (
         <View key={record.id}>
@@ -329,15 +334,15 @@ function LoginHistorySheet({ open, onClose }: { open: boolean; onClose: () => vo
                 {record.ip} · {formatDayTime(record.at)}
               </Text>
             </View>
-            {record.isNewDevice ? <Badge label="Yangi qurilma" tone="warning" /> : null}
-            {record.isNewIp && !record.isNewDevice ? <Badge label="Yangi IP" tone="warning" /> : null}
+            {record.isNewDevice ? <Badge label={t("profile.newDevice")} tone="warning" /> : null}
+            {record.isNewIp && !record.isNewDevice ? <Badge label={t("profile.newIp")} tone="warning" /> : null}
           </View>
         </View>
       ))}
 
       {!history.isLoading && (history.data ?? []).length === 0 ? (
         <Text variant="caption" tone="muted">
-          Yozuv topilmadi.
+          {t("profile.noRecords")}
         </Text>
       ) : null}
     </Sheet>

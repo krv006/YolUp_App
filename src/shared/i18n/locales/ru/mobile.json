@@ -21,5 +21,43 @@
     "min3": "Не менее 3 символов",
     "min8": "Не менее 8 символов",
     "haveAccount": "Уже есть аккаунт? Войти"
+  },
+  "profile": {
+    "edit": "Редактировать",
+    "appearance": "Оформление",
+    "notifications": "Уведомления",
+    "phone": "Телефон",
+    "username": "Имя пользователя",
+    "inviteCode": "Код приглашения — по нему подключается родитель",
+    "switchAccount": "Сменить аккаунт",
+    "linkedAccounts": "Связанных аккаунтов: {{count}}",
+    "newRole": "Создать новую роль",
+    "analytics": "Аналитика",
+    "analyticsHint": "Ваши результаты и показатели",
+    "mockTest": "Mock Test",
+    "mockTestHint": "Симуляция экзамена с таймером",
+    "loginHistory": "История входов",
+    "loginHistoryHint": "С какого устройства и IP входили",
+    "loginHistoryFull": "С какого устройства и IP входили в ваш аккаунт.",
+    "app": "Приложение",
+    "signOut": "Выйти",
+    "newDevice": "Новое устройство",
+    "newIp": "Новый IP",
+    "noRecords": "Записей не найдено."
+  },
+  "common": {
+    "loading": "Загрузка…"
+  },
+  "theme": {
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Системная ({{scheme}})",
+    "lightLower": "светлая",
+    "darkLower": "тёмная"
+  },
+  "roles": {
+    "student": "Ученик",
+    "teacher": "Учитель",
+    "parent": "Родитель"
   }
 }

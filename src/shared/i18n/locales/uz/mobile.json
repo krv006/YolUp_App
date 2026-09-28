@@ -21,5 +21,43 @@
     "min3": "Kamida 3 ta belgi",
     "min8": "Kamida 8 ta belgi",
     "haveAccount": "Hisobingiz bormi? Kirish"
+  },
+  "profile": {
+    "edit": "Tahrirlash",
+    "appearance": "Ko'rinish",
+    "notifications": "Xabarlar",
+    "phone": "Telefon",
+    "username": "Foydalanuvchi nomi",
+    "inviteCode": "Taklif kodi — ota-ona shu kod bilan ulanadi",
+    "switchAccount": "Hisobni almashtirish",
+    "linkedAccounts": "{{count}} ta bog'langan hisob",
+    "newRole": "Yangi rol ochish",
+    "analytics": "Tahlil",
+    "analyticsHint": "Natijalaringiz va ko'rsatkichlaringiz",
+    "mockTest": "Mock Test",
+    "mockTestHint": "Vaqt chegarali imtihon simulyatsiyasi",
+    "loginHistory": "Kirishlar tarixi",
+    "loginHistoryHint": "Qaysi qurilma va IP'dan kirilgani",
+    "loginHistoryFull": "Hisobingizga qaysi qurilma va IP'dan kirilgani.",
+    "app": "Ilova",
+    "signOut": "Chiqish",
+    "newDevice": "Yangi qurilma",
+    "newIp": "Yangi IP",
+    "noRecords": "Yozuv topilmadi."
+  },
+  "common": {
+    "loading": "Yuklanmoqda…"
+  },
+  "theme": {
+    "light": "Yorug'",
+    "dark": "Qorong'i",
+    "system": "Tizim ({{scheme}})",
+    "lightLower": "yorug'",
+    "darkLower": "qorong'i"
+  },
+  "roles": {
+    "student": "O'quvchi",
+    "teacher": "O'qituvchi",
+    "parent": "Ota-ona"
   }
 }

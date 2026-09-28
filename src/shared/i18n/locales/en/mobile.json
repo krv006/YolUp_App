@@ -21,5 +21,43 @@
     "min3": "At least 3 characters",
     "min8": "At least 8 characters",
     "haveAccount": "Already have an account? Sign in"
+  },
+  "profile": {
+    "edit": "Edit",
+    "appearance": "Appearance",
+    "notifications": "Notifications",
+    "phone": "Phone",
+    "username": "Username",
+    "inviteCode": "Invite code — a parent connects with it",
+    "switchAccount": "Switch account",
+    "linkedAccounts": "{{count}} linked accounts",
+    "newRole": "Create a new role",
+    "analytics": "Analytics",
+    "analyticsHint": "Your results and metrics",
+    "mockTest": "Mock Test",
+    "mockTestHint": "Timed exam simulation",
+    "loginHistory": "Login history",
+    "loginHistoryHint": "Which device and IP were used",
+    "loginHistoryFull": "Which device and IP signed in to your account.",
+    "app": "App",
+    "signOut": "Sign out",
+    "newDevice": "New device",
+    "newIp": "New IP",
+    "noRecords": "No records found."
+  },
+  "common": {
+    "loading": "Loading…"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System ({{scheme}})",
+    "lightLower": "light",
+    "darkLower": "dark"
+  },
+  "roles": {
+    "student": "Student",
+    "teacher": "Teacher",
+    "parent": "Parent"
   }
 }

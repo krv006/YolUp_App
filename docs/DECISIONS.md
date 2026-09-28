@@ -592,13 +592,15 @@ Veb'dan yana bir tuzatish olindi: refresh jarayoni davomida token o'zgargan
 bo'lsa (ya'ni shu orada hisob almashgan), eski so'rovning xatosi YANGI
 sessiyani o'chirmaydi.
 
-### Ma'lum kamchilik (shu bosqichda tuzatilmadi)
+### Ma'lum kamchilik — ✅ TUZATILDI
 
-Farzandi yo'q ota-ona hisobida `parent-dashboard-page` "Ma'lumotlarni
-yuklab bo'lmadi" deb xato ko'rsatadi: `useParentDashboard` va
-`useAttendance` shartsiz chaqiriladi. To'g'ri xulq — bo'sh holat
-(`ScreenEmpty`) va "farzand qo'shing" taklifi. Bu ota-ona bosqichida
-tuzatiladi.
+> Farzandi yo'q ota-ona hisobida `parent-dashboard-page` "Ma'lumotlarni
+> yuklab bo'lmadi" deb xato ko'rsatadi.
+
+Tuzatildi: uchala sahifa ham endi bo'sh holat ko'rsatadi va nima qilish
+kerakligini aytadi. `parent-dashboard-page` `children.length === 0` ni,
+`parent-grades-page` va `parent-homework-page` esa `!selectedChild` ni
+tekshiradi.
 
 ---
 

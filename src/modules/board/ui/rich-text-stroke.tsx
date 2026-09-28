@@ -8,6 +8,7 @@ import {
 } from "@shopify/react-native-skia";
 import type { TextLineDto } from "../api/board.dto";
 import { listMarkers } from "../lib/rich-text";
+import { BOARD_FONT_FAMILY } from "./board-font";
 
 /**
  * Formatlangan matn strokesi — veb `board-stroke.tsx:23-46` ning mobil
@@ -58,12 +59,13 @@ export function RichTextStroke({ lines, x, y, size, color, opacity }: RichTextSt
     // Veb qalinligi: oddiy matn 600, qalin 800, belgi 700.
     const fontFor = (bold?: boolean, italic?: boolean) =>
       matchFont({
+        fontFamily: BOARD_FONT_FAMILY,
         fontSize: size,
         fontWeight: bold ? "800" : "600",
         fontStyle: italic ? "italic" : "normal",
       });
 
-    const markerFont = matchFont({ fontSize: size, fontWeight: "700" });
+    const markerFont = matchFont({ fontFamily: BOARD_FONT_FAMILY, fontSize: size, fontWeight: "700" });
 
     return lines.map((line, index) => {
       const pieces: Piece[] = [];

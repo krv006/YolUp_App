@@ -10,6 +10,7 @@ import {
   elementCardHeight,
 } from "../lib/periodic-board";
 import { usePeriodicTable } from "../model/board.queries";
+import { BohrModel } from "./bohr-model";
 
 /**
  * Davriy jadval — element kartasini yoki Bor modelini doskaga qo'yadi.
@@ -141,6 +142,14 @@ export function PeriodicTableSheet({
               ? `Elektron qatlamlari: ${selected.shells.join(", ")}`
               : "Bu element uchun elektron qatlamlari ma'lumoti yo'q."}
           </Text>
+
+          {/*
+            * Jonli ko'rinish — doskaga qo'yishdan OLDIN nima chiqishini
+            * ko'rsatadi. Veb ham shu joyda uch o'lchamli modelni chizadi.
+            */}
+          {selected.shells.length ? (
+            <BohrModel key={selected.z} shells={selected.shells} symbol={selected.symbol} />
+          ) : null}
 
           <Button
             title="Doskaga qo'yish"

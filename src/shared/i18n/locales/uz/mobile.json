@@ -8,7 +8,8 @@
     "overview": "Asosiy",
     "children": "Farzand",
     "attendance": "Davomat",
-    "homework": "Vazifa"
+    "homework": "Vazifa",
+    "workspace": "Ish maydoni"
   },
   "auth": {
     "tagline": "Onlayn ta'lim platformasi",
@@ -573,6 +574,7 @@
     "daqiqa": "Daqiqa",
     "mos_variant_topilmadi": "Mos variant topilmadi",
     "onlayn": "Onlayn",
+    "orqaga": "Orqaga",
     "qayta_urinish": "Qayta urinish",
     "qidirish": "Qidirish",
     "sessiya_tekshirilmoqda": "Sessiya tekshirilmoqda…",

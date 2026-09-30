@@ -8,7 +8,8 @@
     "overview": "Главная",
     "children": "Дети",
     "attendance": "Посещаемость",
-    "homework": "Задания"
+    "homework": "Задания",
+    "workspace": "Рабочее место"
   },
   "auth": {
     "tagline": "Платформа онлайн-обучения",
@@ -638,6 +639,7 @@
     "daqiqa": "Минута",
     "mos_variant_topilmadi": "Подходящий вариант не найден",
     "onlayn": "В сети",
+    "orqaga": "Назад",
     "qayta_urinish": "Повторить",
     "qidirish": "Поиск",
     "sessiya_tekshirilmoqda": "Проверка сессии…",

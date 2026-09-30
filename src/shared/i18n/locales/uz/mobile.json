@@ -460,13 +460,15 @@
     }
   },
   "notifications": {
+    "bildirishnomalar": "Bildirishnomalar",
+    "ochish": "Ochish",
+    "orqaga": "Orqaga",
+    "sinov_push_yuborildi": "Sinov push yuborildi",
+    "sinov_push_yuborish": "Sinov push yuborish",
+    "xabar_yoq": "Xabar yo'q",
     "xabarlar_yuklanmoqda": "Xabarlar yuklanmoqda…",
     "xabarlarni_yuklab_bolmadi": "Xabarlarni yuklab bo'lmadi",
-    "orqaga": "Orqaga",
-    "xabar_yoq": "Xabar yo'q",
-    "yangi_xabarlar_shu_yerda_korinadi": "Yangi xabarlar shu yerda ko'rinadi.",
-    "ochish": "Ochish",
-    "bildirishnomalar": "Bildirishnomalar"
+    "yangi_xabarlar_shu_yerda_korinadi": "Yangi xabarlar shu yerda ko'rinadi."
   },
   "parent": {
     "farzand_biriktirilmagan": "Farzand biriktirilmagan",

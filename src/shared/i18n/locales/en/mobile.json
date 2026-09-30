@@ -629,13 +629,15 @@
     }
   },
   "notifications": {
+    "bildirishnomalar": "Notifications",
+    "ochish": "Open",
+    "orqaga": "Back",
+    "sinov_push_yuborildi": "Test push sent",
+    "sinov_push_yuborish": "Send test push",
+    "xabar_yoq": "No messages",
     "xabarlar_yuklanmoqda": "Loading messages…",
     "xabarlarni_yuklab_bolmadi": "Could not load messages",
-    "orqaga": "Back",
-    "xabar_yoq": "No messages",
-    "yangi_xabarlar_shu_yerda_korinadi": "New messages appear here.",
-    "ochish": "Open",
-    "bildirishnomalar": "Notifications"
+    "yangi_xabarlar_shu_yerda_korinadi": "New messages appear here."
   },
   "shared": {
     "bekor": "Cancel",

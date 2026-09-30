@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { AppError, announceSessionChange, refreshTokenManager, tokenStorage } from "@/shared/api";
 import type { TokenPair } from "@/shared/api";
 import type { AuthStatus, AuthUser, LoginCredentials } from "@/shared/types";
+import { unregisterPushDevice } from "@/modules/notification/model/push-device";
 import { authApi } from "../api/auth.api";
 import type { RegisterRequestDto } from "../api/auth.dto";
 import {
@@ -173,6 +174,17 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
    */
   async logout() {
     const refreshToken = tokenStorage.getRefreshToken();
+    /*
+     * Qurilma push ro'yxatidan CHIQARILADI — tokenlar tozalanishidan
+     * oldin, chunki so'rov autentifikatsiyani talab qiladi.
+     *
+     * Usiz telefondan chiqib ketgan foydalanuvchiga bildirishnoma kelib
+     * turaverardi: backend uchun qurilma hali ham o'sha hisobga bog'liq
+     * bo'lib qolardi.
+     *
+     * 🆕 mobil qadam — vebda qurilma tushunchasi yo'q.
+     */
+    await unregisterPushDevice();
     try {
       await authApi.logout(refreshToken);
     } catch {

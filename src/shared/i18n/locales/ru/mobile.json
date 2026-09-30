@@ -629,13 +629,15 @@
     }
   },
   "notifications": {
+    "bildirishnomalar": "Уведомления",
+    "ochish": "Открыть",
+    "orqaga": "Назад",
+    "sinov_push_yuborildi": "Тестовый push отправлен",
+    "sinov_push_yuborish": "Отправить тестовый push",
+    "xabar_yoq": "Нет сообщений",
     "xabarlar_yuklanmoqda": "Загрузка сообщений…",
     "xabarlarni_yuklab_bolmadi": "Не удалось загрузить сообщения",
-    "orqaga": "Назад",
-    "xabar_yoq": "Нет сообщений",
-    "yangi_xabarlar_shu_yerda_korinadi": "Новые сообщения появятся здесь.",
-    "ochish": "Открыть",
-    "bildirishnomalar": "Уведомления"
+    "yangi_xabarlar_shu_yerda_korinadi": "Новые сообщения появятся здесь."
   },
   "shared": {
     "bekor": "Отмена",

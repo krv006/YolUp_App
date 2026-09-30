@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **141**
-- 🟡/🔴 moslashtirilgan: **85**
-- 🆕 mobilga xos: **9**
-- Jami: **235**
+- 🟢 NUSXA: **140**
+- 🟡/🔴 moslashtirilgan: **86**
+- 🆕 mobilga xos: **11**
+- Jami: **237**
 
 ## Fayllar
 
@@ -175,6 +175,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/notification/lib/notification.mappers.ts` | 🟢 NUSXA | `e91371f2ab65` | — |
 | `src/modules/notification/model/notification.queries.ts` | 🟢 NUSXA | `c33aeb3c92fe` | — |
 | `src/modules/notification/model/use-notification-feed.ts` | 🟢 NUSXA | `a4e4ba829fc0` | — |
+| `src/modules/notification/api/push-device.api.ts` | 🆕 MOBIL | `—` | FCM qurilma tokeni; vebda Web Push obunasi (`push/subscribe/`) ishlatiladi |
+| `src/modules/notification/lib/device-id.ts` | 🆕 MOBIL | `—` | barqaror qurilma ID'si; backend kaliti `(user, device_id)`, token o'zgaruvchan |
+| `src/modules/notification/model/push-device.ts` | 🆕 MOBIL | `—` | chiqishda qurilmani ro'yxatdan chiqarish |
 | `src/modules/parent/api/parent.api.ts` | 🟢 NUSXA | `c944f05ed9d5` | — |
 | `src/modules/parent/api/parent.dto.ts` | 🟢 NUSXA | `daad031b5dac` | — |
 | `src/modules/parent/index.ts` | 🟡 MOSLASH | `f7f9585ba037` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |

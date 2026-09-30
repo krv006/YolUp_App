@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { FileQuestion, History, Pencil, Plus, Trash2 } from "lucide-react-native";
+import { ArrowLeft, FileQuestion, History, Pencil, Plus, Trash2 } from "lucide-react-native";
 import { useCourses, useSubjects } from "@/modules/course";
 import { useAuth } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
@@ -104,7 +104,17 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   return (
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <Text variant="heading">Testlar</Text>
+        {/*
+          * Orqaga qaytish — bu sahifa endi TAB EMAS, Workspace ichidan
+          * ochiladi. Usiz faqat tizim "orqaga" jesti qolardi va ekranda
+          * chiqish yo'li ko'rinmasdi.
+          */}
+        <View style={styles.headTop}>
+          <IconButton accessibilityLabel={t("shared.orqaga")} onPress={() => router.back()}>
+            <ArrowLeft size={20} color={palette["muted-foreground"]} />
+          </IconButton>
+          <Text variant="heading">Testlar</Text>
+        </View>
         <Text variant="caption" tone="muted">
           {t("quizzes.vaqt_chegarasi_yoq_cheklanmagan_qayta_urinis")}
         </Text>
@@ -301,6 +311,7 @@ function QuizRow({
 }
 
 const styles = StyleSheet.create({
+  headTop: { flexDirection: "row", alignItems: "center", gap: 6, marginLeft: -8 },
   head: {
     gap: 4,
     paddingHorizontal: 20,

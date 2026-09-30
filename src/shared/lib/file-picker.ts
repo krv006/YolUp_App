@@ -1,5 +1,7 @@
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+// Barrel EMAS: `@/shared/ui` orqali kelsa aylanma import hosil bo'ladi.
+import { toast } from "@/shared/ui/toast";
 
 /**
  * Fayl tanlash va uni ko'chirilgan API qatlamiga uzatish.
@@ -63,12 +65,41 @@ export async function pickDocument(mimeTypes?: string[]): Promise<PickedFile | n
  * oshib ketadi va mobil internetda uzoq yuklanadi.
  */
 export async function pickImage(source: "camera" | "library"): Promise<PickedFile | null> {
-  const permission =
-    source === "camera"
-      ? await ImagePicker.requestCameraPermissionsAsync()
-      : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-  if (!permission.granted) return null;
+  /*
+   * GALEREYA uchun ruxsat SO'RALMAYDI — ataylab.
+   *
+   * ┌─ NIMA BUZILGAN EDI ───────────────────────────────────────────────────┐
+   * │ Ilgari bu yerda `requestMediaLibraryPermissionsAsync()` turardi va    │
+   * │ rad javobda jimgina `null` qaytarilardi. Android 13+ da o'sha ruxsat  │
+   * │ (`READ_MEDIA_IMAGES`) manifestda `maxSdkVersion="33"` bilan keladi,   │
+   * │ ya'ni yangi Androidda U UMUMAN QO'LLANILMAYDI va so'rov hech qachon   │
+   * │ `granted` bo'lmaydi.                                                  │
+   * │                                                                       │
+   * │ Natijada Android 14/15/16 telefonida profil rasmini almashtirish,     │
+   * │ guruh rasmi va rasm biriktirish — hammasi JIM ishlamasdi: bosasiz,    │
+   * │ hech narsa ochilmaydi, xato ham chiqmaydi.                            │
+   * │                                                                       │
+   * │ Aslida ruxsat kerak emas: `expo-image-picker` tizimning Photo Picker  │
+   * │ oynasini ochadi (o'z manifestida `photopicker_activity` e'lon         │
+   * │ qilingan). U alohida jarayonda ishlaydi va foydalanuvchi TANLAGAN     │
+   * │ faylgagina vaqtinchalik ruxsat beradi — shuning uchun ilovaning       │
+   * │ galereyaga umumiy ruxsati talab qilinmaydi.                           │
+   * └───────────────────────────────────────────────────────────────────────┘
+   *
+   * KAMERA esa boshqa: `CAMERA` ruxsati haqiqatan shart. U rad etilsa
+   * sabab AYTILADI — yana jim qolmasin.
+   */
+  if (source === "camera") {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permission.granted) {
+      toast.error(
+        permission.canAskAgain
+          ? "Kameraga ruxsat berilmadi."
+          : "Kameraga ruxsat yopilgan. Telefon sozlamalaridan oching."
+      );
+      return null;
+    }
+  }
 
   const options: ImagePicker.ImagePickerOptions = {
     mediaTypes: ["images"],

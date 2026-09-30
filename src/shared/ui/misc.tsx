@@ -142,11 +142,20 @@ export function Skeleton({
 export function ScreenHeader({
   title,
   subtitle,
+  subtitleLines = 1,
   leading,
   trailing,
 }: {
   title: string;
   subtitle?: string;
+  /**
+   * Sarlavha ostidagi matn necha qatorga sig'adi.
+   *
+   * Standart — bitta: ro'yxat ekranlarida bu matn ikkinchi darajali va
+   * joy egallamasligi kerak. Ochilish sahifalarida (masalan Workspace)
+   * u to'liq o'qilishi kerak, shuning uchun sozlanadi.
+   */
+  subtitleLines?: number;
   leading?: ReactNode;
   trailing?: ReactNode;
 }) {
@@ -160,7 +169,7 @@ export function ScreenHeader({
           {title}
         </Text>
         {subtitle ? (
-          <Text variant="caption" tone="muted" numberOfLines={1}>
+          <Text variant="caption" tone="muted" numberOfLines={subtitleLines}>
             {subtitle}
           </Text>
         ) : null}

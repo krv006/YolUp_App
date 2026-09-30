@@ -8,7 +8,8 @@
     "overview": "Overview",
     "children": "Children",
     "attendance": "Attendance",
-    "homework": "Homework"
+    "homework": "Homework",
+    "workspace": "Workspace"
   },
   "auth": {
     "tagline": "Online learning platform",
@@ -638,6 +639,7 @@
     "daqiqa": "Minute",
     "mos_variant_topilmadi": "No matching option",
     "onlayn": "Online",
+    "orqaga": "Back",
     "qayta_urinish": "Try again",
     "qidirish": "Search",
     "sessiya_tekshirilmoqda": "Checking session…",

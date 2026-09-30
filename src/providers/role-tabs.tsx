@@ -18,6 +18,14 @@ export interface TabDefinition {
    */
   labelKey: string;
   icon: LucideIcon;
+  /**
+   * Shu bo'limga TEGISHLI, lekin panelda ko'rinmaydigan marshrutlar.
+   *
+   * Ular ochilganda bo'lim FAOL bo'lib turadi. Usiz, masalan, Workspace
+   * ichidan "Test" ochilganda panelda birorta ham bo'lim ajratilmasdi va
+   * foydalanuvchi qayerdaligini bilmasdi.
+   */
+  owns?: readonly string[];
 }
 
 /**
@@ -75,10 +83,13 @@ export function RoleTabs({
   const { palette } = useTheme();
   const { t } = useTranslation("mobile");
   const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.icon]));
+  const ownsByRoute = new Map(tabs.map((tab) => [tab.name, tab.owns ?? []]));
 
   return (
     <Tabs
-      tabBar={(props) => <RoleTabBar {...props} iconByRoute={iconByRoute} />}
+      tabBar={(props) => (
+        <RoleTabBar {...props} iconByRoute={iconByRoute} ownsByRoute={ownsByRoute} />
+      )}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: palette.background },
@@ -112,7 +123,11 @@ function RoleTabBar({
   descriptors,
   navigation,
   iconByRoute,
-}: TabBarProps & { iconByRoute: Map<string, LucideIcon> }) {
+  ownsByRoute,
+}: TabBarProps & {
+  iconByRoute: Map<string, LucideIcon>;
+  ownsByRoute: Map<string, readonly string[]>;
+}) {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -166,7 +181,13 @@ function RoleTabBar({
         const Icon = iconByRoute.get(route.name);
         if (!Icon) return null;
 
-        const focused = state.index === index;
+        /*
+         * Bo'lim o'zi ochilganda YOKI unga tegishli yashirin marshrut
+         * ochilganda faol ko'rinadi (`owns` — izohi tipda).
+         */
+        const focused =
+          state.index === index ||
+          (activeRoute ? (ownsByRoute.get(route.name) ?? []).includes(activeRoute.name) : false);
         const label = options.title ?? route.name;
 
         function onPress() {

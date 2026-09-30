@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
 /**
@@ -14,6 +15,22 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 type Variant = "development" | "staging" | "production";
 
 const VARIANT = (process.env.APP_VARIANT ?? "development") as Variant;
+
+/**
+ * Firebase sozlama fayli — BO'LSAGINA beriladi.
+ *
+ * `googleServicesFile` ko'rsatilib, fayl topilmasa prebuild yiqiladi.
+ * Fayllar `.gitignore` da (loyihaga xos kalitlar), ya'ni yangi klonda yoki
+ * CI'da ular bo'lmasligi normal — bunday holda ilova baribir quriladi,
+ * faqat push tokeni olinmaydi.
+ *
+ * `credentials/` (imzolash kaliti) bilan bir xil naqsh.
+ */
+function firebaseFile(name: string): string | undefined {
+  // Yo'l joriy katalogga nisbatan: `expo prebuild` va `expo start` har doim
+  // loyiha ildizidan ishga tushadi.
+  return existsSync(name) ? `./${name}` : undefined;
+}
 
 const VARIANTS: Record<Variant, { name: string; idSuffix: string }> = {
   development: { name: "YolUp (Dev)", idSuffix: ".dev" },
@@ -40,6 +57,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     userInterfaceStyle: "automatic",
     icon: "./assets/icon.png",
     ios: {
+      // Izohi yuqorida, `firebaseFile` da.
+      googleServicesFile: firebaseFile("GoogleService-Info.plist"),
       supportsTablet: true,
       bundleIdentifier: `${BASE_ID}${variant.idSuffix}`,
       infoPlist: {
@@ -72,6 +91,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         backgroundColor: "#4A66F0",
       },
       predictiveBackGestureEnabled: false,
+      /*
+       * FCM sozlamasi. Fayl Firebase Console'dan olinadi (Android ilovasi,
+       * paket `uz.yolup.edu`) va loyiha ildiziga qo'yiladi. Izohi yuqorida,
+       * `firebaseFile` da.
+       */
+      googleServicesFile: firebaseFile("google-services.json"),
       /*
        * LiveKit/WebRTC uchun ruxsatlar. `@livekit/react-native` da Expo
        * config plugini YO'Q, shuning uchun ular shu yerda qo'lda beriladi —
@@ -113,6 +138,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           android: { minSdkVersion: 24 },
           // Expo SDK 57 ning minimal talabi (LiveKit undan pastini kutadi).
           ios: { deploymentTarget: "16.4" },
+        },
+      ],
+      /*
+       * Push bildirishnomalari. Plugin nativ tomonni sozlaydi: Androidda
+       * FCM xizmati va bildirishnoma ikonkasi, iOS'da esa push
+       * imkoniyati (entitlement).
+       */
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/android-icon-monochrome.png",
+          color: "#4A66F0",
         },
       ],
       // Release APK'ni haqiqiy kalit bilan imzolaydi. `credentials/`

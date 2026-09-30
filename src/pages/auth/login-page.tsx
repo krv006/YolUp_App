@@ -63,7 +63,7 @@ export function LoginPage() {
           name="login"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label={ta("form.login")}
+              label={ta("form.loginLabel")}
               placeholder={ta("form.loginPlaceholder")}
               icon={<UserRound size={18} color={palette["muted-foreground"]} />}
               textContentType="username"
@@ -82,7 +82,7 @@ export function LoginPage() {
           name="password"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label={ta("form.password")}
+              label={ta("form.passwordLabel")}
               placeholder={ta("form.passwordPlaceholder")}
               icon={<LockKeyhole size={18} color={palette["muted-foreground"]} />}
               secure

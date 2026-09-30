@@ -49,3 +49,8 @@ yarn-error.*
 # Release imzolash kaliti va parollari — HECH QACHON git'ga kirmasin.
 # Yo'qotmang: kalitsiz Play Store'dagi ilovani yangilab bo'lmaydi.
 credentials/
+
+# Firebase sozlama fayllari — loyihaga xos kalitlar, repoda saqlanmaydi.
+# Ularsiz ilova quriladi, faqat push ishlamaydi (app.config.ts: firebaseFile).
+google-services.json
+GoogleService-Info.plist

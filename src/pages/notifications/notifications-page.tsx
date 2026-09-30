@@ -10,6 +10,7 @@ import {
   type InboxNotification,
   type NotificationLink,
 } from "@/modules/notification";
+import { pushDeviceApi } from "@/modules/notification/api/push-device.api";
 import { formatDayTime, htmlToPlainText } from "@/shared/lib";
 import {
   Avatar,
@@ -25,6 +26,7 @@ import {
   Sheet,
   Text,
   useTheme,
+  toast,
 } from "@/shared/ui";
 
 /**
@@ -98,6 +100,28 @@ export function NotificationsPage() {
         <Text variant="subheading" style={styles.title}>
           {t("notifications.bildirishnomalar")}
         </Text>
+
+        {/*
+          * Sinov push — FAQAT dev qurilishda.
+          *
+          * Backend `push/test/` endpointini aynan sozlashni tekshirish uchun
+          * berdi: bitta bosishda token -> baza -> FCM -> telefon zanjiri
+          * sinaladi. Ishlab chiqarish ilovasida bunday tugmaning o'rni yo'q,
+          * shuning uchun `__DEV__` bilan chegaralangan.
+          */}
+        {__DEV__ ? (
+          <IconButton
+            accessibilityLabel={t("notifications.sinov_push_yuborish")}
+            onPress={() => {
+              void pushDeviceApi
+                .sendTest()
+                .then(() => toast.success(t("notifications.sinov_push_yuborildi")))
+                .catch((error: Error) => toast.error(error.message));
+            }}
+          >
+            <BellRing size={20} color={palette["muted-foreground"]} />
+          </IconButton>
+        ) : null}
       </View>
 
       {items.length === 0 ? (

@@ -181,15 +181,31 @@ export function ConversationInfoSheet({
               src={conversation.imageUrl}
               size="xl"
             />
-            {/* Guruh rasmini faqat kurs egasi almashtira oladi. */}
+            {/*
+              * Guruh rasmini faqat kurs egasi almashtira oladi.
+              *
+              * Yozuv holatga qarab o'zgaradi: rasm hali yo'q bo'lsa
+              * "Rasm yuklash" — "o'zgartirish" mavjud rasmni nazarda tutadi
+              * va bo'sh avatarda chalg'itardi.
+              *
+              * `alignSelf: center` SHART: `fullWidth={false}` tugmaga
+              * `alignSelf: "flex-start"` qo'yadi va u o'ramning
+              * `alignItems: "center"` ini bekor qiladi — yozuv chapga
+              * yopishib qolardi.
+              */}
             {teacherGroup ? (
               <Button
-                title={t("conversation.rasmni_ozgartirish")}
+                title={
+                  conversation.imageUrl
+                    ? t("conversation.rasmni_ozgartirish")
+                    : t("conversation.rasm_yuklash")
+                }
                 variant="ghost"
                 fullWidth={false}
                 loading={setRoomImage.isPending}
                 icon={<Camera size={15} color={palette["primary-text"]} />}
                 onPress={() => void changeImage()}
+                style={styles.centered}
               />
             ) : null}
             <Text variant="subheading">{conversation.title}</Text>
@@ -317,6 +333,8 @@ export function ConversationInfoSheet({
 
 const styles = StyleSheet.create({
   profile: { alignItems: "center", gap: 8, paddingVertical: 8 },
+  // Izohi tugmaning yonida: `fullWidth={false}` ni bosib o'tish uchun.
+  centered: { alignSelf: "center" },
   actions: { flexDirection: "row", gap: 10 },
   action: { flex: 1 },
   teacher: { flexDirection: "row", alignItems: "center", gap: 8 },

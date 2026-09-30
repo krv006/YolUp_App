@@ -130,11 +130,26 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
           </View>
         </Pressable>
 
+        {/*
+          * Yozuv holatga qarab: rasm yo'q bo'lsa "Rasm yuklash", bor bo'lsa
+          * "Rasmni o'zgartirish". Ilgari bu yerda faqat kamera belgisi
+          * turardi va rasm qo'yish mumkinligi ko'rinmasdi.
+          */}
+        <Button
+          title={user?.avatarUrl ? t("auth.rasmni_ozgartirish") : t("auth.rasm_yuklash")}
+          variant="ghost"
+          fullWidth={false}
+          icon={<Camera size={15} color={palette["primary-text"]} />}
+          onPress={() => void changeAvatar()}
+          style={styles.centered}
+        />
+
         {user?.avatarUrl ? (
           <Button
             title={t("auth.rasmni_ochirish")}
             variant="ghost"
             fullWidth={false}
+            style={styles.centered}
             loading={updateAvatar.isPending}
             // `null` — backend rasmni o'chiradi (veb bilan bir xil shartnoma).
             // Xatosi ham ko'rsatiladi: sabab yuqorida, `changeAvatar` da.
@@ -226,6 +241,12 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
 
 const styles = StyleSheet.create({
   avatarRow: { alignItems: "center", gap: 8 },
+  /*
+   * `fullWidth={false}` tugmaga `alignSelf: "flex-start"` qo'yadi va u
+   * o'ramning `alignItems: "center"` ini bekor qiladi — usiz yozuvlar
+   * chapga yopishib qolardi.
+   */
+  centered: { alignSelf: "center" },
   avatarHit: { width: 64, height: 64 },
   avatarImage: { width: 64, height: 64, borderRadius: 32 },
   avatarBadge: {

@@ -1,5 +1,6 @@
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import { File as FileSystemFile } from "expo-file-system";
 // Barrel EMAS: `@/shared/ui` orqali kelsa aylanma import hosil bo'ladi.
 import { toast } from "@/shared/ui/toast";
 
@@ -7,13 +8,12 @@ import { toast } from "@/shared/ui/toast";
  * Fayl tanlash va uni ko'chirilgan API qatlamiga uzatish.
  *
  * MUAMMO: veb API qatlami (`homework.api.ts`, `auth.api.ts`, …) `File`
- * kutadi — bu brauzer tipi, RN'da mavjud emas. RN'ning `FormData` si esa
- * `{ uri, name, type }` shaklidagi obyektni fayl deb qabul qiladi.
+ * kutadi — bu brauzer tipi, RN'da mavjud emas.
  *
- * YECHIM: shunday obyekt yasaymiz va uni `File` sifatida uzatamiz. Bu xavfsiz,
- * chunki ko'chirilgan kod fayldan FAQAT `name` va `size` ni o'qiydi
- * (`validateHomeworkFile`), qolganini to'g'ridan-to'g'ri `FormData` ga beradi —
- * u yerda esa aynan `{ uri, name, type }` kerak.
+ * YECHIM: `File` o'rniga mos obyekt yasaymiz va uni `File` sifatida
+ * uzatamiz. Bu xavfsiz, chunki ko'chirilgan kod fayldan FAQAT `name` va
+ * `size` ni o'qiydi (`validateHomeworkFile`), qolganini to'g'ridan-to'g'ri
+ * `FormData` ga beradi.
  *
  * Cast shu yerda, BITTA joyda qilinadi va sababi yozilgan; API qatlamining
  * o'zi 🟢 NUSXA bo'lib qoladi.
@@ -26,13 +26,39 @@ export interface PickedFile {
   mimeType: string;
 }
 
-/** `File` o'rniga uzatiladigan RN obyekti (izohi yuqorida). */
+/**
+ * `File` o'rniga uzatiladigan obyekt.
+ *
+ * ┌─ NEGA `uri` YETMAYDI ─────────────────────────────────────────────────┐
+ * │ Ilgari bu yerda `{ uri, name, type, size }` qaytarilardi — React      │
+ * │ Native'ning `FormData` si aynan shunday obyektni fayl deb tushunadi.  │
+ * │                                                                       │
+ * │ Expo SDK 54 dan boshlab ilovada `fetch` — Expo'ning O'Z              │
+ * │ implementatsiyasi va u `uri` ni UMUMAN bilmaydi. Uning               │
+ * │ `convertFormData.ts` fayli har bir qismni faqat uch holatda qabul    │
+ * │ qiladi: satr, `Blob`, yoki `bytes()` metodi bor obyekt. Boshqasida:  │
+ * │                                                                       │
+ * │   Error: Unsupported FormDataPart implementation                      │
+ * │                                                                       │
+ * │ Bu xato so'rov ketishidan OLDIN otiladi, shuning uchun API qatlami   │
+ * │ uni oddiy tarmoq uzilishi deb ko'rsatardi ("Server bilan bog'lanib   │
+ * │ bo'lmadi"). Natijada ilovadagi HAMMA yuklash ishlamasdi: profil      │
+ * │ rasmi, sertifikat, guruh rasmi, vazifa fayllari, test importi.       │
+ * │                                                                       │
+ * │ Endi fayl `expo-file-system` ning `File` i orqali o'qiladi — unda    │
+ * │ `bytes()` bor. Nom va MIME tanlagichdan olinadi: `File.name` kesh    │
+ * │ faylining nomini berardi (`00dd3fa1-….jpeg`), foydalanuvchi tanlagan │
+ * │ nom esa yo'qolardi.                                                   │
+ * └───────────────────────────────────────────────────────────────────────┘
+ */
 export function toUploadFile(picked: PickedFile): File {
+  const source = new FileSystemFile(picked.uri);
   return {
-    uri: picked.uri,
     name: picked.name,
     type: picked.mimeType,
-    size: picked.size,
+    // Tanlagich o'lchamni bermasa (kamera) fayldan o'qiladi.
+    size: picked.size || source.size,
+    bytes: () => source.bytes(),
   } as unknown as File;
 }
 

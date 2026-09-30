@@ -4,8 +4,6 @@ import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import {
   Bell,
-  ChartLine,
-  ClipboardCheck,
   History,
   LogOut,
   Palette,
@@ -18,7 +16,6 @@ import {
 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
-import { ROLES } from "@/shared/constants";
 import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
 import {
   AccountSwitchSheet,
@@ -195,37 +192,16 @@ export function ProfilePage({ roleKey }: { roleKey: string }) {
             </>
           ) : null}
           {/*
-            * Tahlil TAB emas, profil ichida.
+            * TAHLIL VA MOCK TEST BU YERDA YO'Q — ular "Ish maydoni"
+            * bo'limida (`pages/workspace/workspace-page.tsx`).
             *
-            * Veb'da u alohida marshrut (`/analytics`) va yon menyudan
-            * ochiladi. Mobilda tab o'rni cheklangan — o'quvchida beshtasi
-            * ham band. Tahlil har kuni ochiladigan bo'lim emas, shuning
-            * uchun u profilga qo'yildi, xuddi "Ko'rinish" kabi.
+            * Ilgari mobilda Workspace yo'q edi va bu ikkisi boradigan joy
+            * topilmay profilga qo'yilgandi. Workspace qo'shilgach ular
+            * ikki joyda ko'rinib qoldi — vebda esa faqat Workspace'da.
+            *
+            * Profilda HISOBGA tegishli narsalar qoladi: hisob almashish,
+            * kirishlar tarixi, ko'rinish, chiqish.
             */}
-          <ListItem
-            title={t("profile.analytics")}
-            subtitle={t("profile.analyticsHint")}
-            leading={<ChartLine size={20} color={palette["muted-foreground"]} />}
-            chevron
-            onPress={() => router.push("/analytics")}
-          />
-          <Separator inset={52} />
-          {/*
-            * Mock test faqat O'QUVCHIDA — vebda ham shunday
-            * (`app-router.tsx:187`). O'qituvchi imtihon yechmaydi.
-            */}
-          {user?.role === ROLES.STUDENT ? (
-            <>
-              <ListItem
-                title={t("profile.mockTest")}
-                subtitle={t("profile.mockTestHint")}
-                leading={<ClipboardCheck size={20} color={palette["muted-foreground"]} />}
-                chevron
-                onPress={() => router.push("/mock-tests")}
-              />
-              <Separator inset={52} />
-            </>
-          ) : null}
           <ListItem
             title={t("profile.loginHistory")}
             subtitle={t("profile.loginHistoryHint")}

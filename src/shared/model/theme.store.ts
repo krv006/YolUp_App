@@ -1,5 +1,17 @@
 import { create } from "zustand";
-import { storage } from "@/shared/lib";
+/*
+ * Saqlagich O'Z FAYLIDAN olinadi, `@/shared/lib` barrel'idan emas —
+ * `language.store.ts` dagi bilan bir xil sabab.
+ *
+ * Barrel `file-picker.ts` ni ham eksport qiladi, u esa xato xabari uchun
+ * `toast` ni import qiladi va halqa hosil bo'lardi:
+ *
+ *   toast -> theme -> theme.store -> shared/lib -> file-picker -> toast
+ *
+ * Bunday halqa jim ishlamaydi: modul yarim yuklangan holatda qolib,
+ * ilova `undefined` ustida yiqiladi (bir marta shu sabab bo'lgan).
+ */
+import { storage } from "@/shared/lib/storage";
 import { DEFAULT_ACCENT } from "@/shared/ui/accents";
 
 /**

@@ -84,21 +84,24 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
     }
   }
 
+  /*
+   * XATO SHU YERDA KO'RSATILADI.
+   *
+   * `useUpdateAvatarMutation` da `onError` YO'Q — u 🟢 veb bilan bayt-bayt
+   * bir xil fayl (`auth.mutations.ts`) va o'zgartirilmaydi. Ilgari bu
+   * yerdagi `catch` bo'sh edi va "xatoni mutatsiya ko'rsatadi" deb izoh
+   * qo'yilgandi — noto'g'ri izoh. Natijada rasm yuklanmasa EKRANDA HECH
+   * NARSA BO'LMASDI: na rasm almashardi, na xato chiqardi, foydalanuvchi
+   * esa tugma buzuq deb o'ylardi.
+   */
   async function changeAvatar() {
     const picked = await pickImage("library");
     if (!picked) return;
     try {
       await updateAvatar.mutateAsync(toUploadFile(picked));
       toast.success(t("auth.profil_rasmi_yangilandi"));
-    } catch {
-      /*
-       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
-       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
-       * MARTA ko'rinardi.
-       *
-       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
-       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
-       */
+    } catch (caught) {
+      toast.error((caught as Error).message);
     }
   }
 
@@ -134,7 +137,12 @@ export function ProfileEditSheet({ user, open, onClose }: ProfileEditSheetProps)
             fullWidth={false}
             loading={updateAvatar.isPending}
             // `null` — backend rasmni o'chiradi (veb bilan bir xil shartnoma).
-            onPress={() => void updateAvatar.mutateAsync(null)}
+            // Xatosi ham ko'rsatiladi: sabab yuqorida, `changeAvatar` da.
+            onPress={() =>
+              void updateAvatar
+                .mutateAsync(null)
+                .catch((error: Error) => toast.error(error.message))
+            }
           />
         ) : null}
       </View>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -203,8 +203,28 @@ function Player({ streamUrl }: { streamUrl: string }) {
     instance.loop = false;
   });
 
-  // Ekrandan chiqilganda ovoz davom etmasin.
-  useEffect(() => () => player.pause(), [player]);
+  /*
+   * PLEER QO'LDA TO'XTATILMAYDI.
+   *
+   * ┌─ NIMA BUZILGAN EDI ───────────────────────────────────────────────────┐
+   * │ Bu yerda `useEffect(() => () => player.pause(), [player])` turardi —  │
+   * │ "ekrandan chiqilganda ovoz davom etmasin" degan niyatda.              │
+   * │                                                                       │
+   * │ `useVideoPlayer` pleerni unmount'da O'ZI bo'shatadi. Tozalash esa     │
+   * │ bo'shatishdan keyin ishga tushib, allaqachon yo'q obyektga murojaat   │
+   * │ qilardi:                                                              │
+   * │                                                                       │
+   * │   Call to function 'VideoPlayer.pause' has been rejected.             │
+   * │   → Cannot use shared object that was already released                │
+   * │                                                                       │
+   * │ Natijada YOZUVI BOR darsdan orqaga qaytilganda ilova yiqilardi.       │
+   * │ Yozuvi yo'q darsda pleer umuman mount bo'lmagani uchun sezilmasdi —   │
+   * │ shuning uchun xato uzoq vaqt ko'zga tashlanmadi.                      │
+   * │                                                                       │
+   * │ Pleer bo'shatilganda ovoz ham to'xtaydi, ya'ni qo'lda `pause()`       │
+   * │ umuman kerak emas edi.                                                │
+   * └───────────────────────────────────────────────────────────────────────┘
+   */
 
   return (
     <VideoView

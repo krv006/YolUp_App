@@ -666,5 +666,11 @@
     "ruxsat": "Permission",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "The screen sharing request was sent to the teacher",
     "sorovni_yuborib_bolmadi": "Could not send the request"
+  },
+  "workspace": {
+    "rating": {
+      "title": "Rating",
+      "description": "Your homework results and standing."
+    }
   }
 }

@@ -9,7 +9,7 @@
  * "AI" o'quvchida umuman ko'rsatilmaydi (veb ham shunday:
  * `workspace-page.tsx` da `hiddenForStudent`), lekin marshrut saqlanadi.
  */
-import { CalendarDays, LayoutGrid, MessagesSquare, Trophy, UserRound } from "lucide-react-native";
+import { CalendarDays, LayoutGrid, MessagesSquare, UserRound } from "lucide-react-native";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
@@ -17,8 +17,7 @@ import { ROLES } from "@/shared/constants";
 const TABS = [
   { name: "chats", labelKey: "tabs.chats", icon: MessagesSquare },
   { name: "schedule", labelKey: "tabs.schedule", icon: CalendarDays },
-  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes"] },
-  { name: "report", labelKey: "tabs.rating", icon: Trophy },
+  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes", "report"] },
   { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
@@ -26,7 +25,7 @@ export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes"]} />
+        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "report"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

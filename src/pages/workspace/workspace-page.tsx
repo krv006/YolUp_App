@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   FileQuestion,
   Sparkles,
+  Trophy,
   type LucideIcon,
 } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
@@ -20,6 +21,13 @@ interface WorkspaceCard {
   to?: string;
   studentOnly?: boolean;
   hiddenForStudent?: boolean;
+  /**
+   * Matni `mobile` lug'atidan olinadi.
+   *
+   * `workspace.json` 🟢 veb bilan bayt-bayt bir xil, vebda esa bunday
+   * kartochka yo'q — shuning uchun uning matni u yerga qo'shilmaydi.
+   */
+  mobileText?: boolean;
 }
 
 /**
@@ -45,10 +53,19 @@ const CARDS: readonly WorkspaceCard[] = [
   { id: "analytics", icon: BarChart3, to: "/analytics" },
   { id: "ai", icon: Sparkles, to: "ai", hiddenForStudent: true },
   { id: "mock", icon: ClipboardCheck, to: "/mock-tests", studentOnly: true },
+  /*
+   * Reyting ilgari ALOHIDA TAB edi. Vebda u nav'da umuman yo'q
+   * (`/student/grades` marshruti bor, lekin unga havola yo'q), telefonda
+   * esa beshinchi tab joy yeb qo'yardi va har kuni ochiladigan bo'lim
+   * emas. Shuning uchun u shu yerga ko'chdi.
+   */
+  { id: "rating", icon: Trophy, to: "report", studentOnly: true, mobileText: true },
 ];
 
 export function WorkspacePage() {
   const { t } = useTranslation("workspace");
+  // Mobilga xos kartochkalar matni (izohi `mobileText` da).
+  const { t: tm } = useTranslation("mobile");
   const router = useRouter();
   const { user } = useAuth();
 
@@ -74,8 +91,16 @@ export function WorkspacePage() {
           <WorkspaceRow
             key={card.id}
             icon={card.icon}
-            title={t(`cards.${card.id}.title`)}
-            description={t(`cards.${card.id}.description`)}
+            title={
+              card.mobileText
+                ? tm(`workspace.${card.id}.title`)
+                : t(`cards.${card.id}.title`)
+            }
+            description={
+              card.mobileText
+                ? tm(`workspace.${card.id}.description`)
+                : t(`cards.${card.id}.description`)
+            }
             soonLabel={card.to ? undefined : t("soon")}
             onPress={
               card.to

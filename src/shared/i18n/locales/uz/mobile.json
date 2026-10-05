@@ -666,5 +666,22 @@
     "ruxsat": "Ruxsat",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "Ekran ulashish so'rovi o'qituvchiga yuborildi",
     "sorovni_yuborib_bolmadi": "So'rovni yuborib bo'lmadi"
+  },
+  "welcome": {
+    "title": "Xush kelibsiz, {{name}}!",
+    "subtitle": "YolUp'da darslar, vazifalar va testlar bir joyda.",
+    "start": "Boshlash",
+    "teacher": {
+      "group": "Guruh yaratib, o'quvchilarni qo'shing — chat, darslar va vazifalar o'sha guruh ichida.",
+      "lesson": "Dars qo'shsangiz, uni jonli o'tkazish va yozuvini saqlash mumkin."
+    },
+    "student": {
+      "group": "Guruhga qo'shilish uchun o'qituvchingizga yozing.",
+      "parent": "Ota-onangiz profilingizdagi kod orqali hisobingizga ulanishi mumkin."
+    },
+    "parent": {
+      "link": "\"Farzandlar\" bo'limida farzandingizning kodi bilan hisobini ulang.",
+      "follow": "Keyin uning davomati, vazifalari va reytingini kuzatib borasiz."
+    }
   }
 }

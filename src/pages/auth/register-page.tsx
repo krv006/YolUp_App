@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
-import { createRegisterSchema, useAuth, useRegisterMutation } from "@/modules/auth";
+import { createRegisterSchema, useAuth, useRegisterMutation, useWelcomeStore } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import type { RegisterFormValues } from "@/modules/auth";
 import { Button, Chip, ChipRow, Input, Logo, Screen, Text, toast, useTheme } from "@/shared/ui";
@@ -52,6 +52,12 @@ export function RegisterPage() {
   async function submit(values: RegisterFormValues) {
     try {
       await register.mutateAsync(values);
+      /*
+       * "Xush kelibsiz" oynasi uchun BELGI. Oynaning o'zi bu yerda
+       * ochilmaydi — quyidagi `replace` bu ekranni darhol almashtiradi va
+       * oyna u bilan birga yo'qolardi. Izohi `auth/lib/welcome.ts` da.
+       */
+      useWelcomeStore.getState().mark();
       // Ro'yxatdan o'tish tokenlar qaytarmaydi — darhol kirib olamiz.
       await login({ login: values.username.trim(), password: values.password, remember: true });
       router.replace(ROUTES.root);

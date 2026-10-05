@@ -1,6 +1,7 @@
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useCallback } from "react";
+import { BackHandler, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useHomeworkReport } from "@/modules/homework";
 import { HomeworkReportView } from "@/modules/homework/ui/homework-report-view";
@@ -27,6 +28,28 @@ export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
    * ajratiladi: u faqat ota-ona ko'rinishida beriladi.
    */
   const ownReport = !studentId;
+
+  /*
+   * TIZIMNING "orqaga" tugmasi ham Ish maydoniga qaytaradi — sarlavhadagi
+   * tugma bilan bir xil joyga.
+   *
+   * Usiz u tab navigatorining standart xatti-harakatini bajarardi, ya'ni
+   * BIRINCHI tabga (Suhbatlar) o'tardi: bitta ekranda ikki xil "orqaga"
+   * ikki xil joyga olib borardi. Qurilmada aynan shunday chiqdi.
+   *
+   * Faqat o'quvchida: ota-onada bu sahifa o'z tabining ichida va
+   * qaytadigan joy yo'q.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      if (!ownReport) return undefined;
+      const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+        router.replace("/student/workspace");
+        return true;
+      });
+      return () => subscription.remove();
+    }, [ownReport, router])
+  );
   const report = useHomeworkReport(studentId ?? undefined);
 
   if (report.isLoading) {

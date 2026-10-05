@@ -8,7 +8,6 @@ import {
   LogOut,
   Palette,
   Pencil,
-  ShieldCheck,
   Smartphone,
   Star,
   UsersRound,
@@ -141,16 +140,18 @@ export function ProfilePage({ roleKey }: { roleKey: string }) {
           />
         </View>
 
-        {/* O'qituvchi tasdiqlanmagan bo'lsa — veb'dagi kabi ogohlantirish. */}
-        {user?.isApproved === false ? (
-          <View style={[styles.notice, { backgroundColor: palette["warning-soft"] }]}>
-            <ShieldCheck size={18} color={palette["warning-strong"]} />
-            <Text variant="caption" style={{ flex: 1, color: palette["warning-strong"] }}>
-              Hisobingiz hali administrator tomonidan tasdiqlanmagan — kurs va dars
-              yaratish vaqtincha yopiq.
-            </Text>
-          </View>
-        ) : null}
+        {/*
+          * TASDIQLASH OGOHLANTIRISHI OLIB TASHLANDI.
+          *
+          * Vebda bu yerda "hisobingiz hali administrator tomonidan
+          * tasdiqlanmagan" degan chiziq turadi. Loyiha egasi bu bosqichda
+          * tasdiqlash talabi kerak emas deb qaror qildi (2026-10-05).
+          *
+          * DIQQAT: talabning O'ZI backendda qoladi — u tasdiqlanmagan
+          * o'qituvchiga 403 qaytaradi. Backend uni olib tashlamaguncha
+          * o'qituvchi sababni ekranda ko'rmaydi, faqat xatoni ko'radi.
+          * So'rov `docs/BACKEND-SOROVLAR.md` da.
+          */}
 
         {/* ── Ma'lumot kartasi: qiymat tepada, yorlig'i pastda ── */}
         {facts.length > 0 ? (
@@ -341,13 +342,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   actionBadge: { position: "absolute", top: -6, right: -12 },
-  notice: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    padding: 14,
-    borderRadius: radius.sm,
-  },
   group: {
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.lg,

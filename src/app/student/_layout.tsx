@@ -17,7 +17,7 @@ import { ROLES } from "@/shared/constants";
 const TABS = [
   { name: "chats", labelKey: "tabs.chats", icon: MessagesSquare },
   { name: "schedule", labelKey: "tabs.schedule", icon: CalendarDays },
-  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes", "report"] },
+  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes"] },
   { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
@@ -25,7 +25,7 @@ export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "report"]} />
+        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

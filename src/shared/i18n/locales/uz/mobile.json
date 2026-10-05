@@ -546,8 +546,9 @@
     "yozuvni_tayyorlab_bolmadi": "Yozuvni tayyorlab bo'lmadi"
   },
   "report": {
-    "reyting_yuklanmoqda": "Reyting yuklanmoqda…",
-    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Har bir fan bo'yicha vazifalar va baholaringiz."
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Har bir fan bo'yicha farzandingizning vazifalari va baholari.",
+    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Har bir fan bo'yicha vazifalar va baholaringiz.",
+    "reyting_yuklanmoqda": "Reyting yuklanmoqda…"
   },
   "schedule": {
     "kalendar_yuklanmoqda": "Kalendar yuklanmoqda…",
@@ -675,10 +676,6 @@
     "homework": {
       "title": "Vazifalar",
       "description": "Berilgan va bajarilgan vazifalar."
-    },
-    "rating": {
-      "title": "Reyting",
-      "description": "Vazifalar bo'yicha natijalaringiz va o'rningiz."
     },
     "ratingChild": {
       "title": "Reyting",

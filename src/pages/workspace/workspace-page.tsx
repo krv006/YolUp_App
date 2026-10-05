@@ -68,12 +68,6 @@ const CARDS: readonly WorkspaceCard[] = [
   { id: "analytics", icon: BarChart3, to: "/analytics", roles: ["teacher", "student"] },
   { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"] },
   { id: "mock", icon: ClipboardCheck, to: "/mock-tests", roles: ["student"] },
-  /*
-   * Reyting ilgari o'quvchida ALOHIDA TAB edi. Vebda u nav'da umuman yo'q
-   * (`/student/grades` marshruti bor, lekin unga havola yo'q), telefonda
-   * esa beshinchi tab joy yeb qo'yardi.
-   */
-  { id: "rating", icon: Trophy, to: "report", roles: ["student"], mobileText: true },
 
   // --- ota-ona (mobilga xos, izohi yuqorida) ---
   { id: "attendance", icon: CalendarCheck2, to: "attendance", roles: ["parent"], mobileText: true },

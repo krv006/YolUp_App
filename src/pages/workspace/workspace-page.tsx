@@ -78,7 +78,11 @@ const CARDS: readonly WorkspaceCard[] = [
   // --- ota-ona (mobilga xos, izohi yuqorida) ---
   { id: "attendance", icon: CalendarCheck2, to: "attendance", roles: ["parent"], mobileText: true },
   { id: "homework", icon: ListChecks, to: "homework", roles: ["parent"], mobileText: true },
-  { id: "rating", icon: Trophy, to: "grades", roles: ["parent"], mobileText: true },
+  /*
+   * Ota-onada matn BOSHQA kalitdan: "natijalaringiz" o'quvchiga aytiladi,
+   * ota-ona esa FARZANDINING natijalarini ko'radi.
+   */
+  { id: "ratingChild", icon: Trophy, to: "grades", roles: ["parent"], mobileText: true },
 ];
 
 export function WorkspacePage() {

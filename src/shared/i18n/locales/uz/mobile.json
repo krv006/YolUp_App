@@ -679,6 +679,10 @@
     "rating": {
       "title": "Reyting",
       "description": "Vazifalar bo'yicha natijalaringiz va o'rningiz."
+    },
+    "ratingChild": {
+      "title": "Reyting",
+      "description": "Farzandingizning vazifalar bo'yicha natijalari."
     }
   }
 }

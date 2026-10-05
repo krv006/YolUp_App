@@ -1,6 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
+import { useBackTo } from "@/shared/lib";
 import { ArrowLeft } from "lucide-react-native";
 import { useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
@@ -18,6 +19,7 @@ export function ParentGradesPage() {
   const { t } = useTranslation("mobile");
   const { selectedChild, selectedChildId } = useSelectedChild();
   const router = useRouter();
+  useBackTo("/parent/workspace");
   const { palette } = useTheme();
 
   if (!selectedChild) {

@@ -679,6 +679,10 @@
     "rating": {
       "title": "Rating",
       "description": "Your homework results and standing."
+    },
+    "ratingChild": {
+      "title": "Rating",
+      "description": "Your child's homework results."
     }
   }
 }

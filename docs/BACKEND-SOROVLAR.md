@@ -112,11 +112,55 @@ qaytarib qo'yamiz.
 
 ---
 
+## 3. Mock test endpointi — savol
+
+Sinov paytida o'quvchi hisobida "Mock Test" bo'limi ochilganda **404**
+qaytdi:
+
+```
+GET /api/v1/quizzes/mock-tests/   ->  404
+```
+
+Bu endpoint ishlab turgan serverda bormi? Agar hali chiqarilmagan bo'lsa,
+qachon rejalashtirilganini ayting — mobil tomon tayyor, faqat bo'sh
+ro'yxat o'rniga xato ko'rsatmoqchi emasmiz.
+
+Agar endpoint bor bo'lib, bo'sh ro'yxatda 404 qaytarayotgan bo'lsa —
+bo'sh ro'yxat uchun `200` va `[]` to'g'riroq bo'lardi: shunda ilova
+"hali sinov testi yo'q" deb ko'rsatadi, xato emas.
+
+---
+
+## 4. Veb tomondagi xato (sizning e'tiboringiz uchun)
+
+Bu backend emas, **veb frontend** masalasi, lekin yo'l-yo'lakay topildi.
+
+Ota-ona farzandining vazifalar hisobotini so'raganda backend `student_id`
+kutadi:
+
+```
+GET /api/v1/homework/report/?student_id=<id>
+```
+
+Veb esa `student` yuboradi (`homework.api.ts`), shuning uchun **400**
+oladi:
+
+```
+{ "student_id": "Bu maydon majburiy." }
+```
+
+Ya'ni veb saytda ota-ona farzandining reytingini ko'ra olmaydi. Mobil
+tomonda tuzatildi; vebda ham bir so'zlik o'zgarish.
+
+---
+
 ## Ro'yxat
 
 - [ ] `links/request/` `username` qabul qilsin (`invite_code` yonida)
 - [ ] username unique ekani tasdiqlansin
 - [ ] `PATCH /auth/me/` da band username uchun `username` kalitli 400
 - [ ] o'qituvchi uchun tasdiqlash to'sig'i olib tashlansin
+- [ ] mock test endpointi haqida javob (bormi, qachon)
+- [ ] (veb jamoasiga) hisobot so'rovida `student` -> `student_id`
 
 Savol bo'lsa yozing — mobil tomon tayyor turibdi.

@@ -1,8 +1,10 @@
-import { RefreshControl, ScrollView, StyleSheet } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "expo-router";
+import { ArrowLeft } from "lucide-react-native";
 import { useHomeworkReport } from "@/modules/homework";
 import { HomeworkReportView } from "@/modules/homework/ui/homework-report-view";
-import { Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
+import { IconButton, Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
 
 /**
  * O'quvchining reytingi — veb `student-report-page.tsx` porti.
@@ -13,6 +15,18 @@ import { Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui"
 export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
+  const router = useRouter();
+
+  /*
+   * ORQAGA tugmasi faqat O'QUVCHIDA.
+   *
+   * O'quvchida bu sahifa endi tab emas — u Ish maydonidan ochiladi va
+   * qaytish yo'li ko'rinib turishi kerak. Ota-onada esa u hali ham o'z
+   * tabining ichida (`parent-grades-page.tsx`), ya'ni qaytadigan joy yo'q
+   * va tugma faqat chalg'itardi. Shu sababli `studentId` ga qarab
+   * ajratiladi: u faqat ota-ona ko'rinishida beriladi.
+   */
+  const ownReport = !studentId;
   const report = useHomeworkReport(studentId ?? undefined);
 
   if (report.isLoading) {
@@ -46,7 +60,19 @@ export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
           />
         }
       >
-        <Text variant="heading">Mening natijalarim</Text>
+        {ownReport ? (
+          <View style={styles.headRow}>
+            <IconButton
+              accessibilityLabel={t("shared.orqaga")}
+              onPress={() => router.replace("/student/workspace")}
+            >
+              <ArrowLeft size={20} color={palette["muted-foreground"]} />
+            </IconButton>
+            <Text variant="heading">Mening natijalarim</Text>
+          </View>
+        ) : (
+          <Text variant="heading">Mening natijalarim</Text>
+        )}
         <Text variant="caption" tone="muted" style={styles.subtitle}>
           {t("report.har_bir_fan_boyicha_vazifalar_va_baholaringi")}
         </Text>
@@ -58,5 +84,6 @@ export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
 
 const styles = StyleSheet.create({
   body: { padding: 20, paddingBottom: 40 },
+  headRow: { flexDirection: "row", alignItems: "center", gap: 6, marginLeft: -8 },
   subtitle: { paddingBottom: 16 },
 });

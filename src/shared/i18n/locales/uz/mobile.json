@@ -682,6 +682,18 @@
     "parent": {
       "link": "\"Farzandlar\" bo'limida farzandingizning kodi bilan hisobini ulang.",
       "follow": "Keyin uning davomati, vazifalari va reytingini kuzatib borasiz."
+  "workspace": {
+    "attendance": {
+      "title": "Davomat",
+      "description": "Farzandingizning har bir darsdagi ishtiroki."
+    },
+    "homework": {
+      "title": "Vazifalar",
+      "description": "Berilgan va bajarilgan vazifalar."
+    },
+    "rating": {
+      "title": "Reyting",
+      "description": "Vazifalar bo'yicha natijalaringiz va o'rningiz."
     }
   }
 }

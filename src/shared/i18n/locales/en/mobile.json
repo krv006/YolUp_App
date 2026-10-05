@@ -682,6 +682,18 @@
     "parent": {
       "link": "In 'Children', link your child's account with their code.",
       "follow": "After that you can follow their attendance, homework and rating."
+  "workspace": {
+    "attendance": {
+      "title": "Attendance",
+      "description": "Your child's presence in each lesson."
+    },
+    "homework": {
+      "title": "Homework",
+      "description": "Assigned and completed work."
+    },
+    "rating": {
+      "title": "Rating",
+      "description": "Your homework results and standing."
     }
   }
 }

@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshControl, StyleSheet, View } from "react-native";
+import { BackHandler, RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft, FileQuestion, History, Pencil, Plus, Trash2 } from "lucide-react-native";
 import { useCourses, useSubjects } from "@/modules/course";
 import { useAuth } from "@/modules/auth";
@@ -44,6 +44,13 @@ import {
  * marshruti (`quizzes/<id>`), orqaga qaytish esa aniq harakat.
  */
 export function QuizzesPage({ basePath }: { basePath: string }) {
+  /*
+   * `basePath` — `/teacher/quizzes` yoki `/student/quizzes`. Ish maydoni
+   * shu bo'limning yonida turadi, ya'ni oxirgi segmentni almashtirish
+   * yetarli; rolni alohida tekshirish shart emas.
+   */
+  const workspacePath = basePath.replace(/\/quizzes$/, "/workspace");
+
   const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
@@ -55,6 +62,27 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
   const [imported, setImported] = useState<ImportedQuiz | null>(null);
   const publishQuiz = usePublishQuiz();
+
+  /*
+   * TIZIMNING "orqaga" tugmasi ham Ish maydoniga qaytaradi.
+   *
+   * Usiz u tab navigatorining standart xatti-harakatini bajarardi —
+   * BIRINCHI tabga (Suhbatlar) o'tardi. Ilova yopilmasdi, lekin bitta
+   * ekranda ikki xil "orqaga" ikki xil joyga olib borardi.
+   *
+   * `useFocusEffect` SHART: ishlovchi faqat shu ekran ochiq turganda
+   * faol bo'lishi kerak, aks holda u boshqa ekranlarning "orqaga"sini
+   * ham o'g'irlardi.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+        router.replace(workspacePath);
+        return true; // hodisa shu yerda tugaydi
+      });
+      return () => subscription.remove();
+    }, [router, workspacePath])
+  );
 
   /*
    * TAHRIRLASH — ro'yxatda faqat qisqa ma'lumot bor (`QuizSummary`),
@@ -105,12 +133,26 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
     <Screen padded={false}>
       <View style={[styles.head, { borderBottomColor: palette.border }]}>
         {/*
-          * Orqaga qaytish — bu sahifa endi TAB EMAS, Workspace ichidan
-          * ochiladi. Usiz faqat tizim "orqaga" jesti qolardi va ekranda
-          * chiqish yo'li ko'rinmasdi.
+          * Orqaga qaytish — ANIQ MANZILGA, `router.back()` bilan EMAS.
+          *
+          * ┌─ NIMA BUZILGAN EDI ─────────────────────────────────────────┐
+          * │ Testlar marshruti tab navigatoridagi yashirin EKRAN         │
+          * │ (`href: null`), Ish maydonidan unga o'tish esa stack'ga     │
+          * │ yangi qatlam qo'ymaydi — u YONMA-YON ekranga almashish.     │
+          * │                                                             │
+          * │ Shuning uchun `router.back()` tab navigatoridan butunlay    │
+          * │ chiqib ketardi va ILOVA YOPILARDI: foydalanuvchi Ish        │
+          * │ maydoniga qaytish o'rniga bosh ekranga tashlanardi.         │
+          * │                                                             │
+          * │ Ish maydoni — bu sahifaning yagona kirish nuqtasi, shuning  │
+          * │ uchun qayerga qaytishni taxmin qilish shart emas.           │
+          * └─────────────────────────────────────────────────────────────┘
           */}
         <View style={styles.headTop}>
-          <IconButton accessibilityLabel={t("shared.orqaga")} onPress={() => router.back()}>
+          <IconButton
+            accessibilityLabel={t("shared.orqaga")}
+            onPress={() => router.replace(workspacePath)}
+          >
             <ArrowLeft size={20} color={palette["muted-foreground"]} />
           </IconButton>
           <Text variant="heading">Testlar</Text>

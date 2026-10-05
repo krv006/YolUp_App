@@ -666,11 +666,5 @@
     "ruxsat": "Разрешение",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "Запрос на демонстрацию экрана отправлен учителю",
     "sorovni_yuborib_bolmadi": "Не удалось отправить запрос"
-  },
-  "workspace": {
-    "rating": {
-      "title": "Рейтинг",
-      "description": "Ваши результаты по заданиям и место в группе."
-    }
   }
 }

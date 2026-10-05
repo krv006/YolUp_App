@@ -666,11 +666,5 @@
     "ruxsat": "Ruxsat",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "Ekran ulashish so'rovi o'qituvchiga yuborildi",
     "sorovni_yuborib_bolmadi": "So'rovni yuborib bo'lmadi"
-  },
-  "workspace": {
-    "rating": {
-      "title": "Reyting",
-      "description": "Vazifalar bo'yicha natijalaringiz va o'rningiz."
-    }
   }
 }

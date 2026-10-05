@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "expo-router";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
-import { CheckCircle2, Clock3, ListChecks } from "lucide-react-native";
+import { ArrowLeft, CheckCircle2, Clock3, ListChecks } from "lucide-react-native";
 import { HomeworkResultSheet } from "@/modules/homework/ui/homework-result-sheet";
 import { useParentHomework, useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
@@ -9,6 +10,7 @@ import { formatDayTime } from "@/shared/lib";
 import type { Submission } from "@/shared/types";
 import {
   Badge,
+  IconButton,
   radius,
   Screen,
   ScreenEmpty,
@@ -22,6 +24,7 @@ import {
 export function ParentHomeworkPage() {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
+  const router = useRouter();
   const { selectedChild, selectedChildId } = useSelectedChild();
   const homework = useParentHomework(selectedChildId);
   const [resultOf, setResultOf] = useState<Submission | null>(null);
@@ -71,7 +74,19 @@ export function ParentHomeworkPage() {
         }
       >
         <View style={styles.head}>
-          <Text variant="heading">{selectedChild.name}</Text>
+          {/*
+            * Ish maydoniga qaytish — bu sahifa endi TAB EMAS.
+            * Sabab `app/parent/_layout.tsx` da.
+            */}
+          <View style={styles.headRow}>
+            <IconButton
+              accessibilityLabel={t("shared.orqaga")}
+              onPress={() => router.replace("/parent/workspace")}
+            >
+              <ArrowLeft size={20} color={palette["muted-foreground"]} />
+            </IconButton>
+            <Text variant="heading">{selectedChild.name}</Text>
+          </View>
           <Text variant="caption" tone="muted">
             {t("parent.topshiriqlar_va_tekshiruv_natijalari")}
           </Text>
@@ -173,6 +188,7 @@ function SubmissionPill({
 
 const styles = StyleSheet.create({
   body: { padding: 16, gap: 12, paddingBottom: 40 },
+  headRow: { flexDirection: "row", alignItems: "center", gap: 6, marginLeft: -8 },
   head: { gap: 4, paddingTop: 8 },
   card: {
     borderWidth: StyleSheet.hairlineWidth,

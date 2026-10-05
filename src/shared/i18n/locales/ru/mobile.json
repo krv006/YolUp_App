@@ -61,8 +61,6 @@
     "newRole": "Создать новую роль",
     "analytics": "Аналитика",
     "analyticsHint": "Ваши результаты и показатели",
-    "mockTest": "Mock Test",
-    "mockTestHint": "Симуляция экзамена с таймером",
     "loginHistory": "История входов",
     "loginHistoryHint": "С какого устройства и IP входили",
     "loginHistoryFull": "С какого устройства и IP входили в ваш аккаунт.",
@@ -148,18 +146,6 @@
     "muddat_yoq": "Без срока",
     "vaqt_chegarasi_yoq_cheklanmagan_qayta_urinis": "Без ограничения времени — неограниченные попытки."
   },
-  "mocktest": {
-    "toxtatish": "Остановить",
-    "topshirish": "Отправить",
-    "imtihonni_toxtatish": "Остановить экзамен",
-    "javoblaringiz_yuborilmaydi_va_urinish_bekor_": "Ваши ответы не будут отправлены, попытка будет отменена.",
-    "orqaga": "Назад",
-    "mock_test": "Mock Test",
-    "yuklanmoqda": "Загрузка…",
-    "bir_nechta_test_birlashtirilgan_vaqt_chegara": "Несколько тестов, объединённых в экзамен с таймером.",
-    "boshlash": "Начать",
-    "hozircha_mock_test_yo_q": "Пока нет mock-тестов."
-  },
   "notification": {
     "xabar_yuborish": "Отправить сообщение",
     "barcha_foydalanuvchilarga_yoki_bittasiga": "Всем пользователям или одному.",
@@ -234,8 +220,9 @@
     "soat_15_00_da_boshlaymiz": "Начинаем в 15:00."
   },
   "report": {
-    "reyting_yuklanmoqda": "Загрузка рейтинга…",
-    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Ваши задания и оценки по каждому предмету."
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Задания и оценки вашего ребёнка по каждому предмету.",
+    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Ваши задания и оценки по каждому предмету.",
+    "reyting_yuklanmoqda": "Загрузка рейтинга…"
   },
   "live": {
     "darsga_taklif_qilish": "Пригласить на урок",
@@ -460,47 +447,50 @@
     "dars_ketmoqda": "Урок идёт"
   },
   "parent": {
-    "farzand_biriktirilmagan": "Ребёнок не привязан",
-    "farzand_bolimiga_oting_va_oquvchining_taklif": "Перейдите в раздел «Дети» и привяжите аккаунт ученика по коду приглашения.",
+    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "Сначала привяжите аккаунт ученика в разделе «Дети».",
+    "barchasi": "Все",
+    "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Привязанные аккаунты учеников и разрешения приватности.",
+    "bola_hisobi": "Аккаунт ребёнка",
+    "bola_hisobini_yaratish": "Создать аккаунт ребёнка",
+    "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "Вы можете отозвать эти разрешения в любой момент.",
     "davomat_yuklanmoqda": "Загрузка посещаемости…",
     "davomatni_yuklab_bolmadi": "Не удалось загрузить посещаемость",
-    "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Участие, внимание и фокус на каждом уроке.",
-    "farzandlar_yuklanmoqda": "Загрузка детей…",
-    "farzandlar_royxatini_yuklab_bolmadi": "Не удалось загрузить список детей",
-    "oquvchini_ulash": "Привязать ученика",
-    "bola_hisobi": "Аккаунт ребёнка",
-    "farzand_hali_ulanmagan": "Ребёнок ещё не привязан",
-    "oquvchi_taklif_kodini_kiriting_yoki_yangi_hi": "Введите код приглашения ученика или создайте новый аккаунт.",
-    "oquvchi_profilidagi_fk_taklif_kodini_kiritin": "Введите код приглашения FK-… из профиля ученика.",
-    "taklif_kodi": "Код приглашения",
-    "fk_xxxx": "FK-XXXX",
-    "sorov_yuborish": "Отправить запрос",
-    "bola_hisobini_yaratish": "Создать аккаунт ребёнка",
-    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "Созданный ученик привязывается к вам автоматически.",
-    "ism": "Имя",
     "familiya": "Фамилия",
-    "login": "Логин",
-    "vaqtinchalik_parol": "Временный пароль",
-    "hisob_yaratish": "Создать аккаунт",
-    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Запрос отправлен — ваш ребёнок должен подтвердить его",
-    "hisob_yaratildi": "Аккаунт создан",
-    "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Привязанные аккаунты учеников и разрешения приватности.",
-    "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "Вы можете отозвать эти разрешения в любой момент.",
-    "ruxsatlarni_yuklab_bolmadi": "Не удалось загрузить разрешения.",
-    "panel_yuklanmoqda": "Загрузка панели…",
-    "malumotlarni_yuklab_bolmadi": "Не удалось загрузить данные",
-    "songgi_davomat": "Последняя посещаемость",
-    "barchasi": "Все",
-    "tanlangan_farzand_uchun_davomat_topilmadi": "Для выбранного ребёнка посещаемость не найдена.",
+    "farzand_biriktirilmagan": "Ребёнок не привязан",
+    "farzand_bolimiga_oting_va_oquvchining_taklif": "Перейдите в раздел «Дети» и привяжите аккаунт ученика по коду приглашения.",
+    "farzand_hali_ulanmagan": "Ребёнок ещё не привязан",
     "farzand_tanlanmagan": "Ребёнок не выбран",
-    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "Сначала привяжите аккаунт ученика в разделе «Дети».",
-    "vazifalar_yuklanmoqda": "Загрузка заданий…",
-    "vazifa_topilmadi": "Задания не найдены",
-    "topshirilmagan": "Не сдано",
+    "farzandlar_royxatini_yuklab_bolmadi": "Не удалось загрузить список детей",
+    "farzandlar_yuklanmoqda": "Загрузка детей…",
+    "fk_xxxx": "FK-XXXX",
+    "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Участие, внимание и фокус на каждом уроке.",
+    "hisob_yaratildi": "Аккаунт создан",
+    "hisob_yaratish": "Создать аккаунт",
+    "ism": "Имя",
+    "login": "Логин",
+    "login_masalan": "например: krv006",
+    "malumotlarni_yuklab_bolmadi": "Не удалось загрузить данные",
     "natijani_ochish": "Открыть результат",
-    "topshiriqlar_va_tekshiruv_natijalari": "Задания и результаты проверки.",
+    "oquvchi_logini": "Логин ученика",
+    "oquvchi_profilidagi_fk_taklif_kodini_kiritin": "Введите код приглашения FK-… из профиля ученика.",
+    "oquvchi_profilidagi_loginni_kiriting": "Введите логин из профиля ученика.",
+    "oquvchi_taklif_kodini_kiriting_yoki_yangi_hi": "Введите код приглашения ученика или создайте новый аккаунт.",
+    "oquvchini_ulash": "Привязать ученика",
+    "panel_yuklanmoqda": "Загрузка панели…",
+    "ruxsatlarni_yuklab_bolmadi": "Не удалось загрузить разрешения.",
+    "songgi_davomat": "Последняя посещаемость",
+    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Запрос отправлен — ваш ребёнок должен подтвердить его",
+    "sorov_yuborish": "Отправить запрос",
+    "taklif_kodi": "Код приглашения",
+    "tanlangan_farzand_uchun_davomat_topilmadi": "Для выбранного ребёнка посещаемость не найдена.",
     "tekshirilmoqda": "Проверяется",
-    "tekshiruv_xatosi": "Ошибка проверки"
+    "tekshiruv_xatosi": "Ошибка проверки",
+    "topshirilmagan": "Не сдано",
+    "topshiriqlar_va_tekshiruv_natijalari": "Задания и результаты проверки.",
+    "vaqtinchalik_parol": "Временный пароль",
+    "vazifa_topilmadi": "Задания не найдены",
+    "vazifalar_yuklanmoqda": "Загрузка заданий…",
+    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "Созданный ученик привязывается к вам автоматически."
   },
   "conversation": {
     "bekor_qilish": "Отмена",
@@ -682,6 +672,8 @@
     "parent": {
       "link": "В разделе «Дети» подключите аккаунт ребёнка по его коду.",
       "follow": "После этого вы будете видеть посещаемость, задания и рейтинг."
+    }
+  },
   "workspace": {
     "attendance": {
       "title": "Посещаемость",
@@ -691,9 +683,9 @@
       "title": "Задания",
       "description": "Выданные и выполненные задания."
     },
-    "rating": {
+    "ratingChild": {
       "title": "Рейтинг",
-      "description": "Ваши результаты по заданиям и место в группе."
+      "description": "Результаты ребёнка по заданиям."
     }
   }
 }

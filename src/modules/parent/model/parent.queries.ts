@@ -53,7 +53,7 @@ export function useParentHomework(selectedChildId: string | null) {
 export function useRequestChildLink() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (inviteCode: string) => parentApi.requestLink(inviteCode),
+    mutationFn: (username: string) => parentApi.requestLink(username),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("Bog‘lash so‘rovi yuborildi");

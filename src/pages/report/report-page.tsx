@@ -1,32 +1,34 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import { useHomeworkReport } from "@/modules/homework";
 import { HomeworkReportView } from "@/modules/homework/ui/homework-report-view";
+import { ArrowLeft } from "lucide-react-native";
 import { IconButton, Screen, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
 
 /**
- * O'quvchining reytingi — veb `student-report-page.tsx` porti.
+ * Vazifalar bo'yicha hisobot — veb `student-report-page.tsx` porti.
  *
- * `studentId` berilsa ota-ona farzandining hisobotini ko'radi (backend
- * `?student=` parametrini shunday qabul qiladi).
+ * MOBILDA FAQAT OTA-ONADA ishlatiladi: o'quvchida bu bo'lim kerak emas
+ * deb qaror qilindi va marshruti olib tashlandi. `studentId` shuning
+ * uchun amalda doim beriladi — u backendga `student_id` bo'lib ketadi
+ * (`homework.api.ts` da nega aynan shu nom ekani yozilgan).
  */
-export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
+export function ReportPage({
+  studentId,
+  onBack,
+}: {
+  studentId?: string | null;
+  /*
+   * Orqaga tugmasi SHU YERDA chiziladi, chaqiruvchida emas.
+   *
+   * Chaqiruvchi uni o'z o'ramiga qo'yganda u status paneli OSTIGA
+   * tushardi: bu sahifa o'zining `Screen` ini yaratadi va xavfsiz
+   * maydonni o'sha qo'llaydi, tashqaridagi oddiy `View` esa qo'llamaydi.
+   */
+  onBack?: () => void;
+} = {}) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
-  const router = useRouter();
-
-  /*
-   * ORQAGA tugmasi faqat O'QUVCHIDA.
-   *
-   * O'quvchida bu sahifa endi tab emas — u Ish maydonidan ochiladi va
-   * qaytish yo'li ko'rinib turishi kerak. Ota-onada esa u hali ham o'z
-   * tabining ichida (`parent-grades-page.tsx`), ya'ni qaytadigan joy yo'q
-   * va tugma faqat chalg'itardi. Shu sababli `studentId` ga qarab
-   * ajratiladi: u faqat ota-ona ko'rinishida beriladi.
-   */
-  const ownReport = !studentId;
   const report = useHomeworkReport(studentId ?? undefined);
 
   if (report.isLoading) {
@@ -60,21 +62,25 @@ export function ReportPage({ studentId }: { studentId?: string | null } = {}) {
           />
         }
       >
-        {ownReport ? (
-          <View style={styles.headRow}>
-            <IconButton
-              accessibilityLabel={t("shared.orqaga")}
-              onPress={() => router.replace("/student/workspace")}
-            >
+        {/*
+          * Sarlavha KIMNIKI ekaniga qarab. Ilgari ota-ona ham "Mening
+          * natijalarim" degan sarlavhani ko'rardi — u veb'ning o'quvchi
+          * sahifasidan ko'chirilgan va ota-onada noto'g'ri edi.
+          */}
+        <View style={styles.headRow}>
+          {onBack ? (
+            <IconButton accessibilityLabel={t("shared.orqaga")} onPress={onBack}>
               <ArrowLeft size={20} color={palette["muted-foreground"]} />
             </IconButton>
-            <Text variant="heading">Mening natijalarim</Text>
-          </View>
-        ) : (
-          <Text variant="heading">Mening natijalarim</Text>
-        )}
+          ) : null}
+          <Text variant="heading">
+            {studentId ? "Farzandingiz natijalari" : "Mening natijalarim"}
+          </Text>
+        </View>
         <Text variant="caption" tone="muted" style={styles.subtitle}>
-          {t("report.har_bir_fan_boyicha_vazifalar_va_baholaringi")}
+          {studentId
+            ? t("report.har_bir_fan_boyicha_farzandingiz_vazifalari")
+            : t("report.har_bir_fan_boyicha_vazifalar_va_baholaringi")}
         </Text>
         <HomeworkReportView report={report.data} />
       </ScrollView>

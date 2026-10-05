@@ -1,6 +1,7 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
+import { useBackTo } from "@/shared/lib";
 import { ArrowLeft } from "lucide-react-native";
 import { AttendanceList, useAttendance } from "@/modules/attendance";
 import { useSelectedChild } from "@/modules/parent";
@@ -18,6 +19,7 @@ export function ParentAttendancePage() {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
+  useBackTo("/parent/workspace");
   const { children, childrenQuery, selectedChildId } = useSelectedChild();
 
   const attendance = useAttendance(selectedChildId ? { student: selectedChildId } : {});

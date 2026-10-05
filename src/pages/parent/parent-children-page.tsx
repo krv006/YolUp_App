@@ -62,13 +62,17 @@ export function ParentChildrenPage() {
 
   const [linkOpen, setLinkOpen] = useState(false);
   const [childOpen, setChildOpen] = useState(false);
-  const [inviteCode, setInviteCode] = useState("");
+  const [childLogin, setChildLogin] = useState("");
   const [child, setChild] = useState(EMPTY_CHILD);
 
   async function submitLink() {
     try {
-      await requestLink.mutateAsync(inviteCode.trim().toUpperCase());
-      setInviteCode("");
+      /*
+       * Faqat `trim` — katta harfga o'girilmaydi. Sabab `parent.api.ts`
+       * dagi `requestLink` izohida.
+       */
+      await requestLink.mutateAsync(childLogin.trim());
+      setChildLogin("");
       setLinkOpen(false);
       toast.success(t("parent.sorov_yuborildi_farzandingiz_tasdiqlashi_ker"));
     } catch {
@@ -269,20 +273,21 @@ export function ParentChildrenPage() {
         open={linkOpen}
         onClose={() => setLinkOpen(false)}
         title={t("parent.oquvchini_ulash")}
-        description={t("parent.oquvchi_profilidagi_fk_taklif_kodini_kiritin")}
+        description={t("parent.oquvchi_profilidagi_loginni_kiriting")}
       >
         <Input
-          label={t("parent.taklif_kodi")}
-          placeholder={t("parent.fk_xxxx")}
-          value={inviteCode}
-          onChangeText={setInviteCode}
-          autoCapitalize="characters"
+          label={t("parent.oquvchi_logini")}
+          placeholder={t("parent.login_masalan")}
+          value={childLogin}
+          onChangeText={setChildLogin}
+          autoCapitalize="none"
+          autoCorrect={false}
           autoFocus
         />
         <Button
           title={t("parent.sorov_yuborish")}
           loading={requestLink.isPending}
-          disabled={inviteCode.trim().length === 0}
+          disabled={childLogin.trim().length === 0}
           onPress={() => void submitLink()}
         />
       </Sheet>

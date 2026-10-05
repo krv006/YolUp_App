@@ -61,8 +61,6 @@
     "newRole": "Create a new role",
     "analytics": "Analytics",
     "analyticsHint": "Your results and metrics",
-    "mockTest": "Mock Test",
-    "mockTestHint": "Timed exam simulation",
     "loginHistory": "Login history",
     "loginHistoryHint": "Which device and IP were used",
     "loginHistoryFull": "Which device and IP signed in to your account.",
@@ -148,18 +146,6 @@
     "muddat_yoq": "No deadline",
     "vaqt_chegarasi_yoq_cheklanmagan_qayta_urinis": "No time limit — unlimited retakes."
   },
-  "mocktest": {
-    "toxtatish": "Stop",
-    "topshirish": "Submit",
-    "imtihonni_toxtatish": "Stop the exam",
-    "javoblaringiz_yuborilmaydi_va_urinish_bekor_": "Your answers will not be sent and the attempt is cancelled.",
-    "orqaga": "Back",
-    "mock_test": "Mock Test",
-    "yuklanmoqda": "Loading…",
-    "bir_nechta_test_birlashtirilgan_vaqt_chegara": "Several quizzes combined into one timed exam.",
-    "boshlash": "Start",
-    "hozircha_mock_test_yo_q": "No mock tests yet."
-  },
   "notification": {
     "xabar_yuborish": "Send message",
     "barcha_foydalanuvchilarga_yoki_bittasiga": "To all users or to one person.",
@@ -234,8 +220,9 @@
     "soat_15_00_da_boshlaymiz": "We start at 15:00."
   },
   "report": {
-    "reyting_yuklanmoqda": "Loading rating…",
-    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Your assignments and grades for each subject."
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Your child's homework and grades for each subject.",
+    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Your assignments and grades for each subject.",
+    "reyting_yuklanmoqda": "Loading rating…"
   },
   "live": {
     "darsga_taklif_qilish": "Invite to lesson",
@@ -460,47 +447,50 @@
     "dars_ketmoqda": "Lesson in progress"
   },
   "parent": {
-    "farzand_biriktirilmagan": "No child linked",
-    "farzand_bolimiga_oting_va_oquvchining_taklif": "Go to the 'Children' section and link the student's account with their invite code.",
+    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "First link a student account in the 'Children' section.",
+    "barchasi": "All",
+    "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Linked student accounts and privacy permissions.",
+    "bola_hisobi": "Child account",
+    "bola_hisobini_yaratish": "Create a child account",
+    "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "You can revoke these permissions at any time.",
     "davomat_yuklanmoqda": "Loading attendance…",
     "davomatni_yuklab_bolmadi": "Could not load attendance",
-    "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Participation, attention and focus for each lesson.",
-    "farzandlar_yuklanmoqda": "Loading children…",
-    "farzandlar_royxatini_yuklab_bolmadi": "Could not load the list of children",
-    "oquvchini_ulash": "Link a student",
-    "bola_hisobi": "Child account",
-    "farzand_hali_ulanmagan": "No child linked yet",
-    "oquvchi_taklif_kodini_kiriting_yoki_yangi_hi": "Enter the student's invite code or create a new account.",
-    "oquvchi_profilidagi_fk_taklif_kodini_kiritin": "Enter the FK-… invite code from the student's profile.",
-    "taklif_kodi": "Invite code",
-    "fk_xxxx": "FK-XXXX",
-    "sorov_yuborish": "Send request",
-    "bola_hisobini_yaratish": "Create a child account",
-    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "The created student is linked to you automatically.",
-    "ism": "First name",
     "familiya": "Last name",
-    "login": "Username",
-    "vaqtinchalik_parol": "Temporary password",
-    "hisob_yaratish": "Create account",
-    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Request sent — your child needs to confirm it",
-    "hisob_yaratildi": "Account created",
-    "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Linked student accounts and privacy permissions.",
-    "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "You can revoke these permissions at any time.",
-    "ruxsatlarni_yuklab_bolmadi": "Could not load permissions.",
-    "panel_yuklanmoqda": "Loading dashboard…",
-    "malumotlarni_yuklab_bolmadi": "Could not load the data",
-    "songgi_davomat": "Recent attendance",
-    "barchasi": "All",
-    "tanlangan_farzand_uchun_davomat_topilmadi": "No attendance found for the selected child.",
+    "farzand_biriktirilmagan": "No child linked",
+    "farzand_bolimiga_oting_va_oquvchining_taklif": "Go to the 'Children' section and link the student's account with their invite code.",
+    "farzand_hali_ulanmagan": "No child linked yet",
     "farzand_tanlanmagan": "No child selected",
-    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "First link a student account in the 'Children' section.",
-    "vazifalar_yuklanmoqda": "Loading assignments…",
-    "vazifa_topilmadi": "No assignments found",
-    "topshirilmagan": "Not submitted",
+    "farzandlar_royxatini_yuklab_bolmadi": "Could not load the list of children",
+    "farzandlar_yuklanmoqda": "Loading children…",
+    "fk_xxxx": "FK-XXXX",
+    "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Participation, attention and focus for each lesson.",
+    "hisob_yaratildi": "Account created",
+    "hisob_yaratish": "Create account",
+    "ism": "First name",
+    "login": "Username",
+    "login_masalan": "e.g. krv006",
+    "malumotlarni_yuklab_bolmadi": "Could not load the data",
     "natijani_ochish": "Open result",
-    "topshiriqlar_va_tekshiruv_natijalari": "Assignments and review results.",
+    "oquvchi_logini": "Student login",
+    "oquvchi_profilidagi_fk_taklif_kodini_kiritin": "Enter the FK-… invite code from the student's profile.",
+    "oquvchi_profilidagi_loginni_kiriting": "Enter the login from the student's profile.",
+    "oquvchi_taklif_kodini_kiriting_yoki_yangi_hi": "Enter the student's invite code or create a new account.",
+    "oquvchini_ulash": "Link a student",
+    "panel_yuklanmoqda": "Loading dashboard…",
+    "ruxsatlarni_yuklab_bolmadi": "Could not load permissions.",
+    "songgi_davomat": "Recent attendance",
+    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Request sent — your child needs to confirm it",
+    "sorov_yuborish": "Send request",
+    "taklif_kodi": "Invite code",
+    "tanlangan_farzand_uchun_davomat_topilmadi": "No attendance found for the selected child.",
     "tekshirilmoqda": "Reviewing",
-    "tekshiruv_xatosi": "Review error"
+    "tekshiruv_xatosi": "Review error",
+    "topshirilmagan": "Not submitted",
+    "topshiriqlar_va_tekshiruv_natijalari": "Assignments and review results.",
+    "vaqtinchalik_parol": "Temporary password",
+    "vazifa_topilmadi": "No assignments found",
+    "vazifalar_yuklanmoqda": "Loading assignments…",
+    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "The created student is linked to you automatically."
   },
   "conversation": {
     "bekor_qilish": "Cancel",
@@ -682,6 +672,8 @@
     "parent": {
       "link": "In 'Children', link your child's account with their code.",
       "follow": "After that you can follow their attendance, homework and rating."
+    }
+  },
   "workspace": {
     "attendance": {
       "title": "Attendance",
@@ -691,9 +683,9 @@
       "title": "Homework",
       "description": "Assigned and completed work."
     },
-    "rating": {
+    "ratingChild": {
       "title": "Rating",
-      "description": "Your homework results and standing."
+      "description": "Your child's homework results."
     }
   }
 }

@@ -30,10 +30,17 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **140**
-- 🟡/🔴 moslashtirilgan: **86**
+- 🟢 NUSXA: **134**
+- 🟡/🔴 moslashtirilgan: **84**
 - 🆕 mobilga xos: **11**
-- Jami: **237**
+- Jami: **229**
+
+## Olib tashlangan bo'limlar
+
+| Bo'lim | Sana | Sabab |
+| --- | --- | --- |
+| Mock test (`modules/mock-test`, `pages/mock-test`) | 2026-10-05 | Backend javobi: endpoint mavjud emas va rejalashtirilmagan, funksiya platformadan ataylab olib tashlangan. Veb'da modul hali turibdi — u yerda ham olinishi kutilmoqda. Kod git tarixida qoladi. |
+| O'quvchi reytingi (`app/student/report.tsx`) | 2026-10-05 | Loyiha egasi qarori. Hisobotning o'zi qoladi — ota-ona farzandining natijalarini ko'radi. |
 
 ## Fayllar
 
@@ -112,7 +119,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
 | `src/modules/course/ui/add-student-sheet.tsx` | 🟡 MOSLASH | `23417d755aae` | manba: veb `add-student-dialog.tsx`; dialog o'rniga pastdan ochiladigan oyna, qidiruv debounce'siz (ro'yxat kichik) |
 | `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `67f8017c22aa` | veb bilan bir joyda — suhbat ma'lumoti oynasida; o'chirishni tasdiqlash `ConfirmSheet` bilan |
-| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `36fced141fe9` | — |
+| `src/modules/homework/api/homework.api.ts` | 🟡 MOSLASH | `36fced141fe9` | hisobot so'rovida `student_id`, veb'dagi `student` EMAS — backend aynan shu nomni kutadi (vebda bu xato hali turibdi) |
 | `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `4cee08dbcf0f` | — |
 | `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
 | `src/modules/homework/constants/homework.constants.ts` | 🟢 NUSXA | `fccf69310542` | — |
@@ -160,13 +167,6 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2d0725ac8b8a` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-list.tsx` | 🟡 MOSLASH | `06013405aa64` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-text.tsx` | 🟡 MOSLASH | `61a4de2c8e42` | farq qayd etilmagan — tekshiring |
-| `src/modules/mock-test/api/mock-test.api.ts` | 🟢 NUSXA | `1062c395d3bf` | — |
-| `src/modules/mock-test/api/mock-test.dto.ts` | 🟢 NUSXA | `dba8c2ecbbd2` | — |
-| `src/modules/mock-test/api/mock-test.endpoints.ts` | 🟢 NUSXA | `9edd0d4f1b42` | — |
-| `src/modules/mock-test/index.ts` | 🟡 MOSLASH | `0cbb12363162` | generatsiya: veb barrel minus `ui/`; `MockTestCreateDialog` ko'chirilmadi — vebda ham chaqiruvchisi yo'q |
-| `src/modules/mock-test/lib/mock-test.mappers.ts` | 🟢 NUSXA | `93fb33497b26` | — |
-| `src/modules/mock-test/model/mock-test.queries.ts` | 🟢 NUSXA | `353ffb03cda3` | — |
-| `src/modules/mock-test/ui/mock-test-runner.tsx` | 🟡 MOSLASH | `256c436b888c` | vaqt mantiqi o'zgarishsiz; soat va tugmalar yuqorida qotirilgan, "To'xtatish" tasdiq so'raydi, variant tugmasi quiz modulidan (`Choice`) |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `980ff0a9d175` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `6f1a801dfa71` | — |
 | `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `5aa2ccfada89` | — |
@@ -178,7 +178,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/notification/api/push-device.api.ts` | 🆕 MOBIL | `—` | FCM qurilma tokeni; vebda Web Push obunasi (`push/subscribe/`) ishlatiladi |
 | `src/modules/notification/lib/device-id.ts` | 🆕 MOBIL | `—` | barqaror qurilma ID'si; backend kaliti `(user, device_id)`, token o'zgaruvchan |
 | `src/modules/notification/model/push-device.ts` | 🆕 MOBIL | `—` | chiqishda qurilmani ro'yxatdan chiqarish |
-| `src/modules/parent/api/parent.api.ts` | 🟢 NUSXA | `c944f05ed9d5` | — |
+| `src/modules/parent/api/parent.api.ts` | 🟡 MOSLASH | `c944f05ed9d5` | farzand ulashda `username` yuboriladi, veb'dagi `invite_code` EMAS — backend ikkalasini ham qabul qiladi |
 | `src/modules/parent/api/parent.dto.ts` | 🟢 NUSXA | `daad031b5dac` | — |
 | `src/modules/parent/index.ts` | 🟡 MOSLASH | `f7f9585ba037` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/parent/lib/parent.mappers.ts` | 🟢 NUSXA | `d8fb049f6581` | — |
@@ -223,7 +223,6 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
 | `src/pages/workspace/workspace-page.tsx` | 🟡 MOSLASH | `1310f75223c3` | vebda kartochkalar to'rda; telefonda bir ustunli ro'yxat — tor ekranda ikki ustunli matn sinib ketadi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
-| `src/pages/mock-test/mock-test-page.tsx` | 🟡 MOSLASH | `a45a9695e196` | ro'yxat va yechish bir marshrutda (veb kabi), lekin marshrut tab tashqarisida — imtihon paytida boshqa tabga bosish urinishni yo'q qilardi |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | `expo-video` pleeri; pleer QO'LDA to'xtatilmaydi — `useVideoPlayer` uni o'zi bo'shatadi |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |

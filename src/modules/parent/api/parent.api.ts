@@ -59,9 +59,21 @@ export const parentApi = {
     return apiClient.post(authEndpoints.children, dto);
   },
 
-  async requestLink(inviteCode: string) {
+  /*
+   * O'QUVCHI LOGINI bilan ulanadi, taklif kodi bilan EMAS.
+   *
+   * Backend ikkala shaklni ham qabul qiladi (`username` va `invite_code`),
+   * ikkalasi kelsa `username` ustun turadi. Veb hali taklif kodini
+   * yuboradi — shuning uchun bu fayl veb bilan bir xil emas (🟡).
+   *
+   * Qiymat O'ZGARTIRILMASDAN yuboriladi (faqat `trim`): backend
+   * katta-kichik harfdan qat'i nazar topadi, lekin avval AYNAN mos
+   * keladiganini qidiradi. Ilgari bu yerga `.toUpperCase()` qo'llanardi —
+   * u taklif kodi uchun to'g'ri edi, login uchun esa uni buzadi.
+   */
+  async requestLink(username: string) {
     return mapParentLinkDto(
-      await apiClient.post<ParentLinkDto>(authEndpoints.requestLink, { invite_code: inviteCode })
+      await apiClient.post<ParentLinkDto>(authEndpoints.requestLink, { username })
     );
   },
 

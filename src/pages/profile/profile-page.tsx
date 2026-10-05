@@ -91,9 +91,15 @@ export function ProfilePage({ roleKey }: { roleKey: string }) {
     user?.phone ? { value: user.phone, label: t("profile.phone") } : null,
     user?.username ? { value: `@${user.username}`, label: t("profile.username") } : null,
     user?.email ? { value: user.email, label: "Email" } : null,
-    user?.inviteCode
-      ? { value: user.inviteCode, label: t("profile.inviteCode") }
-      : null,
+    /*
+     * TAKLIF KODI KO'RSATILMAYDI. Ota-ona farzandini endi o'quvchining
+     * LOGINI bilan ulaydi (`parent.api.ts` dagi `requestLink`), ya'ni
+     * foydalanuvchi yodda tutadigan bitta identifikator qoladi.
+     *
+     * Backend `invite_code` ni javobda saqlab qoldi — veb hali uni
+     * ishlatadi, shuning uchun maydon o'chirilmagan, faqat mobil
+     * profilda chiqarilmaydi.
+     */
   ].filter((item): item is { value: string; label: string } => item !== null);
 
   return (

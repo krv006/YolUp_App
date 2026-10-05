@@ -73,7 +73,17 @@ export const homeworkApi = {
   async getReport(studentId?: string | null, options: RequestOptions = {}) {
     const dto = await apiClient.get<HomeworkReportDto>(homeworkEndpoints.report, {
       ...options,
-      query: studentId ? { student: studentId } : undefined,
+      /*
+       * `student_id`, `student` EMAS — backend aynan shu nomni kutadi:
+       *
+       *   400 { "student_id": "Bu maydon majburiy." }
+       *
+       * Qurilmada ota-ona hisobida aniqlandi: farzandning reytingi
+       * umuman ochilmasdi. Veb'da ham xuddi shu xato bor
+       * (`student` yuboradi) — ya'ni u yerda ham ota-ona reytingi
+       * ishlamaydi.
+       */
+      query: studentId ? { student_id: studentId } : undefined,
     });
     return mapHomeworkReportDto(dto);
   },

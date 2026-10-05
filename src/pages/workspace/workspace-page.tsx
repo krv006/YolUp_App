@@ -5,7 +5,6 @@ import {
   BarChart3,
   CalendarCheck2,
   ChevronRight,
-  ClipboardCheck,
   FileQuestion,
   ListChecks,
   Sparkles,
@@ -67,7 +66,6 @@ const CARDS: readonly WorkspaceCard[] = [
   { id: "quizzes", icon: FileQuestion, to: "quizzes", roles: ["teacher", "student"] },
   { id: "analytics", icon: BarChart3, to: "/analytics", roles: ["teacher", "student"] },
   { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"] },
-  { id: "mock", icon: ClipboardCheck, to: "/mock-tests", roles: ["student"] },
 
   // --- ota-ona (mobilga xos, izohi yuqorida) ---
   { id: "attendance", icon: CalendarCheck2, to: "attendance", roles: ["parent"], mobileText: true },

@@ -3,9 +3,11 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   BarChart3,
+  CalendarCheck2,
   ChevronRight,
   ClipboardCheck,
   FileQuestion,
+  ListChecks,
   Sparkles,
   Trophy,
   type LucideIcon,
@@ -14,18 +16,20 @@ import { useAuth } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
 import { radius, Screen, ScreenHeader, Text, useTheme } from "@/shared/ui";
 
+type WorkspaceRole = "teacher" | "student" | "parent";
+
 interface WorkspaceCard {
   id: string;
   icon: LucideIcon;
   /** Berilmasa — "tez orada", bosilmaydi (veb bilan bir xil qoida). */
   to?: string;
-  studentOnly?: boolean;
-  hiddenForStudent?: boolean;
+  /** Qaysi rollarda ko'rinadi. */
+  roles: readonly WorkspaceRole[];
   /**
    * Matni `mobile` lug'atidan olinadi.
    *
-   * `workspace.json` 🟢 veb bilan bayt-bayt bir xil, vebda esa bunday
-   * kartochka yo'q — shuning uchun uning matni u yerga qo'shilmaydi.
+   * `workspace.json` 🟢 veb bilan bayt-bayt bir xil; vebda bunday
+   * kartochka yo'q, shuning uchun uning matni u yerga qo'shilmaydi.
    */
   mobileText?: boolean;
 }
@@ -40,26 +44,41 @@ interface WorkspaceCard {
  * │                                                                       │
  * │ Mobilda Workspace umuman yo'q edi: uning o'rniga to'g'ridan-to'g'ri  │
  * │ "Test" tabi qo'yilgandi. Natijada Tahlil faqat Profil ekranidan,     │
- * │ Mock Test va AI esa HECH QAYERDAN ochilmasdi — marshrutlari bor,     │
- * │ havolasi yo'q edi.                                                    │
+ * │ Mock Test va AI esa HECH QAYERDAN ochilmasdi.                         │
  * └───────────────────────────────────────────────────────────────────────┘
  *
- * 🟡 MOSLASH: vebda kartochkalar to'r (grid) bo'lib yonma-yon turadi.
- * Telefonda ular bir ustunli ro'yxat — tor ekranda ikki ustunli kartochka
- * matni ikki-uch qatorga sinadi va o'qilmaydi.
+ * 🟡 MOSLASH, veb'dan ikki farq bilan:
+ *
+ *  1. Kartochkalar BIR USTUNLI ro'yxat. Vebda ular to'r bo'lib yonma-yon
+ *     turadi; tor ekranda ikki ustunli kartochka matni uch qatorga sinib
+ *     o'qilmaydi.
+ *
+ *  2. OTA-ONA ham bor. Vebda ota-onaning o'z navigatsiyasi beshta
+ *     bo'limdan iborat (`parent-layout.tsx`), telefonda esa ularning
+ *     ustiga Profil qo'shilib oltita tab chiqardi va yorliqlar
+ *     kesilardi ("Davoma…", "Vazifa…"). Ikkinchi darajali uchtasi shu
+ *     yerga yig'ildi.
+ *
+ * Shu sababli roldan qat'i nazar BIR XIL naqsh: tab qatorida kundalik
+ * bo'limlar, qolgani Ish maydonida.
  */
 const CARDS: readonly WorkspaceCard[] = [
-  { id: "quizzes", icon: FileQuestion, to: "quizzes" },
-  { id: "analytics", icon: BarChart3, to: "/analytics" },
-  { id: "ai", icon: Sparkles, to: "ai", hiddenForStudent: true },
-  { id: "mock", icon: ClipboardCheck, to: "/mock-tests", studentOnly: true },
+  // --- o'qituvchi va o'quvchi (veb bilan bir xil) ---
+  { id: "quizzes", icon: FileQuestion, to: "quizzes", roles: ["teacher", "student"] },
+  { id: "analytics", icon: BarChart3, to: "/analytics", roles: ["teacher", "student"] },
+  { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"] },
+  { id: "mock", icon: ClipboardCheck, to: "/mock-tests", roles: ["student"] },
   /*
-   * Reyting ilgari ALOHIDA TAB edi. Vebda u nav'da umuman yo'q
+   * Reyting ilgari o'quvchida ALOHIDA TAB edi. Vebda u nav'da umuman yo'q
    * (`/student/grades` marshruti bor, lekin unga havola yo'q), telefonda
-   * esa beshinchi tab joy yeb qo'yardi va har kuni ochiladigan bo'lim
-   * emas. Shuning uchun u shu yerga ko'chdi.
+   * esa beshinchi tab joy yeb qo'yardi.
    */
-  { id: "rating", icon: Trophy, to: "report", studentOnly: true, mobileText: true },
+  { id: "rating", icon: Trophy, to: "report", roles: ["student"], mobileText: true },
+
+  // --- ota-ona (mobilga xos, izohi yuqorida) ---
+  { id: "attendance", icon: CalendarCheck2, to: "attendance", roles: ["parent"], mobileText: true },
+  { id: "homework", icon: ListChecks, to: "homework", roles: ["parent"], mobileText: true },
+  { id: "rating", icon: Trophy, to: "grades", roles: ["parent"], mobileText: true },
 ];
 
 export function WorkspacePage() {
@@ -69,10 +88,9 @@ export function WorkspacePage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  const isStudent = user?.role === ROLES.STUDENT;
-  const cards = CARDS.filter(
-    (card) => (!card.studentOnly || isStudent) && !(card.hiddenForStudent && isStudent)
-  );
+  const role: WorkspaceRole =
+    user?.role === ROLES.STUDENT ? "student" : user?.role === ROLES.PARENT ? "parent" : "teacher";
+  const cards = CARDS.filter((card) => card.roles.includes(role));
 
   /*
    * Nisbiy yo'l ("quizzes") joriy rol bo'limiga tegishli: o'qituvchida
@@ -80,7 +98,7 @@ export function WorkspacePage() {
    * qiladi (`to: "../quizzes"`), shuning uchun ro'yxat bitta bo'lib
    * qolaveradi.
    */
-  const rolePrefix = isStudent ? "/student" : "/teacher";
+  const rolePrefix = `/${role}`;
 
   return (
     <Screen scroll>

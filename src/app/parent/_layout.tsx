@@ -1,4 +1,4 @@
-import { CalendarCheck2, Home, ListChecks, Trophy, UserRound, UsersRound } from "lucide-react-native";
+import { Home, LayoutGrid, UserRound, UsersRound } from "lucide-react-native";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
@@ -15,15 +15,25 @@ import { ROLES } from "@/shared/constants";
  * bormasdi. O'qituvchi va o'quvchida profil tabi bor edi, shuning uchun
  * kamchilik ko'zga tashlanmagan.
  *
- * Yorliq "Farzandlar" emas, "Farzand" — oltita tab bilan uzun yorliq
- * qisqartirib ko'rsatiladi ("Farzan…").
+ * DAVOMAT, VAZIFALAR va REYTING tab EMAS — ular Ish maydonida.
+ *
+ * Veb navigatsiyasi beshta bo'limdan iborat, mobilda ularning ustiga
+ * Profil qo'shilib OLTITA tab chiqardi. Telefonning tor qatorida yorliqlar
+ * kesilardi ("Davoma…", "Vazifa…", "Farzan…") va bo'limlar bir-biridan
+ * ajralmay qolardi. Endi kundalik ikkitasi tabda, qolgan uchtasi Ish
+ * maydonida — o'qituvchi va o'quvchidagi bilan bir xil naqsh.
+ *
+ * Marshrutlar o'zgarmadi, faqat panelda ko'rinmaydi.
  */
 const TABS = [
   { name: "dashboard", labelKey: "tabs.overview", icon: Home },
   { name: "children", labelKey: "tabs.children", icon: UsersRound },
-  { name: "attendance", labelKey: "tabs.attendance", icon: CalendarCheck2 },
-  { name: "homework", labelKey: "tabs.homework", icon: ListChecks },
-  { name: "grades", labelKey: "tabs.rating", icon: Trophy },
+  {
+    name: "workspace",
+    labelKey: "tabs.workspace",
+    icon: LayoutGrid,
+    owns: ["attendance", "homework", "grades"],
+  },
   { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
@@ -31,7 +41,7 @@ export default function ParentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.PARENT]}>
-        <RoleTabs tabs={TABS} />
+        <RoleTabs tabs={TABS} hidden={["attendance", "homework", "grades"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

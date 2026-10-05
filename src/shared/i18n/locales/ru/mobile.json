@@ -668,6 +668,14 @@
     "sorovni_yuborib_bolmadi": "Не удалось отправить запрос"
   },
   "workspace": {
+    "attendance": {
+      "title": "Посещаемость",
+      "description": "Участие ребёнка на каждом уроке."
+    },
+    "homework": {
+      "title": "Задания",
+      "description": "Выданные и выполненные задания."
+    },
     "rating": {
       "title": "Рейтинг",
       "description": "Ваши результаты по заданиям и место в группе."

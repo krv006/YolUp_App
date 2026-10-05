@@ -8,6 +8,12 @@
  *
  * "AI" o'quvchida umuman ko'rsatilmaydi (veb ham shunday:
  * `workspace-page.tsx` da `hiddenForStudent`), lekin marshrut saqlanadi.
+ *
+ * REYTING OLIB TASHLANDI — tab ham, marshrut ham. Vebda u nav'da umuman
+ * yo'q (`/student/grades` marshruti bor, lekin unga havola berilmaydi),
+ * loyiha egasi esa uni mobilda ham kerak emas dedi. Hisobotning o'zi
+ * qoladi: ota-ona farzandining natijalarini `parent-grades-page.tsx`
+ * orqali ko'radi.
  */
 import { CalendarDays, LayoutGrid, MessagesSquare, UserRound } from "lucide-react-native";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";

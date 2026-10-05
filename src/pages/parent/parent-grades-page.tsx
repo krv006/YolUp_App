@@ -1,11 +1,11 @@
 import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { useBackTo } from "@/shared/lib";
 import { useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
 import { ReportPage } from "@/pages/report/report-page";
-import { IconButton, Screen, ScreenEmpty, useTheme } from "@/shared/ui";
+import { Screen, ScreenEmpty } from "@/shared/ui";
 
 /**
  * Farzandning reytingi — veb `parent-report-page.tsx` porti.
@@ -18,7 +18,7 @@ export function ParentGradesPage() {
   const { t } = useTranslation("mobile");
   const { selectedChild, selectedChildId } = useSelectedChild();
   const router = useRouter();
-  const { palette } = useTheme();
+  useBackTo("/parent/workspace");
 
   if (!selectedChild) {
     return (
@@ -33,28 +33,22 @@ export function ParentGradesPage() {
 
   return (
     <View style={styles.root}>
-      {/*
-        * Ish maydoniga qaytish — bu sahifa endi TAB EMAS.
-        * Sabab `app/parent/_layout.tsx` da.
-        */}
-      <View style={styles.headRow}>
-        <IconButton
-          accessibilityLabel={t("shared.orqaga")}
-          onPress={() => router.replace("/parent/workspace")}
-        >
-          <ArrowLeft size={20} color={palette["muted-foreground"]} />
-        </IconButton>
-      </View>
       <View style={styles.selector}>
         <ChildSelector />
       </View>
-      <ReportPage studentId={selectedChildId} />
+      {/*
+        * Orqaga tugmasi `ReportPage` ichida chiziladi — u yerda xavfsiz
+        * maydon to'g'ri hisoblanadi (sabab o'sha faylda).
+        */}
+      <ReportPage
+        studentId={selectedChildId}
+        onBack={() => router.replace("/parent/workspace")}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, paddingTop: 4 },
   root: { flex: 1 },
   selector: { paddingHorizontal: 16 },
 });

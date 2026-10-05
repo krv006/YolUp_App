@@ -234,8 +234,9 @@
     "soat_15_00_da_boshlaymiz": "We start at 15:00."
   },
   "report": {
-    "reyting_yuklanmoqda": "Loading rating…",
-    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Your assignments and grades for each subject."
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Your child's homework and grades for each subject.",
+    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Your assignments and grades for each subject.",
+    "reyting_yuklanmoqda": "Loading rating…"
   },
   "live": {
     "darsga_taklif_qilish": "Invite to lesson",
@@ -682,6 +683,8 @@
     "parent": {
       "link": "In 'Children', link your child's account with their code.",
       "follow": "After that you can follow their attendance, homework and rating."
+    }
+  },
   "workspace": {
     "attendance": {
       "title": "Attendance",
@@ -691,9 +694,9 @@
       "title": "Homework",
       "description": "Assigned and completed work."
     },
-    "rating": {
+    "ratingChild": {
       "title": "Rating",
-      "description": "Your homework results and standing."
+      "description": "Your child's homework results."
     }
   }
 }

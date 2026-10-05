@@ -8,6 +8,12 @@
  *
  * "AI" o'quvchida umuman ko'rsatilmaydi (veb ham shunday:
  * `workspace-page.tsx` da `hiddenForStudent`), lekin marshrut saqlanadi.
+ *
+ * REYTING OLIB TASHLANDI — tab ham, marshrut ham. Vebda u nav'da umuman
+ * yo'q (`/student/grades` marshruti bor, lekin unga havola berilmaydi),
+ * loyiha egasi esa uni mobilda ham kerak emas dedi. Hisobotning o'zi
+ * qoladi: ota-ona farzandining natijalarini `parent-grades-page.tsx`
+ * orqali ko'radi.
  */
 import { CalendarDays, LayoutGrid, MessagesSquare, UserRound } from "lucide-react-native";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
@@ -17,7 +23,7 @@ import { ROLES } from "@/shared/constants";
 const TABS = [
   { name: "chats", labelKey: "tabs.chats", icon: MessagesSquare },
   { name: "schedule", labelKey: "tabs.schedule", icon: CalendarDays },
-  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes", "report"] },
+  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes"] },
   { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
@@ -25,7 +31,7 @@ export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "report"]} />
+        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

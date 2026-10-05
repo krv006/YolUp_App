@@ -6,7 +6,7 @@ import { ArrowLeft, CheckCircle2, Clock3, ListChecks } from "lucide-react-native
 import { HomeworkResultSheet } from "@/modules/homework/ui/homework-result-sheet";
 import { useParentHomework, useSelectedChild } from "@/modules/parent";
 import { ChildSelector } from "@/modules/parent/ui/child-selector";
-import { formatDayTime } from "@/shared/lib";
+import { formatDayTime, useBackTo } from "@/shared/lib";
 import type { Submission } from "@/shared/types";
 import {
   Badge,
@@ -25,6 +25,7 @@ export function ParentHomeworkPage() {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const router = useRouter();
+  useBackTo("/parent/workspace");
   const { selectedChild, selectedChildId } = useSelectedChild();
   const homework = useParentHomework(selectedChildId);
   const [resultOf, setResultOf] = useState<Submission | null>(null);

@@ -234,8 +234,9 @@
     "soat_15_00_da_boshlaymiz": "Начинаем в 15:00."
   },
   "report": {
-    "reyting_yuklanmoqda": "Загрузка рейтинга…",
-    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Ваши задания и оценки по каждому предмету."
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Задания и оценки вашего ребёнка по каждому предмету.",
+    "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Ваши задания и оценки по каждому предмету.",
+    "reyting_yuklanmoqda": "Загрузка рейтинга…"
   },
   "live": {
     "darsga_taklif_qilish": "Пригласить на урок",
@@ -682,6 +683,8 @@
     "parent": {
       "link": "В разделе «Дети» подключите аккаунт ребёнка по его коду.",
       "follow": "После этого вы будете видеть посещаемость, задания и рейтинг."
+    }
+  },
   "workspace": {
     "attendance": {
       "title": "Посещаемость",
@@ -691,9 +694,9 @@
       "title": "Задания",
       "description": "Выданные и выполненные задания."
     },
-    "rating": {
+    "ratingChild": {
       "title": "Рейтинг",
-      "description": "Ваши результаты по заданиям и место в группе."
+      "description": "Результаты ребёнка по заданиям."
     }
   }
 }

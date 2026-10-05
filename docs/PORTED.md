@@ -30,8 +30,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **140**
-- 🟡/🔴 moslashtirilgan: **86**
+- 🟢 NUSXA: **139**
+- 🟡/🔴 moslashtirilgan: **87**
 - 🆕 mobilga xos: **11**
 - Jami: **237**
 
@@ -112,7 +112,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
 | `src/modules/course/ui/add-student-sheet.tsx` | 🟡 MOSLASH | `23417d755aae` | manba: veb `add-student-dialog.tsx`; dialog o'rniga pastdan ochiladigan oyna, qidiruv debounce'siz (ro'yxat kichik) |
 | `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `67f8017c22aa` | veb bilan bir joyda — suhbat ma'lumoti oynasida; o'chirishni tasdiqlash `ConfirmSheet` bilan |
-| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `36fced141fe9` | — |
+| `src/modules/homework/api/homework.api.ts` | 🟡 MOSLASH | `36fced141fe9` | hisobot so'rovida `student_id`, veb'dagi `student` EMAS — backend aynan shu nomni kutadi (vebda bu xato hali turibdi) |
 | `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `4cee08dbcf0f` | — |
 | `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
 | `src/modules/homework/constants/homework.constants.ts` | 🟢 NUSXA | `fccf69310542` | — |

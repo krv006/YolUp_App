@@ -16,6 +16,8 @@ import {
   useQuizAttempts,
   useQuizzes,
   type ImportedQuiz,
+  useRemoveGroupAudio,
+  useUploadGroupAudio,
 } from "@/modules/quiz";
 import { formatDayTime } from "@/shared/lib";
 import type { QuizSummary } from "@/shared/types";
@@ -96,6 +98,8 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const [editTarget, setEditTarget] = useState<string | null>(null);
   const editDetail = useQuiz(editTarget);
   const editAttempts = useQuizAttempts(editTarget);
+  const uploadAudio = useUploadGroupAudio(editTarget ?? "");
+  const removeAudio = useRemoveGroupAudio(editTarget ?? "");
   const courses = useCourses();
   /*
    * Bu sahifada KURS konteksti yo'q — test FANGA biriktiriladi
@@ -251,6 +255,9 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
           courses={[]}
           editQuiz={editDetail.data}
           questionsLocked={(editAttempts.data ?? []).length > 0}
+          uploadingAudio={uploadAudio.isPending}
+          onUploadAudio={(groupId, file) => uploadAudio.mutate({ groupId, file })}
+          onRemoveAudio={(groupId) => removeAudio.mutate(groupId)}
         />
       ) : null}
     </Screen>

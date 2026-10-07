@@ -32,7 +32,7 @@ import enGroup from "./locales/en/group.json";
 import enHomework from "./locales/en/homework.json";
 import enLesson from "./locales/en/lesson.json";
 import enLive from "./locales/en/live.json";
-import enMocktest from "./locales/en/mocktest.json";
+import enExam from "./locales/en/exam.json";
 import enNav from "./locales/en/nav.json";
 import enParent from "./locales/en/parent.json";
 import enQuiz from "./locales/en/quiz.json";
@@ -51,7 +51,7 @@ import ruGroup from "./locales/ru/group.json";
 import ruHomework from "./locales/ru/homework.json";
 import ruLesson from "./locales/ru/lesson.json";
 import ruLive from "./locales/ru/live.json";
-import ruMocktest from "./locales/ru/mocktest.json";
+import ruExam from "./locales/ru/exam.json";
 import ruNav from "./locales/ru/nav.json";
 import ruParent from "./locales/ru/parent.json";
 import ruQuiz from "./locales/ru/quiz.json";
@@ -70,7 +70,7 @@ import uzGroup from "./locales/uz/group.json";
 import uzHomework from "./locales/uz/homework.json";
 import uzLesson from "./locales/uz/lesson.json";
 import uzLive from "./locales/uz/live.json";
-import uzMocktest from "./locales/uz/mocktest.json";
+import uzExam from "./locales/uz/exam.json";
 import uzNav from "./locales/uz/nav.json";
 import uzParent from "./locales/uz/parent.json";
 import uzQuiz from "./locales/uz/quiz.json";
@@ -91,7 +91,7 @@ const resources: Resource = {
     homework: enHomework,
     lesson: enLesson,
     live: enLive,
-    mocktest: enMocktest,
+    exam: enExam,
     nav: enNav,
     parent: enParent,
     quiz: enQuiz,
@@ -111,7 +111,7 @@ const resources: Resource = {
     homework: ruHomework,
     lesson: ruLesson,
     live: ruLive,
-    mocktest: ruMocktest,
+    exam: ruExam,
     nav: ruNav,
     parent: ruParent,
     quiz: ruQuiz,
@@ -131,7 +131,7 @@ const resources: Resource = {
     homework: uzHomework,
     lesson: uzLesson,
     live: uzLive,
-    mocktest: uzMocktest,
+    exam: uzExam,
     nav: uzNav,
     parent: uzParent,
     quiz: uzQuiz,

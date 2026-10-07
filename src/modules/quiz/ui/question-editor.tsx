@@ -21,6 +21,7 @@ import {
   type DraftError,
   type KeyFactory,
   type QuestionDraft,
+  type GroupDraft,
 } from "../lib/question-draft";
 
 /**
@@ -75,6 +76,8 @@ export function draftErrorMessage(error: DraftError): string {
 
 export interface QuestionEditorProps {
   draft: QuestionDraft;
+  /** Savollar guruhlari — bo'sh bo'lsa tanlagich ko'rsatilmaydi. */
+  groups?: GroupDraft[];
   index: number;
   canRemove: boolean;
   newKey: KeyFactory;
@@ -84,6 +87,7 @@ export interface QuestionEditorProps {
 
 export function QuestionEditor({
   draft,
+  groups = [],
   index,
   canRemove,
   newKey,
@@ -141,6 +145,21 @@ export function QuestionEditor({
               </IconButton>
         ) : null}
       </View>
+
+      {groups.length ? (
+        <SelectField
+          label={t("groups.questionGroupLabel", { ns: "quiz" })}
+          value={draft.groupKey ?? ""}
+          options={[
+            { value: "", label: t("groups.noGroup", { ns: "quiz" }) },
+            ...groups.map((group, groupIndex) => ({
+              value: group.key,
+              label: group.title.trim() || t("groups.titlePlaceholder", { ns: "quiz", number: groupIndex + 1 }),
+            })),
+          ]}
+          onChange={(value) => onChange((current) => ({ ...current, groupKey: value || null }))}
+        />
+      ) : null}
 
       <SelectField
         label={t("quiz.savol_turi")}

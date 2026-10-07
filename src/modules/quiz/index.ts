@@ -21,7 +21,9 @@ export {
   mapQuizAttemptAnswerDto,
   mapQuizAttemptResultDto,
   mapQuizAttemptSummaryDto,
+  mapAttemptAnswerRequest,
   mapQuizDto,
+  mapQuizGroupDto,
   mapQuizOptionDto,
   mapQuizQuestionDto,
   mapQuizRequest,
@@ -39,10 +41,15 @@ export {
   useQuizAttempts,
   useQuizDetailLoader,
   useQuizzes,
+  useRemoveGroupAudio,
   useSubmitQuizAttempt,
+  useUploadGroupAudio,
   useUpdateQuiz,
 } from "./model/quiz.queries";
 export { blankTextForDisplay, emptyAnswer, stableShuffle } from "./lib/answer-value";
+export { groupQuestions } from "./lib/group-questions";
+export type { QuestionBlock } from "./lib/group-questions";
+export type { QuizAttemptAnswerInput } from "./lib/quiz.mappers";
 export { quizErrorMessage } from "./lib/quiz-errors";
 
 // --- Mobil UI ---

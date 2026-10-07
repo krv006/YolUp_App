@@ -8,6 +8,10 @@
       "title": "Test",
       "description": "Testlar yaratish, yechish va natijalarni ko'rish."
     },
+    "exams": {
+      "title": "Imtihon",
+      "description": "IELTS, SAT, Milliy sertifikat va o'z imtihoningiz."
+    },
     "analytics": {
       "title": "Tahlil",
       "description": "Natijalar va faollik bo'yicha ko'rsatkichlar."
@@ -15,10 +19,6 @@
     "ai": {
       "title": "AI",
       "description": "Sun'iy intellekt yordamchisi bilan ishlash."
-    },
-    "mock": {
-      "title": "Mock Test",
-      "description": "Imtihon sharoitida sinov testini yechish."
     }
   },
   "analytics": {

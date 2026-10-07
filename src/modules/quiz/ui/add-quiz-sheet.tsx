@@ -25,6 +25,7 @@ import {
   questionToDraft,
   validateDraft,
   type QuestionDraft,
+  type GroupDraft,
 } from "../lib/question-draft";
 import {
   useCreateQuiz,
@@ -35,6 +36,7 @@ import {
   useUpdateQuiz,
 } from "../model/quiz.queries";
 import { draftErrorMessage, QuestionEditor } from "./question-editor";
+import { QuestionGroupEditor } from "./question-group-editor";
 import { QuizPreviewSheet } from "./quiz-preview-sheet";
 
 /** Shablondagi namuna savollar soni — veb `quiz-create-dialog.tsx:32`. */
@@ -121,6 +123,9 @@ export interface AddQuizSheetProps {
    * ma'nosini yo'qotadi.
    */
   questionsLocked?: boolean;
+  uploadingAudio?: boolean;
+  onUploadAudio?: (groupId: string, file: File) => void;
+  onRemoveAudio?: (groupId: string) => void;
 }
 
 /**
@@ -153,6 +158,9 @@ export function AddQuizSheet({
   onImported,
   editQuiz = null,
   questionsLocked = false,
+  uploadingAudio = false,
+  onUploadAudio,
+  onRemoveAudio,
 }: AddQuizSheetProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
@@ -191,6 +199,14 @@ export function AddQuizSheet({
     editQuiz
       ? editQuiz.questions.map((question) => questionToDraft(question, newKey))
       : [createDraft("single", newKey)]
+  );
+  const [groups, setGroups] = useState<GroupDraft[]>(() =>
+    (editQuiz?.groups ?? []).map((group) => ({
+      key: group.id,
+      id: group.id,
+      title: group.title,
+      passage: group.passage,
+    }))
   );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [googleOpen, setGoogleOpen] = useState(false);
@@ -311,6 +327,21 @@ export function AddQuizSheet({
     );
   }
 
+  function groupsPayload() {
+    return groups.map((group) => ({
+      ...(group.id ? { id: group.id } : {}),
+      title: group.title.trim(),
+      passage: group.passage.trim(),
+    }));
+  }
+
+  function questionsPayload() {
+    return questions.map((question) => {
+      const index = groups.findIndex((group) => group.key === question.groupKey);
+      return draftToFormValues(question, index >= 0 ? index : null);
+    });
+  }
+
   async function submit() {
     const error = validate();
     if (error) {
@@ -330,7 +361,8 @@ export function AddQuizSheet({
         description: description.trim(),
         dueAt: dueAt ? `${dueAt}T23:59` : null,
         opensAt: opensAt ? `${opensAt}T00:00` : null,
-        ...(questionsLocked ? {} : { questions: questions.map(draftToFormValues) }),
+        groups: groupsPayload(),
+        ...(questionsLocked ? {} : { questions: questionsPayload() }),
       };
 
       try {
@@ -351,7 +383,8 @@ export function AddQuizSheet({
       description: description.trim(),
       dueAt: dueAt ? `${dueAt}T23:59` : null,
       opensAt: opensAt ? `${opensAt}T00:00` : null,
-      questions: questions.map(draftToFormValues),
+      groups: groupsPayload(),
+      questions: questionsPayload(),
     };
 
     try {
@@ -566,12 +599,22 @@ export function AddQuizSheet({
         */}
       {questionsLocked ? null : (
         <>
+          <QuestionGroupEditor
+            groups={groups}
+            savedGroups={editQuiz?.groups ?? []}
+            uploading={uploadingAudio}
+            onChange={setGroups}
+            onUploadAudio={onUploadAudio}
+            onRemoveAudio={onRemoveAudio}
+          />
+
           <Text variant="label">Savollar</Text>
 
           {questions.map((draft, index) => (
             <QuestionEditor
               key={draft.key}
               draft={draft}
+              groups={groups}
               index={index}
               canRemove={questions.length > 1}
               newKey={newKey}

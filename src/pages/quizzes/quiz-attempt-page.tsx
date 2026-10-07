@@ -3,7 +3,15 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, Check, CircleAlert, X } from "lucide-react-native";
-import { emptyAnswer, QuestionAnswerInput, useQuiz, useQuizAttempts, useSubmitQuizAttempt } from "@/modules/quiz";
+import {
+  emptyAnswer,
+  groupQuestions,
+  QuestionAnswerInput,
+  useQuiz,
+  useQuizAttempts,
+  useSubmitQuizAttempt,
+} from "@/modules/quiz";
+import { ExamPassage } from "@/modules/exam";
 import { formatDayTime } from "@/shared/lib";
 import type { QuizAnswerValue, QuizAttemptResult, QuizQuestion } from "@/shared/types";
 import {
@@ -170,16 +178,27 @@ export function QuizAttemptPage() {
             {questions.length === 0 ? (
               <ScreenEmpty title={t("quizzes.bu_testda_savol_yoq")} />
             ) : (
-              questions.map((question, index) => (
+              groupQuestions(questions, quiz.data.groups).map((block) => (
+                <View key={block.group?.id ?? "plain"} style={styles.block}>
+                  {block.group ? (
+                    <ExamPassage
+                      title={block.group.title}
+                      passage={block.group.passage}
+                      audioUrl={block.group.audioUrl}
+                    />
+                  ) : null}
+                  {block.questions.map((question) => (
                 <QuestionCard
                   key={question.id}
-                  index={index + 1}
+                  index={question.order + 1}
                   question={question}
                   value={answers[question.id] ?? emptyAnswer(question)}
                   onChange={(value) =>
                     setAnswers((current) => ({ ...current, [question.id]: value }))
                   }
                 />
+                  ))}
+                </View>
               ))
             )}
 
@@ -339,6 +358,7 @@ function AttemptsHistory({
 }
 
 const styles = StyleSheet.create({
+  block: { gap: 12 },
   head: {
     flexDirection: "row",
     alignItems: "center",

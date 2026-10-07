@@ -64,6 +64,10 @@ export function NotificationsPage() {
     // guruh chatining "Vazifalar" bo'limida, shuning uchun hozircha
     // suhbatlar ro'yxatiga olib boramiz (veb ham vazifani avval so'raydi).
     else if (link.type === "assignment") router.push("/student/chats");
+    // Topshiriq (`homework_pending_review` / `homework_reviewed`) bildirishnomasi:
+    // natija guruh chatining "Vazifalar" bo'limida ochiladi.
+    else if (link.type === "submission") router.push("/student/chats");
+    else if (link.type === "exam") router.push(`/student/exams/${link.id}`);
   }
 
   function openNotification(item: InboxNotification) {

@@ -25,3 +25,4 @@ export { HomeworkReportView } from "./ui/homework-report-view";
 export { HomeworkResultSheet } from "./ui/homework-result-sheet";
 export { SubmissionReviewSheet } from "./ui/submission-review-sheet";
 
+export { homeworkFieldError } from "./lib/homework-errors";

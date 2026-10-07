@@ -554,7 +554,8 @@
     "alo": "Excellent",
     "bahoni_saqlash": "Save grade",
     "ai_tekshiruvi_tugagach_baho_ozi_yangilanadi": "The grade updates by itself once the AI review finishes.",
-    "ai_xulosasi_natija_oynasida_toliq_korinadi": "The full AI summary is shown in the result sheet."
+    "ai_xulosasi_natija_oynasida_toliq_korinadi": "The full AI summary is shown in the result sheet.",
+    "ball_0_100": "The score must be between 0 and 100"
   },
   "app": {
     "sahifa_topilmadi": "Page not found",

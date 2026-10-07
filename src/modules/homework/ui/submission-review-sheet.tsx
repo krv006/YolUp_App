@@ -12,6 +12,7 @@ import {
   Separator,
   Sheet,
   Text,
+  toast,
   useTheme,
 } from "@/shared/ui";
 import {
@@ -105,10 +106,15 @@ function SubmissionRow({
   const busy = downloadFile.isPending;
 
   function save(score: string, grade: string) {
+    const value = score.trim() === "" ? null : Number(score);
+    if (value !== null && (!Number.isFinite(value) || value < 0 || value > 100)) {
+      toast.error(t("homework.ball_0_100"));
+      return;
+    }
     review.mutate({
       id: submission.id,
       input: {
-        overallScore: score.trim() === "" ? null : Number(score),
+        overallScore: value,
         grade: grade.trim(),
         // AI ning ASL JSON'i — izohi komponent boshida.
         result: submission.rawResult,

@@ -19,6 +19,7 @@ import {
   useDownloadAssignmentFile,
   useSubmission,
   useSubmitHomework,
+  homeworkFieldError,
 } from "@/modules/homework";
 import { HomeworkResultSheet } from "@/modules/homework/ui/homework-result-sheet";
 import { SubmissionReviewSheet } from "@/modules/homework/ui/submission-review-sheet";
@@ -288,6 +289,7 @@ function AssignmentSheet({
   const [file, setFile] = useState<PickedFile | null>(null);
   const submit = useSubmitHomework();
   const download = useDownloadAssignmentFile();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function choose(picker: () => Promise<PickedFile | null>) {
     const picked = await picker();
@@ -296,6 +298,7 @@ function AssignmentSheet({
 
   async function send() {
     if (!assignment || !file) return;
+    setSubmitError(null);
     try {
       await submit.mutateAsync({
         assignmentId: assignment.id,
@@ -304,7 +307,13 @@ function AssignmentSheet({
       });
       setFile(null);
       onClose();
-    } catch {
+    } catch (error) {
+      /*
+       * Soatlik cheklov xabari (`error.details.file`) AYNAN shu yerda
+       * kerak — toast tez yo'qoladi, foydalanuvchi esa nega yuborilmaganini
+       * fayl qatori tagida ko'rishi kerak.
+       */
+      setSubmitError(homeworkFieldError(error, "file"));
       /*
        * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
        * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
@@ -321,6 +330,7 @@ function AssignmentSheet({
       open={Boolean(assignment)}
       onClose={() => {
         setFile(null);
+        setSubmitError(null);
         onClose();
       }}
       title={assignment?.title ?? ""}
@@ -381,6 +391,12 @@ function AssignmentSheet({
               <Camera size={22} color={palette["primary-text"]} />
             </IconButton>
           </View>
+
+          {submitError ? (
+            <Text variant="caption" tone="danger">
+              {submitError}
+            </Text>
+          ) : null}
 
           {file ? (
             <View style={[styles.file, { backgroundColor: palette["primary-tint"] }]}>

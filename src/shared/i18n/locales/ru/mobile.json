@@ -554,7 +554,8 @@
     "alo": "Отлично",
     "bahoni_saqlash": "Сохранить оценку",
     "ai_tekshiruvi_tugagach_baho_ozi_yangilanadi": "Оценка обновится сама после завершения проверки ИИ.",
-    "ai_xulosasi_natija_oynasida_toliq_korinadi": "Полное заключение ИИ показано в окне результата."
+    "ai_xulosasi_natija_oynasida_toliq_korinadi": "Полное заключение ИИ показано в окне результата.",
+    "ball_0_100": "Балл должен быть от 0 до 100"
   },
   "app": {
     "sahifa_topilmadi": "Страница не найдена",

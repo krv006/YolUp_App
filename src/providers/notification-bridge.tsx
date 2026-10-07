@@ -25,6 +25,10 @@ export function NotificationBridge() {
     (link: NotificationLink) => {
       if (link.type === "quiz") router.push(`/student/quizzes/${link.id}`);
       else if (link.type === "assignment") router.push("/student/chats");
+    // Topshiriq (`homework_pending_review` / `homework_reviewed`) bildirishnomasi:
+    // natija guruh chatining "Vazifalar" bo'limida ochiladi.
+    else if (link.type === "submission") router.push("/student/chats");
+    else if (link.type === "exam") router.push(`/student/exams/${link.id}`);
       else if (link.type === "lesson") router.push(`/live/${link.id}`);
       else if (link.type === "recording") router.push(`/recordings/${link.id}`);
     },

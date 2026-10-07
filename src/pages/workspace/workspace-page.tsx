@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   BarChart3,
+  ClipboardCheck,
   CalendarCheck2,
   ChevronRight,
   FileQuestion,
@@ -64,6 +65,7 @@ interface WorkspaceCard {
 const CARDS: readonly WorkspaceCard[] = [
   // --- o'qituvchi va o'quvchi (veb bilan bir xil) ---
   { id: "quizzes", icon: FileQuestion, to: "quizzes", roles: ["teacher", "student"] },
+  { id: "exams", icon: ClipboardCheck, to: "exams", roles: ["teacher", "student"] },
   { id: "analytics", icon: BarChart3, to: "/analytics", roles: ["teacher", "student"] },
   { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"] },
 

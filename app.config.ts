@@ -1,5 +1,14 @@
 import { existsSync } from "fs";
 import type { ConfigContext, ExpoConfig } from "expo/config";
+/*
+ * VERSIYA ALOHIDA FAYLDA.
+ *
+ * `versionCode` har chiqarishda oshishi SHART — Play Market va Android
+ * eski raqamli paketni qabul qilmaydi. U shu fayl ichida yozilganda
+ * oshirishni unutish oson edi; alohida faylda esa u `npm run version:bump`
+ * bilan oshiriladi va git diffda yaqqol ko'rinadi.
+ */
+import versionInfo from "./version.json";
 
 /**
  * YolUp mobil ilova konfiguratsiyasi.
@@ -51,7 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: variant.name,
     slug: "yolup",
-    version: "0.1.0",
+    version: versionInfo.version,
     orientation: "portrait",
     scheme: "yolup",
     userInterfaceStyle: "automatic",
@@ -75,12 +84,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: `${BASE_ID}${variant.idSuffix}`,
       /*
-       * Har YANGI APK uchun bu son OSHISHI SHART. Android eski
-       * `versionCode` li paketni yangilanish deb qabul qilmaydi, telefon
-       * "ilova o'rnatilmadi" deydi. `version` (0.1.0) — bu odamlar uchun,
-       * `versionCode` — tizim uchun.
+       * Har YANGI chiqarish uchun bu son OSHISHI SHART. Android eski
+       * `versionCode` li paketni yangilanish deb qabul qilmaydi (telefon
+       * "ilova o'rnatilmadi" deydi), Play Market esa yuklashni rad etadi.
+       *
+       * `version` — odamlar uchun, `versionCode` — tizim uchun. Ikkalasi
+       * ham `version.json` da; oshirish: `npm run version:bump`.
        */
-      versionCode: 1,
+      versionCode: versionInfo.versionCode,
       adaptiveIcon: {
         foregroundImage: "./assets/android-icon-foreground.png",
         backgroundImage: "./assets/android-icon-background.png",

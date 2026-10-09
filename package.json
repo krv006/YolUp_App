@@ -6,7 +6,9 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
-    "apk": "node scripts/build-apk.mjs",
+    "apk": "node scripts/build-release.mjs apk",
+    "aab": "node scripts/build-release.mjs aab",
+    "version:bump": "node scripts/bump-version.mjs",
     "apk:emulator": "cd android && gradlew.bat app:assembleRelease -PreactNativeArchitectures=x86_64 -x lint -x test --no-parallel",
     "dev:android": "node scripts/dev-android.mjs",
     "ios": "expo run:ios",

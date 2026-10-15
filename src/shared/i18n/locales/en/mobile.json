@@ -79,7 +79,22 @@
     "system": "System ({{scheme}})",
     "lightLower": "light",
     "darkLower": "dark",
-    "systemShort": "System"
+    "systemShort": "System",
+    "brend": "Brand",
+    "kok": "Blue",
+    "siyoh": "Indigo",
+    "binafsha": "Violet",
+    "firuza": "Teal",
+    "yashil": "Green",
+    "kahrabo": "Amber",
+    "qizgish": "Rose",
+    "kulrang": "Slate",
+    "shafaq": "Sunset",
+    "okean": "Ocean",
+    "uzum": "Grape",
+    "ormon": "Forest",
+    "chog": "Ember",
+    "tun": "Night"
   },
   "roles": {
     "student": "Student",
@@ -182,7 +197,8 @@
     "chiqishlar": "Exits",
     "jami_yoqlik": "Total away",
     "eng_uzun": "Longest",
-    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Exit count passed the limit — the parent was notified."
+    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Exit count passed the limit — the parent was notified.",
+    "davomat_yozuvi_topilmadi": "No attendance records found"
   },
   "recording": {
     "dars_yuklanmoqda": "Loading lesson…",
@@ -257,7 +273,8 @@
     "tasdiqlash": "Approve",
     "rad_etish": "Decline",
     "xonani_yopish": "Close room",
-    "chiqish": "Leave"
+    "chiqish": "Leave",
+    "ochiq_guruh_azolari_kira_oladi": "Open — group members can join"
   },
   "quiz": {
     "fan": "Subject",
@@ -353,7 +370,14 @@
     "belgi": "Bullet",
     "raqam": "Number",
     "qator_qoshish": "Add line",
-    "qatorni_o_chirish": "Delete line"
+    "qatorni_o_chirish": "Delete line",
+    "qalam": "Pen",
+    "marker": "Marker",
+    "chiziq": "Line",
+    "strelka": "Arrow",
+    "tortburchak": "Rectangle",
+    "ellips": "Ellipse",
+    "tanlash": "Select"
   },
   "groupworkspace": {
     "yangi_vazifa": "New assignment",
@@ -418,7 +442,16 @@
     "kursdan_chiqarish": "Remove from course",
     "vazifani_tahrirlash": "Edit assignment",
     "saqlash": "Save",
-    "tahrirlash": "Edit"
+    "tahrirlash": "Edit",
+    "suhbat": "Chat",
+    "darslar": "Lessons",
+    "vazifalar": "Assignments",
+    "davomat": "Attendance",
+    "tekshiruv_xatosi": "Check failed",
+    "tekshirilmoqda": "Checking…",
+    "darsga_boglanmagan": "Not linked to a lesson",
+    "tanlanmagan": "Not selected",
+    "davomat_hali_yoq": "No attendance yet"
   },
   "lesson": {
     "oldingi_oy": "Previous month",
@@ -490,7 +523,23 @@
     "vaqtinchalik_parol": "Temporary password",
     "vazifa_topilmadi": "No assignments found",
     "vazifalar_yuklanmoqda": "Loading assignments…",
-    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "The created student is linked to you automatically."
+    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "The created student is linked to you automatically.",
+    "dars_yozuvi": "Lesson recording",
+    "darsni_yozib_olishga_ruxsat": "Permission to record the lesson",
+    "kamera": "Camera",
+    "jonli_darsda_kameradan_foydalanish": "Using the camera in a live lesson",
+    "faollik_tahlili": "Activity analytics",
+    "davomat_diqqat_va_fokus_tahlili": "Attendance, attention and focus analytics",
+    "yoqilgan": "On",
+    "ochiq": "Off",
+    "tanlangan": "Selected",
+    "tasdiqlangan": "Confirmed",
+    "dars": "lessons",
+    "daqiqa": "minutes",
+    "songgi_faollik": "Last activity: {{value}}",
+    "uchun_ruxsatlar": "Permissions for {{name}}",
+    "parol_kamida_8_ta_belgidan_iborat_bolsin": "The password must be at least 8 characters",
+    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Information appears here once your child joins a lesson"
   },
   "conversation": {
     "bekor_qilish": "Cancel",
@@ -642,7 +691,9 @@
     "soat": "Hour",
     "tanlash": "Select",
     "xabarni_yopish": "Dismiss message",
-    "yopish": "Close"
+    "yopish": "Close",
+    "tanlanmagan": "Not selected",
+    "ixtiyoriy_qoshimcha": " — optional"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Request permission to share the screen",
@@ -656,7 +707,9 @@
     "doska": "Board",
     "ruxsat": "Permission",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "The screen sharing request was sent to the teacher",
-    "sorovni_yuborib_bolmadi": "Could not send the request"
+    "sorovni_yuborib_bolmadi": "Could not send the request",
+    "oquvchiga_ekran_ulashish_uchun_ruxsat_beras": "Allow the student to share their screen?",
+    "ruxsat_berish": "Allow"
   },
   "welcome": {
     "title": "Welcome, {{name}}!",

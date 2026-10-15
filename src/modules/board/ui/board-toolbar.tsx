@@ -20,22 +20,23 @@ export type BoardTool = DrawKind | "text" | "math" | "select";
 
 interface ToolDefinition {
   id: BoardTool;
-  label: string;
+  /** Tarjima kaliti — ro'yxat modul darajasida, `t()` hali yo'q. */
+  labelKey: string;
   icon: typeof Pencil;
   /** Faqat matematika kurslarida (`math_enabled`). */
   mathOnly?: boolean;
 }
 
 const TOOLS: readonly ToolDefinition[] = [
-  { id: "pen", label: "Qalam", icon: Pencil },
-  { id: "marker", label: "Marker", icon: Highlighter },
-  { id: "line", label: "Chiziq", icon: Slash },
-  { id: "arrow", label: "Strelka", icon: MoveRight },
-  { id: "rect", label: "To'rtburchak", icon: Square },
-  { id: "ellipse", label: "Ellips", icon: Circle },
-  { id: "text", label: "Matn", icon: Type },
-  { id: "math", label: "Formula", icon: Sigma, mathOnly: true },
-  { id: "select", label: "Tanlash", icon: MousePointer2 },
+  { id: "pen", labelKey: "board.qalam", icon: Pencil },
+  { id: "marker", labelKey: "board.marker", icon: Highlighter },
+  { id: "line", labelKey: "board.chiziq", icon: Slash },
+  { id: "arrow", labelKey: "board.strelka", icon: MoveRight },
+  { id: "rect", labelKey: "board.tortburchak", icon: Square },
+  { id: "ellipse", labelKey: "board.ellips", icon: Circle },
+  { id: "text", labelKey: "board.matn", icon: Type },
+  { id: "math", labelKey: "board.formula", icon: Sigma, mathOnly: true },
+  { id: "select", labelKey: "board.tanlash", icon: MousePointer2 },
 ];
 
 export interface BoardToolbarProps {
@@ -84,13 +85,13 @@ export function BoardToolbar({
         style={styles.scrollRow}
         contentContainerStyle={styles.row}
       >
-        {tools.map(({ id, label, icon: Icon }) => {
+        {tools.map(({ id, labelKey, icon: Icon }) => {
           const active = tool === id;
           return (
             <Pressable
               key={id}
               accessibilityRole="button"
-              accessibilityLabel={label}
+              accessibilityLabel={t(labelKey)}
               accessibilityState={{ selected: active }}
               onPress={() => onToolChange(id)}
               style={[

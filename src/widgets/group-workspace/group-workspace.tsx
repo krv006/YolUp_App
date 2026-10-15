@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import {
   BookOpen,
@@ -16,7 +17,14 @@ export type GroupTab = "chat" | "lessons" | "assignments" | "attendance";
 
 interface TabDefinition {
   id: GroupTab;
-  label: string;
+  /**
+   * Tarjima kaliti, tayyor matn EMAS.
+   *
+   * Ro'yxat modul darajasida, ya'ni `t()` hali mavjud emas — matn
+   * render paytida olinadi. Ilgari bu yerda o'zbekcha matn turardi va
+   * ilova inglizchada ochilganda ham shu tablar o'zbekcha chiqardi.
+   */
+  labelKey: string;
   icon: LucideIcon;
   teacherOnly?: boolean;
 }
@@ -29,10 +37,15 @@ interface TabDefinition {
  * faqat shu to'rttasi.
  */
 const TABS: readonly TabDefinition[] = [
-  { id: "chat", label: "Suhbat", icon: BookOpen },
-  { id: "lessons", label: "Darslar", icon: CalendarDays },
-  { id: "assignments", label: "Vazifalar", icon: ListChecks },
-  { id: "attendance", label: "Davomat", icon: CheckCircle2, teacherOnly: true },
+  { id: "chat", labelKey: "groupworkspace.suhbat", icon: BookOpen },
+  { id: "lessons", labelKey: "groupworkspace.darslar", icon: CalendarDays },
+  { id: "assignments", labelKey: "groupworkspace.vazifalar", icon: ListChecks },
+  {
+    id: "attendance",
+    labelKey: "groupworkspace.davomat",
+    icon: CheckCircle2,
+    teacherOnly: true,
+  },
 ];
 
 export function GroupTabsRow({
@@ -44,6 +57,7 @@ export function GroupTabsRow({
   onChange: (tab: GroupTab) => void;
   isTeacher: boolean;
 }) {
+  const { t } = useTranslation("mobile");
   const visible = TABS.filter((tab) => !tab.teacherOnly || isTeacher);
 
   return (
@@ -51,7 +65,7 @@ export function GroupTabsRow({
       {visible.map((tab) => (
         <Chip
           key={tab.id}
-          label={tab.label}
+          label={t(tab.labelKey)}
           selected={active === tab.id}
           onPress={() => onChange(tab.id)}
         />

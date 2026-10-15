@@ -36,14 +36,14 @@ export interface AddAssignmentSheetProps {
   assignment?: Assignment | null;
 }
 
-/** Veb `SKILL_OPTIONS` bilan bir xil (docs/STAFF_API.md §2). */
-const SKILL_OPTIONS: readonly SelectOption[] = [
-  { value: "", label: "Tanlanmagan" },
-  { value: "writing", label: "Writing" },
-  { value: "reading", label: "Reading" },
-  { value: "listening", label: "Listening" },
-  { value: "speaking", label: "Speaking" },
-];
+/**
+ * Veb `SKILL_OPTIONS` bilan bir xil (docs/STAFF_API.md §2).
+ *
+ * IELTS bo'lim nomlari ATAYLAB tarjima qilinmaydi — ular barcha tilda
+ * shu ko'rinishda ishlatiladi. Faqat "tanlanmagan" holati tarjimadan
+ * oladi, shuning uchun ro'yxat render paytida yig'iladi.
+ */
+const IELTS_SKILLS = ["writing", "reading", "listening", "speaking"] as const;
 
 /**
  * Vazifa yaratish — veb `AddAssignmentDialog` ning mobil varianti.
@@ -63,6 +63,17 @@ export function AddAssignmentSheet({
   assignment = null,
 }: AddAssignmentSheetProps) {
   const { t } = useTranslation("mobile");
+
+  const skillOptions: readonly SelectOption[] = useMemo(
+    () => [
+      { value: "", label: t("groupworkspace.tanlanmagan") },
+      ...IELTS_SKILLS.map((skill) => ({
+        value: skill,
+        label: skill[0].toUpperCase() + skill.slice(1),
+      })),
+    ],
+    [t]
+  );
   const { palette } = useTheme();
   const create = useCreateAssignment();
   const update = useUpdateAssignment();
@@ -90,8 +101,8 @@ export function AddAssignmentSheet({
       .filter((lesson) => lesson.status === "finished")
       .sort((a, b) => b.startsAt.localeCompare(a.startsAt))
       .map((lesson) => ({ value: lesson.id, label: `${lesson.title} · ${lesson.date}` }));
-    return [{ value: "", label: "Darsga bog'lanmagan" }, ...finished];
-  }, [lessons]);
+    return [{ value: "", label: t("groupworkspace.darsga_boglanmagan") }, ...finished];
+  }, [lessons, t]);
 
   function reset() {
     setTitle("");
@@ -210,7 +221,7 @@ export function AddAssignmentSheet({
         <SelectField
           label={t("groupworkspace.tekshiruv_turi")}
           value={skillKey}
-          options={SKILL_OPTIONS}
+          options={skillOptions}
           onChange={setSkillKey}
         />
       ) : null}

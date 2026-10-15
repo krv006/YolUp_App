@@ -247,13 +247,13 @@ function SubmissionPill({
         ? {
             background: palette["destructive-soft"],
             color: palette["destructive-strong"],
-            label: "Tekshiruv xatosi",
+            label: t("groupworkspace.tekshiruv_xatosi"),
             icon: null,
           }
         : {
             background: palette["warning-soft"],
             color: palette["warning-strong"],
-            label: "Tekshirilmoqda…",
+            label: t("groupworkspace.tekshirilmoqda"),
             icon: <Clock3 size={14} color={palette["warning-strong"]} />,
           };
 

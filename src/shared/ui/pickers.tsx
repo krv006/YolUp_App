@@ -43,6 +43,7 @@ export interface DateFieldProps {
 }
 
 export function DateField({ label, value, onChange, minimumDate, optional }: DateFieldProps) {
+  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
 
@@ -50,11 +51,11 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
     <View style={styles.group}>
       <Text variant="label">
         {label}
-        {optional ? " — ixtiyoriy" : ""}
+        {optional ? t("shared.ixtiyoriy_qoshimcha") : ""}
       </Text>
       <Trigger
         icon={<Calendar size={18} color={palette["muted-foreground"]} />}
-        text={value || "Tanlanmagan"}
+        text={value || t("shared.tanlanmagan")}
         muted={!value}
         onPress={() => setOpen(true)}
       />

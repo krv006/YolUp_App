@@ -573,7 +573,14 @@
     "yozuv_holati_tekshirilmoqda": "Yozuv holati tekshirilmoqda…",
     "yozuv_topilmadi": "Yozuv topilmadi",
     "bu_dars_uchun_yozuv_mavjud_emas": "Bu dars uchun yozuv mavjud emas.",
-    "yozuvni_tayyorlab_bolmadi": "Yozuvni tayyorlab bo'lmadi"
+    "yozuvni_tayyorlab_bolmadi": "Yozuvni tayyorlab bo'lmadi",
+    "oqituvchiga_murojaat_qiling": "O'qituvchiga murojaat qiling.",
+    "yozilmoqda": "Yozilmoqda",
+    "tayyorlanmoqda": "Tayyorlanmoqda",
+    "kutilmoqda": "Kutilmoqda",
+    "dars_yozuvi_tayyor_bolgach_shu_yerda_ochilad": "Dars yozuvi tayyor bo'lgach shu yerda ochiladi. Sahifani yopib turishingiz mumkin — holat o'zi yangilanadi.",
+    "yozuvni_ochib_bolmadi_hali_tayyorlanayotgan": "Yozuvni ochib bo'lmadi. U hali tayyorlanayotgan bo'lishi mumkin — bir ozdan keyin urinib ko'ring.",
+    "qayta_urinish": "Qayta urinish"
   },
   "report": {
     "har_bir_fan_boyicha_farzandingiz_vazifalari": "Har bir fan bo'yicha farzandingizning vazifalari va baholari.",

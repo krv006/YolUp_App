@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEvent } from "expo";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -11,6 +12,7 @@ import { ROLES } from "@/shared/constants";
 import { formatDateTime } from "@/shared/lib";
 import {
   Badge,
+  Button,
   ConfirmSheet,
   IconButton,
   radius,
@@ -166,7 +168,7 @@ function RecordingPlayer({
           {t("recording.yozuvni_tayyorlab_bolmadi")}
         </Text>
         <Text variant="caption" tone="muted" style={styles.placeholderText}>
-          {error || "O'qituvchiga murojaat qiling."}
+          {error || t("recording.oqituvchiga_murojaat_qiling")}
         </Text>
       </View>
     );
@@ -176,12 +178,17 @@ function RecordingPlayer({
     return (
       <View style={[styles.placeholder, { backgroundColor: palette.muted }]}>
         <Badge
-          label={status === "recording" ? "Yozilmoqda" : status === "merging" ? "Tayyorlanmoqda" : "Kutilmoqda"}
+          label={
+            status === "recording"
+              ? t("recording.yozilmoqda")
+              : status === "merging"
+                ? t("recording.tayyorlanmoqda")
+                : t("recording.kutilmoqda")
+          }
           tone="warning"
         />
         <Text variant="caption" tone="muted" style={styles.placeholderText}>
-          Dars yozuvi tayyor bo'lgach shu yerda ochiladi. Sahifani yopib
-          turishingiz mumkin — holat o'zi yangilanadi.
+          {t("recording.dars_yozuvi_tayyor_bolgach_shu_yerda_ochilad")}
         </Text>
       </View>
     );
@@ -198,10 +205,48 @@ function Player({ streamUrl }: { streamUrl: string }) {
   // Video ko'rayotganda ekran o'chib qolmasin.
   useKeepAwake();
 
+  const { t } = useTranslation("mobile");
+  const { palette } = useTheme();
+
   const player = useVideoPlayer(streamUrl, (instance) => {
     // Avtomatik boshlanmaydi: mobil internetda foydalanuvchi o'zi qaror qilsin.
     instance.loop = false;
   });
+
+  /*
+   * IJRO XATOSI — ALOHIDA HOLAT.
+   *
+   * ┌─ NEGA KERAK ──────────────────────────────────────────────────────────┐
+   * │ Backend dars yozuvini avval WebM sifatida beradi va MP4 nusxani       │
+   * │ FONDA tayyorlaydi (`docs/BACKEND-IOS.md`). 45 daqiqalik dars uchun bu │
+   * │ 15–30 daqiqa, eski yozuvlarda esa navbat bo'lgani uchun ko'proq ham   │
+   * │ bo'lishi mumkin.                                                       │
+   * │                                                                        │
+   * │ iOS WebM'ni umuman ocholmaydi (AVFoundation'da dekoder yo'q). Usiz    │
+   * │ foydalanuvchi QORA EKRAN ko'rardi va nima bo'layotganini bilmasdi.     │
+   * │                                                                        │
+   * │ Xato Android'da ham chiqishi mumkin — masalan internet uzilsa —       │
+   * │ shuning uchun xabar platformaga bog'lanmagan va qayta urinish         │
+   * │ tugmasi bor.                                                           │
+   * └────────────────────────────────────────────────────────────────────────┘
+   */
+  const { status } = useEvent(player, "statusChange", { status: player.status });
+
+  if (status === "error") {
+    return (
+      <View style={[styles.placeholder, { backgroundColor: palette.muted }]}>
+        <Badge label={t("recording.tayyorlanmoqda")} tone="warning" />
+        <Text variant="caption" tone="muted" style={styles.placeholderText}>
+          {t("recording.yozuvni_ochib_bolmadi_hali_tayyorlanayotgan")}
+        </Text>
+        <Button
+          title={t("recording.qayta_urinish")}
+          variant="secondary"
+          onPress={() => player.replace(streamUrl)}
+        />
+      </View>
+    );
+  }
 
   /*
    * PLEER QO'LDA TO'XTATILMAYDI.

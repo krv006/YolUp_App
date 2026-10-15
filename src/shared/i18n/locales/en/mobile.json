@@ -208,7 +208,14 @@
     "yozuv_holati_tekshirilmoqda": "Checking recording status…",
     "yozuv_topilmadi": "Recording not found",
     "bu_dars_uchun_yozuv_mavjud_emas": "There is no recording for this lesson.",
-    "yozuvni_tayyorlab_bolmadi": "Could not prepare the recording"
+    "yozuvni_tayyorlab_bolmadi": "Could not prepare the recording",
+    "oqituvchiga_murojaat_qiling": "Please contact your teacher.",
+    "yozilmoqda": "Recording",
+    "tayyorlanmoqda": "Preparing",
+    "kutilmoqda": "Waiting",
+    "dars_yozuvi_tayyor_bolgach_shu_yerda_ochilad": "The recording will open here once it is ready. You can leave this page — the status updates on its own.",
+    "yozuvni_ochib_bolmadi_hali_tayyorlanayotgan": "The recording could not be opened. It may still be processing — please try again shortly.",
+    "qayta_urinish": "Try again"
   },
   "schedule": {
     "kalendar_yuklanmoqda": "Loading calendar…",

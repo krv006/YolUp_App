@@ -208,7 +208,14 @@
     "yozuv_holati_tekshirilmoqda": "Проверка состояния записи…",
     "yozuv_topilmadi": "Запись не найдена",
     "bu_dars_uchun_yozuv_mavjud_emas": "Для этого урока записи нет.",
-    "yozuvni_tayyorlab_bolmadi": "Не удалось подготовить запись"
+    "yozuvni_tayyorlab_bolmadi": "Не удалось подготовить запись",
+    "oqituvchiga_murojaat_qiling": "Обратитесь к преподавателю.",
+    "yozilmoqda": "Идёт запись",
+    "tayyorlanmoqda": "Готовится",
+    "kutilmoqda": "Ожидание",
+    "dars_yozuvi_tayyor_bolgach_shu_yerda_ochilad": "Запись откроется здесь, когда будет готова. Страницу можно закрыть — статус обновится сам.",
+    "yozuvni_ochib_bolmadi_hali_tayyorlanayotgan": "Не удалось открыть запись. Возможно, она ещё обрабатывается — попробуйте чуть позже.",
+    "qayta_urinish": "Повторить"
   },
   "schedule": {
     "kalendar_yuklanmoqda": "Загрузка календаря…",

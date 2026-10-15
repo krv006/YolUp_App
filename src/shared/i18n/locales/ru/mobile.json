@@ -699,7 +699,9 @@
     "xabarni_yopish": "Закрыть сообщение",
     "yopish": "Закрыть",
     "tanlanmagan": "Не выбрано",
-    "ixtiyoriy_qoshimcha": " — необязательно"
+    "ixtiyoriy_qoshimcha": " — необязательно",
+    "oldingi_oy": "Предыдущий месяц",
+    "keyingi_oy": "Следующий месяц"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Запросить разрешение на демонстрацию экрана",

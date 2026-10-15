@@ -2,7 +2,6 @@
 
 **Sana:** 2026-10-14
 **Holat:** simulyatorda ishga tushdi. Vaqtinchalik yo'l — shu Mac'da lokal qurish; bulutdagi qurish (EAS) va App Store keyinroq.
-(EAS) va App Store'ga chiqarish keyinroq.
 
 ---
 

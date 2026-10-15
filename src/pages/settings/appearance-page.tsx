@@ -286,6 +286,7 @@ function ColorSwatches({
   onSelect: (id: string) => void;
   extra?: React.ReactNode;
 }) {
+  const { t } = useTranslation("mobile");
   const { scheme, palette } = useTheme();
 
   return (
@@ -298,7 +299,7 @@ function ColorSwatches({
           <Pressable
             key={item.id}
             accessibilityRole="button"
-            accessibilityLabel={item.label}
+            accessibilityLabel={t(item.labelKey)}
             accessibilityState={{ selected: active }}
             onPress={() => onSelect(item.id)}
             style={[
@@ -326,6 +327,7 @@ function GradientSwatches({
   selected: string | null;
   onSelect: (id: string | null) => void;
 }) {
+  const { t } = useTranslation("mobile");
   const { scheme, palette } = useTheme();
 
   return (
@@ -337,7 +339,7 @@ function GradientSwatches({
           <Pressable
             key={item.id}
             accessibilityRole="button"
-            accessibilityLabel={item.label}
+            accessibilityLabel={t(item.labelKey)}
             accessibilityState={{ selected: active }}
             // Tanlangani qayta bosilsa — bekor qilinadi va oddiy rangga qaytadi.
             onPress={() => onSelect(active ? null : item.id)}

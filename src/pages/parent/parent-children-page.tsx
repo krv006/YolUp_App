@@ -36,14 +36,34 @@ import {
   useTheme,
 } from "@/shared/ui";
 
-/** Veb `parent-children-page.tsx` dagi ro'yxat bilan bir xil. */
-const CONSENT_KINDS: { id: ConsentKind; label: string; description: string; icon: LucideIcon }[] = [
-  { id: "recording", label: "Dars yozuvi", description: "Darsni yozib olishga ruxsat", icon: Video },
-  { id: "camera", label: "Kamera", description: "Jonli darsda kameradan foydalanish", icon: Camera },
+/**
+ * Veb `parent-children-page.tsx` dagi ro'yxat bilan bir xil.
+ *
+ * Matn o'rniga tarjima kalitlari — ro'yxat modul darajasida va `t()`
+ * faqat render paytida mavjud.
+ */
+const CONSENT_KINDS: {
+  id: ConsentKind;
+  labelKey: string;
+  descriptionKey: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    id: "recording",
+    labelKey: "parent.dars_yozuvi",
+    descriptionKey: "parent.darsni_yozib_olishga_ruxsat",
+    icon: Video,
+  },
+  {
+    id: "camera",
+    labelKey: "parent.kamera",
+    descriptionKey: "parent.jonli_darsda_kameradan_foydalanish",
+    icon: Camera,
+  },
   {
     id: "analytics",
-    label: "Faollik tahlili",
-    description: "Davomat, diqqat va fokus tahlili",
+    labelKey: "parent.faollik_tahlili",
+    descriptionKey: "parent.davomat_diqqat_va_fokus_tahlili",
     icon: Sparkles,
   },
 ];
@@ -205,18 +225,18 @@ export function ParentChildrenPage() {
                     </Text>
                   </View>
                   <Badge
-                    label={selected ? "Tanlangan" : "Tasdiqlangan"}
+                    label={selected ? t("parent.tanlangan") : t("parent.tasdiqlangan")}
                     tone={selected ? "brand" : "success"}
                   />
                 </View>
 
                 <View style={styles.stats}>
-                  <Stat icon={<CheckCircle2 size={15} color={palette["muted-foreground"]} />} value={`${item.lessons}`} label="dars" />
-                  <Stat icon={<Clock3 size={15} color={palette["muted-foreground"]} />} value={`${item.minutes}`} label="daqiqa" />
+                  <Stat icon={<CheckCircle2 size={15} color={palette["muted-foreground"]} />} value={`${item.lessons}`} label={t("parent.dars")} />
+                  <Stat icon={<Clock3 size={15} color={palette["muted-foreground"]} />} value={`${item.minutes}`} label={t("parent.daqiqa")} />
                 </View>
 
                 <Text variant="caption" tone="muted">
-                  So'nggi faollik: {item.lastActivity}
+                  {t("parent.songgi_faollik", { value: item.lastActivity })}
                 </Text>
               </Pressable>
             );
@@ -227,12 +247,14 @@ export function ParentChildrenPage() {
           <View
             style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}
           >
-            <Text variant="label">{selectedChild.name} uchun ruxsatlar</Text>
+            <Text variant="label">
+              {t("parent.uchun_ruxsatlar", { name: selectedChild.name })}
+            </Text>
             <Text variant="caption" tone="muted">
               {t("parent.bu_ruxsatlarni_istalgan_payt_qaytarib_olishi")}
             </Text>
 
-            {CONSENT_KINDS.map(({ id, label, description, icon: Icon }) => {
+            {CONSENT_KINDS.map(({ id, labelKey, descriptionKey, icon: Icon }) => {
               const granted = (consents.data ?? []).some(
                 (item) => item.studentId === selectedChildId && item.kind === id && item.granted
               );
@@ -241,7 +263,7 @@ export function ParentChildrenPage() {
                   key={id}
                   accessibilityRole="switch"
                   accessibilityState={{ checked: granted }}
-                  accessibilityLabel={`${label}. ${description}`}
+                  accessibilityLabel={`${t(labelKey)}. ${t(descriptionKey)}`}
                   disabled={consents.isLoading || setConsent.isPending}
                   onPress={() => toggleConsent(id)}
                   style={({ pressed }) => [styles.consent, pressed && { opacity: 0.85 }]}
@@ -250,12 +272,15 @@ export function ParentChildrenPage() {
                     <Icon size={18} color={palette["primary-text"]} />
                   </View>
                   <View style={styles.consentBody}>
-                    <Text variant="label">{label}</Text>
+                    <Text variant="label">{t(labelKey)}</Text>
                     <Text variant="caption" tone="muted">
-                      {description}
+                      {t(descriptionKey)}
                     </Text>
                   </View>
-                  <Badge label={granted ? "Yoqilgan" : "O'chiq"} tone={granted ? "success" : "neutral"} />
+                  <Badge
+                    label={granted ? t("parent.yoqilgan") : t("parent.ochiq")}
+                    tone={granted ? "success" : "neutral"}
+                  />
                 </Pressable>
               );
             })}
@@ -323,7 +348,7 @@ export function ParentChildrenPage() {
           // Backend kamida 8 belgi talab qiladi (`auth.schemas.ts`).
           error={
             child.password.length > 0 && child.password.length < 8
-              ? "Parol kamida 8 ta belgidan iborat bo'lsin"
+              ? t("parent.parol_kamida_8_ta_belgidan_iborat_bolsin")
               : undefined
           }
         />

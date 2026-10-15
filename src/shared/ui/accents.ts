@@ -11,7 +11,8 @@ import type { ColorScheme } from "./tokens";
  */
 export interface Accent {
   id: string;
-  label: string;
+  /** Tarjima kaliti (`mobile` lug'ati) — tayyor matn emas. */
+  labelKey: string;
   /** Yorug' mavzuda asos rang. */
   light: string;
   /** Qorong'i mavzuda asos rang — och fonda emas, to'q fonda ishlaydi. */
@@ -30,15 +31,15 @@ export interface Accent {
 
 export const ACCENTS: readonly Accent[] = [
   // Veb bilan BITTA brend: Edu_Front theme.css dagi --primary va --primary-text.
-  { id: "brand", label: "Brend", light: "#5d0cfe", dark: "#5d0cfe", darkText: "#a98cff" },
-  { id: "blue", label: "Ko'k", light: "#1a66e0", dark: "#4d91ff" },
-  { id: "indigo", label: "Siyoh", light: "#4f46e5", dark: "#8b8cf9" },
-  { id: "violet", label: "Binafsha", light: "#7c3aed", dark: "#a78bfa" },
-  { id: "teal", label: "Firuza", light: "#0f766e", dark: "#2dd4bf" },
-  { id: "green", label: "Yashil", light: "#15803d", dark: "#4ade80" },
-  { id: "amber", label: "Kahrabo", light: "#b45309", dark: "#fbbf24" },
-  { id: "rose", label: "Qizg'ish", light: "#be123c", dark: "#fb7185" },
-  { id: "slate", label: "Kulrang", light: "#334155", dark: "#94a3b8" },
+  { id: "brand", labelKey: "theme.brend", light: "#5d0cfe", dark: "#5d0cfe", darkText: "#a98cff" },
+  { id: "blue", labelKey: "theme.kok", light: "#1a66e0", dark: "#4d91ff" },
+  { id: "indigo", labelKey: "theme.siyoh", light: "#4f46e5", dark: "#8b8cf9" },
+  { id: "violet", labelKey: "theme.binafsha", light: "#7c3aed", dark: "#a78bfa" },
+  { id: "teal", labelKey: "theme.firuza", light: "#0f766e", dark: "#2dd4bf" },
+  { id: "green", labelKey: "theme.yashil", light: "#15803d", dark: "#4ade80" },
+  { id: "amber", labelKey: "theme.kahrabo", light: "#b45309", dark: "#fbbf24" },
+  { id: "rose", labelKey: "theme.qizgish", light: "#be123c", dark: "#fb7185" },
+  { id: "slate", labelKey: "theme.kulrang", light: "#334155", dark: "#94a3b8" },
 ] as const;
 
 export const DEFAULT_ACCENT = "brand";
@@ -141,18 +142,19 @@ export function deriveAccentTokens(
  */
 export interface Gradient {
   id: string;
-  label: string;
+  /** Tarjima kaliti (`mobile` lug'ati) — tayyor matn emas. */
+  labelKey: string;
   light: readonly [string, string];
   dark: readonly [string, string];
 }
 
 export const GRADIENTS: readonly Gradient[] = [
-  { id: "sunset", label: "Shafaq", light: ["#f97316", "#db2777"], dark: ["#fb923c", "#f472b6"] },
-  { id: "ocean", label: "Okean", light: ["#0284c7", "#0f766e"], dark: ["#38bdf8", "#2dd4bf"] },
-  { id: "grape", label: "Uzum", light: ["#4f46e5", "#9333ea"], dark: ["#818cf8", "#c084fc"] },
-  { id: "forest", label: "O'rmon", light: ["#15803d", "#0d9488"], dark: ["#4ade80", "#2dd4bf"] },
-  { id: "ember", label: "Cho'g'", light: ["#b91c1c", "#c2410c"], dark: ["#f87171", "#fb923c"] },
-  { id: "night", label: "Tun", light: ["#1e293b", "#4338ca"], dark: ["#64748b", "#818cf8"] },
+  { id: "sunset", labelKey: "theme.shafaq", light: ["#f97316", "#db2777"], dark: ["#fb923c", "#f472b6"] },
+  { id: "ocean", labelKey: "theme.okean", light: ["#0284c7", "#0f766e"], dark: ["#38bdf8", "#2dd4bf"] },
+  { id: "grape", labelKey: "theme.uzum", light: ["#4f46e5", "#9333ea"], dark: ["#818cf8", "#c084fc"] },
+  { id: "forest", labelKey: "theme.ormon", light: ["#15803d", "#0d9488"], dark: ["#4ade80", "#2dd4bf"] },
+  { id: "ember", labelKey: "theme.chog", light: ["#b91c1c", "#c2410c"], dark: ["#f87171", "#fb923c"] },
+  { id: "night", labelKey: "theme.tun", light: ["#1e293b", "#4338ca"], dark: ["#64748b", "#818cf8"] },
 ] as const;
 
 export function findGradient(id: string): Gradient | null {

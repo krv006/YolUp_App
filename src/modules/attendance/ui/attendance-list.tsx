@@ -53,7 +53,7 @@ export function AttendanceList({ rows, emptyLabel }: AttendanceListProps) {
   const [focusTarget, setFocusTarget] = useState<AttendanceRow | null>(null);
 
   if (groups.length === 0) {
-    return <ScreenEmpty title={emptyLabel ?? "Davomat yozuvi topilmadi"} />;
+    return <ScreenEmpty title={emptyLabel ?? t("attendance.davomat_yozuvi_topilmadi")} />;
   }
 
   return (

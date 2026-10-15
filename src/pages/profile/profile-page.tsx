@@ -78,7 +78,7 @@ export function ProfilePage({ roleKey }: { roleKey: string }) {
       : appearanceMode === "dark"
         ? t("theme.dark")
         : t("theme.light"),
-    findAccent(accentId).label.toLowerCase(),
+    t(findAccent(accentId).labelKey).toLowerCase(),
   ].join(" · ");
 
   async function signOut() {

@@ -10,11 +10,17 @@ import { ROUTES } from "@/shared/config";
 import type { RegisterFormValues } from "@/modules/auth";
 import { Button, Chip, ChipRow, Input, Logo, Screen, Text, toast, useTheme } from "@/shared/ui";
 
-/** Veb `register-form.tsx` dagi tanlov bilan bir xil (o'quvchi ham mumkin). */
-const ROLE_OPTIONS: { id: RegisterFormValues["role"]; label: string }[] = [
-  { id: "teacher", label: "O'qituvchi" },
-  { id: "parent", label: "Ota-ona" },
-  { id: "student", label: "O'quvchi" },
+/**
+ * Veb `register-form.tsx` dagi tanlov bilan bir xil (o'quvchi ham mumkin).
+ *
+ * Faqat identifikatorlar — matn `roles.*` kalitlaridan render paytida
+ * olinadi. Ilgari bu yerda o'zbekcha matn turardi va ilova boshqa tilda
+ * ochilganda ham rollar o'zbekcha chiqardi.
+ */
+const ROLE_OPTIONS: readonly RegisterFormValues["role"][] = [
+  "teacher",
+  "parent",
+  "student",
 ];
 
 /**
@@ -86,12 +92,12 @@ export function RegisterPage() {
             render={({ field: { onChange, value } }) => (
               <View style={styles.roles}>
                 <ChipRow>
-                  {ROLE_OPTIONS.map((option) => (
+                  {ROLE_OPTIONS.map((role) => (
                     <Chip
-                      key={option.id}
-                      label={option.label}
-                      selected={value === option.id}
-                      onPress={() => onChange(option.id)}
+                      key={role}
+                      label={t(`roles.${role}`)}
+                      selected={value === role}
+                      onPress={() => onChange(role)}
                     />
                   ))}
                 </ChipRow>

@@ -79,7 +79,22 @@
     "system": "Системная ({{scheme}})",
     "lightLower": "светлая",
     "darkLower": "тёмная",
-    "systemShort": "Системная"
+    "systemShort": "Системная",
+    "brend": "Бренд",
+    "kok": "Синий",
+    "siyoh": "Индиго",
+    "binafsha": "Фиолетовый",
+    "firuza": "Бирюзовый",
+    "yashil": "Зелёный",
+    "kahrabo": "Янтарный",
+    "qizgish": "Розовый",
+    "kulrang": "Серый",
+    "shafaq": "Закат",
+    "okean": "Океан",
+    "uzum": "Виноград",
+    "ormon": "Лес",
+    "chog": "Угли",
+    "tun": "Ночь"
   },
   "roles": {
     "student": "Ученик",
@@ -182,7 +197,8 @@
     "chiqishlar": "Выходы",
     "jami_yoqlik": "Всего отсутствовал",
     "eng_uzun": "Самый долгий",
-    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Число выходов превысило предел — родителю отправлено уведомление."
+    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Число выходов превысило предел — родителю отправлено уведомление.",
+    "davomat_yozuvi_topilmadi": "Записи о посещаемости не найдены"
   },
   "recording": {
     "dars_yuklanmoqda": "Загрузка урока…",
@@ -257,7 +273,8 @@
     "tasdiqlash": "Одобрить",
     "rad_etish": "Отклонить",
     "xonani_yopish": "Закрыть комнату",
-    "chiqish": "Выйти"
+    "chiqish": "Выйти",
+    "ochiq_guruh_azolari_kira_oladi": "Открытая — участники группы могут войти"
   },
   "quiz": {
     "fan": "Предмет",
@@ -353,7 +370,14 @@
     "belgi": "Маркер",
     "raqam": "Нумерация",
     "qator_qoshish": "Добавить строку",
-    "qatorni_o_chirish": "Удалить строку"
+    "qatorni_o_chirish": "Удалить строку",
+    "qalam": "Карандаш",
+    "marker": "Маркер",
+    "chiziq": "Линия",
+    "strelka": "Стрелка",
+    "tortburchak": "Прямоугольник",
+    "ellips": "Эллипс",
+    "tanlash": "Выделение"
   },
   "groupworkspace": {
     "yangi_vazifa": "Новое задание",
@@ -418,7 +442,22 @@
     "kursdan_chiqarish": "Исключить из курса",
     "vazifani_tahrirlash": "Редактировать задание",
     "saqlash": "Сохранить",
-    "tahrirlash": "Редактировать"
+    "tahrirlash": "Редактировать",
+    "suhbat": "Чат",
+    "darslar": "Уроки",
+    "vazifalar": "Задания",
+    "davomat": "Посещаемость",
+    "tekshiruv_xatosi": "Ошибка проверки",
+    "tekshirilmoqda": "Проверяется…",
+    "darsga_boglanmagan": "Не привязано к уроку",
+    "tanlanmagan": "Не выбрано",
+    "davomat_hali_yoq": "Пока нет посещаемости",
+    "yangi_dars": "Новый урок",
+    "darsni_tahrirlash": "Редактировать урок",
+    "mavzu_sana_va_vaqtni_ozgartirish_mumkin": "Можно изменить тему, дату и время.",
+    "bitta_dars_yoki_takrorlanuvchi_haftalik_jad": "Один урок или повторяющееся недельное расписание.",
+    "dars_yaratish": "Создать урок",
+    "ta_dars_yaratish": "Создать {{count}} уроков"
   },
   "lesson": {
     "oldingi_oy": "Предыдущий месяц",
@@ -490,7 +529,23 @@
     "vaqtinchalik_parol": "Временный пароль",
     "vazifa_topilmadi": "Задания не найдены",
     "vazifalar_yuklanmoqda": "Загрузка заданий…",
-    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "Созданный ученик привязывается к вам автоматически."
+    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "Созданный ученик привязывается к вам автоматически.",
+    "dars_yozuvi": "Запись урока",
+    "darsni_yozib_olishga_ruxsat": "Разрешение на запись урока",
+    "kamera": "Камера",
+    "jonli_darsda_kameradan_foydalanish": "Использование камеры на живом уроке",
+    "faollik_tahlili": "Анализ активности",
+    "davomat_diqqat_va_fokus_tahlili": "Анализ посещаемости, внимания и фокуса",
+    "yoqilgan": "Включено",
+    "ochiq": "Выключено",
+    "tanlangan": "Выбрано",
+    "tasdiqlangan": "Подтверждено",
+    "dars": "уроков",
+    "daqiqa": "минут",
+    "songgi_faollik": "Последняя активность: {{value}}",
+    "uchun_ruxsatlar": "Разрешения для {{name}}",
+    "parol_kamida_8_ta_belgidan_iborat_bolsin": "Пароль должен содержать не менее 8 символов",
+    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Информация появится здесь после того, как ваш ребёнок зайдёт на урок"
   },
   "conversation": {
     "bekor_qilish": "Отмена",
@@ -642,7 +697,9 @@
     "soat": "Час",
     "tanlash": "Выбрать",
     "xabarni_yopish": "Закрыть сообщение",
-    "yopish": "Закрыть"
+    "yopish": "Закрыть",
+    "tanlanmagan": "Не выбрано",
+    "ixtiyoriy_qoshimcha": " — необязательно"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Запросить разрешение на демонстрацию экрана",
@@ -656,7 +713,9 @@
     "doska": "Доска",
     "ruxsat": "Разрешение",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "Запрос на демонстрацию экрана отправлен учителю",
-    "sorovni_yuborib_bolmadi": "Не удалось отправить запрос"
+    "sorovni_yuborib_bolmadi": "Не удалось отправить запрос",
+    "oquvchiga_ekran_ulashish_uchun_ruxsat_beras": "Разрешить ученику поделиться экраном?",
+    "ruxsat_berish": "Разрешить"
   },
   "welcome": {
     "title": "Добро пожаловать, {{name}}!",

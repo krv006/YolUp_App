@@ -141,6 +141,12 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
               // Nativ kalendar tizim mavzusiga qaraydi; ilovada mavzu
               // qo'lda almashtirilsa, u holda fon bilan mos kelmaydi.
               themeVariant={scheme}
+              /*
+               * Usiz kalendar iOS'ning ko'k rangini ishlatadi va yonidagi
+               * "Tanlash" tugmasi bilan bitta panelda ikki xil rang chiqadi.
+               */
+              accentColor={palette.primary}
+              textColor={palette.foreground}
               onChange={(event, selected) => {
                 if (event.type === "dismissed" || !selected) return;
                 setDraft(selected);

@@ -451,7 +451,13 @@
     "tekshirilmoqda": "Проверяется…",
     "darsga_boglanmagan": "Не привязано к уроку",
     "tanlanmagan": "Не выбрано",
-    "davomat_hali_yoq": "Пока нет посещаемости"
+    "davomat_hali_yoq": "Пока нет посещаемости",
+    "yangi_dars": "Новый урок",
+    "darsni_tahrirlash": "Редактировать урок",
+    "mavzu_sana_va_vaqtni_ozgartirish_mumkin": "Можно изменить тему, дату и время.",
+    "bitta_dars_yoki_takrorlanuvchi_haftalik_jad": "Один урок или повторяющееся недельное расписание.",
+    "dars_yaratish": "Создать урок",
+    "ta_dars_yaratish": "Создать {{count}} уроков"
   },
   "lesson": {
     "oldingi_oy": "Предыдущий месяц",

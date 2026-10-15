@@ -241,11 +241,11 @@ export function AddLessonSheet({
     <Sheet
       open={open}
       onClose={close}
-      title={editing ? "Darsni tahrirlash" : "Yangi dars"}
+      title={editing ? t("groupworkspace.darsni_tahrirlash") : t("groupworkspace.yangi_dars")}
       description={
         editing
-          ? "Mavzu, sana va vaqtni o'zgartirish mumkin."
-          : "Bitta dars yoki takrorlanuvchi haftalik jadval."
+          ? t("groupworkspace.mavzu_sana_va_vaqtni_ozgartirish_mumkin")
+          : t("groupworkspace.bitta_dars_yoki_takrorlanuvchi_haftalik_jad")
       }
     >
       {repeat ? (
@@ -363,7 +363,13 @@ export function AddLessonSheet({
       ) : null}
 
       <Button
-        title={editing ? "Saqlash" : repeat ? `${dates.length} ta dars yaratish` : "Dars yaratish"}
+        title={
+          editing
+            ? t("groupworkspace.saqlash")
+            : repeat
+              ? t("groupworkspace.ta_dars_yaratish", { count: dates.length })
+              : t("groupworkspace.dars_yaratish")
+        }
         size="lg"
         loading={pending}
         disabled={

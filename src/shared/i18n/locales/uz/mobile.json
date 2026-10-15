@@ -693,7 +693,13 @@
     "tekshirilmoqda": "Tekshirilmoqda…",
     "darsga_boglanmagan": "Darsga bog'lanmagan",
     "tanlanmagan": "Tanlanmagan",
-    "davomat_hali_yoq": "Davomat hali yo'q"
+    "davomat_hali_yoq": "Davomat hali yo'q",
+    "yangi_dars": "Yangi dars",
+    "darsni_tahrirlash": "Darsni tahrirlash",
+    "mavzu_sana_va_vaqtni_ozgartirish_mumkin": "Mavzu, sana va vaqtni o'zgartirish mumkin.",
+    "bitta_dars_yoki_takrorlanuvchi_haftalik_jad": "Bitta dars yoki takrorlanuvchi haftalik jadval.",
+    "dars_yaratish": "Dars yaratish",
+    "ta_dars_yaratish": "{{count}} ta dars yaratish"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Ekran ulashish uchun ruxsat so'rash",

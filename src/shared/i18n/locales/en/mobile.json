@@ -451,7 +451,13 @@
     "tekshirilmoqda": "Checking…",
     "darsga_boglanmagan": "Not linked to a lesson",
     "tanlanmagan": "Not selected",
-    "davomat_hali_yoq": "No attendance yet"
+    "davomat_hali_yoq": "No attendance yet",
+    "yangi_dars": "New lesson",
+    "darsni_tahrirlash": "Edit lesson",
+    "mavzu_sana_va_vaqtni_ozgartirish_mumkin": "You can change the topic, date and time.",
+    "bitta_dars_yoki_takrorlanuvchi_haftalik_jad": "A single lesson or a repeating weekly schedule.",
+    "dars_yaratish": "Create lesson",
+    "ta_dars_yaratish": "Create {{count}} lessons"
   },
   "lesson": {
     "oldingi_oy": "Previous month",

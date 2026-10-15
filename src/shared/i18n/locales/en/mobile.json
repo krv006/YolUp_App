@@ -699,7 +699,9 @@
     "xabarni_yopish": "Dismiss message",
     "yopish": "Close",
     "tanlanmagan": "Not selected",
-    "ixtiyoriy_qoshimcha": " — optional"
+    "ixtiyoriy_qoshimcha": " — optional",
+    "oldingi_oy": "Previous month",
+    "keyingi_oy": "Next month"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Request permission to share the screen",

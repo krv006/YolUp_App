@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Calendar, Check, ChevronDown, Clock } from "lucide-react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Calendar, Check, ChevronDown, ChevronLeft, ChevronRight, Clock } from "lucide-react-native";
+import { toIntlLocale } from "@/shared/i18n/intl-locale";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
 import { useTheme } from "./theme";
 import { Text } from "./text";
@@ -44,9 +44,9 @@ export interface DateFieldProps {
 
 export function DateField({ label, value, onChange, minimumDate, optional }: DateFieldProps) {
   const { t } = useTranslation("mobile");
-  const { palette, scheme } = useTheme();
+  const { palette } = useTheme();
   const [open, setOpen] = useState(false);
-  /* iOS panelida tanlov DARHOL qo'llanmaydi — "Tanlash" bosilguncha qoralama. */
+  /* Tanlov DARHOL qo'llanmaydi — "Tanlash" bosilguncha qoralama. */
   const [draft, setDraft] = useState<Date>(() => parseDate(value));
 
   function openPicker() {
@@ -55,8 +55,8 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
     setOpen(true);
   }
 
-  const trigger = (
-    <>
+  return (
+    <View style={styles.group}>
       <Text variant="label">
         {label}
         {optional ? t("shared.ixtiyoriy_qoshimcha") : ""}
@@ -67,52 +67,6 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
         muted={!value}
         onPress={openPicker}
       />
-    </>
-  );
-
-  /*
-   * ANDROID — platformaning o'z dialogi. U o'zi modal bo'lib chiqadi,
-   * o'zi yopiladi va foydalanuvchi uni allaqachon biladi.
-   */
-  if (Platform.OS !== "ios") {
-    return (
-      <View style={styles.group}>
-        {trigger}
-        {open ? (
-          <DateTimePicker
-            value={parseDate(value)}
-            mode="date"
-            minimumDate={minimumDate}
-            display="default"
-            onChange={(event, selected) => {
-              setOpen(false);
-              if (event.type === "dismissed" || !selected) return;
-              onChange(toDateValue(selected));
-            }}
-          />
-        ) : null}
-      </View>
-    );
-  }
-
-  /*
-   * iOS — O'ZIMIZNING PANEL.
-   *
-   * ┌─ NEGA NATIV INLINE EMAS ─────────────────────────────────────────────┐
-   * │ iOS'da `display="inline"` kalendarni JOYIDA, oqim ichida chizadi.    │
-   * │ U ~700px joy egallaydi va forma pastdagi maydonlar bilan tugmani     │
-   * │ ekrandan chiqarib yuboradi: "Yangi dars" panelida "Dars yaratish"    │
-   * │ tugmasiga yetish uchun uzoq aylantirish kerak bo'lardi.              │
-   * │                                                                       │
-   * │ Bundan tashqari yonidagi `TimeField` allaqachon shunday panel        │
-   * │ ochardi — bitta formada ikki xil naqsh chiqardi.                      │
-   * └───────────────────────────────────────────────────────────────────────┘
-   *
-   * Kalendarning o'zi baribir nativ — faqat panel ichiga olindi.
-   */
-  return (
-    <View style={styles.group}>
-      {trigger}
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
         <Pressable
@@ -133,32 +87,9 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
               {label}
             </Text>
 
-            {/*
-              * Nativ kalendarning O'Z kengligi bor va u paneldan tor —
-              * o'rab olinmasa chap chetga yopishib qoladi.
-              */}
-            <View style={styles.calendarWrap}>
-              <DateTimePicker
-                value={draft}
-                mode="date"
-                minimumDate={minimumDate}
-                display="inline"
-                // Nativ kalendar tizim mavzusiga qaraydi; ilovada mavzu
-                // qo'lda almashtirilsa, u holda fon bilan mos kelmaydi.
-                themeVariant={scheme}
-                /*
-                 * Usiz kalendar iOS'ning ko'k rangini ishlatadi va yonidagi
-                 * "Tanlash" tugmasi bilan bitta panelda ikki xil rang chiqadi.
-                 */
-                accentColor={palette.primary}
-                textColor={palette.foreground}
-                onChange={(event, selected) => {
-                  if (event.type === "dismissed" || !selected) return;
-                  setDraft(selected);
-                }}
-                style={styles.calendar}
-              />
-            </View>
+            {open ? (
+              <MonthCalendar value={draft} minimumDate={minimumDate} onSelect={setDraft} />
+            ) : null}
 
             <View style={styles.timeActions}>
               <Button
@@ -179,6 +110,168 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
           </Pressable>
         </Pressable>
       </Modal>
+    </View>
+  );
+}
+
+/** Dushanbadan boshlanadigan haftaning kun tartibi (JS'da hafta yakshanbadan). */
+function weekdayIndex(date: Date): number {
+  return (date.getDay() + 6) % 7;
+}
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+/**
+ * Oylik kalendar — O'ZIMIZNIKI, nativ tanlagich EMAS.
+ *
+ * ┌─ NEGA NATIV TASHLAB YUBORILDI ───────────────────────────────────────┐
+ * │ Android'da `@react-native-community/datetimepicker` FAQAT dialog     │
+ * │ bo'lib chiqa oladi — uni panel ichiga joylashtirib bo'lmaydi         │
+ * │ (iOS'dagi `display="inline"` ning Android'da muqobili yo'q). Dialog  │
+ * │ esa Material'ning o'z rangida chiqadi: qurilmada u firuza-yashil     │
+ * │ bo'lib, ilovaning binafsha rangi va yorug' paneli yonida butunlay    │
+ * │ begona ko'rinardi.                                                    │
+ * │                                                                       │
+ * │ Shu dalil bilan `TimeField` da ham nativ tanlagich rad etilgan edi   │
+ * │ (izohi o'sha yerda). Endi sana ham shunday — natijada iOS va Android │
+ * │ BIR XIL ko'rinadi va ilova ichida bitta uslub qoladi.                 │
+ * └───────────────────────────────────────────────────────────────────────┘
+ *
+ * Oy va hafta kunlari nomlari `Intl` dan olinadi, ya'ni ilova tiliga
+ * ergashadi. Hafta HAR DOIM dushanbadan boshlanadi: `en-US` yakshanbadan
+ * boshlanadi, lekin ilova O'zbekiston uchun va jadval dushanbadan yuriladi.
+ */
+function MonthCalendar({
+  value,
+  minimumDate,
+  onSelect,
+}: {
+  value: Date;
+  minimumDate?: Date;
+  onSelect: (date: Date) => void;
+}) {
+  const { t, i18n } = useTranslation("mobile");
+  const { palette } = useTheme();
+  const locale = toIntlLocale(i18n.language);
+
+  /**
+   * Ko'rinib turgan oy.
+   *
+   * Faqat MOUNT paytida tanlangan sanadan olinadi: keyin foydalanuvchi
+   * oylar bo'ylab yurganda sana tanlansa ham ko'rinish sakramasligi
+   * kerak. Panel har ochilganda komponent qaytadan tug'iladi (chizilishi
+   * `open` ga bog'langan), shuning uchun sinxronlash effekti kerak emas.
+   */
+  const [cursor, setCursor] = useState(() => new Date(value.getFullYear(), value.getMonth(), 1));
+
+  const title = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(cursor),
+    [cursor, locale]
+  );
+
+  /** Qisqa hafta kunlari: 2026-06-01 dushanba ekani ma'lum, shundan olamiz. */
+  const weekdays = useMemo(() => {
+    const format = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    return Array.from({ length: 7 }, (_, index) =>
+      format.format(new Date(2026, 5, 1 + index))
+    );
+  }, [locale]);
+
+  /** Katakchalar: oy boshigacha bo'sh joylar, keyin kunlar. */
+  const cells = useMemo(() => {
+    const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+    const total = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+    const blanks = Array.from({ length: weekdayIndex(first) }, () => null);
+    const days = Array.from(
+      { length: total },
+      (_, index) => new Date(cursor.getFullYear(), cursor.getMonth(), index + 1)
+    );
+    return [...blanks, ...days];
+  }, [cursor]);
+
+  const min = minimumDate ? startOfDay(minimumDate) : null;
+  const selected = startOfDay(value).getTime();
+
+  function shiftMonth(step: number) {
+    setCursor((current) => new Date(current.getFullYear(), current.getMonth() + step, 1));
+  }
+
+  return (
+    <View style={styles.calendar}>
+      <View style={styles.calendarHead}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("shared.oldingi_oy")}
+          onPress={() => shiftMonth(-1)}
+          style={styles.calendarArrow}
+        >
+          <ChevronLeft size={20} color={palette["primary-text"]} />
+        </Pressable>
+
+        <Text variant="label" style={styles.calendarTitle}>
+          {title}
+        </Text>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("shared.keyingi_oy")}
+          onPress={() => shiftMonth(1)}
+          style={styles.calendarArrow}
+        >
+          <ChevronRight size={20} color={palette["primary-text"]} />
+        </Pressable>
+      </View>
+
+      <View style={styles.calendarRow}>
+        {weekdays.map((name) => (
+          <Text key={name} variant="caption" tone="muted" style={styles.calendarCellText}>
+            {name}
+          </Text>
+        ))}
+      </View>
+
+      <View style={styles.calendarGrid}>
+        {cells.map((date, index) => {
+          if (!date) return <View key={`bo-${index}`} style={styles.calendarCell} />;
+
+          const disabled = min ? date.getTime() < min.getTime() : false;
+          const active = date.getTime() === selected;
+
+          return (
+            <Pressable
+              key={date.toISOString()}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active, disabled }}
+              accessibilityLabel={new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(date)}
+              disabled={disabled}
+              onPress={() => onSelect(date)}
+              style={styles.calendarCell}
+            >
+              <View
+                style={[
+                  styles.calendarDay,
+                  active && { backgroundColor: palette.primary, borderRadius: radius.full },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: active
+                      ? palette["primary-foreground"]
+                      : disabled
+                        ? palette["muted-foreground"]
+                        : palette.foreground,
+                    opacity: disabled ? 0.45 : 1,
+                  }}
+                >
+                  {date.getDate()}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -610,9 +703,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   optionText: { flex: 1 },
-  calendarWrap: { alignItems: "center", paddingHorizontal: 8, paddingBottom: 4 },
-  /* Nativ kalendar o'z o'lchamini biladi; kenglikni biz bermaymiz. */
-  calendar: { alignSelf: "center" },
+  calendar: { paddingHorizontal: 12, paddingBottom: 8 },
+  calendarHead: { flexDirection: "row", alignItems: "center", paddingBottom: 8 },
+  calendarTitle: { flex: 1, textAlign: "center" },
+  calendarArrow: {
+    width: MIN_TOUCH_SIZE,
+    height: MIN_TOUCH_SIZE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calendarRow: { flexDirection: "row" },
+  calendarGrid: { flexDirection: "row", flexWrap: "wrap" },
+  /* Yetti ustun: `flexBasis` foizda, shunda ekran enidan qat'i nazar teng. */
+  calendarCell: { width: `${100 / 7}%`, alignItems: "center", paddingVertical: 2 },
+  /*
+   * Yetti ustun — katakcha bilan BIR XIL kenglik. Ilgari bu yerda
+   * `width: "100%"` turardi va birinchi yorliq butun qatorni egallab,
+   * qolgan oltitasini chetga surib yuborardi: ekranda faqat "Dush"
+   * ko'rinardi.
+   */
+  calendarCellText: { width: `${100 / 7}%`, textAlign: "center" },
+  calendarDay: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   timePreview: {
     textAlign: "center",
     fontSize: 34,

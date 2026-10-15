@@ -133,25 +133,32 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
               {label}
             </Text>
 
-            <DateTimePicker
-              value={draft}
-              mode="date"
-              minimumDate={minimumDate}
-              display="inline"
-              // Nativ kalendar tizim mavzusiga qaraydi; ilovada mavzu
-              // qo'lda almashtirilsa, u holda fon bilan mos kelmaydi.
-              themeVariant={scheme}
-              /*
-               * Usiz kalendar iOS'ning ko'k rangini ishlatadi va yonidagi
-               * "Tanlash" tugmasi bilan bitta panelda ikki xil rang chiqadi.
-               */
-              accentColor={palette.primary}
-              textColor={palette.foreground}
-              onChange={(event, selected) => {
-                if (event.type === "dismissed" || !selected) return;
-                setDraft(selected);
-              }}
-            />
+            {/*
+              * Nativ kalendarning O'Z kengligi bor va u paneldan tor —
+              * o'rab olinmasa chap chetga yopishib qoladi.
+              */}
+            <View style={styles.calendarWrap}>
+              <DateTimePicker
+                value={draft}
+                mode="date"
+                minimumDate={minimumDate}
+                display="inline"
+                // Nativ kalendar tizim mavzusiga qaraydi; ilovada mavzu
+                // qo'lda almashtirilsa, u holda fon bilan mos kelmaydi.
+                themeVariant={scheme}
+                /*
+                 * Usiz kalendar iOS'ning ko'k rangini ishlatadi va yonidagi
+                 * "Tanlash" tugmasi bilan bitta panelda ikki xil rang chiqadi.
+                 */
+                accentColor={palette.primary}
+                textColor={palette.foreground}
+                onChange={(event, selected) => {
+                  if (event.type === "dismissed" || !selected) return;
+                  setDraft(selected);
+                }}
+                style={styles.calendar}
+              />
+            </View>
 
             <View style={styles.timeActions}>
               <Button
@@ -603,6 +610,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   optionText: { flex: 1 },
+  calendarWrap: { alignItems: "center", paddingHorizontal: 8, paddingBottom: 4 },
+  /* Nativ kalendar o'z o'lchamini biladi; kenglikni biz bermaymiz. */
+  calendar: { alignSelf: "center" },
   timePreview: {
     textAlign: "center",
     fontSize: 34,

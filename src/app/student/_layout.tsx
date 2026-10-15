@@ -23,7 +23,17 @@ import { ROLES } from "@/shared/constants";
 const TABS = [
   { name: "chats", labelKey: "tabs.chats", icon: MessagesSquare },
   { name: "schedule", labelKey: "tabs.schedule", icon: CalendarDays },
-  { name: "workspace", labelKey: "tabs.workspace", icon: LayoutGrid, owns: ["quizzes"] },
+  {
+    name: "workspace",
+    labelKey: "tabs.workspace",
+    icon: LayoutGrid,
+    /*
+     * Ish maydonidan ochiladigan hamma narsa shu yerda sanaladi — aks
+     * holda bo'lim ichida panelda birorta tab ajratilmay qoladi va
+     * foydalanuvchi qayerdan kirganini bilmaydi.
+     */
+    owns: ["quizzes", "exams", "ai"],
+  },
   { name: "profile", labelKey: "tabs.profile", icon: UserRound },
 ] as const;
 
@@ -31,7 +41,7 @@ export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes"]} />
+        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

@@ -147,8 +147,27 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           // WebRTC minimal Android API 24 talab qiladi.
           android: { minSdkVersion: 24 },
-          // Expo SDK 57 ning minimal talabi (LiveKit undan pastini kutadi).
-          ios: { deploymentTarget: "16.4" },
+          ios: {
+            // Expo SDK 57 ning minimal talabi (LiveKit undan pastini kutadi).
+            deploymentTarget: "16.4",
+            /*
+             * UIScene hayot sikli — Xcode 27 BILAN QURISH UCHUN SHART.
+             *
+             * Apple TN3187: iOS 27 SDK bilan yig'ilgan ilova UIScene'ni
+             * qabul qilmasa, umuman ISHGA TUSHMAYDI — "UIScene life cycle
+             * is required for apps built with this SDK" deb yiqiladi.
+             * Cheklov qurilmaning iOS versiyasiga emas, qaysi SDK bilan
+             * yig'ilganiga bog'liq.
+             *
+             * React Native buni 0.88 da qabul qildi (bizda 0.86.3), Expo
+             * esa SDK 58 da avtomatik yaratadi. SDK 57 da `ExpoAppSceneDelegate`
+             * mavjud, lekin prebuild shabloni uni ro'yxatdan O'TKAZMAYDI —
+             * shu kalit o'tkazadi.
+             *
+             * Talab: expo >= 57.0.29, expo-build-properties >= 57.0.22.
+             */
+            enableSceneSupport: true,
+          },
         },
       ],
       /*

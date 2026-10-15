@@ -1,7 +1,7 @@
 # iOS — ishga tushirish
 
 **Sana:** 2026-10-14
-**Holat:** vaqtinchalik yo'l — shu Mac'da lokal qurish. Bulutdagi qurish
+**Holat:** simulyatorda ishga tushdi. Vaqtinchalik yo'l — shu Mac'da lokal qurish; bulutdagi qurish (EAS) va App Store keyinroq.
 (EAS) va App Store'ga chiqarish keyinroq.
 
 ---
@@ -119,6 +119,77 @@ qilmaydi. Rejada v1.1 (`app.config.ts` izohi).
 `google-services.json` bilan bir xil holat (`docs/PUSH-FIREBASE.md`).
 Bundan tashqari iOS'da APNs kaliti kerak, u esa Apple Developer
 Program ichida beriladi. Ya'ni $99 to'lanmaguncha iOS'da push yo'q.
+
+---
+
+## Yo'lda uchragan ikki to'siq
+
+Ikkalasi ham kodda emas, muhitda edi. Qaytarilmasligi uchun yozib
+qo'yildi.
+
+### 1. Skia'ning simulyator kutubxonasi yetishmasdi
+
+```
+rsync(162): error: .../libskia.xcframework/ios-arm64_arm64e_x86_64-simulator/*:
+(l)stat: No such file or directory
+```
+
+`@shopify/react-native-skia` ning npm paketida `libs/` UMUMAN YO'Q —
+u `postinstall` skripti orqali `react-native-skia-apple-ios` dan
+nusxalanadi. O'sha yuklash qachonlardir qisman uzilgan: sakkizta
+xcframework ichidan faqat `libskia` ning simulyator qismi bo'sh
+qolgandi (53 MB fayl). Qurilma qismi joyida bo'lgani uchun Android
+va haqiqiy iPhone yo'lida bu sezilmasdi.
+
+Yechim:
+
+```bash
+rm -rf node_modules/react-native-skia-apple-ios node_modules/@shopify/react-native-skia
+npm cache clean --force
+npm install
+```
+
+Tekshirish — fayl bo'sh bo'lmasligi kerak:
+
+```bash
+ls -la node_modules/@shopify/react-native-skia/libs/ios/libskia.xcframework/ios-arm64_arm64e_x86_64-simulator/
+```
+
+### 2. UIScene hayot sikli (Xcode 27)
+
+Ilova yig'ilardi, lekin ISHGA TUSHMASDI:
+
+```
+Application failed to launch: UIScene life cycle is required for
+apps built with this SDK.
+```
+
+Apple TN3187: iOS 27 SDK bilan yig'ilgan ilova UIScene'ni qabul
+qilishi shart. Cheklov qurilmaning iOS versiyasiga emas, **qaysi
+SDK bilan yig'ilganiga** bog'liq — shu ilovani Xcode 26 bilan
+yig'sak, iOS 27 da ham ishlardi.
+
+React Native buni 0.88 da qabul qildi (bizda 0.86.3), Expo esa SDK
+58 da `SceneDelegate.swift` ni avtomatik yaratadi. SDK 57 da
+`ExpoAppSceneDelegate` mavjud, lekin prebuild shabloni uni
+ro'yxatdan o'tkazmaydi.
+
+Yechim — `app.config.ts` da `expo-build-properties` ga:
+
+```ts
+ios: { deploymentTarget: "16.4", enableSceneSupport: true }
+```
+
+Talab: `expo` >= 57.0.29, `expo-build-properties` >= 57.0.22.
+Shu sababli SDK 57 ichidagi patch versiyalari ko'tarildi
+(`npx expo install --fix`) va Android qayta yig'ilib tekshirildi.
+
+Natijada `Info.plist` ga quyidagi tushadi:
+
+```
+UIApplicationSceneManifest
+  UISceneDelegateClassName = EXExpoAppSceneDelegate
+```
 
 ---
 

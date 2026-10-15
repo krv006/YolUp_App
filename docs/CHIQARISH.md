@@ -19,6 +19,43 @@ shuning uchun foydalanuvchi yuklaydigan fayl kichikroq chiqadi.
 
 ---
 
+## Muhit — qurishdan oldin
+
+Gradle ikkala o'zgaruvchini ham talab qiladi. Ularsiz yig'ilish
+**chalg'ituvchi xatolar** bilan yiqiladi:
+
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME=$HOME/Library/Android/sdk
+```
+
+**`JAVA_HOME` — aynan JDK 17.** Yangiroq JDK (masalan 25) bilan
+`react-native-worklets` ning nativ qurilishi quyidagi xato bilan
+yiqiladi:
+
+```
+Execution failed for task ':react-native-worklets:configureCMakeRelWithDebInfo[arm64-v8a]'.
+> WARNING: A restricted method in java.lang.System has been called
+```
+
+Xato matni sababni yashiradi: bu Gradle emas, JDK 25 ning stderr'ga
+yozgan ogohlantirishi, Android Gradle plugini esa uni xato deb
+qabul qiladi. Yechim — JDK ni almashtirish, kodga tegmaslik.
+
+```bash
+brew install openjdk@17     # o'rnatilmagan bo'lsa
+```
+
+**`ANDROID_HOME`.** `expo prebuild --clean` `android/local.properties`
+faylini o'chiradi, shuning uchun SDK yo'li muhitdan olinishi kerak:
+
+```
+SDK location not found. Define a valid SDK location with an
+ANDROID_HOME environment variable...
+```
+
+---
+
 ## Har chiqarishda — ketma-ketlik
 
 ### 1. Kod mainga qo'shilgan bo'lsin

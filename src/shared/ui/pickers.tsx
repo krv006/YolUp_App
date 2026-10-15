@@ -43,37 +43,142 @@ export interface DateFieldProps {
 }
 
 export function DateField({ label, value, onChange, minimumDate, optional }: DateFieldProps) {
-  const { palette } = useTheme();
+  const { t } = useTranslation("mobile");
+  const { palette, scheme } = useTheme();
   const [open, setOpen] = useState(false);
+  /* iOS panelida tanlov DARHOL qo'llanmaydi — "Tanlash" bosilguncha qoralama. */
+  const [draft, setDraft] = useState<Date>(() => parseDate(value));
 
-  return (
-    <View style={styles.group}>
+  function openPicker() {
+    // Har ochilishda joriy qiymatdan boshlanadi — `TimeField` dagi kabi.
+    setDraft(parseDate(value));
+    setOpen(true);
+  }
+
+  const trigger = (
+    <>
       <Text variant="label">
         {label}
-        {optional ? " — ixtiyoriy" : ""}
+        {optional ? t("shared.ixtiyoriy_qoshimcha") : ""}
       </Text>
       <Trigger
         icon={<Calendar size={18} color={palette["muted-foreground"]} />}
-        text={value || "Tanlanmagan"}
+        text={value || t("shared.tanlanmagan")}
         muted={!value}
-        onPress={() => setOpen(true)}
+        onPress={openPicker}
       />
-      {open ? (
-        <DateTimePicker
-          value={parseDate(value)}
-          mode="date"
-          minimumDate={minimumDate}
-          // Androidda tanlagich modal sifatida chiqadi va o'zi yopiladi;
-          // iOS'da u inline turadi, shuning uchun holatni biz boshqaramiz.
-          display={Platform.OS === "ios" ? "inline" : "default"}
-          onChange={(event, selected) => {
-            if (Platform.OS === "android") setOpen(false);
-            if (event.type === "dismissed" || !selected) return;
-            onChange(toDateValue(selected));
-            if (Platform.OS === "ios") setOpen(false);
-          }}
-        />
-      ) : null}
+    </>
+  );
+
+  /*
+   * ANDROID — platformaning o'z dialogi. U o'zi modal bo'lib chiqadi,
+   * o'zi yopiladi va foydalanuvchi uni allaqachon biladi.
+   */
+  if (Platform.OS !== "ios") {
+    return (
+      <View style={styles.group}>
+        {trigger}
+        {open ? (
+          <DateTimePicker
+            value={parseDate(value)}
+            mode="date"
+            minimumDate={minimumDate}
+            display="default"
+            onChange={(event, selected) => {
+              setOpen(false);
+              if (event.type === "dismissed" || !selected) return;
+              onChange(toDateValue(selected));
+            }}
+          />
+        ) : null}
+      </View>
+    );
+  }
+
+  /*
+   * iOS — O'ZIMIZNING PANEL.
+   *
+   * ┌─ NEGA NATIV INLINE EMAS ─────────────────────────────────────────────┐
+   * │ iOS'da `display="inline"` kalendarni JOYIDA, oqim ichida chizadi.    │
+   * │ U ~700px joy egallaydi va forma pastdagi maydonlar bilan tugmani     │
+   * │ ekrandan chiqarib yuboradi: "Yangi dars" panelida "Dars yaratish"    │
+   * │ tugmasiga yetish uchun uzoq aylantirish kerak bo'lardi.              │
+   * │                                                                       │
+   * │ Bundan tashqari yonidagi `TimeField` allaqachon shunday panel        │
+   * │ ochardi — bitta formada ikki xil naqsh chiqardi.                      │
+   * └───────────────────────────────────────────────────────────────────────┘
+   *
+   * Kalendarning o'zi baribir nativ — faqat panel ichiga olindi.
+   */
+  return (
+    <View style={styles.group}>
+      {trigger}
+
+      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("shared.yopish")}
+          style={[styles.backdrop, { backgroundColor: palette.overlay }]}
+          onPress={() => setOpen(false)}
+        >
+          <Pressable
+            onPress={() => undefined}
+            style={[
+              styles.sheet,
+              { backgroundColor: palette["surface-elevated"], borderColor: palette.border },
+            ]}
+          >
+            <View style={[styles.grabber, { backgroundColor: palette["border-strong"] }]} />
+            <Text variant="subheading" style={styles.sheetTitle}>
+              {label}
+            </Text>
+
+            {/*
+              * Nativ kalendarning O'Z kengligi bor va u paneldan tor —
+              * o'rab olinmasa chap chetga yopishib qoladi.
+              */}
+            <View style={styles.calendarWrap}>
+              <DateTimePicker
+                value={draft}
+                mode="date"
+                minimumDate={minimumDate}
+                display="inline"
+                // Nativ kalendar tizim mavzusiga qaraydi; ilovada mavzu
+                // qo'lda almashtirilsa, u holda fon bilan mos kelmaydi.
+                themeVariant={scheme}
+                /*
+                 * Usiz kalendar iOS'ning ko'k rangini ishlatadi va yonidagi
+                 * "Tanlash" tugmasi bilan bitta panelda ikki xil rang chiqadi.
+                 */
+                accentColor={palette.primary}
+                textColor={palette.foreground}
+                onChange={(event, selected) => {
+                  if (event.type === "dismissed" || !selected) return;
+                  setDraft(selected);
+                }}
+                style={styles.calendar}
+              />
+            </View>
+
+            <View style={styles.timeActions}>
+              <Button
+                title={t("shared.bekor")}
+                variant="secondary"
+                onPress={() => setOpen(false)}
+                style={styles.timeAction}
+              />
+              <Button
+                title={t("shared.tanlash")}
+                onPress={() => {
+                  onChange(toDateValue(draft));
+                  setOpen(false);
+                }}
+                style={styles.timeAction}
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -144,7 +249,7 @@ export function TimeField({ label, value, onChange }: TimeFieldProps) {
       <Text variant="label">{label}</Text>
       <Trigger
         icon={<Clock size={18} color={palette["muted-foreground"]} />}
-        text={value || "Tanlanmagan"}
+        text={value || t("shared.tanlanmagan")}
         muted={!value}
         onPress={openPicker}
       />
@@ -505,9 +610,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   optionText: { flex: 1 },
+  calendarWrap: { alignItems: "center", paddingHorizontal: 8, paddingBottom: 4 },
+  /* Nativ kalendar o'z o'lchamini biladi; kenglikni biz bermaymiz. */
+  calendar: { alignSelf: "center" },
   timePreview: {
     textAlign: "center",
     fontSize: 34,
+    // `Text` variantsiz `body` ni oladi (lineHeight 20) va 34px raqamlarning
+    // tepasi kesilib qolardi — shuning uchun aniq beriladi.
+    lineHeight: 42,
     fontWeight: "700",
     fontVariant: ["tabular-nums"],
     paddingBottom: 8,

@@ -118,9 +118,9 @@ export function LiveRoom({
       const name = request.name || participant.name || identity;
 
       toast(`${name} ekran ulashmoqchi`, {
-        description: "O'quvchiga ekran ulashish uchun ruxsat berasizmi?",
+        description: t("liveroom.oquvchiga_ekran_ulashish_uchun_ruxsat_beras"),
         duration: 12_000,
-        action: { label: "Ruxsat berish", onClick: () => grantShare(identity) },
+        action: { label: t("liveroom.ruxsat_berish"), onClick: () => grantShare(identity) },
       });
     }
 
@@ -128,7 +128,7 @@ export function LiveRoom({
     return () => {
       room.off(RoomEvent.DataReceived, receive);
     };
-  }, [isTeacher, grantShare, room]);
+  }, [isTeacher, grantShare, room, t]);
 
   /** O'quvchi: ekran ulashish uchun ruxsat so'raydi (🟢 veb bilan bir xil). */
   async function requestShare() {

@@ -133,8 +133,8 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
           label={t("voice.kirish")}
           value={accessMode}
           options={[
-            { value: "open", label: "Ochiq — guruh a'zolari kira oladi" },
-            { value: "invite_only", label: "Taklif asosida" },
+            { value: "open", label: t("voice.ochiq_guruh_azolari_kira_oladi") },
+            { value: "invite_only", label: t("voice.taklif_asosida") },
           ]}
           onChange={(value) => setAccessMode(value === "invite_only" ? "invite_only" : "open")}
         />

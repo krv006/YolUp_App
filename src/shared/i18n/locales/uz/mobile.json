@@ -79,7 +79,22 @@
     "system": "Tizim ({{scheme}})",
     "lightLower": "yorug'",
     "darkLower": "qorong'i",
-    "systemShort": "Tizim"
+    "systemShort": "Tizim",
+    "brend": "Brend",
+    "kok": "Ko'k",
+    "siyoh": "Siyoh",
+    "binafsha": "Binafsha",
+    "firuza": "Firuza",
+    "yashil": "Yashil",
+    "kahrabo": "Kahrabo",
+    "qizgish": "Qizg'ish",
+    "kulrang": "Kulrang",
+    "shafaq": "Shafaq",
+    "okean": "Okean",
+    "uzum": "Uzum",
+    "ormon": "O'rmon",
+    "chog": "Cho'g'",
+    "tun": "Tun"
   },
   "roles": {
     "student": "O'quvchi",
@@ -122,7 +137,8 @@
     "chiqishlar": "Chiqishlar",
     "jami_yoqlik": "Jami yo'qlik",
     "eng_uzun": "Eng uzun",
-    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Chiqishlar soni chegaradan oshgan — ota-onaga xabar yuborilgan."
+    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Chiqishlar soni chegaradan oshgan — ota-onaga xabar yuborilgan.",
+    "davomat_yozuvi_topilmadi": "Davomat yozuvi topilmadi"
   },
   "board": {
     "darsdan_chiqqan": "Darsdan chiqqan",
@@ -167,7 +183,14 @@
     "belgi": "Belgi",
     "raqam": "Raqam",
     "qator_qoshish": "Qator qo'shish",
-    "qatorni_o_chirish": "Qatorni o'chirish"
+    "qatorni_o_chirish": "Qatorni o'chirish",
+    "qalam": "Qalam",
+    "marker": "Marker",
+    "chiziq": "Chiziq",
+    "strelka": "Strelka",
+    "tortburchak": "To'rtburchak",
+    "ellips": "Ellips",
+    "tanlash": "Tanlash"
   },
   "conversation": {
     "bekor_qilish": "Bekor qilish",
@@ -392,7 +415,8 @@
     "tasdiqlash": "Tasdiqlash",
     "rad_etish": "Rad etish",
     "xonani_yopish": "Xonani yopish",
-    "chiqish": "Chiqish"
+    "chiqish": "Chiqish",
+    "ochiq_guruh_azolari_kira_oladi": "Ochiq — guruh a'zolari kira oladi"
   },
   "admin": {
     "panel_yuklanmoqda": "Panel yuklanmoqda…",
@@ -501,7 +525,23 @@
     "vaqtinchalik_parol": "Vaqtinchalik parol",
     "vazifa_topilmadi": "Vazifa topilmadi",
     "vazifalar_yuklanmoqda": "Vazifalar yuklanmoqda…",
-    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "Yaratilgan o'quvchi sizga avtomatik ulanadi."
+    "yaratilgan_oquvchi_sizga_avtomatik_ulanadi": "Yaratilgan o'quvchi sizga avtomatik ulanadi.",
+    "dars_yozuvi": "Dars yozuvi",
+    "darsni_yozib_olishga_ruxsat": "Darsni yozib olishga ruxsat",
+    "kamera": "Kamera",
+    "jonli_darsda_kameradan_foydalanish": "Jonli darsda kameradan foydalanish",
+    "faollik_tahlili": "Faollik tahlili",
+    "davomat_diqqat_va_fokus_tahlili": "Davomat, diqqat va fokus tahlili",
+    "yoqilgan": "Yoqilgan",
+    "ochiq": "O'chiq",
+    "tanlangan": "Tanlangan",
+    "tasdiqlangan": "Tasdiqlangan",
+    "dars": "dars",
+    "daqiqa": "daqiqa",
+    "songgi_faollik": "So'nggi faollik: {{value}}",
+    "uchun_ruxsatlar": "{{name}} uchun ruxsatlar",
+    "parol_kamida_8_ta_belgidan_iborat_bolsin": "Parol kamida 8 ta belgidan iborat bo'lsin",
+    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Farzandingiz darsga kirgach ma'lumot shu yerda paydo bo'ladi"
   },
   "quizzes": {
     "test_yuklanmoqda": "Test yuklanmoqda…",
@@ -577,7 +617,9 @@
     "soat": "Soat",
     "tanlash": "Tanlash",
     "xabarni_yopish": "Xabarni yopish",
-    "yopish": "Yopish"
+    "yopish": "Yopish",
+    "tanlanmagan": "Tanlanmagan",
+    "ixtiyoriy_qoshimcha": " — ixtiyoriy"
   },
   "groupworkspace": {
     "yangi_vazifa": "Yangi vazifa",
@@ -642,7 +684,22 @@
     "kursdan_chiqarish": "Kursdan chiqarish",
     "vazifani_tahrirlash": "Vazifani tahrirlash",
     "saqlash": "Saqlash",
-    "tahrirlash": "Tahrirlash"
+    "tahrirlash": "Tahrirlash",
+    "suhbat": "Suhbat",
+    "darslar": "Darslar",
+    "vazifalar": "Vazifalar",
+    "davomat": "Davomat",
+    "tekshiruv_xatosi": "Tekshiruv xatosi",
+    "tekshirilmoqda": "Tekshirilmoqda…",
+    "darsga_boglanmagan": "Darsga bog'lanmagan",
+    "tanlanmagan": "Tanlanmagan",
+    "davomat_hali_yoq": "Davomat hali yo'q",
+    "yangi_dars": "Yangi dars",
+    "darsni_tahrirlash": "Darsni tahrirlash",
+    "mavzu_sana_va_vaqtni_ozgartirish_mumkin": "Mavzu, sana va vaqtni o'zgartirish mumkin.",
+    "bitta_dars_yoki_takrorlanuvchi_haftalik_jad": "Bitta dars yoki takrorlanuvchi haftalik jadval.",
+    "dars_yaratish": "Dars yaratish",
+    "ta_dars_yaratish": "{{count}} ta dars yaratish"
   },
   "liveroom": {
     "ekran_ulashish_uchun_ruxsat_sorash": "Ekran ulashish uchun ruxsat so'rash",
@@ -656,7 +713,9 @@
     "doska": "Doska",
     "ruxsat": "Ruxsat",
     "ekran_ulashish_sorovi_oqituvchiga_yuborildi": "Ekran ulashish so'rovi o'qituvchiga yuborildi",
-    "sorovni_yuborib_bolmadi": "So'rovni yuborib bo'lmadi"
+    "sorovni_yuborib_bolmadi": "So'rovni yuborib bo'lmadi",
+    "oquvchiga_ekran_ulashish_uchun_ruxsat_beras": "O'quvchiga ekran ulashish uchun ruxsat berasizmi?",
+    "ruxsat_berish": "Ruxsat berish"
   },
   "welcome": {
     "title": "Xush kelibsiz, {{name}}!",

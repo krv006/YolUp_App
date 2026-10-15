@@ -99,7 +99,7 @@ export function ParentAttendancePage() {
 
         <AttendanceList
           rows={attendance.data ?? []}
-          emptyLabel="Farzandingiz darsga kirgach ma'lumot shu yerda paydo bo'ladi"
+          emptyLabel={t("parent.farzandingiz_darsga_kirgach_malumot_shu_yerd")}
         />
       </ScrollView>
     </Screen>

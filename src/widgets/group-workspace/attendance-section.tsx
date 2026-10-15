@@ -41,7 +41,7 @@ export function AttendanceSection({ courseId }: { courseId: string }) {
         </Text>
       </View>
 
-      <AttendanceList rows={filtered} emptyLabel="Davomat hali yo'q" />
+      <AttendanceList rows={filtered} emptyLabel={t("groupworkspace.davomat_hali_yoq")} />
     </ScrollView>
   );
 }

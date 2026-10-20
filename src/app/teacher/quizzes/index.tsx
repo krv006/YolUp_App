@@ -1,5 +1,5 @@
-import { QuizzesPage } from "@/pages/quizzes/quizzes-page";
+import { TeacherQuizzesPage } from "@/pages/quizzes/teacher-quizzes-page";
 
 export default function TeacherQuizzesRoute() {
-  return <QuizzesPage basePath="/teacher/quizzes" />;
+  return <TeacherQuizzesPage />;
 }

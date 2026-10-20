@@ -61,3 +61,5 @@ export type { SearchFieldProps } from "./search-field";
 export type { IconName, IconProps } from "./icon";
 export type { FontWeightToken } from "./fonts";
 export type { ColorName, ColorScheme } from "./tokens";
+export { SheetButton, SheetFooter } from "./sheet-footer";
+export type { SheetButtonProps } from "./sheet-footer";

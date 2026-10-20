@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Hourglass } from "lucide-react-native";
 import { useCourses } from "@/modules/course";
 import type { Lesson } from "@/shared/types";
 import {
   DateField,
   Input,
-  radius,
   SelectField,
   Sheet,
-  Text,
+  SheetButton,
+  SheetFooter,
   TimeField,
   toast,
   useTheme,
@@ -163,40 +163,15 @@ export function LessonCreateSheet({ open, onClose, date, lesson }: LessonCreateS
           numberOfLines={2}
         />
 
-        {/* Veb `dialog-actions`: yuqorida chiziq, `px-5 py-4 gap-3`, tugmalar h-12. */}
-        <View style={[styles.footer, { borderTopColor: palette.border }]}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={onClose}
-            style={({ pressed }) => [
-              styles.footerButton,
-              {
-                backgroundColor: pressed ? palette["surface-subtle"] : palette.surface,
-                borderColor: palette.border,
-                borderWidth: 1,
-              },
-            ]}
-          >
-            <Text variant="label">{t("schedule.cancel")}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ disabled: pending }}
-            disabled={pending}
+        <SheetFooter>
+          <SheetButton title={t("schedule.cancel")} onPress={onClose} />
+          <SheetButton
+            variant="primary"
+            title={t("schedule.save")}
+            loading={pending}
             onPress={() => void save()}
-            style={({ pressed }) => [
-              styles.footerButton,
-              {
-                backgroundColor: pressed ? palette["primary-hover"] : palette.primary,
-                opacity: pending ? 0.6 : 1,
-              },
-            ]}
-          >
-            <Text variant="label" style={{ color: palette["primary-foreground"] }}>
-              {t("schedule.save")}
-            </Text>
-          </Pressable>
-        </View>
+          />
+        </SheetFooter>
       </View>
     </Sheet>
   );
@@ -205,20 +180,4 @@ export function LessonCreateSheet({ open, onClose, date, lesson }: LessonCreateS
 const styles = StyleSheet.create({
   /* `flex flex-col gap-4` */
   body: { gap: 16 },
-  footer: {
-    flexDirection: "row",
-    gap: 12,
-    marginHorizontal: -16,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-  },
-  footerButton: {
-    flex: 1,
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    borderRadius: radius.full,
-  },
 });

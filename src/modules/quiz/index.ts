@@ -5,7 +5,7 @@
  * domen qatlami to'liq, `ui/` eksportlari olib tashlangan — mobil UI alohida
  * yoziladi va o'z fayllaridan import qilinadi.
  */
-export type { ImportedQuiz } from "./api/quiz.api";
+export type { ImportedQuiz, QuizExportMode, QuizExportType } from "./api/quiz.api";
 export { quizApi } from "./api/quiz.api";
 export { quizEndpoints } from "./api/quiz.endpoints";
 export type {
@@ -13,6 +13,7 @@ export type {
   QuizAttemptResultDto,
   QuizAttemptSummaryDto,
   QuizDto,
+  QuizImportPreviewDto,
   QuizOptionDto,
   QuizQuestionDto,
   QuizSummaryDto,
@@ -23,6 +24,9 @@ export {
   mapQuizAttemptSummaryDto,
   mapAttemptAnswerRequest,
   mapQuizDto,
+  mapQuizImportPreviewDto,
+  quizDisplayTitle,
+  toQuestionType,
   mapQuizGroupDto,
   mapQuizOptionDto,
   mapQuizQuestionDto,
@@ -31,9 +35,12 @@ export {
 } from "./lib/quiz.mappers";
 export {
   quizKeys,
+  useAiQuizJobs,
+  useAssignQuizToCourse,
   useCreateQuiz,
   useDeleteQuiz,
   useDownloadQuizTemplate,
+  useExportQuiz,
   useImportGoogleLink,
   useImportQuizDocx,
   usePublishQuiz,
@@ -42,6 +49,7 @@ export {
   useQuizDetailLoader,
   useQuizzes,
   useRemoveGroupAudio,
+  useStartAiQuiz,
   useSubmitQuizAttempt,
   useUploadGroupAudio,
   useUpdateQuiz,
@@ -63,3 +71,11 @@ export type { ImportResultSheetProps } from "./ui/import-result-sheet";
 export { QuizPreviewSheet } from "./ui/quiz-preview-sheet";
 export type { QuizPreviewSheetProps } from "./ui/quiz-preview-sheet";
 export { Choice } from "./ui/question-answer-input";
+export { SubjectFilterSheet } from "./ui/subject-filter-sheet";
+export type { SubjectFilterSheetProps } from "./ui/subject-filter-sheet";
+export { AssignQuizSheet } from "./ui/assign-quiz-sheet";
+export type { AssignQuizSheetProps } from "./ui/assign-quiz-sheet";
+export { QuizExportSheet } from "./ui/quiz-export-sheet";
+export type { QuizExportSheetProps } from "./ui/quiz-export-sheet";
+export { QuizAttemptsSheet } from "./ui/quiz-attempts-sheet";
+export type { QuizAttemptsSheetProps } from "./ui/quiz-attempts-sheet";

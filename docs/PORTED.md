@@ -210,6 +210,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/ui/quiz-preview-sheet.tsx` | 🟡 MOSLASH | `6f6e9fee7e8e` | vebda yonma-yon ustun (`quiz-page-split`), mobilda talab bo'yicha ochiladigan oyna; mantiq bir xil — o'sha `draftToStudentQuestion` + `QuestionAnswerInput` |
 | `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn; `Choice` eksport qilingan — mock test uni qayta ishlatadi (vebda ular CSS klassini bo'lishadi) |
 | `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
+| `src/modules/quiz/ui/subject-filter-sheet.tsx` | 🟡 MOSLASH | `—` | Drawer -> Sheet |
+| `src/modules/quiz/ui/assign-quiz-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `assign-quiz-sheet.tsx` (Dialog -> Sheet) |
+| `src/modules/quiz/ui/quiz-export-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `quiz-export-sheet.tsx`; faqat telefon varianti (3 qator, o'qituvchi nusxasi) |
+| `src/modules/quiz/ui/quiz-attempts-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `quiz-attempts-sheet.tsx`; yuklab olish `downloadBlob` (ulashish oynasi) orqali |
+| `src/pages/teacher/quizzes/teacher-quizzes-page.tsx` | 🟡 MOSLASH | `—` | mobilda `pages/quizzes/teacher-quizzes-page.tsx`; karta bosilganda tahrirlash oynasi ochiladi (savollardan boshlash hali yo'q) |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |

@@ -35,11 +35,16 @@ export interface AppBarProps {
    * Logotipli ko'rinishda SHART, aks holda ekranning nomi aytilmaydi.
    */
   a11yTitle?: string;
+  /**
+   * Chapdagi "orqaga" tugmasi — vebda ichki sahifalarda (masalan Ish
+   * maydoni -> Testlar): 40x40, chapga -8 surilgan, `arrow-back` 22.
+   */
+  back?: { label: string; onPress: () => void };
   /** O'ng tomondagi tugmalar. */
   children?: ReactNode;
 }
 
-export function AppBar({ title, a11yTitle, children }: AppBarProps) {
+export function AppBar({ title, a11yTitle, back, children }: AppBarProps) {
   const { palette } = useTheme();
 
   return (
@@ -51,6 +56,19 @@ export function AppBar({ title, a11yTitle, children }: AppBarProps) {
         { backgroundColor: palette.background, borderBottomColor: palette.border },
       ]}
     >
+      {back ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={back.label}
+          onPress={back.onPress}
+          style={({ pressed }) => [
+            styles.back,
+            pressed && { backgroundColor: palette["surface-subtle"] },
+          ]}
+        >
+          <Icon name="arrow-back" size={22} color={palette.foreground} />
+        </Pressable>
+      ) : null}
       {title ? (
         <Text variant="heading" numberOfLines={1} style={styles.title}>
           {title}
@@ -145,6 +163,14 @@ const styles = StyleSheet.create({
   /* Sarlavha bo'sh joyni egallaydi, tugmalar o'ngga suriladi. */
   title: { flex: 1 },
   spacer: { flex: 1 },
+  back: {
+    width: 40,
+    height: 40,
+    marginLeft: -8,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   action: {
     width: 44,
     height: 44,

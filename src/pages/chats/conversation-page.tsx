@@ -20,6 +20,7 @@ import { useChat } from "@/modules/message";
 import { MessageActionsSheet } from "@/modules/message/ui/message-actions-sheet";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
 import { MessageList } from "@/modules/message/ui/message-list";
+import { VoiceRoomBar } from "@/modules/voice";
 import {
   GroupTabsRow,
   GroupWorkspaceSection,
@@ -141,6 +142,17 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         lesson={liveLesson}
         onJoin={() => liveLesson && router.push(`/live/${liveLesson.id}`)}
       />
+
+      {/*
+        * Ovozli suhbat chizig'i TABLAR USTIDA — vebdagi kabi, ya'ni
+        * qaysi bo'lim ochiq bo'lishidan qat'i nazar ko'rinadi.
+        *
+        * Ilgari u Darslar bo'limining ichida edi: "har bo'limda
+        * takrorlansa joy yeb qo'yadi" degan xavotir bilan. Bu joylashuvda
+        * u BIR MARTA chiziladi, shuning uchun o'sha xavotir yuzaga
+        * kelmaydi.
+        */}
+      {courseId ? <VoiceRoomBar courseId={courseId} isTeacher={role === "teacher"} /> : null}
 
       {/* Bo'limlar faqat GURUH chatida: shaxsiy suhbatda kurs, dars va
           vazifa tushunchasi yo'q. */}

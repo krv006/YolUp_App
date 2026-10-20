@@ -21,7 +21,8 @@ export interface AvatarProps {
 
 const SIZES: Record<AvatarSize, { box: number; font: number; dot: number }> = {
   sm: { box: 28, font: 11, dot: 8 },
-  md: { box: 36, font: 13, dot: 9 },
+  // `md` — suhbat panelidagi avatar. 40 — veb DOM'idan (ilgari 36).
+  md: { box: 40, font: 13, dot: 9 },
   // `lg` — ro'yxat avatari. 50 — veb DOM'idan o'lchangan qiymat (ilgari 46).
   lg: { box: 50, font: 16, dot: 11 },
   xl: { box: 64, font: 22, dot: 14 },

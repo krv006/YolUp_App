@@ -27,6 +27,34 @@ export interface Accent {
    */
   lightText?: string;
   darkText?: string;
+  /**
+   * Hosila tokenlar uchun ANIQ qiymatlar.
+   *
+   * ┌─ NEGA KERAK ────────────────────────────────────────────────────────┐
+   * │ Qolgan aksentlarda och fonlar asos rangni sahifa foni bilan         │
+   * │ ARALASHTIRIB olinadi. Brend uchun bu yaramaydi: vebdagi shkala      │
+   * │ qo'lda sozlangan va aralashtirish bilan chiqmaydi — masalan         │
+   * │ `--blue-50` (#eef2ff) ning ko'k kanali ham asos rangdan, ham fondan │
+   * │ YUQORI, ya'ni ularning hech qanday aralashmasi unga yetmaydi.       │
+   * │ Qurilmada faol chip #c9d2f9 bo'lib, vebdagidan to'qroq chiqqandi.   │
+   * └─────────────────────────────────────────────────────────────────────┘
+   */
+  overrides?: {
+    light?: Partial<AccentTokens>;
+    dark?: Partial<AccentTokens>;
+  };
+}
+
+/** `deriveAccentTokens` qaytaradigan tokenlar. */
+export interface AccentTokens {
+  primary: string;
+  "primary-hover": string;
+  "primary-foreground": string;
+  "primary-text": string;
+  "primary-tint": string;
+  "primary-tint-strong": string;
+  "primary-soft": string;
+  ring: string;
 }
 
 export const ACCENTS: readonly Accent[] = [
@@ -49,6 +77,15 @@ export const ACCENTS: readonly Accent[] = [
     lightText: "#3a56e0",
     dark: "#4567f5",
     darkText: "#90a5fa",
+    overrides: {
+      // --action-primary-subtle / --blue-50 / --blue-100
+      light: { "primary-soft": "#eef2ff", "primary-tint": "#eef2ff", "primary-tint-strong": "#dde4fe" },
+      dark: {
+        "primary-soft": "rgba(69, 103, 245, 0.22)",
+        "primary-tint": "rgba(69, 103, 245, 0.22)",
+        "primary-tint-strong": "#2f45ba",
+      },
+    },
   },
   { id: "blue", labelKey: "theme.kok", light: "#1a66e0", dark: "#4d91ff" },
   { id: "indigo", labelKey: "theme.siyoh", light: "#4f46e5", dark: "#8b8cf9" },
@@ -120,16 +157,7 @@ export function deriveAccentTokens(
   accentId: string,
   scheme: ColorScheme,
   background: string
-): {
-  primary: string;
-  "primary-hover": string;
-  "primary-foreground": string;
-  "primary-text": string;
-  "primary-tint": string;
-  "primary-tint-strong": string;
-  "primary-soft": string;
-  ring: string;
-} {
+): AccentTokens {
   const accent = findAccent(accentId);
   const base = scheme === "dark" ? accent.dark : accent.light;
   // Matn/halqa uchun alohida variant berilgan bo'lsa o'sha, aks holda asos rang.
@@ -146,6 +174,8 @@ export function deriveAccentTokens(
     "primary-tint-strong": mix(base, background, scheme === "dark" ? 0.74 : 0.8),
     "primary-soft": mix(base, background, scheme === "dark" ? 0.68 : 0.74),
     ring: text,
+    // Aniq berilgan qiymatlar hosilalarni bekor qiladi (izohi `Accent` da).
+    ...(scheme === "dark" ? accent.overrides?.dark : accent.overrides?.light),
   };
 }
 

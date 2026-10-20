@@ -8,6 +8,7 @@ import type { ChatMessage } from "@/shared/types";
 import { fontSize, GradientFill, overlayOn, radius, Text, useTheme } from "@/shared/ui";
 import { MessageAttachment } from "./message-attachment";
 import { MessageText } from "./message-text";
+import { VoiceMessage } from "./voice-message";
 
 export interface MessageBubbleProps {
   message: ChatMessage;
@@ -162,8 +163,13 @@ export function MessageBubble({
         {message.text ? <MessageText text={message.text} outgoing={outgoing} /> : null}
 
         {/* Dars tugagach backend doska PDF'ini shu ko'rinishda yuboradi. */}
+        {/* Audio — ovozli xabar pleyeri, qolgani fayl kartochkasi (vebdagi kabi). */}
         {message.attachment ? (
-          <MessageAttachment attachment={message.attachment} outgoing={outgoing} />
+          message.attachment.mimeType?.startsWith("audio/") ? (
+            <VoiceMessage attachment={message.attachment} outgoing={outgoing} />
+          ) : (
+            <MessageAttachment attachment={message.attachment} outgoing={outgoing} />
+          )
         ) : null}
 
         <View style={styles.meta}>

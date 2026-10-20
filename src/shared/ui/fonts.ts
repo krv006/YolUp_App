@@ -18,6 +18,19 @@
  * └───────────────────────────────────────────────────────────────────────┘
  */
 
+/*
+ * ┌─ FAYLLAR QAYERDAN ────────────────────────────────────────────────────┐
+ * │ `google/fonts` repozitoriyasidagi o'zgaruvchan (variable) fayllardan  │
+ * │ (`ofl/onest/Onest[wght].ttf`, `ofl/unbounded/Unbounded[wght].ttf`)    │
+ * │ fontTools `instancer` bilan 400/500/600 qalinliklar ajratilgan.       │
+ * │                                                                       │
+ * │ Ilgari fayllar Google Fonts CSS'idan olingan edi va ular faqat LOTIN  │
+ * │ to'plami (223 belgi) bo'lib chiqdi: kirill harflari tizim shriftiga   │
+ * │ tushib ketardi (rus tilidagi interfeys va kirillcha savollar). Endi   │
+ * │ to'liq to'plam — lotin, kirill va o'zbekcha ʻ belgisi.                │
+ * └───────────────────────────────────────────────────────────────────────┘
+ */
+
 /** `useFonts` ga beriladigan xarita: oila nomi -> fayl. */
 export const FONT_ASSETS = {
   "Onest-Regular": require("../../../assets/fonts/Onest-Regular.ttf"),

@@ -63,6 +63,7 @@ export function MessageBubble({
         delayLongPress={280}
         style={({ pressed }) => [
           styles.bubble,
+          outgoing ? styles.bubbleOutgoing : styles.bubbleIncoming,
           // Gradient bo'lsa fon SVG bilan chiziladi va burchaklar kesilishi
           // uchun `overflow` yopiladi.
           gradient ? styles.clip : null,
@@ -194,19 +195,31 @@ function metaColor(outgoing: boolean, palette: ReturnType<typeof useTheme>["pale
 }
 
 const styles = StyleSheet.create({
-  row: { paddingHorizontal: 12, paddingVertical: 2 },
+  row: { paddingHorizontal: 12, paddingVertical: 4 },
   rowIncoming: { alignItems: "flex-start" },
   rowOutgoing: { alignItems: "flex-end" },
   clip: { overflow: "hidden" },
+  /*
+   * O'lchamlar veb `message-bubble.tsx` ning MOBIL sinflaridan
+   * (`lg:` prefikssiz):
+   *   max-w-[80%]  ·  rounded-2xl (24)  ·  px-3.5 py-2.5 (14/10)
+   *   gap-1 (4)    ·  text-body-sm (14/20)
+   *
+   * Burchaklardan BITTASI kichikroq (12): chiquvchi purakchada pastki
+   * o'ng, kiruvchida pastki chap — veb `rounded-br-md` / `rounded-bl-md`.
+   * Shu bilan purakcha kimga tegishliligi shaklidan ham bilinadi.
+   */
   bubble: {
-    maxWidth: "84%",
+    maxWidth: "80%",
     minWidth: 76,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    gap: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: radius["2xl"],
+    borderWidth: 1,
+    gap: 4,
   },
+  bubbleOutgoing: { borderBottomRightRadius: radius.md },
+  bubbleIncoming: { borderBottomLeftRadius: radius.md },
   senderRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   sender: { fontWeight: "700" },
   reply: {

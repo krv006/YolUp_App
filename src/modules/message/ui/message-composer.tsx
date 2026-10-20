@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboardState } from "react-native-keyboard-controller";
 import { SendHorizontal, X } from "lucide-react-native";
 import type { ChatMessage, SendMessagePayload } from "@/shared/types";
-import { fontSize, IconButton, MIN_TOUCH_SIZE, radius, Text, useTheme } from "@/shared/ui";
+import { IconButton, MIN_TOUCH_SIZE, radius, Text, useTheme } from "@/shared/ui";
 
 export interface MessageComposerProps {
   onSend: (payload: SendMessagePayload) => void;
@@ -126,7 +126,8 @@ export function MessageComposer({
             styles.input,
             {
               color: palette.foreground,
-              backgroundColor: palette["surface-subtle"],
+              // Veb: maydon foni `--bg-canvas` (sahifa foni), `--bg-subtle` emas.
+              backgroundColor: palette.background,
               borderColor: palette.border,
             },
           ]}
@@ -169,17 +170,24 @@ export function MessageComposer({
 const styles = StyleSheet.create({
   wrapper: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8, paddingHorizontal: 10, gap: 8 },
   row: { flexDirection: "row", alignItems: "flex-end", gap: 8 },
+  /*
+   * O'lchamlar veb DOM'idan (390px): o'ram 56 balandlik, radius 24,
+   * fon `--bg-canvas`, chegara 1px, ichki bo'shliq 12/20, matn 16/24.
+   *
+   * Ilgari radius 16, chegara hairline va matn 15px edi.
+   */
   input: {
     flex: 1,
-    minHeight: MIN_TOUCH_SIZE,
+    minHeight: 56,
     // Uzun xabar butun ekranni egallab ketmasin.
     maxHeight: 130,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 14,
-    paddingTop: Platform.OS === "ios" ? 12 : 8,
-    paddingBottom: Platform.OS === "ios" ? 12 : 8,
-    fontSize: fontSize.lg,
+    borderRadius: radius["2xl"],
+    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 16 : 12,
+    paddingBottom: Platform.OS === "ios" ? 16 : 12,
+    fontSize: 16,
+    lineHeight: 24,
   },
   send: {
     width: MIN_TOUCH_SIZE,

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import {
   BookOpen,
   CalendarDays,
@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { VoiceRoomBar } from "@/modules/voice";
-import { Chip, ChipRow } from "@/shared/ui";
+import { Text, useTheme } from "@/shared/ui";
 import { AssignmentsSection } from "./assignments-section";
 import { AttendanceSection } from "./attendance-section";
 import { LessonsSection } from "./lessons-section";
@@ -58,19 +58,49 @@ export function GroupTabsRow({
   isTeacher: boolean;
 }) {
   const { t } = useTranslation("mobile");
+  const { palette } = useTheme();
   const visible = TABS.filter((tab) => !tab.teacherOnly || isTeacher);
 
   return (
-    <ChipRow>
-      {visible.map((tab) => (
-        <Chip
-          key={tab.id}
-          label={t(tab.labelKey)}
-          selected={active === tab.id}
-          onPress={() => onChange(tab.id)}
-        />
-      ))}
-    </ChipRow>
+    <View
+      style={[
+        styles.tabRow,
+        { backgroundColor: palette.surface, borderBottomColor: palette.border },
+      ]}
+    >
+      {visible.map((tab) => {
+        const selected = active === tab.id;
+        return (
+          <Pressable
+            key={tab.id}
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}
+            onPress={() => onChange(tab.id)}
+            style={styles.tab}
+          >
+            <Text
+              numberOfLines={1}
+              style={[
+                styles.tabLabel,
+                { color: selected ? palette.primary : palette["muted-foreground"] },
+              ]}
+            >
+              {t(tab.labelKey)}
+            </Text>
+            {/*
+              * Tagidagi chiziq — faol tabni shu belgilaydi. Vebda u
+              * `border-bottom` ham, `::after` ham emas, alohida element.
+              */}
+            <View
+              style={[
+                styles.tabUnderline,
+                selected && { backgroundColor: palette.primary },
+              ]}
+            />
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -118,5 +148,26 @@ export function GroupWorkspaceSection({
 }
 
 const styles = StyleSheet.create({
+  /*
+   * O'lchamlar veb DOM'idan (390px): qator 49 balandlik, OQ fon, pastki
+   * chegara 1px, yon bo'shliq 4; tab 48 balandlik, pad 14/8, yorliq
+   * 14/20 qalinlik 600; faol rangi --action-primary, nofaolniki
+   * --text-secondary.
+   *
+   * ILGARI bu yerda CHIP qatori turardi (to'liq yumaloq, fonli). Vebda
+   * esa oddiy matn tablari va faolining TAGIDA ko'k chiziq.
+   */
+  tabRow: { flexDirection: "row", height: 49, paddingHorizontal: 4, borderBottomWidth: 1 },
+  tab: { flex: 1, justifyContent: "space-between", alignItems: "center", paddingTop: 14 },
+  tabLabel: { fontSize: 14, lineHeight: 20, fontWeight: "600" },
+  /* Chiziq doim chiziladi — nofaolida shaffof, shunda yorliq sakramaydi. */
+  tabUnderline: {
+    alignSelf: "stretch",
+    height: 3,
+    marginHorizontal: 8,
+    backgroundColor: "transparent",
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
+  },
   root: { flex: 1 },
 });

@@ -28,6 +28,7 @@ import {
   ScreenError,
   SearchField,
   Skeleton,
+  Text,
   useTheme,
 } from "@/shared/ui";
 
@@ -197,6 +198,8 @@ function ChatsList({
   hasFilter,
 }: ChatsListProps) {
   const { t } = useTranslation("mobile");
+  // Guruh sarlavhalari veb bilan BIR XIL kalitdan: `chat:panel.groups.*`.
+  const { t: tc } = useTranslation("chat");
   const { palette } = useTheme();
 
   if (isLoading) return <ChatsSkeleton />;
@@ -225,9 +228,8 @@ function ChatsList({
     // FlashList v2 qator balandligini o'zi o'lchaydi — `estimatedItemSize`
     // kerak emas (v1 da majburiy edi).
     <FlashList
-      data={conversations}
-      keyExtractor={(item) => item.id}
-      ItemSeparatorComponent={() => <View style={styles.rowGap} />}
+      data={toRows(conversations)}
+      keyExtractor={(row) => (row.kind === "header" ? `h-${row.key}` : row.conversation.id)}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
@@ -235,15 +237,69 @@ function ChatsList({
           tintColor={palette["muted-foreground"]}
         />
       }
-      renderItem={({ item }) => (
-        <ConversationItem
-          conversation={item}
-          onPress={onOpen}
-          live={Boolean(item.courseId && liveCourses.has(item.courseId))}
-        />
-      )}
+      renderItem={({ item: row }) =>
+        row.kind === "header" ? (
+          <Text variant="label" tone="muted" style={styles.groupHeader}>
+            {tc(`panel.groups.${row.key}`)}
+          </Text>
+        ) : (
+          <View style={styles.groupItem}>
+            <ConversationItem
+              conversation={row.conversation}
+              onPress={onOpen}
+              live={Boolean(
+                row.conversation.courseId && liveCourses.has(row.conversation.courseId)
+              )}
+            />
+          </View>
+        )
+      }
     />
   );
+}
+
+type GroupKey = "today" | "yesterday" | "earlier";
+
+/**
+ * Suhbat qaysi sana guruhiga tushishi — veb `conversation-panel.tsx`
+ * dagi `groupKeyOf` ning porti (chegaralar bayt-bayt bir xil).
+ */
+function groupKeyOf(value: string): GroupKey {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "earlier";
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  if (date.getTime() >= start.getTime()) return "today";
+  if (date.getTime() >= start.getTime() - 86_400_000) return "yesterday";
+  return "earlier";
+}
+
+/** Sarlavha va suhbatlar bitta tekis ro'yxatda — FlashList bo'lim bilmaydi. */
+type Row =
+  | { kind: "header"; key: GroupKey }
+  | { kind: "item"; conversation: Conversation };
+
+/**
+ * Suhbatlarni sana guruhlariga ajratib, tekis ro'yxatga yoyadi.
+ *
+ * Vebda ro'yxat "Bugun / Kecha / Avvalgi" sarlavhalari bilan bo'linadi;
+ * mobilda bu umuman yo'q edi.
+ */
+function toRows(conversations: readonly Conversation[]): Row[] {
+  const buckets: { key: GroupKey; items: Conversation[] }[] = [
+    { key: "today", items: [] },
+    { key: "yesterday", items: [] },
+    { key: "earlier", items: [] },
+  ];
+  for (const item of conversations) {
+    buckets.find((entry) => entry.key === groupKeyOf(item.updatedAt))?.items.push(item);
+  }
+  return buckets
+    .filter((entry) => entry.items.length > 0)
+    .flatMap<Row>((entry) => [
+      { kind: "header", key: entry.key },
+      ...entry.items.map((conversation) => ({ kind: "item" as const, conversation })),
+    ]);
 }
 
 function ChatsSkeleton() {
@@ -273,7 +329,13 @@ const styles = StyleSheet.create({
    * Ilgari bu yerda ajratgich chiziq turardi; suhbatlar alohida
    * kartochka bo'lgach u ortiqcha.
    */
-  rowGap: { height: 16 },
+  /*
+   * Veb: guruh sarlavhasi `px-1 pt-2` (chapda 4, tepada 8), guruh ichida
+   * elementlar orasi `gap-2` (8). Ilgari mobilda guruhlar umuman yo'q edi
+   * va qatorlar orasida ajratgich chiziq turardi.
+   */
+  groupHeader: { paddingLeft: 4, paddingTop: 8, paddingBottom: 8 },
+  groupItem: { paddingBottom: 8 },
   header: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   titleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 8 },
   title: { flex: 1 },

@@ -6,10 +6,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import { FONT_ASSETS } from "@/shared/ui";
 import { tokenStorage } from "@/shared/api";
 import { useAuthStore } from "@/modules/auth";
-import { ToastHost } from "@/shared/ui";
+import { FONT_ASSETS, ToastHost } from "@/shared/ui";
 import { queryClient } from "./query-client";
 
 /*

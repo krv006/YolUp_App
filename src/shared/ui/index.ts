@@ -51,5 +51,7 @@ export { toast, ToastHost } from "./toast";
 export type { ToastAction, ToastOptions, ToastVariant } from "./toast";
 export { colors, color, fontSize, MIN_TOUCH_SIZE, radius, spacing } from "./tokens";
 export { bodyFont, FONT_ASSETS, HEADING_TRACKING, headingFont } from "./fonts";
+export { Icon } from "./icon";
+export type { IconName, IconProps } from "./icon";
 export type { FontWeightToken } from "./fonts";
 export type { ColorName, ColorScheme } from "./tokens";

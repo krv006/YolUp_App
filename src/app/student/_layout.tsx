@@ -15,18 +15,17 @@
  * qoladi: ota-ona farzandining natijalarini `parent-grades-page.tsx`
  * orqali ko'radi.
  */
-import { CalendarDays, LayoutGrid, MessagesSquare, UserRound } from "lucide-react-native";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
 
 const TABS = [
-  { name: "chats", labelKey: "tabs.chats", icon: MessagesSquare },
-  { name: "schedule", labelKey: "tabs.schedule", icon: CalendarDays },
+  { name: "chats", labelKey: "tabs.chats", iconName: "nav-chat" },
+  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar" },
   {
     name: "workspace",
     labelKey: "tabs.workspace",
-    icon: LayoutGrid,
+    iconName: "nav-workspace",
     /*
      * Ish maydonidan ochiladigan hamma narsa shu yerda sanaladi — aks
      * holda bo'lim ichida panelda birorta tab ajratilmay qoladi va
@@ -34,7 +33,7 @@ const TABS = [
      */
     owns: ["quizzes", "exams", "ai"],
   },
-  { name: "profile", labelKey: "tabs.profile", icon: UserRound },
+  { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
 ] as const;
 
 export default function StudentLayout() {

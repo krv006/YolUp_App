@@ -34,15 +34,19 @@ export function color(scheme: ColorScheme, name: ColorName): string {
 }
 
 /**
- * Radius shkalasi — veb `--r-*` tokenlari.
- * Veb'da 21 xil qiymat bor edi; shkala ularni 6 pog'onaga yig'adi.
+ * Radius shkalasi — veb `design-tokens.css` dagi `--radius-*`.
+ *
+ * Figma qayta dizayni bilan shkala o'zgardi: ilgari 7/10/13 edi (eski
+ * `theme.css` dan), endi 2/4/8/12 — bayt-bayt vebdagidek.
  */
 export const radius = {
-  xs: 7,
-  sm: 10,
-  md: 13,
+  "2xs": 2,
+  xs: 4,
+  sm: 8,
+  md: 12,
   lg: 16,
   xl: 20,
+  "2xl": 24,
   full: 999,
 } as const;
 

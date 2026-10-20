@@ -4,9 +4,9 @@ import {
   type TextProps as RNTextProps,
   type TextStyle,
 } from "react-native";
-import { fontSize } from "./tokens";
 import { useTheme } from "./theme";
 import { useTextScale } from "./text-scale";
+import { bodyFont, headingFont, HEADING_TRACKING, type FontWeightToken } from "./fonts";
 
 /**
  * Tipografiya shkalasi veb `--fs-*` tokenlaridan (MOBILE_PLAN §8.1).
@@ -20,14 +20,36 @@ export type TextVariant =
   | "label"
   | "caption";
 
+/*
+ * Qiymatlar veb `design-tokens.css` dagi MOBIL o'lchamlardan
+ * (`@media (max-width: 1023px)` bloki):
+ *
+ *   title      <- --fs-h1    28/36/500
+ *   heading    <- --fs-h2    22/30/500
+ *   subheading <- --fs-h3    18/26/500
+ *   body       <- --fs-body  16/24
+ *   label      <- --fs-label 14/20
+ *   caption    <- --fs-caption 12/16
+ *
+ * Ilgari bular eski `theme.css` dan olingan edi va hammasi bir-ikki
+ * piksel kichik, qalinroq chiqardi.
+ */
 const VARIANTS: Record<TextVariant, { fontSize: number; lineHeight: number; fontWeight: "400" | "500" | "600" | "700" }> = {
-  title: { fontSize: fontSize["6xl"], lineHeight: 34, fontWeight: "700" },
-  heading: { fontSize: fontSize["4xl"], lineHeight: 28, fontWeight: "600" },
-  subheading: { fontSize: fontSize["2xl"], lineHeight: 24, fontWeight: "600" },
-  body: { fontSize: fontSize.md, lineHeight: 20, fontWeight: "400" },
-  label: { fontSize: fontSize.md, lineHeight: 18, fontWeight: "600" },
-  caption: { fontSize: fontSize.sm, lineHeight: 18, fontWeight: "400" },
+  title: { fontSize: 28, lineHeight: 36, fontWeight: "500" },
+  heading: { fontSize: 22, lineHeight: 30, fontWeight: "500" },
+  subheading: { fontSize: 18, lineHeight: 26, fontWeight: "500" },
+  body: { fontSize: 16, lineHeight: 24, fontWeight: "400" },
+  label: { fontSize: 14, lineHeight: 20, fontWeight: "600" },
+  caption: { fontSize: 12, lineHeight: 16, fontWeight: "400" },
 };
+
+/**
+ * Sarlavha shriftida chiziladigan variantlar — vebdagi `font-heading`.
+ *
+ * Vebda u dialog sarlavhalari va h1/h2/h3 da ishlatiladi; qolgan matn
+ * `font-body` (Onest) bilan ketadi.
+ */
+const HEADING_VARIANTS = new Set<TextVariant>(["title", "heading", "subheading"]);
 
 /** `foreground` — asosiy matn, `muted` — ikkilamchi, `danger` — xato. */
 export type TextTone = "default" | "muted" | "brand" | "danger" | "onPrimary";
@@ -89,11 +111,41 @@ export function Text({ variant = "body", tone = "default", style, ...rest }: Tex
             : null),
         };
 
-  return <RNText style={[styles.base, merged, { color: resolvedColor }, scaled]} {...rest} />;
+  /*
+   * SHRIFT OILASI QALINLIKDAN KELIB CHIQADI.
+   *
+   * Androidda RN maxsus shrift uchun qalinlikni o'zi yasay olmaydi,
+   * shuning uchun har qalinlik alohida oila nomi bilan yuklangan
+   * (izohi `fonts.ts` da). `fontWeight` esa OLIB TASHLANADI — aks holda
+   * iOS ustiga yana sun'iy qalinlik qo'shib, harflarni buzadi.
+   *
+   * Chaqiruvchi o'z `fontFamily` sini bergan bo'lsa (masalan doskadagi
+   * monoshrift), unga tegilmaydi.
+   */
+  const weight = (typeof merged.fontWeight === "string"
+    ? merged.fontWeight
+    : VARIANTS[variant].fontWeight) as FontWeightToken;
+
+  const font: TextStyle = merged.fontFamily
+    ? {}
+    : {
+        fontFamily: HEADING_VARIANTS.has(variant) ? headingFont(weight) : bodyFont(weight),
+        fontWeight: undefined,
+        ...(HEADING_VARIANTS.has(variant) && typeof merged.fontSize === "number"
+          ? { letterSpacing: merged.fontSize * HEADING_TRACKING }
+          : null),
+      };
+
+  return (
+    <RNText style={[styles.base, merged, font, { color: resolvedColor }, scaled]} {...rest} />
+  );
 }
 
 const styles = StyleSheet.create({
-  // Tizim shrifti ataylab: maxsus shrift yuklash birinchi kadrni kechiktiradi
-  // va low-end Androidda matn "sakraydi". Brend shrifti Faza 1 da baholanadi.
+  /*
+   * `includeFontPadding: false` — Androidda shrift ustidagi qo'shimcha
+   * bo'shliqni olib tashlaydi, aks holda qatorlar veb bilan solishtirganda
+   * pastroq tushadi.
+   */
   base: { includeFontPadding: false },
 });

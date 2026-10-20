@@ -5,6 +5,8 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+import { FONT_ASSETS } from "@/shared/ui";
 import { tokenStorage } from "@/shared/api";
 import { useAuthStore } from "@/modules/auth";
 import { ToastHost } from "@/shared/ui";
@@ -42,6 +44,15 @@ export function AppProviders({ children }: { children: ReactNode }) {
   const bootstrap = useAuthStore((state) => state.bootstrap);
   const [ready, setReady] = useState(false);
 
+  /*
+   * Brend shriftlari (Onest, Unbounded) — izohi `shared/ui/fonts.ts` da.
+   *
+   * Splash ataylab shriftlar yuklangunicha ushlab turiladi: aks holda
+   * birinchi kadr tizim shriftida chizilib, keyin brend shriftiga
+   * almashardi va matn "sakrab" ketardi.
+   */
+  const [fontsLoaded, fontError] = useFonts(FONT_ASSETS);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -60,13 +71,20 @@ export function AppProviders({ children }: { children: ReactNode }) {
     };
   }, [bootstrap]);
 
+  /*
+   * Shrift yuklanmay qolsa ham ILOVA OCHILADI: `fontError` bo'lganda
+   * tizim shriftiga tushamiz. Aks holda bitta shrift fayli tufayli
+   * foydalanuvchi splash ekranda qolib ketardi.
+   */
+  const fontsSettled = fontsLoaded || fontError !== null;
+
   useEffect(() => {
-    if (ready) void SplashScreen.hideAsync();
-  }, [ready]);
+    if (ready && fontsSettled) void SplashScreen.hideAsync();
+  }, [ready, fontsSettled]);
 
   // Splash hali ekranda — bo'sh daraxt qaytaramiz, aks holda marshrut
   // guard'lari hali noma'lum auth holati ustida qaror qabul qilib qo'yadi.
-  if (!ready) return null;
+  if (!ready || !fontsSettled) return null;
 
   return (
     <GestureHandlerRootView style={styles.root}>

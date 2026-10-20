@@ -30,8 +30,26 @@ export interface Accent {
 }
 
 export const ACCENTS: readonly Accent[] = [
-  // Veb bilan BITTA brend: Edu_Front theme.css dagi --primary va --primary-text.
-  { id: "brand", labelKey: "theme.brend", light: "#5d0cfe", dark: "#5d0cfe", darkText: "#a98cff" },
+  /*
+   * Veb bilan BITTA brend — Edu_Front `design-tokens.css`:
+   *   light  <- --action-primary  (--blue-500)
+   *   lightText <- --text-link    (--blue-600)
+   *   darkText  <- --text-link    (--blue-300, qorong'i mavzuda)
+   *
+   * Ilgari bu yerda #5d0cfe (binafsha) turardi — u eski `theme.css` dan
+   * olingan edi. 2026-10-19 dagi Figma qayta dizayni bilan veb ko'kka
+   * o'tdi; palitra yangilanganda shu qator ham almashtirilmasa, aksent
+   * tizimi `primary-*` ni qayta hisoblab, butun ilovani yana binafsha
+   * qilib qo'yardi.
+   */
+  {
+    id: "brand",
+    labelKey: "theme.brend",
+    light: "#4567f5",
+    lightText: "#3a56e0",
+    dark: "#4567f5",
+    darkText: "#90a5fa",
+  },
   { id: "blue", labelKey: "theme.kok", light: "#1a66e0", dark: "#4d91ff" },
   { id: "indigo", labelKey: "theme.siyoh", light: "#4f46e5", dark: "#8b8cf9" },
   { id: "violet", labelKey: "theme.binafsha", light: "#7c3aed", dark: "#a78bfa" },

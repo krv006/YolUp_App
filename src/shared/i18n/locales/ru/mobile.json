@@ -223,7 +223,8 @@
     "royxat": "Список",
     "hali_dars_rejalashtirilmagan": "Уроки ещё не запланированы",
     "kursga_yozilganingizdan_keyin_darslar_shu_ye": "Уроки появятся здесь после записи на курс.",
-    "bu_kunda_dars_yoq": "В этот день уроков нет."
+    "bu_kunda_dars_yoq": "В этот день уроков нет.",
+    "jadval": "Расписание"
   },
   "settings": {
     "orqaga": "Назад",

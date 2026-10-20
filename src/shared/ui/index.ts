@@ -54,6 +54,8 @@ export { bodyFont, FONT_ASSETS, HEADING_TRACKING, headingFont } from "./fonts";
 export { AppBar, AppBarAction } from "./app-bar";
 export type { AppBarActionProps, AppBarProps } from "./app-bar";
 export { Icon } from "./icon";
+export { Segmented } from "./segmented";
+export type { SegmentedOption, SegmentedProps } from "./segmented";
 export { SearchField } from "./search-field";
 export type { SearchFieldProps } from "./search-field";
 export type { IconName, IconProps } from "./icon";

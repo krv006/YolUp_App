@@ -20,9 +20,11 @@ import { ROLES } from "@/shared/constants";
 import { ROUTES } from "@/shared/config";
 import type { Lesson } from "@/shared/types";
 import {
-  Chip,
+  AppBar,
+  AppBarAction,
   Screen,
   ScreenEmpty,
+  Segmented,
   ScreenError,
   ScreenLoading,
   Text,
@@ -96,12 +98,38 @@ export function SchedulePage() {
 
   return (
     <Screen padded={false}>
-      <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <Text variant="heading">Mening darslarim</Text>
-        <View style={styles.switch}>
-          <Chip label={t("schedule.kalendar")} selected={view === "calendar"} onPress={() => setView("calendar")} />
-          <Chip label={t("schedule.royxat")} selected={view === "list"} onPress={() => setView("list")} />
-        </View>
+      {/*
+        * Tepa panel — vebdagidek: sarlavha chapda, o'ngda qo'ng'iroq.
+        * Ilgari bu yerda "Mening darslarim" deb QATTIQ YOZILGAN matn
+        * turardi; vebda sarlavha "Jadval".
+        */}
+      <AppBar title={t("schedule.jadval")}>
+        <AppBarAction
+          name="bell"
+          label={t("chats.bildirishnomalar")}
+          onPress={() => router.push("/notifications")}
+        />
+      </AppBar>
+
+      {/*
+        * Ko'rinish almashtirgichi — veb kulrang yo'lakcha ichidagi
+        * bo'laklar (izohi `shared/ui/segmented.tsx` da). Ilgari ikkita
+        * alohida chip edi.
+        *
+        * Vebda to'rtta ko'rinish bor (Ro'yxat / Kun / Hafta / Oy),
+        * mobilda esa ikkitasi: kun, hafta va oy ko'rinishlari hali
+        * yozilmagan — bu uslub emas, alohida ish.
+        */}
+      <View style={styles.switchRow}>
+        <Segmented
+          label={t("schedule.jadval")}
+          value={view}
+          onChange={setView}
+          options={[
+            { value: "list", label: t("schedule.royxat") },
+            { value: "calendar", label: t("schedule.kalendar") },
+          ]}
+        />
       </View>
 
       {items.length === 0 ? (
@@ -181,7 +209,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  switch: { flexDirection: "row", gap: 8 },
+  switchRow: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 },
   body: { padding: 16, gap: 12, paddingBottom: 32 },
   dayHead: { flexDirection: "row", alignItems: "center", gap: 8, paddingTop: 6 },
   dayTitle: { textTransform: "capitalize" },

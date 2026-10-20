@@ -27,7 +27,6 @@ import {
   ScreenEmpty,
   ScreenError,
   SearchField,
-  Separator,
   Skeleton,
   useTheme,
 } from "@/shared/ui";
@@ -228,7 +227,7 @@ function ChatsList({
     <FlashList
       data={conversations}
       keyExtractor={(item) => item.id}
-      ItemSeparatorComponent={() => <Separator inset={72} />}
+      ItemSeparatorComponent={() => <View style={styles.rowGap} />}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
@@ -269,6 +268,12 @@ const styles = StyleSheet.create({
    * Sahifa foni (`--bg-canvas`) faqat tepa panelda qoladi.
    */
   body: { flex: 1, paddingHorizontal: 20, paddingTop: 20, gap: 16 },
+  /*
+   * Kartochkalar ORASIDA bo'shliq — vebdagi bo'limning `gap: 16`.
+   * Ilgari bu yerda ajratgich chiziq turardi; suhbatlar alohida
+   * kartochka bo'lgach u ortiqcha.
+   */
+  rowGap: { height: 16 },
   header: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   titleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 8 },
   title: { flex: 1 },

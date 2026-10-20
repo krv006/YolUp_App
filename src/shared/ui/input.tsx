@@ -10,7 +10,6 @@ import {
   type ViewStyle,
 } from "react-native";
 import { Eye, EyeOff } from "lucide-react-native";
-import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
 import { useTheme } from "./theme";
 import { Text } from "./text";
 
@@ -54,7 +53,12 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
   const [focused, setFocused] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
-  const borderColor = error ? palette.destructive : focused ? palette.ring : palette.input;
+  /*
+   * Veb `form-skin.css`: tinch holatda kulrang fon va SHAFFOF chegara,
+   * fokusda oq fon va ko'k (`--border-focus`) chegara.
+   */
+  const borderColor = error ? palette.destructive : focused ? palette.primary : "transparent";
+  const multiline = Boolean(rest.multiline);
 
   return (
     <View style={[styles.group, containerStyle]}>
@@ -67,13 +71,22 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
       <View
         style={[
           styles.shell,
-          { backgroundColor: palette.surface, borderColor, borderWidth: focused || error ? 1.5 : 1 },
+          multiline && styles.shellMultiline,
+          {
+            backgroundColor: focused ? palette.surface : palette["surface-subtle"],
+            borderColor,
+          },
         ]}
       >
         {icon ? <View style={styles.icon}>{icon}</View> : null}
         <TextInput
           ref={ref}
-          style={[styles.input, { color: palette.foreground }, inputStyle]}
+          style={[
+            styles.input,
+            multiline && styles.inputMultiline,
+            { color: palette.foreground },
+            inputStyle,
+          ]}
           placeholderTextColor={palette["muted-foreground"]}
           secureTextEntry={secure && !revealed}
           autoCapitalize="none"
@@ -117,17 +130,23 @@ export const Input = forwardRef<TextInput, InputProps>(function Input(
 
 const styles = StyleSheet.create({
   group: { gap: 6 },
-  label: { marginLeft: 2 },
+  /* `.field-group > span` — 14/21, 500 */
+  label: { lineHeight: 21, fontWeight: "500" },
+  /* `.input-shell` — 52 balandlik, radius 13 (390px DOM'dan), bo'shliq 0 16 */
   shell: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: MIN_TOUCH_SIZE + 4,
-    borderRadius: radius.md,
-    paddingHorizontal: 12,
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: 13,
+    paddingHorizontal: 16,
     gap: 10,
   },
+  /* `.field-group textarea` — bo'shliq 14/16, ikki qator = 78 */
+  shellMultiline: { alignItems: "flex-start", minHeight: 78 },
   icon: { alignItems: "center", justifyContent: "center" },
-  input: { flex: 1, fontSize: fontSize.lg, paddingVertical: 12 },
+  input: { flex: 1, fontSize: 16, paddingVertical: 12 },
+  inputMultiline: { lineHeight: 24, paddingVertical: 14, textAlignVertical: "top" },
   reveal: {
     width: 32,
     height: 32,

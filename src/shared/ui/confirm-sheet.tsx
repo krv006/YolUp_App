@@ -10,6 +10,8 @@ export interface ConfirmSheetProps {
   /** Nima yo'qolishini aniq ayting — "qayta tiklanmaydi" kabi. */
   description?: string;
   confirmLabel?: string;
+  /** Rad etish tugmasi matni; berilmasa "Bekor". */
+  cancelLabel?: string;
   loading?: boolean;
   onConfirm: () => void;
 }
@@ -29,6 +31,7 @@ export function ConfirmSheet({
   title,
   description,
   confirmLabel = "O'chirish",
+  cancelLabel,
   loading = false,
   onConfirm,
 }: ConfirmSheetProps) {
@@ -36,7 +39,7 @@ export function ConfirmSheet({
   return (
     <Sheet open={open} onClose={onClose} title={title} description={description}>
       <View style={styles.actions}>
-        <Button title={t("shared.bekor")} variant="secondary" onPress={onClose} />
+        <Button title={cancelLabel ?? t("shared.bekor")} variant="secondary" onPress={onClose} />
         <Button title={confirmLabel} variant="danger" loading={loading} onPress={onConfirm} />
       </View>
     </Sheet>

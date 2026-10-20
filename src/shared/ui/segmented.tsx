@@ -29,7 +29,8 @@ export interface SegmentedProps<T extends string> {
  * O'lchamlar veb DOM'idan (390px):
  *   yo'lakcha  fon `--bg-subtle`, radius 999, ichki bo'shliq 4, oraliq 4
  *   bo'lak     radius 999, bo'shliq 0 12, yorliq 14/20 qalinlik 600
- *   tanlangan  OQ fon, matn `--text-primary`
+ *   bo'lak balandligi 40 (`h-10`)
+ *   tanlangan  OQ fon, `--shadow-xs` soya, matn `--text-primary`
  *   tanlanmagan shaffof, matn `--text-secondary`
  */
 export function Segmented<T extends string>({
@@ -56,7 +57,7 @@ export function Segmented<T extends string>({
             onPress={() => onChange(option.value)}
             style={({ pressed }) => [
               styles.segment,
-              selected && { backgroundColor: palette.surface },
+              selected && [styles.selected, { backgroundColor: palette.surface }],
               pressed && !selected && { opacity: 0.7 },
             ]}
           >
@@ -86,11 +87,13 @@ const styles = StyleSheet.create({
   },
   segment: {
     flex: 1,
-    height: 36,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 12,
     borderRadius: radius.full,
   },
+  // Veb `--shadow-xs`: 0 1px 3px rgb(36 38 77 / 0.06).
+  selected: { boxShadow: "0 1px 3px rgba(36, 38, 77, 0.06)" },
   label: { fontSize: 14, lineHeight: 20, fontWeight: "600" },
 });

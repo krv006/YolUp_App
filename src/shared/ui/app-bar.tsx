@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { Bell } from "lucide-react-native";
 import { Icon, type IconName } from "./icon";
 import { Logo } from "./logo";
 import { Text } from "./text";
@@ -79,7 +80,19 @@ export interface AppBarActionProps {
   badge?: ReactNode;
 }
 
-/** Tepa paneldagi dumaloq tugma — 44x44, vebdagi kabi. */
+/**
+ * Ikonka o'lchamlari vebdagi tepa paneldan: "+" `size={20}`, qidiruv
+ * `size={19}`.
+ */
+const ICON_SIZES: Partial<Record<IconName, number>> = { add: 20, search: 19 };
+
+/**
+ * Tepa paneldagi dumaloq tugma — 44x44, vebdagi kabi.
+ *
+ * Qo'ng'iroq ALOHIDA: vebdagi `NotificationBell` loyiha ikonkalaridan
+ * (to'ldirilgan `bell.svg`) emas, lucide `Bell` (chiziqli, 18) bilan
+ * chiziladi.
+ */
 export function AppBarAction({
   name,
   label,
@@ -106,11 +119,15 @@ export function AppBarAction({
         },
       ]}
     >
-      <Icon
-        name={name}
-        size={24}
-        color={primary ? palette["primary-foreground"] : palette.foreground}
-      />
+      {name === "bell" ? (
+        <Bell size={18} color={primary ? palette["primary-foreground"] : palette.foreground} />
+      ) : (
+        <Icon
+          name={name}
+          size={ICON_SIZES[name] ?? 20}
+          color={primary ? palette["primary-foreground"] : palette.foreground}
+        />
+      )}
       {badge}
     </Pressable>
   );

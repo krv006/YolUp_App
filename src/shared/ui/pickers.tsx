@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { Calendar, Check, ChevronDown, ChevronLeft, ChevronRight, Clock } from "lucide-react-native";
+import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock } from "lucide-react-native";
 import { toIntlLocale } from "@/shared/i18n/intl-locale";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
 import { useTheme } from "./theme";
@@ -21,6 +21,16 @@ import { Button } from "./button";
  */
 
 /** `yyyy-MM-dd` — mahalliy vaqt bo'yicha (toISOString UTC'ga surib yuboradi). */
+/**
+ * Maydonda ko'rinadigan sana — veb `formatDateValue`: "20 oktabr, 2026".
+ * Oy nomlari `common:formPickers.months` dan (veb bilan bir xil manba).
+ */
+function formatDateValue(value: string, months: string[]): string {
+  if (!value) return "";
+  const date = parseDate(value);
+  return `${date.getDate()} ${(months[date.getMonth()] ?? "").toLowerCase()}, ${date.getFullYear()}`;
+}
+
 function toDateValue(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -44,6 +54,8 @@ export interface DateFieldProps {
 
 export function DateField({ label, value, onChange, minimumDate, optional }: DateFieldProps) {
   const { t } = useTranslation("mobile");
+  const { t: tc } = useTranslation("common");
+  const months = tc("formPickers.months", { returnObjects: true }) as string[];
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
   /* Tanlov DARHOL qo'llanmaydi — "Tanlash" bosilguncha qoralama. */
@@ -57,13 +69,13 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
 
   return (
     <View style={styles.group}>
-      <Text variant="label">
+      <Text variant="label" style={styles.label}>
         {label}
         {optional ? t("shared.ixtiyoriy_qoshimcha") : ""}
       </Text>
       <Trigger
-        icon={<Calendar size={18} color={palette["muted-foreground"]} />}
-        text={value || t("shared.tanlanmagan")}
+        icon={<CalendarDays size={17} color={palette["subtle-foreground"]} />}
+        text={value ? formatDateValue(value, months) : t("shared.tanlanmagan")}
         muted={!value}
         onPress={openPicker}
       />
@@ -339,9 +351,9 @@ export function TimeField({ label, value, onChange }: TimeFieldProps) {
 
   return (
     <View style={styles.group}>
-      <Text variant="label">{label}</Text>
+      <Text variant="label" style={styles.label}>{label}</Text>
       <Trigger
-        icon={<Clock size={18} color={palette["muted-foreground"]} />}
+        icon={<Clock size={17} color={palette["subtle-foreground"]} />}
         text={value || t("shared.tanlanmagan")}
         muted={!value}
         onPress={openPicker}
@@ -499,6 +511,10 @@ export interface SelectFieldProps {
    * `SEARCH_THRESHOLD` dan oshganda O'ZI yoqiladi.
    */
   searchable?: boolean;
+  /** Chapdagi ikonka (17px); berilmasa — pastga o'q, vebdagidek. */
+  icon?: React.ReactNode;
+  /** Qiymatdan keyingi kulrang birlik — veb `DurationPicker` dagi "daqiqa". */
+  suffix?: string;
 }
 
 /**
@@ -522,8 +538,11 @@ export function SelectField({
   onChange,
   placeholder,
   searchable,
+  icon,
+  suffix,
 }: SelectFieldProps) {
   const { t } = useTranslation("mobile");
+  const { t: tc } = useTranslation("common");
   const { palette } = useTheme();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -543,10 +562,11 @@ export function SelectField({
 
   return (
     <View style={styles.group}>
-      <Text variant="label">{label}</Text>
+      <Text variant="label" style={styles.label}>{label}</Text>
       <Trigger
-        icon={<ChevronDown size={18} color={palette["muted-foreground"]} />}
-        text={selected?.label ?? placeholder ?? "Tanlang"}
+        icon={icon ?? <ChevronDown size={17} color={palette["subtle-foreground"]} />}
+        text={selected?.label ?? placeholder ?? tc("formPickers.selectPlaceholder")}
+        suffix={suffix}
         muted={!selected}
         onPress={() => setOpen(true)}
       />
@@ -625,15 +645,23 @@ export function SelectField({
   );
 }
 
+/**
+ * Maydon tugmasi — veb `.form-picker-trigger` (o'lchamlar 390px DOM'dan):
+ *   52 balandlik, fon `--bg-subtle`, shaffof 1px chegara, radius 13,
+ *   bo'shliq 6/14, oraliq 8; chapda 32x32 ikonka qutisi (radius 10,
+ *   tertiary), qiymat 16/24 qalin, o'ngda 16px pastga o'q.
+ */
 function Trigger({
   icon,
   text,
-  muted,
+  suffix,
   onPress,
 }: {
   icon: React.ReactNode;
   text: string;
+  /** Qiymat tanlanmagan. Rang o'zgarmaydi, faqat ma'lumot uchun. */
   muted: boolean;
+  suffix?: string;
   onPress: () => void;
 }) {
   const { palette } = useTheme();
@@ -644,36 +672,45 @@ function Trigger({
       onPress={onPress}
       style={({ pressed }) => [
         styles.trigger,
-        {
-          backgroundColor: palette.surface,
-          borderColor: palette.input,
-          opacity: pressed ? 0.85 : 1,
-        },
+        { backgroundColor: pressed ? palette.muted : palette["surface-subtle"] },
       ]}
     >
-      {icon}
+      <View style={styles.triggerIcon}>{icon}</View>
       <Text
-        style={[styles.triggerText, { color: muted ? palette["muted-foreground"] : palette.foreground }]}
+        // Bo'sh holat ("Tanlang") ham to'q rangda — vebda ham shunday.
+        style={[styles.triggerText, { color: palette.foreground }]}
         numberOfLines={1}
       >
         {text}
       </Text>
+      {suffix ? (
+        <Text variant="label" style={[styles.triggerSuffix, { color: palette["subtle-foreground"] }]}>
+          {suffix}
+        </Text>
+      ) : null}
+      <ChevronDown size={16} color={palette["muted-foreground"]} />
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   group: { gap: 6 },
+  /* `.form-picker-label` — 14/21, 500 */
+  label: { lineHeight: 21, fontWeight: "500" },
   trigger: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    minHeight: MIN_TOUCH_SIZE + 4,
-    paddingHorizontal: 12,
-    borderRadius: radius.md,
+    gap: 8,
+    minHeight: 52,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 13,
     borderWidth: 1,
+    borderColor: "transparent",
   },
-  triggerText: { flex: 1, fontSize: fontSize.lg },
+  triggerIcon: { width: 32, height: 32, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  triggerText: { flex: 1, fontSize: 16, lineHeight: 24, fontWeight: "600" },
+  triggerSuffix: { fontWeight: "400" },
   backdrop: { flex: 1, justifyContent: "flex-end" },
   sheet: {
     maxHeight: "70%",

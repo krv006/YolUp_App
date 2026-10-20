@@ -205,11 +205,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/lib/quiz-errors.ts` | 🟢 NUSXA | `da4cf7939388` | — |
 | `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
 | `src/modules/quiz/model/quiz.queries.ts` | 🟢 NUSXA | `a079604c210e` | — |
-| `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); yaratish va tahrirlash vebdagidek BITTA komponentda; nom taklifi (combobox), qoralama saqlash va `QuizPreview` ko'chirilmadi; import natijasi `import-result-sheet` da |
-| `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
-| `src/modules/quiz/ui/quiz-preview-sheet.tsx` | 🟡 MOSLASH | `6f6e9fee7e8e` | vebda yonma-yon ustun (`quiz-page-split`), mobilda talab bo'yicha ochiladigan oyna; mantiq bir xil — o'sha `draftToStudentQuestion` + `QuestionAnswerInput` |
-| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn; `Choice` eksport qilingan — mock test uni qayta ishlatadi (vebda ular CSS klassini bo'lishadi) |
-| `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
+| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `—` | veb uslublari (legacy.css) bilan qayta yozildi; `<select>` -> ro'yxatli oyna, bo'sh joylar so'zlar oqimida; `$...$` formulalar oddiy matn (MathLive yo'q); `Choice` eksport qilingan |
+| `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `—` | veb o'lchamlari bilan qayta yozildi; formula oynasida MathLive/palitra yo'q — LaTeX matn sifatida kursor joyiga `$...$` bo'lib qo'yiladi |
+| `src/modules/quiz/ui/question-group-editor.tsx` | 🟡 MOSLASH | `—` | `<audio>` -> expo-audio; `<details>` -> ochib-yopiladigan blok |
+| `src/modules/quiz/ui/quiz-create-dialog.tsx` | 🟡 MOSLASH | `—` | ikki bosqich vebdagidek (Sheet + to'liq ekranli Modal); nom taklifi (existingQuizzes) yo'q; telefondagi "Qoralama saqlash" haqiqatan qoralama sifatida saqlaydi |
+| `src/modules/quiz/ui/quiz-preview.tsx` | 🟡 MOSLASH | `—` | veb o'lchamlari |
 | `src/modules/quiz/ui/subject-filter-sheet.tsx` | 🟡 MOSLASH | `—` | Drawer -> Sheet |
 | `src/modules/quiz/ui/assign-quiz-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `assign-quiz-sheet.tsx` (Dialog -> Sheet) |
 | `src/modules/quiz/ui/quiz-export-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `quiz-export-sheet.tsx`; faqat telefon varianti (3 qator, o'qituvchi nusxasi) |

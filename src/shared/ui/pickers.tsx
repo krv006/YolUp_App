@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, Clock } from "lucide-react-native";
 import { toIntlLocale } from "@/shared/i18n/intl-locale";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
@@ -421,6 +430,120 @@ export function TimeField({ label, value, onChange }: TimeFieldProps) {
   );
 }
 
+export interface DateTimeFieldProps {
+  label: string;
+  /** `yyyy-MM-ddTHH:mm` yoki serverdan kelgan ISO; bo'sh — tanlanmagan. */
+  value: string;
+  onChange: (value: string) => void;
+  optional?: boolean;
+}
+
+/**
+ * Sana va vaqt — veb `DatePicker includeTime` (telefonda `Drawer`):
+ * maydonda "20 oktabr, 2026 · 18:30", oynada kalendar va uning ostida
+ * vaqt. Tanlov darhol qo'llanadi (vebdagidek), "Tayyor" faqat yopadi.
+ */
+export function DateTimeField({ label, value, onChange, optional }: DateTimeFieldProps) {
+  const { t } = useTranslation("mobile");
+  const { t: tc } = useTranslation("common");
+  const { palette } = useTheme();
+  const months = tc("formPickers.months", { returnObjects: true }) as string[];
+  const [open, setOpen] = useState(false);
+
+  const hasValue = Boolean(value);
+  const date = parseDate(value);
+  const timeValue = hasValue ? `${pad(date.getHours())}:${pad(date.getMinutes())}` : "18:30";
+  const [hour, minute] = splitTime(timeValue);
+  const hours = useMemo(() => Array.from({ length: 24 }, (_, index) => index), []);
+  const minutes = useMemo(() => {
+    const steps = Array.from({ length: 60 / MINUTE_STEP }, (_, index) => index * MINUTE_STEP);
+    return steps.includes(minute) ? steps : [...steps, minute].sort((a, b) => a - b);
+  }, [minute]);
+
+  function emit(nextDate: Date, time: string) {
+    onChange(`${toDateValue(nextDate)}T${time}`);
+  }
+
+  return (
+    <View style={styles.group}>
+      {/* Vebda `optional` yorliqqa qo'shilmaydi — faqat "Tozalash" tugmasini beradi. */}
+      <Text variant="label" style={styles.label}>
+        {label}
+      </Text>
+      <Trigger
+        icon={<Clock size={17} color={palette["subtle-foreground"]} />}
+        text={
+          hasValue
+            ? `${formatDateValue(toDateValue(date), months)} · ${timeValue}`
+            : tc("formPickers.chooseDateTime")
+        }
+        muted={!hasValue}
+        onPress={() => setOpen(true)}
+      />
+
+      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("shared.yopish")}
+          style={[styles.backdrop, { backgroundColor: palette.overlay }]}
+          onPress={() => setOpen(false)}
+        >
+          <Pressable
+            onPress={() => undefined}
+            style={[
+              styles.sheet,
+              styles.sheetTall,
+              { backgroundColor: palette["surface-elevated"], borderColor: palette.border },
+            ]}
+          >
+            <View style={[styles.grabber, { backgroundColor: palette["border-strong"] }]} />
+            <Text variant="subheading" style={styles.sheetTitle}>
+              {label}
+            </Text>
+            <ScrollView>
+              {open ? <MonthCalendar value={date} onSelect={(next) => emit(next, timeValue)} /> : null}
+
+              <View style={styles.dateTimeSection}>
+                <Clock size={15} color={palette["muted-foreground"]} />
+                <Text variant="label">{tc("formPickers.dueTimeSection")}</Text>
+              </View>
+              <View style={styles.wheels}>
+                <Wheel
+                  accessibilityLabel={t("shared.soat")}
+                  values={hours}
+                  selected={hour}
+                  onSelect={(next) => emit(date, `${pad(next)}:${pad(minute)}`)}
+                />
+                <Wheel
+                  accessibilityLabel={t("shared.daqiqa")}
+                  values={minutes}
+                  selected={minute}
+                  onSelect={(next) => emit(date, `${pad(hour)}:${pad(next)}`)}
+                />
+              </View>
+            </ScrollView>
+
+            <View style={styles.timeActions}>
+              {optional ? (
+                <Button
+                  title={tc("formPickers.clear")}
+                  variant="secondary"
+                  onPress={() => {
+                    onChange("");
+                    setOpen(false);
+                  }}
+                  style={styles.timeAction}
+                />
+              ) : null}
+              <Button title={tc("formPickers.done")} onPress={() => setOpen(false)} style={styles.timeAction} />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+}
+
 /** `HH:mm` -> `[soat, daqiqa]`; buzuq qiymatda 18:30 ga qaytadi. */
 function splitTime(value: string): [number, number] {
   const [rawHour, rawMinute] = (value || "").split(":").map(Number);
@@ -515,6 +638,10 @@ export interface SelectFieldProps {
   icon?: React.ReactNode;
   /** Qiymatdan keyingi kulrang birlik — veb `DurationPicker` dagi "daqiqa". */
   suffix?: string;
+  /** Yorliq ko'rinmaydi (veb `hideLabel`), faqat ekran o'quvchisiga aytiladi. */
+  hideLabel?: boolean;
+  /** Tashqi o'ramga uslub — masalan qatorda `flex: 1`. */
+  style?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -540,6 +667,8 @@ export function SelectField({
   searchable,
   icon,
   suffix,
+  hideLabel = false,
+  style,
 }: SelectFieldProps) {
   const { t } = useTranslation("mobile");
   const { t: tc } = useTranslation("common");
@@ -561,8 +690,12 @@ export function SelectField({
   }
 
   return (
-    <View style={styles.group}>
-      <Text variant="label" style={styles.label}>{label}</Text>
+    <View style={[styles.group, style]}>
+      {hideLabel ? null : (
+        <Text variant="label" style={styles.label}>
+          {label}
+        </Text>
+      )}
       <Trigger
         icon={icon ?? <ChevronDown size={17} color={palette["subtle-foreground"]} />}
         text={selected?.label ?? placeholder ?? tc("formPickers.selectPlaceholder")}
@@ -712,6 +845,8 @@ const styles = StyleSheet.create({
   triggerText: { flex: 1, fontSize: 16, lineHeight: 24, fontWeight: "600" },
   triggerSuffix: { fontWeight: "400" },
   backdrop: { flex: 1, justifyContent: "flex-end" },
+  sheetTall: { maxHeight: "88%" },
+  dateTimeSection: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingVertical: 8 },
   sheet: {
     maxHeight: "70%",
     borderTopLeftRadius: radius.xl,

@@ -61,15 +61,9 @@ export type { QuizAttemptAnswerInput } from "./lib/quiz.mappers";
 export { quizErrorMessage } from "./lib/quiz-errors";
 
 // --- Mobil UI ---
-export { QuestionAnswerInput } from "./ui/question-answer-input";
+export { QuestionAnswerInput, QuestionPrompt } from "./ui/question-answer-input";
 export type { QuestionAnswerInputProps } from "./ui/question-answer-input";
-export { AddQuizSheet } from "./ui/add-quiz-sheet";
-export type { AddQuizSheetProps } from "./ui/add-quiz-sheet";
-export { ImportResultSheet } from "./ui/import-result-sheet";
-export type { ImportResultSheetProps } from "./ui/import-result-sheet";
 
-export { QuizPreviewSheet } from "./ui/quiz-preview-sheet";
-export type { QuizPreviewSheetProps } from "./ui/quiz-preview-sheet";
 export { Choice } from "./ui/question-answer-input";
 export { SubjectFilterSheet } from "./ui/subject-filter-sheet";
 export type { SubjectFilterSheetProps } from "./ui/subject-filter-sheet";
@@ -79,3 +73,11 @@ export { QuizExportSheet } from "./ui/quiz-export-sheet";
 export type { QuizExportSheetProps } from "./ui/quiz-export-sheet";
 export { QuizAttemptsSheet } from "./ui/quiz-attempts-sheet";
 export type { QuizAttemptsSheetProps } from "./ui/quiz-attempts-sheet";
+export { AddQuizDialog } from "./ui/quiz-create-dialog";
+export type { AddQuizDialogProps } from "./ui/quiz-create-dialog";
+export { QuizPreview } from "./ui/quiz-preview";
+export type { QuizPreviewProps } from "./ui/quiz-preview";
+export { QuestionEditor } from "./ui/question-editor";
+export type { QuestionEditorProps } from "./ui/question-editor";
+export { QuestionGroupEditor } from "./ui/question-group-editor";
+export type { QuestionGroupEditorProps } from "./ui/question-group-editor";

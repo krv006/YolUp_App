@@ -15,25 +15,27 @@ import {
 } from "lucide-react-native";
 import { useCourses, useSubjects } from "@/modules/course";
 import {
-  AddQuizSheet,
+  AddQuizDialog,
   AssignQuizSheet,
-  ImportResultSheet,
   QuizAttemptsSheet,
   QuizExportSheet,
   SubjectFilterSheet,
   quizDisplayTitle,
+  quizErrorMessage,
   useAssignQuizToCourse,
+  useCreateQuiz,
   useDeleteQuiz,
   useExportQuiz,
+  usePublishQuiz,
   useQuiz,
   useQuizAttempts,
   useQuizzes,
   useRemoveGroupAudio,
+  useUpdateQuiz,
   useUploadGroupAudio,
-  type ImportedQuiz,
 } from "@/modules/quiz";
 import { toIntlLocale } from "@/shared/i18n/intl-locale";
-import type { QuizSummary } from "@/shared/types";
+import type { QuizImportWarning, QuizSummary } from "@/shared/types";
 import {
   AppBar,
   AppBarAction,
@@ -85,7 +87,12 @@ export function TeacherQuizzesPage() {
   const [attemptsOf, setAttemptsOf] = useState<QuizSummary | null>(null);
   const [giveTarget, setGiveTarget] = useState<QuizSummary | null>(null);
   const [exportTarget, setExportTarget] = useState<QuizSummary | null>(null);
-  const [imported, setImported] = useState<ImportedQuiz | null>(null);
+  const [openOnQuestions, setOpenOnQuestions] = useState(false);
+  const [importedWarnings, setImportedWarnings] = useState<QuizImportWarning[]>([]);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const create = useCreateQuiz();
+  const update = useUpdateQuiz();
+  const publish = usePublishQuiz();
 
   const editDetail = useQuiz(editTarget?.id ?? null);
   const editAttempts = useQuizAttempts(editTarget?.id ?? null, Boolean(editTarget));
@@ -93,6 +100,19 @@ export function TeacherQuizzesPage() {
   const removeAudio = useRemoveGroupAudio(editTarget?.id ?? "");
 
   const workspacePath = "/teacher/workspace";
+
+  /** Kartochka bosilganda savollar to'g'ridan-to'g'ri ochiladi (qalamcha avval mavzu/nom oynasini ochadi). */
+  function openQuestions(item: QuizSummary) {
+    setOpenOnQuestions(true);
+    setEditTarget(item);
+  }
+
+  function closeEditor() {
+    setEditTarget(null);
+    setOpenOnQuestions(false);
+    setImportedWarnings([]);
+    setPublishError(null);
+  }
 
   /*
    * Tizimning "orqaga" tugmasi ham Ish maydoniga qaytaradi — Testlar
@@ -274,11 +294,14 @@ export function TeacherQuizzesPage() {
                               : t("teacherPage.noDue"),
                             t("teacherPage.questionCount", { count: item.questionCount }),
                           ].join(" · ")}
-                          onOpen={() => setEditTarget(item)}
+                          onOpen={() => openQuestions(item)}
                           onGive={item.courseId ? undefined : () => setGiveTarget(item)}
                           onAttempts={() => setAttemptsOf(item)}
                           onExport={() => setExportTarget(item)}
-                          onEdit={() => setEditTarget(item)}
+                          onEdit={() => {
+                            setOpenOnQuestions(false);
+                            setEditTarget(item);
+                          }}
                           onDelete={() => setDeleteTarget(item)}
                         />
                       ))}
@@ -346,37 +369,56 @@ export function TeacherQuizzesPage() {
         onChange={setSubjectFilter}
       />
 
-      <AddQuizSheet
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        courses={[]}
-        subjects={subjectOptions}
-        onImported={setImported}
-      />
-
-      <ImportResultSheet
-        result={imported}
-        onClose={() => setImported(null)}
-        onEdit={(quizId) => {
-          setImported(null);
-          const found = all.find((item) => item.id === quizId);
-          if (found) setEditTarget(found);
-        }}
-      />
-
       {editTarget && editDetail.data && !editAttempts.isLoading ? (
-        <AddQuizSheet
+        <AddQuizDialog
           key={editTarget.id}
           open
-          onClose={() => setEditTarget(null)}
+          onOpenChange={(next) => {
+            if (!next) closeEditor();
+          }}
           courses={[]}
           editQuiz={editDetail.data}
-          questionsLocked={(editAttempts.data ?? []).length > 0}
+          initialWarnings={importedWarnings}
           uploadingAudio={uploadAudio.isPending}
           onUploadAudio={(groupId, file) => uploadAudio.mutate({ groupId, file })}
           onRemoveAudio={(groupId) => removeAudio.mutate(groupId)}
+          startOnQuestions={importedWarnings.length > 0 || openOnQuestions}
+          questionsLocked={(editAttempts.data ?? []).length > 0}
+          saving={update.isPending}
+          publishing={publish.isPending}
+          publishError={publishError}
+          showSchedule
+          onCreate={() => undefined}
+          onUpdate={(values) =>
+            update
+              .mutateAsync({ id: editTarget.id, values })
+              .then(() => closeEditor())
+              .catch((error: unknown) => setPublishError(quizErrorMessage(error)))
+          }
+          onPublish={() => {
+            setPublishError(null);
+            publish
+              .mutateAsync(editTarget.id)
+              .then(() => closeEditor())
+              .catch((error: unknown) => setPublishError(quizErrorMessage(error)));
+          }}
         />
       ) : null}
+
+      <AddQuizDialog
+        open={createOpen}
+        onImported={(result) => {
+          setImportedWarnings(result.warnings);
+          setPublishError(null);
+          setEditTarget({ ...result.quiz });
+        }}
+        onOpenChange={setCreateOpen}
+        courses={[]}
+        subjects={subjectOptions}
+        onCreate={(form) => {
+          void create.mutateAsync(form).then(() => setCreateOpen(false));
+        }}
+      />
 
       <Sheet
         open={Boolean(deleteTarget)}

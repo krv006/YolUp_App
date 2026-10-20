@@ -1,30 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { BackHandler, RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useFocusEffect, useRouter } from "expo-router";
-import { ArrowLeft, FileQuestion, History, Pencil, Plus, Trash2 } from "lucide-react-native";
-import { useCourses, useSubjects } from "@/modules/course";
-import { useAuth } from "@/modules/auth";
-import { ROLES } from "@/shared/constants";
-import {
-  AddQuizSheet,
-  ImportResultSheet,
-  useDeleteQuiz,
-  usePublishQuiz,
-  useQuiz,
-  useQuizAttempts,
-  useQuizzes,
-  type ImportedQuiz,
-  useRemoveGroupAudio,
-  useUploadGroupAudio,
-} from "@/modules/quiz";
+import { ArrowLeft, FileQuestion, History } from "lucide-react-native";
+import { useCourses } from "@/modules/course";
+import { useQuizzes } from "@/modules/quiz";
 import { formatDayTime } from "@/shared/lib";
 import type { QuizSummary } from "@/shared/types";
 import {
   Badge,
-  Button,
-  ConfirmSheet,
   IconButton,
   radius,
   Screen,
@@ -32,7 +17,6 @@ import {
   ScreenError,
   ScreenLoading,
   Text,
-  toast,
   useTheme,
 } from "@/shared/ui";
 
@@ -56,14 +40,7 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
   const { t } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
-  const { user } = useAuth();
-  const [createOpen, setCreateOpen] = useState(false);
-  const isTeacher = user?.role === ROLES.TEACHER;
   const quizzes = useQuizzes(null);
-  const removeQuiz = useDeleteQuiz();
-  const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
-  const [imported, setImported] = useState<ImportedQuiz | null>(null);
-  const publishQuiz = usePublishQuiz();
 
   /*
    * TIZIMNING "orqaga" tugmasi ham Ish maydoniga qaytaradi.
@@ -86,26 +63,7 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
     }, [router, workspacePath])
   );
 
-  /*
-   * TAHRIRLASH — ro'yxatda faqat qisqa ma'lumot bor (`QuizSummary`),
-   * tahrirlash uchun esa savollar kerak. Shuning uchun avval batafsil
-   * ma'lumot yuklanadi va oyna FAQAT SHUNDAN KEYIN chiziladi
-   * (veb `teacher-quizzes-page.tsx:188` ham shunday qiladi).
-   *
-   * `key={editTarget}` ham shart: oyna maydonlari boshlang'ich qiymatini
-   * `useState` dan oladi, u esa faqat mount paytida hisoblanadi.
-   */
-  const [editTarget, setEditTarget] = useState<string | null>(null);
-  const editDetail = useQuiz(editTarget);
-  const editAttempts = useQuizAttempts(editTarget);
-  const uploadAudio = useUploadGroupAudio(editTarget ?? "");
-  const removeAudio = useRemoveGroupAudio(editTarget ?? "");
   const courses = useCourses();
-  /*
-   * Bu sahifada KURS konteksti yo'q — test FANGA biriktiriladi
-   * (veb `teacher-quizzes-page.tsx:227` bilan bir xil).
-   */
-  const subjects = useSubjects(isTeacher);
 
   const courseTitleById = useMemo(
     () => new Map((courses.data ?? []).map((course) => [course.id, course.title])),
@@ -164,14 +122,6 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
         <Text variant="caption" tone="muted">
           {t("quizzes.vaqt_chegarasi_yoq_cheklanmagan_qayta_urinis")}
         </Text>
-        {isTeacher ? (
-          <Button
-            title={t("quizzes.test_yaratish")}
-            variant="secondary"
-            icon={<Plus size={16} color={palette["secondary-foreground"]} />}
-            onPress={() => setCreateOpen(true)}
-          />
-        ) : null}
       </View>
 
       {list.length === 0 ? (
@@ -197,69 +147,11 @@ export function QuizzesPage({ basePath }: { basePath: string }) {
               courseTitle={courseTitleById.get(item.courseId) ?? "Kurs"}
               onOpen={() => router.push(`${basePath}/${item.id}`)}
               onHistory={() => router.push(`${basePath}/${item.id}?tab=history`)}
-              onDelete={isTeacher ? () => setDeleteTarget(item) : undefined}
-              onEdit={isTeacher ? () => setEditTarget(item.id) : undefined}
-              loadingEdit={editTarget === item.id}
-              publishing={publishQuiz.isPending && publishQuiz.variables === item.id}
-              onPublish={
-                isTeacher && item.status === "draft"
-                  ? () =>
-                      /*
-                       * `usePublishQuiz` da `onError` yo'q (veb bilan
-                       * bayt-bayt bir xil). Xato shu yerda ushlanadi.
-                       */
-                      publishQuiz.mutate(item.id, {
-                        onError: (error: Error) => toast.error(error.message),
-                      })
-                  : undefined
-              }
             />
           )}
         />
       )}
 
-      <ConfirmSheet
-        open={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        title={t("quizzes.testni_ochirish")}
-        description={`"${deleteTarget?.title ?? ""}" va uning urinishlari o'chadi.`}
-        loading={removeQuiz.isPending}
-        onConfirm={() => {
-          if (!deleteTarget) return;
-          removeQuiz.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
-        }}
-      />
-
-      <AddQuizSheet
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        courses={[]}
-        subjects={subjects.data ?? []}
-        onImported={setImported}
-      />
-
-      <ImportResultSheet
-        result={imported}
-        onClose={() => setImported(null)}
-        onEdit={(quizId) => {
-          setImported(null);
-          setEditTarget(quizId);
-        }}
-      />
-
-      {editTarget && editDetail.data && !editAttempts.isLoading ? (
-        <AddQuizSheet
-          key={editTarget}
-          open
-          onClose={() => setEditTarget(null)}
-          courses={[]}
-          editQuiz={editDetail.data}
-          questionsLocked={(editAttempts.data ?? []).length > 0}
-          uploadingAudio={uploadAudio.isPending}
-          onUploadAudio={(groupId, file) => uploadAudio.mutate({ groupId, file })}
-          onRemoveAudio={(groupId) => removeAudio.mutate(groupId)}
-        />
-      ) : null}
     </Screen>
   );
 }
@@ -269,25 +161,11 @@ function QuizRow({
   courseTitle,
   onOpen,
   onHistory,
-  onDelete,
-  onEdit,
-  loadingEdit = false,
-  onPublish,
-  publishing = false,
 }: {
   quiz: QuizSummary;
   courseTitle: string;
   onOpen: () => void;
   onHistory: () => void;
-  /** Faqat o'qituvchida — berilmasa tugma chizilmaydi. */
-  onDelete?: () => void;
-  /** Faqat o'qituvchida. */
-  onEdit?: () => void;
-  /** Batafsil ma'lumot yuklanmoqda — tugma ikki marta bosilmasin. */
-  loadingEdit?: boolean;
-  /** Faqat o'qituvchida va faqat QORALAMA testda. */
-  onPublish?: () => void;
-  publishing?: boolean;
 }) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
@@ -311,21 +189,6 @@ function QuizRow({
           <History size={18} color={palette["muted-foreground"]} />
         </IconButton>
 
-        {onEdit ? (
-          <IconButton
-            accessibilityLabel={`${quiz.title} testini tahrirlash`}
-            disabled={loadingEdit}
-            onPress={onEdit}
-          >
-            <Pencil size={18} color={palette["muted-foreground"]} />
-          </IconButton>
-        ) : null}
-
-        {onDelete ? (
-          <IconButton accessibilityLabel={`${quiz.title} testini o'chirish`} onPress={onDelete}>
-            <Trash2 size={18} color={palette.destructive} />
-          </IconButton>
-        ) : null}
       </View>
 
       <View style={styles.cardFoot}>
@@ -347,12 +210,12 @@ function QuizRow({
 
         <Text
           accessibilityRole="button"
-          onPress={onPublish ?? onOpen}
+          onPress={onOpen}
           variant="label"
           tone="brand"
           style={styles.solve}
         >
-          {onPublish ? (publishing ? "E'lon qilinmoqda…" : "E'lon qilish") : "Yechish"}
+          Yechish
         </Text>
       </View>
     </View>

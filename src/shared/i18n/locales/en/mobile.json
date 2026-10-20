@@ -757,6 +757,7 @@
     "ratingChild": {
       "title": "Rating",
       "description": "Your child's homework results."
-    }
+    },
+    "modullar": "Modules"
   }
 }

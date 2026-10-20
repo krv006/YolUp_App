@@ -757,6 +757,7 @@
     "ratingChild": {
       "title": "Reyting",
       "description": "Farzandingizning vazifalar bo'yicha natijalari."
-    }
+    },
+    "modullar": "Modullar"
   }
 }

@@ -8,10 +8,6 @@
       "title": "Тест",
       "description": "Создание и прохождение тестов, просмотр результатов."
     },
-    "exams": {
-      "title": "Экзамен",
-      "description": "IELTS, SAT, Национальный сертификат и свой экзамен."
-    },
     "analytics": {
       "title": "Аналитика",
       "description": "Показатели по результатам и активности."
@@ -19,6 +15,14 @@
     "ai": {
       "title": "AI",
       "description": "Работа с ИИ-помощником."
+    },
+    "exams": {
+      "title": "Мок-тест",
+      "description": "IELTS, SAT, Национальный сертификат и свой мок-тест."
+    },
+    "assignments": {
+      "title": "Задания",
+      "description": "Выдача домашних заданий и проверка с ИИ."
     }
   },
   "analytics": {
@@ -30,7 +34,7 @@
     "retry": "Повторить",
     "attemptCount": "Попытки",
     "avgPercentage": "Средний результат",
-    "recentAttempts": "ПОСЛЕДНИЕ ПОПЫТКИ",
+    "recentAttempts": "Последние попытки",
     "noAttempts": "Тесты ещё не пройдены.",
     "avgRating": "Средняя оценка",
     "ratingCount": "Всего оценок",
@@ -38,10 +42,60 @@
     "studentCount": "Ученики",
     "lessonsFinished": "Проведено уроков",
     "reliability": "Надёжность",
-    "byCourse": "ПО КУРСАМ",
+    "byCourse": "По курсам",
     "course": "Курс",
     "quizAvg": "Среднее по тестам",
     "attendance": "Посещаемость",
-    "noCourses": "Курсы не найдены."
-  }
+    "noCourses": "Когда появятся оценки, результаты тестов и посещаемость, здесь будут показатели по курсам.",
+    "studentCountValue": "{{count}} учеников",
+    "emptyTitle": "Пока нет данных"
+  },
+  "createGroup": "Создать группу",
+  "statGroups": "Группы",
+  "statStudents": "Ученики",
+  "statUnchecked": "Не проверено",
+  "modules": "Модули",
+  "quickActions": "Быстрые действия",
+  "quickHomework": "Домашнее задание",
+  "quickHomeworkHint": "выдать",
+  "quickAttendance": "Посещаемость",
+  "quickAttendanceHint": "отметить",
+  "quickGrading": "Оценивание",
+  "quickGradingHint": "{{count}} в ожидании",
+  "quickGradingUnknown": "в ожидании",
+  "quickMaterials": "Материалы",
+  "quickMaterialsHint": "{{count}} файлов",
+  "quickMaterialsUnknown": "файлы",
+  "myGroups": "Мои группы",
+  "allGroups": "Все",
+  "groupMeta": "{{count}} учеников",
+  "groupProgress": "Успеваемость",
+  "nextLesson": "Следующее занятие: {{value}}",
+  "noNextLesson": "Следующее занятие не назначено",
+  "emptyTitle": "Создайте первую группу",
+  "emptyDescription": "Создайте группу, пригласите учеников по ссылке и начните занятия.",
+  "offlineTitle": "Нет интернета. Данные не обновлены",
+  "offlineRetry": "Повторить",
+  "searchAria": "Поиск",
+  "notificationsAria": "Уведомления",
+  "searchTitle": "Поиск",
+  "searchPlaceholder": "Группа, занятие, тест или сообщение",
+  "searchHint": "Введите минимум 2 символа.",
+  "searchEmpty": "По «{{query}}» ничего не найдено.",
+  "filterAll": "Все · {{count}}",
+  "filterGroups": "Группы",
+  "filterLessons": "Занятия",
+  "filterQuizzes": "Тесты",
+  "filterMessages": "Сообщения",
+  "sectionGroups": "ГРУППЫ · {{count}}",
+  "sectionLessons": "ЗАНЯТИЯ · {{count}}",
+  "sectionQuizzes": "ТЕСТЫ · {{count}}",
+  "sectionMessages": "СООБЩЕНИЯ · {{count}}",
+  "quizQuestions": "{{count}} вопросов",
+  "draft": "Черновик",
+  "published": "Опубликован",
+  "searchSubtitle": "По группам, урокам, тестам, ученикам и сообщениям",
+  "searchHotkeys": "↑↓ выбор · Enter открыть · Esc закрыть",
+  "searchAllResults": "Все результаты",
+  "searchBack": "Назад"
 }

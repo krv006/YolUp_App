@@ -8,17 +8,21 @@
       "title": "Test",
       "description": "Testlar yaratish, yechish va natijalarni ko'rish."
     },
-    "exams": {
-      "title": "Imtihon",
-      "description": "IELTS, SAT, Milliy sertifikat va o'z imtihoningiz."
-    },
     "analytics": {
       "title": "Tahlil",
       "description": "Natijalar va faollik bo'yicha ko'rsatkichlar."
     },
     "ai": {
       "title": "AI",
-      "description": "Sun'iy intellekt yordamchisi bilan ishlash."
+      "description": "AI yordamida test tuzish."
+    },
+    "exams": {
+      "title": "Mock test",
+      "description": "IELTS, SAT, Milliy sertifikat va o'z mock testingiz."
+    },
+    "assignments": {
+      "title": "Vazifalar",
+      "description": "Uy vazifalarini berish va AI yordamida tekshirish."
     }
   },
   "analytics": {
@@ -30,7 +34,7 @@
     "retry": "Qayta urinish",
     "attemptCount": "Urinishlar",
     "avgPercentage": "O'rtacha natija",
-    "recentAttempts": "SO'NGGI URINISHLAR",
+    "recentAttempts": "So‘nggi urinishlar",
     "noAttempts": "Hali test yechilmagan.",
     "avgRating": "O'rtacha baho",
     "ratingCount": "Baholar soni",
@@ -38,10 +42,60 @@
     "studentCount": "O'quvchilar",
     "lessonsFinished": "O'tilgan darslar",
     "reliability": "Ishonchlilik",
-    "byCourse": "KURSLAR BO'YICHA",
+    "byCourse": "Kurslar bo‘yicha",
     "course": "Kurs",
     "quizAvg": "Test o'rtachasi",
     "attendance": "Davomat",
-    "noCourses": "Kurs topilmadi."
-  }
+    "noCourses": "Baholar, test natijalari va davomat kiritilgach, kurslar bo‘yicha ko‘rsatkichlar shu yerda chiqadi.",
+    "studentCountValue": "{{count}} o‘quvchi",
+    "emptyTitle": "Hali ma’lumot yo‘q"
+  },
+  "createGroup": "Guruh yaratish",
+  "statGroups": "Guruh",
+  "statStudents": "O‘quvchi",
+  "statUnchecked": "Tekshirilmagan",
+  "modules": "Modullar",
+  "quickActions": "Tezkor amallar",
+  "quickHomework": "Uy vazifasi",
+  "quickHomeworkHint": "berish",
+  "quickAttendance": "Davomat",
+  "quickAttendanceHint": "olish",
+  "quickGrading": "Baholash",
+  "quickGradingHint": "{{count}} ta kutmoqda",
+  "quickGradingUnknown": "kutilmoqda",
+  "quickMaterials": "Materiallar",
+  "quickMaterialsHint": "{{count}} ta fayl",
+  "quickMaterialsUnknown": "fayllar",
+  "myGroups": "Guruhlarim",
+  "allGroups": "Barchasi",
+  "groupMeta": "{{count}} o‘quvchi",
+  "groupProgress": "O‘zlashtirish",
+  "nextLesson": "Keyingi dars: {{value}}",
+  "noNextLesson": "Keyingi dars belgilanmagan",
+  "emptyTitle": "Birinchi guruhingizni yarating",
+  "emptyDescription": "Guruh yarating, o‘quvchilarni havola orqali taklif qiling va darslarni boshlang.",
+  "offlineTitle": "Internet aloqasi yo‘q. Ma’lumotlar yangilanmagan",
+  "offlineRetry": "Qayta urinish",
+  "searchAria": "Qidirish",
+  "notificationsAria": "Bildirishnomalar",
+  "searchTitle": "Qidirish",
+  "searchPlaceholder": "Guruh, dars, test yoki xabar",
+  "searchHint": "Qidirish uchun kamida 2 ta belgi yozing.",
+  "searchEmpty": "“{{query}}” bo‘yicha hech narsa topilmadi.",
+  "filterAll": "Hammasi · {{count}}",
+  "filterGroups": "Guruhlar",
+  "filterLessons": "Darslar",
+  "filterQuizzes": "Testlar",
+  "filterMessages": "Xabarlar",
+  "sectionGroups": "GURUHLAR · {{count}}",
+  "sectionLessons": "DARSLAR · {{count}}",
+  "sectionQuizzes": "TESTLAR · {{count}}",
+  "sectionMessages": "XABARLAR · {{count}}",
+  "quizQuestions": "{{count}} ta savol",
+  "draft": "Qoralama",
+  "published": "E’lon qilingan",
+  "searchSubtitle": "Guruhlar, darslar, testlar, o‘quvchilar va xabarlar bo‘yicha",
+  "searchHotkeys": "↑↓ tanlash · Enter ochish · Esc yopish",
+  "searchAllResults": "Barcha natijalar",
+  "searchBack": "Orqaga"
 }

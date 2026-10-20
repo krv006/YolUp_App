@@ -225,7 +225,8 @@
     "yangi_kurs_va_guruh": "Yangi kurs va guruh",
     "yangi_oquv_maydoni": "Yangi o'quv maydoni",
     "yangi_sorov": "Yangi so'rov",
-    "suhbat_malumoti": "Suhbat ma'lumoti"
+    "suhbat_malumoti": "Suhbat ma'lumoti",
+    "xabarlardan_qidirish": "Xabarlardan qidirish"
   },
   "homework": {
     "barcha_fanlar": "Barcha fanlar",
@@ -317,7 +318,11 @@
     "birinchi_xabarni_yozib_suhbatni_boshlang": "Birinchi xabarni yozib suhbatni boshlang.",
     "dars_yozuvini_korish": "Dars yozuvini ko'rish",
     "yozuvni_korish": "Yozuvni ko'rish",
-    "yozmoqda": "{{name}} yozmoqda…"
+    "yozmoqda": "{{name}} yozmoqda…",
+    "biriktirish": "Biriktirish",
+    "eslatish": "Kimnidir eslatish",
+    "emoji": "Emoji",
+    "ovozli_xabar": "Ovozli xabar"
   },
   "notification": {
     "xabar_yuborish": "Xabar yuborish",

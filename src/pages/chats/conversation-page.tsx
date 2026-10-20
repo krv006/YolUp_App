@@ -27,7 +27,7 @@ import {
   type GroupTab,
 } from "@/widgets/group-workspace/group-workspace";
 import type { ChatMessage, ConversationRole } from "@/shared/types";
-import { Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
+import { AppBar, AppBarAction, Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
 
 /**
  * Suhbat oynasi — veb `pages/teacher/conversation-page.tsx` va
@@ -129,6 +129,18 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 
   return (
     <View style={[styles.root, { backgroundColor: palette["chat-bg"], paddingTop: insets.top }]}>
+      {/*
+        * IKKI QAVATLI tepa panel — vebdagi kabi. Suhbat ichida ham
+        * global panel (logotip + qo'ng'iroq) tepada qoladi, suhbat
+        * paneli esa uning ostida.
+        */}
+      <AppBar a11yTitle={conversation.title}>
+        <AppBarAction
+          name="bell"
+          label={t("chats.bildirishnomalar")}
+          onPress={() => router.push("/notifications")}
+        />
+      </AppBar>
       <ChatHeader
         conversation={conversation}
         onBack={goBack}
@@ -177,11 +189,19 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
             onLongPress={setActionMessage}
             onRetryMessage={chat.retryMessage}
             currentUserId={user?.id ?? null}
+            conversationId={conversation.id}
             typingName={conversation.typingName ?? null}
           />
 
           <MessageComposer
             onSend={(payload) => chat.sendMessage.mutate(payload)}
+            /*
+             * O'qituvchida biriktirma varag'idagi "Vazifa" plitkasi
+             * Vazifalar bo'limini ochadi — vazifa o'sha yerdan yaratiladi.
+             */
+            onAssignment={
+              courseId && role === "teacher" ? () => setTab("assignments") : undefined
+            }
             onTyping={chat.sendTyping}
             replyTo={replyTo}
             onCancelReply={() => setReplyTo(null)}

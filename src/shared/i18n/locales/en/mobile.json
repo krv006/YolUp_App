@@ -117,7 +117,11 @@
     "xabarlar_yoq": "No messages",
     "birinchi_xabarni_yozib_suhbatni_boshlang": "Write the first message to start the conversation.",
     "dars_yozuvini_korish": "View lesson recording",
-    "yozuvni_korish": "View recording"
+    "yozuvni_korish": "View recording",
+    "biriktirish": "Attach",
+    "eslatish": "Mention someone",
+    "emoji": "Emoji",
+    "ovozli_xabar": "Voice message"
   },
   "analytics": {
     "qiymatlarni_ko_rish_uchun_grafikni_bosi": "Tap the chart to see values.",
@@ -588,7 +592,8 @@
     "yangi_kurs_va_guruh": "New course and group",
     "yangi_oquv_maydoni": "New learning space",
     "yangi_sorov": "New request",
-    "suhbat_malumoti": "Conversation details"
+    "suhbat_malumoti": "Conversation details",
+    "xabarlardan_qidirish": "Search messages"
   },
   "homework": {
     "barcha_fanlar": "All subjects",

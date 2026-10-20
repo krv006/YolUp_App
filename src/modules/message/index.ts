@@ -26,3 +26,4 @@ export { MessageText } from "./ui/message-text";
 export { MessageAttachment } from "./ui/message-attachment";
 export { buildMessageRows } from "./lib/message-day";
 export type { MessageRow } from "./lib/message-day";
+export { useChatUiStore } from "./model/chat-ui.store";

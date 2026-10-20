@@ -117,7 +117,11 @@
     "xabarlar_yoq": "Нет сообщений",
     "birinchi_xabarni_yozib_suhbatni_boshlang": "Напишите первое сообщение, чтобы начать беседу.",
     "dars_yozuvini_korish": "Смотреть запись урока",
-    "yozuvni_korish": "Смотреть запись"
+    "yozuvni_korish": "Смотреть запись",
+    "biriktirish": "Прикрепить",
+    "eslatish": "Упомянуть",
+    "emoji": "Эмодзи",
+    "ovozli_xabar": "Голосовое сообщение"
   },
   "analytics": {
     "qiymatlarni_ko_rish_uchun_grafikni_bosi": "Нажмите на график, чтобы увидеть значения.",
@@ -588,7 +592,8 @@
     "yangi_kurs_va_guruh": "Новый курс и группа",
     "yangi_oquv_maydoni": "Новое учебное пространство",
     "yangi_sorov": "Новый запрос",
-    "suhbat_malumoti": "Сведения о чате"
+    "suhbat_malumoti": "Сведения о чате",
+    "xabarlardan_qidirish": "Поиск по сообщениям"
   },
   "homework": {
     "barcha_fanlar": "Все предметы",

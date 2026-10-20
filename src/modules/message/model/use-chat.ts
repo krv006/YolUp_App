@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-// 🟡 MOBIL FARQI: veb `react-router-dom`ning `useNavigate` ini ishlatadi.
-// Expo Router ekvivalenti — `useRouter().replace()`.
+// 🟡 MOSLASH: veb `useNavigate` (react-router) -> Expo Router `useRouter`.
 import { useRouter } from "expo-router";
 import { toast } from "sonner";
+import { i18n } from "@/shared/i18n";
 import { conversationApi, conversationKeys, readCachedConversation } from "@/modules/conversation";
 import type { ChatMessage, ConversationRole, SendMessagePayload } from "@/shared/types";
 import { messageApi } from "../api/message.api";
 import { ChatSocketManager, type SocketState } from "../lib/chat-socket-manager";
-import { markMessageFailed, upsertMessage } from "../lib/message.mappers";
+import { applyReactions, markMessageFailed, upsertMessage } from "../lib/message.mappers";
 import { messageKeys } from "./message.keys";
 
 const TYPING_RESET_MS = 2600;
 
-/** WebSocket ishlamayotgan holat uchun zaxira — kanal ulanganda o'chadi. */
 const REST_FALLBACK_POLL_MS = 6000;
 
 export interface UseChatOptions {
@@ -38,9 +37,6 @@ export function useChat(
   const [socketState, setSocketState] = useState<SocketState>("idle");
   const [typing, setTyping] = useState<string | null>(null);
 
-  // Yon paneldagi ro'yxatdagi nusxa — chat ochilishi uchun detal so'rovi
-  // kutilmaydi, u fonda kelib ustiga yoziladi. Keshda topilmasa `undefined`
-  // bo'ladi va sahifa odatdagidek skeleton ko'rsatadi.
   const cachedConversation = readCachedConversation(queryClient, conversationId, role);
 
   const conversation = useQuery({
@@ -52,10 +48,8 @@ export function useChat(
 
   const messages = useQuery({
     queryKey: messagesKey,
-    queryFn: ({ signal }) => messageApi.getAll(conversationId as string, { signal }),
+    queryFn: ({ signal }) => messageApi.getAll(conversationId as string, { signal }, senderId),
     enabled: Boolean(conversationId),
-    // WebSocket uzilgan bo'lsa yangi xabarlar kelmay qoladi — zaxira sifatida
-    // tarixni qayta so'raymiz. Kanal ulanishi bilan polling o'chadi.
     refetchInterval: socketState === "connected" ? false : REST_FALLBACK_POLL_MS,
   });
 
@@ -64,6 +58,7 @@ export function useChat(
       conversationId
         ? new ChatSocketManager({
             roomId: conversationId,
+            currentUserId: senderId,
             onState: setSocketState,
             onEvent: (event) => {
               if (event.type === "message") {
@@ -71,18 +66,39 @@ export function useChat(
                   upsertMessage(current, event.message)
                 );
               }
-              // O'zimizning "yozmoqda" signalimizni ko'rsatmaymiz.
+              if (event.type === "edited") {
+                queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+                  current.map((item) =>
+                    item.id === event.messageId
+                      ? { ...item, text: event.text, editedAt: event.editedAt }
+                      : item
+                  )
+                );
+              }
+              if (event.type === "deleted") {
+                queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+                  current.filter((item) => !event.messageIds.includes(item.id))
+                );
+              }
+              if (event.type === "reaction") {
+                queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+                  applyReactions(current, event.messageId, event.reactions, senderId)
+                );
+              }
+              if (event.type === "pinned") {
+                queryClient.invalidateQueries({ queryKey: messageKeys.pinned(conversationId ?? "") });
+              }
+              if (event.type === "roomUpdated" || event.type === "read") {
+                queryClient.invalidateQueries({
+                  queryKey: conversationKeys.detail(conversationId ?? "", role),
+                });
+              }
               if (event.type === "typing" && event.userId !== String(senderId)) {
                 setTyping(event.name);
                 globalThis.setTimeout(() => setTyping(null), TYPING_RESET_MS);
               }
-              /*
-               * Kursdan chiqarildik: server socketni baribir yopadi, lekin
-               * foydalanuvchi nima bo'lganini bilishi va ochiq chatda qolib
-               * ketmasligi kerak. Ro'yxat ham yangilanadi — guruh yo'qoladi.
-               */
               if (event.type === "removed") {
-                toast.error("Siz bu guruhdan chiqarildingiz");
+                toast.error(i18n.t("chat:removedFromGroup"));
                 queryClient.invalidateQueries({ queryKey: conversationKeys.all });
                 router.replace(role === "teacher" ? "/teacher/chats" : "/student/chats");
               }
@@ -98,8 +114,8 @@ export function useChat(
   }, [socket]);
 
   const sendMessage = useMutation({
-    mutationFn: (payload: SendMessagePayload) => messageApi.send(conversationId as string, payload),
-    // Optimistik xabar darhol ko'rinadi, javob kelgach haqiqiysi bilan almashadi.
+    mutationFn: (payload: SendMessagePayload) =>
+      messageApi.send(conversationId as string, payload, senderId),
     onMutate: async (payload): Promise<OptimisticContext> => {
       const temporaryId = `temp-${crypto.randomUUID()}`;
       const optimistic: ChatMessage = {
@@ -137,13 +153,66 @@ export function useChat(
   });
 
   const updateMessage = useMutation({
-    mutationFn: (_variables: { messageId: string; text: string }) => messageApi.update(),
+    mutationFn: ({ messageId, text }: { messageId: string; text: string }) =>
+      messageApi.update(messageId, text, senderId),
+    onSuccess: (message) =>
+      queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+        upsertMessage(current, message)
+      ),
   });
+
   const deleteMessage = useMutation({
-    mutationFn: (_variables: { messageId: string; scope: "me" | "everyone" }) => messageApi.remove(),
+    mutationFn: ({ messageId, scope }: { messageId: string; scope: "me" | "everyone" }) =>
+      messageApi.remove(messageId, scope),
+    onSuccess: (_result, { messageId }) =>
+      queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+        current.filter((item) => item.id !== messageId)
+      ),
   });
+
+  const deleteMessages = useMutation({
+    mutationFn: ({ messageIds, scope }: { messageIds: string[]; scope: "me" | "everyone" }) =>
+      messageApi.bulkRemove(messageIds, scope),
+    onSuccess: (_result, { messageIds }) =>
+      queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+        current.filter((item) => !messageIds.includes(item.id))
+      ),
+  });
+
+  const forwardMessages = useMutation({
+    mutationFn: ({ messageIds, roomIds }: { messageIds: string[]; roomIds: string[] }) =>
+      messageApi.forward(messageIds, roomIds, senderId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.all }),
+  });
+
   const toggleReaction = useMutation({
-    mutationFn: (_variables: { messageId: string; emoji: string }) => messageApi.toggleReaction(),
+    mutationFn: ({ messageId, emoji }: { messageId: string; emoji: string }) =>
+      messageApi.addReaction(messageId, emoji),
+    onSuccess: (reactions, { messageId }) =>
+      queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
+        applyReactions(current, messageId, reactions, senderId)
+      ),
+  });
+
+  const pinnedMessages = useQuery({
+    queryKey: messageKeys.pinned(conversationId ?? ""),
+    queryFn: ({ signal }) => messageApi.getPinned(conversationId as string, { signal }),
+    enabled: Boolean(conversationId),
+  });
+
+  const pinMessage = useMutation({
+    mutationFn: ({ messageId, pinned }: { messageId: string; pinned: boolean }) =>
+      pinned
+        ? messageApi.unpin(conversationId as string, messageId)
+        : messageApi.pin(conversationId as string, messageId),
+    onSuccess: (items) =>
+      queryClient.setQueryData(messageKeys.pinned(conversationId ?? ""), items),
+  });
+
+  const markRead = useMutation({
+    mutationFn: (lastReadMessageId?: string | null) =>
+      messageApi.markRead(conversationId as string, lastReadMessageId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.all }),
   });
 
   function retryMessage(message: ChatMessage) {
@@ -165,11 +234,15 @@ export function useChat(
     retryMessage,
     updateMessage,
     deleteMessage,
+    deleteMessages,
+    forwardMessages,
     toggleReaction,
+    pinnedMessages,
+    pinMessage,
+    markRead,
     socketState,
     sendTyping: () => socket?.sendTyping(),
   };
 }
 
-/** `useChat` qaytaradigan to'liq shakl — widget va sahifalar shu tipga tayanadi. */
 export type ChatController = ReturnType<typeof useChat>;

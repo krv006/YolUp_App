@@ -73,10 +73,13 @@ interface WorkspaceCard {
  */
 const CARDS: readonly WorkspaceCard[] = [
   // --- o'qituvchi va o'quvchi (veb bilan bir xil) ---
+  // Tartib vebdagidek: Test, Vazifalar, Tahlil, AI, Mock test.
+  // "Vazifalar" (o'qituvchi) Uy vazifalari bosqichida o'z sahifasi bilan
+  // qo'shiladi — vebda u butun `HomeworkWorkspace` vidjetini ochadi.
   { id: "quizzes", icon: FileQuestion, to: "quizzes", roles: ["teacher", "student"] },
-  { id: "exams", icon: ClipboardCheck, to: "exams", roles: ["teacher", "student"], tone: "green" },
   { id: "analytics", icon: BarChart3, to: "/analytics", roles: ["teacher", "student"] },
   { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"], tone: "gold" },
+  { id: "exams", icon: ClipboardCheck, to: "exams", roles: ["teacher", "student"], tone: "green" },
 
   // --- ota-ona (mobilga xos, izohi yuqorida) ---
   { id: "attendance", icon: CalendarCheck2, to: "attendance", roles: ["parent"], mobileText: true },
@@ -313,7 +316,8 @@ const styles = StyleSheet.create({
   subtitle: { fontWeight: "400" },
   sectionTitle: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
   /* Ikki ustun: kartochka kengligi 173, oraliq 12 (390 - 32 = 358). */
-  statsRow: { flexDirection: "row", gap: 12 },
+  /* Veb: `grid grid-cols-3 gap-2` — oraliq 8 (12 da yorliq kesilardi). */
+  statsRow: { flexDirection: "row", gap: 8 },
   stat: {
     flex: 1,
     padding: 12,

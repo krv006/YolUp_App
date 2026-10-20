@@ -42,12 +42,23 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { palette } = useTheme();
-  const { conversationId } = useLocalSearchParams<{ conversationId: string }>();
+  /*
+   * `tab` — boshqa ekrandan aniq bo'limga ochish uchun (masalan jadvaldagi
+   * "Davomat qilish" -> davomat bo'limi). Vebda bu alohida sahifalar.
+   */
+  const { conversationId, tab: initialTab } = useLocalSearchParams<{
+    conversationId: string;
+    tab?: GroupTab;
+  }>();
   const { user } = useAuth();
 
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
-  const [tab, setTab] = useState<GroupTab>("chat");
+  const [tab, setTab] = useState<GroupTab>(
+    initialTab === "lessons" || initialTab === "assignments" || initialTab === "attendance"
+      ? initialTab
+      : "chat"
+  );
   const [infoOpen, setInfoOpen] = useState(false);
 
   const chat = useChat(conversationId, { role, senderId: user?.id ?? null });

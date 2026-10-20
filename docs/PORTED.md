@@ -138,8 +138,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `afbcc4e0feff` | — |
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `31172199c0d6` | — |
 | `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `54d2b67dd248` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
+| `src/modules/lesson/model/schedule.store.ts` | 🟢 NUSXA | `—` | jadval ko'rinishi, tayanch sana va qadam (2026-10-20 qo'shildi) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `520a875a379e` | farq qayd etilmagan — tekshiring |
+| `src/modules/lesson/ui/schedule-grid.tsx` | 🟡 MOSLASH | `—` | faqat tor ekran shoxlari (Ro'yxat/Kun/Hafta/Oy); keng ekran to'rlari ko'chirilmadi |
+| `src/modules/lesson/ui/schedule-sidebar.tsx` | 🟡 MOSLASH | `—` | faqat telefon bloklari: hafta tasmasi va eng yaqin dars |
+| `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-detail-sheet.tsx` (AppDialog -> Sheet) |
+| `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-create-sheet.tsx` (AppDialog -> Sheet) |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `111c8b0a89c6` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `865100a4509c` | — |

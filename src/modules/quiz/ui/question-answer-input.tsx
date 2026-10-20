@@ -37,8 +37,14 @@ export interface QuestionAnswerInputProps {
   onChange: (value: QuizAnswerValue) => void;
 }
 
+function countWords(value: string): number {
+  const trimmed = value.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
+
 export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswerInputProps) {
   const { t } = useTranslation("mobile");
+  const { t: tq } = useTranslation("quiz");
   const { palette } = useTheme();
 
   if (value.type === "single") {
@@ -108,6 +114,34 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
         keyboardType="numbers-and-punctuation"
         onChangeText={(next) => onChange({ type: "numeric", value: next })}
       />
+    );
+  }
+
+  /* Insho — veb `quiz-answer-essay`: katta matn maydoni va so'z sanagich. */
+  if (value.type === "essay") {
+    const words = countWords(value.value);
+    const minimum = question.minWords ?? 0;
+    return (
+      <View style={styles.list}>
+        <Input
+          placeholder={tq("answer.essayPlaceholder")}
+          value={value.value}
+          multiline
+          numberOfLines={14}
+          inputStyle={styles.essay}
+          onChangeText={(next) => onChange({ type: "essay", value: next })}
+        />
+        <Text
+          variant="caption"
+          style={{
+            color: minimum && words < minimum ? palette["warning-strong"] : palette["success-strong"],
+          }}
+        >
+          {minimum
+            ? tq("answer.wordsOfMin", { count: words, min: minimum })
+            : tq("answer.words", { count: words })}
+        </Text>
+      </View>
     );
   }
 
@@ -289,6 +323,7 @@ export function Choice({
 }
 
 const styles = StyleSheet.create({
+  essay: { minHeight: 280 },
   list: { gap: 8 },
   row: { flexDirection: "row", gap: 8 },
   half: { flex: 1 },

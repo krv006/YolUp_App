@@ -90,7 +90,7 @@ export function QuestionGroupEditor({
                 {saved?.audioUrl ? (
                   <>
                     <Text variant="caption" tone="muted" style={styles.audioName}>
-                      {t("groups.audioReady")}
+                      {t("groups.audioFile")}
                     </Text>
                     <IconButton
                       accessibilityLabel={t("groups.removeAudio")}

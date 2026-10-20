@@ -9,6 +9,7 @@
     "children": "Дети",
     "attendance": "Посещаемость",
     "homework": "Задания",
+    "exams": "Мок-тесты",
     "grades": "Рейтинг"
   },
   "rail": {
@@ -21,5 +22,12 @@
     "teacherWorkspace": "Рабочее пространство учителя",
     "studentWorkspace": "Рабочее пространство ученика",
     "parentWorkspace": "Кабинет родителя"
+  },
+  "titles": {
+    "chat": "Чаты",
+    "schedule": "Расписание",
+    "workspace": "Workspace",
+    "profile": "Профиль",
+    "assignments": "Задания"
   }
 }

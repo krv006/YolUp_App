@@ -47,6 +47,7 @@ export const TYPE_LABELS: Record<QuizQuestionType, string> = {
   matching: "Moslashtirish",
   ordering: "Tartibga solish",
   fill_blank: "Bo'sh joyni to'ldirish",
+  essay: "Insho (Writing)",
 };
 
 const ERROR_MESSAGES: Record<DraftError, string> = {
@@ -95,6 +96,7 @@ export function QuestionEditor({
   onRemove,
 }: QuestionEditorProps) {
   const { t } = useTranslation("mobile");
+  const { t: tq } = useTranslation("quiz");
   const { palette } = useTheme();
   // Tekshiruv yozilayotganda BEZOVTA QILMASIN: javob hali kiritilmagan
   // bo'lsa xato ko'rsatilmaydi, faqat shakl xatolari chiqadi.
@@ -285,6 +287,20 @@ export function QuestionEditor({
             />
           ))}
         </View>
+      ) : null}
+
+      {draft.type === "essay" ? (
+        <>
+          <Input
+            label={tq("editor.minWordsLabel")}
+            value={draft.minWords}
+            keyboardType="number-pad"
+            onChangeText={(minWords) => onChange((current) => ({ ...current, minWords }))}
+          />
+          <Text variant="caption" tone="muted">
+            {tq("editor.essayHint")}
+          </Text>
+        </>
       ) : null}
 
       {draft.type === "numeric" ? (

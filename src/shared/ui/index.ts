@@ -79,3 +79,5 @@ export {
   portalPage,
 } from "./portal";
 export type { PortalButtonProps, PortalHeadingProps, PortalMetricTone } from "./portal";
+export { FullscreenDialog } from "./fullscreen-dialog";
+export type { FullscreenDialogProps } from "./fullscreen-dialog";

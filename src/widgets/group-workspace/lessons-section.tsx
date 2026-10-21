@@ -17,7 +17,7 @@ import {
 import { ROUTES } from "@/shared/config";
 import type { Lesson } from "@/shared/types";
 import { ConfirmSheet, radius, Text, useTheme } from "@/shared/ui";
-import { AddLessonSheet } from "./add-lesson-sheet";
+import { AddLessonDialog } from "./add-lesson-dialog";
 import { PanelHeading } from "./panel-heading";
 
 /**
@@ -104,7 +104,7 @@ export function LessonsSection({ courseId, isTeacher = false }: { courseId: stri
       {isTeacher ? (
         <>
           {/* `key` — tahrirdan yaratishga o'tganda oyna qaytadan quriladi (veb ham shunday). */}
-          <AddLessonSheet
+          <AddLessonDialog
             key={editing?.id ?? "new-lesson"}
             open={addOpen}
             onClose={() => {
@@ -112,8 +112,8 @@ export function LessonsSection({ courseId, isTeacher = false }: { courseId: stri
               setEditing(null);
             }}
             courseId={courseId}
-            existingLessons={items}
             editing={editing}
+            onDelete={editing ? () => setDeleteTarget(editing) : undefined}
           />
           <ConfirmSheet
             open={Boolean(deleteTarget)}

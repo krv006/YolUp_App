@@ -21,8 +21,11 @@ export function SheetFooter({ children }: { children: ReactNode }) {
 export interface SheetButtonProps {
   title: string;
   onPress: () => void;
-  /** `secondary` — oq, chegarali; `primary` — ko'k; `danger` — qizil. */
-  variant?: "primary" | "secondary" | "danger";
+  /**
+   * `secondary` — oq, chegarali; `primary` — ko'k; `danger` — qizil;
+   * `ghost` — shaffof, kulrang matn (eski `.dialog-actions` dagi "Bekor").
+   */
+  variant?: "primary" | "secondary" | "danger" | "ghost";
   disabled?: boolean;
   loading?: boolean;
   /**
@@ -44,16 +47,23 @@ export function SheetButton({
   icon,
 }: SheetButtonProps) {
   const { palette } = useTheme();
-  const filled = variant !== "secondary";
+  const ghost = variant === "ghost";
+  const filled = variant === "primary" || variant === "danger";
   const background =
-    variant === "primary" ? palette.primary : variant === "danger" ? palette.destructive : palette.surface;
+    variant === "primary"
+      ? palette.primary
+      : variant === "danger"
+        ? palette.destructive
+        : ghost
+          ? "transparent"
+          : palette.surface;
   const pressedBackground =
     variant === "primary"
       ? palette["primary-hover"]
       : variant === "danger"
         ? palette["destructive-strong"]
         : palette["surface-subtle"];
-  const foreground = filled ? palette["primary-foreground"] : palette.foreground;
+  const foreground = filled ? palette["primary-foreground"] : ghost ? palette["muted-foreground"] : palette.foreground;
   const inactive = disabled || loading;
 
   return (
@@ -67,13 +77,14 @@ export function SheetButton({
         fill ? styles.fill : styles.auto,
         {
           backgroundColor: pressed ? pressedBackground : background,
-          borderColor: filled ? "transparent" : palette.border,
+          borderColor: filled || ghost ? "transparent" : palette.border,
           opacity: disabled ? 0.5 : 1,
         },
       ]}
     >
       {loading ? <ActivityIndicator size="small" color={foreground} /> : (icon ?? null)}
-      <Text variant="label" style={{ color: foreground }}>
+      {/* Tor ekranda ikki qatorga tushsa ham markazda (vebdagidek). */}
+      <Text variant="label" style={[styles.title, { color: foreground }]}>
         {title}
       </Text>
     </Pressable>
@@ -81,6 +92,7 @@ export function SheetButton({
 }
 
 const styles = StyleSheet.create({
+  title: { flexShrink: 1, textAlign: "center" },
   footer: {
     flexDirection: "row",
     gap: 12,

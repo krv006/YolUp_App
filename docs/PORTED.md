@@ -234,6 +234,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/admin/system-panels.tsx` | 🟡 MOSLASH | `1f10ae6fae56` | server holatida davr tugmalari sarlavha ostida (vebda tor ekranda ustun bo'lib izohni siqadi) |
 | `src/pages/admin/teachers/admin-teachers-page.tsx` | 🟡 MOSLASH | `73fbd40d4d08` | mobilda `pages/admin/admin-teachers-page.tsx`; ko'rinish tanlagichi sarlavha ostida; `?teacher=` qatorga aylantiradi va belgilaydi |
 | `src/pages/admin/teachers/teacher-stats-dialog.tsx` | 🟡 MOSLASH | `b15753cd64fc` | mobilda `pages/admin/teacher-stats-sheet.tsx` (Dialog o'rniga Sheet) |
+| `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `7ee0926f54e8` | mobilda ikki fayl: `add-lesson-dialog.tsx` (butun ekran, saqlash shu yerda) va `add-assignment-sheet.tsx`; vazifa matnidagi formatlash qatori YO'Q — vebda tugmalar `onClick` siz |
+| `src/shared/ui/app-dialog.tsx` | 🟡 MOSLASH | `c4982b8cfc42` | faqat `fullscreen` varianti — mobilda `fullscreen-dialog.tsx`; `sheet` o'rniga `Sheet` |
 | `src/pages/analytics/analytics-page.tsx` | 🟡 MOSLASH | `092cef5c60fa` | o'qituvchi jadvali (olti ustun) kartochkalarga aylandi — telefonda jadval o'qilmaydi |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `395726c80080` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `cbcaa1d3644e` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |

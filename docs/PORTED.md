@@ -174,14 +174,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2d0725ac8b8a` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-list.tsx` | 🟡 MOSLASH | `06013405aa64` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-text.tsx` | 🟡 MOSLASH | `61a4de2c8e42` | farq qayd etilmagan — tekshiring |
-| `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `980ff0a9d175` | — |
+| `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `e8e41ad97e44` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `6f1a801dfa71` | — |
-| `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `5aa2ccfada89` | — |
-| `src/modules/notification/index.ts` | 🟡 MOSLASH | `96ef103beb1c` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `2f9b58ec017a` | — |
+| `src/modules/notification/index.ts` | 🟡 MOSLASH | `4f761ce85f85` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/notification/lib/notification-socket-manager.ts` | 🟢 NUSXA | `c8aa876d78e0` | — |
 | `src/modules/notification/lib/notification.mappers.ts` | 🟢 NUSXA | `e91371f2ab65` | — |
-| `src/modules/notification/model/notification.queries.ts` | 🟢 NUSXA | `c33aeb3c92fe` | — |
-| `src/modules/notification/model/use-notification-feed.ts` | 🟢 NUSXA | `a4e4ba829fc0` | — |
+| `src/modules/notification/model/notification.queries.ts` | 🟢 NUSXA | `64e64268858d` | — |
+| `src/modules/notification/model/use-notification-feed.ts` | 🟢 NUSXA | `262b6e0922d7` | — |
 | `src/modules/notification/api/push-device.api.ts` | 🆕 MOBIL | `—` | FCM qurilma tokeni; vebda Web Push obunasi (`push/subscribe/`) ishlatiladi |
 | `src/modules/notification/lib/device-id.ts` | 🆕 MOBIL | `—` | barqaror qurilma ID'si; backend kaliti `(user, device_id)`, token o'zgaruvchan |
 | `src/modules/notification/model/push-device.ts` | 🆕 MOBIL | `—` | chiqishda qurilmani ro'yxatdan chiqarish |
@@ -258,7 +258,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/constants/storage-keys.ts` | 🟢 NUSXA | `f381330fe63a` | — |
 | `src/shared/i18n/i18n.ts` | 🟡 MOSLASH | `d2d2d9a67a3a` | `import.meta.glob` (Vite) o'rniga qo'lda import; `mobile` bo'limi qo'shilgan; suspense o'chirilgan |
 | `src/shared/i18n/intl-locale.ts` | 🟢 NUSXA | `b3f6b40c5b6f` | — |
-| `src/shared/i18n/locales/**` | 🟢 NUSXA | `—` | 17 bo'lim × 3 til, vebdan bayt-bayt; `mobile.json` mobilga xos |
+| `src/shared/i18n/locales/**` | 🟢 NUSXA | `—` | 18 bo'lim × 3 til, vebdan bayt-bayt; `mobile.json` mobilga xos |
 | `src/shared/model/language.store.ts` | 🔴 QAYTA | `0f01a0cbc3c6` | zustand `persist` (localStorage) o'rniga MMKV; qurilma tili `Intl` dan |
 | `src/shared/model/text-size.store.ts` | 🔴 QAYTA | `f61042795fd4` | `persist` o'rniga MMKV; `--text-scale` o'rniga `Text` komponenti ko'paytiruvchisi (`text-scale.tsx`) |
 | `src/shared/lib/app-state.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |

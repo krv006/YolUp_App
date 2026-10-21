@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import { AppBarAction, Text, useTheme } from "@/shared/ui";
 import { useUnreadNotificationCount } from "../model/notification.queries";
 
@@ -15,7 +15,11 @@ import { useUnreadNotificationCount } from "../model/notification.queries";
 export function NotificationBell() {
   const { t } = useTranslation("mobile");
   const router = useRouter();
+  const pathname = usePathname();
   const { palette } = useTheme();
+  // Rol bo'limi ichida (vebdagidek) — Workspace tabi faol qoladi; boshqa joyda umumiy sahifa.
+  const role = /^\/(teacher|student|parent)(\/|$)/.exec(pathname)?.[1];
+  const target = role ? `/${role}/notifications` : "/notifications";
   const unread = useUnreadNotificationCount();
   const count = unread.data ?? 0;
 
@@ -23,7 +27,7 @@ export function NotificationBell() {
     <AppBarAction
       name="bell"
       label={t("chats.bildirishnomalar")}
-      onPress={() => router.push("/notifications")}
+      onPress={() => router.push(target as never)}
       badge={
         count > 0 ? (
           // `.notification-badge` — qizil, 17px, atrofida 2px oq chegara.

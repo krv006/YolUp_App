@@ -9,10 +9,6 @@ import {
   mapSentPage,
 } from "../lib/notification.mappers";
 
-/**
- * Bildirishnoma moduli hali barcha muhitlarga chiqarilmagan (docs/COMPLETED_WORK.md §2)
- * — u yerda endpoint 404 qaytaradi. Bu xato emas: qo'ng'iroq shunchaki ko'rinmaydi.
- */
 function isMissingModule(error: unknown): boolean {
   return (
     error instanceof AppError &&
@@ -25,7 +21,6 @@ export const notificationApi = {
     return mapInboxPage(await apiClient.get(notificationEndpoints.list, options), options.query);
   },
 
-  /** Modul mavjud bo'lmasa `null` — chaqiruvchi badge'ni yashiradi. */
   async getUnreadCount(options?: RequestOptions): Promise<number | null> {
     try {
       const dto = await apiClient.get<{ count?: number }>(
@@ -39,14 +34,17 @@ export const notificationApi = {
     }
   },
 
-  /**
-   * Diqqat: backend XABAR id'sini kutadi (`notification.id`), inbox qatorining
-   * id'sini emas. Ikkalasi ham UUID, shuning uchun adashish oson — noto'g'risi
-   * yuborilsa 404 keladi.
-   */
   async markRead(notificationId: string) {
     await apiClient.post(notificationEndpoints.read(notificationId), {});
     return notificationId;
+  },
+
+  async markAllRead() {
+    const response = await apiClient.post<{ updated?: number }>(
+      notificationEndpoints.readAll,
+      {}
+    );
+    return response?.updated ?? 0;
   },
 
   async send(input: SendNotificationInput) {
@@ -63,7 +61,6 @@ export const notificationApi = {
     );
   },
 
-  /** Admin: xabar yuborishda foydalanuvchi qidirish (2+ belgidan, 10 tagacha). */
   async searchUsers(query: string, options?: RequestOptions) {
     const dto = await apiClient.get<UserDto[]>(notificationEndpoints.searchUsers, {
       ...options,

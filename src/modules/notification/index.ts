@@ -33,6 +33,7 @@ export {
 export type { LiveNotification } from "./lib/notification-socket-manager";
 export {
   notificationKeys,
+  useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotificationInbox,
   useNotificationRecipients,

@@ -239,7 +239,7 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
       {/* `px-4 pb-24` — pastki boshqaruvlar ustiga chiqmasin. */}
       <View style={[styles.stage, { paddingBottom: 96 + insets.bottom }]}>
         {boardOpen ? (
-          <BoardSurface lessonId={lesson.id} courseId={lesson.courseId} embedded />
+          <BoardSurface lessonId={lesson.id} courseId={lesson.courseId} />
         ) : activeShare ? (
           <View style={styles.shareLayout}>
             <View style={[styles.shareMain, { backgroundColor: palette["surface-subtle"] }]}>

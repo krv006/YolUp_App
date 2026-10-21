@@ -25,12 +25,7 @@ export async function downloadBlob(
   if (!blob) return false;
 
   try {
-    const directory = new Directory(Paths.cache, DOWNLOAD_DIR);
-    if (!directory.exists) directory.create({ intermediates: true });
-
-    const file = new File(directory, sanitizeFileName(fileName));
-    file.create({ overwrite: true });
-    file.write(await blobToBase64(blob), { encoding: "base64" });
+    const file = await writeBlobToCache(blob, fileName);
 
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(file.uri, {
@@ -43,6 +38,20 @@ export async function downloadBlob(
     console.warn("[download] faylni saqlab bo'lmadi", error);
     return false;
   }
+}
+
+/**
+ * Blob'ni keshdagi faylga yozadi va uni qaytaradi — masalan doska PDF'ini
+ * chatga fayl sifatida yuborish uchun (`toUploadFile` bilan).
+ */
+export async function writeBlobToCache(blob: Blob, fileName = FALLBACK_FILE_NAME): Promise<File> {
+  const directory = new Directory(Paths.cache, DOWNLOAD_DIR);
+  if (!directory.exists) directory.create({ intermediates: true });
+
+  const file = new File(directory, sanitizeFileName(fileName));
+  file.create({ overwrite: true });
+  file.write(await blobToBase64(blob), { encoding: "base64" });
+  return file;
 }
 
 /**

@@ -6,11 +6,16 @@ import {
   useAuth,
   useAuthStore,
   useChangePasswordMutation,
+  useConfirmTwoFactorMutation,
   useDeleteAccountMutation,
+  useDisableTwoFactorMutation,
+  useEnableTwoFactorMutation,
   useLogoutOtherSessionsMutation,
   useRevokeSessionMutation,
   useSessions,
+  useTwoFactorStatus,
 } from "@/modules/auth";
+import { OtpInput } from "@/modules/auth/ui/otp-input";
 import { useQuizColors } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import {
@@ -28,7 +33,16 @@ import {
 } from "@/shared/ui";
 import { ProfileSubPage, RowPill, SectionLabel, SettingsCard, SettingsRow, SettingsSection } from "./profile-shell";
 
-type DialogId = "password" | "logoutOthers" | "delete" | null;
+type DialogId =
+  | "password"
+  | "logoutOthers"
+  | "delete"
+  | "twoFactorEnable"
+  | "twoFactorCode"
+  | "twoFactorDisable"
+  | null;
+
+const TWO_FACTOR_CODE_LENGTH = 5;
 
 /** Akkaunt sozlamalari — veb `pages/profile/account-settings-page.tsx`. */
 export function AccountSettingsPage() {
@@ -42,13 +56,70 @@ export function AccountSettingsPage() {
   const revokeSession = useRevokeSessionMutation();
   const logoutOthers = useLogoutOtherSessionsMutation();
   const deleteAccount = useDeleteAccountMutation();
+  const twoFactor = useTwoFactorStatus();
+  const enableTwoFactor = useEnableTwoFactorMutation();
+  const confirmTwoFactor = useConfirmTwoFactorMutation();
+  const disableTwoFactor = useDisableTwoFactorMutation();
   const logout = useAuthStore((state) => state.logout);
   const [dialog, setDialog] = useState<DialogId>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [twoFactorPassword, setTwoFactorPassword] = useState("");
+  const [twoFactorCode, setTwoFactorCode] = useState("");
 
   const sessions = sessionList.data ?? [];
+  const twoFactorEnabled = twoFactor.data?.enabled === true;
+
+  function closeTwoFactor() {
+    setDialog(null);
+    setTwoFactorPassword("");
+    setTwoFactorCode("");
+  }
+
+  /** Yoqish: parol tasdig'i -> server SMS kodi yuboradi -> kod kiritiladi. */
+  function startTwoFactor() {
+    if (!twoFactorPassword) {
+      toast.error(t("page.passwordRule"));
+      return;
+    }
+    enableTwoFactor.mutate(twoFactorPassword, {
+      onSuccess: () => {
+        setTwoFactorPassword("");
+        setDialog("twoFactorCode");
+      },
+      onError: (error: Error & { status?: number }) =>
+        toast.error(error.status === 503 ? t("page.twoFactorSmsUnavailable") : error.message),
+    });
+  }
+
+  function finishTwoFactor() {
+    if (twoFactorCode.length < TWO_FACTOR_CODE_LENGTH) {
+      toast.error(t("page.twoFactorCodeRequired"));
+      return;
+    }
+    confirmTwoFactor.mutate(twoFactorCode, {
+      onSuccess: () => {
+        toast.success(t("page.twoFactorEnabled"));
+        closeTwoFactor();
+      },
+      onError: (error: Error) => toast.error(error.message),
+    });
+  }
+
+  function stopTwoFactor() {
+    if (!twoFactorPassword) {
+      toast.error(t("page.passwordRule"));
+      return;
+    }
+    disableTwoFactor.mutate(twoFactorPassword, {
+      onSuccess: () => {
+        toast.success(t("page.twoFactorDisabled"));
+        closeTwoFactor();
+      },
+      onError: (error: Error) => toast.error(error.message),
+    });
+  }
 
   function submitPassword() {
     if (!currentPassword || !newPassword) {
@@ -109,11 +180,16 @@ export function AccountSettingsPage() {
           icon="check-circle"
           tone={legacy.success}
           title={t("page.twoFactor")}
-          hint={t("page.twoFactorHint")}
+          hint={
+            twoFactor.isLoading
+              ? t("page.twoFactorHint")
+              : `${twoFactorEnabled ? t("page.twoFactorOn") : t("page.twoFactorOff")} · ${t("page.twoFactorHint")}`
+          }
           right={
             <Switch
-              checked={false}
-              onCheckedChange={() => toast.info(t("page.notAvailable"))}
+              checked={twoFactorEnabled}
+              disabled={twoFactor.isLoading}
+              onCheckedChange={(next) => setDialog(next ? "twoFactorEnable" : "twoFactorDisable")}
               accessibilityLabel={t("page.twoFactor")}
             />
           }
@@ -211,6 +287,72 @@ export function AccountSettingsPage() {
             title={t("page.updatePassword")}
             disabled={changePassword.isPending}
             onPress={submitPassword}
+          />
+        </SheetFooter>
+      </Sheet>
+
+      <Sheet
+        open={dialog === "twoFactorEnable"}
+        onClose={closeTwoFactor}
+        title={t("page.twoFactorEnableTitle")}
+        description={t("page.twoFactorEnableDescription")}
+      >
+        <Input
+          label={t("page.currentPassword")}
+          value={twoFactorPassword}
+          onChangeText={setTwoFactorPassword}
+          secure
+          autoComplete="current-password"
+        />
+        <SheetFooter>
+          <SheetButton title={t("page.cancel")} onPress={closeTwoFactor} />
+          <SheetButton
+            variant="primary"
+            title={t("page.enable")}
+            loading={enableTwoFactor.isPending}
+            onPress={startTwoFactor}
+          />
+        </SheetFooter>
+      </Sheet>
+
+      <Sheet
+        open={dialog === "twoFactorCode"}
+        onClose={closeTwoFactor}
+        title={t("page.twoFactorCodeTitle")}
+        description={t("page.twoFactorCodeDescription")}
+      >
+        <OtpInput length={TWO_FACTOR_CODE_LENGTH} value={twoFactorCode} onChange={setTwoFactorCode} />
+        <SheetFooter>
+          <SheetButton title={t("page.cancel")} onPress={closeTwoFactor} />
+          <SheetButton
+            variant="primary"
+            title={t("page.confirmCode")}
+            loading={confirmTwoFactor.isPending}
+            onPress={finishTwoFactor}
+          />
+        </SheetFooter>
+      </Sheet>
+
+      <Sheet
+        open={dialog === "twoFactorDisable"}
+        onClose={closeTwoFactor}
+        title={t("page.twoFactorDisableTitle")}
+        description={t("page.twoFactorDisableDescription")}
+      >
+        <Input
+          label={t("page.currentPassword")}
+          value={twoFactorPassword}
+          onChangeText={setTwoFactorPassword}
+          secure
+          autoComplete="current-password"
+        />
+        <SheetFooter>
+          <SheetButton title={t("page.cancel")} onPress={closeTwoFactor} />
+          <SheetButton
+            variant="danger"
+            title={t("page.delete")}
+            loading={disableTwoFactor.isPending}
+            onPress={stopTwoFactor}
           />
         </SheetFooter>
       </Sheet>

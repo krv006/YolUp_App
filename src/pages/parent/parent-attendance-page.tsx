@@ -1,13 +1,23 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { CalendarCheck2, Search } from "lucide-react-native";
 import { AttendanceList, useAttendance } from "@/modules/attendance";
 import { useSelectedChild } from "@/modules/parent";
 import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
 import { formatDuration, useBackTo } from "@/shared/lib";
-import { PortalHeading, portalPage, Screen, ScreenError, ScreenLoading, Text, useLegacyColors, useTheme } from "@/shared/ui";
+import {
+  PortalHeading,
+  portalPage,
+  PullRefresh,
+  Screen,
+  ScreenError,
+  ScreenLoading,
+  Text,
+  useLegacyColors,
+  useTheme,
+} from "@/shared/ui";
 
 const WORKSPACE_PATH = "/parent/workspace";
 
@@ -73,11 +83,7 @@ export function ParentAttendancePage() {
         contentContainerStyle={portalPage}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl
-            refreshing={attendance.isRefetching}
-            onRefresh={() => void attendance.refetch()}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={() => attendance.refetch()} />
         }
       >
         <PortalHeading

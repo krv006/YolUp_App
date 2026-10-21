@@ -140,16 +140,17 @@ function RoleTabBar({
      * Bu yerda o'ram joy egallagani uchun ro'yxatlar o'z-o'zidan panel
      * ustida tugaydi.
      */
-    <View
-      style={[
-        styles.wrap,
-        { backgroundColor: palette.background, paddingBottom: insets.bottom + 8 },
-      ]}
-    >
+    <View style={[styles.wrap, { backgroundColor: palette.background }]}>
+      {/*
+        * Pastki bo'shliq (home chizig'i / gesture panel) PANELNING o'zida —
+        * oq fon ekranning eng pastigacha boradi (vebdagidek). Avval o'ramda
+        * edi va iPhone'da panel ostida sahifa rangidagi kulrang chiziq qolardi.
+        */}
       <View
         style={[
           styles.bar,
           {
+            paddingBottom: insets.bottom + 8,
             backgroundColor: palette["surface-elevated"],
             borderColor: palette.border,
             shadowColor: palette.shadow,

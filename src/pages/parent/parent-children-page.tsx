@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import {
   Camera,
   CheckCircle2,
@@ -25,7 +25,24 @@ import {
   type ConsentKind,
 } from "@/modules/parent";
 import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
-import { Avatar, Button, Input, PortalButton, PortalCard, PortalEmpty, PortalHeading, portalPage, Screen, ScreenError, ScreenLoading, Sheet, Text, useLegacyColors, useTheme } from "@/shared/ui";
+import {
+  Avatar,
+  Button,
+  Input,
+  PortalButton,
+  PortalCard,
+  PortalEmpty,
+  PortalHeading,
+  portalPage,
+  PullRefresh,
+  Screen,
+  ScreenError,
+  ScreenLoading,
+  Sheet,
+  Text,
+  useLegacyColors,
+  useTheme,
+} from "@/shared/ui";
 
 const CONSENT_KINDS: ReadonlyArray<{ id: ConsentKind; icon: LucideIcon }> = [
   { id: "recording", icon: Video },
@@ -116,14 +133,7 @@ export function ParentChildrenPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={childrenQuery.isRefetching}
-            onRefresh={() => {
-              void childrenQuery.refetch();
-              void consents.refetch();
-            }}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={() => Promise.all([childrenQuery.refetch(), consents.refetch()])} />
         }
       >
         <PortalHeading

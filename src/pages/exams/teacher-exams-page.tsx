@@ -16,6 +16,7 @@ import {
   useExamTemplates,
   useExams,
   useSaveManualScores,
+  useShareExamResults,
   useUpdateExam,
 } from "@/modules/exam";
 import { NotificationBell } from "@/modules/notification";
@@ -99,6 +100,7 @@ export function TeacherExamsPage() {
   // Telefonda (vebdagi `isCompact`) avtomatik tanlov yo'q — ro'yxat ochiladi.
   const selected = list.find((exam) => exam.id === selectedId) ?? null;
   const results = useExamResults(selected?.id ?? null, Boolean(selected));
+  const shareResults = useShareExamResults();
   const saveScores = useSaveManualScores(selected?.id ?? "");
   const courseOptions = (courses.data ?? []).map((course) => ({ id: course.id, title: course.title }));
 
@@ -506,11 +508,17 @@ export function TeacherExamsPage() {
               </Pressable>
               <Pressable
                 accessibilityRole="button"
-                disabled={!rows.length}
-                onPress={() => toast.info(t("mock.shareUnavailable"))}
+                disabled={!rows.length || shareResults.isPending || !selected}
+                onPress={() =>
+                  selected &&
+                  shareResults.mutate(selected.id, {
+                    onSuccess: (result) => toast.success(t("mock.shared", { count: result.students })),
+                  })
+                }
                 style={({ pressed }) => [
                   styles.pillButton,
                   { backgroundColor: pressed ? palette["primary-hover"] : palette.primary },
+                  (!rows.length || shareResults.isPending) && { opacity: 0.6 },
                 ]}
               >
                 <Icon name="send" size={17} color={palette["primary-foreground"]} />

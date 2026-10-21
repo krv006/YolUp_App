@@ -5,7 +5,7 @@ import { Bold, Italic, Link2, List, Underline } from "lucide-react-native";
 import { useCourses } from "@/modules/course";
 import { useCreateAssignment, useUpdateAssignment } from "@/modules/homework";
 import { pickDocument, toUploadFile, type PickedFile } from "@/shared/lib";
-import type { Assignment } from "@/shared/types";
+import type { Assignment, AssignmentStatus, GradingScale } from "@/shared/types";
 import {
   DateField,
   Icon,
@@ -33,8 +33,6 @@ export interface AssignmentFormSheetProps {
   onDelete?: (assignment: Assignment) => void;
 }
 
-type Grading = "five" | "hundred" | "none";
-
 /**
  * Vazifa berish va tahrirlash — veb `widgets/homework-workspace/assignment-form-dialog.tsx`
  * porti. Ikki ko'rinish vebdagidek: yaratish (guruh, nom, matn, muddat,
@@ -61,14 +59,15 @@ export function AssignmentFormSheet({
   const [body, setBody] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("18:00");
-  const [grading, setGrading] = useState<Grading>("five");
+  const [grading, setGrading] = useState<GradingScale>("five");
+  const [maxScore, setMaxScore] = useState("100");
   const [file, setFile] = useState<PickedFile | null>(null);
   const [lessonId, setLessonId] = useState("");
-  const [grading2, setGrading2] = useState("");
+  const [gradingNote, setGradingNote] = useState("");
   const selection = useRef({ start: 0, end: 0 });
   const [aiCheck, setAiCheck] = useState(true);
-  const [announce] = useState(true);
-  const [allowLate] = useState(false);
+  const [announce, setAnnounce] = useState(true);
+  const [allowLate, setAllowLate] = useState(true);
   // Vebdagi `window.prompt` o'rniga — Android'da `Alert.prompt` yo'q.
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
@@ -82,8 +81,12 @@ export function AssignmentFormSheet({
     setTitle(assignment?.title ?? "");
     setBody(assignment?.description ?? "");
     setLessonId(assignment?.lessonId ?? "");
-    setGrading2("");
+    setGradingNote("");
     setFile(null);
+    setGrading(assignment?.grading ?? "five");
+    setMaxScore(String(assignment?.maxScore ?? 100));
+    setAnnounce(assignment?.announceInChat ?? true);
+    setAllowLate(assignment?.allowLate ?? true);
     if (assignment?.dueAt) {
       const due = new Date(assignment.dueAt);
       setDate(
@@ -121,7 +124,7 @@ export function AssignmentFormSheet({
     if (picked) setFile(picked);
   }
 
-  async function save() {
+  async function save(status: AssignmentStatus = "active") {
     if (!course || !title.trim()) {
       toast.error(t("form.required"));
       return;
@@ -133,7 +136,12 @@ export function AssignmentFormSheet({
       body: body.trim(),
       dueAt: date ? new Date(`${date}T${time}`).toISOString() : undefined,
       file: file ? toUploadFile(file) : null,
-      ...(assignment ? { lessonId: lessonId || null, extraInstructions: grading2 } : {}),
+      status,
+      announceInChat: announce,
+      allowLate,
+      grading,
+      maxScore: Number(maxScore) || 100,
+      ...(assignment ? { lessonId: lessonId || null, extraInstructions: gradingNote } : {}),
     };
     try {
       if (assignment) await update.mutateAsync({ id: assignment.id, form });
@@ -243,7 +251,7 @@ export function AssignmentFormSheet({
 
           <DateField label={t("form.dueDate")} value={date} onChange={setDate} optional />
           <SelectField label={t("form.lessonLabel")} value={lessonId} onChange={setLessonId} options={lessonChoices} />
-          <Input label={t("form.gradingNote")} value={grading2} onChangeText={setGrading2} placeholder={t("form.gradingNotePlaceholder")} />
+          <Input label={t("form.gradingNote")} value={gradingNote} onChangeText={setGradingNote} placeholder={t("form.gradingNotePlaceholder")} />
 
           {onDelete ? (
             <Pressable
@@ -291,10 +299,7 @@ export function AssignmentFormSheet({
                 <Pressable
                   key={id}
                   accessibilityRole="button"
-                  onPress={() => {
-                    setGrading(id);
-                    if (id !== "five") toast.info(t("form.gradingUnavailable"));
-                  }}
+                  onPress={() => setGrading(id)}
                   style={[
                     styles.chip,
                     grading === id
@@ -308,6 +313,15 @@ export function AssignmentFormSheet({
                 </Pressable>
               ))}
             </View>
+            {grading === "hundred" ? (
+              <Input
+                label={t("form.maxScore")}
+                keyboardType="number-pad"
+                value={maxScore}
+                onChangeText={(value) => setMaxScore(value.replace(/\D/g, ""))}
+                placeholder="100"
+              />
+            ) : null}
           </View>
 
           <View style={styles.gradingBlock}>
@@ -357,8 +371,8 @@ export function AssignmentFormSheet({
             {(
               [
                 ["ai", "check-circle", palette["saffron-strong"], aiCheck, setAiCheck, true],
-                ["announce", "bell", palette.primary, announce, null, false],
-                ["late", "clock", palette["subtle-foreground"], allowLate, null, false],
+                ["announce", "bell", palette.primary, announce, setAnnounce, true],
+                ["late", "clock", palette["subtle-foreground"], allowLate, setAllowLate, true],
               ] as const
             ).map(([id, icon, tone, value, setValue, supported], index) => (
               <View key={id} style={[styles.toggle, index < 2 && { borderBottomWidth: 1, borderBottomColor: palette.border }]}>
@@ -407,14 +421,15 @@ export function AssignmentFormSheet({
       <SheetFooter>
         <SheetButton
           title={assignment ? t("form.cancel") : t("form.draft")}
-          onPress={() => (assignment ? onClose() : toast.info(t("form.draftUnavailable")))}
+          disabled={pending}
+          onPress={() => (assignment ? onClose() : void save("draft"))}
         />
         <SheetButton
           variant="primary"
-          title={assignment ? t("form.save") : t("form.submit")}
+          title={assignment ? (assignment.status === "draft" ? t("form.publish") : t("form.save")) : t("form.submit")}
           disabled={pending}
           loading={pending}
-          onPress={() => void save()}
+          onPress={() => void save("active")}
         />
       </SheetFooter>
     </Sheet>

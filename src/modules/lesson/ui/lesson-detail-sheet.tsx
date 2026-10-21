@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useCourses } from "@/modules/course";
 import type { Lesson } from "@/shared/types";
 import { ConfirmSheet, Icon, radius, Sheet, Text, toast, useTheme, type IconName } from "@/shared/ui";
-import { useDeleteLesson } from "../model/lesson.queries";
+import { useCancelLesson } from "../model/lesson.queries";
 import { endTime } from "./schedule-grid";
 
 export interface LessonDetailSheetProps {
@@ -36,7 +36,8 @@ export function LessonDetailSheet({
   const months = t("list.months", { returnObjects: true }) as string[];
   const weekdaysLong = t("list.weekdaysLong", { returnObjects: true }) as string[];
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const deleteLesson = useDeleteLesson();
+  const [scope, setScope] = useState<"one" | "series">("one");
+  const cancelLesson = useCancelLesson();
   const courses = useCourses();
 
   if (!lesson) return null;
@@ -109,17 +110,49 @@ export function LessonDetailSheet({
         description={t("schedule.cancelDescription")}
         cancelLabel={t("schedule.keep")}
         confirmLabel={t("schedule.cancelConfirm")}
-        loading={deleteLesson.isPending}
+        loading={cancelLesson.isPending}
         onConfirm={() =>
-          deleteLesson.mutate(lesson.id, {
-            onSuccess: () => {
-              setConfirmOpen(false);
-              onClose();
-            },
-            onError: (error: Error) => toast.error(error.message),
-          })
+          cancelLesson.mutate(
+            { id: lesson.id, scope },
+            {
+              onSuccess: (count) => {
+                toast.success(t("schedule.cancelled", { count }));
+                setConfirmOpen(false);
+                onClose();
+              },
+            }
+          )
         }
-      />
+      >
+        {/* Takrorlanuvchi dars: faqat shu darsmi yoki butun seriya. */}
+        {lesson.recurrenceId ? (
+          <View accessibilityRole="radiogroup" style={styles.scopes}>
+            {(["one", "series"] as const).map((item) => {
+              const active = scope === item;
+              return (
+                <Pressable
+                  key={item}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: active }}
+                  onPress={() => setScope(item)}
+                  style={[
+                    styles.scope,
+                    {
+                      borderColor: active ? palette.primary : palette.border,
+                      backgroundColor: active ? palette["primary-soft"] : palette.surface,
+                    },
+                  ]}
+                >
+                  <View style={[styles.radio, { borderColor: active ? palette.primary : palette.border }]}>
+                    {active ? <View style={[styles.radioDot, { backgroundColor: palette.primary }]} /> : null}
+                  </View>
+                  <Text variant="label">{t(`schedule.cancelScope.${item}`)}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
+      </ConfirmSheet>
     </>
   );
 }
@@ -175,6 +208,12 @@ function DetailAction({
 const styles = StyleSheet.create({
   /* `flex-col gap-3` */
   body: { gap: 12 },
+  /* `flex flex-col gap-2`; variant — `rounded-xl border px-3.5 py-3 gap-3` */
+  scopes: { gap: 8, marginBottom: 16 },
+  scope: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 12, borderWidth: 1, borderRadius: radius.xl },
+  /* `size-5 border-2 rounded-full`, ichida `size-2.5` */
+  radio: { width: 20, height: 20, borderWidth: 2, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  radioDot: { width: 10, height: 10, borderRadius: radius.full },
   grow: { flex: 1 },
   bodySm: { fontWeight: "400" },
   /* `flex items-center gap-2.5 text-body-sm` */

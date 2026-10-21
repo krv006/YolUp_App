@@ -33,6 +33,9 @@ export {
   useEraseStrokes,
   useGrantDraw,
   usePeriodicTable,
+  useRevokeDraw,
+  useSendBoardToChat,
+  useSetBoardPermissions,
   useSolveFormula,
 } from "./model/board.queries";
 export { useBoardChannel } from "./model/use-board-channel";

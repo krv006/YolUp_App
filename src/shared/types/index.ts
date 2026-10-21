@@ -72,6 +72,8 @@ export type {
   StudentAttemptSummary,
   Submission,
   SubmissionStatus,
+  AssignmentStatus,
+  GradingScale,
   TeacherAnalytics,
   TeacherCourseAnalytics,
   TeacherVideoStat,
@@ -102,13 +104,13 @@ export type {
   ExamTotalResult,
   QuizGroup,
   QuizGroupFormValues,
+  ExamManualAnswer,
+  ExamStudentResultDetail,
   ExamReviewRow,
   ExamWritingAi,
   ExamWritingAiItem,
   ExamWritingCriterion,
   ExamWritingError,
-  ExamManualAnswer,
-  ExamStudentResultDetail,
 } from "./domain";
 export type { MessageCapabilities } from "./chat";
 export type { PaginatedDto, UserDto } from "./dto";

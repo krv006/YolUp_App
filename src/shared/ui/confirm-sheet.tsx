@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Button } from "./button";
@@ -14,6 +15,8 @@ export interface ConfirmSheetProps {
   cancelLabel?: string;
   loading?: boolean;
   onConfirm: () => void;
+  /** Tugmalar ustidagi qo'shimcha tanlov (masalan "faqat shu dars / butun seriya"). */
+  children?: ReactNode;
 }
 
 /**
@@ -34,10 +37,12 @@ export function ConfirmSheet({
   cancelLabel,
   loading = false,
   onConfirm,
+  children,
 }: ConfirmSheetProps) {
   const { t } = useTranslation("mobile");
   return (
     <Sheet open={open} onClose={onClose} title={title} description={description}>
+      {children}
       <View style={styles.actions}>
         <Button title={cancelLabel ?? t("shared.bekor")} variant="secondary" onPress={onClose} />
         <Button title={confirmLabel} variant="danger" loading={loading} onPress={onConfirm} />

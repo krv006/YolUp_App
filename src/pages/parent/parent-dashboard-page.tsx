@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   ArrowRight,
@@ -16,7 +16,22 @@ import { useAuth } from "@/modules/auth";
 import { useParentDashboard, useSelectedChild } from "@/modules/parent";
 import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
 import { ROUTES } from "@/shared/config";
-import { GradientFill, PortalButton, PortalCard, PortalMetric, portalPage, PortalSectionHead, type PortalMetricTone, Screen, ScreenError, ScreenLoading, Text, useLegacyColors, useTheme } from "@/shared/ui";
+import {
+  GradientFill,
+  PortalButton,
+  PortalCard,
+  PortalMetric,
+  type PortalMetricTone,
+  portalPage,
+  PortalSectionHead,
+  PullRefresh,
+  Screen,
+  ScreenError,
+  ScreenLoading,
+  Text,
+  useLegacyColors,
+  useTheme,
+} from "@/shared/ui";
 
 /** Backend `metric.id` -> ikonka (veb `parent-dashboard-page.tsx` bilan bir xil). */
 const METRIC_ICONS: Record<string, LucideIcon> = {
@@ -47,9 +62,7 @@ export function ParentDashboardPage() {
   const appBar = <ParentAppBar a11yTitle={tn("parent.dashboard")} />;
 
   function refresh() {
-    void childrenQuery.refetch();
-    void dashboard.refetch();
-    void attendance.refetch();
+    return Promise.all([childrenQuery.refetch(), dashboard.refetch(), attendance.refetch()]);
   }
 
   if (childrenQuery.isLoading || dashboard.isLoading || attendance.isLoading) {
@@ -105,11 +118,7 @@ export function ParentDashboardPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={dashboard.isRefetching || attendance.isRefetching}
-            onRefresh={refresh}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={refresh} />
         }
       >
         {/* `.portal-welcome.parent-welcome` — oqdan yashil-och rangga o'tuvchi fon. */}

@@ -166,16 +166,18 @@ export interface BoardPermissionStudent {
   username: string;
 }
 
+export type BoardPermissionInput = { studentIds: string[] } | { mode: "all" | "none" };
+
 export interface BoardPermissionSheetProps {
   open: boolean;
   onClose: () => void;
   students: BoardPermissionStudent[];
   pending: boolean;
-  onGrant: (studentIds: string[]) => void;
+  onSubmit: (input: BoardPermissionInput) => void;
 }
 
 /** Veb `board-permission-dialog.tsx`: rejim tanlash va o'quvchilar ro'yxati. */
-export function BoardPermissionSheet({ open, onClose, students, pending, onGrant }: BoardPermissionSheetProps) {
+export function BoardPermissionSheet({ open, onClose, students, pending, onSubmit }: BoardPermissionSheetProps) {
   const { t } = useTranslation("board");
   const { palette } = useTheme();
   const [mode, setMode] = useState<PermissionMode>("selected");
@@ -183,15 +185,18 @@ export function BoardPermissionSheet({ open, onClose, students, pending, onGrant
 
   function save() {
     if (mode === "teacher") {
-      toast.info(t("permissionDialog.revokeUnavailable"));
+      onSubmit({ mode: "none" });
       return;
     }
-    const ids = mode === "everyone" ? students.map((student) => student.id) : allowed;
-    if (!ids.length) {
+    if (mode === "everyone") {
+      onSubmit({ mode: "all" });
+      return;
+    }
+    if (!allowed.length) {
       toast.info(t("permissionDialog.pickStudent"));
       return;
     }
-    onGrant(ids);
+    onSubmit({ studentIds: allowed });
   }
 
   return (

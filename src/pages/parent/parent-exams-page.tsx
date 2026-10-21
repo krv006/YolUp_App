@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { ClipboardCheck } from "lucide-react-native";
 import { ExamResultCard, useExamResults, useExams } from "@/modules/exam";
@@ -9,7 +9,21 @@ import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
 import { toIntlLocale } from "@/shared/i18n/intl-locale";
 import { useBackTo } from "@/shared/lib";
 import type { ExamSummary } from "@/shared/types";
-import { PortalButton, PortalEmpty, PortalHeading, PortalListIcon, portalPage, Screen, ScreenError, ScreenLoading, Sheet, Text, useLegacyColors, useTheme } from "@/shared/ui";
+import {
+  PortalButton,
+  PortalEmpty,
+  PortalHeading,
+  PortalListIcon,
+  portalPage,
+  PullRefresh,
+  Screen,
+  ScreenError,
+  ScreenLoading,
+  Sheet,
+  Text,
+  useLegacyColors,
+  useTheme,
+} from "@/shared/ui";
 
 const WORKSPACE_PATH = "/parent/workspace";
 
@@ -89,11 +103,7 @@ export function ParentExamsPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={exams.isRefetching}
-            onRefresh={() => void exams.refetch()}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={() => exams.refetch()} />
         }
       >
         <PortalHeading eyebrow={t("list.eyebrow")} title={selectedChild.name} description={t("parentList.subtitle")} />

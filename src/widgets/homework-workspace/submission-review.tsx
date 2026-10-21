@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useDownloadSubmissionFile, useRecheckSubmission, useReviewSubmission, useSubmission } from "@/modules/homework";
-import type { Submission } from "@/shared/types";
-import { Avatar, Icon, Input, radius, Switch, Text, toast, useTheme, type IconName } from "@/shared/ui";
+import {
+  useDownloadSubmissionFile,
+  useRecheckSubmission,
+  useRequestResubmit,
+  useReviewSubmission,
+  useSubmission,
+} from "@/modules/homework";
+import type { GradingScale, Submission } from "@/shared/types";
+import { Avatar, Icon, Input, radius, Sheet, SheetButton, SheetFooter, Switch, Text, useTheme, type IconName } from "@/shared/ui";
 
 export interface SubmissionReviewProps {
   submission: Submission;
+  grading?: GradingScale;
+  maxScore?: number;
   onClose: () => void;
   onStep: (direction: 1 | -1) => void;
 }
@@ -23,12 +31,24 @@ function aiComment(result: Submission["result"] | null | undefined): string {
     .join(" ");
 }
 
+function initialScore(submission: Submission, fallback: number | null): number | null {
+  return submission.gradeValue ?? submission.overallScore ?? fallback;
+}
+
+/** Saqlangan o'qituvchi izohi (`result.teacher_comment`), bo'lmasa AI qoralamasi. */
+function initialComment(submission: Submission): string {
+  const stored = submission.rawResult?.teacher_comment;
+  if (typeof stored === "string" && stored) return stored;
+  return aiComment(submission.result) || "";
+}
+
 /**
  * O'quvchi javobini tekshirish — veb `widgets/homework-workspace/submission-review.tsx`
  * porti, telefon ko'rinishi (bitta ustun): o'quvchi, fayl, AI tahlili,
- * baho tugmalari (2–5), izoh, ota-onaga ulashish va tasdiqlash.
+ * baho (vazifa shkalasiga qarab: 2–5 tugmalari, 100 ballik maydon yoki
+ * bahosiz), izoh, ota-onaga ulashish, qayta topshirishni so'rash va tasdiqlash.
  */
-export function SubmissionReview({ submission, onClose, onStep }: SubmissionReviewProps) {
+export function SubmissionReview({ submission, grading = "five", maxScore = 100, onClose, onStep }: SubmissionReviewProps) {
   const { t } = useTranslation("homework");
   const { palette } = useTheme();
   const months = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
@@ -36,19 +56,29 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
   const review = useReviewSubmission();
   const recheck = useRecheckSubmission();
   const download = useDownloadSubmissionFile();
+  const requestResubmit = useRequestResubmit();
 
   const current = detail.data ?? submission;
   const ai = current.result;
   const aiScore = ai?.overallScore ?? null;
 
-  const [score, setScore] = useState<number | null>(current.overallScore ?? aiScore);
-  const [comment, setComment] = useState(current.grade || aiComment(current.result) || "");
+  const [score, setScore] = useState<number | null>(initialScore(current, aiScore));
+  const [comment, setComment] = useState(initialComment(current));
+  const [shareWithParent, setShareWithParent] = useState(current.shareWithParent);
+  const [resubmitOpen, setResubmitOpen] = useState(false);
+  const [resubmitComment, setResubmitComment] = useState("");
   const [syncedId, setSyncedId] = useState(current.id);
 
   if (syncedId !== current.id) {
     setSyncedId(current.id);
-    setScore(current.overallScore ?? current.result?.overallScore ?? null);
-    setComment(current.grade || aiComment(current.result) || "");
+    setScore(initialScore(current, current.result?.overallScore ?? null));
+    setComment(initialComment(current));
+    setShareWithParent(current.shareWithParent);
+  }
+
+  function closeResubmit() {
+    setResubmitOpen(false);
+    setResubmitComment("");
   }
 
   const questions = ai?.questions ?? [];
@@ -65,6 +95,8 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
   }
 
   const border = { borderColor: palette.border };
+  const resubmitDisabled = current.status === "resubmit_requested" || current.status === "checking";
+  const confirmDisabled = review.isPending || (grading !== "none" && score === null);
 
   return (
     <ScrollView style={{ backgroundColor: palette.background }} contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled">
@@ -103,6 +135,18 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
         </View>
       </View>
 
+      {current.status === "resubmit_requested" ? (
+        <View style={[styles.resubmitNote, border, { backgroundColor: palette["primary-soft"] }]}>
+          <View style={styles.noteIcon}>
+            <Icon name="refresh" size={16} color={palette.primary} />
+          </View>
+          <Text variant="label" style={[styles.bodySm, styles.grow]}>
+            {t("review.resubmitRequested")}
+            {current.resubmitComment ? ` · ${current.resubmitComment}` : ""}
+          </Text>
+        </View>
+      ) : null}
+
       {current.error ? (
         <View style={[styles.error, { backgroundColor: palette["destructive-soft"], borderColor: palette["destructive-soft"] }]}>
           <Text variant="label" style={[styles.bodySm, { color: palette["destructive-strong"] }]}>
@@ -126,7 +170,7 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
           <Text variant="title">
             {aiScore === null ? "—" : aiScore}
             <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
-              /5
+              /{grading === "hundred" ? maxScore : 5}
             </Text>
           </Text>
         </View>
@@ -181,27 +225,48 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
         <Text variant="caption" style={[styles.overline, { color: palette["subtle-foreground"] }]}>
           {t("review.yourGrade")}
         </Text>
-        <View style={styles.scores}>
-          {SCORES.map((value) => (
-            <Pressable
-              key={value}
-              accessibilityRole="button"
-              accessibilityState={{ selected: score === value }}
-              onPress={() => setScore(value)}
-              style={[
-                styles.score,
-                score === value
-                  ? { borderColor: palette.primary, backgroundColor: palette.primary }
-                  : { borderColor: palette.border, backgroundColor: palette.surface },
-              ]}
-            >
-              <Text variant="subheading" style={{ color: score === value ? palette["primary-foreground"] : palette.foreground }}>
-                {value}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        {aiScore !== null ? (
+        {grading === "five" ? (
+          <View style={styles.scores}>
+            {SCORES.map((value) => (
+              <Pressable
+                key={value}
+                accessibilityRole="button"
+                accessibilityState={{ selected: score === value }}
+                onPress={() => setScore(value)}
+                style={[
+                  styles.score,
+                  score === value
+                    ? { borderColor: palette.primary, backgroundColor: palette.primary }
+                    : { borderColor: palette.border, backgroundColor: palette.surface },
+                ]}
+              >
+                <Text variant="subheading" style={{ color: score === value ? palette["primary-foreground"] : palette.foreground }}>
+                  {value}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
+
+        {grading === "hundred" ? (
+          <Input
+            label={t("review.scoreOf", { max: maxScore })}
+            keyboardType="number-pad"
+            value={score === null ? "" : String(score)}
+            onChangeText={(value) => {
+              const digits = value.replace(/\D/g, "");
+              setScore(digits ? Math.min(Number(digits), maxScore) : null);
+            }}
+          />
+        ) : null}
+
+        {grading === "none" ? (
+          <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
+            {t("review.gradingNone")}
+          </Text>
+        ) : null}
+
+        {aiScore !== null && grading !== "none" ? (
           <View style={styles.suggestion}>
             <Icon name="check-circle" size={14} color={palette["saffron-strong"]} />
             <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
@@ -222,26 +287,41 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
               {t("review.shareParentHint")}
             </Text>
           </View>
-          <Switch checked={false} accessibilityLabel={t("review.shareParent")} onCheckedChange={() => toast.info(t("review.sharePending"))} />
+          <Switch checked={shareWithParent} accessibilityLabel={t("review.shareParent")} onCheckedChange={setShareWithParent} />
         </View>
 
         <View style={styles.actions}>
           <Pressable
             accessibilityRole="button"
-            onPress={() => toast.info(t("review.resubmitPending"))}
-            style={({ pressed }) => [styles.action, border, { borderWidth: 1, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface }]}
+            disabled={resubmitDisabled}
+            onPress={() => setResubmitOpen(true)}
+            style={({ pressed }) => [
+              styles.action,
+              border,
+              { borderWidth: 1, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface },
+              resubmitDisabled && styles.dim,
+            ]}
           >
             <Text variant="label">{t("review.resubmit")}</Text>
           </Pressable>
           <Pressable
             accessibilityRole="button"
-            disabled={review.isPending || score === null}
-            onPress={() => review.mutate({ id: current.id, input: { overallScore: score, grade: comment } })}
+            disabled={confirmDisabled}
+            onPress={() =>
+              review.mutate({
+                id: current.id,
+                input: {
+                  gradeValue: grading === "none" ? undefined : score,
+                  shareWithParent,
+                  result: { ...(current.rawResult ?? {}), teacher_comment: comment },
+                },
+              })
+            }
             style={({ pressed }) => [
               styles.action,
               {
                 backgroundColor: pressed ? palette["primary-hover"] : palette.primary,
-                opacity: review.isPending || score === null ? 0.5 : 1,
+                opacity: confirmDisabled ? 0.5 : 1,
               },
             ]}
           >
@@ -251,6 +331,34 @@ export function SubmissionReview({ submission, onClose, onStep }: SubmissionRevi
           </Pressable>
         </View>
       </View>
+
+      <Sheet
+        open={resubmitOpen}
+        onClose={closeResubmit}
+        title={t("review.resubmitTitle")}
+        description={t("review.resubmitDescription", { name: current.studentName })}
+      >
+        <Input
+          label={t("review.resubmitComment")}
+          value={resubmitComment}
+          onChangeText={setResubmitComment}
+          placeholder={t("review.resubmitPlaceholder")}
+          multiline
+          numberOfLines={4}
+        />
+        <SheetFooter>
+          <SheetButton title={t("review.resubmitCancel")} onPress={closeResubmit} />
+          <SheetButton
+            variant="primary"
+            title={t("review.resubmitSend")}
+            disabled={requestResubmit.isPending || !resubmitComment.trim()}
+            loading={requestResubmit.isPending}
+            onPress={() =>
+              requestResubmit.mutate({ id: current.id, comment: resubmitComment.trim() }, { onSuccess: closeResubmit })
+            }
+          />
+        </SheetFooter>
+      </Sheet>
     </ScrollView>
   );
 }
@@ -280,6 +388,10 @@ const styles = StyleSheet.create({
   fileCard: { minHeight: 220, gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
   preview: { minHeight: 180, flex: 1, alignItems: "center", justifyContent: "center", gap: 8, borderRadius: radius.xl },
   fileBar: { flexDirection: "row", alignItems: "center", gap: 12 },
+  /* `rounded-2xl border bg-action-subtle/40 px-4 py-3 gap-2` */
+  resubmitNote: { flexDirection: "row", alignItems: "flex-start", gap: 8, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: radius["2xl"] },
+  noteIcon: { marginTop: 2 },
+  dim: { opacity: 0.5 },
   error: { paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: radius["2xl"] },
   box: { gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
   aiHead: { flexDirection: "row", alignItems: "center", gap: 12 },

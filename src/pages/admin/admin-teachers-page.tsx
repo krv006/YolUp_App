@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, BarChart3, ShieldCheck, Star, Users } from "lucide-react-native";
 import { useApproveTeacher, usePendingTeachers, useTeachers } from "@/modules/auth";
@@ -13,6 +13,7 @@ import {
   PortalHeading,
   portalPage,
   PortalSectionHead,
+  PullRefresh,
   Screen,
   SelectField,
   Text,
@@ -61,14 +62,7 @@ export function AdminTeachersPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={pending.isRefetching || teachers.isRefetching}
-            onRefresh={() => {
-              void pending.refetch();
-              void teachers.refetch();
-            }}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={() => Promise.all([pending.refetch(), teachers.refetch()])} />
         }
       >
         <PortalHeading

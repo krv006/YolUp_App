@@ -6,27 +6,38 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { CloudOff } from "lucide-react-native";
-import { createLoginSchema, resolveHomeRoute, useAuth } from "@/modules/auth";
+import { createLoginSchema, resolveHomeRoute, useAuth, type TwoFactorChallenge } from "@/modules/auth";
 import { AuthButton, AuthField, AuthFieldError, AuthPasswordField, AuthScreen } from "@/modules/auth/ui/auth-screen";
+import { MobileTwoFactorForm } from "@/modules/auth/ui/two-factor-form";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import type { LoginCredentials } from "@/shared/types";
 import { radius, Text, toast, useTheme } from "@/shared/ui";
+
+interface PendingChallenge {
+  credentials: LoginCredentials;
+  challenge: TwoFactorChallenge;
+}
 
 /**
  * Kirish — veb `modules/auth/ui/mobile-login-form.tsx` (veb tor ekranda
  * shuni ko'rsatadi): "Xush kelibsiz!", login va parol, "Parolni
  * unutdingizmi?", pastda "Kirish" va ro'yxatdan o'tish havolasi.
  * Xulqi o'zgarmagan: `loginSchema`, `applyApiFieldErrors`, `resolveHomeRoute`.
+ *
+ * Hisobda ikki bosqichli himoya yoqilgan bo'lsa, server token o'rniga
+ * `two_factor_required` qaytaradi — shunda SMS kodi ekrani ochiladi
+ * (veb `login-page.tsx` dagi `pending` holati).
  */
 export function LoginPage() {
   const { t } = useTranslation("auth");
   const { palette } = useTheme();
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, completeTwoFactorLogin } = useAuth();
   const net = useNetInfo();
   const online = net.isConnected !== false;
   const [showPassword, setShowPassword] = useState(false);
+  const [pending, setPending] = useState<PendingChallenge | null>(null);
   const schema = useMemo(() => createLoginSchema(t), [t]);
 
   const {
@@ -42,8 +53,12 @@ export function LoginPage() {
 
   async function submit(values: LoginCredentials) {
     try {
-      const user = await login(values);
-      router.replace(resolveHomeRoute(user));
+      const result = await login(values);
+      if (result.status === "twoFactor") {
+        setPending({ credentials: values, challenge: result.challenge });
+        return;
+      }
+      router.replace(resolveHomeRoute(result.user));
     } catch (error) {
       const appError = error as AppError;
       if (!applyApiFieldErrors(appError, setError, { username: "login" })) {
@@ -51,6 +66,37 @@ export function LoginPage() {
       }
       toast.error(t("mobile.login.errorToastTitle"), { description: t("mobile.login.errorToastDescription") });
     }
+  }
+
+  async function resend() {
+    if (!pending) return;
+    const result = await login(pending.credentials);
+    if (result.status === "twoFactor") {
+      setPending({ credentials: pending.credentials, challenge: result.challenge });
+      return;
+    }
+    router.replace(resolveHomeRoute(result.user));
+  }
+
+  async function submitCode(code: string) {
+    if (!pending) return;
+    const user = await completeTwoFactorLogin(
+      pending.challenge.challengeToken,
+      code,
+      pending.credentials.remember !== false
+    );
+    router.replace(resolveHomeRoute(user));
+  }
+
+  if (pending) {
+    return (
+      <MobileTwoFactorForm
+        challenge={pending.challenge}
+        onSubmit={submitCode}
+        onResend={resend}
+        onCancel={() => setPending(null)}
+      />
+    );
   }
 
   return (

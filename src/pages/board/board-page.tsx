@@ -4,13 +4,9 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ArrowLeft, Download, Send } from "lucide-react-native";
-import { useAuth } from "@/modules/auth";
-import { boardApi, BoardSurface } from "@/modules/board";
-import { useConversations } from "@/modules/conversation";
+import { boardApi, BoardSurface, useSendBoardToChat } from "@/modules/board";
 import { useLesson } from "@/modules/lesson";
-import { messageApi } from "@/modules/message";
-import { ROLES } from "@/shared/constants";
-import { downloadBlob, toUploadFile, writeBlobToCache } from "@/shared/lib";
+import { downloadBlob } from "@/shared/lib";
 import { radius, Screen, ScreenLoading, Text, ThemeScope, toast, useTheme } from "@/shared/ui";
 import { LiveRoomState } from "@/widgets/live-room/live-room-state";
 
@@ -58,10 +54,10 @@ function BoardPageBody({ lessonId, onBack }: { lessonId: string; onBack: () => v
   const { t } = useTranslation("board");
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
   const lesson = useLesson(lessonId);
-  const conversations = useConversations(user?.role === ROLES.TEACHER ? "teacher" : "student");
-  const [busy, setBusy] = useState<"pdf" | "chat" | null>(null);
+  // PDF ni server o'zi yasab guruh chatiga yuboradi — veb `board-page.tsx` dagidek.
+  const sendToChat = useSendBoardToChat(lessonId);
+  const [busy, setBusy] = useState<"pdf" | null>(null);
   const data = lesson.data;
   if (!data) return null;
   const current = data;
@@ -73,27 +69,6 @@ function BoardPageBody({ lessonId, onBack }: { lessonId: string; onBack: () => v
       await downloadBlob(blob as Blob, `${current.title}.pdf`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("page.pdfFailed"));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function sendToChat() {
-    const room = (conversations.data ?? []).find((item) => item.courseId === current.courseId);
-    if (!room) {
-      toast.error(t("page.roomNotFound"));
-      return;
-    }
-    setBusy("chat");
-    try {
-      const blob = (await boardApi.downloadPdf(current.id)) as Blob;
-      const name = `${current.title}.pdf`;
-      const cached = await writeBlobToCache(blob, name);
-      const file = toUploadFile({ uri: cached.uri, name, size: cached.size, mimeType: "application/pdf" });
-      await messageApi.send(room.id, { text: t("page.chatMessage", { title: current.title }), file });
-      toast.success(t("page.sentToChat"));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("page.sendFailed"));
     } finally {
       setBusy(null);
     }
@@ -128,9 +103,14 @@ function BoardPageBody({ lessonId, onBack }: { lessonId: string; onBack: () => v
             <>
               <Pressable
                 accessibilityRole="button"
-                disabled={busy !== null}
-                onPress={() => void sendToChat()}
-                style={[styles.action, styles.secondary, { borderColor: palette.border, backgroundColor: palette.surface }, busy !== null && styles.dim]}
+                disabled={busy !== null || sendToChat.isPending}
+                onPress={() => sendToChat.mutate(undefined, { onSuccess: () => toast.success(t("page.sentToChat")) })}
+                style={[
+                  styles.action,
+                  styles.secondary,
+                  { borderColor: palette.border, backgroundColor: palette.surface },
+                  (busy !== null || sendToChat.isPending) && styles.dim,
+                ]}
               >
                 <Send size={16} color={palette.foreground} />
                 <Text variant="label">{t("page.sendToChat")}</Text>

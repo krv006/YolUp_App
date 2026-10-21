@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useKeepAwake } from "expo-keep-awake";
-import { ArrowLeft, CalendarDays, Clock3, ShieldCheck, Trash2, TriangleAlert, Users, VideoOff } from "lucide-react-native";
+import { ArrowLeft, CalendarDays, Clock3, PenLine, ShieldCheck, Trash2, TriangleAlert, Users, VideoOff } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { LessonRatingForm, useDeleteRecording, useLesson, useLessonRecording } from "@/modules/lesson";
 import { ROLES } from "@/shared/constants";
@@ -146,6 +146,20 @@ function RecordingBody({ lesson: data, onBack }: { lesson: Lesson; onBack: () =>
         ) : (
           <View style={styles.player}>
             <Player streamUrl={current.streamUrl} />
+            {/* Dars statistikasi — server bersa: ishtirokchilar, davomat, doska sahifalari. */}
+            {current.participantsCount !== null || current.attendanceRate !== null || current.boardPages !== null ? (
+              <View style={styles.stats}>
+                {current.participantsCount !== null ? (
+                  <StatChip icon={Users} label={t("recording.participants", { count: current.participantsCount })} />
+                ) : null}
+                {current.attendanceRate !== null ? (
+                  <StatChip icon={ShieldCheck} label={t("recording.attendanceRate", { value: current.attendanceRate })} />
+                ) : null}
+                {current.boardPages !== null ? (
+                  <StatChip icon={PenLine} label={t("recording.boardPages", { count: current.boardPages })} />
+                ) : null}
+              </View>
+            ) : null}
             {/* `.recording-meta` */}
             <View style={styles.meta}>
               <View style={styles.metaText}>
@@ -329,6 +343,18 @@ export function RecordingMissing() {
   );
 }
 
+function StatChip({ icon: IconComponent, label }: { icon: typeof Users; label: string }) {
+  const { palette } = useTheme();
+  return (
+    <View style={[styles.chip, { backgroundColor: palette["surface-subtle"] }]}>
+      <IconComponent size={14} color={palette["muted-foreground"]} />
+      <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   strong: { fontWeight: "600" },
   /* `px-4 pt-3 pb-6` */
@@ -346,6 +372,8 @@ const styles = StyleSheet.create({
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: radius.lg, backgroundColor: "#000" },
   placeholder: { width: "100%", aspectRatio: 16 / 9, borderRadius: radius.lg, alignItems: "center", justifyContent: "center", gap: 10, padding: 24 },
   placeholderText: { textAlign: "center" },
+  /* `flex flex-wrap items-center gap-2 px-1` */
+  stats: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8, paddingHorizontal: 4 },
   meta: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 14 },
   metaText: { gap: 3 },
   metaTitle: { fontWeight: "700" },

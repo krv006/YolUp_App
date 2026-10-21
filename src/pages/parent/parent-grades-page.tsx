@@ -1,12 +1,21 @@
 import { useTranslation } from "react-i18next";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Trophy } from "lucide-react-native";
 import { HomeworkReportView, useHomeworkReport } from "@/modules/homework";
 import { useSelectedChild } from "@/modules/parent";
 import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
 import { useBackTo } from "@/shared/lib";
-import { PortalEmpty, PortalHeading, portalPage, Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
+import {
+  PortalEmpty,
+  PortalHeading,
+  portalPage,
+  PullRefresh,
+  Screen,
+  ScreenError,
+  ScreenLoading,
+  useTheme,
+} from "@/shared/ui";
 
 const WORKSPACE_PATH = "/parent/workspace";
 
@@ -67,11 +76,7 @@ export function ParentGradesPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={report.isRefetching}
-            onRefresh={() => void report.refetch()}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={() => report.refetch()} />
         }
       >
         <PortalHeading eyebrow={t("report.eyebrow")} title={selectedChild.name} description={t("report.subtitle")} />

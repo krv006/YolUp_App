@@ -14,6 +14,6 @@ export {
   formatDuration,
   formatMessageTime,
 } from "./date";
-export { pickDocument, pickImage, toUploadFile } from "./file-picker";
+export { pickDocument, pickDocuments, pickImage, toUploadFile } from "./file-picker";
 export { useBackTo } from "./use-back-to";
 export type { PickedFile } from "./file-picker";

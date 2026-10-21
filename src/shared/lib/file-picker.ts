@@ -84,6 +84,25 @@ export async function pickDocument(mimeTypes?: string[]): Promise<PickedFile | n
 }
 
 /**
+ * Bir nechta hujjat tanlash (vebdagi `<input type="file" multiple>`).
+ * Foydalanuvchi bekor qilsa — bo'sh ro'yxat.
+ */
+export async function pickDocuments(mimeTypes?: string[]): Promise<PickedFile[]> {
+  const result = await DocumentPicker.getDocumentAsync({
+    type: mimeTypes ?? "*/*",
+    copyToCacheDirectory: true,
+    multiple: true,
+  });
+  if (result.canceled || !result.assets?.length) return [];
+  return result.assets.map((asset) => ({
+    uri: asset.uri,
+    name: asset.name || "fayl",
+    size: asset.size ?? 0,
+    mimeType: asset.mimeType || "application/octet-stream",
+  }));
+}
+
+/**
  * Rasm tanlash yoki kamera.
  *
  * `quality: 0.7` ATAYLAB: telefon kamerasi 5–12 MB rasm beradi, backend

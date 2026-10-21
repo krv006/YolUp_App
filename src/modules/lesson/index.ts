@@ -33,6 +33,7 @@ export {
   useLessonRecording,
   useLiveLesson,
   useLiveLessons,
+  useCancelLesson,
   useCreateLesson,
   useCreateLessonSchedule,
   useDeleteLesson,

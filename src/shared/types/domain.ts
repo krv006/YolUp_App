@@ -95,6 +95,38 @@ export interface MessageAttachment {
   kind?: "voice" | "image" | "file";
 }
 
+export interface MessageForwardSource {
+  messageId: string;
+  authorId: string;
+  authorName: string;
+  roomId: string;
+}
+
+export interface MessageAssignment {
+  id: string;
+  title: string;
+  dueAt: string | null;
+  submittedCount: number;
+  totalCount: number;
+}
+
+export interface PinnedChatMessage {
+  messageId: string;
+  authorName: string;
+  text: string;
+  messageType: string;
+  pinnedAt: string;
+}
+
+export interface ChatMember {
+  id: string;
+  name: string;
+  username: string;
+  role: string;
+  isOnline: boolean;
+  avatarUrl: string | null;
+}
+
 export interface ChatMessage {
   id: string;
   conversationId: string;
@@ -169,6 +201,9 @@ export interface LessonRecording {
   createdAt: string | null;
   endedAt: string | null;
   error: string | null;
+  participantsCount: number | null;
+  attendanceRate: number | null;
+  boardPages: number | null;
 }
 
 export interface Lesson {
@@ -188,6 +223,8 @@ export interface Lesson {
   avgRating: number | null;
   ratingCount: number;
   quizId: string | null;
+  note: string;
+  recurrenceId: string | null;
 }
 
 export interface LessonRating {
@@ -207,7 +244,16 @@ export interface LessonFormValues {
   duration: number;
 }
 
-export type SubmissionStatus = "checking" | "done" | "error";
+export type SubmissionStatus =
+  | "checking"
+  | "pending_review"
+  | "done"
+  | "error"
+  | "resubmit_requested";
+
+export type AssignmentStatus = "draft" | "active";
+
+export type GradingScale = "five" | "hundred" | "none";
 
 export interface AiQuestion {
   questionNumber?: number;
@@ -252,6 +298,9 @@ export interface Submission {
   checkedAt: string | null;
   result: AiResult | null;
   rawResult: Record<string, unknown> | null;
+  gradeValue: number | null;
+  shareWithParent: boolean;
+  resubmitComment: string;
 }
 
 export interface AssignmentStats {
@@ -279,6 +328,11 @@ export interface Assignment {
   mySubmission: Submission | null;
   submissions: Submission[];
   stats: AssignmentStats | null;
+  status: AssignmentStatus;
+  announceInChat: boolean;
+  allowLate: boolean;
+  grading: GradingScale;
+  maxScore: number;
 }
 
 export interface AssignmentFormValues {
@@ -519,9 +573,6 @@ export interface ExamStudentResult {
   /** Halollik jurnali (faqat o'qituvchiga): oynadan chiqish va tashqaridan nusxa qo'yish soni. */
   integrity: { away: number; paste: number } | null;
 }
-
-
-
 
 export interface ExamManualAnswer {
   section: string;
@@ -846,43 +897,4 @@ export interface MonitoringHistory {
   hours: number;
   samples: MonitoringSample[];
   peak: MonitoringSample | null;
-}
-
-/*
- * Quyidagilar veb `shared/types/domain.ts` dan KO'CHIRILDI — xabar moduli
- * vebdan qayta sinxronlanganda kerak bo'ldi. Mobildagi mavjud tiplar
- * (masalan `fill_blank`, `ExamAiWriting`) OLIB TASHLANMADI: vebda ular
- * yo'q, lekin mobil imtihon ekranlari ularni ishlatadi.
- */
-
-export interface ChatMember {
-  id: string;
-  name: string;
-  username: string;
-  role: string;
-  isOnline: boolean;
-  avatarUrl: string | null;
-}
-
-export interface MessageAssignment {
-  id: string;
-  title: string;
-  dueAt: string | null;
-  submittedCount: number;
-  totalCount: number;
-}
-
-export interface MessageForwardSource {
-  messageId: string;
-  authorId: string;
-  authorName: string;
-  roomId: string;
-}
-
-export interface PinnedChatMessage {
-  messageId: string;
-  authorName: string;
-  text: string;
-  messageType: string;
-  pinnedAt: string;
 }

@@ -16,6 +16,7 @@ export {
   useFinishExam,
   useSaveExamAnswers,
   useSaveManualScores,
+  useShareExamResults,
   useNextExamSection,
   useRecordExamFocus,
   useRequestWritingAi,

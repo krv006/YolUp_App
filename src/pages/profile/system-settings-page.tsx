@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AlarmClock } from "lucide-react-native";
-import { useAuth, useUpdateLessonReminderMutation } from "@/modules/auth";
+import { useAuth, useUpdateLessonReminderMutation, useUpdateNotificationPrefsMutation } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
 import { useLanguageStore, useTextSizeStore, type AppLanguage, type TextSize } from "@/shared/model";
 import { useAppearanceStore, type ThemeMode } from "@/shared/model/theme.store";
@@ -16,6 +16,7 @@ import {
   SheetButton,
   SheetFooter,
   Slider,
+  Switch,
   Text,
   toast,
   useTheme,
@@ -241,36 +242,83 @@ function ThemePreview({ id }: { id: ThemeMode }) {
 /**
  * Bildirishnomalar — veb `widgets/account-menu/notification-settings.tsx`.
  *
- * Brauzer push qatori yo'q: mobil qurilma tokeni uchun backendda hali
- * endpoint yo'q, vebdagi Web Push esa ilovada ishlamaydi. Dars eslatmasi
- * esa vebdagidek.
+ * Brauzer push qatori yo'q: vebdagi Web Push ilovada ishlamaydi, qurilma
+ * tokeni esa kirishda o'zi ro'yxatdan o'tadi. Chat xabarlari va email
+ * kalitlari hamda dars eslatmasi vebdagidek.
  */
 function NotificationSettings() {
   const { t } = useTranslation("account");
   const { palette } = useTheme();
   const { user } = useAuth();
   const reminder = useUpdateLessonReminderMutation();
+  const prefs = useUpdateNotificationPrefsMutation();
   const minutes = user?.lessonReminderMinutes ?? (user?.role === ROLES.STUDENT ? 15 : 10);
 
   return (
-    <View style={[styles.settingsRow, { borderColor: palette.border }]}>
-      <Text variant="label" style={styles.grow}>
-        {t("settingsDialog.reminderLabel")}
-      </Text>
-      <View style={styles.picker}>
-        <SelectField
-          hideLabel
-          label={t("settingsDialog.reminderLabel")}
-          icon={<AlarmClock size={17} color={palette["subtle-foreground"]} />}
-          value={String(minutes)}
-          onChange={(value) => reminder.mutate(Number(value))}
-          options={MINUTE_OPTIONS.map((value) => ({
-            value: String(value),
-            label: t("settingsDialog.reminderOption", { count: value }),
-          }))}
-        />
+    <>
+      <PrefRow
+        label={t("settingsDialog.messagesLabel")}
+        hint={t("settingsDialog.messagesHint")}
+        checked={user?.notifyMessages !== false}
+        disabled={prefs.isPending}
+        onChange={(next) => prefs.mutate({ notifyMessages: next })}
+      />
+      <PrefRow
+        label={t("settingsDialog.emailLabel")}
+        hint={t("settingsDialog.emailHint")}
+        checked={user?.notifyEmail === true}
+        disabled={prefs.isPending}
+        onChange={(next) => prefs.mutate({ notifyEmail: next })}
+      />
+      <View style={[styles.settingsRow, { borderColor: palette.border }]}>
+        <Text variant="label" style={styles.grow}>
+          {t("settingsDialog.reminderLabel")}
+        </Text>
+        <View style={styles.picker}>
+          <SelectField
+            hideLabel
+            label={t("settingsDialog.reminderLabel")}
+            icon={<AlarmClock size={17} color={palette["subtle-foreground"]} />}
+            value={String(minutes)}
+            onChange={(value) => reminder.mutate(Number(value))}
+            options={MINUTE_OPTIONS.map((value) => ({
+              value: String(value),
+              label: t("settingsDialog.reminderOption", { count: value }),
+            }))}
+          />
+        </View>
       </View>
-    </View>
+    </>
+  );
+}
+
+/** `.account-settings-row` + `Switch`, ostida `.account-settings-hint`. */
+function PrefRow({
+  label,
+  hint,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  disabled: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  const { palette } = useTheme();
+  return (
+    <>
+      <View style={[styles.settingsRow, { borderColor: palette.border }]}>
+        <Text variant="label" style={styles.grow}>
+          {label}
+        </Text>
+        <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} accessibilityLabel={label} />
+      </View>
+      <Text variant="caption" style={[styles.prefHint, { color: palette["muted-foreground"] }]}>
+        {hint}
+      </Text>
+    </>
   );
 }
 
@@ -300,9 +348,11 @@ const styles = StyleSheet.create({
   radio: { width: 14, height: 14, borderWidth: 1, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
   radioDot: { width: 8, height: 8, borderRadius: radius.full },
   sizeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  notifications: { padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
+  notifications: { gap: 8, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
   /* `.account-settings-row` */
   settingsRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 13, paddingVertical: 11, borderWidth: 1, borderRadius: 13 },
   picker: { width: "52%", maxWidth: 210 },
+  /* `.account-settings-hint` — 12/1.5 */
+  prefHint: { marginTop: -2, fontSize: 12, lineHeight: 18, fontWeight: "400" },
   languageOption: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14, borderRadius: radius.xl },
 });

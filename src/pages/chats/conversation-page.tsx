@@ -185,7 +185,6 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
           tab={tab}
           courseId={courseId}
           isTeacher={role === "teacher"}
-          subject={conversation.subject ?? ""}
         />
       ) : (
         <KeyboardAvoidingView style={styles.body} behavior="padding">

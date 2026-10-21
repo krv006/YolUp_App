@@ -119,19 +119,16 @@ export function GroupWorkspaceSection({
   tab,
   courseId,
   isTeacher = false,
-  subject = "",
 }: {
   tab: Exclude<GroupTab, "chat">;
   courseId: string;
   isTeacher?: boolean;
-  /** Kurs fani — vazifa oynasidagi "tekshiruv turi" tanlovi shunga bog'liq. */
-  subject?: string;
 }) {
   return (
     <View style={styles.root}>
       {tab === "lessons" ? <LessonsSection courseId={courseId} isTeacher={isTeacher} /> : null}
       {tab === "assignments" ? (
-        <AssignmentsSection courseId={courseId} isTeacher={isTeacher} subject={subject} />
+        <AssignmentsSection courseId={courseId} isTeacher={isTeacher} />
       ) : null}
       {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}
     </View>

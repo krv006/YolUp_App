@@ -19,7 +19,6 @@ import {
   Hand,
   Info,
   LayoutDashboard,
-  LogOut,
   Mic,
   MicOff,
   MonitorUp,
@@ -34,7 +33,7 @@ import {
 } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { AwayStudentsNotice, BoardSurface } from "@/modules/board";
-import { useFinishLesson } from "@/modules/lesson";
+import { FinishLessonSheet } from "@/modules/lesson";
 import {
   CAMERA_SOURCE,
   canPublishSource,
@@ -369,7 +368,12 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
         ) : null}
 
         {isTeacher ? (
-          <FinishLessonSheet lesson={finishOpen ? lesson : null} onClose={() => setFinishOpen(false)} onLeave={onLeave} />
+          <FinishLessonSheet
+            lesson={finishOpen ? lesson : null}
+            onClose={() => setFinishOpen(false)}
+            onFinished={onLeave}
+            onLeaveOnly={onLeave}
+          />
         ) : null}
 
         <Sheet
@@ -701,52 +705,6 @@ function MenuItem({
       </Text>
       {trailing}
     </Pressable>
-  );
-}
-
-/** Veb `FinishLessonDialog` — "Faqat chiqish" yoki darsni hamma uchun yakunlash. */
-function FinishLessonSheet({ lesson, onClose, onLeave }: { lesson: Lesson | null; onClose: () => void; onLeave: () => void }) {
-  const { t } = useTranslation("lesson");
-  const { palette } = useTheme();
-  const finish = useFinishLesson();
-  return (
-    <Sheet
-      open={Boolean(lesson)}
-      onClose={onClose}
-      title={t("finishDialog.title")}
-      description={t("finishDialog.description", { title: lesson?.title ?? "" })}
-    >
-      <View style={[styles.finishIcon, { backgroundColor: palette["destructive-soft"] }]}>
-        <LogOut size={20} color={palette["destructive-strong"]} />
-      </View>
-      <SheetFooter>
-        <SheetButton
-          title={t("finishDialog.leaveOnly")}
-          onPress={() => {
-            onClose();
-            onLeave();
-          }}
-        />
-        <SheetButton
-          variant="danger"
-          title={t("finishDialog.confirm")}
-          disabled={finish.isPending}
-          onPress={() => {
-            if (!lesson) return;
-            finish.mutate(
-              { id: lesson.id },
-              {
-                onSuccess: () => {
-                  onClose();
-                  onLeave();
-                },
-                onError: (error: Error) => toast.error(error.message),
-              }
-            );
-          }}
-        />
-      </SheetFooter>
-    </Sheet>
   );
 }
 

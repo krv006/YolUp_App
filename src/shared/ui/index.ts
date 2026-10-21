@@ -65,3 +65,5 @@ export { SheetButton, SheetFooter } from "./sheet-footer";
 export type { SheetButtonProps } from "./sheet-footer";
 export { Switch } from "./switch";
 export type { SwitchProps } from "./switch";
+export { ViewSelect } from "./view-select";
+export type { ViewSelectOption, ViewSelectProps } from "./view-select";

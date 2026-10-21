@@ -8,10 +8,6 @@ function time(value: string | null | undefined): string {
     : "—";
 }
 
-/**
- * Eski backend faqat `focus_exits` sonini qaytaradi, yangisi to'liq `focus` obyektini.
- * Ikkalasini ham bitta shaklga keltiramiz — UI faqat `AttendanceRow.focus` bilan ishlaydi.
- */
 function mapFocusJournal(
   dto: FocusJournalDto | null | undefined,
   fallbackExits: number,

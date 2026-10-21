@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
+import { LogOut } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { formatDayTime } from "@/shared/lib";
 import {
@@ -9,9 +10,13 @@ import {
   Input,
   ScreenEmpty,
   ScreenLoading,
+  radius,
   Separator,
   Sheet,
+  SheetButton,
+  SheetFooter,
   Text,
+  useTheme,
 } from "@/shared/ui";
 import { useFinishLesson, useLessonRatings, useRateLesson } from "../model/lesson.queries";
 import { StarRating } from "./star-rating";
@@ -81,71 +86,61 @@ export function RateLessonSheet({
 }
 
 /**
- * Darsni yakunlash — veb `finish-lesson-dialog.tsx` ning mobil varianti.
- *
- * Yozuv NOMI shu yerda beriladi: backend uni guruh chatiga e'lon qiladi
- * (docs/PROJECT.md §10). Bo'sh qoldirilsa dars nomi olinadi.
+ * Darsni yakunlash — veb `finish-lesson-dialog.tsx`: qizil ikonka, sarlavha,
+ * tavsif va ikki tugma. `onLeaveOnly` berilsa (jonli xonada) chap tugma
+ * "Faqat chiqish" bo'ladi va dars davom etadi.
  */
 export function FinishLessonSheet({
   lesson,
   onClose,
   onFinished,
+  onLeaveOnly,
 }: {
   lesson: Lesson | null;
   onClose: () => void;
   onFinished?: () => void;
+  onLeaveOnly?: () => void;
 }) {
-  const { t } = useTranslation("mobile");
-  const [title, setTitle] = useState("");
+  const { t } = useTranslation("lesson");
+  const { palette } = useTheme();
   const finish = useFinishLesson();
-
-  function close() {
-    setTitle("");
-    onClose();
-  }
-
-  async function submit() {
-    if (!lesson) return;
-    try {
-      await finish.mutateAsync({ id: lesson.id, recordingTitle: title.trim() || undefined });
-      close();
-      onFinished?.();
-    } catch {
-      /*
-       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
-       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
-       * MARTA ko'rinardi.
-       *
-       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
-       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
-       */
-    }
-  }
 
   return (
     <Sheet
       open={Boolean(lesson)}
-      onClose={close}
-      title={t("lesson.darsni_yakunlash")}
-      description={t("lesson.yakunlangach_doska_pdfi_va_video_yozuv_guruh")}
+      onClose={onClose}
+      title={t("finishDialog.title")}
+      description={t("finishDialog.description", { title: lesson?.title ?? "" })}
     >
-      <Input
-        label={t("lesson.yozuv_nomi")}
-        placeholder={lesson?.title ?? "Dars nomi"}
-        value={title}
-        onChangeText={setTitle}
-      />
-      <Text variant="caption" tone="muted">
-        {t("lesson.bosh_qoldirsangiz_dars_nomi_ishlatiladi")}
-      </Text>
-
-      <Button
-        title={t("lesson.darsni_yakunlash")}
-        variant="danger"
-        size="lg"
-        loading={finish.isPending}
-        onPress={() => void submit()}
-      />
+      <View style={[styles.finishIcon, { backgroundColor: palette["destructive-soft"] }]}>
+        <LogOut size={20} color={palette["destructive-strong"]} />
+      </View>
+      <SheetFooter>
+        <SheetButton
+          title={onLeaveOnly ? t("finishDialog.leaveOnly") : t("finishDialog.cancel")}
+          onPress={() => {
+            onClose();
+            onLeaveOnly?.();
+          }}
+        />
+        <SheetButton
+          variant="danger"
+          title={t("finishDialog.confirm")}
+          disabled={finish.isPending}
+          onPress={() => {
+            if (!lesson) return;
+            finish.mutate(
+              { id: lesson.id },
+              {
+                onSuccess: () => {
+                  onClose();
+                  onFinished?.();
+                },
+              }
+            );
+          }}
+        />
+      </SheetFooter>
     </Sheet>
   );
 }
@@ -203,4 +198,5 @@ const styles = StyleSheet.create({
   center: { alignItems: "center", paddingVertical: 8 },
   rating: { flexDirection: "row", gap: 12, paddingVertical: 12 },
   ratingBody: { flex: 1, gap: 4 },
+  finishIcon: { width: 44, height: 44, borderRadius: radius["2xl"], alignItems: "center", justifyContent: "center" },
 });

@@ -14,6 +14,7 @@ export type {
   EnrollmentAction,
   EnrollmentDto,
   EnrollPayload,
+  SubjectOptionDto,
 } from "./api/course.dto";
 export { mapCourseDto, mapCoursePage, mapCourseRequest, mapCourseUserDto, mapEnrollmentDto } from "./lib/course.mappers";
 export {

@@ -1,10 +1,8 @@
 import type { AttendanceRow } from "@/shared/types";
 
-/** Bitta dars bo'yicha yig'ilgan davomat — accordion sarlavhasi shu yig'indini ko'rsatadi. */
 export interface LessonAttendanceGroup {
   lessonId: string;
   lesson: string;
-  /** Guruhdagi eng erta kirish vaqti — sarlavhadagi sana shundan olinadi. */
   startedAt: string | null;
   rows: AttendanceRow[];
   studentsCount: number;
@@ -12,17 +10,9 @@ export interface LessonAttendanceGroup {
   attentionTotal: number;
   focusExits: number;
   awaySeconds: number;
-  /** Shu darsda kamida bitta o'quvchi chegaradan oshib chiqqan. */
   hasAlert: boolean;
 }
 
-/**
- * Davomat yozuvlarini dars bo'yicha guruhlaydi.
- *
- * Backend yozuvlarni yangisidan eskisiga qarab qaytaradi, shu tartib saqlanadi —
- * eng so'nggi dars ro'yxatning boshida turadi. Yig'indilar sarlavhada ko'rsatiladi,
- * shuning uchun ular shu yerda bir marta hisoblanadi.
- */
 export function groupAttendanceByLesson(rows: AttendanceRow[]): LessonAttendanceGroup[] {
   const groups = new Map<string, LessonAttendanceGroup>();
 

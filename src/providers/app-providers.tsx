@@ -8,7 +8,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { tokenStorage } from "@/shared/api";
 import { useAuthStore } from "@/modules/auth";
-import { FONT_ASSETS, ToastHost } from "@/shared/ui";
+import { BootScreen, FONT_ASSETS, ToastHost } from "@/shared/ui";
 import { queryClient } from "./query-client";
 
 /*
@@ -32,8 +32,9 @@ import "@/shared/i18n";
  *   1. tokenStorage.hydrate()  — Keychain'dan tokenni XOTIRAGA o'qish
  *   2. useAuthStore.bootstrap() — GET /auth/me/ (1-qadam tugamasdan
  *      chaqirilsa token topilmaydi va foydalanuvchi har safar login qiladi)
- *   3. Splash yopiladi — undan oldin yopilsa login ekrani bir lahza
- *      "miltillab" o'tadi va keyin bosh sahifaga sakraydi
+ *   3. Shu vaqt davomida `BootScreen` (logo + harakatlanuvchi nuqtalar)
+ *      turadi; marshrutlar faqat undan keyin chiziladi — aks holda login
+ *      ekrani bir lahza "miltillab" o'tib, bosh sahifaga sakrardi
  */
 
 // Splash o'zi yopilib qolmasin — hydrate tugaguncha biz ushlab turamiz.
@@ -77,13 +78,19 @@ export function AppProviders({ children }: { children: ReactNode }) {
    */
   const fontsSettled = fontsLoaded || fontError !== null;
 
-  useEffect(() => {
-    if (ready && fontsSettled) void SplashScreen.hideAsync();
-  }, [ready, fontsSettled]);
-
-  // Splash hali ekranda — bo'sh daraxt qaytaramiz, aks holda marshrut
-  // guard'lari hali noma'lum auth holati ustida qaror qabul qilib qo'yadi.
-  if (!ready || !fontsSettled) return null;
+  /*
+   * Hali tayyor emas — marshrutlar EMAS, ochilish ekrani chiziladi: aks
+   * holda guard'lar noma'lum auth holati ustida qaror qabul qilib qo'yadi.
+   * Tizim splash'i shu ekranning birinchi kadrida yopiladi (u faqat statik
+   * rasm, nuqtalar animatsiyasi esa shu yerda).
+   */
+  if (!ready || !fontsSettled) {
+    return (
+      <SafeAreaProvider>
+        <BootScreen onReady={() => void SplashScreen.hideAsync()} />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={styles.root}>

@@ -129,32 +129,35 @@ export function StudentExamsPage() {
                     </Text>
                   </View>
                   {exam.state === "upcoming" ? <ExamCountdown startsAt={exam.startsAt} /> : null}
-                  <Pressable
-                    accessibilityRole="button"
-                    disabled={disabled}
-                    onPress={() => router.push(`/student/exams/${exam.id}`)}
-                    style={({ pressed }) => [
-                      styles.button,
-                      running
-                        ? {
-                            backgroundColor: pressed ? palette["primary-hover"] : palette.primary,
-                            boxShadow: "0 8px 20px rgba(69, 103, 245, 0.2)",
-                          }
-                        : {
-                            borderWidth: 1,
-                            borderColor: colors.border,
-                            backgroundColor: pressed ? palette["primary-soft"] : palette.surface,
-                          },
-                      disabled && styles.disabled,
-                    ]}
-                  >
-                    <Text
-                      variant="body"
-                      style={[styles.buttonText, { color: running ? palette["primary-foreground"] : colors.foreground }]}
+                  {/* To'liq kenglikdagi qator — tugma sarlavhani siqmaydi, pastga tushadi. */}
+                  <View style={styles.footer}>
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={disabled}
+                      onPress={() => router.push(`/student/exams/${exam.id}`)}
+                      style={({ pressed }) => [
+                        styles.button,
+                        running
+                          ? {
+                              backgroundColor: pressed ? palette["primary-hover"] : palette.primary,
+                              boxShadow: "0 8px 20px rgba(69, 103, 245, 0.2)",
+                            }
+                          : {
+                              borderWidth: 1,
+                              borderColor: colors.border,
+                              backgroundColor: pressed ? palette["primary-soft"] : palette.surface,
+                            },
+                        disabled && styles.disabled,
+                      ]}
                     >
-                      {exam.state === "finished" ? t("list.openResult") : t("list.enter")}
-                    </Text>
-                  </Pressable>
+                      <Text
+                        variant="body"
+                        style={[styles.buttonText, { color: running ? palette["primary-foreground"] : colors.foreground }]}
+                      >
+                        {exam.state === "finished" ? t("list.openResult") : t("list.enter")}
+                      </Text>
+                    </Pressable>
+                  </View>
                 </View>
               );
             })}
@@ -196,7 +199,9 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 14, lineHeight: 21, fontWeight: "700" },
   /* `.exam-state-badge` — 11/800 KATTA HARF */
   badge: { fontSize: 11, fontWeight: "700", letterSpacing: 0.44, textTransform: "uppercase", borderRadius: 999 },
-  button: { minHeight: 38, justifyContent: "center", marginLeft: 53, paddingHorizontal: 13, borderRadius: 10 },
+  // Ikonka (41) + oraliq (12) ichkarida — tugma matn bilan bir chiziqdan boshlanadi.
+  footer: { width: "100%", flexDirection: "row", paddingLeft: 53 },
+  button: { minHeight: 38, justifyContent: "center", paddingHorizontal: 13, borderRadius: 10 },
   buttonText: { fontSize: 15, lineHeight: 22, fontWeight: "700" },
   disabled: { opacity: 0.5 },
   empty: { alignItems: "center", gap: 10, paddingVertical: 40 },

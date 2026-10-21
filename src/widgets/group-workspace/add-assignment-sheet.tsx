@@ -1,20 +1,17 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
-import { FileUp, Paperclip } from "lucide-react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { CalendarDays, FileUp, GraduationCap, Paperclip } from "lucide-react-native";
 import { useCreateAssignment, useUpdateAssignment } from "@/modules/homework";
 import type { Assignment, Lesson } from "@/shared/types";
 import { pickDocument, toUploadFile, type PickedFile } from "@/shared/lib";
 import {
-  Button,
-  DateField,
-  IconButton,
+  DateTimeField,
   Input,
-  radius,
   SelectField,
   Sheet,
+  SheetButton,
   Text,
-  TimeField,
   useTheme,
   type SelectOption,
 } from "@/shared/ui";
@@ -36,17 +33,14 @@ export interface AddAssignmentSheetProps {
   assignment?: Assignment | null;
 }
 
-/**
- * Veb `SKILL_OPTIONS` bilan bir xil (docs/STAFF_API.md §2).
- *
- * IELTS bo'lim nomlari ATAYLAB tarjima qilinmaydi — ular barcha tilda
- * shu ko'rinishda ishlatiladi. Faqat "tanlanmagan" holati tarjimadan
- * oladi, shuning uchun ro'yxat render paytida yig'iladi.
- */
-const IELTS_SKILLS = ["writing", "reading", "listening", "speaking"] as const;
+/** Veb `useSkillOptions` bilan bir xil tartib (docs/STAFF_API.md §2). */
+const SKILLS = ["", "writing", "reading", "listening", "speaking"] as const;
 
 /**
- * Vazifa yaratish — veb `AddAssignmentDialog` ning mobil varianti.
+ * Vazifa yaratish — veb `group-action-dialogs.tsx` dagi `AddAssignmentDialog`:
+ * nom, matn, fayl, topshirish muddati (sana va vaqt), qaysi dars uchun,
+ * til fanida tekshiruv turi, baholash izohi; pastda "Bekor qilish" va
+ * "Vazifani yuborish".
  *
  * Veb'da matn maydoni ustida rich-text asboblar qatori bor edi (qalin, qiya,
  * ro'yxat). Mobilda u ATAYLAB olib tashlandi: veb'da ham u faqat ko'rinish
@@ -62,16 +56,10 @@ export function AddAssignmentSheet({
   isLanguageSubject = false,
   assignment = null,
 }: AddAssignmentSheetProps) {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("group");
 
   const skillOptions: readonly SelectOption[] = useMemo(
-    () => [
-      { value: "", label: t("groupworkspace.tanlanmagan") },
-      ...IELTS_SKILLS.map((skill) => ({
-        value: skill,
-        label: skill[0].toUpperCase() + skill.slice(1),
-      })),
-    ],
+    () => SKILLS.map((skill) => ({ value: skill, label: t(`dialogs.assignment.skillOptions.${skill || "general"}`) })),
     [t]
   );
   const { palette } = useTheme();
@@ -87,10 +75,7 @@ export function AddAssignmentSheet({
    * bo'lmaydi. Bo'sh qoldirilsa o'zgarmaydi — yozilsa almashadi.
    */
   const [grading, setGrading] = useState("");
-  const [dueDate, setDueDate] = useState(assignment?.dueAt ? assignment.dueAt.slice(0, 10) : "");
-  const [dueTime, setDueTime] = useState(
-    assignment?.dueAt ? assignment.dueAt.slice(11, 16) : "23:59"
-  );
+  const [dueAt, setDueAt] = useState(assignment?.dueAt ?? "");
   const [skillKey, setSkillKey] = useState(assignment?.skillKey ?? "");
   const [lessonId, setLessonId] = useState(assignment?.lessonId ?? "");
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -101,15 +86,14 @@ export function AddAssignmentSheet({
       .filter((lesson) => lesson.status === "finished")
       .sort((a, b) => b.startsAt.localeCompare(a.startsAt))
       .map((lesson) => ({ value: lesson.id, label: `${lesson.title} · ${lesson.date}` }));
-    return [{ value: "", label: t("groupworkspace.darsga_boglanmagan") }, ...finished];
+    return [{ value: "", label: t("dialogs.assignment.notLinkedToLesson") }, ...finished];
   }, [lessons, t]);
 
   function reset() {
     setTitle("");
     setDescription("");
     setGrading("");
-    setDueDate("");
-    setDueTime("23:59");
+    setDueAt("");
     setSkillKey("");
     setLessonId("");
     setFile(null);
@@ -133,8 +117,8 @@ export function AddAssignmentSheet({
       title: title.trim(),
       description: description.trim(),
       body: description.trim(),
-      // Muddat sana + vaqtdan yig'iladi; sana yo'q bo'lsa umuman yuborilmaydi.
-      dueAt: dueDate ? `${dueDate}T${dueTime || "23:59"}` : undefined,
+      // Muddat ixtiyoriy — tanlanmagan bo'lsa umuman yuborilmaydi.
+      dueAt: dueAt || undefined,
       // Til fani bo'lmasa tanlov ko'rsatilmagan — eskirgan qiymat ketmasin.
       skillKey: isLanguageSubject ? skillKey : "",
       lessonId: lessonId || null,
@@ -162,107 +146,115 @@ export function AddAssignmentSheet({
     <Sheet
       open={open}
       onClose={close}
-      title={editing ? t("groupworkspace.vazifani_tahrirlash") : t("groupworkspace.yangi_vazifa")}
-      description={t("groupworkspace.topshiriq_muddat_va_kerakli_fayllarni_bir_jo")}
+      title={editing ? t("dialogs.assignment.editTitle") : t("dialogs.assignment.newTitle")}
+      description={t("dialogs.assignment.description")}
     >
-      <Input
-        label={t("groupworkspace.vazifa_nomi")}
-        placeholder={t("groupworkspace.masalan_kvadrat_tenglamalar_5_ta_misol")}
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      <Input
-        label={t("groupworkspace.vazifa_matni")}
-        placeholder={t("groupworkspace.misollar_savollar_korsatmalar")}
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        inputStyle={styles.textarea}
-      />
-
-      <View style={styles.attachRow}>
-        <IconButton accessibilityLabel={t("groupworkspace.fayl_biriktirish")} onPress={() => void attach()}>
-          <FileUp size={22} color={palette["primary-text"]} />
-        </IconButton>
-        {file ? (
-          <View style={[styles.file, { backgroundColor: palette["primary-tint"] }]}>
-            <Paperclip size={14} color={palette["primary-text"]} />
-            <Text variant="caption" numberOfLines={1} style={styles.fileName}>
-              {file.name}
-            </Text>
-            <Text
-              accessibilityRole="button"
-              onPress={() => setFile(null)}
-              variant="caption"
-              tone="danger"
-            >
-              {t("groupworkspace.ochirish")}
-            </Text>
-          </View>
-        ) : (
-          <Text variant="caption" tone="muted">
-            {t("groupworkspace.pdf_docx_yoki_rasm_biriktirish_ixtiyoriy")}
-          </Text>
-        )}
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.half}>
-          <DateField label={t("groupworkspace.muddat")} value={dueDate} onChange={setDueDate} optional />
-        </View>
-        <View style={styles.half}>
-          <TimeField label={t("groupworkspace.vaqt")} value={dueTime} onChange={setDueTime} />
-        </View>
-      </View>
-
-      {/* Tekshiruv turi faqat til fanida ma'noli. */}
-      {isLanguageSubject ? (
-        <SelectField
-          label={t("groupworkspace.tekshiruv_turi")}
-          value={skillKey}
-          options={skillOptions}
-          onChange={setSkillKey}
+      <View style={styles.form}>
+        <Input
+          label={t("dialogs.assignment.titleLabel")}
+          placeholder={t("dialogs.assignment.titlePlaceholder")}
+          value={title}
+          onChangeText={setTitle}
+          autoFocus={!editing}
         />
-      ) : null}
 
-      <SelectField
-        label={t("groupworkspace.qaysi_dars_uchun")}
-        value={lessonId}
-        options={lessonOptions}
-        onChange={setLessonId}
-      />
+        {/* Vebdagi formatlash qatori yo'q — sababi yuqoridagi izohda. */}
+        <Input
+          accessibilityLabel={t("dialogs.assignment.descriptionPlaceholder")}
+          placeholder={t("dialogs.assignment.descriptionPlaceholder")}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          inputStyle={styles.textarea}
+        />
 
-      <Input
-        label={t("groupworkspace.baholash_izohi_ixtiyoriy")}
-        placeholder={t("groupworkspace.masalan_har_bir_misol_2_balldan")}
-        value={grading}
-        onChangeText={setGrading}
-      />
+        {/* `.assignment-upload-row` */}
+        <View style={styles.upload}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void attach()}
+            style={({ pressed }) => [
+              styles.uploadButton,
+              { borderColor: palette.primary, backgroundColor: pressed ? palette["primary-tint"] : palette["primary-soft"] },
+            ]}
+          >
+            <FileUp size={16} color={palette["primary-text"]} />
+            <Text variant="caption" style={[styles.uploadText, { color: palette["primary-text"] }]}>
+              {assignment?.hasAttachment ? t("dialogs.assignment.replaceFile") : t("dialogs.assignment.attachFile")}
+            </Text>
+          </Pressable>
+          {file ? (
+            <View style={styles.fileName}>
+              <Paperclip size={14} color={palette["muted-foreground"]} />
+              <Text variant="caption" numberOfLines={1} style={styles.grow}>
+                {file.name}
+              </Text>
+            </View>
+          ) : assignment?.hasAttachment ? (
+            <View style={styles.fileName}>
+              <Paperclip size={14} color={palette["muted-foreground"]} />
+              <Text variant="caption" numberOfLines={1} style={styles.grow}>
+                {t("dialogs.assignment.currentFilePrefix")}{" "}
+                {assignment.attachmentName || t("dialogs.assignment.fileAttachedFallback")}
+              </Text>
+            </View>
+          ) : null}
+        </View>
 
-      <Button
-        title={editing ? t("groupworkspace.saqlash") : t("groupworkspace.vazifani_yuborish")}
-        size="lg"
-        loading={create.isPending || update.isPending}
-        disabled={!title.trim() || !description.trim()}
-        onPress={() => void submit()}
-      />
+        <DateTimeField label={t("dialogs.assignment.dueLabel")} value={dueAt} onChange={setDueAt} optional />
+
+        {/* Tekshiruv turi faqat til fanida ma'noli. */}
+        {isLanguageSubject ? (
+          <SelectField
+            label={t("dialogs.assignment.checkTypeLabel")}
+            icon={<GraduationCap size={17} color={palette["muted-foreground"]} />}
+            value={skillKey}
+            options={skillOptions}
+            onChange={setSkillKey}
+          />
+        ) : null}
+
+        <SelectField
+          label={t("dialogs.assignment.lessonLabel")}
+          icon={<CalendarDays size={17} color={palette["muted-foreground"]} />}
+          value={lessonId}
+          options={lessonOptions}
+          onChange={setLessonId}
+        />
+
+        <Input
+          label={t("dialogs.assignment.gradingLabel")}
+          placeholder={t("dialogs.assignment.gradingPlaceholder")}
+          value={grading}
+          onChangeText={setGrading}
+        />
+
+        {/* `.dialog-actions` — o'ngda, "Bekor qilish" shaffof. */}
+        <View style={styles.actions}>
+          <SheetButton fill={false} variant="ghost" title={t("dialogs.assignment.cancel")} onPress={close} />
+          <SheetButton
+            fill={false}
+            variant="primary"
+            title={editing ? t("dialogs.assignment.saveChanges") : t("dialogs.assignment.submit")}
+            loading={create.isPending || update.isPending}
+            disabled={!title.trim() || !description.trim()}
+            onPress={() => void submit()}
+          />
+        </View>
+      </View>
     </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  textarea: { minHeight: 110, textAlignVertical: "top" },
-  row: { flexDirection: "row", gap: 12 },
-  half: { flex: 1 },
-  attachRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  file: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    padding: 10,
-    borderRadius: radius.sm,
-  },
-  fileName: { flex: 1 },
+  grow: { flex: 1, minWidth: 0 },
+  /* `.group-action-form` — bloklar orasi 11 */
+  form: { gap: 11 },
+  textarea: { minHeight: 150, textAlignVertical: "top" },
+  upload: { flexDirection: "row", alignItems: "center", gap: 10 },
+  /* `> button` — 35 balandlik, 0 11, radius 10, 11/800 */
+  uploadButton: { minHeight: 35, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 11, borderWidth: 1, borderRadius: 10 },
+  uploadText: { fontSize: 11, lineHeight: 16.5, fontWeight: "700" },
+  fileName: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 6 },
+  actions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 4 },
 });

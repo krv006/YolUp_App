@@ -73,7 +73,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `92a4e4b6b9a7` | — |
 | `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `0b52138d2b10` | — |
 | `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `217cf656f39d` | — |
-| `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi va til sinxroni yo'q; sessiya raqami olindi |
+| `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi yo'q; sessiya raqami olindi; til sinxroni vebdagidek |
 | `src/modules/auth/model/use-auth.ts` | 🟢 NUSXA | `800d84e26e18` | — |
 | `src/modules/board/api/board.api.ts` | 🟢 NUSXA | `4c54b3d918f0` | — |
 | `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `cb6691d2ce73` | — |
@@ -234,6 +234,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/admin/system-panels.tsx` | 🟡 MOSLASH | `1f10ae6fae56` | server holatida davr tugmalari sarlavha ostida (vebda tor ekranda ustun bo'lib izohni siqadi) |
 | `src/pages/admin/teachers/admin-teachers-page.tsx` | 🟡 MOSLASH | `73fbd40d4d08` | mobilda `pages/admin/admin-teachers-page.tsx`; ko'rinish tanlagichi sarlavha ostida; `?teacher=` qatorga aylantiradi va belgilaydi |
 | `src/pages/admin/teachers/teacher-stats-dialog.tsx` | 🟡 MOSLASH | `b15753cd64fc` | mobilda `pages/admin/teacher-stats-sheet.tsx` (Dialog o'rniga Sheet) |
+| `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `7ee0926f54e8` | mobilda ikki fayl: `add-lesson-dialog.tsx` (butun ekran, saqlash shu yerda) va `add-assignment-sheet.tsx`; vazifa matnidagi formatlash qatori YO'Q — vebda tugmalar `onClick` siz |
+| `src/shared/ui/app-dialog.tsx` | 🟡 MOSLASH | `c4982b8cfc42` | faqat `fullscreen` varianti — mobilda `fullscreen-dialog.tsx`; `sheet` o'rniga `Sheet` |
+| `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `c94dcadd37cd` | mobilda `formula-solver-sheet.tsx` (AppDialog sheet o'rniga Sheet); joylash vebdagidek `nextTextPoint` bilan |
 | `src/pages/analytics/analytics-page.tsx` | 🟡 MOSLASH | `092cef5c60fa` | o'qituvchi jadvali (olti ustun) kartochkalarga aylandi — telefonda jadval o'qilmaydi |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `395726c80080` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `cbcaa1d3644e` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
@@ -265,7 +268,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/api/pagination.ts` | 🟢 NUSXA | `ff2532083aa9` | — |
 | `src/shared/api/realtime-socket.ts` | 🔴 QAYTA | `d64ba10c0dea` | AppState + NetInfo; fon rejimida uziladi, qaytganda onResync |
 | `src/shared/api/refresh-token-manager.ts` | 🔴 QAYTA | `d7216dbab64d` | CustomEvent o'rniga obuna ro'yxati; announceSessionChange va refresh poyga tuzatishi olindi |
-| `src/shared/api/request-interceptor.ts` | 🟡 MOSLASH | `f99b14fa30f2` | Accept-Language til saqlagichi o'rniga qat'iy "uz" (§13) |
+| `src/shared/api/request-interceptor.ts` | 🟡 MOSLASH | `f99b14fa30f2` | + `X-Device-Name` sarlavhasi (seanslarda qurilma nomi; vebda brauzer o'zi aniqlanadi) |
 | `src/shared/api/response-interceptor.ts` | 🟢 NUSXA | `283cbb28d435` | — |
 | `src/shared/api/token-storage.ts` | 🔴 QAYTA | `47a479a247f8` | SecureStore + xotira keshi; interfeys va sinxronligi bir xil |
 | `src/shared/config/env.ts` | 🔴 QAYTA | `ff591f4dcda1` | import.meta.env -> expo-constants; o'sha zod sxemasi |

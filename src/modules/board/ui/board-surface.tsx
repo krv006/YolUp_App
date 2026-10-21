@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useKeepAwake } from "expo-keep-awake";
 import { Atom, Calculator, Eye, FilePlus2, Pencil, UserCheck } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
@@ -22,8 +22,10 @@ import { BoardPagesSheet, BoardPermissionSheet, EraseReasonSheet } from "./board
 import { MathFieldSheet } from "./math-field-sheet";
 import { RichTextSheet } from "./rich-text-sheet";
 import { PeriodicTableSheet } from "./periodic-table-sheet";
+import { FormulaSolverSheet } from "./formula-solver-sheet";
+import { nextTextPoint } from "../lib/board-flow";
 import { BoardToolbar, type BoardTool } from "./board-toolbar";
-import { Button, Input, radius, Sheet, Text, ThemeScope, toast, useTheme } from "@/shared/ui";
+import { radius, Text, ThemeScope, toast, useTheme } from "@/shared/ui";
 
 export interface BoardSurfaceProps {
   lessonId: string;
@@ -54,7 +56,6 @@ const PANEL_DARK = { bg: "#161c23", border: "#26313d" };
  */
 export function BoardSurface({ lessonId, courseId = null, statusNote, footerActions, source }: BoardSurfaceProps) {
   const { t } = useTranslation("board");
-  const { t: tm } = useTranslation("mobile");
   const { palette, scheme } = useTheme();
   const { user } = useAuth();
 
@@ -140,10 +141,21 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
     }
   }
 
-  function placeSolution() {
-    if (!solution) return;
+  /**
+   * Yechimni (yoki faqat javobni) doskadagi navbatdagi bo'sh joyga qo'yadi —
+   * veb `placeSolution` / `placeResultOnly`.
+   */
+  function placeSolution(resultOnly: boolean) {
+    if (!solution || !state) return;
     const steps = solution.steps?.length ? `\n${solution.steps.join("\n")}` : "";
-    commitTextStroke({ type: "text", text: `${solution.pretty}\n${solution.result}${steps}`, x: 60, y: 80, size: BOARD_TEXT_SIZE, color });
+    const text = resultOnly ? solution.result : `${solution.pretty}\n${solution.result}${steps}`;
+    const [x, y] = nextTextPoint(active?.strokes ?? [], {
+      boardWidth: state.width,
+      boardHeight: state.height,
+      size: BOARD_TEXT_SIZE,
+      lines: text.split("\n").length,
+    });
+    commitTextStroke({ type: "text", text, x, y, size: BOARD_TEXT_SIZE, color });
     setFormulaOpen(false);
     setFormula("");
     setSolution(null);
@@ -375,44 +387,22 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
         />
 
         {/* Formula yechuvchi — server SymPy bilan yechadi, natija doskaga qo'yiladi. */}
-        <Sheet
+        <FormulaSolverSheet
           open={formulaOpen}
           onClose={() => setFormulaOpen(false)}
-          title={tm("board.formula_yordamchisi")}
-          description={tm("board.masalan_2x_2_5x_3_0")}
-        >
-          <Input
-            label={tm("board.formula")}
-            value={formula}
-            onChangeText={(value) => {
-              setFormula(value);
-              setSolution(null);
-            }}
-            placeholder={tm("board.2x_2_5x_3_0")}
-            autoFocus
-          />
-          {solution ? (
-            <View style={[styles.solution, { backgroundColor: palette.muted }]}>
-              <Text variant="caption" tone="muted" style={styles.mono}>
-                {solution.pretty}
-              </Text>
-              <Text variant="label">{solution.result}</Text>
-              {solution.steps?.map((step) => (
-                <Text key={step} variant="caption" tone="muted">
-                  {step}
-                </Text>
-              ))}
-            </View>
-          ) : null}
-          <Button
-            title={tm("board.yechish")}
-            variant="secondary"
-            loading={solve.isPending}
-            disabled={!formula.trim()}
-            onPress={() => void solveFormula()}
-          />
-          {solution && canDraw ? <Button title={tm("board.doskaga_qoyish")} onPress={placeSolution} /> : null}
-        </Sheet>
+          formula={formula}
+          onFormulaChange={(value) => {
+            setFormula(value);
+            setSolution(null);
+          }}
+          solution={solution}
+          solving={solve.isPending}
+          placing={addStroke.isPending}
+          canPlace={canDraw}
+          onSolve={() => void solveFormula()}
+          onPlace={() => placeSolution(false)}
+          onPlaceResultOnly={() => placeSolution(true)}
+        />
       </ThemeScope>
     </View>
   );
@@ -444,6 +434,4 @@ const styles = StyleSheet.create({
   /* `absolute inset-x-0 bottom-4 px-4` */
   toolbar: { position: "absolute", left: 0, right: 0, bottom: 16, alignItems: "center", paddingHorizontal: 16 },
   footerActions: { position: "absolute", right: 16, bottom: 16, flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 },
-  solution: { gap: 4, padding: 12, borderRadius: radius.sm },
-  mono: { fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }) },
 });

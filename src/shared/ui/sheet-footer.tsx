@@ -30,6 +30,8 @@ export interface SheetButtonProps {
    * `false` — o'z kengligida, bo'shliq 0 24 (eski `.dialog-actions`).
    */
   fill?: boolean;
+  /** Matn oldidagi ikonka (masalan "Havolani nusxalash" dagi zanjir). */
+  icon?: ReactNode;
 }
 
 export function SheetButton({
@@ -39,6 +41,7 @@ export function SheetButton({
   disabled = false,
   loading = false,
   fill = true,
+  icon,
 }: SheetButtonProps) {
   const { palette } = useTheme();
   const filled = variant !== "secondary";
@@ -69,7 +72,7 @@ export function SheetButton({
         },
       ]}
     >
-      {loading ? <ActivityIndicator size="small" color={foreground} /> : null}
+      {loading ? <ActivityIndicator size="small" color={foreground} /> : (icon ?? null)}
       <Text variant="label" style={{ color: foreground }}>
         {title}
       </Text>

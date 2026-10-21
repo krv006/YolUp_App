@@ -9,25 +9,30 @@ export { boardApi } from "./api/board.api";
 export type {
   AwayStudent,
   BoardSheet,
+  BoardSource,
+  FormulaSolutionDto,
   BoardState,
   PendingCameraRequest,
   PendingMicRequest,
+  PeriodicElement,
   Point,
   StrokeDto,
   StrokeInput,
   StrokeKind,
   StrokeShapeDto,
 } from "./api/board.dto";
-export { mapBoardDto } from "./lib/board.mappers";
+export { mapBoardDto, mapPeriodicElementDto } from "./lib/board.mappers";
 export { BoardSocketManager, parseBoardEvent } from "./lib/board-socket-manager";
 export type { BoardSocketEvent } from "./lib/board-socket-manager";
 export {
   boardKeys,
   useAddSheet,
   useAddStroke,
+  useAddStrokes,
   useBoard,
   useEraseStrokes,
   useGrantDraw,
+  usePeriodicTable,
   useSolveFormula,
 } from "./model/board.queries";
 export { useBoardChannel } from "./model/use-board-channel";
@@ -36,7 +41,7 @@ export { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "./constants/board.c
 export { arrowHeadPoints, boxFromDrag, buildStroke, strokeKindOf } from "./lib/board.geometry";
 export { FORMULA_GROUPS } from "./lib/formula-palette";
 export type { FormulaGroup, FormulaTemplate } from "./lib/formula-palette";
-export { FLOW_GAP, FLOW_MARGIN, nextFlowPoint, nextTextPoint } from "./lib/board-flow";
+export { FLOW_GAP, FLOW_MARGIN, nextFlowPoint, nextTextPoint, strokeSpan } from "./lib/board-flow";
 export {
   bohrDiagramSize,
   buildBohrStrokes,

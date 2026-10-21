@@ -30,6 +30,8 @@ const LEGACY_SIZES: Partial<Record<AvatarSize, { box: number; font: number }>> =
   sm: { box: 36, font: 13 },
   md: { box: 43, font: 15 },
   lg: { box: 50, font: 16 },
+  // Jonli dars plitkasi: `.live-camera-placeholder .avatar` — 72px, `--fs-4xl`.
+  xl: { box: 72, font: 28 },
 };
 
 /** Veb `legacy.css` dagi `.avatar--{tone}` gradientlari (145deg). */

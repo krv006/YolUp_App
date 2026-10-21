@@ -45,7 +45,7 @@ export { Screen, ScreenEmpty, ScreenError, ScreenLoading } from "./screen";
 export type { ScreenProps } from "./screen";
 export { Text } from "./text";
 export type { TextProps, TextTone, TextVariant } from "./text";
-export { useTheme } from "./theme";
+export { ThemeScope, useTheme } from "./theme";
 export type { Palette } from "./theme";
 export { toast, ToastHost } from "./toast";
 export type { ToastAction, ToastOptions, ToastVariant } from "./toast";

@@ -37,24 +37,15 @@ export const liveApi = {
     return apiClient.post(liveEndpoints.allowShare, { lesson_id: lessonId, identity });
   },
 
-  /**
-   * Mikrofon so'rovi (MIC_REQUEST_GRANT.md). O'quvchi darsga mikrofonsiz kiradi;
-   * so'rov o'qituvchi ekraniga doska kanali orqali chiqadi.
-   */
   async requestMic(lessonId: string) {
     return apiClient.post(liveEndpoints.requestMic, { lesson_id: lessonId });
   },
 
-  /** O'qituvchi ruxsati — LiveKit darajasida o'quvchi gapira oladigan bo'ladi. */
   async grantMic(lessonId: string, studentId: string) {
     await apiClient.post(liveEndpoints.grantMic, { lesson_id: lessonId, student_id: studentId });
     return studentId;
   },
 
-  /**
-   * So'rovni rad etish: mikrofon berilmaydi, so'rov navbatdan chiqadi.
-   * `denied:false` — navbatda bunday so'rov topilmadi (allaqachon yopilgan).
-   */
   async denyMic(lessonId: string, studentId: string) {
     const dto = await apiClient.post<{ denied?: boolean } | null>(liveEndpoints.denyMic, {
       lesson_id: lessonId,
@@ -63,11 +54,6 @@ export const liveApi = {
     return Boolean(dto?.denied);
   },
 
-  /**
-   * Kamera so'rovi — mikrofon bilan aynan bir xil naqsh
-   * (FRONTEND_TODO_CAMERA_BOARD.md §1). O'quvchi tokeni kamera nashr qilish
-   * huquqisiz keladi, o'qituvchi ruxsat berguncha kamera yoqilmaydi.
-   */
   async requestCamera(lessonId: string) {
     return apiClient.post(liveEndpoints.requestCamera, { lesson_id: lessonId });
   },
@@ -93,7 +79,6 @@ export const liveApi = {
     return Number(dto?.invited ?? 0);
   },
 
-  /** Darsdan chetlashtirish: xonadan uzadi va qayta kirishni bloklaydi. */
   async ban(lessonId: string, studentId: string) {
     await apiClient.post(liveEndpoints.ban, { lesson_id: lessonId, student_id: studentId });
     return studentId;

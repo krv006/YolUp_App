@@ -21,7 +21,6 @@ export function mapAttentionDto(dto: AttentionResponseDto | null | undefined): A
   return dto?.check ? { id: String(dto.check.id), dueAt: dto.check.due_at } : null;
 }
 
-/** Eskirgan backend faqat `{ok:true}` qaytaradi — u holda `tracked: false`. */
 export function mapFocusDto(dto: FocusResponseDto | null | undefined): FocusResult {
   return {
     exitCount: Number(dto?.exit_count ?? 0),

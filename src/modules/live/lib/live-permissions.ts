@@ -1,7 +1,3 @@
-/**
- * LiveKit `TrackSource` protokol qiymatlari. SDK enum'i emas, aynan raqamlar
- * keladi: token ichidagi `canPublishSources` shu ko'rinishda bo'ladi.
- */
 export const CAMERA_SOURCE = 1;
 export const MICROPHONE_SOURCE = 2;
 export const SCREEN_SHARE_SOURCE = 3;
@@ -11,12 +7,6 @@ interface PublishPermissions {
   canPublishSources: number[];
 }
 
-/**
- * Foydalanuvchi shu manbani efirga uzata oladimi.
- *
- * `canPublishSources` bo'sh bo'lsa — cheklov yo'q, hamma manba ochiq (LiveKit
- * shartnomasi). Ro'yxat to'ldirilgan bo'lsa — faqat sanab o'tilganlari.
- */
 export function canPublishSource(
   permissions: PublishPermissions | null | undefined,
   source: number

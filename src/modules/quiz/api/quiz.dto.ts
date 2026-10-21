@@ -13,7 +13,8 @@ export type QuizQuestionTypeDto =
   | "text"
   | "matching"
   | "ordering"
-  | "fill_blank";
+  | "fill_blank"
+  | "essay";
 
 export interface QuizChoiceItemDto {
   id: string | number;
@@ -38,6 +39,7 @@ export interface QuizQuestionDto {
   pairs?: Array<{ left: string; right: string }> | null;
   items?: string[] | null;
   blanks?: Array<{ answers: string[] }> | null;
+  min_words?: number | null;
 }
 
 export interface QuizSummaryDto {
@@ -62,6 +64,8 @@ export interface QuizGroupDto {
   title?: string | null;
   passage?: string | null;
   audio_url?: string | null;
+  /** Audio skripti (AI yaratgan Listening): faqat o'qituvchi javobida bo'ladi. */
+  transcript?: string | null;
 }
 
 export interface QuizDto extends QuizSummaryDto {
@@ -95,6 +99,56 @@ export interface QuizImportRequest {
   courseId?: string | null;
   subject?: string;
   title?: string;
+}
+
+export type AiQuizStandard = "uzbmb" | "ielts" | "sat";
+/** rules — imtihon qoidalari bo'yicha, simple — oddiy variantli, test_creator — eski yo'l */
+export type AiQuizMode = "rules" | "simple" | "test_creator";
+export type AiQuizJobStatus = "queued" | "processing" | "generating" | "done" | "failed";
+
+export interface AiQuizRequest {
+  topic: string;
+  courseId?: string | null;
+  subject?: string;
+  title?: string;
+  /** Faqat eski Test-creator yo'li uchun; bo'sh = imtihon qoidalari bo'yicha AI generator. */
+  standard?: AiQuizStandard;
+  questionCount: number;
+  rulesFile?: File | null;
+  rulesText?: string;
+  /** Material matni (fayl o'rniga yoki fayllarga qo'shimcha). */
+  materialText?: string;
+  /** Imtihon nomi: AI uning rasmiy tuzilmasini o'zi eslaydi (qoidalar berilmasa). */
+  examName?: string;
+}
+
+export interface AiQuizJobDto {
+  id: string;
+  status: AiQuizJobStatus;
+  topic?: string;
+  title?: string;
+  standard?: AiQuizStandard | "";
+  mode?: AiQuizMode;
+  summary?: string;
+  question_count?: number;
+  quiz: string | number | null;
+  error: string;
+  warnings: QuizImportWarningDto[];
+  created_at?: string;
+}
+
+export interface AiQuizJob {
+  id: string;
+  status: AiQuizJobStatus;
+  topic: string;
+  title: string;
+  standard: AiQuizStandard | null;
+  mode: AiQuizMode;
+  summary: string;
+  questionCount: number;
+  quizId: string | null;
+  error: string;
+  createdAt: string;
 }
 
 export interface QuizImportPreviewDto {

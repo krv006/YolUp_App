@@ -60,9 +60,14 @@ export function Card({ children, title, action, onPress, style }: CardProps) {
 }
 
 const styles = StyleSheet.create({
+  /*
+   * Veb DOM'idan o'lchandi: radius 20 (`--radius-xl`), chegara 1px,
+   * ichki bo'shliq 16. Ilgari radius 16 va chegara `hairlineWidth` edi —
+   * kartochka burchaklari o'tkirroq va chekkasi yupqaroq chiqardi.
+   */
   card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderRadius: radius.xl,
     padding: 16,
     gap: 12,
   },

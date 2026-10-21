@@ -9,6 +9,7 @@
     "children": "Children",
     "attendance": "Attendance",
     "homework": "Homework",
+    "exams": "Mock tests",
     "grades": "Rating"
   },
   "rail": {
@@ -21,5 +22,12 @@
     "teacherWorkspace": "Teacher workspace",
     "studentWorkspace": "Student workspace",
     "parentWorkspace": "Parent workspace"
+  },
+  "titles": {
+    "chat": "Chats",
+    "schedule": "Schedule",
+    "workspace": "Workspace",
+    "profile": "Profile",
+    "assignments": "Assignments"
   }
 }

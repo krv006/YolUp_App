@@ -1,55 +1,94 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ArrowDown, ArrowUp, Check } from "lucide-react-native";
+import { Pressable, StyleSheet, TextInput, View, type StyleProp, type ViewStyle } from "react-native";
+import { ArrowDown, ArrowUp, Check, ChevronDown } from "lucide-react-native";
 import type { QuizAnswerValue, QuizQuestion } from "@/shared/types";
-import {
-  Badge,
-  Input,
-  MIN_TOUCH_SIZE,
-  radius,
-  SelectField,
-  Text,
-  useTheme,
-} from "@/shared/ui";
-import { blankTextForDisplay } from "../lib/answer-value";
+import { radius, Sheet, Text, useTheme } from "@/shared/ui";
+import { emptyAnswer } from "../lib/answer-value";
+import { QUIZ_RADIUS, useQuizColors } from "./quiz-colors";
 
 /**
- * Bitta savolning javob maydoni — sakkizta savol turi uchun.
+ * Savolga javob berish — veb `modules/quiz/ui/question-answer-input.tsx`
+ * porti. Test yechishda, mock testda va muharrirdagi "O'quvchi ko'radi"
+ * yorlig'ida bir xil ko'rinadi.
  *
- * Veb `modules/quiz/ui/question-answer-input.tsx` ning mobil varianti.
- * Mantiq (qaysi tur qanday qiymat qaytaradi) AYNAN bir xil; farq faqat
- * boshqaruv elementlarida:
+ * Uslublar vebdagi `legacy.css` qoidalaridan (`.quiz-attempt-option`,
+ * `.quiz-option-radio`, `.quiz-answer-*`):
+ *   variant   min-h 42, bo'shliq 0 12, chegara 1 `--border-strong`,
+ *             radius 13, fon `--surface-tint`, oraliq 10;
+ *             tanlangan: chegara action, fon action-tint
+ *   radio     20x20, 2px chegara, ichida 10x10 nuqta
+ *   belgi     20x20, radius 6, tanlanganda to'la action va oq belgi
  *
- *   matching  — veb'da `<select>`, mobilda `SelectField` (to'liq ekranli ro'yxat)
- *   ordering  — veb'da ham, mobilda ham yuqori/quyi strelkalar. Sudrab
- *               ko'chirish ATAYLAB olinmadi: ro'yxat aylantiriladigan
- *               ekran ichida turadi va ikkala gesture bir-biriga xalaqit
- *               beradi. Strelka ishonchli va ekran o'quvchisi uchun ham aniq.
- *
- * MATEMATIKA HOZIRCHA ODDIY MATN. Veb `MathText` bilan LaTeX ni chizadi;
- * mobilda buning uchun KaTeX WebView kerak (doskadagi `MathMarkup`), va
- * har savol uchun alohida WebView ochish og'ir. Bu test bosqichining
- * ikkinchi qismida hal qilinadi.
+ * Vebdan farqi: `$...$` formulalar hozircha oddiy matn bo'lib chiqadi —
+ * vebda ular MathLive bilan chiziladi, mobilda bunday renderer yo'q.
  */
 export interface QuestionAnswerInputProps {
   question: QuizQuestion;
-  value: QuizAnswerValue;
+  /** Savol raqami — ekran o'quvchisi uchun ("3-savol javoblari"). */
+  number?: number;
+  value: QuizAnswerValue | undefined;
   onChange: (value: QuizAnswerValue) => void;
 }
 
-export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswerInputProps) {
-  const { t } = useTranslation("mobile");
-  const { palette } = useTheme();
+function countWords(value: string): number {
+  const trimmed = value.trim();
+  return trimmed ? trimmed.split(/\s+/).length : 0;
+}
 
-  if (value.type === "single") {
+function asType<T extends QuizAnswerValue["type"]>(
+  value: QuizAnswerValue,
+  type: T
+): Extract<QuizAnswerValue, { type: T }> | null {
+  return value.type === type ? (value as Extract<QuizAnswerValue, { type: T }>) : null;
+}
+
+/** Savol matni — veb `QuestionPrompt`. */
+export function QuestionPrompt({ question }: { question: QuizQuestion }) {
+  const { t } = useTranslation("quiz");
+  const colors = useQuizColors();
+  if (question.type === "fill_blank") {
     return (
-      <View style={styles.list}>
+      <Text variant="caption" style={{ color: colors.muted }}>
+        {t("answer.fillBlankHint")}
+      </Text>
+    );
+  }
+  if (!question.text.trim()) {
+    return (
+      <Text variant="label" style={[styles.prompt, styles.placeholder, { color: colors.muted }]}>
+        {t("preview.questionPlaceholder")}
+      </Text>
+    );
+  }
+  return (
+    <Text
+      variant="label"
+      style={[styles.prompt, question.type === "essay" && styles.essayPrompt, { color: colors.foreground }]}
+    >
+      {question.text}
+    </Text>
+  );
+}
+
+export function QuestionAnswerInput({ question, number = 1, value, onChange }: QuestionAnswerInputProps) {
+  const { t } = useTranslation("quiz");
+  const { palette } = useTheme();
+  const colors = useQuizColors();
+  const current = value && value.type === question.type ? value : emptyAnswer(question);
+  const groupLabel = t("attemptDialog.answersAria", { number });
+
+  const single = asType(current, "single");
+  if (single) {
+    return (
+      <View style={styles.list} accessibilityRole="radiogroup" accessibilityLabel={groupLabel}>
         {question.options.map((option) => (
           <Choice
             key={option.id}
-            label={option.text}
-            selected={value.optionId === option.id}
             shape="radio"
+            selected={single.optionId === option.id}
+            label={option.text}
+            placeholder={t("preview.optionPlaceholder")}
             onPress={() => onChange({ type: "single", optionId: option.id })}
           />
         ))}
@@ -57,23 +96,28 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
     );
   }
 
-  if (value.type === "multiple") {
+  const multiple = asType(current, "multiple");
+  if (multiple) {
     return (
-      <View style={styles.list}>
+      <View style={styles.list} accessibilityLabel={groupLabel}>
+        <Text variant="caption" style={{ color: colors.muted }}>
+          {t("answer.multipleHint")}
+        </Text>
         {question.options.map((option) => {
-          const selected = value.optionIds.includes(option.id);
+          const active = multiple.optionIds.includes(option.id);
           return (
             <Choice
               key={option.id}
-              label={option.text}
-              selected={selected}
               shape="box"
+              selected={active}
+              label={option.text}
+              placeholder={t("preview.optionPlaceholder")}
               onPress={() =>
                 onChange({
                   type: "multiple",
-                  optionIds: selected
-                    ? value.optionIds.filter((id) => id !== option.id)
-                    : [...value.optionIds, option.id],
+                  optionIds: active
+                    ? multiple.optionIds.filter((id) => id !== option.id)
+                    : [...multiple.optionIds, option.id],
                 })
               }
             />
@@ -83,59 +127,88 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
     );
   }
 
-  if (value.type === "true_false") {
+  const trueFalse = asType(current, "true_false");
+  if (trueFalse) {
     return (
-      <View style={styles.row}>
+      <View style={styles.bool} accessibilityRole="radiogroup" accessibilityLabel={groupLabel}>
         {[true, false].map((option) => (
           <Choice
             key={String(option)}
-            label={option ? "To'g'ri" : "Noto'g'ri"}
-            selected={value.value === option}
             shape="radio"
-            style={styles.half}
+            selected={trueFalse.value === option}
+            label={option ? t("answer.true") : t("answer.false")}
             onPress={() => onChange({ type: "true_false", value: option })}
+            style={styles.half}
           />
         ))}
       </View>
     );
   }
 
-  if (value.type === "numeric") {
+  const numeric = asType(current, "numeric");
+  if (numeric) {
     return (
-      <Input
-        placeholder={t("quiz.son_kiriting")}
-        value={value.value}
+      <AnswerInput
+        value={numeric.value}
+        label={groupLabel}
+        placeholder={t("answer.numericPlaceholder")}
         keyboardType="numbers-and-punctuation"
-        onChangeText={(next) => onChange({ type: "numeric", value: next })}
+        onChange={(next) => onChange({ type: "numeric", value: next })}
       />
     );
   }
 
-  if (value.type === "text") {
-    return (
-      <Input
-        placeholder={t("quiz.javobingizni_yozing")}
-        value={value.value}
-        multiline
-        onChangeText={(next) => onChange({ type: "text", value: next })}
-      />
-    );
-  }
-
-  if (value.type === "matching") {
-    const options = question.matchRight.map((right) => ({ value: right.id, label: right.text }));
+  const essay = asType(current, "essay");
+  if (essay) {
+    const words = countWords(essay.value);
+    const minimum = question.minWords ?? 0;
     return (
       <View style={styles.list}>
+        <AnswerInput
+          value={essay.value}
+          label={groupLabel}
+          placeholder={t("answer.essayPlaceholder")}
+          multiline
+          onChange={(next) => onChange({ type: "essay", value: next })}
+        />
+        <Text
+          variant="caption"
+          // `.quiz-answer-words.is-short` #b45309, `.is-enough` #15803d
+          style={{ color: minimum && words < minimum ? "#b45309" : "#15803d" }}
+        >
+          {minimum ? t("answer.wordsOfMin", { count: words, min: minimum }) : t("answer.words", { count: words })}
+        </Text>
+      </View>
+    );
+  }
+
+  const text = asType(current, "text");
+  if (text) {
+    return (
+      <AnswerInput
+        value={text.value}
+        label={groupLabel}
+        placeholder={t("answer.textPlaceholder")}
+        onChange={(next) => onChange({ type: "text", value: next })}
+      />
+    );
+  }
+
+  const matching = asType(current, "matching");
+  if (matching) {
+    return (
+      <View style={styles.list} accessibilityLabel={groupLabel}>
         {question.matchLeft.map((left) => (
           <View key={left.id} style={styles.matchRow}>
-            <Text style={styles.matchLeft}>{left.text || "…"}</Text>
-            <SelectField
-              label=""
-              placeholder={t("quiz.tanlang")}
-              value={value.pairs[left.id] ?? ""}
-              options={options}
+            <Text variant="body" style={[styles.matchLeft, { color: colors.foreground }]}>
+              {left.text || "…"}
+            </Text>
+            <MatchSelect
+              value={matching.pairs[left.id] ?? ""}
+              placeholder={t("answer.matchPlaceholder")}
+              options={question.matchRight.map((right) => ({ value: right.id, label: right.text }))}
               onChange={(next) => {
-                const pairs = { ...value.pairs };
+                const pairs = { ...matching.pairs };
                 if (next) pairs[left.id] = next;
                 else delete pairs[left.id];
                 onChange({ type: "matching", pairs });
@@ -147,123 +220,139 @@ export function QuestionAnswerInput({ question, value, onChange }: QuestionAnswe
     );
   }
 
-  if (value.type === "ordering") {
+  const ordering = asType(current, "ordering");
+  if (ordering) {
     const byId = new Map(question.options.map((option) => [option.id, option]));
-    // Noma'lum id'lar tashlab yuboriladi, yangi variantlar oxiriga qo'shiladi —
-    // savol tahrirlangan bo'lsa ham tartib buzilmaydi.
-    const known = value.order.filter((id) => byId.has(id));
-    const order = [
-      ...known,
-      ...question.options.map((option) => option.id).filter((id) => !known.includes(id)),
-    ];
-
-    function move(from: number, to: number) {
+    const known = ordering.order.filter((id) => byId.has(id));
+    const order = [...known, ...question.options.map((option) => option.id).filter((id) => !known.includes(id))];
+    const moveItem = (from: number, to: number) => {
       if (to < 0 || to >= order.length) return;
       const next = [...order];
       const [item] = next.splice(from, 1);
       next.splice(to, 0, item);
       onChange({ type: "ordering", order: next });
-    }
-
+    };
     return (
-      <View style={styles.list}>
+      <View style={styles.list} accessibilityLabel={groupLabel}>
         {order.map((id, position) => (
           <View
             key={id}
-            style={[styles.orderRow, { borderColor: palette.border, backgroundColor: palette.surface }]}
+            style={[styles.orderRow, { borderColor: colors.borderStrong, backgroundColor: colors.surfaceTint }]}
           >
-            <Badge label={String(position + 1)} tone="neutral" />
-            <Text style={styles.orderText}>{byId.get(id)?.text || "…"}</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("quiz.yuqoriga")}
+            <View style={[styles.orderIndex, { backgroundColor: palette["primary-tint"] }]}>
+              <Text variant="caption" style={[styles.heavy, { color: palette["primary-text"] }]}>
+                {position + 1}
+              </Text>
+            </View>
+            <Text variant="body" style={[styles.grow, { color: colors.foreground }]}>
+              {byId.get(id)?.text || "…"}
+            </Text>
+            <OrderButton
+              label={t("editor.moveUpAria")}
               disabled={position === 0}
-              onPress={() => move(position, position - 1)}
-              style={styles.arrow}
+              onPress={() => moveItem(position, position - 1)}
             >
-              <ArrowUp
-                size={18}
-                color={position === 0 ? palette["border-strong"] : palette["primary-text"]}
-              />
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("quiz.pastga")}
+              <ArrowUp size={14} color={colors.muted} />
+            </OrderButton>
+            <OrderButton
+              label={t("editor.moveDownAria")}
               disabled={position === order.length - 1}
-              onPress={() => move(position, position + 1)}
-              style={styles.arrow}
+              onPress={() => moveItem(position, position + 1)}
             >
-              <ArrowDown
-                size={18}
-                color={
-                  position === order.length - 1
-                    ? palette["border-strong"]
-                    : palette["primary-text"]
-                }
-              />
-            </Pressable>
+              <ArrowDown size={14} color={colors.muted} />
+            </OrderButton>
           </View>
         ))}
       </View>
     );
   }
 
-  // fill_blank
-  return (
-    <View style={styles.list}>
-      <Text variant="caption" tone="muted">
-        {blankTextForDisplay(question.text)}
-      </Text>
-      {value.values.map((entry, index) => (
-        <Input
-          key={index}
-          label={`${index + 1}-bo'sh joy`}
-          value={entry}
-          onChangeText={(next) => {
-            const values = [...value.values];
-            values[index] = next;
-            onChange({ type: "fill_blank", values });
-          }}
-        />
-      ))}
-    </View>
-  );
+  const fill = asType(current, "fill_blank");
+  if (fill) {
+    const parts = question.text.split(/(\{\{\d+\}\})/g);
+    return (
+      <View style={styles.fill}>
+        {parts.flatMap((part, index) => {
+          const match = /^\{\{(\d+)\}\}$/.exec(part);
+          if (!match) {
+            // Matn so'zlarga bo'linadi — qator oxirida o'ralishi uchun.
+            return part
+              .split(/(\s+)/)
+              .filter((word) => word.trim())
+              .map((word, wordIndex) => (
+                <Text
+                  key={`${index}-${wordIndex}`}
+                  variant="label"
+                  style={[styles.fillText, { color: colors.foreground }]}
+                >
+                  {word}
+                </Text>
+              ));
+          }
+          const blankIndex = Number(match[1]) - 1;
+          return [
+            <TextInput
+              key={index}
+              value={fill.values[blankIndex] ?? ""}
+              accessibilityLabel={t("answer.blankAria", { number: blankIndex + 1 })}
+              onChangeText={(next) => {
+                const values = Array.from(
+                  { length: Math.max(question.blankCount, fill.values.length, blankIndex + 1) },
+                  (_, position) => fill.values[position] ?? ""
+                );
+                values[blankIndex] = next;
+                onChange({ type: "fill_blank", values });
+              }}
+              style={[
+                styles.blank,
+                {
+                  borderBottomColor: palette.primary,
+                  backgroundColor: palette["primary-tint"],
+                  color: colors.foreground,
+                },
+              ]}
+            />,
+          ];
+        })}
+      </View>
+    );
+  }
+
+  return null;
 }
 
-/*
- * EKSPORT QILINADI (vebda bu yo'q).
- *
- * Vebda variant tugmasi `quiz-attempt-option` CSS klassi bilan chiziladi
- * va uni mock test ham AYNAN shu klass bilan qayta ishlatadi. Mobilda CSS
- * klassi yo'q, shuning uchun komponentning o'zi eksport qilinadi —
- * aks holda ikkinchi nusxa yozilardi va ikki joyda ikki xil ko'rinishga
- * ajralib ketardi.
+/**
+ * Variant tugmasi — `.quiz-attempt-option` + `.quiz-option-radio` /
+ * `.quiz-option-check`. Mock test ham shuni ishlatadi.
  */
 export function Choice({
   label,
+  placeholder,
   selected,
   shape,
   onPress,
   style,
 }: {
   label: string;
+  /** Matn bo'sh bo'lsa (muharrirdagi ko'rinish) — kulrang o'rinbosar. */
+  placeholder?: string;
   selected: boolean;
   shape: "radio" | "box";
   onPress: () => void;
-  style?: object;
+  style?: StyleProp<ViewStyle>;
 }) {
   const { palette } = useTheme();
+  const colors = useQuizColors();
   return (
     <Pressable
       accessibilityRole={shape === "radio" ? "radio" : "checkbox"}
-      accessibilityState={{ selected }}
+      accessibilityState={{ checked: selected }}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.choice,
+      style={[
+        styles.option,
         {
-          borderColor: selected ? palette.primary : palette.border,
-          backgroundColor: selected ? palette["primary-tint"] : palette.surface,
-          opacity: pressed ? 0.85 : 1,
+          borderColor: selected ? palette.primary : colors.borderStrong,
+          backgroundColor: selected ? palette["primary-tint"] : colors.surfaceTint,
         },
         style,
       ]}
@@ -272,63 +361,233 @@ export function Choice({
         style={[
           styles.mark,
           shape === "radio" ? styles.markRound : styles.markSquare,
-          { borderColor: selected ? palette.primary : palette["border-strong"] },
+          {
+            borderColor: selected ? palette.primary : colors.borderStrong,
+            backgroundColor: selected && shape === "box" ? palette.primary : "transparent",
+          },
         ]}
       >
         {selected ? (
           shape === "radio" ? (
             <View style={[styles.dot, { backgroundColor: palette.primary }]} />
           ) : (
-            <Check size={12} color={palette.primary} strokeWidth={3} />
+            <Check size={13} color={palette["primary-foreground"]} strokeWidth={3} />
           )
         ) : null}
       </View>
-      <Text style={styles.choiceText}>{label}</Text>
+      <Text
+        variant="body"
+        style={[styles.grow, { color: label ? colors.foreground : colors.muted }]}
+      >
+        {label || placeholder}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** `.quiz-answer-input` — min-h 42, chegara 1 `--border-strong`, radius 13. */
+function AnswerInput({
+  value,
+  label,
+  placeholder,
+  onChange,
+  multiline = false,
+  keyboardType,
+}: {
+  value: string;
+  label: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  multiline?: boolean;
+  keyboardType?: "numbers-and-punctuation";
+}) {
+  const { palette } = useTheme();
+  const colors = useQuizColors();
+  const [focused, setFocused] = useState(false);
+  return (
+    <TextInput
+      value={value}
+      accessibilityLabel={label}
+      placeholder={placeholder}
+      placeholderTextColor={colors.muted}
+      keyboardType={keyboardType}
+      multiline={multiline}
+      textAlignVertical={multiline ? "top" : "center"}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onChangeText={onChange}
+      style={[
+        styles.input,
+        multiline && styles.essayInput,
+        {
+          borderColor: focused ? palette.primary : colors.borderStrong,
+          backgroundColor: palette.surface,
+          color: colors.foreground,
+        },
+      ]}
+    />
+  );
+}
+
+/** Moslashtirishdagi tanlov — vebda `<select>`, mobilda ro'yxatli oyna. */
+function MatchSelect({
+  value,
+  placeholder,
+  options,
+  onChange,
+}: {
+  value: string;
+  placeholder: string;
+  options: Array<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+}) {
+  const { palette } = useTheme();
+  const colors = useQuizColors();
+  const [open, setOpen] = useState(false);
+  const selected = options.find((option) => option.value === value);
+  return (
+    <>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => setOpen(true)}
+        style={[styles.select, { borderColor: colors.borderStrong, backgroundColor: palette.surface }]}
+      >
+        <Text variant="body" numberOfLines={1} style={[styles.grow, { color: colors.foreground }]}>
+          {selected?.label ?? placeholder}
+        </Text>
+        <ChevronDown size={16} color={colors.muted} />
+      </Pressable>
+      <Sheet open={open} onClose={() => setOpen(false)} title={placeholder}>
+        {[{ value: "", label: placeholder }, ...options].map((option) => (
+          <Pressable
+            key={option.value || "__empty"}
+            accessibilityRole="button"
+            onPress={() => {
+              onChange(option.value);
+              setOpen(false);
+            }}
+            style={({ pressed }) => [
+              styles.selectOption,
+              (pressed || option.value === value) && { backgroundColor: palette["surface-subtle"] },
+            ]}
+          >
+            <Text variant="body" style={styles.grow}>
+              {option.label}
+            </Text>
+            {option.value === value ? <Check size={18} color={palette.primary} /> : null}
+          </Pressable>
+        ))}
+      </Sheet>
+    </>
+  );
+}
+
+function OrderButton({
+  label,
+  disabled,
+  onPress,
+  children,
+}: {
+  label: string;
+  disabled: boolean;
+  onPress: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.orderButton, disabled && styles.disabled]}
+    >
+      {children}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  list: { gap: 8 },
-  row: { flexDirection: "row", gap: 8 },
+  grow: { flex: 1, minWidth: 0 },
   half: { flex: 1 },
-  choice: {
+  heavy: { fontWeight: "700" },
+  disabled: { opacity: 0.35 },
+  /* Savol matni — 14/21, 650 */
+  prompt: { fontSize: 14, lineHeight: 21, fontWeight: "600" },
+  placeholder: { fontWeight: "400" },
+  essayPrompt: { lineHeight: 22 },
+  /* `.quiz-option-list` — gap 6 */
+  list: { gap: 6 },
+  bool: { flexDirection: "row", gap: 6 },
+  option: {
+    minHeight: 42,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    minHeight: MIN_TOUCH_SIZE,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.md,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: QUIZ_RADIUS.md,
   },
-  choiceText: { flex: 1 },
-  mark: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  mark: { width: 20, height: 20, borderWidth: 2, alignItems: "center", justifyContent: "center" },
   markRound: { borderRadius: radius.full },
   markSquare: { borderRadius: 6 },
   dot: { width: 10, height: 10, borderRadius: radius.full },
+  input: {
+    minHeight: 42,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: QUIZ_RADIUS.md,
+    fontSize: 16,
+    fontFamily: "Onest-Regular",
+  },
+  /* `.quiz-answer-essay-input` — min-h 280, qator 1.6 */
+  essayInput: { minHeight: 280, lineHeight: 26 },
+  /* `.quiz-answer-match-row` — telefonda bitta ustun, gap 4 */
   matchRow: { gap: 4 },
   matchLeft: { fontWeight: "600" },
-  orderRow: {
+  select: {
+    minHeight: 40,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    minHeight: MIN_TOUCH_SIZE,
     paddingHorizontal: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.md,
+    borderWidth: 1,
+    borderRadius: QUIZ_RADIUS.md,
   },
-  orderText: { flex: 1 },
-  arrow: {
-    width: MIN_TOUCH_SIZE,
-    height: MIN_TOUCH_SIZE,
+  selectOption: {
+    minHeight: 48,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    gap: 12,
+    paddingHorizontal: 12,
+    borderRadius: radius.xl,
+  },
+  /* `.quiz-answer-ordering li` — min-h 42, bo'shliq 0 6 0 10, gap 8 */
+  orderRow: {
+    minHeight: 42,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingLeft: 10,
+    paddingRight: 6,
+    borderWidth: 1,
+    borderRadius: QUIZ_RADIUS.md,
+  },
+  orderIndex: { width: 22, height: 22, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  orderButton: { width: 30, height: 30, borderRadius: QUIZ_RADIUS.sm, alignItems: "center", justifyContent: "center" },
+  /* `.quiz-answer-fill` — 14px, 600, qator 2.2 */
+  fill: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", columnGap: 4, rowGap: 4 },
+  fillText: { fontSize: 14, lineHeight: 30, fontWeight: "600" },
+  blank: {
+    width: 110,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderBottomWidth: 2,
+    borderTopLeftRadius: QUIZ_RADIUS.sm,
+    borderTopRightRadius: QUIZ_RADIUS.sm,
+    fontSize: 14,
+    fontFamily: "Onest-SemiBold",
+    textAlign: "center",
   },
 });

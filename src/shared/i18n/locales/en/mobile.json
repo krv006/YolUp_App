@@ -117,7 +117,11 @@
     "xabarlar_yoq": "No messages",
     "birinchi_xabarni_yozib_suhbatni_boshlang": "Write the first message to start the conversation.",
     "dars_yozuvini_korish": "View lesson recording",
-    "yozuvni_korish": "View recording"
+    "yozuvni_korish": "View recording",
+    "biriktirish": "Attach",
+    "eslatish": "Mention someone",
+    "emoji": "Emoji",
+    "ovozli_xabar": "Voice message"
   },
   "analytics": {
     "qiymatlarni_ko_rish_uchun_grafikni_bosi": "Tap the chart to see values.",
@@ -223,7 +227,8 @@
     "royxat": "List",
     "hali_dars_rejalashtirilmagan": "No lessons scheduled yet",
     "kursga_yozilganingizdan_keyin_darslar_shu_ye": "Lessons appear here once you enrol in a course.",
-    "bu_kunda_dars_yoq": "No lessons on this day."
+    "bu_kunda_dars_yoq": "No lessons on this day.",
+    "jadval": "Schedule"
   },
   "settings": {
     "orqaga": "Back",
@@ -586,7 +591,9 @@
     "username_nusxalandi": "Username copied",
     "yangi_kurs_va_guruh": "New course and group",
     "yangi_oquv_maydoni": "New learning space",
-    "yangi_sorov": "New request"
+    "yangi_sorov": "New request",
+    "suhbat_malumoti": "Conversation details",
+    "xabarlardan_qidirish": "Search messages"
   },
   "homework": {
     "barcha_fanlar": "All subjects",
@@ -755,6 +762,7 @@
     "ratingChild": {
       "title": "Rating",
       "description": "Your child's homework results."
-    }
+    },
+    "modullar": "Modules"
   }
 }

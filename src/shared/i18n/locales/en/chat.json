@@ -2,14 +2,25 @@
   "emptyState": {
     "title": "Choose a conversation",
     "description": "Pick a conversation on the left to view and continue messaging.",
-    "openConversations": "Open conversations"
+    "openConversations": "Open conversations",
+    "noChatsTitle": "No chats yet",
+    "noChatsTeacher": "Create a group and invite your students. Chats will appear here.",
+    "noChatsStudent": "Join a course or find a teacher. Chats will appear here.",
+    "createGroup": "Create a group",
+    "findTeacher": "Join a course"
   },
   "header": {
     "backAria": "Back to conversations",
     "openInfoAria": "Open {{title}} info",
-    "memberCount": "{{count}} students",
+    "memberCount": "{{count}} members",
     "online": "Online now",
-    "recentlyActive": "Recently active"
+    "recentlyActive": "Recently active",
+    "searchAria": "Search messages",
+    "searchPlaceholder": "Search messages",
+    "closeSearchAria": "Close search",
+    "searchPrevAria": "Previous match",
+    "searchNextAria": "Next match",
+    "onlineCount": "{{count}} online"
   },
   "directStatus": {
     "pending": "Request pending",
@@ -20,7 +31,7 @@
   "info": {
     "groupSubjectFallback": "Course group",
     "profileInfo": "Profile info",
-    "memberCount": "{{count}} students",
+    "memberCount": "{{count}} members",
     "changeGroupImageAria": "Change group photo",
     "groupImageUpdated": "Group photo updated",
     "muteOn": "Unmute",
@@ -49,14 +60,42 @@
     "cancel": "Cancel",
     "save": "Save",
     "deleteCourseTitle": "Delete course",
-    "deleteCourseDescription": "\"{{title}}\" and its related data cannot be restored."
+    "deleteCourseDescription": "The group chat, lessons, assignments and recordings will be removed for good. This cannot be undone.",
+    "panelTitle": "Group info",
+    "backAria": "Back",
+    "closeAria": "Close",
+    "search": "Search",
+    "invite": "Invite",
+    "announcementTitle": "Announcement mode",
+    "announcementHint": "Only you can post",
+    "aboutGroupPlain": "About the group",
+    "allMembers": "All",
+    "membersTitle": "Members",
+    "deleteCourseConfirmTitle": "Delete the “{{title}}” group?",
+    "deleteTypeName": "Type the group name to confirm",
+    "deleteConfirm": "Delete",
+    "descriptionOptional": "Short description · optional",
+    "joinRequests": "Join requests · {{count}}",
+    "joinRequestsHint": "They came through the invite link",
+    "pinned": "Pinned",
+    "pinHint": "No pinned message",
+    "tabMembers": "Members — {{count}}",
+    "tabFiles": "Files",
+    "tabMedia": "Media",
+    "filesEmpty": "No files",
+    "mediaEmpty": "No media",
+    "sectionPending": "Will appear once the backend is ready",
+    "online": "online",
+    "onlineCount": "{{count}} online",
+    "teacherBadge": "Teacher"
   },
   "item": {
     "liveNow": "Lesson in progress",
-    "typing": "typing..."
+    "typing": "typing...",
+    "mentionTitle": "You were mentioned"
   },
   "newDialog": {
-    "title": "New course & group",
+    "title": "New group",
     "description": "Once the course is created, the backend automatically opens its group chat.",
     "pendingEnrollments": "PENDING ENROLLMENTS",
     "decline": "Decline",
@@ -64,19 +103,34 @@
     "createdToast": "Course and group chat created",
     "noteTitle": "A new learning space",
     "noteDescription": "Chat, lessons, homework and students, all in one course.",
-    "courseNameLabel": "Course name",
-    "courseNamePlaceholder": "E.g. English — Intermediate",
+    "courseNameLabel": "Group name",
+    "courseNamePlaceholder": "For example: Maths, evening group",
     "subjectLabel": "Subject",
     "descriptionLabel": "Short description",
     "descriptionPlaceholder": "The course's goal and direction...",
     "cancel": "Cancel",
-    "create": "Create course"
+    "create": "Create the group",
+    "lessonsPerWeekLabel": "Lessons per week",
+    "lessonsPerWeekValue": "{{count}}",
+    "feeLabel": "Monthly fee (optional)",
+    "feePlaceholder": "450 000 soʻm",
+    "inviteTitle": "Invite students",
+    "inviteDescription": "Students who follow the link join the “{{title}}” group automatically.",
+    "inviteCopy": "Copy",
+    "inviteCopied": "Link copied",
+    "inviteShare": "Share the link",
+    "invitePending": "The invite link appears once the backend provides it"
   },
   "list": {
     "today": "Today",
     "loadError": "Couldn't load messages",
     "loadErrorHint": "Please try again shortly.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "searchEmpty": "Nothing found",
+    "searchEmptyHint": "Nothing found for “{{query}}”. Try another word.",
+    "announcementOn": "Announcement mode is on — only teachers can post",
+    "announcementLocked": "Only teachers can write in this group",
+    "searchOlder": "{{count}} more matches in older messages — scroll up"
   },
   "composer": {
     "editingLabel": "Editing message",
@@ -93,7 +147,13 @@
     "textAria": "Message text",
     "emojiAria": "Choose emoji",
     "saveEditAria": "Save edited message",
-    "sendAria": "Send message"
+    "sendAria": "Send message",
+    "attachUnavailable": "Sending files is not available yet",
+    "voiceUnavailable": "Voice messages are not available yet",
+    "recordCancel": "Cancel recording",
+    "recordSend": "Send voice message",
+    "micDenied": "Microphone access was denied",
+    "recordHint": "‹ Swipe to cancel"
   },
   "actionsMenu": {
     "closeAria": "Close message menu",
@@ -102,22 +162,48 @@
     "reply": "Reply",
     "edit": "Edit",
     "deleteForMe": "Delete for me",
-    "deleteForEveryone": "Delete for everyone"
+    "deleteForEveryone": "Delete for everyone",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "copy": "Copy",
+    "forward": "Forward",
+    "select": "Select",
+    "delete": "Delete",
+    "copied": "Text copied",
+    "selectedCount": "{{count}} selected",
+    "cancelSelection": "Cancel selection",
+    "deleteTitle": "Delete {{count}} messages?",
+    "deleteDescription": "The messages are removed for everyone in the group. This cannot be undone.",
+    "cancel": "Cancel",
+    "newMessages": "{{count}} new messages",
+    "scrollDown": "Scroll down",
+    "mentionAria": "Mention",
+    "voiceAria": "Voice message",
+    "selectedMessages": "{{count}} messages selected"
   },
   "bubble": {
     "edited": "edited",
     "retry": "Resend",
-    "reactionsAria": "Message reactions"
+    "reactionsAria": "Message reactions",
+    "replyAria": "Reply",
+    "moreAria": "Message actions"
   },
   "text": {
-    "viewRecording": "View the video recording"
+    "viewRecording": "View the video recording",
+    "recordingHint": "Open the lesson recording"
   },
   "typing": {
     "suffix": "typing"
   },
   "attachment": {
     "openAria": "{{name}} — open",
-    "openSuffix": "open"
+    "openSuffix": "open",
+    "uploadFailed": "Upload failed",
+    "voicePlay": "Play voice message",
+    "voicePause": "Pause",
+    "voiceFailed": "Could not load the voice message",
+    "uploading": "Uploading...",
+    "pages": "{{count}} pages"
   },
   "removedFromGroup": "You were removed from this group",
   "directPage": {
@@ -148,14 +234,89 @@
     "loadErrorHint": "Check your internet connection and try again.",
     "retry": "Retry",
     "peopleLabel": "PEOPLE",
-    "emptyTitle": "No conversations found",
-    "emptyHint": "Try a different search term or filter.",
-    "clearFilters": "Clear filters",
+    "emptyTitle": "No chat found",
+    "emptyHint": "Try a different search term or filters",
+    "clearFilters": "Clear the filter",
     "newGroupAria": "Create a new group or conversation",
     "findTeacherAria": "Find a teacher or course",
     "assignmentGroupNotFound": "Assignment group not found",
     "assignmentOpenFailed": "Couldn't open the assignment",
     "directOpened": "Conversation opened",
-    "directRequestSent": "Request sent — waiting for the teacher's approval"
+    "directRequestSent": "Request sent — waiting for the teacher's approval",
+    "groups": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "loading": "Loading",
+    "resultCount": "{{count}} results",
+    "offlineTitle": "No internet connection",
+    "offlineRetry": "Try again",
+    "noChatsTitle": "No chats yet",
+    "noChatsTeacherHint": "Create a group and invite your students. Chats will show up here.",
+    "noChatsStudentHint": "Join a group — lessons and chats will show up here.",
+    "createGroup": "Create a group",
+    "joinGroup": "Join a group"
+  },
+  "pinned": {
+    "label": "Pinned message",
+    "removeAria": "Unpin",
+    "attachment": "Attachment"
+  },
+  "actions": {
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "markRead": "Mark as read",
+    "delete": "Delete chat",
+    "deleteTitle": "Delete this chat?",
+    "deleteDescription": "All messages will be removed from this device only. This cannot be undone.",
+    "cancel": "Cancel",
+    "confirmDelete": "Delete",
+    "notAvailable": "The backend does not support this action yet",
+    "deleted": "The chat was removed from the list"
+  },
+  "offline": {
+    "banner": "No internet connection. Messages will be sent once you are back online.",
+    "composer": "You are offline — messages will be sent once the connection is back",
+    "failed": "Not sent",
+    "retry": "Try again"
+  },
+  "mention": {
+    "title": "Group members",
+    "empty": "No members found",
+    "teacher": "Teacher",
+    "parent": "Parent"
+  },
+  "forward": {
+    "title": "Forward message",
+    "description": "{{count}} message(s) will be sent to the selected chats",
+    "searchPlaceholder": "Search a chat",
+    "empty": "No chat found",
+    "done": "Message forwarded"
+  },
+  "system": {
+    "recordingTitle": "The lesson recording is ready",
+    "recordingHint": "The recording can only be watched on the platform",
+    "recordingAction": "Watch"
+  },
+  "attach": {
+    "title": "Attach",
+    "sizeHint": "Up to {{size}} MB per file",
+    "gallery": "Gallery",
+    "camera": "Camera",
+    "document": "Document",
+    "assignment": "Assignment"
+  },
+  "preview": {
+    "title": "{{count}} photos",
+    "cancel": "Cancel",
+    "captionPlaceholder": "Add a caption...",
+    "send": "Send",
+    "addMore": "Add more",
+    "selectAria": "Photo {{number}}",
+    "removeAria": "Remove photo {{number}}",
+    "quality": "Photos are sent in original quality · {{size}}"
   }
 }

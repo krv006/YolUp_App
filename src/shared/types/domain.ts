@@ -1,3 +1,4 @@
+import type { MessageCapabilities } from "./chat";
 import type { TeacherStats } from "./auth";
 
 export type AvatarTone = "violet" | "blue" | "emerald" | "amber" | "rose";
@@ -60,6 +61,11 @@ export interface MessageReply {
 export interface SendMessagePayload {
   text: string;
   replyTo?: MessageReply;
+  replyToId?: string | null;
+  mentions?: string[];
+  clientMessageId?: string;
+  file?: File | null;
+  voice?: { file: File; durationMs: number; waveform?: number[] } | null;
   attachment?: unknown;
 }
 
@@ -73,6 +79,12 @@ export interface MessageAttachment {
   messageId: string;
   name: string;
   mimeType: string;
+  url?: string | null;
+  size?: number | null;
+  pageCount?: number | null;
+  durationMs?: number | null;
+  waveform?: number[];
+  kind?: "voice" | "image" | "file";
 }
 
 export interface ChatMessage {
@@ -93,6 +105,13 @@ export interface ChatMessage {
   retryPayload?: SendMessagePayload;
   attachment?: MessageAttachment;
   reactions?: MessageReaction[];
+  capabilities?: MessageCapabilities;
+  forwardedFrom?: MessageForwardSource | null;
+  assignment?: MessageAssignment | null;
+  mentions?: string[];
+  clientMessageId?: string | null;
+  replyToId?: string | null;
+  replyToDeleted?: boolean;
 }
 
 export interface Course {
@@ -277,7 +296,8 @@ export type QuizQuestionType =
   | "text"
   | "matching"
   | "ordering"
-  | "fill_blank";
+  | "fill_blank"
+  | "essay";
 
 export type VoiceAccessMode = "open" | "invite_only";
 export type VoiceRoomStatus = "scheduled" | "live" | "ended";
@@ -341,6 +361,8 @@ export interface QuizGroup {
   title: string;
   passage: string;
   audioUrl: string | null;
+  /** Audio skripti — faqat o'qituvchiga ko'rinadi (o'quvchi javobida yo'q). */
+  transcript?: string;
 }
 
 export interface QuizQuestion {
@@ -354,6 +376,8 @@ export interface QuizQuestion {
   matchLeft: QuizChoiceItem[];
   matchRight: QuizChoiceItem[];
   blankCount: number;
+  /** Insho (Writing): kamida nechta so'z (0 — cheklov yo'q). */
+  minWords?: number;
   answerKey?: QuizAnswerKey;
 }
 
@@ -365,7 +389,8 @@ export type QuizAnswerValue =
   | { type: "text"; value: string }
   | { type: "matching"; pairs: Record<string, string> }
   | { type: "ordering"; order: string[] }
-  | { type: "fill_blank"; values: string[] };
+  | { type: "fill_blank"; values: string[] }
+  | { type: "essay"; value: string };
 
 export type ExamItemKind = "section" | "break" | "offline";
 export type ExamState = "upcoming" | "running" | "finished" | "submitted";
@@ -597,6 +622,7 @@ export interface QuizQuestionFormValues {
   pairs?: Array<{ left: string; right: string }>;
   items?: string[];
   blanks?: Array<{ answers: string[] }>;
+  minWords?: number;
 }
 
 export interface QuizEditValues {
@@ -779,4 +805,43 @@ export interface MonitoringHistory {
   hours: number;
   samples: MonitoringSample[];
   peak: MonitoringSample | null;
+}
+
+/*
+ * Quyidagilar veb `shared/types/domain.ts` dan KO'CHIRILDI — xabar moduli
+ * vebdan qayta sinxronlanganda kerak bo'ldi. Mobildagi mavjud tiplar
+ * (masalan `fill_blank`, `ExamAiWriting`) OLIB TASHLANMADI: vebda ular
+ * yo'q, lekin mobil imtihon ekranlari ularni ishlatadi.
+ */
+
+export interface ChatMember {
+  id: string;
+  name: string;
+  username: string;
+  role: string;
+  isOnline: boolean;
+  avatarUrl: string | null;
+}
+
+export interface MessageAssignment {
+  id: string;
+  title: string;
+  dueAt: string | null;
+  submittedCount: number;
+  totalCount: number;
+}
+
+export interface MessageForwardSource {
+  messageId: string;
+  authorId: string;
+  authorName: string;
+  roomId: string;
+}
+
+export interface PinnedChatMessage {
+  messageId: string;
+  authorName: string;
+  text: string;
+  messageType: string;
+  pinnedAt: string;
 }

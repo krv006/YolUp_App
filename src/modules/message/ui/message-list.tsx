@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
@@ -12,7 +13,10 @@ import {
   Text,
   useTheme,
 } from "@/shared/ui";
+import { messageApi } from "../api/message.api";
 import { buildMessageRows, type MessageRow } from "../lib/message-day";
+import { useChatUiStore } from "../model/chat-ui.store";
+import { messageKeys } from "../model/message.keys";
 import { MessageBubble } from "./message-bubble";
 
 export interface MessageListProps {
@@ -25,6 +29,8 @@ export interface MessageListProps {
   currentUserId?: string | null;
   /** Kimdir yozmoqda — teskari ro'yxatning eng pastida ko'rinadi. */
   typingName?: string | null;
+  /** Xabar qidiruvi uchun — berilsa server qidiruvi ham ishlatiladi. */
+  conversationId?: string;
 }
 
 export function MessageList({
@@ -36,9 +42,38 @@ export function MessageList({
   onRetryMessage,
   currentUserId = null,
   typingName = null,
+  conversationId,
 }: MessageListProps) {
   const { t } = useTranslation("mobile");
-  const rows = useMemo(() => buildMessageRows(messages ?? []), [messages]);
+
+  /*
+   * XABAR QIDIRUVI — veb `message-list.tsx` dagi kabi: server qidiruvi
+   * natijasi VA yuklangan xabarlar matni bo'yicha mos kelganlari. Qidiruv
+   * paytida faqat moslar ko'rinadi.
+   */
+  const search = useChatUiStore((state) => state.search).trim();
+  const setSearchCount = useChatUiStore((state) => state.setSearchCount);
+  const serverSearch = useQuery({
+    queryKey: messageKeys.search(conversationId ?? "", search.toLowerCase()),
+    queryFn: ({ signal }) => messageApi.search(conversationId ?? "", search, { signal }),
+    enabled: search.length > 0 && Boolean(conversationId),
+  });
+
+  const visible = useMemo(() => {
+    if (!search) return messages ?? [];
+    const matched = new Set((serverSearch.data?.items ?? []).map((item) => item.id));
+    const needle = search.toLowerCase();
+    return (messages ?? []).filter(
+      (message) => matched.has(message.id) || message.text.toLowerCase().includes(needle)
+    );
+  }, [messages, search, serverSearch.data]);
+
+  // Hisoblagich ("x / y") panelda — sonini do'konga yetkazamiz.
+  useEffect(() => {
+    setSearchCount(search ? visible.length : 0);
+  }, [search, visible.length, setSearchCount]);
+
+  const rows = useMemo(() => buildMessageRows(visible), [visible]);
 
   if (loading) return <MessagesSkeleton />;
 

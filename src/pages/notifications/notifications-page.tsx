@@ -59,7 +59,7 @@ export function NotificationsPage() {
    */
   function openLink(link: NotificationLink | null) {
     if (!link) return;
-    if (link.type === "quiz") router.push(`/student/quizzes/${link.id}`);
+    if (link.type === "quiz") router.push(`/student/quizzes?quiz=${link.id}`);
     // `assignment` uchun kurs kerak — u bildirishnomada yo'q. Vazifalar
     // guruh chatining "Vazifalar" bo'limida, shuning uchun hozircha
     // suhbatlar ro'yxatiga olib boramiz (veb ham vazifani avval so'raydi).

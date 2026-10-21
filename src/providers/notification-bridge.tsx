@@ -23,7 +23,7 @@ export function NotificationBridge() {
 
   const openLink = useCallback(
     (link: NotificationLink) => {
-      if (link.type === "quiz") router.push(`/student/quizzes/${link.id}`);
+      if (link.type === "quiz") router.push(`/student/quizzes?quiz=${link.id}`);
       else if (link.type === "assignment") router.push("/student/chats");
     // Topshiriq (`homework_pending_review` / `homework_reviewed`) bildirishnomasi:
     // natija guruh chatining "Vazifalar" bo'limida ochiladi.

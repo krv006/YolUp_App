@@ -2,9 +2,8 @@ import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { LucideIcon } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { fontSize, radius, Text, useTheme } from "@/shared/ui";
+import { Icon, radius, Text, useTheme, type IconName } from "@/shared/ui";
 
 export interface TabDefinition {
   /** Marshrut fayli nomi: `chats`, `schedule`, … */
@@ -17,7 +16,15 @@ export interface TabDefinition {
    * komponentda, chizish paytida qilinadi.
    */
   labelKey: string;
-  icon: LucideIcon;
+  /**
+   * Veb ikonkasi nomi (`assets/icons/*.svg`).
+   *
+   * Ilgari bu yerda `lucide-react-native` komponenti turardi. Veb o'z
+   * to'plamini ishlatadi va u TO'LDIRILGAN uslubda — yonma-yon qo'yilganda
+   * farq darhol ko'rinadi, shuning uchun ikonkalar ham vebdan ko'chirildi
+   * (izohi `shared/ui/icon.tsx` da).
+   */
+  iconName: IconName;
   /**
    * Shu bo'limga TEGISHLI, lekin panelda ko'rinmaydigan marshrutlar.
    *
@@ -26,30 +33,6 @@ export interface TabDefinition {
    * foydalanuvchi qayerdaligini bilmasdi.
    */
   owns?: readonly string[];
-}
-
-/**
- * Faol bo'lim fonining yumaloqligi.
- *
- * QAT'IY SON, `radius.full` EMAS: plastinka balandligi kontent bo'yicha
- * o'zgaradi va juda katta radius (999) siqilgan elementda Androidda
- * to'g'ri chizilmaydi. Bu qiymat ikonka+yorliq balandligining yarmiga
- * yaqin — natija barqaror.
- */
-const PILL_RADIUS = 22;
-
-/**
- * Faol plastinkaning yon bo'shlig'i — BO'LIM SONIGA qarab.
- *
- * Qat'iy 14 qolganda ota-onadagi oltita bo'lim yorlig'i qisqarib ketardi
- * ("Davo…", "Reyti…"): ekran eni teng bo'linadi va har bo'limga ~63dp
- * qoladi, undan 28dp ni bo'shliq yeb qo'yardi. To'rt bo'limda esa keng
- * bo'shliq plastinkani chiroyli ko'rsatadi, shuning uchun u saqlanadi.
- */
-function pillPadding(count: number): number {
-  if (count >= 6) return 4;
-  if (count === 5) return 8;
-  return 14;
 }
 
 /*
@@ -82,7 +65,7 @@ export function RoleTabs({
 }) {
   const { palette } = useTheme();
   const { t } = useTranslation("mobile");
-  const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.icon]));
+  const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.iconName]));
   const ownsByRoute = new Map(tabs.map((tab) => [tab.name, tab.owns ?? []]));
 
   return (
@@ -125,7 +108,7 @@ function RoleTabBar({
   iconByRoute,
   ownsByRoute,
 }: TabBarProps & {
-  iconByRoute: Map<string, LucideIcon>;
+  iconByRoute: Map<string, IconName>;
   ownsByRoute: Map<string, readonly string[]>;
 }) {
   const { palette } = useTheme();
@@ -178,8 +161,8 @@ function RoleTabBar({
 
         // `hidden` marshrutlar `tabs` ro'yxatida yo'q, demak ikonkasi ham
         // yo'q — panelda chizilmaydi.
-        const Icon = iconByRoute.get(route.name);
-        if (!Icon) return null;
+        const iconName = iconByRoute.get(route.name);
+        if (!iconName) return null;
 
         /*
          * Bo'lim o'zi ochilganda YOKI unga tegishli yashirin marshrut
@@ -214,26 +197,29 @@ function RoleTabBar({
           >
             {/* Telegramda tanlangan bo'lim IKONKA VA YORLIQNI birga
                 o'rab turgan yumaloq fon bilan ajratiladi. */}
-            <View
-              style={[
-                styles.itemInner,
-                { paddingHorizontal: pillPadding(state.routes.length) },
-                focused && {
-                  backgroundColor: palette["primary-tint"],
-                  borderRadius: PILL_RADIUS,
-                },
-              ]}
-            >
-              <Icon
-                size={20}
-                color={focused ? palette["primary-text"] : palette["muted-foreground"]}
-                strokeWidth={focused ? 2.4 : 2}
-              />
+            <View style={styles.itemInner}>
+              {/*
+               * Plastinka FAQAT IKONKANI o'raydi — vebda ham shunday
+               * (o'lchami u yerdan olingan: 56x28). Ilgari u ikonka bilan
+               * yorliqni birga o'rardi.
+               */}
+              <View
+                style={[
+                  styles.iconWrap,
+                  focused && { backgroundColor: palette["primary-soft"] },
+                ]}
+              >
+                <Icon
+                  name={iconName}
+                  size={24}
+                  color={focused ? palette.primary : palette["muted-foreground"]}
+                />
+              </View>
               <Text
                 numberOfLines={1}
                 style={[
                   styles.label,
-                  { color: focused ? palette["primary-text"] : palette["muted-foreground"] },
+                  { color: focused ? palette.primary : palette["muted-foreground"] },
                 ]}
               >
                 {label}
@@ -248,30 +234,36 @@ function RoleTabBar({
 }
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 10, paddingTop: 4 },
+  /*
+   * O'lchamlar veb DOM'idan olindi (390px kenglikda):
+   *   panel      balandlik 68, oq fon, TEPA burchaklari 24, tepa chegara 1px,
+   *              bo'shliq 6/8/0
+   *   element    radius 13, bo'shliq 6/8, oraliq 4
+   *   ikonka plastinkasi  56x28, radius 999, faol fonda #eef2ff
+   *   yorliq     12/16, qalinlik 600
+   *
+   * ILGARI panel SUZUVCHI plastinka edi (yon chekkalarda bo'shliq, to'liq
+   * yumaloq, soya bilan). Vebda u ekran kengligida turadi va faqat tepa
+   * burchaklari yumaloq.
+   */
+  wrap: {},
   bar: {
     flexDirection: "row",
-    alignItems: "center",
-    borderRadius: radius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-    /*
-     * Ichki bo'shliq SHART: usiz chetdagi bo'limning faol foni
-     * plastinkaning yumaloq burchagiga tegib, kesilgandek ko'rinardi.
-     */
+    alignItems: "flex-start",
+    borderTopLeftRadius: radius["2xl"],
+    borderTopRightRadius: radius["2xl"],
+    borderTopWidth: 1,
+    paddingTop: 6,
     paddingHorizontal: 8,
-    paddingVertical: 6,
-    shadowOpacity: 1,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
   },
   item: { flex: 1, alignItems: "center" },
-  itemInner: {
+  itemInner: { alignItems: "center", gap: 4, paddingVertical: 6, paddingHorizontal: 8 },
+  iconWrap: {
+    width: 56,
+    height: 28,
+    borderRadius: radius.full,
     alignItems: "center",
     justifyContent: "center",
-    gap: 1,
-    paddingVertical: 6,
-    // Yon bo'shliq pillPadding() dan keladi — bo'lim soniga bog'liq.
   },
-  label: { fontSize: fontSize["2xs"], fontWeight: "600" },
+  label: { fontSize: 12, lineHeight: 16, fontWeight: "600" },
 });

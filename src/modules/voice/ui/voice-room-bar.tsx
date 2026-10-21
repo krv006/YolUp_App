@@ -74,12 +74,15 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
   }
 
   return (
-    <View style={[styles.bar, { borderColor: palette.border, backgroundColor: palette.surface }]}>
+    <View style={[styles.bar, { borderBottomColor: palette.border }]}>
       <View style={styles.head}>
-        <Mic size={18} color={live ? palette["primary-text"] : palette["muted-foreground"]} />
+        {/* Ikonka OQ doirada — vebda ham shunday (36x36). */}
+        <View style={[styles.iconWrap, { backgroundColor: palette.surface }]}>
+          <Mic size={20} color={palette.primary} />
+        </View>
         <View style={styles.headBody}>
           <Text variant="label">{room?.title || "Ovozli suhbat"}</Text>
-          <Text variant="caption" tone="muted">
+          <Text variant="caption" tone="muted" style={styles.subtitle}>
             {room
               ? `${live ? "Hozir jonli" : "Rejalashtirilgan"} · ${room.participantCount} ishtirokchi`
               : "Guruh a'zolari bilan mikrofon orqali gaplashing."}
@@ -87,6 +90,20 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
         </View>
         {room?.accessMode === "invite_only" ? (
           <Badge label={t("voice.taklif_asosida")} tone="neutral" />
+        ) : null}
+
+        {/*
+          * Bitta tugmali holatda u SHU QATORDA, o'ngda — vebdagi kabi.
+          * Ikkita tugma bo'lganda (taklif asosidagi xonaga qo'shilish)
+          * ular matn bilan bitta qatorga sig'maydi, shuning uchun pastda
+          * qoladi.
+          */}
+        {!live && isTeacher ? (
+          <Button
+            title={t("voice.xona_ochish")}
+            icon={<Plus size={16} color={palette["primary-foreground"]} />}
+            onPress={() => setCreateOpen(true)}
+          />
         ) : null}
       </View>
 
@@ -108,13 +125,6 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
             />
           ) : null}
         </View>
-      ) : isTeacher ? (
-        <Button
-          title={t("voice.xona_ochish")}
-          variant="secondary"
-          icon={<Plus size={16} color={palette["secondary-foreground"]} />}
-          onPress={() => setCreateOpen(true)}
-        />
       ) : null}
 
       <Sheet
@@ -159,14 +169,33 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
 }
 
 const styles = StyleSheet.create({
+  /*
+   * O'lchamlar veb DOM'idan (390px): banner 65 balandlik, ko'kimtir fon
+   * (`--action-primary-subtle` yarim shaffof), pastki chegara 1px,
+   * bo'shliq 12/16, oraliq 12; ikonka oq doirada 36x36; sarlavha
+   * 14/20/600, ostki matn 12/16/500; tugma 40 balandlik, radius 999.
+   *
+   * ILGARI bu KARTOCHKA edi (chegarali, yumaloq, oq fonda) va tugma
+   * pastda alohida qatorda turardi. Vebda u ekran kengligidagi tasma va
+   * tugma O'SHA QATORNING o'ng tomonida.
+   */
   bar: {
-    gap: 10,
-    padding: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
+    backgroundColor: "rgba(238, 242, 255, 0.5)",
+    borderBottomWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 12,
   },
-  head: { flexDirection: "row", alignItems: "center", gap: 10 },
+  head: { flexDirection: "row", alignItems: "center", gap: 12 },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headBody: { flex: 1 },
+  subtitle: { fontWeight: "500" },
   actions: { flexDirection: "row", gap: 8 },
   grow: { flex: 1 },
 });

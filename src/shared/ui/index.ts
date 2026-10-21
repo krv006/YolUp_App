@@ -1,7 +1,7 @@
 export { HtmlView } from "./html-view";
 export type { HtmlViewProps } from "./html-view";
-export { DateField, SelectField, TimeField } from "./pickers";
-export type { DateFieldProps, SelectFieldProps, SelectOption, TimeFieldProps } from "./pickers";
+export { DateField, DateTimeField, SelectField, TimeField } from "./pickers";
+export type { DateFieldProps, DateTimeFieldProps, SelectFieldProps, SelectOption, TimeFieldProps } from "./pickers";
 export { Sheet } from "./sheet";
 export type { SheetProps } from "./sheet";
 export {
@@ -50,4 +50,16 @@ export type { Palette } from "./theme";
 export { toast, ToastHost } from "./toast";
 export type { ToastAction, ToastOptions, ToastVariant } from "./toast";
 export { colors, color, fontSize, MIN_TOUCH_SIZE, radius, spacing } from "./tokens";
+export { bodyFont, FONT_ASSETS, HEADING_TRACKING, headingFont } from "./fonts";
+export { AppBar, AppBarAction } from "./app-bar";
+export type { AppBarActionProps, AppBarProps } from "./app-bar";
+export { Icon } from "./icon";
+export { Segmented } from "./segmented";
+export type { SegmentedOption, SegmentedProps } from "./segmented";
+export { SearchField } from "./search-field";
+export type { SearchFieldProps } from "./search-field";
+export type { IconName, IconProps } from "./icon";
+export type { FontWeightToken } from "./fonts";
 export type { ColorName, ColorScheme } from "./tokens";
+export { SheetButton, SheetFooter } from "./sheet-footer";
+export type { SheetButtonProps } from "./sheet-footer";

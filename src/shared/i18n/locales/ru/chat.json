@@ -2,14 +2,25 @@
   "emptyState": {
     "title": "Выберите беседу",
     "description": "Выберите беседу слева, чтобы просмотреть сообщения и продолжить переписку.",
-    "openConversations": "Открыть беседы"
+    "openConversations": "Открыть беседы",
+    "noChatsTitle": "Чатов пока нет",
+    "noChatsTeacher": "Создайте группу и пригласите учеников. Чаты появятся здесь.",
+    "noChatsStudent": "Запишитесь на курс или найдите преподавателя. Чаты появятся здесь.",
+    "createGroup": "Создать группу",
+    "findTeacher": "Записаться на курс"
   },
   "header": {
     "backAria": "Назад к списку бесед",
     "openInfoAria": "Открыть информацию — {{title}}",
-    "memberCount": "{{count}} учеников",
+    "memberCount": "{{count}} участников",
     "online": "Сейчас в сети",
-    "recentlyActive": "Недавно был(а) в сети"
+    "recentlyActive": "Недавно был(а) в сети",
+    "searchAria": "Поиск по сообщениям",
+    "searchPlaceholder": "Поиск по сообщениям",
+    "closeSearchAria": "Закрыть поиск",
+    "searchPrevAria": "Предыдущий результат",
+    "searchNextAria": "Следующий результат",
+    "onlineCount": "{{count}} онлайн"
   },
   "directStatus": {
     "pending": "Запрос ожидает",
@@ -20,7 +31,7 @@
   "info": {
     "groupSubjectFallback": "Группа курса",
     "profileInfo": "Информация о профиле",
-    "memberCount": "{{count}} учеников",
+    "memberCount": "{{count}} участников",
     "changeGroupImageAria": "Изменить фото группы",
     "groupImageUpdated": "Фото группы обновлено",
     "muteOn": "Включить звук",
@@ -49,14 +60,42 @@
     "cancel": "Отмена",
     "save": "Сохранить",
     "deleteCourseTitle": "Удалить курс",
-    "deleteCourseDescription": "«{{title}}» и связанные с ним данные будут удалены безвозвратно."
+    "deleteCourseDescription": "Чат группы, занятия, задания и записи будут удалены безвозвратно.",
+    "panelTitle": "Информация о группе",
+    "backAria": "Назад",
+    "closeAria": "Закрыть",
+    "search": "Поиск",
+    "invite": "Пригласить",
+    "announcementTitle": "Режим объявлений",
+    "announcementHint": "Писать можете только вы",
+    "aboutGroupPlain": "О группе",
+    "allMembers": "Все",
+    "membersTitle": "Участники",
+    "deleteCourseConfirmTitle": "Удалить группу «{{title}}»?",
+    "deleteTypeName": "Введите название группы для подтверждения",
+    "deleteConfirm": "Удалить",
+    "descriptionOptional": "Краткое описание · необязательно",
+    "joinRequests": "Заявки на вступление · {{count}}",
+    "joinRequestsHint": "Пришли по ссылке-приглашению",
+    "pinned": "Закреплённое",
+    "pinHint": "Закреплённых сообщений нет",
+    "tabMembers": "Участники — {{count}}",
+    "tabFiles": "Файлы",
+    "tabMedia": "Медиа",
+    "filesEmpty": "Файлов нет",
+    "mediaEmpty": "Медиа нет",
+    "sectionPending": "Появится, когда бэкенд будет готов",
+    "online": "в сети",
+    "onlineCount": "{{count}} в сети",
+    "teacherBadge": "Учитель"
   },
   "item": {
     "liveNow": "Идёт урок",
-    "typing": "печатает..."
+    "typing": "печатает...",
+    "mentionTitle": "Вас упомянули"
   },
   "newDialog": {
-    "title": "Новый курс и группа",
+    "title": "Новая группа",
     "description": "После создания курса сервер автоматически откроет его групповой чат.",
     "pendingEnrollments": "ОЖИДАЮЩИЕ ЗАЯВКИ",
     "decline": "Отклонить",
@@ -64,19 +103,34 @@
     "createdToast": "Курс и групповой чат созданы",
     "noteTitle": "Новое учебное пространство",
     "noteDescription": "Чат, уроки, задания и ученики — всё в одном курсе.",
-    "courseNameLabel": "Название курса",
-    "courseNamePlaceholder": "Например: Английский — Intermediate",
+    "courseNameLabel": "Название группы",
+    "courseNamePlaceholder": "Например: Математика, вечерняя группа",
     "subjectLabel": "Предмет",
     "descriptionLabel": "Краткое описание",
     "descriptionPlaceholder": "Цель и направление курса...",
     "cancel": "Отмена",
-    "create": "Создать курс"
+    "create": "Создать группу",
+    "lessonsPerWeekLabel": "Занятий в неделю",
+    "lessonsPerWeekValue": "{{count}}",
+    "feeLabel": "Ежемесячная оплата (необязательно)",
+    "feePlaceholder": "450 000 сум",
+    "inviteTitle": "Пригласите учеников",
+    "inviteDescription": "Ученики, перешедшие по ссылке, автоматически попадут в группу «{{title}}».",
+    "inviteCopy": "Копировать",
+    "inviteCopied": "Ссылка скопирована",
+    "inviteShare": "Поделиться ссылкой",
+    "invitePending": "Ссылка-приглашение появится, когда её добавит бэкенд"
   },
   "list": {
     "today": "Сегодня",
     "loadError": "Не удалось загрузить сообщения",
     "loadErrorHint": "Повторите попытку через некоторое время.",
-    "retry": "Повторить"
+    "retry": "Повторить",
+    "searchEmpty": "Ничего не найдено",
+    "searchEmptyHint": "По запросу «{{query}}» ничего не найдено. Попробуйте другое слово.",
+    "announcementOn": "Режим объявлений включён — пишут только учителя",
+    "announcementLocked": "В этой группе писать могут только учителя",
+    "searchOlder": "Ещё {{count}} совпадений в старых сообщениях — прокрутите вверх"
   },
   "composer": {
     "editingLabel": "Редактирование сообщения",
@@ -93,7 +147,13 @@
     "textAria": "Текст сообщения",
     "emojiAria": "Выбрать эмодзи",
     "saveEditAria": "Сохранить отредактированное сообщение",
-    "sendAria": "Отправить сообщение"
+    "sendAria": "Отправить сообщение",
+    "attachUnavailable": "Отправка файлов пока недоступна",
+    "voiceUnavailable": "Голосовые сообщения пока недоступны",
+    "recordCancel": "Отменить запись",
+    "recordSend": "Отправить голосовое",
+    "micDenied": "Доступ к микрофону не разрешён",
+    "recordHint": "‹ Проведите, чтобы отменить"
   },
   "actionsMenu": {
     "closeAria": "Закрыть меню сообщения",
@@ -102,22 +162,48 @@
     "reply": "Ответить",
     "edit": "Редактировать",
     "deleteForMe": "Удалить у себя",
-    "deleteForEveryone": "Удалить у всех"
+    "deleteForEveryone": "Удалить у всех",
+    "pin": "Закрепить",
+    "unpin": "Открепить",
+    "copy": "Копировать",
+    "forward": "Переслать",
+    "select": "Выбрать",
+    "delete": "Удалить",
+    "copied": "Текст скопирован",
+    "selectedCount": "Выбрано: {{count}}",
+    "cancelSelection": "Отменить выбор",
+    "deleteTitle": "Удалить {{count}} сообщений?",
+    "deleteDescription": "Сообщения удалятся у всех участников группы. Это действие нельзя отменить.",
+    "cancel": "Отмена",
+    "newMessages": "{{count}} новых сообщений",
+    "scrollDown": "Вниз",
+    "mentionAria": "Упомянуть",
+    "voiceAria": "Голосовое сообщение",
+    "selectedMessages": "Выбрано сообщений: {{count}}"
   },
   "bubble": {
     "edited": "изменено",
     "retry": "Отправить снова",
-    "reactionsAria": "Реакции на сообщение"
+    "reactionsAria": "Реакции на сообщение",
+    "replyAria": "Ответить",
+    "moreAria": "Действия с сообщением"
   },
   "text": {
-    "viewRecording": "Посмотреть видеозапись"
+    "viewRecording": "Посмотреть видеозапись",
+    "recordingHint": "Открыть запись урока"
   },
   "typing": {
     "suffix": "печатает"
   },
   "attachment": {
     "openAria": "{{name}} — открыть",
-    "openSuffix": "открыть"
+    "openSuffix": "открыть",
+    "uploadFailed": "Не загружено",
+    "voicePlay": "Прослушать голосовое",
+    "voicePause": "Пауза",
+    "voiceFailed": "Голосовое не загрузилось",
+    "uploading": "Загружается...",
+    "pages": "{{count}} стр."
   },
   "removedFromGroup": "Вы были удалены из этой группы",
   "directPage": {
@@ -148,14 +234,89 @@
     "loadErrorHint": "Проверьте интернет-соединение и попробуйте снова.",
     "retry": "Повторить",
     "peopleLabel": "ЛЮДИ",
-    "emptyTitle": "Беседы не найдены",
-    "emptyHint": "Попробуйте изменить поисковый запрос или фильтр.",
-    "clearFilters": "Очистить фильтры",
+    "emptyTitle": "Чат не найден",
+    "emptyHint": "Измените поисковый запрос или фильтры",
+    "clearFilters": "Сбросить фильтр",
     "newGroupAria": "Создать новую группу или беседу",
     "findTeacherAria": "Найти учителя или курс",
     "assignmentGroupNotFound": "Группа задания не найдена",
     "assignmentOpenFailed": "Не удалось открыть задание",
     "directOpened": "Беседа открыта",
-    "directRequestSent": "Запрос отправлен — ожидайте подтверждения учителя"
+    "directRequestSent": "Запрос отправлен — ожидайте подтверждения учителя",
+    "groups": {
+      "today": "Сегодня",
+      "yesterday": "Вчера",
+      "earlier": "Ранее"
+    },
+    "loading": "Загрузка",
+    "resultCount": "{{count}} результатов",
+    "offlineTitle": "Нет подключения к интернету",
+    "offlineRetry": "Повторить",
+    "noChatsTitle": "Пока нет чатов",
+    "noChatsTeacherHint": "Создайте группу и пригласите учеников. Чаты появятся здесь.",
+    "noChatsStudentHint": "Присоединитесь к группе — уроки и чаты появятся здесь.",
+    "createGroup": "Создать группу",
+    "joinGroup": "Вступить в группу"
+  },
+  "pinned": {
+    "label": "Закреплённое сообщение",
+    "removeAria": "Открепить",
+    "attachment": "Вложение"
+  },
+  "actions": {
+    "pin": "Закрепить",
+    "unpin": "Открепить",
+    "mute": "Отключить звук",
+    "unmute": "Включить звук",
+    "markRead": "Отметить прочитанным",
+    "delete": "Удалить чат",
+    "deleteTitle": "Удалить чат?",
+    "deleteDescription": "Все сообщения будут удалены только на вашем устройстве. Это действие нельзя отменить.",
+    "cancel": "Отмена",
+    "confirmDelete": "Удалить",
+    "notAvailable": "Это действие пока не поддерживается бэкендом",
+    "deleted": "Чат убран из списка"
+  },
+  "offline": {
+    "banner": "Нет соединения. Сообщения будут отправлены после восстановления связи.",
+    "composer": "Нет интернета — сообщения уйдут после восстановления связи",
+    "failed": "Не отправлено",
+    "retry": "Повторить"
+  },
+  "mention": {
+    "title": "Участники группы",
+    "empty": "Участник не найден",
+    "teacher": "Учитель",
+    "parent": "Родитель"
+  },
+  "forward": {
+    "title": "Переслать сообщение",
+    "description": "{{count}} сообщение(й) уйдёт в выбранные чаты",
+    "searchPlaceholder": "Поиск чата",
+    "empty": "Чат не найден",
+    "done": "Сообщение переслано"
+  },
+  "system": {
+    "recordingTitle": "Видеозапись урока готова",
+    "recordingHint": "Запись доступна только на платформе",
+    "recordingAction": "Смотреть"
+  },
+  "attach": {
+    "title": "Прикрепить",
+    "sizeHint": "Каждый файл до {{size}} МБ",
+    "gallery": "Галерея",
+    "camera": "Камера",
+    "document": "Документ",
+    "assignment": "Задание"
+  },
+  "preview": {
+    "title": "{{count}} фото",
+    "cancel": "Отмена",
+    "captionPlaceholder": "Добавьте подпись...",
+    "send": "Отправить",
+    "addMore": "Добавить ещё",
+    "selectAria": "Фото {{number}}",
+    "removeAria": "Убрать фото {{number}}",
+    "quality": "Фото отправятся в исходном качестве · {{size}}"
   }
 }

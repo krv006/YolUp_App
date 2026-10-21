@@ -1,12 +1,14 @@
 import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { CheckCheck, GraduationCap, RefreshCw } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { CheckCheck, GraduationCap, Play, RefreshCw } from "lucide-react-native";
 import { formatMessageTime } from "@/shared/lib";
 import { ROLES } from "@/shared/constants";
 import type { ChatMessage } from "@/shared/types";
 import { fontSize, GradientFill, overlayOn, radius, Text, useTheme } from "@/shared/ui";
 import { MessageAttachment } from "./message-attachment";
 import { MessageText } from "./message-text";
+import { VoiceMessage } from "./voice-message";
 
 export interface MessageBubbleProps {
   message: ChatMessage;
@@ -42,6 +44,25 @@ export function MessageBubble({
   const gradient = outgoing ? bubbleGradient : null;
 
   if (message.type === "system") {
+    /*
+     * Tizim xabarida dars yozuvi havolasi bo'lsa — YOZUV KARTOCHKASI,
+     * aks holda kulrang pilyulka. Veb `message-bubble.tsx` dagi
+     * `SystemMessage` bilan bir xil.
+     *
+     * Bu holat xabar moduli vebdan qayta ko'chirilganda paydo bo'ldi:
+     * eski mapper hamma xabarni `text` deb belgilardi, yangisi esa
+     * backenddagi `kind: "system"` ni saqlaydi. Usiz yozuv xabari xom
+     * URL'li kulrang pilyulka bo'lib qolardi.
+     */
+    const path = message.text.match(RECORDING_PATH)?.[0] ?? null;
+    if (path) {
+      return (
+        <RecordingCard
+          path={path}
+          title={message.text.match(QUOTED_TITLE)?.[1] ?? ""}
+        />
+      );
+    }
     return (
       <View style={styles.systemRow}>
         <View style={[styles.system, { backgroundColor: palette.muted }]}>
@@ -63,6 +84,7 @@ export function MessageBubble({
         delayLongPress={280}
         style={({ pressed }) => [
           styles.bubble,
+          outgoing ? styles.bubbleOutgoing : styles.bubbleIncoming,
           // Gradient bo'lsa fon SVG bilan chiziladi va burchaklar kesilishi
           // uchun `overflow` yopiladi.
           gradient ? styles.clip : null,
@@ -141,8 +163,13 @@ export function MessageBubble({
         {message.text ? <MessageText text={message.text} outgoing={outgoing} /> : null}
 
         {/* Dars tugagach backend doska PDF'ini shu ko'rinishda yuboradi. */}
+        {/* Audio — ovozli xabar pleyeri, qolgani fayl kartochkasi (vebdagi kabi). */}
         {message.attachment ? (
-          <MessageAttachment attachment={message.attachment} outgoing={outgoing} />
+          message.attachment.mimeType?.startsWith("audio/") ? (
+            <VoiceMessage attachment={message.attachment} outgoing={outgoing} />
+          ) : (
+            <MessageAttachment attachment={message.attachment} outgoing={outgoing} />
+          )
         ) : null}
 
         <View style={styles.meta}>
@@ -193,20 +220,106 @@ function metaColor(outgoing: boolean, palette: ReturnType<typeof useTheme>["pale
     : palette["muted-foreground"];
 }
 
+const RECORDING_PATH = /\/recordings\/[\w-]+/;
+const QUOTED_TITLE = /[“"']([^“”"']+)[”"']/;
+
+/**
+ * Dars yozuvi kartochkasi — veb `SystemMessage` ning yozuv holati.
+ *
+ * O'lchamlar vebdan: kartochka radius 24, chegara 1px, oq fon, pad 12,
+ * oraliq 12; chapda 40x40 radius 20 ko'kimtir kvadratda o'ynash ikonkasi;
+ * o'ngda ko'k "Ko'rish" tugmasi (36 balandlik, pad 0 16).
+ */
+function RecordingCard({ path, title }: { path: string; title: string }) {
+  const { t } = useTranslation("chat");
+  const { palette } = useTheme();
+  const router = useRouter();
+
+  return (
+    <View style={styles.recordingRow}>
+      <View
+        style={[styles.recording, { backgroundColor: palette.surface, borderColor: palette.border }]}
+      >
+        <View style={[styles.recordingIcon, { backgroundColor: palette["primary-soft"] }]}>
+          <Play size={18} color={palette.primary} />
+        </View>
+        <View style={styles.recordingBody}>
+          <Text variant="label" numberOfLines={1}>
+            {t("system.recordingTitle")}
+          </Text>
+          <Text variant="caption" tone="muted" numberOfLines={1}>
+            {title || t("system.recordingHint")}
+          </Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("system.recordingAction")}
+          onPress={() => router.push(path)}
+          style={({ pressed }) => [
+            styles.recordingAction,
+            { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
+          ]}
+        >
+          <Text variant="label" style={{ color: palette["primary-foreground"] }}>
+            {t("system.recordingAction")}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  row: { paddingHorizontal: 12, paddingVertical: 2 },
+  recordingRow: { paddingHorizontal: 12, paddingVertical: 4, alignItems: "flex-end" },
+  recording: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 12,
+    borderRadius: radius["2xl"],
+    borderWidth: 1,
+  },
+  recordingIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  recordingBody: { flex: 1, minWidth: 0 },
+  recordingAction: {
+    height: 36,
+    paddingHorizontal: 16,
+    borderRadius: radius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  row: { paddingHorizontal: 12, paddingVertical: 4 },
   rowIncoming: { alignItems: "flex-start" },
   rowOutgoing: { alignItems: "flex-end" },
   clip: { overflow: "hidden" },
+  /*
+   * O'lchamlar veb `message-bubble.tsx` ning MOBIL sinflaridan
+   * (`lg:` prefikssiz):
+   *   max-w-[80%]  ·  rounded-2xl (24)  ·  px-3.5 py-2.5 (14/10)
+   *   gap-1 (4)    ·  text-body-sm (14/20)
+   *
+   * Burchaklardan BITTASI kichikroq (12): chiquvchi purakchada pastki
+   * o'ng, kiruvchida pastki chap — veb `rounded-br-md` / `rounded-bl-md`.
+   * Shu bilan purakcha kimga tegishliligi shaklidan ham bilinadi.
+   */
   bubble: {
-    maxWidth: "84%",
+    maxWidth: "80%",
     minWidth: 76,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    gap: 3,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: radius["2xl"],
+    borderWidth: 1,
+    gap: 4,
   },
+  bubbleOutgoing: { borderBottomRightRadius: radius.md },
+  bubbleIncoming: { borderBottomLeftRadius: radius.md },
   senderRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   sender: { fontWeight: "700" },
   reply: {

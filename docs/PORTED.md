@@ -138,8 +138,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `afbcc4e0feff` | — |
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `31172199c0d6` | — |
 | `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `54d2b67dd248` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda) |
+| `src/modules/lesson/model/schedule.store.ts` | 🟢 NUSXA | `—` | jadval ko'rinishi, tayanch sana va qadam (2026-10-20 qo'shildi) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `520a875a379e` | farq qayd etilmagan — tekshiring |
+| `src/modules/lesson/ui/schedule-grid.tsx` | 🟡 MOSLASH | `—` | faqat tor ekran shoxlari (Ro'yxat/Kun/Hafta/Oy); keng ekran to'rlari ko'chirilmadi |
+| `src/modules/lesson/ui/schedule-sidebar.tsx` | 🟡 MOSLASH | `—` | faqat telefon bloklari: hafta tasmasi va eng yaqin dars |
+| `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-detail-sheet.tsx` (AppDialog -> Sheet) |
+| `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-create-sheet.tsx` (AppDialog -> Sheet) |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `111c8b0a89c6` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `865100a4509c` | — |
@@ -161,7 +166,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/lib/linkify.ts` | 🟢 NUSXA | `5a21a96293c4` | — |
 | `src/modules/message/lib/message.mappers.ts` | 🟢 NUSXA | `2c43593d1edf` | — |
 | `src/modules/message/model/message.keys.ts` | 🟢 NUSXA | `fadd16224f37` | — |
-| `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `e0e9c5b75b8d` | react-router useNavigate -> expo-router; "guruhdan chiqarildingiz" matni literal (§13) |
+| `src/modules/message/model/chat-ui.store.ts` | 🟢 NUSXA | `—` | xabar qidiruvi va tanlash holati (2026-10-20 qo'shildi) |
+| `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `e0e9c5b75b8d` | react-router useNavigate -> expo-router (2026-10-20 vebdan qayta sinxronlandi; literal matn moslashtirishi olib tashlandi — chat.json da `removedFromGroup` endi bor) |
 | `src/modules/message/ui/message-attachment.tsx` | 🟡 MOSLASH | `e5c7e28f553a` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-bubble.tsx` | 🟡 MOSLASH | `2cefe5cc619f` | farq qayd etilmagan — tekshiring |
 | `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2d0725ac8b8a` | farq qayd etilmagan — tekshiring |
@@ -199,11 +205,16 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/lib/quiz-errors.ts` | 🟢 NUSXA | `da4cf7939388` | — |
 | `src/modules/quiz/lib/quiz.mappers.ts` | 🟢 NUSXA | `afd552bf77ba` | — |
 | `src/modules/quiz/model/quiz.queries.ts` | 🟢 NUSXA | `a079604c210e` | — |
-| `src/modules/quiz/ui/add-quiz-sheet.tsx` | 🟡 MOSLASH | `a8df40293043` | bitta varaq (veb ikki bosqichli: details/questions); yaratish va tahrirlash vebdagidek BITTA komponentda; nom taklifi (combobox), qoralama saqlash va `QuizPreview` ko'chirilmadi; import natijasi `import-result-sheet` da |
-| `src/modules/quiz/ui/import-result-sheet.tsx` | 🆕 MOBIL | `—` | vebda import natijasi tahrirlash dialogini ochadi; mobilda u hali yo'q, shuning uchun ogohlantirishlar va e'lon qilish alohida oynada |
-| `src/modules/quiz/ui/quiz-preview-sheet.tsx` | 🟡 MOSLASH | `6f6e9fee7e8e` | vebda yonma-yon ustun (`quiz-page-split`), mobilda talab bo'yicha ochiladigan oyna; mantiq bir xil — o'sha `draftToStudentQuestion` + `QuestionAnswerInput` |
-| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `5fb911e2fc0e` | mobil boshqaruvlar: select -> SelectField, tartiblash strelkalar bilan; matematika hozircha oddiy matn; `Choice` eksport qilingan — mock test uni qayta ishlatadi (vebda ular CSS klassini bo'lishadi) |
-| `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `198c84c9263f` | mantiq lib/question-draft da; kursor joyiga belgi qo'yish (insertAt) ko'chirilmadi — RN TextInput da tanlov holati ishonchsiz |
+| `src/modules/quiz/ui/question-answer-input.tsx` | 🟡 MOSLASH | `—` | veb uslublari (legacy.css) bilan qayta yozildi; `<select>` -> ro'yxatli oyna, bo'sh joylar so'zlar oqimida; `$...$` formulalar oddiy matn (MathLive yo'q); `Choice` eksport qilingan |
+| `src/modules/quiz/ui/question-editor.tsx` | 🟡 MOSLASH | `—` | veb o'lchamlari bilan qayta yozildi; formula oynasida MathLive/palitra yo'q — LaTeX matn sifatida kursor joyiga `$...$` bo'lib qo'yiladi |
+| `src/modules/quiz/ui/question-group-editor.tsx` | 🟡 MOSLASH | `—` | `<audio>` -> expo-audio; `<details>` -> ochib-yopiladigan blok |
+| `src/modules/quiz/ui/quiz-create-dialog.tsx` | 🟡 MOSLASH | `—` | ikki bosqich vebdagidek (Sheet + to'liq ekranli Modal); nom taklifi (existingQuizzes) yo'q; telefondagi "Qoralama saqlash" haqiqatan qoralama sifatida saqlaydi |
+| `src/modules/quiz/ui/quiz-preview.tsx` | 🟡 MOSLASH | `—` | veb o'lchamlari |
+| `src/modules/quiz/ui/subject-filter-sheet.tsx` | 🟡 MOSLASH | `—` | Drawer -> Sheet |
+| `src/modules/quiz/ui/assign-quiz-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `assign-quiz-sheet.tsx` (Dialog -> Sheet) |
+| `src/modules/quiz/ui/quiz-export-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `quiz-export-sheet.tsx`; faqat telefon varianti (3 qator, o'qituvchi nusxasi) |
+| `src/modules/quiz/ui/quiz-attempts-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `quiz-attempts-sheet.tsx`; yuklab olish `downloadBlob` (ulashish oynasi) orqali |
+| `src/pages/teacher/quizzes/teacher-quizzes-page.tsx` | 🟡 MOSLASH | `—` | mobilda `pages/quizzes/teacher-quizzes-page.tsx`; karta bosilganda tahrirlash oynasi ochiladi (savollardan boshlash hali yo'q) |
 | `src/modules/student/api/student.api.ts` | 🟢 NUSXA | `8e54d2259086` | — |
 | `src/modules/student/api/student.dto.ts` | 🟢 NUSXA | `f0d3020fd053` | — |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `82f60b388730` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |

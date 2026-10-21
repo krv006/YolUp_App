@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { Bell, Plus, Search, X } from "lucide-react-native";
+import { Plus } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import {
   matchesConversationFilter,
@@ -13,20 +13,18 @@ import {
 } from "@/modules/conversation";
 import { ConversationItem } from "@/modules/conversation/ui/conversation-item";
 import { useLiveLessons } from "@/modules/lesson";
-import { useUnreadNotificationCount } from "@/modules/notification";
+import { NotificationBell } from "@/modules/notification";
 import { NewGroupSheet } from "@/modules/conversation/ui/new-group-sheet";
 import { StudentEnrollmentSheet } from "@/modules/student";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import {
+  AppBar,
   Chip,
   ChipRow,
-  CountBadge,
-  IconButton,
-  Input,
   Screen,
   ScreenEmpty,
   ScreenError,
-  Separator,
+  SearchField,
   Skeleton,
   Text,
   useTheme,
@@ -59,11 +57,9 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   const { user } = useAuth();
   const { filter, setFilter } = useConversationFilter();
   const [search, setSearch] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const [enrollOpen, setEnrollOpen] = useState(false);
 
   const { data = [], isLoading, isError, error, refetch, isRefetching } = useConversations(role);
-  const unread = useUnreadNotificationCount();
 
   /**
    * Qaysi guruhda dars ketyapti. Dars kurs bilan bog'langan, chat ham —
@@ -99,50 +95,20 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
 
   return (
     <Screen padded={false}>
-      <View style={[styles.header, { borderBottomColor: palette.border }]}>
-        {searchOpen ? (
-          <View style={styles.searchRow}>
-            <View style={styles.searchInput}>
-              <Input
-                placeholder={t("chats.suhbat_qidirish")}
-                icon={<Search size={18} color={palette["muted-foreground"]} />}
-                value={search}
-                onChangeText={setSearch}
-                autoFocus
-                returnKeyType="search"
-              />
-            </View>
-            <IconButton
-              accessibilityLabel={t("chats.qidiruvni_yopish")}
-              onPress={() => {
-                setSearch("");
-                setSearchOpen(false);
-              }}
-            >
-              <X size={20} color={palette["muted-foreground"]} />
-            </IconButton>
-          </View>
-        ) : (
-          <View style={styles.titleRow}>
-            <Text variant="heading" style={styles.title}>
-              {t("chats.suhbatlar")}
-            </Text>
-            <IconButton accessibilityLabel={t("chats.qidirish")} onPress={() => setSearchOpen(true)}>
-              <Search size={20} color={palette["muted-foreground"]} />
-            </IconButton>
-            <IconButton
-              accessibilityLabel={t("chats.bildirishnomalar")}
-              onPress={() => router.push("/notifications")}
-            >
-              <Bell size={20} color={palette["muted-foreground"]} />
-              {(unread.data ?? 0) > 0 ? (
-                <View style={styles.bellBadge}>
-                  <CountBadge count={unread.data ?? 0} />
-                </View>
-              ) : null}
-            </IconButton>
-          </View>
-        )}
+      <AppBar a11yTitle={t("chats.suhbatlar")}>
+        <NotificationBell />
+      </AppBar>
+
+      <View style={[styles.body, { backgroundColor: palette.surface }]}>
+        {/*
+         * Qidiruv DOIM ko'rinadi — vebdagi kabi. Ilgari u sarlavha
+         * yonidagi ikonka ortida yashiringan edi.
+         */}
+        <SearchField
+          value={search}
+          onChangeText={setSearch}
+          placeholder={t("chats.suhbat_qidirish")}
+        />
 
         <ChipRow>
           {FILTERS.map(({ id, labelKey, ns }) => (
@@ -154,19 +120,19 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
             />
           ))}
         </ChipRow>
-      </View>
 
-      <ChatsList
-        conversations={visible}
-        liveCourses={liveCourses}
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error instanceof Error ? error.message : undefined}
-        isRefetching={isRefetching}
-        onRefresh={() => void refetch()}
-        onOpen={openConversation}
-        hasFilter={Boolean(search.trim()) || filter !== "all"}
-      />
+        <ChatsList
+          conversations={visible}
+          liveCourses={liveCourses}
+          isLoading={isLoading}
+          isError={isError}
+          errorMessage={error instanceof Error ? error.message : undefined}
+          isRefetching={isRefetching}
+          onRefresh={() => void refetch()}
+          onOpen={openConversation}
+          hasFilter={Boolean(search.trim()) || filter !== "all"}
+        />
+      </View>
 
       <Pressable
         accessibilityRole="button"
@@ -218,22 +184,24 @@ function ChatsList({
   hasFilter,
 }: ChatsListProps) {
   const { t } = useTranslation("mobile");
+  // Guruh sarlavhalari veb bilan BIR XIL kalitdan: `chat:panel.groups.*`.
+  const { t: tc } = useTranslation("chat");
   const { palette } = useTheme();
 
   if (isLoading) return <ChatsSkeleton />;
 
   if (isError) {
     return (
-      <ScreenError
-        message={errorMessage ?? "Suhbatlarni yuklab bo'lmadi"}
-        onRetry={onRefresh}
-      />
+      <ScreenError message={errorMessage ?? "Suhbatlarni yuklab bo'lmadi"} onRetry={onRefresh} />
     );
   }
 
   if (conversations.length === 0) {
     return hasFilter ? (
-      <ScreenEmpty title={t("chats.hech_narsa_topilmadi")} description={t("chats.qidiruv_yoki_filtrni_ozgartiring")} />
+      <ScreenEmpty
+        title={t("chats.hech_narsa_topilmadi")}
+        description={t("chats.qidiruv_yoki_filtrni_ozgartiring")}
+      />
     ) : (
       <ScreenEmpty
         title={t("chats.suhbatlar_yoq")}
@@ -246,9 +214,8 @@ function ChatsList({
     // FlashList v2 qator balandligini o'zi o'lchaydi — `estimatedItemSize`
     // kerak emas (v1 da majburiy edi).
     <FlashList
-      data={conversations}
-      keyExtractor={(item) => item.id}
-      ItemSeparatorComponent={() => <Separator inset={72} />}
+      data={toRows(conversations)}
+      keyExtractor={(row) => (row.kind === "header" ? `h-${row.key}` : row.conversation.id)}
       refreshControl={
         <RefreshControl
           refreshing={isRefetching}
@@ -256,15 +223,69 @@ function ChatsList({
           tintColor={palette["muted-foreground"]}
         />
       }
-      renderItem={({ item }) => (
-        <ConversationItem
-          conversation={item}
-          onPress={onOpen}
-          live={Boolean(item.courseId && liveCourses.has(item.courseId))}
-        />
-      )}
+      renderItem={({ item: row }) =>
+        row.kind === "header" ? (
+          <Text variant="label" tone="muted" style={styles.groupHeader}>
+            {tc(`panel.groups.${row.key}`)}
+          </Text>
+        ) : (
+          <View style={styles.groupItem}>
+            <ConversationItem
+              conversation={row.conversation}
+              onPress={onOpen}
+              live={Boolean(
+                row.conversation.courseId && liveCourses.has(row.conversation.courseId)
+              )}
+            />
+          </View>
+        )
+      }
     />
   );
+}
+
+type GroupKey = "today" | "yesterday" | "earlier";
+
+/**
+ * Suhbat qaysi sana guruhiga tushishi — veb `conversation-panel.tsx`
+ * dagi `groupKeyOf` ning porti (chegaralar bayt-bayt bir xil).
+ */
+function groupKeyOf(value: string): GroupKey {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "earlier";
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  if (date.getTime() >= start.getTime()) return "today";
+  if (date.getTime() >= start.getTime() - 86_400_000) return "yesterday";
+  return "earlier";
+}
+
+/** Sarlavha va suhbatlar bitta tekis ro'yxatda — FlashList bo'lim bilmaydi. */
+type Row =
+  | { kind: "header"; key: GroupKey }
+  | { kind: "item"; conversation: Conversation };
+
+/**
+ * Suhbatlarni sana guruhlariga ajratib, tekis ro'yxatga yoyadi.
+ *
+ * Vebda ro'yxat "Bugun / Kecha / Avvalgi" sarlavhalari bilan bo'linadi;
+ * mobilda bu umuman yo'q edi.
+ */
+function toRows(conversations: readonly Conversation[]): Row[] {
+  const buckets: { key: GroupKey; items: Conversation[] }[] = [
+    { key: "today", items: [] },
+    { key: "yesterday", items: [] },
+    { key: "earlier", items: [] },
+  ];
+  for (const item of conversations) {
+    buckets.find((entry) => entry.key === groupKeyOf(item.updatedAt))?.items.push(item);
+  }
+  return buckets
+    .filter((entry) => entry.items.length > 0)
+    .flatMap<Row>((entry) => [
+      { kind: "header", key: entry.key },
+      ...entry.items.map((conversation) => ({ kind: "item" as const, conversation })),
+    ]);
 }
 
 function ChatsSkeleton() {
@@ -284,12 +305,33 @@ function ChatsSkeleton() {
 }
 
 const styles = StyleSheet.create({
+  /*
+   * Veb DOM'idan: bo'lim OQ fonda, bo'shlig'i 20, elementlar orasi 16.
+   * Sahifa foni (`--bg-canvas`) faqat tepa panelda qoladi.
+   */
+  body: { flex: 1, paddingHorizontal: 20, paddingTop: 20, gap: 16 },
+  /*
+   * Kartochkalar ORASIDA bo'shliq — vebdagi bo'limning `gap: 16`.
+   * Ilgari bu yerda ajratgich chiziq turardi; suhbatlar alohida
+   * kartochka bo'lgach u ortiqcha.
+   */
+  /*
+   * Veb: guruh sarlavhasi `px-1 pt-2` (chapda 4, tepada 8), guruh ichida
+   * elementlar orasi `gap-2` (8). Ilgari mobilda guruhlar umuman yo'q edi
+   * va qatorlar orasida ajratgich chiziq turardi.
+   */
+  groupHeader: { paddingLeft: 4, paddingTop: 8, paddingBottom: 8 },
+  groupItem: { paddingBottom: 8 },
   header: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   titleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 8 },
   title: { flex: 1 },
   searchRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, gap: 4 },
   // Qo'ng'iroq ustidagi hisoblagich — tugma maydonini o'zgartirmasligi kerak.
-  bellBadge: { position: "absolute", top: 4, right: 2 },
+  /*
+   * Nishon tugma doirasidan TASHQARIDA turadi. Ilgari u doira ichida
+   * edi va qo'ng'iroq ikonkasini bosib qolardi. Vebda bu yerda nishon
+   * umuman yo'q, lekin o'qilmagan sonni yo'qotmaslik uchun qoldirildi.
+   */
   searchInput: { flex: 1 },
   // Suzuvchi tugma ro'yxat USTIDA — pastdagi tab paneli ustida turadi.
   fab: {

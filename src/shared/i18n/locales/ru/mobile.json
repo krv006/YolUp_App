@@ -9,7 +9,7 @@
     "children": "Дети",
     "attendance": "Посещаемость",
     "homework": "Задания",
-    "workspace": "Рабочее место"
+    "workspace": "Workspace"
   },
   "auth": {
     "accountType": "Тип аккаунта",
@@ -117,7 +117,11 @@
     "xabarlar_yoq": "Нет сообщений",
     "birinchi_xabarni_yozib_suhbatni_boshlang": "Напишите первое сообщение, чтобы начать беседу.",
     "dars_yozuvini_korish": "Смотреть запись урока",
-    "yozuvni_korish": "Смотреть запись"
+    "yozuvni_korish": "Смотреть запись",
+    "biriktirish": "Прикрепить",
+    "eslatish": "Упомянуть",
+    "emoji": "Эмодзи",
+    "ovozli_xabar": "Голосовое сообщение"
   },
   "analytics": {
     "qiymatlarni_ko_rish_uchun_grafikni_bosi": "Нажмите на график, чтобы увидеть значения.",
@@ -223,7 +227,8 @@
     "royxat": "Список",
     "hali_dars_rejalashtirilmagan": "Уроки ещё не запланированы",
     "kursga_yozilganingizdan_keyin_darslar_shu_ye": "Уроки появятся здесь после записи на курс.",
-    "bu_kunda_dars_yoq": "В этот день уроков нет."
+    "bu_kunda_dars_yoq": "В этот день уроков нет.",
+    "jadval": "Расписание"
   },
   "settings": {
     "orqaga": "Назад",
@@ -586,7 +591,9 @@
     "username_nusxalandi": "Логин скопирован",
     "yangi_kurs_va_guruh": "Новый курс и группа",
     "yangi_oquv_maydoni": "Новое учебное пространство",
-    "yangi_sorov": "Новый запрос"
+    "yangi_sorov": "Новый запрос",
+    "suhbat_malumoti": "Сведения о чате",
+    "xabarlardan_qidirish": "Поиск по сообщениям"
   },
   "homework": {
     "barcha_fanlar": "Все предметы",
@@ -755,6 +762,7 @@
     "ratingChild": {
       "title": "Рейтинг",
       "description": "Результаты ребёнка по заданиям."
-    }
+    },
+    "modullar": "Модули"
   }
 }

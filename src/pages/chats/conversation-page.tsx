@@ -20,13 +20,15 @@ import { useChat } from "@/modules/message";
 import { MessageActionsSheet } from "@/modules/message/ui/message-actions-sheet";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
 import { MessageList } from "@/modules/message/ui/message-list";
+import { VoiceRoomBar } from "@/modules/voice";
 import {
   GroupTabsRow,
   GroupWorkspaceSection,
   type GroupTab,
 } from "@/widgets/group-workspace/group-workspace";
 import type { ChatMessage, ConversationRole } from "@/shared/types";
-import { Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
+import { AppBar, Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
+import { NotificationBell } from "@/modules/notification";
 
 /**
  * Suhbat oynasi — veb `pages/teacher/conversation-page.tsx` va
@@ -41,12 +43,23 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { palette } = useTheme();
-  const { conversationId } = useLocalSearchParams<{ conversationId: string }>();
+  /*
+   * `tab` — boshqa ekrandan aniq bo'limga ochish uchun (masalan jadvaldagi
+   * "Davomat qilish" -> davomat bo'limi). Vebda bu alohida sahifalar.
+   */
+  const { conversationId, tab: initialTab } = useLocalSearchParams<{
+    conversationId: string;
+    tab?: GroupTab;
+  }>();
   const { user } = useAuth();
 
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
-  const [tab, setTab] = useState<GroupTab>("chat");
+  const [tab, setTab] = useState<GroupTab>(
+    initialTab === "lessons" || initialTab === "assignments" || initialTab === "attendance"
+      ? initialTab
+      : "chat"
+  );
   const [infoOpen, setInfoOpen] = useState(false);
 
   const chat = useChat(conversationId, { role, senderId: user?.id ?? null });
@@ -128,6 +141,14 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 
   return (
     <View style={[styles.root, { backgroundColor: palette["chat-bg"], paddingTop: insets.top }]}>
+      {/*
+        * IKKI QAVATLI tepa panel — vebdagi kabi. Suhbat ichida ham
+        * global panel (logotip + qo'ng'iroq) tepada qoladi, suhbat
+        * paneli esa uning ostida.
+        */}
+      <AppBar a11yTitle={conversation.title}>
+        <NotificationBell />
+      </AppBar>
       <ChatHeader
         conversation={conversation}
         onBack={goBack}
@@ -141,6 +162,17 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         lesson={liveLesson}
         onJoin={() => liveLesson && router.push(`/live/${liveLesson.id}`)}
       />
+
+      {/*
+        * Ovozli suhbat chizig'i TABLAR USTIDA — vebdagi kabi, ya'ni
+        * qaysi bo'lim ochiq bo'lishidan qat'i nazar ko'rinadi.
+        *
+        * Ilgari u Darslar bo'limining ichida edi: "har bo'limda
+        * takrorlansa joy yeb qo'yadi" degan xavotir bilan. Bu joylashuvda
+        * u BIR MARTA chiziladi, shuning uchun o'sha xavotir yuzaga
+        * kelmaydi.
+        */}
+      {courseId ? <VoiceRoomBar courseId={courseId} isTeacher={role === "teacher"} /> : null}
 
       {/* Bo'limlar faqat GURUH chatida: shaxsiy suhbatda kurs, dars va
           vazifa tushunchasi yo'q. */}
@@ -165,11 +197,19 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
             onLongPress={setActionMessage}
             onRetryMessage={chat.retryMessage}
             currentUserId={user?.id ?? null}
+            conversationId={conversation.id}
             typingName={conversation.typingName ?? null}
           />
 
           <MessageComposer
             onSend={(payload) => chat.sendMessage.mutate(payload)}
+            /*
+             * O'qituvchida biriktirma varag'idagi "Vazifa" plitkasi
+             * Vazifalar bo'limini ochadi — vazifa o'sha yerdan yaratiladi.
+             */
+            onAssignment={
+              courseId && role === "teacher" ? () => setTab("assignments") : undefined
+            }
             onTyping={chat.sendTyping}
             replyTo={replyTo}
             onCancelReply={() => setReplyTo(null)}

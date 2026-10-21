@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { UsersRound, Video } from "lucide-react-native";
 import { formatConversationTime } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
-import { Avatar, CountBadge, MIN_TOUCH_SIZE, Text, useTheme } from "@/shared/ui";
+import { Avatar, CountBadge, radius, Text, useTheme } from "@/shared/ui";
 
 export interface ConversationItemProps {
   conversation: Conversation;
@@ -35,7 +35,10 @@ export function ConversationItem({ conversation, onPress, live = false }: Conver
       onPress={() => onPress(conversation.id)}
       style={({ pressed }) => [
         styles.row,
-        pressed && { backgroundColor: palette["surface-subtle"] },
+        {
+          backgroundColor: pressed ? palette["surface-subtle"] : palette.surface,
+          borderColor: palette.border,
+        },
       ]}
     >
       <View>
@@ -100,13 +103,21 @@ export function ConversationItem({ conversation, onPress, live = false }: Conver
 }
 
 const styles = StyleSheet.create({
+  /*
+   * Veb DOM'idan o'lchandi: balandlik 82, radius 20, oq fon,
+   * chegara 1px, ichki bo'shliq 16, elementlar orasi 14.
+   *
+   * ILGARI bu oddiy QATOR edi — fonsiz, chegarasiz, ajratgich chiziq
+   * bilan. Vebda har suhbat alohida KARTOCHKA.
+   */
   row: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    minHeight: MIN_TOUCH_SIZE + 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    gap: 14,
+    minHeight: 82,
+    padding: 16,
+    borderRadius: radius.xl,
+    borderWidth: 1,
   },
   body: { flex: 1, gap: 4 },
   topRow: { flexDirection: "row", alignItems: "center", gap: 8 },

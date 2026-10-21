@@ -1,17 +1,19 @@
+import { useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { downloadBlob } from "@/shared/lib";
 import type { QuizEditValues, QuizFormValues } from "@/shared/types";
 import type { QuizAttemptAnswerInput } from "../lib/quiz.mappers";
-import { quizApi } from "../api/quiz.api";
-import type { QuizImportRequest } from "../api/quiz.dto";
+import { quizApi, type QuizExportMode, type QuizExportType } from "../api/quiz.api";
+import type { AiQuizRequest, QuizImportRequest } from "../api/quiz.dto";
 
 export const quizKeys = Object.freeze({
   all: ["quizzes"] as const,
   list: (courseId: string | null) => ["quizzes", "list", courseId] as const,
   detail: (id: string) => ["quizzes", "detail", id] as const,
   attempts: (id: string) => ["quizzes", "attempts", id] as const,
+  aiJobs: ["quizzes", "ai-jobs"] as const,
 });
 
 export function useQuizzes(courseId: string | null, enabled = true) {
@@ -66,6 +68,20 @@ export function useUpdateQuiz() {
   });
 }
 
+export function useAssignQuizToCourse() {
+  const { t } = useTranslation("quiz");
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ quizId, courseId }: { quizId: string; courseId: string }) =>
+      quizApi.assignToCourse(quizId, courseId),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: quizKeys.all });
+      toast.success(t("toast.assigned"));
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
 export function useImportQuizDocx() {
   const { t } = useTranslation("quiz");
   const client = useQueryClient();
@@ -101,6 +117,42 @@ export function useImportGoogleLink() {
   });
 }
 
+export function useStartAiQuiz() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ files, request }: { files: File[]; request: AiQuizRequest }) =>
+      quizApi.startAiGenerate(files, request),
+    onSuccess: () => client.invalidateQueries({ queryKey: quizKeys.aiJobs }),
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+/** O'qituvchining AI testlari; faol ish bo'lsa har 5 soniyada yangilanadi. Biror ish tayyor bo'lganda test ro'yxati ham yangilanadi. */
+export function useAiQuizJobs() {
+  const client = useQueryClient();
+  const query = useQuery({
+    queryKey: quizKeys.aiJobs,
+    queryFn: ({ signal }) => quizApi.getAiJobs({ signal }),
+    refetchInterval: (current) =>
+      (current.state.data ?? []).some((job) => ["queued", "processing", "generating"].includes(job.status))
+        ? 5000
+        : false,
+  });
+
+  // Tayyor ishlar soni o'zgargandagina test ro'yxatini yangilaymiz. DIQQAT: bu yerda `quizKeys.all`
+  // ni yangilab bo'lmaydi: u `aiJobs` kalitini ham o'z ichiga oladi va cheksiz so'rovlar tsikli bo'lib qoladi.
+  const doneCount = (query.data ?? []).filter((job) => job.status === "done").length;
+  const seenDone = useRef<number | null>(null);
+  useEffect(() => {
+    if (seenDone.current !== null && doneCount > seenDone.current) {
+      client.invalidateQueries({ queryKey: ["quizzes", "list"] });
+    }
+    seenDone.current = doneCount;
+  }, [doneCount, client]);
+
+  return query;
+}
+
 export function usePublishQuiz() {
   const { t } = useTranslation("quiz");
   const client = useQueryClient();
@@ -121,6 +173,17 @@ export function useDownloadQuizTemplate() {
       quizApi.downloadTemplate(type, count).then((blob) =>
         downloadBlob(blob, t("createDialog.templateFileName", { ext: type }))
       ),
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useExportQuiz() {
+  return useMutation({
+    mutationFn: ({ id, type, mode, name }: { id: string; type: QuizExportType; mode: QuizExportMode; name: string }) =>
+      quizApi.exportQuiz(id, type, mode).then((blob) => {
+        const safe = name.replace(/[\\/:*?"<>|]+/g, " ").trim().slice(0, 80) || "test";
+        return downloadBlob(blob, `${safe} (${mode}).${type}`);
+      }),
     onError: (error: Error) => toast.error(error.message),
   });
 }

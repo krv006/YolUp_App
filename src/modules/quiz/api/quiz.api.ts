@@ -1,8 +1,18 @@
-import { apiClient, normalizePagination, type RequestOptions } from "@/shared/api";
+import {
+  API_ERROR_CODES,
+  apiClient,
+  AppError,
+  directApiUrl,
+  normalizePagination,
+  type RequestOptions,
+} from "@/shared/api";
 import type { QuizDetail, QuizEditValues, QuizFormValues, QuizImportWarning } from "@/shared/types";
 import { quizEndpoints } from "./quiz.endpoints";
 import type { QuizAttemptAnswerInput } from "../lib/quiz.mappers";
 import type {
+  AiQuizJob,
+  AiQuizJobDto,
+  AiQuizRequest,
   QuizAttemptResultDto,
   QuizAttemptSummaryDto,
   QuizDto,
@@ -24,6 +34,11 @@ import {
   mapQuizRequest,
   mapQuizSummaryDto,
 } from "../lib/quiz.mappers";
+
+const AI_UPLOAD_TIMEOUT_MS = 300_000;
+
+export type QuizExportType = "pdf" | "docx" | "xlsx";
+export type QuizExportMode = "student" | "teacher";
 
 export interface ImportedQuiz {
   quiz: QuizDetail;
@@ -53,6 +68,10 @@ export const quizApi = {
       await apiClient.patch<QuizDto>(quizEndpoints.detail(id), mapQuizEditRequest(values))
     );
   },
+  /** Guruhsiz testni (masalan, AI yaratgan) o'qituvchining guruhiga biriktiradi. */
+  async assignToCourse(id: string, courseId: string) {
+    return mapQuizDto(await apiClient.patch<QuizDto>(quizEndpoints.detail(id), { course: courseId }));
+  },
   async importDocx(file: File, request: QuizImportRequest) {
     const body = new FormData();
     body.set("file", file);
@@ -72,8 +91,54 @@ export const quizApi = {
       await apiClient.post<QuizDto>(endpoint, { url, ...mapQuizImportRequest(request) })
     );
   },
+  async startAiGenerate(files: File[], request: AiQuizRequest) {
+    const body = new FormData();
+    for (const file of files) body.append("file", file);
+    body.set("topic", request.topic);
+    if (request.standard) body.set("standard", request.standard);
+    if (request.rulesFile) body.set("rules_file", request.rulesFile);
+    if (request.rulesText) body.set("rules_text", request.rulesText);
+    if (request.materialText) body.set("material_text", request.materialText);
+    if (request.examName) body.set("exam_name", request.examName);
+    body.set("question_count", String(request.questionCount));
+    if (request.courseId) body.set("course", request.courseId);
+    if (request.subject) body.set("subject", request.subject);
+    if (request.title) body.set("title", request.title);
+    // Katta fayllar: (1) standart 15 soniyadan uzoq davom etadi; (2) Vercel proxy'si ularni uzib qo'yishi mumkin —
+    // shuning uchun avval to'g'ridan-to'g'ri API domeniga yuboramiz, tarmoq darajasida muvaffaqiyatsiz bo'lsa
+    // (CORS/ulanish) odatiy yo'l bilan qayta urinamiz.
+    const options = { timeoutMs: AI_UPLOAD_TIMEOUT_MS };
+    try {
+      return await apiClient.post<AiQuizJobDto>(directApiUrl(quizEndpoints.aiGenerate), body, options);
+    } catch (error) {
+      if (error instanceof AppError && error.code === API_ERROR_CODES.NETWORK_ERROR) {
+        return apiClient.post<AiQuizJobDto>(quizEndpoints.aiGenerate, body, options);
+      }
+      throw error;
+    }
+  },
+  async getAiJobs(options?: RequestOptions): Promise<AiQuizJob[]> {
+    const dto = await apiClient.get<unknown>(quizEndpoints.aiGenerate, options);
+    return normalizePagination<AiQuizJobDto>(dto).items.map((item) => ({
+      id: String(item.id),
+      status: item.status,
+      topic: item.topic ?? "",
+      title: item.title ?? "",
+      standard: item.standard ? item.standard : null,
+      mode: item.mode ?? (item.standard ? "test_creator" : "simple"),
+      summary: item.summary ?? "",
+      questionCount: item.question_count ?? 0,
+      quizId: item.quiz === null || item.quiz === undefined ? null : String(item.quiz),
+      error: item.error ?? "",
+      createdAt: item.created_at ?? "",
+    }));
+  },
   async publish(id: string) {
     return mapQuizDto(await apiClient.post<QuizDto>(quizEndpoints.publish(id), {}));
+  },
+  /** Testni fayl qilib yuklab olish: `student` — javobsiz, `teacher` — javob kaliti va Listening skripti bilan. */
+  async exportQuiz(id: string, type: QuizExportType, mode: QuizExportMode) {
+    return apiClient.get<Blob>(quizEndpoints.export(id), { responseType: "blob", query: { type, mode } });
   },
   async downloadTemplate(type: "docx" | "xlsx", count: number) {
     return apiClient.get<Blob>(quizEndpoints.template, {
@@ -110,5 +175,24 @@ export const quizApi = {
   async getAttempts(quizId: string, options?: RequestOptions) {
     const dto = await apiClient.get<unknown>(quizEndpoints.attempts(quizId), options);
     return normalizePagination<QuizAttemptSummaryDto>(dto).items.map(mapQuizAttemptSummaryDto);
+  },
+
+  exportAttempts(quizId: string, type: "xlsx" | "csv" = "xlsx") {
+    return apiClient.get<Blob>(quizEndpoints.attemptsExport(quizId), {
+      query: { type },
+      responseType: "blob",
+    });
+  },
+
+  async getNotAttempted(quizId: string, options?: RequestOptions) {
+    const items = await apiClient.get<
+      Array<{ id: string | number; name?: string; username?: string; avatar_url?: string | null }>
+    >(quizEndpoints.notAttempted(quizId), options);
+    return (items ?? []).map((item) => ({
+      id: String(item.id),
+      name: item.name ?? item.username ?? "",
+      username: item.username ?? "",
+      avatarUrl: item.avatar_url ?? null,
+    }));
   },
 };

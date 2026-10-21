@@ -7,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
+import { MIN_TOUCH_SIZE, radius } from "./tokens";
 import { useTheme } from "./theme";
 import { Text } from "./text";
 
@@ -35,7 +35,12 @@ export function Chip({ label, selected = false, onPress }: ChipProps) {
       style={({ pressed }) => [
         styles.chip,
         {
-          backgroundColor: selected ? palette.primary : palette.secondary,
+          /*
+           * Veb faol chipni TO'LDIRMAYDI: och ko'k fon (`--action-primary-subtle`),
+           * ko'k matn va ko'k chegara. Ilgari mobilda u to'liq ko'k bo'lib,
+           * oq matn bilan chiqardi.
+           */
+          backgroundColor: selected ? palette["primary-soft"] : palette.surface,
           borderColor: selected ? palette.primary : palette.border,
           opacity: pressed ? 0.85 : 1,
         },
@@ -44,7 +49,7 @@ export function Chip({ label, selected = false, onPress }: ChipProps) {
       <Text
         style={[
           styles.chipLabel,
-          { color: selected ? palette["primary-foreground"] : palette["muted-foreground"] },
+          { color: selected ? palette.primary : palette["muted-foreground"] },
         ]}
       >
         {label}
@@ -181,14 +186,22 @@ export function ScreenHeader({
 
 const styles = StyleSheet.create({
   separator: { height: StyleSheet.hairlineWidth },
+  /*
+   * O'lchamlar veb DOM'idan o'lchandi (390px kenglikda):
+   *   balandlik 40, yon bo'shliq 12, radius 999, chegara 1px,
+   *   yorliq 12/16, qalinlik 600.
+   *
+   * Chegara ATAYLAB `hairlineWidth` emas: vebda u 1px va yupqaroq
+   * chiziq faol chipni xiraroq ko'rsatardi.
+   */
   chip: {
-    minHeight: 34,
+    height: 40,
     justifyContent: "center",
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     borderRadius: radius.full,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
   },
-  chipLabel: { fontSize: fontSize.sm, fontWeight: "600" },
+  chipLabel: { fontSize: 12, lineHeight: 16, fontWeight: "600" },
   chipRowOuter: { flexGrow: 0, flexShrink: 0 },
   chipRow: { gap: 8, paddingHorizontal: 16, paddingVertical: 10 },
   iconButton: {

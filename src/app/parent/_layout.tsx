@@ -1,4 +1,3 @@
-import { Home, LayoutGrid, UserRound, UsersRound } from "lucide-react-native";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
@@ -26,15 +25,15 @@ import { ROLES } from "@/shared/constants";
  * Marshrutlar o'zgarmadi, faqat panelda ko'rinmaydi.
  */
 const TABS = [
-  { name: "dashboard", labelKey: "tabs.overview", icon: Home },
-  { name: "children", labelKey: "tabs.children", icon: UsersRound },
+  { name: "dashboard", labelKey: "tabs.overview", iconName: "school" },
+  { name: "children", labelKey: "tabs.children", iconName: "groups" },
   {
     name: "workspace",
     labelKey: "tabs.workspace",
-    icon: LayoutGrid,
+    iconName: "nav-workspace",
     owns: ["attendance", "homework", "grades"],
   },
-  { name: "profile", labelKey: "tabs.profile", icon: UserRound },
+  { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
 ] as const;
 
 export default function ParentLayout() {

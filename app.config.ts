@@ -175,6 +175,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
        * FCM xizmati va bildirishnoma ikonkasi, iOS'da esa push
        * imkoniyati (entitlement).
        */
+      /*
+       * Ovozli xabar yozish (suhbat kompozitoridagi mikrofon). Ruxsat
+       * matni iOS `NSMicrophoneUsageDescription` bilan bir xil.
+       */
+      [
+        "expo-audio",
+        {
+          microphonePermission:
+            "Jonli darsda gapirish va og'zaki vazifani yozib topshirish uchun.",
+        },
+      ],
       [
         "expo-notifications",
         {

@@ -1,28 +1,30 @@
 import { useState } from "react";
 import { useEvent } from "expo";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useKeepAwake } from "expo-keep-awake";
-import { ArrowLeft, BookOpen, CalendarDays, Clock3, Star, Trash2 } from "lucide-react-native";
+import { ArrowLeft, CalendarDays, Clock3, ShieldCheck, Trash2, TriangleAlert, Users, VideoOff } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
-import { useDeleteRecording, useLesson, useLessonRecording } from "@/modules/lesson";
+import { LessonRatingForm, useDeleteRecording, useLesson, useLessonRecording } from "@/modules/lesson";
 import { ROLES } from "@/shared/constants";
 import { formatDateTime } from "@/shared/lib";
+import type { Lesson } from "@/shared/types";
 import {
   Badge,
   Button,
   ConfirmSheet,
-  IconButton,
   radius,
   Screen,
   ScreenEmpty,
-  ScreenError,
   ScreenLoading,
   Text,
+  ThemeScope,
   useTheme,
 } from "@/shared/ui";
+import { LiveRoomState } from "@/widgets/live-room/live-room-state";
 
 /**
  * Dars yozuvi — veb `recording-page.tsx` porti.
@@ -36,165 +38,199 @@ import {
  * keshlamaymiz: eskirgan URL bilan pleer ochilsa video umuman yuklanmaydi.
  */
 export function RecordingPage() {
-  const { t } = useTranslation("mobile");
   const router = useRouter();
-  const { palette } = useTheme();
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
-
-  const { user } = useAuth();
   const lesson = useLesson(lessonId ?? null);
-  const recording = useLessonRecording(lessonId ?? null);
-  const removeRecording = useDeleteRecording();
-  const [confirmOpen, setConfirmOpen] = useState(false);
-
-  // Yozuvni faqat o'qituvchi o'chira oladi — veb ham `canDelete` ni shu
-  // shartda beradi. Backend baribir qayta tekshiradi.
-  const canDelete = user?.role === ROLES.TEACHER && Boolean(recording.data?.ready);
 
   function goBack() {
     if (router.canGoBack()) router.back();
     else router.replace("/");
   }
 
-  if (lesson.isLoading) {
+  if (lesson.isLoading || (!lesson.isError && !lesson.data))
     return (
-      <Screen>
-        <ScreenLoading label={t("recording.dars_yuklanmoqda")} />
-      </Screen>
+      <ThemeScope scheme="dark">
+        <Screen>
+          <ScreenLoading label="Dars yuklanmoqda" />
+        </Screen>
+      </ThemeScope>
     );
-  }
 
-  if (lesson.isError || !lesson.data) {
+  if (lesson.isError || !lesson.data)
     return (
-      <Screen>
-        <ScreenError
-          message={lesson.error?.message ?? "Darsni topib bo'lmadi"}
-          onRetry={() => void lesson.refetch()}
-        />
-      </Screen>
+      <LiveRoomState
+        title="Darsni topib bo‘lmadi"
+        description={lesson.error?.message}
+        actionLabel="Qayta urinish"
+        onAction={() => void lesson.refetch()}
+        onBack={goBack}
+      />
     );
-  }
-
-  const data = lesson.data;
 
   return (
-    <Screen padded={false}>
-      <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel={t("recording.orqaga")} onPress={goBack}>
-          <ArrowLeft size={22} color={palette.foreground} />
-        </IconButton>
-        <Text variant="subheading" numberOfLines={1} style={styles.title}>
-          {data.title}
-        </Text>
-
-        {canDelete ? (
-          <IconButton accessibilityLabel={t("recording.video_yozuvni_ochirish")} onPress={() => setConfirmOpen(true)}>
-            <Trash2 size={20} color={palette.destructive} />
-          </IconButton>
-        ) : null}
-      </View>
-
-      <ConfirmSheet
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        title={t("recording.video_yozuvni_ochirish")}
-        description={t("recording.yozuv_butunlay_ochadi_va_qayta_tiklanmaydi")}
-        loading={removeRecording.isPending}
-        onConfirm={() =>
-          removeRecording.mutate(lessonId ?? "", { onSuccess: () => setConfirmOpen(false) })
-        }
-      />
-
-      <ScrollView contentContainerStyle={styles.body}>
-        <RecordingPlayer
-          status={recording.data?.status}
-          ready={Boolean(recording.data?.ready)}
-          streamUrl={recording.data?.streamUrl ?? null}
-          error={recording.data?.error ?? null}
-          loading={recording.isLoading}
-        />
-
-        <View style={styles.meta}>
-          <MetaItem icon={<BookOpen size={14} color={palette["muted-foreground"]} />} label={data.courseTitle} />
-          <MetaItem
-            icon={<CalendarDays size={14} color={palette["muted-foreground"]} />}
-            label={formatDateTime(data.startsAt)}
-          />
-          <MetaItem
-            icon={<Clock3 size={14} color={palette["muted-foreground"]} />}
-            label={`${data.durationMinutes} daqiqa`}
-          />
-          {data.avgRating !== null ? (
-            <MetaItem
-              icon={<Star size={14} color={palette.warning} fill={palette.warning} />}
-              label={`${data.avgRating.toFixed(1)} (${data.ratingCount})`}
-            />
-          ) : null}
-        </View>
-
-        {data.topic ? (
-          <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            <Text variant="label">Mavzu</Text>
-            <Text tone="muted">{data.topic}</Text>
-          </View>
-        ) : null}
-      </ScrollView>
-    </Screen>
+    <ThemeScope scheme="dark">
+      <RecordingBody lesson={lesson.data} onBack={goBack} />
+    </ThemeScope>
   );
 }
 
-function RecordingPlayer({
-  status,
-  ready,
-  streamUrl,
-  error,
-  loading,
-}: {
-  status?: string;
-  ready: boolean;
-  streamUrl: string | null;
-  error: string | null;
-  loading: boolean;
-}) {
-  const { t } = useTranslation("mobile");
+/**
+ * Vebning tor ekran (`isCompact`) ko'rinishi: qorong'i fon, "Dars yozuvi"
+ * sarlavhasi, ma'lumot chiplari, pleer va uning ostida nom, "Faqat
+ * platformada ochiladi" va o'chirish; o'quvchiga baholash formasi.
+ */
+function RecordingBody({ lesson: data, onBack }: { lesson: Lesson; onBack: () => void }) {
+  const { t } = useTranslation("lesson");
   const { palette } = useTheme();
+  const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const recording = useLessonRecording(data.id);
+  const removeRecording = useDeleteRecording();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const isStudent = user?.role === ROLES.STUDENT;
+  const canDelete = user?.role === ROLES.TEACHER;
+  const current = recording.data;
+  const stamp = current?.endedAt ?? current?.createdAt ?? null;
 
-  if (loading) return <ScreenLoading label={t("recording.yozuv_holati_tekshirilmoqda")} />;
+  const chips: Array<{ icon: React.ReactNode; label: string }> = [
+    { icon: <Users size={14} color={palette["muted-foreground"]} />, label: data.courseTitle },
+    { icon: <CalendarDays size={14} color={palette["muted-foreground"]} />, label: data.date },
+    { icon: <Clock3 size={14} color={palette["muted-foreground"]} />, label: `${data.time} · ${data.durationMinutes} daqiqa` },
+  ];
 
-  if (error || status === "failed") {
-    return (
-      <View style={[styles.placeholder, { backgroundColor: palette["destructive-soft"] }]}>
-        <Text variant="label" style={{ color: palette["destructive-strong"] }}>
-          {t("recording.yozuvni_tayyorlab_bolmadi")}
-        </Text>
-        <Text variant="caption" tone="muted" style={styles.placeholderText}>
-          {error || t("recording.oqituvchiga_murojaat_qiling")}
+  return (
+    <ScrollView
+      style={{ backgroundColor: palette.background }}
+      contentContainerStyle={[styles.page, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 }]}
+    >
+      <View style={styles.header}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Orqaga" onPress={onBack} style={styles.back}>
+          <ArrowLeft size={22} color={palette.foreground} />
+        </Pressable>
+        <Text variant="body" style={styles.heading}>
+          Dars yozuvi
         </Text>
       </View>
-    );
-  }
 
-  if (!ready || !streamUrl) {
-    return (
-      <View style={[styles.placeholder, { backgroundColor: palette.muted }]}>
-        <Badge
-          label={
-            status === "recording"
-              ? t("recording.yozilmoqda")
-              : status === "merging"
-                ? t("recording.tayyorlanmoqda")
-                : t("recording.kutilmoqda")
-          }
-          tone="warning"
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chips}>
+        {chips.map((chip) => (
+          <View key={chip.label} style={[styles.chip, { backgroundColor: palette["surface-subtle"] }]}>
+            {chip.icon}
+            <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+              {chip.label}
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      <View style={styles.content}>
+        {recording.isLoading ? (
+          <ScreenLoading label="Yozuv yuklanmoqda" />
+        ) : recording.isError ? (
+          <RecordingState tone="error" icon={<TriangleAlert size={28} color={palette["destructive-strong"]} />} text={recording.error?.message ?? t("recording.failed")} />
+        ) : !current ? (
+          <RecordingState icon={<VideoOff size={28} color={palette["primary-text"]} />} text={t("recording.none")} />
+        ) : current.status === "failed" ? (
+          <RecordingState tone="error" icon={<TriangleAlert size={28} color={palette["destructive-strong"]} />} text={current.error || t("recording.failed")} />
+        ) : !current.ready || !current.streamUrl ? (
+          <RecordingState
+            icon={<ActivityIndicator size="small" color={palette["primary-text"]} />}
+            text={
+              current.status === "recording"
+                ? t("recording.recording")
+                : current.status === "merging"
+                  ? t("recording.merging")
+                  : t("recording.preparing")
+            }
+          />
+        ) : (
+          <View style={styles.player}>
+            <Player streamUrl={current.streamUrl} />
+            {/* `.recording-meta` */}
+            <View style={styles.meta}>
+              <View style={styles.metaText}>
+                <Text variant="body" style={styles.metaTitle}>
+                  {current.title}
+                </Text>
+                <View style={styles.metaNote}>
+                  <ShieldCheck size={13} color={palette["muted-foreground"]} />
+                  <Text variant="caption" style={{ color: palette["muted-foreground"] }}>
+                    {t("recording.platformOnly")}
+                    {stamp ? ` · ${formatDateTime(stamp)}` : ""}
+                  </Text>
+                </View>
+              </View>
+              {canDelete ? (
+                <ThemeScope scheme="light">
+                  <DeleteButton label={t("recording.delete")} onPress={() => setConfirmOpen(true)} />
+                </ThemeScope>
+              ) : null}
+            </View>
+          </View>
+        )}
+
+        {isStudent ? (
+          <ThemeScope scheme={null}>
+            <View style={[styles.ratingCard, { backgroundColor: palette.surface }]}>
+              <LessonRatingForm lesson={data} currentUserId={user?.id} />
+            </View>
+          </ThemeScope>
+        ) : null}
+      </View>
+
+      <ThemeScope scheme={null}>
+        <ConfirmSheet
+          open={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          title={t("recording.deleteDialogTitle")}
+          description={t("recording.deleteDialogDescription")}
+          confirmLabel={t("recording.delete")}
+          cancelLabel={t("recording.cancel")}
+          loading={removeRecording.isPending}
+          onConfirm={() => removeRecording.mutate(data.id, { onSuccess: () => setConfirmOpen(false) })}
         />
-        <Text variant="caption" tone="muted" style={styles.placeholderText}>
-          {t("recording.dars_yozuvi_tayyor_bolgach_shu_yerda_ochilad")}
-        </Text>
-      </View>
-    );
-  }
+      </ThemeScope>
+    </ScrollView>
+  );
+}
 
-  return <Player streamUrl={streamUrl} />;
+/** `.recording-state` — yozuv yo'q / tayyorlanmoqda / xato holati. */
+function RecordingState({ icon, text, tone = "info" }: { icon: React.ReactNode; text: string; tone?: "info" | "error" }) {
+  const { palette } = useTheme();
+  const error = tone === "error";
+  return (
+    <View
+      style={[
+        styles.state,
+        error
+          ? { borderColor: palette["destructive-soft-border"], backgroundColor: palette["destructive-soft"] }
+          : { borderColor: palette["border-accent"], backgroundColor: palette["surface-subtle"] },
+      ]}
+    >
+      {icon}
+      <Text variant="label" style={[styles.stateText, { color: palette["muted-foreground"] }]}>
+        {text}
+      </Text>
+    </View>
+  );
+}
+
+/** Veb `Button variant="secondary"`: oq, chegarali. */
+function DeleteButton({ label, onPress }: { label: string; onPress: () => void }) {
+  const { palette } = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.delete,
+        { borderColor: palette.border, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface },
+      ]}
+    >
+      <Trash2 size={16} color={palette.foreground} />
+      <Text variant="label">{label}</Text>
+    </Pressable>
+  );
 }
 
 /**
@@ -283,17 +319,6 @@ function Player({ streamUrl }: { streamUrl: string }) {
   );
 }
 
-function MetaItem({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <View style={styles.metaItem}>
-      {icon}
-      <Text variant="caption" tone="muted">
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 /** Yozuv o'chirilgan bo'lsa ko'rsatiladi (o'qituvchi o'chirishi mumkin). */
 export function RecordingMissing() {
   const { t } = useTranslation("mobile");
@@ -305,33 +330,29 @@ export function RecordingMissing() {
 }
 
 const styles = StyleSheet.create({
-  head: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  title: { flex: 1 },
-  body: { padding: 16, gap: 16, paddingBottom: 40 },
+  strong: { fontWeight: "600" },
+  /* `px-4 pt-3 pb-6` */
+  page: { flexGrow: 1, paddingHorizontal: 16 },
+  header: { height: 44, flexDirection: "row", alignItems: "center", gap: 8 },
+  back: { marginLeft: -8, width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  heading: { fontFamily: "Unbounded-SemiBold", fontWeight: "600" },
+  chipsScroll: { marginRight: -16, flexGrow: 0 },
+  /* `gap-2 py-3 pr-4` */
+  chips: { gap: 8, paddingVertical: 12, paddingRight: 16 },
+  chip: { height: 36, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: radius.full },
+  content: { gap: 16 },
+  /* `.recording-player` gap 14 */
+  player: { gap: 14 },
   video: { width: "100%", aspectRatio: 16 / 9, borderRadius: radius.lg, backgroundColor: "#000" },
-  placeholder: {
-    width: "100%",
-    aspectRatio: 16 / 9,
-    borderRadius: radius.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    padding: 24,
-  },
+  placeholder: { width: "100%", aspectRatio: 16 / 9, borderRadius: radius.lg, alignItems: "center", justifyContent: "center", gap: 10, padding: 24 },
   placeholderText: { textAlign: "center" },
-  meta: { flexDirection: "row", flexWrap: "wrap", gap: 14 },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 14,
-    gap: 6,
-  },
+  meta: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 14 },
+  metaText: { gap: 3 },
+  metaTitle: { fontWeight: "700" },
+  metaNote: { flexDirection: "row", alignItems: "center", gap: 5 },
+  delete: { height: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 18, borderWidth: 1, borderRadius: 13 },
+  /* `.recording-state` */
+  state: { minHeight: 260, padding: 30, borderWidth: 1, borderStyle: "dashed", borderRadius: radius.lg, alignItems: "center", justifyContent: "center", gap: 10 },
+  stateText: { maxWidth: 380, textAlign: "center", fontWeight: "400" },
+  ratingCard: { padding: 16, borderRadius: radius["2xl"] },
 });

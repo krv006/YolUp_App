@@ -13,15 +13,8 @@ export const notificationKeys = Object.freeze({
   userSearch: (query: string) => ["notifications", "user-search", query] as const,
 });
 
-/** WebSocket ishlamasa ham badge eskirib qolmasin. */
 const UNREAD_POLL_MS = 60_000;
 
-/**
- * O'qilmagan xabarlar soni.
- *
- * `null` — bildirishnoma moduli bu muhitda mavjud emas (404): qo'ng'iroq
- * umuman ko'rsatilmaydi, foydalanuvchiga xato chiqmaydi.
- */
 export function useUnreadNotificationCount(enabled = true) {
   return useQuery({
     queryKey: notificationKeys.unread,
@@ -40,11 +33,18 @@ export function useNotificationInbox(params: QueryParams = {}, enabled = true) {
   });
 }
 
-/** `notificationId` — inbox qatorining emas, xabarning o'zining id'si. */
 export function useMarkNotificationRead() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (notificationId: string) => notificationApi.markRead(notificationId),
+    onSuccess: () => client.invalidateQueries({ queryKey: notificationKeys.all }),
+  });
+}
+
+export function useMarkAllNotificationsRead() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => notificationApi.markAllRead(),
     onSuccess: () => client.invalidateQueries({ queryKey: notificationKeys.all }),
   });
 }
@@ -77,7 +77,6 @@ export function useNotificationRecipients(notificationId: string | null) {
   });
 }
 
-/** Backend 2+ belgidan qidiradi — undan qisqasida so'rov yubormaymiz. */
 export function useUserSearch(query: string) {
   const trimmed = query.trim();
   return useQuery({

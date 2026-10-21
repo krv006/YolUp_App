@@ -30,6 +30,7 @@ import enChat from "./locales/en/chat.json";
 import enCommon from "./locales/en/common.json";
 import enGroup from "./locales/en/group.json";
 import enHomework from "./locales/en/homework.json";
+import enNotification from "./locales/en/notification.json";
 import enLesson from "./locales/en/lesson.json";
 import enLive from "./locales/en/live.json";
 import enExam from "./locales/en/exam.json";
@@ -49,6 +50,7 @@ import ruChat from "./locales/ru/chat.json";
 import ruCommon from "./locales/ru/common.json";
 import ruGroup from "./locales/ru/group.json";
 import ruHomework from "./locales/ru/homework.json";
+import ruNotification from "./locales/ru/notification.json";
 import ruLesson from "./locales/ru/lesson.json";
 import ruLive from "./locales/ru/live.json";
 import ruExam from "./locales/ru/exam.json";
@@ -68,6 +70,7 @@ import uzChat from "./locales/uz/chat.json";
 import uzCommon from "./locales/uz/common.json";
 import uzGroup from "./locales/uz/group.json";
 import uzHomework from "./locales/uz/homework.json";
+import uzNotification from "./locales/uz/notification.json";
 import uzLesson from "./locales/uz/lesson.json";
 import uzLive from "./locales/uz/live.json";
 import uzExam from "./locales/uz/exam.json";
@@ -89,6 +92,7 @@ const resources: Resource = {
     common: enCommon,
     group: enGroup,
     homework: enHomework,
+    notification: enNotification,
     lesson: enLesson,
     live: enLive,
     exam: enExam,
@@ -109,6 +113,7 @@ const resources: Resource = {
     common: ruCommon,
     group: ruGroup,
     homework: ruHomework,
+    notification: ruNotification,
     lesson: ruLesson,
     live: ruLive,
     exam: ruExam,
@@ -129,6 +134,7 @@ const resources: Resource = {
     common: uzCommon,
     group: uzGroup,
     homework: uzHomework,
+    notification: uzNotification,
     lesson: uzLesson,
     live: uzLive,
     exam: uzExam,

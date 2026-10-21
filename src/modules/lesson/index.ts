@@ -82,6 +82,7 @@ export { LiveLessonBar } from "./ui/live-lesson-bar";
 export type { LiveLessonBarProps } from "./ui/live-lesson-bar";
 export { FinishLessonSheet, LessonRatingsSheet, RateLessonSheet } from "./ui/lesson-sheets";
 export { RatingSummary, StarRating } from "./ui/star-rating";
+export { LessonRatingForm } from "./ui/lesson-rating-form";
 export type { StarRatingProps } from "./ui/star-rating";
 
 export { useScheduleStore } from "./model/schedule.store";

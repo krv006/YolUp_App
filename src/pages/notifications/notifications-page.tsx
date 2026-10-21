@@ -1,237 +1,263 @@
-import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlashList } from "@shopify/flash-list";
-import { useState } from "react";
-import { useRouter } from "expo-router";
-import { ArrowLeft, BellRing } from "lucide-react-native";
+import { BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useAuth } from "@/modules/auth";
 import {
+  NotificationBell,
+  useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotificationInbox,
   type InboxNotification,
   type NotificationLink,
 } from "@/modules/notification";
-import { pushDeviceApi } from "@/modules/notification/api/push-device.api";
-import { formatDayTime, htmlToPlainText } from "@/shared/lib";
-import {
-  Avatar,
-  Button,
-  HtmlView,
-  IconButton,
-  radius,
-  Screen,
-  ScreenEmpty,
-  ScreenError,
-  ScreenLoading,
-  Separator,
-  Sheet,
-  Text,
-  useTheme,
-  toast,
-} from "@/shared/ui";
+import { ROLES } from "@/shared/constants";
+import { formatMessageTime, htmlToPlainText } from "@/shared/lib";
+import { AppBar, AppBarAction, Icon, radius, Screen, Text, useTheme, type IconName } from "@/shared/ui";
+
+const LESSON_REMINDER_KIND = "lesson_reminder";
+type GroupKey = "today" | "yesterday" | "earlier";
+
+function groupKeyOf(value: string): GroupKey {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "earlier";
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  if (date.getTime() >= start.getTime()) return "today";
+  if (date.getTime() >= start.getTime() - 86_400_000) return "yesterday";
+  return "earlier";
+}
 
 /**
- * Bildirishnomalar — veb `notification-inbox-dialog.tsx` ning mobil varianti.
+ * Bildirishnomalar — veb `pages/notifications/notifications-page.tsx` va
+ * `notification-inbox-panel.tsx`: "Hammasi / O'qilmagan" filtrlari, kun
+ * bo'yicha guruhlar ("Bugun", "Kecha", "Avvalgi") va rangli ikonkalar.
  *
- * Veb'da bu qo'ng'iroq tugmasi ostidagi dialog edi. Mobilda alohida ekran:
- * ro'yxat uzun bo'lishi mumkin va dialog ichida skroll qilish noqulay.
- *
- * HTML matni `htmlToPlainText` bilan oddiy matnga aylantiriladi. WebView
- * ATAYLAB ishlatilmadi: ro'yxatdagi har element uchun alohida WebView ochish
- * xotirani tez yeydi va skrollni sekinlashtiradi. To'liq HTML kerak bo'lsa,
- * u kelajakda alohida tafsilot ekranida ko'rsatiladi.
+ * Vebdan farqi: bosilganda bildirishnoma havolasi (test, imtihon,
+ * vazifa) ham ochiladi — vebda u faqat o'qilgan deb belgilanadi.
  */
 export function NotificationsPage() {
-  const { t } = useTranslation("mobile");
-  const router = useRouter();
+  const { t } = useTranslation("notification");
+  const { t: tw } = useTranslation("workspace");
   const { palette } = useTheme();
-  const inbox = useNotificationInbox();
+  const router = useRouter();
+  const { user } = useAuth();
+  const [unreadOnly, setUnreadOnly] = useState(false);
+  const inbox = useNotificationInbox({ page_size: 30 }, true);
   const markRead = useMarkNotificationRead();
-  const [detail, setDetail] = useState<InboxNotification | null>(null);
+  const markAllRead = useMarkAllNotificationsRead();
 
-  function goBack() {
+  const rolePrefix = user?.role === ROLES.STUDENT ? "/student" : user?.role === ROLES.PARENT ? "/parent" : "/teacher";
+  const all = inbox.data?.items ?? [];
+  const unreadCount = all.filter((item) => !item.isRead).length;
+  const items = unreadOnly ? all.filter((item) => !item.isRead) : all;
+  const groups = (["today", "yesterday", "earlier"] as GroupKey[])
+    .map((key) => ({ key, items: items.filter((item) => groupKeyOf(item.createdAt) === key) }))
+    .filter((group) => group.items.length > 0);
+
+  const goBack = useCallback(() => {
     if (router.canGoBack()) router.back();
-    else router.replace("/");
-  }
+    else router.replace(`${rolePrefix}/workspace` as never);
+  }, [router, rolePrefix]);
 
-  /**
-   * Havolani ochish. Vazifa va test bildirishnomalari o'z bo'limlariga
-   * olib boradi; noma'lum tur bo'lsa faqat o'qilgan deb belgilanadi.
-   */
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+        goBack();
+        return true;
+      });
+      return () => subscription.remove();
+    }, [goBack])
+  );
+
   function openLink(link: NotificationLink | null) {
     if (!link) return;
-    if (link.type === "quiz") router.push(`/student/quizzes?quiz=${link.id}`);
-    // `assignment` uchun kurs kerak — u bildirishnomada yo'q. Vazifalar
-    // guruh chatining "Vazifalar" bo'limida, shuning uchun hozircha
-    // suhbatlar ro'yxatiga olib boramiz (veb ham vazifani avval so'raydi).
-    else if (link.type === "assignment") router.push("/student/chats");
-    // Topshiriq (`homework_pending_review` / `homework_reviewed`) bildirishnomasi:
-    // natija guruh chatining "Vazifalar" bo'limida ochiladi.
-    else if (link.type === "submission") router.push("/student/chats");
-    else if (link.type === "exam") router.push(`/student/exams/${link.id}`);
+    if (link.type === "quiz") router.push(`${rolePrefix}/quizzes?quiz=${link.id}` as never);
+    else if (link.type === "exam") router.push((rolePrefix === "/student" ? `/student/exams/${link.id}` : `${rolePrefix}/exams`) as never);
+    else if (link.type === "assignment" || link.type === "submission")
+      router.push((rolePrefix === "/teacher" ? "/teacher/assignments" : `${rolePrefix}/chats`) as never);
   }
 
-  function openNotification(item: InboxNotification) {
+  function openItem(item: InboxNotification) {
     if (!item.isRead) markRead.mutate(item.notificationId);
-    // Ro'yxatda faqat qisqa matn ko'rinadi (WebView xotira sababi) —
-    // to'liq HTML tafsilot oynasida chiziladi.
-    setDetail(item);
+    openLink(item.link);
   }
 
-  if (inbox.isLoading) {
-    return (
-      <Screen>
-        <ScreenLoading label={t("notifications.xabarlar_yuklanmoqda")} />
-      </Screen>
-    );
+  function iconFor(item: InboxNotification): { icon: IconName; bg: string; fg: string } {
+    const lesson = { bg: palette["saffron-soft"], fg: palette["saffron-strong"] };
+    const done = { bg: palette["success-soft"], fg: palette["success-strong"] };
+    const action = { bg: palette["primary-soft"], fg: palette.primary };
+    if (item.kind === LESSON_REMINDER_KIND) return { icon: "clock", ...lesson };
+    if (item.link?.type === "submission") return { icon: "check-circle", ...done };
+    if (item.link?.type === "assignment" || item.link?.type === "quiz") return { icon: "assign", ...action };
+    if (item.targetType === "all") return { icon: "bell", ...action };
+    if (item.kind === "mention") return { icon: "person", ...action };
+    return { icon: "groups", ...done };
   }
-
-  if (inbox.isError) {
-    return (
-      <Screen>
-        <ScreenError message={t("notifications.xabarlarni_yuklab_bolmadi")} onRetry={() => void inbox.refetch()} />
-      </Screen>
-    );
-  }
-
-  const items = inbox.data?.items ?? [];
 
   return (
     <Screen padded={false}>
-      <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel={t("notifications.orqaga")} onPress={goBack}>
-          <ArrowLeft size={22} color={palette.foreground} />
-        </IconButton>
-        <Text variant="subheading" style={styles.title}>
-          {t("notifications.bildirishnomalar")}
-        </Text>
+      <AppBar title={tw("title")} back={{ label: tw("searchBack"), onPress: goBack }}>
+        <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push(`${rolePrefix}/search` as never)} />
+        <NotificationBell />
+      </AppBar>
 
-        {/*
-          * Sinov push — FAQAT dev qurilishda.
-          *
-          * Backend `push/test/` endpointini aynan sozlashni tekshirish uchun
-          * berdi: bitta bosishda token -> baza -> FCM -> telefon zanjiri
-          * sinaladi. Ishlab chiqarish ilovasida bunday tugmaning o'rni yo'q,
-          * shuning uchun `__DEV__` bilan chegaralangan.
-          */}
-        {__DEV__ ? (
-          <IconButton
-            accessibilityLabel={t("notifications.sinov_push_yuborish")}
-            onPress={() => {
-              void pushDeviceApi
-                .sendTest()
-                .then(() => toast.success(t("notifications.sinov_push_yuborildi")))
-                .catch((error: Error) => toast.error(error.message));
-            }}
-          >
-            <BellRing size={20} color={palette["muted-foreground"]} />
-          </IconButton>
-        ) : null}
+      <View style={styles.header}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t("openAria")} onPress={goBack} style={styles.back}>
+          <Icon name="arrow-back" size={22} color={palette.foreground} />
+        </Pressable>
+        <Text variant="heading" numberOfLines={1} style={styles.grow}>
+          {t("title")}
+        </Text>
       </View>
 
-      {items.length === 0 ? (
-        <ScreenEmpty title={t("notifications.xabar_yoq")} description={t("notifications.yangi_xabarlar_shu_yerda_korinadi")} />
-      ) : (
-        <FlashList
-          data={items}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <Separator inset={64} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={inbox.isRefetching}
-              onRefresh={() => void inbox.refetch()}
-              tintColor={palette["muted-foreground"]}
-            />
-          }
-          renderItem={({ item }) => (
-            <NotificationRow item={item} onPress={() => openNotification(item)} />
-          )}
-        />
-      )}
+      <View style={styles.filters}>
+        {[
+          { id: "all", label: t("filterAll"), active: !unreadOnly },
+          { id: "unread", label: t("filterUnread", { count: unreadCount }), active: unreadOnly },
+        ].map((chip) => (
+          <Pressable
+            key={chip.id}
+            accessibilityRole="button"
+            onPress={() => setUnreadOnly(chip.id === "unread")}
+            style={[
+              styles.filter,
+              chip.active
+                ? { borderColor: palette.primary, backgroundColor: palette["primary-soft"] }
+                : { borderColor: palette.border, backgroundColor: palette.surface },
+            ]}
+          >
+            <Text variant="caption" style={[styles.strong, { color: chip.active ? palette.primary : palette["muted-foreground"] }]}>
+              {chip.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
 
-      <Sheet
-        open={Boolean(detail)}
-        onClose={() => setDetail(null)}
-        title={detail?.sender?.name ?? "YolUp"}
-        description={detail ? formatDayTime(detail.createdAt) : undefined}
+      <ScrollView
+        style={styles.grow}
+        contentContainerStyle={styles.body}
+        refreshControl={<RefreshControl refreshing={inbox.isRefetching} onRefresh={() => void inbox.refetch()} />}
       >
-        {detail ? <HtmlView html={detail.html} /> : null}
+        {/* `px-5 pt-4 pb-3` — o'ng tomonda "Hammasini o'qildi". */}
+        <View style={styles.toolbar}>
+          <View style={styles.grow} />
+          {items.some((item) => !item.isRead) ? (
+            <Pressable accessibilityRole="button" disabled={markAllRead.isPending} onPress={() => markAllRead.mutate()}>
+              <Text variant="label" style={{ color: palette.primary, opacity: markAllRead.isPending ? 0.5 : 1 }}>
+                {t("markAllRead")}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
 
-        {detail?.link ? (
-          <Button
-            title={t("notifications.ochish")}
-            onPress={() => {
-              openLink(detail.link);
-              setDetail(null);
-            }}
-          />
+        {inbox.isLoading ? (
+          <View style={styles.skeletons}>
+            {Array.from({ length: 3 }, (_, index) => (
+              <View key={index} style={styles.skeletonRow}>
+                <View style={[styles.skeletonDot, { backgroundColor: palette.muted }]} />
+                <View style={[styles.grow, styles.skeletonLines]}>
+                  <View style={[styles.skeletonLine, { width: "80%", backgroundColor: palette.muted }]} />
+                  <View style={[styles.skeletonLine, { width: "40%", backgroundColor: palette.muted }]} />
+                </View>
+              </View>
+            ))}
+          </View>
         ) : null}
-      </Sheet>
+
+        {inbox.isError ? (
+          <View style={styles.state}>
+            <Text variant="body" style={styles.strong}>
+              {t("loadError")}
+            </Text>
+            <Pressable accessibilityRole="button" onPress={() => void inbox.refetch()} style={[styles.retry, { backgroundColor: palette.muted }]}>
+              <Text variant="label">{t("retry")}</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {inbox.isSuccess && !items.length ? (
+          <View style={styles.state}>
+            <View style={[styles.emptyIcon, { backgroundColor: palette["primary-soft"] }]}>
+              <Icon name="bell" size={28} color={palette.primary} />
+            </View>
+            <Text variant="subheading" style={styles.emptyTitle}>
+              {t("emptyTitle")}
+            </Text>
+            <Text variant="label" style={[styles.regular, styles.centerText, { color: palette["muted-foreground"] }]}>
+              {t("emptyDescription")}
+            </Text>
+          </View>
+        ) : null}
+
+        {groups.map((group) => (
+          <View key={group.key} style={styles.group}>
+            <Text variant="label" style={[styles.groupLabel, { color: palette["subtle-foreground"] }]}>
+              {t(`groups.${group.key}`)}
+            </Text>
+            <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.surface }]}>
+              {group.items.map((item) => {
+                const { icon, bg, fg } = iconFor(item);
+                return (
+                  <Pressable
+                    key={item.id}
+                    accessibilityRole="button"
+                    onPress={() => openItem(item)}
+                    style={({ pressed }) => [styles.row, pressed && { backgroundColor: palette["surface-subtle"] }]}
+                  >
+                    <View style={[styles.icon, { backgroundColor: bg }]}>
+                      <Icon name={icon} size={17} color={fg} />
+                    </View>
+                    <View style={[styles.grow, styles.rowText]}>
+                      <Text variant="label" numberOfLines={2} style={styles.regular}>
+                        {htmlToPlainText(item.html, 240)}
+                      </Text>
+                      <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
+                        {item.sender?.name ?? t("system")} · {item.createdAt ? formatMessageTime(item.createdAt) : ""}
+                      </Text>
+                    </View>
+                    {item.isRead ? null : (
+                      <View accessibilityLabel={t("markRead")} style={[styles.unread, { backgroundColor: palette.primary }]} />
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
     </Screen>
   );
 }
 
-function NotificationRow({ item, onPress }: { item: InboxNotification; onPress: () => void }) {
-  const { palette } = useTheme();
-  const preview = htmlToPlainText(item.html, 160);
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${item.sender?.name ?? "YolUp"}: ${preview}`}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.row,
-        !item.isRead && { backgroundColor: palette["primary-tint"] },
-        pressed && { opacity: 0.85 },
-      ]}
-    >
-      {item.sender ? (
-        <Avatar name={item.sender.name} size="md" />
-      ) : (
-        <View style={[styles.systemIcon, { backgroundColor: palette["primary-soft"] }]}>
-          <BellRing size={18} color={palette["primary-text"]} />
-        </View>
-      )}
-
-      <View style={styles.body}>
-        <View style={styles.rowHead}>
-          <Text variant="label" numberOfLines={1} style={styles.sender}>
-            {item.sender?.name ?? "YolUp"}
-          </Text>
-          <Text variant="caption" tone="muted">
-            {formatDayTime(item.createdAt)}
-          </Text>
-        </View>
-        <Text variant="caption" tone={item.isRead ? "muted" : "default"} numberOfLines={3}>
-          {preview || "Xabar"}
-        </Text>
-      </View>
-
-      {!item.isRead ? <View style={[styles.dot, { backgroundColor: palette.primary }]} /> : null}
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  head: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  title: { flex: 1 },
-  row: { flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  systemIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  body: { flex: 1, gap: 4 },
-  rowHead: { flexDirection: "row", alignItems: "center", gap: 8 },
-  sender: { flex: 1 },
-  dot: { width: 8, height: 8, borderRadius: 4, alignSelf: "center" },
+  grow: { flex: 1, minWidth: 0 },
+  strong: { fontWeight: "600" },
+  regular: { fontWeight: "400" },
+  caption: { fontWeight: "500" },
+  centerText: { textAlign: "center" },
+  header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  back: { width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  /* `px-4 pb-2 gap-2` */
+  filters: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
+  filter: { height: 36, justifyContent: "center", paddingHorizontal: 16, borderWidth: 1, borderRadius: radius.full },
+  body: { paddingBottom: 16 },
+  toolbar: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  skeletons: { gap: 12, paddingHorizontal: 20, paddingBottom: 20 },
+  skeletonRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  skeletonDot: { width: 36, height: 36, borderRadius: radius.full },
+  skeletonLines: { gap: 8 },
+  skeletonLine: { height: 10, borderRadius: radius.full },
+  state: { alignItems: "center", gap: 8, paddingHorizontal: 32, paddingVertical: 40 },
+  retry: { marginTop: 8, height: 40, justifyContent: "center", paddingHorizontal: 16, borderRadius: radius.full },
+  emptyIcon: { width: 64, height: 64, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  emptyTitle: { marginTop: 8 },
+  /* `px-4 pb-4 gap-2`, guruh ichida `gap-1.5` */
+  group: { gap: 6, paddingHorizontal: 16, marginBottom: 8 },
+  groupLabel: { paddingHorizontal: 8, paddingTop: 8 },
+  card: { overflow: "hidden", borderWidth: 1, borderRadius: radius.xl },
+  row: { flexDirection: "row", alignItems: "flex-start", gap: 12, paddingHorizontal: 12, paddingVertical: 12, borderRadius: radius.xl },
+  icon: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  rowText: { gap: 2 },
+  unread: { marginTop: 6, width: 8, height: 8, borderRadius: radius.full },
 });

@@ -31,7 +31,7 @@ const TABS = [
      * holda bo'lim ichida panelda birorta tab ajratilmay qoladi va
      * foydalanuvchi qayerdan kirganini bilmaydi.
      */
-    owns: ["quizzes", "exams", "ai"],
+    owns: ["quizzes", "exams", "ai", "analytics"],
   },
   { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
 ] as const;
@@ -40,7 +40,7 @@ export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams"]} />
+        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams", "analytics"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

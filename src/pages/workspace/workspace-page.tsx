@@ -78,7 +78,7 @@ const CARDS: readonly WorkspaceCard[] = [
   // "Vazifalar" (o'qituvchi) Uy vazifalari bosqichida o'z sahifasi bilan
   // qo'shiladi — vebda u butun `HomeworkWorkspace` vidjetini ochadi.
   { id: "quizzes", icon: FileQuestion, to: "quizzes", roles: ["teacher", "student"] },
-  { id: "analytics", icon: BarChart3, to: "/analytics", roles: ["teacher", "student"] },
+  { id: "analytics", icon: BarChart3, to: "analytics", roles: ["teacher", "student"] },
   { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"], tone: "gold" },
   { id: "exams", icon: ClipboardCheck, to: "exams", roles: ["teacher", "student"], tone: "green" },
 

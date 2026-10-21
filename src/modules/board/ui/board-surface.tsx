@@ -13,7 +13,7 @@ import {
   useAddStroke,
   useBoard,
   useEraseStrokes,
-  useGrantDraw,
+  useSetBoardPermissions,
   useSolveFormula,
 } from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
@@ -67,7 +67,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
   const addStroke = useAddStroke(lessonId ?? "");
   const addSheet = useAddSheet(lessonId ?? "");
   const erase = useEraseStrokes(lessonId ?? "");
-  const grant = useGrantDraw(lessonId ?? "");
+  const permissions = useSetBoardPermissions(lessonId ?? "");
   const solve = useSolveFormula(lessonId ?? "");
 
   const [sheet, setSheet] = useState(0);
@@ -355,22 +355,20 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
         <BoardPermissionSheet
           open={grantOpen}
           onClose={() => setGrantOpen(false)}
-          pending={grant.isPending}
+          pending={permissions.isPending}
           students={(members.data?.items ?? []).map(({ student }) => ({ id: student.id, name: student.name, username: student.username }))}
-          onGrant={(studentIds) => {
-            let done = 0;
-            for (const studentId of studentIds)
-              grant.mutate(studentId, {
-                onSuccess: () => {
-                  done += 1;
-                  if (done === studentIds.length) {
-                    toast.success(t("permissionDialog.saved", { count: studentIds.length }));
-                    setGrantOpen(false);
-                  }
-                },
-                onError: (error: Error) => toast.error(error.message),
-              });
-          }}
+          onSubmit={(input) =>
+            permissions.mutate(input, {
+              onSuccess: (result) => {
+                toast.success(
+                  "mode" in input && input.mode === "none"
+                    ? t("permissionDialog.revoked", { count: result.revoked ?? 0 })
+                    : t("permissionDialog.saved", { count: result.granted ?? 0 })
+                );
+                setGrantOpen(false);
+              },
+            })
+          }
         />
 
         <RichTextSheet open={placement?.tool === "text"} onClose={() => setPlacement(null)} onSubmit={placeRichText} />

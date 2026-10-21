@@ -100,6 +100,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/ui/rich-text-stroke.tsx` | 🟡 MOSLASH | `8e850d9e1b06` | veb `board-stroke.tsx` dagi `lines` shoxi; Skia'da har run uchun `matchFont` va qo'lda joylashtirish, tagiga chizish qo'lda `Rect` bilan |
 | `src/modules/board/ui/rich-text-sheet.tsx` | 🔴 QAYTA | `dfebccfb5ed6` | veb `rich-text-input.tsx` (contenteditable + execCommand) RN'da mumkin emas; format QATOR darajasida qo'yiladi va `TextLineDto` to'g'ridan-to'g'ri quriladi |
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |
+| `src/modules/board/ui/board-panel.tsx` | 🟡 MOSLASH | `ff2c8e5a2260` | mobilda `board-surface.tsx` (Skia); ruxsat oynasi `board-dialogs.tsx` dagi `BoardPermissionSheet` |
+| `src/modules/board/ui/board-permission-dialog.tsx` | 🟡 MOSLASH | `44c76ae71974` | mobilda `board-dialogs.tsx` dagi `BoardPermissionSheet` (AppDialog -> Sheet) |
 | `src/modules/board/ui/formula-palette.tsx` | 🟡 MOSLASH | `c3db89716ff5` | MathLive placeholder'lari (#0, #?) olib tashlanadi — mobilda LaTeX oddiy TextInput da yoziladi |
 | `src/modules/board/ui/periodic-table-sheet.tsx` | 🟡 MOSLASH | `f354893b6a1a` | manba: veb `periodic-table-dialog.tsx`; veb 18 ustunli panjara, mobilda qidiruvli ro'yxat — telefonda panjara o'qilmaydi |
 | `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `4ee5ffcb78a3` | — |
@@ -246,6 +248,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `7ee0926f54e8` | mobilda ikki fayl: `add-lesson-dialog.tsx` (butun ekran, saqlash shu yerda) va `add-assignment-sheet.tsx`; vazifa matnidagi formatlash qatori YO'Q — vebda tugmalar `onClick` siz |
 | `src/shared/ui/app-dialog.tsx` | 🟡 MOSLASH | `c4982b8cfc42` | faqat `fullscreen` varianti — mobilda `fullscreen-dialog.tsx`; `sheet` o'rniga `Sheet` |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `c94dcadd37cd` | mobilda `formula-solver-sheet.tsx` (AppDialog sheet o'rniga Sheet); joylash vebdagidek `nextTextPoint` bilan |
+| `src/pages/teacher/exams/teacher-exams-page.tsx` | 🟡 MOSLASH | `aaec2fc43c46` | mobilda `pages/exams/teacher-exams-page.tsx`; telefon ko'rinishi (ro'yxat yoki tanlangan imtihon) |
 | `src/pages/analytics/analytics-page.tsx` | 🟡 MOSLASH | `092cef5c60fa` | o'qituvchi jadvali (olti ustun) kartochkalarga aylandi — telefonda jadval o'qilmaydi |
 | `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `9c9510af0702` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `cbcaa1d3644e` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
@@ -265,7 +268,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/homework/parent-homework-page.tsx` | 🟡 MOSLASH | `2851d3486787` | mobilda `pages/parent/parent-homework-page.tsx`; karta ichida 16 gorizontal bo'shliq (vebda qatorlar chetga yopishadi) |
 | `src/pages/parent/exams/parent-exams-page.tsx` | 🟡 MOSLASH | `6211f82e3125` | mobilda `pages/parent/parent-exams-page.tsx`; "Natija" tugmasi pastki qatorda (vebda sarlavhani siqadi) |
 | `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `3a6146c6e277` | mobilda `pages/parent/parent-grades-page.tsx` |
-| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
+| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `9b73053549dd` | PDF yuklab olish `downloadBlob` (ulashish oynasi); chatga yuborish server endpointi orqali |
 | `src/pages/workspace/workspace-page.tsx` | 🟡 MOSLASH | `1310f75223c3` | vebda kartochkalar to'rda; telefonda bir ustunli ro'yxat — tor ekranda ikki ustunli matn sinib ketadi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | `expo-video` pleeri; pleer QO'LDA to'xtatilmaydi — `useVideoPlayer` uni o'zi bo'shatadi |
@@ -321,7 +324,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/widgets/group-workspace/group-workspace.tsx` | 🟡 MOSLASH | `17d7db1ac265` | tablar veb bilan teng: suhbat, darslar, vazifalar, davomat. O'quvchilar tab EMAS — ma'lumot oynasida (`CourseMembersSection`) |
-| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `770a6277c18c` | yolg'iz ishtirokchi oynasi butun maydonni egallaydi (vebda setka doim); tizim panellari uchun safe-area |
+| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `bdb7697a4424` | yolg'iz ishtirokchi oynasi butun maydonni egallaydi (vebda setka doim); tizim panellari uchun safe-area |
 
 ## Ataylab ko'chirilmagan
 

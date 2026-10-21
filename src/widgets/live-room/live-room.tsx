@@ -46,6 +46,7 @@ import {
   useAnswerAttention,
   useAttentionCheck,
   useBanFromLesson,
+  useMuteAll,
   useCameraSignals,
   useFocusTracker,
   useMicSignals,
@@ -837,6 +838,7 @@ function ParticipantsPanel({
   const participants = useParticipants();
   const allowShare = useAllowShare(lessonId);
   const ban = useBanFromLesson(lessonId);
+  const muteAll = useMuteAll(lessonId);
   const raisedHands = new Set([...micRequests.map((request) => request.name), ...cameraRequests.map((request) => request.name)]);
 
   return (
@@ -962,8 +964,13 @@ function ParticipantsPanel({
         <View style={[styles.panelFooter, { borderTopColor: palette.border }]}>
           <Pressable
             accessibilityRole="button"
-            onPress={() => toast.info(t("participantsPanel.muteAllUnavailable"))}
-            style={[styles.panelButton, { borderWidth: 1, borderColor: palette.border }]}
+            disabled={muteAll.isPending}
+            onPress={() =>
+              muteAll.mutate([], {
+                onSuccess: (count) => toast.success(t("participantsPanel.muteAllDone", { count })),
+              })
+            }
+            style={[styles.panelButton, { borderWidth: 1, borderColor: palette.border }, muteAll.isPending && { opacity: 0.6 }]}
           >
             <Text variant="label">{t("participantsPanel.muteAll")}</Text>
           </Pressable>

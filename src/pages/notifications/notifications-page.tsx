@@ -47,6 +47,7 @@ export function NotificationsPage() {
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
 
+  const isAdmin = user?.role === ROLES.ADMIN || user?.role === ROLES.SUPER_ADMIN;
   const rolePrefix = user?.role === ROLES.STUDENT ? "/student" : user?.role === ROLES.PARENT ? "/parent" : "/teacher";
   const all = inbox.data?.items ?? [];
   const unreadCount = all.filter((item) => !item.isRead).length;
@@ -57,8 +58,9 @@ export function NotificationsPage() {
 
   const goBack = useCallback(() => {
     if (router.canGoBack()) router.back();
-    else router.replace(`${rolePrefix}/workspace` as never);
-  }, [router, rolePrefix]);
+    // Adminda Ish maydoni yo'q — boshqaruv paneliga qaytadi.
+    else router.replace((isAdmin ? "/admin/dashboard" : `${rolePrefix}/workspace`) as never);
+  }, [router, rolePrefix, isAdmin]);
 
   useFocusEffect(
     useCallback(() => {
@@ -72,7 +74,9 @@ export function NotificationsPage() {
 
   function openLink(link: NotificationLink | null) {
     if (!link) return;
-    if (link.type === "quiz") router.push(`${rolePrefix}/quizzes?quiz=${link.id}` as never);
+    // Veb admin paneli: o'qituvchi haqidagi xabar o'qituvchilar ro'yxatida o'sha qatorni ochadi.
+    if (link.type === "teacher") router.push(`/admin/teachers?teacher=${encodeURIComponent(link.id)}` as never);
+    else if (link.type === "quiz") router.push(`${rolePrefix}/quizzes?quiz=${link.id}` as never);
     else if (link.type === "exam") router.push((rolePrefix === "/student" ? `/student/exams/${link.id}` : `${rolePrefix}/exams`) as never);
     else if (link.type === "assignment" || link.type === "submission")
       router.push((rolePrefix === "/teacher" ? "/teacher/assignments" : `${rolePrefix}/chats`) as never);

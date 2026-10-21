@@ -17,7 +17,6 @@ export const PERMISSIONS = Object.freeze({
   GRADE_MANAGE: "grade:manage",
   PAYMENT_VIEW: "payment:view",
   USER_MANAGE: "user:manage",
-  /** Bildirishnoma yuborish — backendda `notification.send` (docs/COMPLETED_WORK.md §2). */
   NOTIFICATION_SEND: "notification:send",
 });
 

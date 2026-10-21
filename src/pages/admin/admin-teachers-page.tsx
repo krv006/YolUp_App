@@ -1,67 +1,65 @@
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "expo-router";
-import { ArrowLeft, ShieldCheck } from "lucide-react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft, BarChart3, ShieldCheck, Star, Users } from "lucide-react-native";
 import { useApproveTeacher, usePendingTeachers, useTeachers } from "@/modules/auth";
-import { RatingSummary } from "@/modules/lesson";
+import { ROUTES } from "@/shared/config";
 import type { AuthUser } from "@/shared/types";
 import {
   Avatar,
-  Badge,
-  Button,
-  IconButton,
-  radius,
+  PortalButton,
+  PortalCard,
+  PortalHeading,
+  portalPage,
+  PortalSectionHead,
   Screen,
-  ScreenLoading,
-  Separator,
+  SelectField,
   Text,
+  useLegacyColors,
   useTheme,
 } from "@/shared/ui";
+import { TeacherStatsSheet } from "./teacher-stats-sheet";
+
+type TeacherView = "pending" | "all";
 
 /**
- * O'qituvchilarni tasdiqlash — veb `admin-teachers-page.tsx` porti.
+ * O'qituvchilar — veb `admin-teachers-page.tsx`: tasdiqlanishi kerak
+ * bo'lganlar yoki barcha o'qituvchilar, reyting, statistika va tasdiqlash.
+ * `?teacher=<id>` bilan kelinsa (bildirishnomadan) o'sha qatorga aylanadi.
  *
- * Tasdiqlanmagan o'qituvchi kurs va dars YARATA OLMAYDI (backend 403 beradi),
- * shuning uchun kutayotganlar ro'yxati tepada va ajratib ko'rsatiladi.
+ * Vebda tor ekranda bo'lim sarlavhasi tanlagich yonida 110px ga siqiladi —
+ * bu yerda tanlagich sarlavha ostida, to'liq kenglikda.
  */
 export function AdminTeachersPage() {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("admin");
   const router = useRouter();
   const { palette } = useTheme();
-
+  const colors = useLegacyColors();
+  const { teacher: highlightId } = useLocalSearchParams<{ teacher?: string }>();
   const pending = usePendingTeachers();
   const teachers = useTeachers();
   const approve = useApproveTeacher();
+  const [statsTarget, setStatsTarget] = useState<AuthUser | null>(null);
+  const [view, setView] = useState<TeacherView>("pending");
+  const query = view === "pending" ? pending : teachers;
+  const list = query.data ?? [];
 
-  function goBack() {
-    if (router.canGoBack()) router.back();
-    else router.replace("/admin/dashboard");
-  }
-
-  if (pending.isLoading || teachers.isLoading) {
-    return (
-      <Screen>
-        <ScreenLoading label={t("admin.oqituvchilar_yuklanmoqda")} />
-      </Screen>
-    );
-  }
-
-  const waiting = pending.data ?? [];
-  const all = teachers.data ?? [];
+  // Vebdagi `scrollIntoView({ block: "center" })`.
+  const scrollRef = useRef<ScrollView>(null);
+  const [listY, setListY] = useState(0);
+  const [rowY, setRowY] = useState<number | null>(null);
+  useEffect(() => {
+    if (rowY == null) return;
+    scrollRef.current?.scrollTo({ y: Math.max(listY + rowY - 200, 0), animated: true });
+  }, [listY, rowY]);
 
   return (
     <Screen padded={false}>
-      <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel={t("admin.orqaga")} onPress={goBack}>
-          <ArrowLeft size={22} color={palette.foreground} />
-        </IconButton>
-        <Text variant="subheading" style={styles.title}>
-          {t("admin.oqituvchilar")}
-        </Text>
-      </View>
-
       <ScrollView
-        contentContainerStyle={styles.body}
+        ref={scrollRef}
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={portalPage}
         refreshControl={
           <RefreshControl
             refreshing={pending.isRefetching || teachers.isRefetching}
@@ -73,108 +71,159 @@ export function AdminTeachersPage() {
           />
         }
       >
-        {waiting.length > 0 ? (
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: palette["warning-soft"], borderColor: palette.border },
+        <PortalHeading
+          eyebrowIcon={ShieldCheck}
+          eyebrow={t("teachers.eyebrow")}
+          title={t("teachers.title")}
+          description={t("teachers.subtitle")}
+          actions={
+            <PortalButton
+              variant="primary"
+              size="link"
+              icon={ArrowLeft}
+              label={t("teachers.backToDashboard")}
+              onPress={() => (router.canGoBack() ? router.back() : router.replace(ROUTES.admin.dashboard))}
+            />
+          }
+        />
+
+        <PortalCard style={styles.panel}>
+          <PortalSectionHead
+            eyebrowIcon={view === "pending" ? ShieldCheck : Users}
+            eyebrow={view === "pending" ? t("teachers.pendingEyebrow") : t("teachers.allEyebrow")}
+            title={view === "pending" ? t("teachers.pendingTitle") : t("teachers.allTitle")}
+          />
+          <SelectField
+            hideLabel
+            label={t("teachers.viewLabel")}
+            icon={view === "pending" ? <ShieldCheck size={17} color={colors.muted} /> : <Users size={17} color={colors.muted} />}
+            value={view}
+            onChange={(value) => setView(value as TeacherView)}
+            options={[
+              { value: "pending", label: t("teachers.viewPending", { count: pending.data?.length ?? 0 }) },
+              { value: "all", label: t("teachers.viewAll", { count: teachers.data?.length ?? 0 }) },
             ]}
-          >
-            <View style={styles.cardHead}>
-              <ShieldCheck size={16} color={palette["warning-strong"]} />
-              <Text variant="label" style={{ color: palette["warning-strong"] }}>
-                Tasdiq kutmoqda ({waiting.length})
+          />
+
+          {query.isLoading ? (
+            <View style={styles.loading}>
+              <ActivityIndicator color={palette.primary} />
+              <Text variant="label" style={{ color: colors.muted }}>
+                {t("teachers.loading")}
               </Text>
             </View>
+          ) : null}
 
-            {waiting.map((teacher, index) => (
-              <View key={teacher.id}>
-                {index > 0 ? <Separator /> : null}
-                <TeacherRow
-                  teacher={teacher}
-                  action={
-                    <Button
-                      title={t("admin.tasdiqlash")}
-                      fullWidth={false}
-                      loading={approve.isPending}
+          {/* `.admin-teacher-list` — orasi 4 */}
+          <View style={styles.list} onLayout={(event) => setListY(event.nativeEvent.layout.y)}>
+            {list.map((teacher, index) => (
+              <TeacherRow
+                key={teacher.id}
+                teacher={teacher}
+                last={index === list.length - 1}
+                highlighted={teacher.id === highlightId}
+                onLayoutY={teacher.id === highlightId ? setRowY : undefined}
+                onStats={setStatsTarget}
+                action={
+                  view === "pending" ? (
+                    <PortalButton
+                      size="sm"
+                      variant="primary"
+                      label={t("teachers.approve")}
+                      loading={approve.isPending && approve.variables === teacher.id}
                       onPress={() => approve.mutate(teacher.id)}
                     />
-                  }
-                />
-              </View>
-            ))}
-          </View>
-        ) : null}
-
-        <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
-          <Text variant="label" style={styles.cardTitle}>
-            Barcha o'qituvchilar ({all.length})
-          </Text>
-
-          {all.map((teacher, index) => (
-            <View key={teacher.id}>
-              {index > 0 ? <Separator /> : null}
-              <TeacherRow
-                teacher={teacher}
-                action={
-                  teacher.isApproved ? (
-                    <Badge label={t("admin.tasdiqlangan")} tone="success" />
-                  ) : (
-                    <Badge label={t("admin.kutmoqda")} tone="warning" />
-                  )
+                  ) : undefined
                 }
               />
-            </View>
-          ))}
-
-          {all.length === 0 ? (
-            <Text variant="caption" tone="muted">
-              {t("admin.oqituvchi_topilmadi")}
-            </Text>
-          ) : null}
-        </View>
+            ))}
+            {!query.isLoading && !list.length ? (
+              <Text variant="body" style={{ color: colors.muted }}>
+                {view === "pending" ? t("teachers.noPending") : t("teachers.noTeachers")}
+              </Text>
+            ) : null}
+          </View>
+        </PortalCard>
       </ScrollView>
+
+      <TeacherStatsSheet teacher={statsTarget} onClose={() => setStatsTarget(null)} />
     </Screen>
   );
 }
 
-function TeacherRow({ teacher, action }: { teacher: AuthUser; action?: React.ReactNode }) {
+/** `.admin-teacher-row` — 12 4, pastki chiziq, avatar, ism, reyting va amallar. */
+function TeacherRow({
+  teacher,
+  last,
+  highlighted,
+  onLayoutY,
+  onStats,
+  action,
+}: {
+  teacher: AuthUser;
+  last: boolean;
+  highlighted: boolean;
+  onLayoutY?: (y: number) => void;
+  onStats: (teacher: AuthUser) => void;
+  action?: ReactNode;
+}) {
+  const { t } = useTranslation("admin");
+  const { palette } = useTheme();
+  const colors = useLegacyColors();
+  const ratingCount = teacher.ratingCount ?? 0;
   return (
-    <View style={styles.row}>
-      <Avatar name={teacher.name} src={teacher.avatarUrl} size="md" />
-      <View style={styles.rowBody}>
+    <View
+      onLayout={onLayoutY ? (event) => onLayoutY(event.nativeEvent.layout.y) : undefined}
+      style={[
+        styles.row,
+        !last && { borderBottomWidth: 1, borderColor: colors.border },
+        highlighted && { backgroundColor: palette["primary-tint"] },
+      ]}
+    >
+      <Avatar name={teacher.name} src={teacher.avatarUrl} size="sm" />
+      <View style={styles.identity}>
         <Text variant="label" numberOfLines={1}>
           {teacher.name}
         </Text>
-        <Text variant="caption" tone="muted" numberOfLines={1}>
+        <Text variant="caption" numberOfLines={1} style={[styles.small, { color: colors.muted }]}>
           @{teacher.username}
         </Text>
-        <RatingSummary average={teacher.avgRating} count={teacher.ratingCount ?? 0} />
       </View>
+      {/* `RatingSummary compact` — baho bo'lmasa ko'rinmaydi. */}
+      {ratingCount && teacher.avgRating != null ? (
+        <View style={styles.rating}>
+          <Star size={13} color={palette.warning} fill={palette.warning} />
+          <Text variant="caption" style={styles.ratingText}>
+            {teacher.avgRating.toFixed(1)}
+          </Text>
+        </View>
+      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("stats.openAria", { name: teacher.name })}
+        onPress={() => onStats(teacher)}
+        style={({ pressed }) => [
+          styles.iconButton,
+          { borderColor: colors.border, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface },
+        ]}
+      >
+        <BarChart3 size={16} color={colors.foreground} />
+      </Pressable>
       {action}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  head: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  title: { flex: 1 },
-  body: { padding: 16, gap: 14, paddingBottom: 40 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 12,
-    gap: 4,
-  },
-  cardHead: { flexDirection: "row", alignItems: "center", gap: 8, paddingBottom: 4 },
-  cardTitle: { paddingBottom: 4 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
-  rowBody: { flex: 1, gap: 3 },
+  /* `.admin-teacher-panel` — 20 bo'shliq */
+  panel: { padding: 20, gap: 14 },
+  loading: { alignItems: "center", gap: 10, paddingVertical: 16 },
+  list: { gap: 4 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12, paddingHorizontal: 4, borderRadius: 8 },
+  identity: { flex: 1, minWidth: 0, gap: 2 },
+  small: { fontSize: 11, lineHeight: 16.5 },
+  rating: { flexDirection: "row", alignItems: "center", gap: 4 },
+  ratingText: { fontSize: 13, fontWeight: "700" },
+  /* `.icon-button` — 36x36, radius 10 */
+  iconButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center", borderWidth: 1, borderRadius: 10 },
 });

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Svg, { Line, Path, Rect, Text as SvgText } from "react-native-svg";
-import { Text, useTheme } from "@/shared/ui";
+import { useTheme } from "@/shared/ui";
+import { ChartTooltip } from "./chart-tooltip";
 
 export interface TrendBarSeries {
   key: string;
@@ -40,10 +40,9 @@ function topRoundedRectPath(x: number, y: number, w: number, h: number, r: numbe
  * varianti.
  *
  * 🟡 MOSLASH: hisob-kitob o'zgarishsiz, chizish `react-native-svg` bilan,
- * sichqoncha o'rniga bosish (izohi `trend-line-chart.tsx` da).
+ * sichqoncha o'rniga bosish va tepada yozuv (izohi `trend-line-chart.tsx` da).
  */
 export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartProps) {
-  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
   const [width, setWidth] = useState(0);
@@ -92,7 +91,7 @@ export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartPro
               x={PAD_L - 6}
               y={yFor(value) + 3.5}
               textAnchor="end"
-              fontSize={10}
+              fontSize={9.5}
               fill={palette["muted-foreground"]}
             >
               {String(Math.round(value))}
@@ -122,7 +121,7 @@ export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartPro
                 x={xFor(index) + barWidth / 2}
                 y={H - 6}
                 textAnchor="middle"
-                fontSize={10}
+                fontSize={9.5}
                 fill={palette["muted-foreground"]}
               >
                 {label}
@@ -144,51 +143,18 @@ export function TrendStackedBarChart({ series, labels }: TrendStackedBarChartPro
         </Svg>
       ) : null}
 
-      {selected != null ? (
-        <View style={[styles.readout, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-          <Text variant="caption" tone="muted">
-            {labels[selected]}
-          </Text>
-          {series.map((item) => (
-            <View key={item.key} style={styles.row}>
-              <View style={[styles.dot, { backgroundColor: item.color }]} />
-              <Text variant="caption" style={styles.name}>
-                {item.name}
-              </Text>
-              <Text variant="caption">{item.values[selected] ?? 0}</Text>
-            </View>
-          ))}
-        </View>
-      ) : (
-        <Text variant="caption" tone="muted">
-          {t("analytics.qiymatlarni_ko_rish_uchun_ustunni_bosin")}
-        </Text>
-      )}
-
-      <View style={styles.legend}>
-        {series.map((item) => (
-          <View key={item.key} style={styles.row}>
-            <View style={[styles.dot, { backgroundColor: item.color }]} />
-            <Text variant="caption" tone="muted">
-              {item.name}
-            </Text>
-          </View>
-        ))}
-      </View>
+      {selected != null && width > 0 ? (
+        <ChartTooltip
+          ratio={(xFor(selected) + barWidth / 2) / W}
+          chartWidth={width}
+          title={labels[selected] ?? ""}
+          rows={series.map((item) => ({ key: item.key, name: item.name, color: item.color, value: String(item.values[selected] ?? 0) }))}
+        />
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 8, width: "100%" },
-  readout: {
-    gap: 4,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  row: { flexDirection: "row", alignItems: "center", gap: 6 },
-  name: { flex: 1 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  legend: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  wrap: { position: "relative", width: "100%", marginTop: 8 },
 });

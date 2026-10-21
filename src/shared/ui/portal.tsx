@@ -18,18 +18,22 @@ export const portalPage = { paddingTop: 20, paddingHorizontal: 24, paddingBottom
 
 export interface PortalHeadingProps {
   eyebrow: string;
+  /** Eyebrow ustidagi kichik ikonka — veb admin sahifalarida `ShieldCheck`. */
+  eyebrowIcon?: LucideIcon;
   title: string;
   description?: string;
   actions?: ReactNode;
 }
 
 /** `.portal-page-heading` — ko'k "eyebrow", 28/42 sarlavha, izoh va amallar. */
-export function PortalHeading({ eyebrow, title, description, actions }: PortalHeadingProps) {
+export function PortalHeading({ eyebrow, eyebrowIcon: EyebrowIcon, title, description, actions }: PortalHeadingProps) {
   const { palette } = useTheme();
   const colors = useLegacyColors();
   return (
     <View style={styles.heading}>
       <View>
+        {/* Vebda ikonka `inline` matn bilan, tor ekranda o'z qatoriga tushadi. */}
+        {EyebrowIcon ? <EyebrowIcon size={14} color={palette["primary-text"]} style={styles.eyebrowIcon} /> : null}
         <Text variant="caption" style={[styles.eyebrow, { color: palette["primary-text"] }]}>
           {eyebrow}
         </Text>
@@ -54,18 +58,38 @@ export function PortalCard({ children, style }: { children: ReactNode; style?: S
   return <View style={[styles.card, { borderColor: colors.border, backgroundColor: palette.surface }, style]}>{children}</View>;
 }
 
-/** `.portal-section-head` — kichik kulrang "eyebrow" va 19px sarlavha. */
-export function PortalSectionHead({ eyebrow, title, action }: { eyebrow: string; title: string; action?: ReactNode }) {
+/** `.portal-section-head` — kichik kulrang "eyebrow" (ixtiyoriy ikonka bilan), 19px sarlavha va izoh. */
+export function PortalSectionHead({
+  eyebrow,
+  eyebrowIcon: EyebrowIcon,
+  title,
+  note,
+  action,
+}: {
+  eyebrow: string;
+  eyebrowIcon?: LucideIcon;
+  title: string;
+  note?: string;
+  action?: ReactNode;
+}) {
   const colors = useLegacyColors();
   return (
     <View style={styles.sectionHead}>
       <View style={styles.grow}>
-        <Text variant="caption" style={[styles.sectionEyebrow, { color: colors.muted }]}>
-          {eyebrow}
-        </Text>
+        <View style={styles.sectionEyebrowRow}>
+          {EyebrowIcon ? <EyebrowIcon size={13} color={colors.muted} /> : null}
+          <Text variant="caption" style={[styles.sectionEyebrow, { color: colors.muted }]}>
+            {eyebrow}
+          </Text>
+        </View>
         <Text variant="body" style={styles.sectionTitle}>
           {title}
         </Text>
+        {note ? (
+          <Text variant="caption" style={[styles.sectionNote, { color: colors.muted }]}>
+            {note}
+          </Text>
+        ) : null}
       </View>
       {action}
     </View>
@@ -79,9 +103,10 @@ export interface PortalButtonProps {
   variant?: "primary" | "secondary";
   /**
    * `md` — oddiy tugma (44, 16/700); `sm` — kichik (38, 15/700);
-   * `dense` — tor ekrandagi `.heading-actions` (44, 12/700).
+   * `dense` — tor ekrandagi `.heading-actions` (44, 12/700);
+   * `link` — `.portal-primary-link` (44, 0 14, 13/800).
    */
-  size?: "md" | "sm" | "dense";
+  size?: "md" | "sm" | "dense" | "link";
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -131,6 +156,7 @@ const BUTTON_SIZES = {
   md: { height: 44, padding: 18, font: 16, icon: 17 },
   sm: { height: 38, padding: 13, font: 15, icon: 15 },
   dense: { height: 44, padding: 9, font: 12, icon: 17 },
+  link: { height: 44, padding: 14, font: 13, icon: 15 },
 } as const;
 
 /** `.portal-empty` — kesik chiziqli ko'k chegara, markazda ikonka, sarlavha va izoh. */
@@ -190,6 +216,7 @@ const styles = StyleSheet.create({
   heading: { gap: 20 },
   /* `.portal-eyebrow` — 12/900, harf orasi .13em */
   eyebrow: { fontSize: 12, lineHeight: 18, fontWeight: "700", letterSpacing: 1.56 },
+  eyebrowIcon: { marginBottom: 3 },
   /* `.portal-page-heading h1` — 28/42/400, -0.035em */
   title: { marginVertical: 6, fontSize: 28, lineHeight: 42, fontWeight: "400", letterSpacing: -0.98 },
   description: { fontSize: 14, lineHeight: 21, fontWeight: "400" },
@@ -197,6 +224,8 @@ const styles = StyleSheet.create({
   card: { borderWidth: 1, borderRadius: 20 },
   sectionHead: { flexDirection: "row", alignItems: "center", gap: 15 },
   /* `.portal-section-head span` — 11/900, .12em */
+  sectionEyebrowRow: { flexDirection: "row", alignItems: "center", gap: 5 },
+  sectionNote: { marginTop: 4, fontSize: 12, lineHeight: 18 },
   sectionEyebrow: { fontSize: 11, lineHeight: 16.5, fontWeight: "700", letterSpacing: 1.32 },
   sectionTitle: { marginTop: 4, fontSize: 19, lineHeight: 28.5, fontWeight: "400" },
   button: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 10 },

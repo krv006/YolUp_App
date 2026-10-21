@@ -120,6 +120,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/lib/course.mappers.ts` | 🟢 NUSXA | `5c3d601e0d85` | — |
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `93f6364baf6d` | — |
 | `src/modules/course/ui/add-student-sheet.tsx` | 🟡 MOSLASH | `23417d755aae` | manba: veb `add-student-dialog.tsx`; dialog o'rniga pastdan ochiladigan oyna, qidiruv debounce'siz (ro'yxat kichik) |
+| `src/modules/course/ui/add-student-dialog.tsx` | 🟡 MOSLASH | `99ce9ce1073e` | mobilda `add-student-sheet.tsx`; "Taklif havolasini ulashish" -> `invite-link-sheet.tsx` (ikki oyna ketma-ket, ustma-ust emas) |
+| `src/modules/course/ui/invite-link-dialog.tsx` | 🟡 MOSLASH | `b696c00d20fd` | mobilda `invite-link-sheet.tsx` (AppDialog -> Sheet); nusxalash `expo-clipboard` |
+| `src/modules/live/ui/lesson-invite-dialog.tsx` | 🟡 MOSLASH | `333fc4931091` | mobilda `lesson-invite-sheet.tsx`; onlayn nuqta va "Onlayn" holati vebdagidek |
+| `src/pages/join/join-course-page.tsx` | 🟡 MOSLASH | `50b9d49bc41c` | marshrut `app/j/[code].tsx`. VEBDA bu sahifa `app-router` ga ULANMAGAN. "Guruhni ochish" chatlar ro'yxatiga olib boradi (mobilda kurs sahifasi yo'q, guruh chat ichida) |
 | `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `67f8017c22aa` | veb bilan bir joyda — suhbat ma'lumoti oynasida; o'chirishni tasdiqlash `ConfirmSheet` bilan |
 | `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `62bd38ed657b` | — |
 | `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `6913f63ea717` | — |

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Link2, Search } from "lucide-react-native";
-import { useCourseStudents } from "@/modules/course";
+import { useCourseStudentPresence, useCourseStudents } from "@/modules/course";
 import { env, ROUTES } from "@/shared/config";
 import { Avatar, radius, Sheet, SheetButton, SheetFooter, Text, toast, useTheme } from "@/shared/ui";
 import { useInviteToLesson } from "../model/live.queries";
@@ -29,7 +29,10 @@ export function LessonInviteSheet({ lessonId, courseId, open, onClose }: LessonI
   const [focused, setFocused] = useState(false);
   const [invited, setInvited] = useState<string[]>([]);
   const students = useCourseStudents(courseId, { page_size: 100 }, open);
+  const presence = useCourseStudentPresence(courseId, open);
   const invite = useInviteToLesson(lessonId);
+
+  const online = useMemo(() => new Map((presence.data ?? []).map((row) => [row.id, row])), [presence.data]);
 
   const visible = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -86,15 +89,21 @@ export function LessonInviteSheet({ lessonId, courseId, open, onClose }: LessonI
           <View style={styles.list}>
             {visible.map((student) => {
               const called = invited.includes(student.id);
+              const isOnline = online.get(student.id)?.isOnline === true;
               return (
                 <View key={student.id} style={styles.row}>
-                  <Avatar variant="legacy" name={student.name} tone={student.avatarTone} size="sm" />
+                  <View>
+                    <Avatar variant="legacy" name={student.name} tone={student.avatarTone} size="sm" />
+                    {isOnline ? (
+                      <View style={[styles.onlineDot, { borderColor: palette.surface, backgroundColor: palette.success }]} />
+                    ) : null}
+                  </View>
                   <View style={styles.grow}>
                     <Text variant="label" numberOfLines={1}>
                       {student.name}
                     </Text>
                     <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
-                      {called ? t("invite.calledJustNow") : `@${student.username}`}
+                      {called ? t("invite.calledJustNow") : isOnline ? t("invite.online") : `@${student.username}`}
                     </Text>
                   </View>
                   <Pressable
@@ -125,10 +134,6 @@ export function LessonInviteSheet({ lessonId, courseId, open, onClose }: LessonI
             ) : null}
           </View>
         )}
-
-        <Text variant="caption" style={[styles.caption, { color: palette["subtle-foreground"] }]}>
-          {t("invite.note")}
-        </Text>
       </View>
 
       <SheetFooter>
@@ -166,6 +171,8 @@ const styles = StyleSheet.create({
   list: { gap: 4 },
   skeleton: { height: 56, borderRadius: radius.xl },
   row: { flexDirection: "row", alignItems: "center", gap: 10, padding: 8, borderRadius: radius.xl },
+  /* `absolute right-0 bottom-0 size-3 border-2 bg-success` */
+  onlineDot: { position: "absolute", right: 0, bottom: 0, width: 12, height: 12, borderWidth: 2, borderRadius: radius.full },
   call: { height: 36, justifyContent: "center", paddingHorizontal: 16, borderRadius: radius.full },
   empty: { paddingVertical: 16, textAlign: "center", fontWeight: "400" },
 });

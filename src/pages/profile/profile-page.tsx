@@ -1,359 +1,324 @@
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import Constants from "expo-constants";
+import { useTranslation } from "react-i18next";
+import { Image, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
-  Bell,
-  History,
-  LogOut,
-  Palette,
-  Pencil,
-  Smartphone,
-  Star,
-  UsersRound,
-  type LucideIcon,
-} from "lucide-react-native";
-import { useTranslation } from "react-i18next";
-import { describeUserAgent, useAuth, useLoginHistory } from "@/modules/auth";
-import { ProfileEditSheet } from "@/modules/auth/ui/profile-edit-sheet";
+  resolveHomeRoute,
+  useAuth,
+  useSwitchAccountMutation,
+  useUpdateAvatarMutation,
+} from "@/modules/auth";
+import { useCourses } from "@/modules/course";
+import { NotificationBell } from "@/modules/notification";
+import { useQuizColors } from "@/modules/quiz";
+import { ROUTES } from "@/shared/config";
+import { ROLES } from "@/shared/constants";
+import { pickImage, toUploadFile } from "@/shared/lib";
 import {
-  AccountSwitchSheet,
-  canSwitchAccounts,
-} from "@/modules/auth/ui/account-switch-sheet";
-import { useUnreadNotificationCount } from "@/modules/notification";
-import { useAppearanceStore } from "@/shared/model/theme.store";
-import { env, ROUTES } from "@/shared/config";
-import { formatDayTime } from "@/shared/lib";
-import {
-  Avatar,
-  Badge,
-  Button,
-  CountBadge,
-  findAccent,
-  ListItem,
+  AppBar,
+  ConfirmSheet,
+  Icon,
   radius,
   Screen,
-  ScreenLoading,
-  Separator,
   Sheet,
+  SheetButton,
+  SheetFooter,
   Text,
+  toast,
   useTheme,
 } from "@/shared/ui";
+import { initialsOf, SettingsCard, SettingsRow, useProfileLink } from "./profile-shell";
 
 /**
- * Profil — veb `account-menu.tsx` (439 qator) ning mobil varianti.
- *
- * Veb'da bu chap ustundagi ochiladigan menyu edi. Mobilda alohida tab:
- * hisob sozlamalari, xavfsizlik va chiqish bir joyda turgani tushunarliroq.
- *
- * KO'RINISH TELEGRAMDAN ILHOMLANGAN (buyurtmachi namunasi:
- * `docs/ChatExport_2026-09-08/photo_9`): yirik markazlashgan avatar, uning
- * ostida amallar qatori, so'ng "qiymat tepada — yorlig'i pastda" ko'rinishidagi
- * ma'lumot kartasi. Bu tanish naqsh: foydalanuvchi qayerga qarashni biladi.
- *
- * MUHIM: bu yerda TO'QIMA (mock) ma'lumot YO'Q. Faqat backend bergan
- * maydonlar chiziladi va qiymati bo'lmagan qator UMUMAN ko'rsatilmaydi —
- * bo'sh "—" belgilar qo'yish ekranni to'ldirgandek ko'rsatadi, aslida esa
- * foydalanuvchini chalg'itadi.
+ * Profil — veb `pages/profile/profile-page.tsx` ning tor ekran ko'rinishi:
+ * avatar kartasi (statistika, tahrirlash), "Sozlamalar", "Aloqa
+ * ma'lumotlari", akkaunt almashtirish va chiqish.
  */
-export function ProfilePage({ roleKey }: { roleKey: string }) {
-  const { t } = useTranslation("mobile");
+export function ProfilePage() {
+  const { t } = useTranslation("account");
+  const { t: tn } = useTranslation("nav");
   const router = useRouter();
-  const { palette, scheme } = useTheme();
+  const open = useProfileLink();
+  const { palette } = useTheme();
+  const legacy = useQuizColors();
   const { user, logout } = useAuth();
-  const unread = useUnreadNotificationCount();
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
+  const courses = useCourses();
+  const updateAvatar = useUpdateAvatarMutation();
+  const switchAccount = useSwitchAccountMutation();
+  const [logoutOpen, setLogoutOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
+  const linkedAccounts = user?.linkedAccounts ?? [];
 
-  const appearanceMode = useAppearanceStore((state) => state.mode);
-  const accentId = useAppearanceStore((state) => state.accent);
+  const isTeacher = user?.role === ROLES.TEACHER;
+  const groups = courses.data ?? [];
+  const students = groups.reduce((sum, course) => sum + (course.studentCount || 0), 0);
 
-  // Qatorda hozirgi tanlov ko'rinib tursin — ekranga kirmasdan ham bilinadi.
-  const appearanceSummary = [
-    appearanceMode === "system"
-      ? t("theme.system", {
-          scheme: scheme === "dark" ? t("theme.darkLower") : t("theme.lightLower"),
-        })
-      : appearanceMode === "dark"
-        ? t("theme.dark")
-        : t("theme.light"),
-    t(findAccent(accentId).labelKey).toLowerCase(),
-  ].join(" · ");
+  const links = [
+    { id: "personal", icon: "edit", tone: palette.primary, to: "personal" },
+    { id: "account", icon: "check-circle", tone: legacy.success, to: "account" },
+    { id: "system", icon: "more", tone: palette["saffron-strong"], to: "system" },
+    { id: "help", icon: "error", tone: palette.primary, to: "system" },
+  ] as const;
 
-  async function signOut() {
-    await logout();
-    router.replace(ROUTES.auth.login);
+  async function changeAvatar() {
+    const picked = await pickImage("library");
+    if (picked) updateAvatar.mutate(toUploadFile(picked), { onError: (error: Error) => toast.error(error.message) });
   }
-
-  /** Faqat qiymati BOR maydonlar. Bo'sh qator chizilmaydi. */
-  const facts: { value: string; label: string }[] = [
-    user?.phone ? { value: user.phone, label: t("profile.phone") } : null,
-    user?.username ? { value: `@${user.username}`, label: t("profile.username") } : null,
-    user?.email ? { value: user.email, label: "Email" } : null,
-    /*
-     * TAKLIF KODI KO'RSATILMAYDI. Ota-ona farzandini endi o'quvchining
-     * LOGINI bilan ulaydi (`parent.api.ts` dagi `requestLink`), ya'ni
-     * foydalanuvchi yodda tutadigan bitta identifikator qoladi.
-     *
-     * Backend `invite_code` ni javobda saqlab qoldi — veb hali uni
-     * ishlatadi, shuning uchun maydon o'chirilmagan, faqat mobil
-     * profilda chiqarilmaydi.
-     */
-  ].filter((item): item is { value: string; label: string } => item !== null);
 
   return (
     <Screen padded={false}>
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        {/* ── Bosh qism ── */}
-        <View style={styles.hero}>
-          <Avatar name={user?.name} src={user?.avatarUrl} size="2xl" />
-          <Text variant="heading" style={styles.heroName} numberOfLines={2}>
-            {user?.name || "Foydalanuvchi"}
-          </Text>
-
-          <View style={styles.heroMeta}>
-            <Badge label={t(roleKey)} tone="brand" />
-            {/* Reyting faqat o'qituvchida mazmunli va faqat baho bo'lsa. */}
-            {user?.avgRating != null && (user.ratingCount ?? 0) > 0 ? (
-              <View style={styles.rating}>
-                <Star size={14} color={palette["warning-strong"]} fill={palette["warning-strong"]} />
-                <Text variant="caption" tone="muted">
-                  {user.avgRating.toFixed(1)} · {user.ratingCount} baho
+      <AppBar title={tn("titles.profile")}>
+        <NotificationBell />
+      </AppBar>
+      <ScrollView style={{ backgroundColor: palette.background }} contentContainerStyle={styles.page}>
+        <View style={[styles.hero, { borderColor: palette.border, backgroundColor: palette.surface }]}>
+          <View>
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, { backgroundColor: palette["primary-soft"] }]}>
+                <Text variant="heading" style={{ color: palette.primary }}>
+                  {initialsOf(user?.name)}
                 </Text>
               </View>
-            ) : null}
+            )}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("page.avatarTitle")}
+              onPress={() => void changeAvatar()}
+              style={[styles.camera, { borderColor: palette.surface, backgroundColor: palette.primary }]}
+            >
+              <Icon name="camera" size={16} color={palette["primary-foreground"]} />
+            </Pressable>
           </View>
-        </View>
 
-        {/* ── Amallar qatori ── */}
-        <View style={styles.actions}>
-          <ActionButton
-            icon={Pencil}
-            label={t("profile.edit")}
-            onPress={() => setEditOpen(true)}
-          />
-          <ActionButton
-            icon={Palette}
-            label={t("profile.appearance")}
-            onPress={() => router.push("/appearance")}
-          />
-          <ActionButton
-            icon={Bell}
-            label={t("profile.notifications")}
-            badge={unread.data ?? 0}
-            onPress={() => router.push("/notifications")}
-          />
-        </View>
+          <Text variant="subheading" style={[styles.center, styles.name]}>
+            {user?.name}
+          </Text>
+          <Text variant="label" style={[styles.bodySm, { color: palette["subtle-foreground"] }]}>
+            {isTeacher ? tn("roles.teacher") : tn("roles.student")}
+          </Text>
 
-        {/*
-          * TASDIQLASH OGOHLANTIRISHI OLIB TASHLANDI.
-          *
-          * Vebda bu yerda "hisobingiz hali administrator tomonidan
-          * tasdiqlanmagan" degan chiziq turadi. Loyiha egasi bu bosqichda
-          * tasdiqlash talabi kerak emas deb qaror qildi (2026-10-05).
-          *
-          * DIQQAT: talabning O'ZI backendda qoladi — u tasdiqlanmagan
-          * o'qituvchiga 403 qaytaradi. Backend uni olib tashlamaguncha
-          * o'qituvchi sababni ekranda ko'rmaydi, faqat xatoni ko'radi.
-          * So'rov `docs/BACKEND-SOROVLAR.md` da.
-          */}
-
-        {/* ── Ma'lumot kartasi: qiymat tepada, yorlig'i pastda ── */}
-        {facts.length > 0 ? (
-          <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
-            {facts.map((fact, index) => (
-              <View key={fact.label}>
-                {index > 0 ? <Separator inset={16} /> : null}
-                <View style={styles.fact}>
-                  <Text selectable>{fact.value}</Text>
-                  <Text variant="caption" tone="muted">
-                    {fact.label}
-                  </Text>
-                </View>
+          <View style={[styles.stats, { backgroundColor: palette["surface-subtle"] }]}>
+            {[
+              { value: String(groups.length), label: t("page.statGroups") },
+              { value: String(students), label: t("page.statStudents") },
+              { value: "—", label: t("page.statYears") },
+            ].map((stat, index) => (
+              <View key={stat.label} style={[styles.stat, index > 0 && { borderLeftWidth: 1, borderLeftColor: palette.border }]}>
+                <Text variant="subheading" style={styles.statValue}>
+                  {stat.value}
+                </Text>
+                <Text variant="caption" style={[styles.caption, { color: palette["subtle-foreground"] }]}>
+                  {stat.label}
+                </Text>
               </View>
             ))}
           </View>
-        ) : null}
 
-        <View style={[styles.group, { backgroundColor: palette.card, borderColor: palette.border }]}>
-          {/*
-            * Hisob almashtirish faqat IMKONI BOR foydalanuvchida ko'rinadi:
-            * bog'langan hisobi bor yoki yangi rol ocha oladigan. Aks holda
-            * qator bosilganda bo'sh oyna chiqardi.
-            */}
-          {canSwitchAccounts(user) ? (
-            <>
-              <ListItem
-                title={t("profile.switchAccount")}
-                subtitle={
-                  user?.linkedAccounts.length
-                    ? t("profile.linkedAccounts", { count: user.linkedAccounts.length })
-                    : t("profile.newRole")
-                }
-                leading={<UsersRound size={20} color={palette["muted-foreground"]} />}
-                chevron
-                onPress={() => setSwitchOpen(true)}
-              />
-              <Separator inset={52} />
-            </>
-          ) : null}
-          {/*
-            * TAHLIL VA MOCK TEST BU YERDA YO'Q — ular "Ish maydoni"
-            * bo'limida (`pages/workspace/workspace-page.tsx`).
-            *
-            * Ilgari mobilda Workspace yo'q edi va bu ikkisi boradigan joy
-            * topilmay profilga qo'yilgandi. Workspace qo'shilgach ular
-            * ikki joyda ko'rinib qoldi — vebda esa faqat Workspace'da.
-            *
-            * Profilda HISOBGA tegishli narsalar qoladi: hisob almashish,
-            * kirishlar tarixi, ko'rinish, chiqish.
-            */}
-          <ListItem
-            title={t("profile.loginHistory")}
-            subtitle={t("profile.loginHistoryHint")}
-            leading={<History size={20} color={palette["muted-foreground"]} />}
-            chevron
-            onPress={() => setHistoryOpen(true)}
-          />
-          <Separator inset={52} />
-          <ListItem
-            title={t("profile.appearance")}
-            subtitle={appearanceSummary}
-            leading={<Palette size={20} color={palette["muted-foreground"]} />}
-            chevron
-            onPress={() => router.push("/appearance")}
-          />
-          <Separator inset={52} />
-          <ListItem
-            title={t("profile.app")}
-            subtitle={`${Constants.expoConfig?.version ?? "0.0.0"} · ${env.appEnv}`}
-            leading={<Smartphone size={20} color={palette["muted-foreground"]} />}
-          />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => open("personal")}
+            style={({ pressed }) => [
+              styles.edit,
+              { borderColor: palette.border, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface },
+            ]}
+          >
+            <Icon name="edit" size={18} color={palette.foreground} />
+            <Text variant="label">{t("page.editProfile")}</Text>
+          </Pressable>
         </View>
 
-        <Button
-          title={t("profile.signOut")}
-          variant="secondary"
-          icon={<LogOut size={16} color={palette["secondary-foreground"]} />}
-          onPress={() => void signOut()}
-        />
+        <View style={styles.section}>
+          <Text variant="body" style={styles.sectionTitle}>
+            {t("page.settings")}
+          </Text>
+          <SettingsCard>
+            {links.map((link) => (
+              <SettingsRow
+                key={link.id}
+                icon={link.icon}
+                tone={link.tone}
+                title={t(`page.${link.id}Title`)}
+                hint={t(`page.${link.id}Hint`)}
+                onPress={() => open(link.to)}
+              />
+            ))}
+          </SettingsCard>
+        </View>
+
+        <View style={styles.section}>
+          <Text variant="body" style={styles.sectionTitle}>
+            {t("page.contact")}
+          </Text>
+          <SettingsCard>
+            <SettingsRow icon="person" tone={palette["subtle-foreground"]} title={user?.phone ?? "—"} hint={t("page.phoneLabel")} />
+            <SettingsRow icon="assign" tone={palette["subtle-foreground"]} title={user?.email ?? "—"} hint={t("page.emailLabel")} />
+            <SettingsRow icon="school" tone={palette["subtle-foreground"]} title="—" hint={t("page.cityLabel")} />
+          </SettingsCard>
+
+          <SettingsCard>
+            <SettingsRow
+              icon="person"
+              title={t("page.switchAccount")}
+              hint={t("page.switchAccountHint")}
+              onPress={() => setSwitchOpen(true)}
+            />
+          </SettingsCard>
+
+          <SettingsCard>
+            <SettingsRow
+              icon="trash"
+              tone={palette.destructive}
+              title={t("page.logout")}
+              danger
+              onPress={() => setLogoutOpen(true)}
+              right={null}
+            />
+          </SettingsCard>
+        </View>
       </ScrollView>
 
-      <LoginHistorySheet open={historyOpen} onClose={() => setHistoryOpen(false)} />
-      <ProfileEditSheet user={user} open={editOpen} onClose={() => setEditOpen(false)} />
-      <AccountSwitchSheet user={user} open={switchOpen} onClose={() => setSwitchOpen(false)} />
+      <Sheet
+        open={switchOpen}
+        onClose={() => setSwitchOpen(false)}
+        title={t("page.switchAccount")}
+        description={t("page.switchAccountDescription")}
+      >
+        <View style={styles.switchList}>
+          <SettingsCard>
+            <View style={styles.account}>
+              <View style={[styles.accountAvatar, { backgroundColor: palette["primary-soft"] }]}>
+                <Text variant="label" style={{ color: palette.primary }}>
+                  {initialsOf(user?.name)}
+                </Text>
+              </View>
+              <View style={styles.grow}>
+                <Text variant="label" numberOfLines={1}>
+                  {user?.name}
+                </Text>
+                <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["success-strong"] }]}>
+                  {`${tn(`roles.${user?.role?.toLowerCase() ?? "teacher"}`, { defaultValue: user?.role ?? "" })} · ${t("page.accountActive")}`}
+                </Text>
+              </View>
+              <Icon name="check-circle" size={20} color={palette.primary} />
+            </View>
+            {linkedAccounts.map((account) => (
+              <Pressable
+                key={account.id}
+                accessibilityRole="button"
+                disabled={switchAccount.isPending}
+                onPress={() =>
+                  switchAccount.mutate(account.id, {
+                    onSuccess: (next) => {
+                      setSwitchOpen(false);
+                      router.replace(resolveHomeRoute(next) as never);
+                    },
+                    onError: (error: Error) => toast.error(error.message),
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.account,
+                  pressed && { backgroundColor: palette["surface-subtle"] },
+                  switchAccount.isPending && { opacity: 0.6 },
+                ]}
+              >
+                <View style={[styles.accountAvatar, { backgroundColor: palette["surface-subtle"] }]}>
+                  <Text variant="label" style={{ color: palette["muted-foreground"] }}>
+                    {initialsOf(account.name ?? account.username)}
+                  </Text>
+                </View>
+                <View style={styles.grow}>
+                  <Text variant="label" numberOfLines={1}>
+                    {account.name || account.username}
+                  </Text>
+                  <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
+                    {tn(`roles.${account.role?.toLowerCase() ?? "student"}`, { defaultValue: account.role })}
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={18} color={palette["subtle-foreground"]} />
+              </Pressable>
+            ))}
+          </SettingsCard>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              setSwitchOpen(false);
+              open("account");
+            }}
+            style={({ pressed }) => [styles.addAccount, pressed && { backgroundColor: palette["primary-soft"] }]}
+          >
+            <Icon name="add" size={18} color={palette.primary} />
+            <Text variant="label" style={{ color: palette.primary }}>
+              {t("page.addAccount")}
+            </Text>
+          </Pressable>
+        </View>
+        <SheetFooter>
+          <SheetButton variant="primary" title={t("page.close")} onPress={() => setSwitchOpen(false)} />
+        </SheetFooter>
+      </Sheet>
+
+      <ConfirmSheet
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        title={t("page.logoutTitle")}
+        description={t("page.logoutDescription")}
+        confirmLabel={t("page.logout")}
+        cancelLabel={t("page.cancel")}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          void logout().then(() => {
+            toast.success(t("toast.loggedOut", { defaultValue: "" }));
+            router.replace(ROUTES.auth.login);
+          });
+        }}
+      />
     </Screen>
   );
 }
 
-/** Avatar ostidagi keng teginish maydonli amal tugmasi (Telegram naqshi). */
-function ActionButton({
-  icon: Icon,
-  label,
-  onPress,
-  badge = 0,
-}: {
-  icon: LucideIcon;
-  label: string;
-  onPress: () => void;
-  badge?: number;
-}) {
-  const { palette } = useTheme();
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.action,
-        { backgroundColor: palette.card, borderColor: palette.border },
-        pressed && { opacity: 0.85 },
-      ]}
-    >
-      <View>
-        <Icon size={20} color={palette["primary-text"]} />
-        {badge > 0 ? (
-          <View style={styles.actionBadge}>
-            <CountBadge count={badge} />
-          </View>
-        ) : null}
-      </View>
-      <Text variant="caption" numberOfLines={1} style={{ color: palette["primary-text"] }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-/**
- * Kirishlar tarixi — veb `login-history-dialog.tsx` porti.
- *
- * `new_ip` / `new_device` bayroqlari ajratib ko'rsatiladi: begona kirishni
- * foydalanuvchi darhol sezishi kerak.
- */
-function LoginHistorySheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { t } = useTranslation("mobile");
-  // `enabled: open` — tarix faqat oyna ochilganda so'raladi.
-  const history = useLoginHistory(null, open);
-
-  return (
-    <Sheet
-      open={open}
-      onClose={onClose}
-      title={t("profile.loginHistory")}
-      description={t("profile.loginHistoryFull")}
-    >
-      {history.isLoading ? <ScreenLoading label={t("common.loading")} /> : null}
-
-      {(history.data ?? []).map((record, index) => (
-        <View key={record.id}>
-          {index > 0 ? <Separator /> : null}
-          <View style={styles.record}>
-            <View style={styles.recordBody}>
-              <Text variant="label">{record.device || describeUserAgent(record.userAgent)}</Text>
-              <Text variant="caption" tone="muted">
-                {record.ip} · {formatDayTime(record.at)}
-              </Text>
-            </View>
-            {record.isNewDevice ? <Badge label={t("profile.newDevice")} tone="warning" /> : null}
-            {record.isNewIp && !record.isNewDevice ? <Badge label={t("profile.newIp")} tone="warning" /> : null}
-          </View>
-        </View>
-      ))}
-
-      {!history.isLoading && (history.data ?? []).length === 0 ? (
-        <Text variant="caption" tone="muted">
-          {t("profile.noRecords")}
-        </Text>
-      ) : null}
-    </Sheet>
-  );
-}
-
 const styles = StyleSheet.create({
-  body: { padding: 16, gap: 14, paddingBottom: 40 },
-  hero: { alignItems: "center", gap: 8, paddingTop: 12, paddingBottom: 4 },
-  heroName: { textAlign: "center" },
-  heroMeta: { flexDirection: "row", alignItems: "center", gap: 10 },
-  rating: { flexDirection: "row", alignItems: "center", gap: 4 },
-  actions: { flexDirection: "row", gap: 10 },
-  action: {
-    flex: 1,
+  grow: { flex: 1, minWidth: 0 },
+  center: { textAlign: "center" },
+  bodySm: { fontWeight: "400" },
+  caption: { fontWeight: "500" },
+  /* `p-4 gap-5` */
+  page: { gap: 20, padding: 16 },
+  /* `items-center gap-1 rounded-2xl border p-5` */
+  hero: { alignItems: "center", gap: 4, padding: 20, borderWidth: 1, borderRadius: radius["2xl"] },
+  avatar: { width: 96, height: 96, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  camera: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    width: 36,
+    height: 36,
     alignItems: "center",
-    gap: 6,
-    paddingVertical: 14,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
+    justifyContent: "center",
+    borderWidth: 2,
+    borderRadius: radius.full,
   },
-  actionBadge: { position: "absolute", top: -6, right: -12 },
-  group: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    overflow: "hidden",
+  name: { marginTop: 12 },
+  /* `mt-4 grid-cols-3 divide-x rounded-xl bg-subtle py-3` */
+  stats: { marginTop: 16, alignSelf: "stretch", flexDirection: "row", paddingVertical: 12, borderRadius: radius.xl },
+  stat: { flex: 1, alignItems: "center" },
+  statValue: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
+  edit: {
+    marginTop: 16,
+    alignSelf: "stretch",
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderRadius: radius.full,
   },
-  fact: { gap: 2, paddingHorizontal: 16, paddingVertical: 12 },
-  record: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10 },
-  recordBody: { flex: 1, gap: 2 },
+  section: { gap: 8 },
+  sectionTitle: { paddingHorizontal: 4, fontWeight: "600" },
+  switchList: { gap: 8 },
+  account: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  accountAvatar: { width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  addAccount: { alignSelf: "flex-start", height: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, borderRadius: radius.full },
 });

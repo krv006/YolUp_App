@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-10-21 (homework domeni qayta sinxronlandi)
+- **Oxirgi yangilanish:** 2026-10-21 (homework va auth domeni qayta sinxronlandi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -61,17 +61,17 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/attendance/lib/attendance.mappers.ts` | 🟢 NUSXA | `7d0841bec8ec` | — |
 | `src/modules/attendance/lib/group-by-lesson.ts` | 🟢 NUSXA | `b4d5b820b1ce` | — |
 | `src/modules/attendance/model/attendance.queries.ts` | 🟢 NUSXA | `4fbbab2e9fec` | — |
-| `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `daecf1c10346` | — |
-| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `f66878b10a16` | — |
-| `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `883f8f109856` | — |
-| `src/modules/auth/index.ts` | 🟡 MOSLASH | `7d1bf9d84bbc` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `606294fd2be0` | — |
+| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `d4080e685551` | — |
+| `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `506aa2f1fdfa` | — |
+| `src/modules/auth/index.ts` | 🟡 MOSLASH | `1489096b2036` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/auth/lib/auth-session.ts` | 🟢 NUSXA | `4e39458e320b` | — |
-| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `8ddc534cf67d` | — |
+| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `4718c192fad7` | — |
 | `src/modules/auth/lib/describe-user-agent.ts` | 🟢 NUSXA | `ee0799ca7c53` | — |
 | `src/modules/auth/lib/resolve-home-route.ts` | 🟢 NUSXA | `86d9a3f708fc` | — |
-| `src/modules/auth/lib/teacher-approval.ts` | 🟢 NUSXA | `6cfe7eb8db46` | — |
-| `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `a9b35eac9e38` | — |
-| `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `3ff520568a17` | — |
+| `src/modules/auth/lib/teacher-approval.ts` | 🟢 NUSXA | `ea465e71f081` | — |
+| `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `92a4e4b6b9a7` | — |
+| `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `0b52138d2b10` | — |
 | `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `217cf656f39d` | — |
 | `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi va til sinxroni yo'q; sessiya raqami olindi |
 | `src/modules/auth/model/use-auth.ts` | 🟢 NUSXA | `800d84e26e18` | — |
@@ -259,6 +259,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/i18n/intl-locale.ts` | 🟢 NUSXA | `b3f6b40c5b6f` | — |
 | `src/shared/i18n/locales/**` | 🟢 NUSXA | `—` | 17 bo'lim × 3 til, vebdan bayt-bayt; `mobile.json` mobilga xos |
 | `src/shared/model/language.store.ts` | 🔴 QAYTA | `0f01a0cbc3c6` | zustand `persist` (localStorage) o'rniga MMKV; qurilma tili `Intl` dan |
+| `src/shared/model/text-size.store.ts` | 🔴 QAYTA | `f61042795fd4` | `persist` o'rniga MMKV; `--text-scale` o'rniga `Text` komponenti ko'paytiruvchisi (`text-scale.tsx`) |
 | `src/shared/lib/app-state.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/lib/date.ts` | 🟢 NUSXA | `13624ad3dcd2` | — |
 | `src/shared/lib/download.ts` | 🔴 QAYTA | `af194a763a11` | <a download> -> expo-file-system + Share; ASYNC bo'ldi |
@@ -268,7 +269,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/lib/sanitize-html.ts` | 🔴 QAYTA | `0fffa4bdbf6c` | DOMPurify -> regex; WebView CSP bilan birga |
 | `src/shared/lib/storage.ts` | 🔴 QAYTA | `a49745b6789d` | localStorage -> MMKV; interfeys bir xil |
 | `src/shared/lib/utils.ts` | 🟢 NUSXA | `4dd93deacc31` | — |
-| `src/shared/types/auth.ts` | 🟢 NUSXA | `231c2b789a1f` | — |
+| `src/shared/types/auth.ts` | 🟢 NUSXA | `019a99721acc` | — |
 | `src/shared/types/chat.ts` | 🟢 NUSXA | `69dedcbdcc16` | — |
 | `src/shared/types/domain.ts` | 🟢 NUSXA | `cd4ce09bfc06` | — |
 | `src/shared/types/dto.ts` | 🟢 NUSXA | `626467937625` | — |

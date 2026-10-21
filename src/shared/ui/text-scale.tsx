@@ -1,5 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useAppearanceStore } from "@/shared/model/theme.store";
+import { TEXT_SCALE, useTextSizeStore } from "@/shared/model/text-size.store";
 
 /**
  * Matn o'lchami ko'paytuvchisi — FAQAT shu kontekst ichida.
@@ -13,10 +14,16 @@ import { useAppearanceStore } from "@/shared/model/theme.store";
  * shunday: `MessageTextScale` bilan o'ralgan daraxt ichidagi `Text` lar
  * masshtablanadi, qolgan hamma joy o'z o'lchamida qoladi.
  */
-const TextScaleContext = createContext(1);
+const TextScaleContext = createContext<number | null>(null);
 
+/**
+ * O'ram ichida — xabar masshtabi, tashqarida — "Tizim sozlamalari"dagi
+ * umumiy matn o'lchami (veb `--text-scale`, `text-size.store.ts`).
+ */
 export function useTextScale(): number {
-  return useContext(TextScaleContext);
+  const local = useContext(TextScaleContext);
+  const size = useTextSizeStore((state) => state.size);
+  return local ?? TEXT_SCALE[size];
 }
 
 /**

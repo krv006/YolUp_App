@@ -33,14 +33,19 @@ const TABS = [
      */
     owns: ["quizzes", "exams", "ai", "analytics"],
   },
-  { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
+  {
+    name: "profile",
+    labelKey: "tabs.profile",
+    iconName: "nav-profile",
+    owns: ["profile-personal", "profile-account", "profile-system"],
+  },
 ] as const;
 
 export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams", "analytics"]} />
+        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams", "analytics", "profile-personal", "profile-account", "profile-system"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

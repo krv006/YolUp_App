@@ -61,8 +61,8 @@ export interface TextProps extends RNTextProps {
 
 export function Text({ variant = "body", tone = "default", style, ...rest }: TextProps) {
   const { palette } = useTheme();
-  // Masshtab GLOBAL emas: faqat `MessageTextScale` o'ramidagi matn
-  // kattalashadi (sabab shu faylda emas, `text-scale.tsx` da yozilgan).
+  // Umumiy matn o'lchami (Tizim sozlamalari); `MessageTextScale` ichida
+  // esa xabar masshtabi (izohi `text-scale.tsx` da).
   const fontScale = useTextScale();
 
   const color = {

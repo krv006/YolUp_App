@@ -230,8 +230,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/voice/ui/voice-room-sheet.tsx` | 🟡 MOSLASH | `76f4b2d71876` | manba: veb `voice-room-dialog.tsx`; video plitkalari o'rniga ro'yxat, LiveKitRoom video={false} |
 | `src/pages/admin/admin-dashboard-page.tsx` | 🟡 MOSLASH | `f3de9850f257` | farq qayd etilmagan — tekshiring |
 | `src/pages/analytics/analytics-page.tsx` | 🟡 MOSLASH | `092cef5c60fa` | o'qituvchi jadvali (olti ustun) kartochkalarga aylandi — telefonda jadval o'qilmaydi |
-| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `26701b566b44` | farq qayd etilmagan — tekshiring |
-| `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `47952b4dde32` | farq qayd etilmagan — tekshiring |
+| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `395726c80080` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
+| `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `cbcaa1d3644e` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
+| `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `f6df598d6f72` | `AuthScreen` + maydon/tugma komponentlari bitta faylda; telefon maslahati toast orqali |
+| `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `3f62db0fe17c` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp` |
+| `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `b50a11868d3a` | til menyusi oddiy ochiluvchi ro'yxat |
+| `src/pages/auth/forgot-password-page.tsx` | 🟡 MOSLASH | `554ab26320d5` | mobilda `password-reset-pages.tsx` ichida |
+| `src/pages/auth/verify-code-page.tsx` | 🟡 MOSLASH | `1421f37f8743` | mobilda `password-reset-pages.tsx` ichida |
+| `src/pages/auth/new-password-page.tsx` | 🟡 MOSLASH | `6b541b378526` | mobilda `password-reset-pages.tsx` ichida |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
 | `src/pages/workspace/workspace-page.tsx` | 🟡 MOSLASH | `1310f75223c3` | vebda kartochkalar to'rda; telefonda bir ustunli ro'yxat — tor ekranda ikki ustunli matn sinib ketadi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
@@ -252,7 +258,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/api/token-storage.ts` | 🔴 QAYTA | `47a479a247f8` | SecureStore + xotira keshi; interfeys va sinxronligi bir xil |
 | `src/shared/config/env.ts` | 🔴 QAYTA | `ff591f4dcda1` | import.meta.env -> expo-constants; o'sha zod sxemasi |
 | `src/shared/config/index.ts` | 🟢 NUSXA | `2a1ff6fd4d60` | — |
-| `src/shared/config/routes.ts` | 🟢 NUSXA | `69ed361d3fce` | — |
+| `src/shared/config/routes.ts` | 🟢 NUSXA | `605dc2092c86` | — |
 | `src/shared/constants/index.ts` | 🟢 NUSXA | `c06257bbb1f3` | — |
 | `src/shared/constants/roles.ts` | 🟢 NUSXA | `2f90f03f91dc` | — |
 | `src/shared/constants/storage-keys.ts` | 🟢 NUSXA | `f381330fe63a` | — |

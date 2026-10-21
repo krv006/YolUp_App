@@ -269,7 +269,9 @@ export function ProfilePage() {
         onConfirm={() => {
           setLogoutOpen(false);
           void logout().then(() => {
-            toast.success(t("toast.loggedOut", { defaultValue: "" }));
+            // Kalit locale'da yo'q (vebda ham) — bo'sh toast ko'rsatilmaydi.
+            const message = t("toast.loggedOut", { defaultValue: "" });
+            if (message) toast.success(message);
             router.replace(ROUTES.auth.login);
           });
         }}

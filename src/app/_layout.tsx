@@ -4,7 +4,6 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AppProviders } from "@/providers/app-providers";
 import { NotificationBridge } from "@/providers/notification-bridge";
-import { WelcomeGate } from "@/providers/welcome-gate";
 import { useTheme } from "@/shared/ui";
 
 /**
@@ -24,7 +23,6 @@ export default function RootLayout() {
     <AppProviders>
       <ThemedStack />
       <NotificationBridge />
-      <WelcomeGate />
     </AppProviders>
   );
 }

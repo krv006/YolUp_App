@@ -1,7 +1,6 @@
 import { Redirect } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { resolveHomeRoute, useAuth } from "@/modules/auth";
-import { ROUTES } from "@/shared/config";
 import { Screen, ScreenError, ScreenLoading } from "@/shared/ui";
 
 /**
@@ -37,7 +36,7 @@ export default function IndexRoute() {
     );
   }
 
-  if (!isAuthenticated) return <Redirect href={ROUTES.auth.login} />;
+  if (!isAuthenticated) return <Redirect href="/welcome" />;
 
   // Rolga qarab bosh sahifa — 🟢 veb bilan bir xil `resolveHomeRoute`.
   return <Redirect href={resolveHomeRoute(user)} />;

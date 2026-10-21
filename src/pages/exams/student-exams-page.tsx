@@ -118,9 +118,13 @@ export function StudentExamsPage() {
                   <View style={styles.text}>
                     <Text variant="label" style={styles.cardTitle}>
                       {exam.title}{" "}
+                      {/*
+                       * Belgi ichidagi bo'shliqlar uzilmaydigan (U+00A0): oddiy probelda
+                       * iOS qatorni belgi ICHIDA bo'lib, fonning bir bo'lagini yuqori
+                       * qatorda qoldirardi. Endi belgi butunligicha keyingi qatorga o'tadi.
+                       */}
                       <Text variant="caption" style={[styles.badge, { backgroundColor: tone.bg, color: tone.fg }]}>
-                        {" "}
-                        {t(`state.${exam.state}`)}{" "}
+                        {` ${t(`state.${exam.state}`)} `}
                       </Text>
                     </Text>
                     <Text variant="caption" style={{ color: colors.foreground }}>

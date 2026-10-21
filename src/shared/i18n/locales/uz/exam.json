@@ -6,8 +6,7 @@
     "deleted": "Imtihon o'chirildi",
     "templateCreated": "Shablon yaratildi",
     "templateDeleted": "Shablon o'chirildi",
-    "scoresSaved": "Ballar saqlandi",
-    "aiApproved": "Band tasdiqlandi"
+    "scoresSaved": "Ballar saqlandi"
   },
   "state": {
     "upcoming": "Boshlanmagan",
@@ -16,8 +15,8 @@
     "submitted": "Topshirilgan"
   },
   "list": {
-    "eyebrow": "IMTIHONLAR",
-    "title": "Imtihonlar",
+    "eyebrow": "MOCK TEST",
+    "title": "Mock testlar",
     "subtitle": "Belgilangan vaqtda boshlanadi va hamma uchun bir vaqtda tugaydi.",
     "loading": "Imtihonlar yuklanmoqda",
     "loadError": "Imtihonlarni yuklab bo'lmadi",
@@ -27,6 +26,14 @@
     "startsIn": "Boshlanishiga {{time}}",
     "enter": "Kirish",
     "openResult": "Natija"
+  },
+  "parentList": {
+    "subtitle": "Farzandingiz guruhlaridagi imtihonlar. Natija imtihon tugagach ochiladi.",
+    "resultTitle": "{{name}} — natija",
+    "hidden": "Natija imtihon tugagach ochiladi.",
+    "notInExam": "Bu imtihon farzandingizning guruhiga tegishli emas.",
+    "noChildTitle": "Farzand tanlanmagan",
+    "noChildDescription": "Imtihonlarni ko'rish uchun avval farzand qo'shing."
   },
   "runner": {
     "loading": "Imtihon yuklanmoqda",
@@ -50,7 +57,21 @@
     "audioPlaying": "Audio ijro etilmoqda",
     "audioPlayed": "Audio eshitildi",
     "audioOnce": "Audio bir marta eshittiriladi, to'xtatib yoki qaytarib bo'lmaydi.",
-    "audioPause": "To'xtatish"
+    "audioPart": "{{number}}-qism",
+    "audioStartPart": "{{label}} audiosini boshlash",
+    "audioPlayingPart": "{{label}} — audio ijro etilmoqda",
+    "audioNext": "{{label}} — audio birozdan keyin boshlanadi",
+    "audioAllDone": "Barcha audiolar eshittirildi",
+    "audioPartsCount": "{{current}} / {{total}}-qism",
+    "navAria": "Savollar paneli",
+    "flag": "Belgilash",
+    "unflag": "Belgini olish",
+    "pasteBlocked": "Imtihonda tashqaridan nusxa qo'yish mumkin emas.",
+    "integrityNotice": "Imtihon vaqtida boshqa oynaga o'tish qayd etiladi.",
+    "next": "Keyingi bo'lim",
+    "nextTitle": "Keyingi bo'limga o'tasizmi?",
+    "nextDescription": "Hozirgi bo'lim yopiladi va unga qaytib bo'lmaydi. Keyingisi: {{title}}. Vaqt shu zahotiyoq boshlanadi.",
+    "nextConfirm": "Ha, o'tish"
   },
   "result": {
     "total": "Natija",
@@ -68,7 +89,9 @@
     "absent": "Kirmagan",
     "manualScores": "Ball qo'yish",
     "saveScores": "Saqlash",
-    "cancel": "Bekor"
+    "cancel": "Bekor",
+    "integrity": "Oynadan chiqdi: {{away}} · Nusxa qo'ymoqchi bo'ldi: {{paste}}",
+    "integrityTitle": "Imtihon davomida boshqa oynaga o'tish va nusxa qo'yishga urinishlar soni"
   },
   "teacherList": {
     "subtitle": "Guruhlaringizdagi imtihonlar — yaratish, tahrirlash va natijalar.",
@@ -87,7 +110,8 @@
     "deleteDescription": "“{{title}}” o'chiriladi. Buni qaytarib bo'lmaydi.",
     "save": "Saqlash",
     "cancel": "Bekor qilish",
-    "delete": "O'chirish"
+    "delete": "O'chirish",
+    "emptyDescription": "Guruhingiz uchun birinchi mock imtihonni yarating — natijalar shu yerda ko‘rinadi."
   },
   "createDialog": {
     "title": "Yangi imtihon",
@@ -118,7 +142,9 @@
       "chooseQuiz": "“{{title}}” bo'limi uchun test tanlang",
       "quizTwice": "Bitta test faqat bitta bo'limga biriktiriladi"
     },
-    "startTimeLabel": "Boshlanish soati"
+    "draftsHint": "{{count}} ta test hali qoralama (AI yaratgan testlar ham). Ularni tekshirib e'lon qiling — shunda shu ro'yxatda chiqadi.",
+    "createWithAi": "Test yo'qmi? AI bilan yarating →",
+    "startNow": "Hozir boshlash (vaqt kutilmaydi)"
   },
   "templateDialog": {
     "title": "O'z shabloningiz",
@@ -158,27 +184,86 @@
     },
     "breakDefaultTitle": "Tanaffus"
   },
-  "ai": {
+  "writing": {
     "essays": "O'QUVCHI INSHOSI",
-    "notStarted": "AI baholash hali boshlanmagan.",
-    "start": "AI bilan baholash",
-    "running": "AI baholamoqda…",
-    "failed": "AI baholay olmadi",
-    "retry": "Qayta urinish",
-    "proposedBand": "AI taklifi",
-    "approvedBand": "Tasdiqlangan band",
-    "task": "{{number}}-task",
-    "words": "{{words}} so'z (kamida {{min}})",
-    "approve": "Tasdiqlash",
-    "approveWithBand": "Shu band bilan tasdiqlash",
-    "bandLabel": "Band",
-    "show": "AI baholash",
-    "hide": "AI baholashni yopish",
-    "criteria": {
-      "task_response": "Topshiriqqa javob",
-      "coherence_cohesion": "Mantiq va bog'lanish",
-      "lexical_resource": "Lug'at boyligi",
-      "grammatical_range_accuracy": "Grammatika"
-    }
+    "empty": "Yozma javob topshirilmagan.",
+    "show": "Insholarni ko'rish",
+    "hide": "Insholarni yopish"
+  },
+  "review": {
+    "show": "Javoblarni ko'rish (qaysi biri xato)",
+    "empty": "Tahlil hali mavjud emas.",
+    "correctCount": "{{right}} / {{total}} to'g'ri",
+    "yourAnswer": "Sizning javobingiz",
+    "noAnswer": "javob berilmagan",
+    "correctAnswer": "To'g'ri javob"
+  },
+  "writingAi": {
+    "ask": "AI bilan tahlil qilish (IELTS mezonlari)",
+    "again": "AI tahlilni qayta so'rash",
+    "queued": "AI tahlil qilmoqda… (1–2 daqiqa)",
+    "failed": "AI tahlil qila olmadi: {{error}}",
+    "suggested": "Taklif etilgan Writing bandi: {{band}}",
+    "apply": "Ball maydoniga qo'yish",
+    "teacherConfirms": "Yakuniy bandni o'qituvchi tasdiqlaydi.",
+    "taskTitle": "Task {{task}}",
+    "band": "Band {{band}}",
+    "words": "{{count}} ta so'z (kamida {{min}})",
+    "tooShort": "so'z soni yetarli emas",
+    "capped": "so'z kamligi uchun cheklandi",
+    "errors": "Asosiy xatolar",
+    "strengths": "Kuchli tomonlar",
+    "improvements": "Yaxshilash uchun",
+    "upgraded": "Yaxshilangan variant (taxminan +1 band)",
+    "sectionTitle": "Writing tahlili"
+  },
+  "mock": {
+    "filterAll": "Hammasi",
+    "filterIelts": "IELTS",
+    "filterSat": "SAT",
+    "filterCert": "Sertifikat",
+    "filterCustom": "O‘z formatim",
+    "stateScheduled": "Rejalashtirilgan",
+    "stateRunning": "Davom etmoqda",
+    "stateFinished": "Yakunlangan",
+    "sections": "{{count}} bo‘lim",
+    "durationValue": "{{hours}} soat {{minutes}} daqiqa",
+    "minutesOnly": "{{count}} daqiqa",
+    "studentCount": "{{count}} o‘quvchi",
+    "submittedOf": "{{done}} / {{total}} o‘quvchi topshirdi",
+    "avgBand": "O‘rtacha band: {{value}} · {{done}} / {{total}} topshirdi",
+    "watch": "Kuzatish",
+    "edit": "Tahrirlash",
+    "results": "Natijalar",
+    "download": "Yuklab olish",
+    "resultsHeader": "Natijalar · {{date}} · {{course}}",
+    "statSubmitted": "Topshirdi",
+    "statAvg": "O‘rtacha band",
+    "statTop": "Eng yuqori",
+    "sectionAverages": "Bo‘limlar bo‘yicha o‘rtacha",
+    "studentsTitle": "O‘quvchilar",
+    "byBand": "Band bo‘yicha",
+    "notSubmitted": "Topshirmagan",
+    "notEntered": "Imtihonga kirmadi",
+    "backToResults": "Natijalarga qaytish",
+    "essaysHeader": "{{exam}} · {{date}} · {{count}} ta topshiriq",
+    "wordCount": "{{count}} so‘z",
+    "minWords": "min {{count}}",
+    "scoreTitle": "{{name}} · baholash",
+    "scoreDescription": "Listening va Reading avtomatik baholandi. Writing va Speaking uchun band kiriting.",
+    "autoLabel": "{{title}} · avtomatik",
+    "overallBand": "Umumiy band (taxminiy)",
+    "scoreComment": "Izoh · ixtiyoriy",
+    "scoreSave": "Saqlash",
+    "scoreCancel": "Bekor qilish",
+    "scorePlaceholder": "Masalan: 7.0",
+    "noResults": "Natija hali yo‘q",
+    "pickExam": "Chapdan imtihonni tanlang",
+    "noEssays": "Yozma javoblar yo‘q",
+    "hoursOnly": "{{count}} soat",
+    "taskNumber": "Task {{number}}",
+    "backToList": "Ro‘yxatga qaytish",
+    "share": "Natijalarni ulashish",
+    "shareUnavailable": "Natijalarni ulashish backendda hali mavjud emas."
   }
 }

@@ -112,6 +112,8 @@ export interface ExamFormValues {
   templateId: string;
   title: string;
   startsAt: string;
+  /** true bo'lsa `startsAt` e'tiborga olinmaydi: imtihon hoziroq boshlanadi. */
+  startNow?: boolean;
   sections: Array<{ key: string; quizId: string; minutes?: number }>;
 }
 
@@ -144,6 +146,7 @@ export interface ExamStudentResultDto {
   sections?: ExamSectionResultDto[];
   total?: ExamTotalResultDto | null;
   pending?: string[];
+  integrity?: { away: number; paste: number };
 }
 
 export interface ExamResultsDto {
@@ -154,45 +157,46 @@ export interface ExamResultsDto {
   results?: ExamStudentResultDto[];
 }
 
-export interface ExamAiCriteriaDto {
-  task_response?: number | null;
-  coherence_cohesion?: number | null;
-  lexical_resource?: number | null;
-  grammatical_range_accuracy?: number | null;
-}
-
-export interface ExamAiTaskDto {
-  task_number: number;
-  words?: number | null;
-  min_words?: number | null;
-  band?: number | null;
-  criteria?: ExamAiCriteriaDto;
-  strengths?: string[];
-  weaknesses?: string[];
-  corrections?: Array<{ original: string; corrected: string; explanation?: string | null }>;
-  feedback?: string | null;
-}
-
-export interface ExamAiWritingDto {
-  status?: "running" | "proposed" | "approved" | "failed";
-  proposed_band?: number | null;
-  approved_band?: number | null;
-  error?: string | null;
-  generated_at?: string | null;
-  result?: {
-    writing_band?: number | null;
-    tasks?: ExamAiTaskDto[];
-    summary?: { overall_comment?: string | null; recommendations?: string[] } | null;
-  } | null;
-}
-
 export interface ExamManualAnswerDto {
   section: string;
   question: string;
   answer: string;
 }
 
+export interface ExamReviewRowDto {
+  section: string;
+  section_title: string;
+  number: number;
+  question: string;
+  type: string;
+  given: string | null;
+  correct_answer: string | null;
+  earned: number;
+  points: number;
+  is_correct: boolean;
+}
+
+export interface ExamWritingAiDto {
+  status: "queued" | "done" | "failed";
+  items?: Array<{
+    question?: string;
+    task: number;
+    word_count: number;
+    min_words: number;
+    too_short: boolean;
+    overall_band: number;
+    criteria: Array<{ key: string; title: string; band: number; capped: boolean; comment: string; evidence: string }>;
+    errors: Array<{ quote: string; issue: string; correction: string }>;
+    strengths: string[];
+    improvements: string[];
+    upgraded_paragraph: string;
+  }>;
+  suggested_band?: number | null;
+  error?: string;
+}
+
 export interface ExamStudentResultDetailDto extends ExamStudentResultDto {
   manual_answers?: ExamManualAnswerDto[];
-  ai?: { writing?: ExamAiWritingDto } | null;
+  review?: ExamReviewRowDto[];
+  writing_ai?: ExamWritingAiDto | null;
 }

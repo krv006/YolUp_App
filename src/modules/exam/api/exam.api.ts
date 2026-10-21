@@ -48,10 +48,11 @@ export const examApi = {
   async create(form: ExamFormValues) {
     return mapExamDetailDto(await apiClient.post<ExamDetailDto>(examEndpoints.list, mapExamRequest(form)));
   },
-  async update(id: string, values: { title?: string; startsAt?: string }) {
+  async update(id: string, values: { title?: string; startsAt?: string; startNow?: boolean }) {
     const body: Record<string, unknown> = {};
     if (values.title !== undefined) body.title = values.title;
-    if (values.startsAt !== undefined) body.starts_at = toIsoDateTime(values.startsAt);
+    if (values.startNow) body.start_now = true;
+    else if (values.startsAt !== undefined) body.starts_at = toIsoDateTime(values.startsAt);
     return mapExamDetailDto(await apiClient.patch<ExamDetailDto>(examEndpoints.detail(id), body));
   },
   async remove(id: string) {
@@ -66,6 +67,11 @@ export const examApi = {
   async removeTemplate(id: string) {
     await apiClient.delete(examEndpoints.template(id));
     return id;
+  },
+  async requestWritingAi(id: string, studentId: string) {
+    return mapExamStudentResultDetailDto(
+      await apiClient.post<ExamStudentResultDetailDto>(examEndpoints.writingAi(id, studentId), {})
+    );
   },
   async saveManualScores(id: string, studentId: string, scores: Record<string, number>) {
     return mapExamStudentResultDto(
@@ -95,16 +101,14 @@ export const examApi = {
       await apiClient.get<ExamStudentResultDetailDto>(examEndpoints.studentResult(id, studentId), options)
     );
   },
-  async startAiReview(id: string, studentId: string) {
-    return apiClient.post<{ status?: string }>(examEndpoints.aiReview(id, studentId), {});
+  /** Imtihon davomida boshqa oynaga o'tish (`blur`) yoki tashqaridan nusxa qo'yishga urinish (`paste`) qayd etiladi. */
+  async recordFocus(id: string, kind: "blur" | "paste") {
+    await apiClient.post(examEndpoints.focus(id), { kind });
   },
-  async approveAiBand(id: string, studentId: string, band?: number) {
-    return mapExamStudentResultDetailDto(
-      await apiClient.post<ExamStudentResultDetailDto>(
-        examEndpoints.aiApprove(id, studentId),
-        band === undefined ? {} : { band }
-      )
-    );
+  /** Joriy bo'limni muddatidan oldin tugatib keyingisiga o'tish (orqaga qaytib bo'lmaydi). */
+  async nextSection(id: string) {
+    await apiClient.post(examEndpoints.nextSection(id), {});
+    return id;
   },
   async finish(id: string) {
     await apiClient.post(examEndpoints.finish(id), {});

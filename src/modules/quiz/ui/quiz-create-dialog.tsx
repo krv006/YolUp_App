@@ -120,7 +120,7 @@ export function AddQuizDialog({
   onImported,
 }: AddQuizDialogProps) {
   const { t } = useTranslation("quiz");
-  const { palette, scheme } = useTheme();
+  const { palette } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [step, setStep] = useState<"details" | "questions">(startOnQuestions ? "questions" : "details");
@@ -360,9 +360,9 @@ export function AddQuizDialog({
   if (!open) return null;
 
   if (step === "questions") {
-    // Ogohlantirishlar foni — vebdagi `bg-saffron-subtle` (#fdefcf).
-    const notice = scheme === "dark" ? palette["warning-soft"] : "#fdefcf";
-    const noticeMark = scheme === "dark" ? palette["warning-strong"] : "#b87d14";
+    // Ogohlantirishlar foni — vebdagi `bg-saffron-subtle`.
+    const notice = palette["saffron-soft"];
+    const noticeMark = palette["saffron-strong"];
 
     const header = (
       <View style={styles.listHeader}>

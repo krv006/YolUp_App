@@ -6,9 +6,10 @@ export const examEndpoints = Object.freeze({
   current: (id: string) => `/api/v1/exams/${id}/current/`,
   answers: (id: string) => `/api/v1/exams/${id}/answers/`,
   finish: (id: string) => `/api/v1/exams/${id}/finish/`,
+  nextSection: (id: string) => `/api/v1/exams/${id}/next-section/`,
+  focus: (id: string) => `/api/v1/exams/${id}/focus/`,
   results: (id: string) => `/api/v1/exams/${id}/results/`,
   studentResult: (id: string, studentId: string) => `/api/v1/exams/${id}/results/${studentId}/`,
+  writingAi: (id: string, studentId: string) => `/api/v1/exams/${id}/results/${studentId}/writing-ai/`,
   manualScores: (id: string, studentId: string) => `/api/v1/exams/${id}/results/${studentId}/manual/`,
-  aiReview: (id: string, studentId: string) => `/api/v1/exams/${id}/results/${studentId}/ai/`,
-  aiApprove: (id: string, studentId: string) => `/api/v1/exams/${id}/results/${studentId}/ai/approve/`,
 });

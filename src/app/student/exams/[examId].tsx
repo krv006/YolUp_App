@@ -1,5 +1,5 @@
-import { ExamRunnerPage } from "@/pages/exams/exam-runner-page";
+import { StudentExamPage } from "@/pages/exams/student-exam-page";
 
 export default function StudentExamRoute() {
-  return <ExamRunnerPage />;
+  return <StudentExamPage />;
 }

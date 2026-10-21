@@ -159,7 +159,7 @@ export function WorkspacePage() {
             />
             <StatCard
               icon={<ClipboardList size={18} color={palette["primary-foreground"]} />}
-              tone={palette["warning-strong"]}
+              tone={palette["saffron-strong"]}
               value="—"
               label={t("statUnchecked")}
             />
@@ -267,7 +267,7 @@ function WorkspaceCard({
 
   const toneColor = {
     brand: palette.primary,
-    gold: palette["warning-strong"],
+    gold: palette["saffron-strong"],
     green: palette["success-strong"],
   }[tone];
 

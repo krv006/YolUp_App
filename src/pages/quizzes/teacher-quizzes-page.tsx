@@ -260,7 +260,7 @@ export function TeacherQuizzesPage() {
                       <Text variant="caption" numberOfLines={1} style={{ color: palette["subtle-foreground"] }}>
                         {t("teacherPage.sectionCount", { count: group.items.length })}
                         {drafts ? (
-                          <Text variant="caption" style={{ color: palette["warning-strong"] }}>
+                          <Text variant="caption" style={{ color: palette["saffron-strong"] }}>
                             {" · "}
                             {t("teacherPage.sectionDrafts", { count: drafts })}
                           </Text>
@@ -521,8 +521,8 @@ function QuizCard({
           <View style={styles.cardTitle}>
             <Text variant="label">{title}</Text>
             {quiz.status === "draft" ? (
-              <View style={[styles.badge, { backgroundColor: palette["warning-soft"] }]}>
-                <Text variant="caption" style={[styles.strong, { color: palette["warning-strong"] }]}>
+              <View style={[styles.badge, { backgroundColor: palette["saffron-soft"] }]}>
+                <Text variant="caption" style={[styles.strong, { color: palette["saffron-strong"] }]}>
                   {t("teacherPage.draftBadge")}
                 </Text>
               </View>

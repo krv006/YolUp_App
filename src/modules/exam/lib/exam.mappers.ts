@@ -1,4 +1,4 @@
-import { mapQuizQuestionDto } from "@/modules/quiz";
+import { mapQuizQuestionDto, toQuestionType } from "@/modules/quiz";
 import type {
   ExamCurrent,
   ExamCurrentItem,
@@ -11,7 +11,6 @@ import type {
   ExamTemplate,
   ExamResults,
   ExamSectionResult,
-  ExamAiWriting,
   ExamStudentResult,
   ExamStudentResultDetail,
   ExamTemplateItem,
@@ -135,6 +134,8 @@ export function mapSavedAnswer(
       return { type: "numeric", value: String(answer.value_text ?? "") };
     case "text":
       return { type: "text", value: String(answer.value_text ?? "") };
+    case "essay":
+      return { type: "essay", value: String(answer.value_text ?? "") };
     case "matching": {
       const pairs: Record<string, string> = {};
       for (const pair of Array.isArray(answer.pairs) ? answer.pairs : []) {
@@ -229,7 +230,7 @@ export function mapExamRequest(form: ExamFormValues): Record<string, unknown> {
     course: form.courseId,
     template: form.templateId,
     title: form.title,
-    starts_at: toIsoDateTime(form.startsAt),
+    ...(form.startNow ? { start_now: true } : { starts_at: toIsoDateTime(form.startsAt) }),
     sections: form.sections.map((section) => ({
       key: section.key,
       quiz: section.quizId,
@@ -271,6 +272,7 @@ export function mapExamStudentResultDto(dto: ExamStudentResultDto): ExamStudentR
         }
       : null,
     pending: dto.pending ?? [],
+    integrity: dto.integrity ? { away: dto.integrity.away, paste: dto.integrity.paste } : null,
   };
 }
 
@@ -280,44 +282,6 @@ export function mapExamResultsDto(dto: ExamResultsDto): ExamResults {
     engine: dto.engine || "",
     state: dto.state || "",
     results: (dto.results ?? []).map(mapExamStudentResultDto),
-  };
-}
-
-const AI_CRITERIA = [
-  "task_response",
-  "coherence_cohesion",
-  "lexical_resource",
-  "grammatical_range_accuracy",
-] as const;
-
-function mapAiWriting(dto: ExamStudentResultDetailDto["ai"]): ExamAiWriting | null {
-  const writing = dto?.writing;
-  if (!writing || !writing.status) return null;
-  const result = writing.result ?? null;
-  return {
-    status: writing.status,
-    proposedBand: writing.proposed_band ?? null,
-    approvedBand: writing.approved_band ?? null,
-    error: writing.error || "",
-    generatedAt: writing.generated_at ?? null,
-    writingBand: result?.writing_band ?? null,
-    tasks: (result?.tasks ?? []).map((task) => ({
-      taskNumber: task.task_number,
-      words: task.words ?? null,
-      minWords: task.min_words ?? null,
-      band: task.band ?? null,
-      criteria: AI_CRITERIA.map((key) => ({ key, score: task.criteria?.[key] ?? null })),
-      strengths: task.strengths ?? [],
-      weaknesses: task.weaknesses ?? [],
-      corrections: (task.corrections ?? []).map((item) => ({
-        original: item.original,
-        corrected: item.corrected,
-        explanation: item.explanation || "",
-      })),
-      feedback: task.feedback || "",
-    })),
-    overallComment: result?.summary?.overall_comment || "",
-    recommendations: result?.summary?.recommendations ?? [],
   };
 }
 
@@ -331,6 +295,37 @@ export function mapExamStudentResultDetailDto(
       question: item.question,
       answer: item.answer,
     })),
-    ai: mapAiWriting(dto.ai),
+    review: (dto.review ?? []).map((row) => ({
+      section: row.section,
+      sectionTitle: row.section_title,
+      number: row.number,
+      question: row.question,
+      type: toQuestionType(row.type),
+      given: row.given,
+      correctAnswer: row.correct_answer,
+      earned: row.earned,
+      points: row.points,
+      isCorrect: row.is_correct,
+    })),
+    writingAi: dto.writing_ai
+      ? {
+          status: dto.writing_ai.status,
+          suggestedBand: dto.writing_ai.suggested_band ?? null,
+          error: dto.writing_ai.error ?? "",
+          items: (dto.writing_ai.items ?? []).map((item) => ({
+            question: item.question ?? "",
+            task: item.task,
+            wordCount: item.word_count,
+            minWords: item.min_words,
+            tooShort: item.too_short,
+            overallBand: item.overall_band,
+            criteria: item.criteria,
+            errors: item.errors ?? [],
+            strengths: item.strengths ?? [],
+            improvements: item.improvements ?? [],
+            upgradedParagraph: item.upgraded_paragraph ?? "",
+          })),
+        }
+      : null,
   };
 }

@@ -6,8 +6,7 @@
     "deleted": "Exam deleted",
     "templateCreated": "Template created",
     "templateDeleted": "Template deleted",
-    "scoresSaved": "Scores saved",
-    "aiApproved": "Band approved"
+    "scoresSaved": "Scores saved"
   },
   "state": {
     "upcoming": "Not started",
@@ -16,8 +15,8 @@
     "submitted": "Submitted"
   },
   "list": {
-    "eyebrow": "EXAMS",
-    "title": "Exams",
+    "eyebrow": "MOCK TESTS",
+    "title": "Mock tests",
     "subtitle": "They start at the set time and end for everyone at once.",
     "loading": "Loading exams",
     "loadError": "Could not load the exams",
@@ -27,6 +26,14 @@
     "startsIn": "Starts in {{time}}",
     "enter": "Enter",
     "openResult": "Result"
+  },
+  "parentList": {
+    "subtitle": "Exams in your child's groups. Results open once the exam is over.",
+    "resultTitle": "{{name}} — result",
+    "hidden": "The result opens once the exam is over.",
+    "notInExam": "This exam doesn't belong to your child's group.",
+    "noChildTitle": "No child selected",
+    "noChildDescription": "Add a child first to see their exams."
   },
   "runner": {
     "loading": "Loading the exam",
@@ -49,8 +56,22 @@
     "audioStart": "Play the audio",
     "audioPlaying": "Audio is playing",
     "audioPlayed": "Audio played",
-    "audioOnce": "The audio plays once and cannot be paused or replayed.",
-    "audioPause": "Pause"
+    "audioOnce": "The audio plays once: it cannot be paused or replayed.",
+    "audioPart": "Part {{number}}",
+    "audioStartPart": "Start audio: {{label}}",
+    "audioPlayingPart": "{{label}} — audio is playing",
+    "audioNext": "{{label}} — audio starts shortly",
+    "audioAllDone": "All audio has been played",
+    "audioPartsCount": "Part {{current}} / {{total}}",
+    "navAria": "Question palette",
+    "flag": "Flag",
+    "unflag": "Unflag",
+    "pasteBlocked": "Pasting from outside is not allowed during the exam.",
+    "integrityNotice": "Switching to another window during the exam is recorded.",
+    "next": "Next section",
+    "nextTitle": "Move on to the next section?",
+    "nextDescription": "This section will be closed and you cannot go back to it. Next: {{title}}. Its timer starts immediately.",
+    "nextConfirm": "Yes, continue"
   },
   "result": {
     "total": "Result",
@@ -68,7 +89,9 @@
     "absent": "Did not take it",
     "manualScores": "Enter scores",
     "saveScores": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "integrity": "Left the window: {{away}} · Paste attempts: {{paste}}",
+    "integrityTitle": "Times the student switched windows or tried to paste during the exam"
   },
   "teacherList": {
     "subtitle": "Exams in your groups — create, edit and see the results.",
@@ -87,7 +110,8 @@
     "deleteDescription": "“{{title}}” will be deleted. This cannot be undone.",
     "save": "Save",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "emptyDescription": "Create the first mock exam for your group — results will show up here."
   },
   "createDialog": {
     "title": "New exam",
@@ -118,7 +142,9 @@
       "chooseQuiz": "Choose a test for the “{{title}}” section",
       "quizTwice": "One test can be attached to only one section"
     },
-    "startTimeLabel": "Start time"
+    "draftsHint": "{{count}} test(s) are still drafts (including AI-made ones). Review and publish them and they will appear in this list.",
+    "createWithAi": "No test yet? Create one with AI →",
+    "startNow": "Start now (don't wait for a time)"
   },
   "templateDialog": {
     "title": "Your own template",
@@ -158,27 +184,86 @@
     },
     "breakDefaultTitle": "Break"
   },
-  "ai": {
-    "essays": "STUDENT'S ESSAY",
-    "notStarted": "The AI review has not started yet.",
-    "start": "Review with AI",
-    "running": "The AI is reviewing…",
-    "failed": "The AI could not review it",
-    "retry": "Try again",
-    "proposedBand": "AI suggestion",
-    "approvedBand": "Approved band",
-    "task": "Task {{number}}",
-    "words": "{{words}} words (at least {{min}})",
-    "approve": "Approve",
-    "approveWithBand": "Approve with this band",
-    "bandLabel": "Band",
-    "show": "AI review",
-    "hide": "Hide the AI review",
-    "criteria": {
-      "task_response": "Task response",
-      "coherence_cohesion": "Coherence and cohesion",
-      "lexical_resource": "Lexical resource",
-      "grammatical_range_accuracy": "Grammar"
-    }
+  "writing": {
+    "essays": "STUDENT ESSAYS",
+    "empty": "No written answers submitted.",
+    "show": "View essays",
+    "hide": "Hide essays"
+  },
+  "review": {
+    "show": "Review your answers (what was wrong)",
+    "empty": "No review available yet.",
+    "correctCount": "{{right}} / {{total}} correct",
+    "yourAnswer": "Your answer",
+    "noAnswer": "no answer",
+    "correctAnswer": "Correct answer"
+  },
+  "writingAi": {
+    "ask": "Analyse with AI (IELTS criteria)",
+    "again": "Ask for the AI analysis again",
+    "queued": "AI is analysing… (1–2 minutes)",
+    "failed": "AI could not analyse it: {{error}}",
+    "suggested": "Suggested Writing band: {{band}}",
+    "apply": "Use as the score",
+    "teacherConfirms": "The teacher confirms the final band.",
+    "taskTitle": "Task {{task}}",
+    "band": "Band {{band}}",
+    "words": "{{count}} words (minimum {{min}})",
+    "tooShort": "too short",
+    "capped": "capped: too short",
+    "errors": "Main mistakes",
+    "strengths": "Strengths",
+    "improvements": "How to improve",
+    "upgraded": "Upgraded version (about +1 band)",
+    "sectionTitle": "Writing analysis"
+  },
+  "mock": {
+    "filterAll": "All",
+    "filterIelts": "IELTS",
+    "filterSat": "SAT",
+    "filterCert": "Certificate",
+    "filterCustom": "My format",
+    "stateScheduled": "Scheduled",
+    "stateRunning": "In progress",
+    "stateFinished": "Finished",
+    "sections": "{{count}} sections",
+    "durationValue": "{{hours}} h {{minutes}} min",
+    "minutesOnly": "{{count}} min",
+    "studentCount": "{{count}} students",
+    "submittedOf": "{{done}} / {{total}} submitted",
+    "avgBand": "Average band: {{value}} · {{done}} / {{total}} submitted",
+    "watch": "Watch",
+    "edit": "Edit",
+    "results": "Results",
+    "download": "Download",
+    "resultsHeader": "Results · {{date}} · {{course}}",
+    "statSubmitted": "Submitted",
+    "statAvg": "Average band",
+    "statTop": "Highest",
+    "sectionAverages": "Section averages",
+    "studentsTitle": "Students",
+    "byBand": "By band",
+    "notSubmitted": "Not submitted",
+    "notEntered": "Did not take the exam",
+    "backToResults": "Back to results",
+    "essaysHeader": "{{exam}} · {{date}} · {{count}} tasks",
+    "wordCount": "{{count}} words",
+    "minWords": "min {{count}}",
+    "scoreTitle": "{{name}} · scoring",
+    "scoreDescription": "Listening and Reading are graded automatically. Enter the Writing and Speaking bands.",
+    "autoLabel": "{{title}} · automatic",
+    "overallBand": "Overall band (estimate)",
+    "scoreComment": "Comment · optional",
+    "scoreSave": "Save",
+    "scoreCancel": "Cancel",
+    "scorePlaceholder": "For example: 7.0",
+    "noResults": "No results yet",
+    "pickExam": "Pick an exam on the left",
+    "noEssays": "No written answers",
+    "hoursOnly": "{{count}} h",
+    "taskNumber": "Task {{number}}",
+    "backToList": "Back to the list",
+    "share": "Share the results",
+    "shareUnavailable": "Sharing results is not available on the backend yet."
   }
 }

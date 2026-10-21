@@ -506,33 +506,12 @@ export interface ExamStudentResult {
   sections: ExamSectionResult[];
   total: ExamTotalResult | null;
   pending: string[];
+  /** Halollik jurnali (faqat o'qituvchiga): oynadan chiqish va tashqaridan nusxa qo'yish soni. */
+  integrity: { away: number; paste: number } | null;
 }
 
-export type ExamAiStatus = "idle" | "running" | "proposed" | "approved" | "failed";
 
-export interface ExamAiTask {
-  taskNumber: number;
-  words: number | null;
-  minWords: number | null;
-  band: number | null;
-  criteria: Array<{ key: string; score: number | null }>;
-  strengths: string[];
-  weaknesses: string[];
-  corrections: Array<{ original: string; corrected: string; explanation: string }>;
-  feedback: string;
-}
 
-export interface ExamAiWriting {
-  status: ExamAiStatus;
-  proposedBand: number | null;
-  approvedBand: number | null;
-  error: string;
-  generatedAt: string | null;
-  writingBand: number | null;
-  tasks: ExamAiTask[];
-  overallComment: string;
-  recommendations: string[];
-}
 
 export interface ExamManualAnswer {
   section: string;
@@ -540,9 +519,61 @@ export interface ExamManualAnswer {
   answer: string;
 }
 
+export interface ExamWritingCriterion {
+  key: string;
+  title: string;
+  band: number;
+  capped: boolean;
+  comment: string;
+  evidence: string;
+}
+
+export interface ExamWritingError {
+  quote: string;
+  issue: string;
+  correction: string;
+}
+
+export interface ExamWritingAiItem {
+  question: string;
+  task: number;
+  wordCount: number;
+  minWords: number;
+  tooShort: boolean;
+  overallBand: number;
+  criteria: ExamWritingCriterion[];
+  errors: ExamWritingError[];
+  strengths: string[];
+  improvements: string[];
+  upgradedParagraph: string;
+}
+
+export interface ExamWritingAi {
+  status: "queued" | "done" | "failed";
+  items: ExamWritingAiItem[];
+  /** O'qituvchiga: Writing bo'limi uchun taklif etilgan band (o'quvchiga ko'rsatilmaydi). */
+  suggestedBand: number | null;
+  error: string;
+}
+
+export interface ExamReviewRow {
+  section: string;
+  sectionTitle: string;
+  number: number;
+  question: string;
+  type: QuizQuestionType;
+  given: string | null;
+  correctAnswer: string | null;
+  earned: number;
+  points: number;
+  isCorrect: boolean;
+}
+
 export interface ExamStudentResultDetail extends ExamStudentResult {
   manualAnswers: ExamManualAnswer[];
-  ai: ExamAiWriting | null;
+  /** Savol-savol tahlil (o'quvchiga imtihon tugagach, o'qituvchiga doim). */
+  review: ExamReviewRow[];
+  writingAi: ExamWritingAi | null;
 }
 
 export interface ExamResults {

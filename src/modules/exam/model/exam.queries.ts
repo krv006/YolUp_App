@@ -65,32 +65,16 @@ export function useExamStudentResult(examId: string | null, studentId: string | 
     queryKey: examKeys.studentResult(examId ?? "", studentId ?? ""),
     queryFn: ({ signal }) => examApi.getStudentResult(examId as string, studentId as string, { signal }),
     enabled: Boolean(examId && studentId),
-    refetchInterval: (query) =>
-      query.state.data?.ai?.status === "running" ? 10_000 : false,
+    // AI tahlil navbatda turganda natija chiqquncha har 4 soniyada so'raymiz
+    refetchInterval: (query) => (query.state.data?.writingAi?.status === "queued" ? 4000 : false),
   });
 }
 
-export function useStartAiReview(examId: string) {
+export function useRequestWritingAi(examId: string) {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (studentId: string) => examApi.startAiReview(examId, studentId),
-    onSuccess: (_result, studentId) =>
-      client.invalidateQueries({ queryKey: examKeys.studentResult(examId, studentId) }),
-    onError: (error: Error) => toast.error(error.message),
-  });
-}
-
-export function useApproveAiBand(examId: string) {
-  const { t } = useTranslation("exam");
-  const client = useQueryClient();
-  return useMutation({
-    mutationFn: ({ studentId, band }: { studentId: string; band?: number }) =>
-      examApi.approveAiBand(examId, studentId, band),
-    onSuccess: (result) => {
-      client.setQueryData(examKeys.studentResult(examId, result.studentId), result);
-      client.invalidateQueries({ queryKey: examKeys.results(examId) });
-      toast.success(t("toast.aiApproved"));
-    },
+    mutationFn: (studentId: string) => examApi.requestWritingAi(examId, studentId),
+    onSuccess: (detail) => client.setQueryData(examKeys.studentResult(examId, detail.studentId), detail),
     onError: (error: Error) => toast.error(error.message),
   });
 }
@@ -112,7 +96,7 @@ export function useUpdateExam() {
   const { t } = useTranslation("exam");
   const client = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, values }: { id: string; values: { title?: string; startsAt?: string } }) =>
+    mutationFn: ({ id, values }: { id: string; values: { title?: string; startsAt?: string; startNow?: boolean } }) =>
       examApi.update(id, values),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: examKeys.all });
@@ -174,9 +158,22 @@ export function useSaveManualScores(examId: string) {
   });
 }
 
+export function useRecordExamFocus(examId: string) {
+  return useMutation({ mutationFn: (kind: "blur" | "paste") => examApi.recordFocus(examId, kind) });
+}
+
 export function useSaveExamAnswers(examId: string) {
   return useMutation({
     mutationFn: (answers: QuizAttemptAnswerInput[]) => examApi.saveAnswers(examId, answers),
+  });
+}
+
+export function useNextExamSection(examId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: () => examApi.nextSection(examId),
+    onSuccess: () => client.invalidateQueries({ queryKey: examKeys.all }),
+    onError: (error: Error) => toast.error(error.message),
   });
 }
 

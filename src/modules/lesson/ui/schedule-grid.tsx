@@ -295,7 +295,7 @@ export function ScheduleDay({ anchor, lessons, onSelect }: ScheduleViewProps) {
           <Pill bg={palette["primary-soft"]} fg={palette.primary}>
             {t("schedule.liveCount", { count: live })}
           </Pill>
-          <Pill bg={palette["warning-soft"]} fg={palette["warning-strong"]}>
+          <Pill bg={palette["saffron-soft"]} fg={palette["saffron-strong"]}>
             {t("schedule.leftCount", { count: Math.max(0, left) })}
           </Pill>
         </View>

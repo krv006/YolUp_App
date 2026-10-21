@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from "react-native-svg";
-import { Text, useTheme } from "@/shared/ui";
+import { useTheme } from "@/shared/ui";
+import { ChartTooltip } from "./chart-tooltip";
 
 export interface TrendLineSeries {
   key: string;
@@ -48,12 +48,11 @@ const PLOT_H = H - PAD_T - PAD_B;
  *
  * SICHQONCHA O'RNIGA BOSISH. Vebda qiymatlar sichqoncha tepasiga
  * kelganda ko'rinadi. Telefonda "tepasiga kelish" yo'q, shuning uchun
- * ustun BOSILADI va tanlangan nuqta grafik OSTIDA yozuv bo'lib chiqadi —
- * barmoq ostidagi qalqib chiquvchi oyna barmoqning o'zi bilan
- * to'silib qolardi.
+ * ustun BOSILADI (qayta bosilsa yopiladi) va vebdagi yozuv grafik
+ * tepasida chiqadi. Legenda grafik ichida YO'Q — vebdagidek panel
+ * sarlavhasida turadi.
  */
 export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: TrendLineChartProps) {
-  const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const [selected, setSelected] = useState<number | null>(null);
   const [width, setWidth] = useState(0);
@@ -116,7 +115,7 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
               x={PAD_L - 6}
               y={yFor(value) + 3.5}
               textAnchor="end"
-              fontSize={10}
+              fontSize={9.5}
               fill={palette["muted-foreground"]}
             >
               {`${axisLabel(value)}${unit}`}
@@ -153,7 +152,27 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
                   strokeLinejoin="round"
                 />
                 {lastValue != null ? (
-                  <Circle cx={xFor(lastIndex)} cy={yFor(lastValue)} r={3.4} fill={item.color} />
+                  <>
+                    <Circle
+                      cx={xFor(lastIndex)}
+                      cy={yFor(lastValue)}
+                      r={3.4}
+                      fill={item.color}
+                      stroke={palette.card}
+                      strokeWidth={1.6}
+                    />
+                    {/* `.trend-chart-endlabel` — oxirgi qiymat nuqta ustida. */}
+                    <SvgText
+                      x={xFor(lastIndex)}
+                      y={yFor(lastValue) - 9}
+                      textAnchor="end"
+                      fontSize={10.5}
+                      fontWeight="700"
+                      fill={item.color}
+                    >
+                      {`${lastValue}${unit}`}
+                    </SvgText>
+                  </>
                 ) : null}
               </G>
             );
@@ -170,7 +189,7 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
                 x={xFor(index)}
                 y={H - 6}
                 textAnchor={isLast ? "end" : index === 0 ? "start" : "middle"}
-                fontSize={10}
+                fontSize={9.5}
                 fill={palette["muted-foreground"]}
               >
                 {label}
@@ -184,9 +203,9 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
               y1={PAD_T}
               x2={xFor(selected)}
               y2={PAD_T + PLOT_H}
-              stroke={palette["muted-foreground"]}
+              stroke={palette["border-strong"]}
               strokeWidth={1}
-              strokeDasharray="4 4"
+              strokeDasharray="3 3"
             />
           ) : null}
 
@@ -208,54 +227,22 @@ export function TrendLineChart({ series, labels, zeroBase = true, unit = "" }: T
         </Svg>
       ) : null}
 
-      {selected != null ? (
-        <View style={[styles.readout, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-          <Text variant="caption" tone="muted">
-            {labels[selected]}
-          </Text>
-          {series.map((item) => {
+      {selected != null && width > 0 ? (
+        <ChartTooltip
+          ratio={xFor(selected) / W}
+          chartWidth={width}
+          title={labels[selected] ?? ""}
+          rows={series.map((item) => {
             const value = item.values[selected];
-            return (
-              <View key={item.key} style={styles.readoutRow}>
-                <View style={[styles.dot, { backgroundColor: item.color }]} />
-                <Text variant="caption" style={styles.readoutName}>
-                  {item.name}
-                </Text>
-                <Text variant="caption">{value == null ? "—" : `${value}${unit}`}</Text>
-              </View>
-            );
+            return { key: item.key, name: item.name, color: item.color, value: value == null ? "—" : `${value}${unit}` };
           })}
-        </View>
-      ) : (
-        <Text variant="caption" tone="muted">
-          {t("analytics.qiymatlarni_ko_rish_uchun_grafikni_bosi")}
-        </Text>
-      )}
-
-      <View style={styles.legend}>
-        {series.map((item) => (
-          <View key={item.key} style={styles.readoutRow}>
-            <View style={[styles.dot, { backgroundColor: item.color }]} />
-            <Text variant="caption" tone="muted">
-              {item.name}
-            </Text>
-          </View>
-        ))}
-      </View>
+        />
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: 8, width: "100%" },
-  readout: {
-    gap: 4,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  readoutRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  readoutName: { flex: 1 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  legend: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  /* `.trend-chart` — margin-top 8 */
+  wrap: { position: "relative", width: "100%", marginTop: 8 },
 });

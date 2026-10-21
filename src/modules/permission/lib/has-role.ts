@@ -1,6 +1,5 @@
 import type { Role } from "@/shared/constants";
 
-/** Backend rollarni kichik harfda qaytaradi (teacher), frontend esa TEACHER bilan solishtiradi. */
 export function normalizeRole(role: unknown): string {
   return typeof role === "string" ? role.trim().toUpperCase() : "";
 }

@@ -1,4 +1,5 @@
 import { installBase64Shim } from "./base64-shim";
+import { installCryptoShim } from "./crypto-shim";
 import { installFormDataShim } from "./form-data-shim";
 import { installWebStorageShim } from "./web-storage-shim";
 
@@ -17,6 +18,7 @@ import { installWebStorageShim } from "./web-storage-shim";
  *   localStorage — zustand `persist` uchun (MMKV ustida)
  *   FormData.set — RN'da bu metod umuman yo'q
  *   atob/btoa    — LiveKit token'ini o'qish uchun
+ *   crypto.randomUUID — vebdan ko'chirilgan id yaratish (doska, chat)
  *
  * Uchalasi ham `tsc` va ESLint KO'RA OLMAYDIGAN xatolarni yopadi: Expo
  * tsconfig'i `DOM` lib'ini yoqadi va TypeScript brauzerning to'liq API'sini
@@ -25,3 +27,4 @@ import { installWebStorageShim } from "./web-storage-shim";
 installWebStorageShim();
 installFormDataShim();
 installBase64Shim();
+installCryptoShim();

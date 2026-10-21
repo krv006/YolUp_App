@@ -37,6 +37,7 @@ export function HtmlView({ html, minHeight = 80 }: HtmlViewProps) {
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <style>
   :root { color-scheme: ${palette === undefined ? "light" : "light dark"}; }
+  #content { display: flow-root; }
   body {
     margin: 0;
     padding: 0;
@@ -52,7 +53,7 @@ export function HtmlView({ html, minHeight = 80 }: HtmlViewProps) {
   pre, code { white-space: pre-wrap; }
 </style>
 </head>
-<body>${safe}</body>
+<body><div id="content">${safe}</div></body>
 </html>`;
   }, [html, palette]);
 
@@ -72,11 +73,16 @@ export function HtmlView({ html, minHeight = 80 }: HtmlViewProps) {
         onShouldStartLoadWithRequest={(request) => request.url === "about:blank"}
         injectedJavaScript={`
           (function () {
+            // \`body.scrollHeight\` Android WebView'da ko'rish oynasi
+            // balandligini qaytarishi mumkin — kontent o'ramini o'lchaymiz.
+            var node = document.getElementById('content');
             function report() {
-              window.ReactNativeWebView.postMessage(String(document.body.scrollHeight));
+              var height = Math.ceil(node.getBoundingClientRect().height);
+              window.ReactNativeWebView.postMessage(String(height));
             }
             report();
             window.addEventListener('load', report);
+            if (window.ResizeObserver) new ResizeObserver(report).observe(node);
           })();
           true;
         `}

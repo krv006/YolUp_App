@@ -182,7 +182,9 @@ function RoleTabBar({
           });
           // Bosilgan tab allaqachon ochiq bo'lsa navigatsiya qilinmaydi —
           // aks holda stack ildizga qaytib, ochiq suhbat yopilib ketardi.
-          if (!focused && !event.defaultPrevented) {
+          // Unga tegishli yashirin sahifa (masalan Workspace ichidagi Davomat)
+          // ochiq bo'lsa esa — vebdagidek bo'limning o'ziga qaytadi.
+          if (state.index !== index && !event.defaultPrevented) {
             navigation.navigate(route.name);
           }
         }

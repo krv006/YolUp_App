@@ -107,7 +107,7 @@ export function QuizAttemptsSheet({ quizId, open, onClose, title, courseId = nul
                 key={row.id}
                 style={[styles.row, index > 0 && { borderTopWidth: 1, borderTopColor: palette.border }]}
               >
-                <Avatar name={row.studentName} size="sm" />
+                <Avatar variant="legacy" name={row.studentName} size="sm" />
                 <View style={styles.grow}>
                   <Text variant="label" numberOfLines={1}>
                     {row.studentName}
@@ -134,7 +134,7 @@ export function QuizAttemptsSheet({ quizId, open, onClose, title, courseId = nul
                 (rows.length > 0 || index > 0) && { borderTopWidth: 1, borderTopColor: palette.border },
               ]}
             >
-              <Avatar name={student.name} tone={student.avatarTone} size="sm" />
+              <Avatar variant="legacy" name={student.name} tone={student.avatarTone} size="sm" />
               <View style={styles.grow}>
                 <Text variant="label" numberOfLines={1}>
                   {student.name}

@@ -485,7 +485,7 @@ export function TeacherExamsPage() {
             </RoundButton>
 
             <View style={styles.resultsHead}>
-              <Text variant="label" style={[styles.bodySm, styles.grow, { color: palette["muted-foreground"] }]}>
+              <Text variant="label" style={[styles.bodySm, styles.grow, styles.resultsText, { color: palette["muted-foreground"] }]}>
                 {t("mock.resultsHeader", { date: formatDate(selected.startsAt, false), course: selected.courseTitle })}
               </Text>
               <Pressable
@@ -586,7 +586,7 @@ export function TeacherExamsPage() {
                         pressed && { backgroundColor: palette["surface-subtle"] },
                       ]}
                     >
-                      <Avatar name={row.studentName} size="sm" />
+                      <Avatar variant="legacy" name={row.studentName} size="sm" />
                       <View style={styles.grow}>
                         <Text variant="label" numberOfLines={1}>
                           {row.studentName}
@@ -727,7 +727,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: radius.full,
   },
+  /*
+   * Vebda izoh matni `flex-1` va tugmalar bilan bir qatorda qoladi —
+   * telefonda u so'zlar bo'yicha tor ustunga siqiladi. RN'da "min-content"
+   * yo'q, shuning uchun eng uzun so'zga yetadigan minimal kenglik.
+   */
   resultsHead: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 12 },
+  resultsText: { minWidth: 62 },
   stat: { gap: 4, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
   box: { gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
   avgRow: { flexDirection: "row", alignItems: "center", gap: 12 },

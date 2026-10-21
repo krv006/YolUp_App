@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-28 (parent + notification qayta sinxronlandi)
+- **Oxirgi yangilanish:** 2026-10-21 (homework domeni qayta sinxronlandi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -119,14 +119,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
 | `src/modules/course/ui/add-student-sheet.tsx` | 🟡 MOSLASH | `23417d755aae` | manba: veb `add-student-dialog.tsx`; dialog o'rniga pastdan ochiladigan oyna, qidiruv debounce'siz (ro'yxat kichik) |
 | `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `67f8017c22aa` | veb bilan bir joyda — suhbat ma'lumoti oynasida; o'chirishni tasdiqlash `ConfirmSheet` bilan |
-| `src/modules/homework/api/homework.api.ts` | 🟡 MOSLASH | `36fced141fe9` | hisobot so'rovida `student_id`, veb'dagi `student` EMAS — backend aynan shu nomni kutadi (vebda bu xato hali turibdi) |
-| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `4cee08dbcf0f` | — |
-| `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
+| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `3b6953669648` | — |
+| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `6d59c99d3e6d` | — |
+| `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `52669db62972` | — |
 | `src/modules/homework/constants/homework.constants.ts` | 🟢 NUSXA | `fccf69310542` | — |
 | `src/modules/homework/index.ts` | 🟡 MOSLASH | `3c108061ccd7` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `c8327541f59b` | — |
-| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `f460f43aa2fb` | — |
-| `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `078c98e9912a` | — |
+| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `31627942d5ee` | — |
+| `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `6a6148929f3f` | — |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `b1cd81660536` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `3f7f3900f46d` | — |
 | `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `ab15866473ba` | — |

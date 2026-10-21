@@ -11,14 +11,15 @@ import {
   ListChecks,
   Sparkles,
   Trophy,
-  UserRound,
-  UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { useCourses } from "@/modules/course";
 import { ROLES } from "@/shared/constants";
-import { AppBar, AppBarAction, radius, Screen, Text, useTheme } from "@/shared/ui";
+import { useMemo, useState } from "react";
+import { InviteStudentsSheet, NewGroupSheet } from "@/modules/conversation";
+import { useLessons } from "@/modules/lesson";
+import { AppBar, AppBarAction, Icon, radius, Screen, Text, useTheme, type IconName } from "@/shared/ui";
 import { NotificationBell } from "@/modules/notification";
 
 type WorkspaceRole = "teacher" | "student" | "parent";
@@ -74,10 +75,9 @@ interface WorkspaceCard {
  */
 const CARDS: readonly WorkspaceCard[] = [
   // --- o'qituvchi va o'quvchi (veb bilan bir xil) ---
-  // Tartib vebdagidek: Test, Vazifalar, Tahlil, AI, Mock test.
-  // "Vazifalar" (o'qituvchi) Uy vazifalari bosqichida o'z sahifasi bilan
-  // qo'shiladi — vebda u butun `HomeworkWorkspace` vidjetini ochadi.
+  // Tartib vebdagidek: Test, Vazifalar (faqat o'qituvchi), Tahlil, AI, Mock test.
   { id: "quizzes", icon: FileQuestion, to: "quizzes", roles: ["teacher", "student"] },
+  { id: "assignments", icon: ClipboardList, to: "assignments", roles: ["teacher"] },
   { id: "analytics", icon: BarChart3, to: "analytics", roles: ["teacher", "student"] },
   { id: "ai", icon: Sparkles, to: "ai", roles: ["teacher"], tone: "gold" },
   { id: "exams", icon: ClipboardCheck, to: "exams", roles: ["teacher", "student"], tone: "green" },
@@ -117,6 +117,33 @@ export function WorkspacePage() {
    * qolaveradi.
    */
   const rolePrefix = `/${role}`;
+  const isStudent = role === "student";
+  const [inviteFor, setInviteFor] = useState<string | null>(null);
+  const [newGroupOpen, setNewGroupOpen] = useState(false);
+  const lessons = useLessons({ page_size: 200 }, role === "teacher");
+  const monthNames = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
+
+  const [now] = useState(() => Date.now());
+
+  // Har guruhning eng yaqin darsi — veb `nextLessonByCourse`.
+  const nextLessonByCourse = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const item of [...(lessons.data ?? [])].sort(
+      (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+    )) {
+      if (new Date(item.startsAt).getTime() < now || item.status === "finished") continue;
+      if (!map.has(item.courseId)) map.set(item.courseId, item.startsAt);
+    }
+    return map;
+  }, [lessons.data, now]);
+
+  function formatNext(value: string | undefined): string | null {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    const time = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    return `${date.getDate()}-${(monthNames[date.getMonth()] ?? "").toLowerCase()}, ${time}`;
+  }
 
   return (
     <Screen scroll padded={false}>
@@ -146,19 +173,19 @@ export function WorkspacePage() {
         {role !== "student" && courses.length > 0 ? (
           <View style={styles.statsRow}>
             <StatCard
-              icon={<UsersRound size={18} color={palette["primary-foreground"]} />}
+              icon={<Icon name="groups" size={18} color={palette["primary-foreground"]} />}
               tone={palette.primary}
               value={String(courses.length)}
               label={t("statGroups")}
             />
             <StatCard
-              icon={<UserRound size={18} color={palette["primary-foreground"]} />}
+              icon={<Icon name="person" size={18} color={palette["primary-foreground"]} />}
               tone={palette.success}
               value={String(studentTotal)}
               label={t("statStudents")}
             />
             <StatCard
-              icon={<ClipboardList size={18} color={palette["primary-foreground"]} />}
+              icon={<Icon name="assign" size={18} color={palette["primary-foreground"]} />}
               tone={palette["saffron-strong"]}
               value="—"
               label={t("statUnchecked")}
@@ -166,8 +193,9 @@ export function WorkspacePage() {
           </View>
         ) : null}
 
+        <View style={styles.section}>
         <Text variant="label" style={styles.sectionTitle}>
-          {tm("workspace.modullar")}
+          {t("modules")}
         </Text>
 
         {/*
@@ -204,10 +232,146 @@ export function WorkspacePage() {
             />
           ))}
         </View>
+        </View>
+
+        {/* Tezkor amallar — veb `QUICK` (faqat o'qituvchi). */}
+        {isStudent || role === "parent" ? null : (
+          <View style={styles.section}>
+            <Text variant="label" style={styles.sectionTitle}>
+              {t("quickActions")}
+            </Text>
+            {QUICK.map((item) => {
+              const key = `quick${item.id.charAt(0).toUpperCase()}${item.id.slice(1)}`;
+              return (
+                <Pressable
+                  key={item.id}
+                  accessibilityRole="button"
+                  onPress={() => router.push(`${rolePrefix}/${item.to}`)}
+                  style={({ pressed }) => [
+                    styles.quick,
+                    { backgroundColor: pressed ? palette["surface-subtle"] : palette.surface, borderColor: palette.border },
+                  ]}
+                >
+                  <View style={[styles.quickIcon, { backgroundColor: palette[item.tone] }]}>
+                    <Icon name={item.icon} size={18} color="#ffffff" />
+                  </View>
+                  <View style={styles.grow}>
+                    <Text variant="label" numberOfLines={1}>
+                      {t(key)}
+                    </Text>
+                    <Text variant="caption" numberOfLines={1} style={{ color: palette["subtle-foreground"] }}>
+                      {item.id === "grading"
+                        ? t("quickGradingUnknown")
+                        : item.id === "materials"
+                          ? t("quickMaterialsUnknown")
+                          : t(`${key}Hint`)}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Mening guruhlarim — veb (faqat o'qituvchi). */}
+        {isStudent || role === "parent" ? null : courses.length ? (
+          <View style={styles.section}>
+            <View style={styles.groupsHead}>
+              <Text variant="label" style={[styles.sectionTitle, styles.grow]}>
+                {t("myGroups")}
+              </Text>
+              <Pressable accessibilityRole="button" onPress={() => router.push(`${rolePrefix}/chats`)}>
+                <Text variant="label" style={{ color: palette.primary }}>
+                  {t("allGroups")}
+                </Text>
+              </Pressable>
+            </View>
+            {courses.slice(0, 4).map((course) => {
+              const next = formatNext(nextLessonByCourse.get(course.id));
+              return (
+                <View key={course.id} style={[styles.group, { backgroundColor: palette.surface, borderColor: palette.border }]}>
+                  <View style={styles.groupHead}>
+                    <View style={[styles.groupAvatar, { backgroundColor: palette["primary-soft"] }]}>
+                      <Text variant="subheading" style={[styles.groupInitials, { color: palette.primary }]}>
+                        {course.title.slice(0, 2).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles.grow}>
+                      <Text variant="body" numberOfLines={1} style={styles.groupTitle}>
+                        {course.title}
+                      </Text>
+                      <Text variant="caption" numberOfLines={1} style={{ color: palette["subtle-foreground"] }}>
+                        {t("groupMeta", { count: course.studentCount ?? 0 })}
+                      </Text>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t("createGroup")}
+                      onPress={() => setInviteFor(course.title)}
+                      style={({ pressed }) => [styles.invite, { backgroundColor: palette["primary-soft"], opacity: pressed ? 0.8 : 1 }]}
+                    >
+                      <Icon name="add" size={18} color={palette.primary} />
+                    </Pressable>
+                  </View>
+                  <View style={styles.progressBlock}>
+                    <View style={styles.progressHead}>
+                      <Text variant="caption" style={[styles.grow, { color: palette["muted-foreground"] }]}>
+                        {t("groupProgress")}
+                      </Text>
+                      <Text variant="caption" style={styles.strong}>
+                        —
+                      </Text>
+                    </View>
+                    <View style={[styles.progressTrack, { backgroundColor: palette["surface-subtle"] }]} />
+                  </View>
+                  <View style={[styles.nextLesson, { backgroundColor: palette["surface-subtle"] }]}>
+                    <Icon name="clock" size={15} color={palette["muted-foreground"]} />
+                    <Text variant="caption" style={{ color: palette["muted-foreground"] }}>
+                      {next ? t("nextLesson", { value: next }) : t("noNextLesson")}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <View style={styles.emptyGroups}>
+            <View style={[styles.emptyIcon, { backgroundColor: palette["primary-soft"] }]}>
+              <Icon name="groups" size={28} color={palette.primary} />
+            </View>
+            <Text variant="subheading" style={styles.center}>
+              {t("emptyTitle")}
+            </Text>
+            <Text variant="label" style={[styles.subtitle, styles.center, { color: palette["muted-foreground"] }]}>
+              {t("emptyDescription")}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setNewGroupOpen(true)}
+              style={({ pressed }) => [styles.emptyAction, { backgroundColor: pressed ? palette["primary-hover"] : palette.primary }]}
+            >
+              <Icon name="add" size={18} color={palette["primary-foreground"]} />
+              <Text variant="label" style={{ color: palette["primary-foreground"] }}>
+                {t("createGroup")}
+              </Text>
+            </Pressable>
+          </View>
+        )}
       </View>
+
+      <InviteStudentsSheet open={Boolean(inviteFor)} onClose={() => setInviteFor(null)} title={inviteFor ?? ""} />
+      <NewGroupSheet open={newGroupOpen} onClose={() => setNewGroupOpen(false)} />
     </Screen>
   );
 }
+
+/** Veb `QUICK` — havolalar vebdagidek (ba'zilari hali vaqtincha manzilga). */
+const QUICK: ReadonlyArray<{ id: string; icon: IconName; tone: "primary" | "success" | "saffron-strong" | "destructive"; to: string }> = [
+  { id: "homework", icon: "assign", tone: "primary", to: "quizzes" },
+  { id: "attendance", icon: "check-circle", tone: "success", to: "analytics" },
+  { id: "grading", icon: "done-all", tone: "saffron-strong", to: "quizzes" },
+  { id: "materials", icon: "assign", tone: "destructive", to: "quizzes" },
+];
 
 /**
  * Statistika kartochkasi — veb to'ridagi uchta element.
@@ -233,8 +397,8 @@ function StatCard({
       style={[styles.stat, { backgroundColor: palette.card, borderColor: palette.border }]}
     >
       <View style={[styles.statIcon, { backgroundColor: tone }]}>{icon}</View>
-      <Text variant="heading">{value}</Text>
-      <Text variant="label" tone="muted" numberOfLines={1} style={styles.cardText}>
+      <Text variant="subheading">{value}</Text>
+      <Text variant="caption" style={{ color: palette["muted-foreground"] }}>
         {label}
       </Text>
     </View>
@@ -309,7 +473,29 @@ function WorkspaceCard({
 
 const styles = StyleSheet.create({
   /* Veb: bo'lim bo'shlig'i 16, elementlar orasi 16. */
-  body: { paddingHorizontal: 16, paddingTop: 16, gap: 16 },
+  /* Veb: `flex-col gap-6 p-4` */
+  body: { padding: 16, gap: 24 },
+  section: { gap: 12 },
+  grow: { flex: 1, minWidth: 0 },
+  center: { textAlign: "center" },
+  strong: { fontWeight: "600" },
+  /* `rounded-2xl border bg-surface p-4 gap-3` */
+  quick: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
+  quickIcon: { width: 40, height: 40, borderRadius: radius.xl, alignItems: "center", justifyContent: "center" },
+  groupsHead: { flexDirection: "row", alignItems: "baseline", gap: 12 },
+  group: { gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
+  groupHead: { flexDirection: "row", alignItems: "center", gap: 12 },
+  groupAvatar: { width: 44, height: 44, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  groupInitials: { fontSize: 14, lineHeight: 20 },
+  groupTitle: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
+  invite: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  progressBlock: { gap: 6 },
+  progressHead: { flexDirection: "row", alignItems: "baseline", gap: 8 },
+  progressTrack: { height: 6, borderRadius: radius.full },
+  nextLesson: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.xl },
+  emptyGroups: { alignItems: "center", gap: 12, paddingHorizontal: 24, paddingVertical: 40 },
+  emptyIcon: { width: 64, height: 64, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  emptyAction: { marginTop: 4, height: 48, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 20, borderRadius: radius.full },
   subtitle: { fontWeight: "400" },
   sectionTitle: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
   /* Ikki ustun: kartochka kengligi 173, oraliq 12 (390 - 32 = 358). */

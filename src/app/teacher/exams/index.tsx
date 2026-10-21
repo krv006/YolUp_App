@@ -1,5 +1,5 @@
-import { ExamsPage } from "@/pages/exams/exams-page";
+import { TeacherExamsPage } from "@/pages/exams/teacher-exams-page";
 
 export default function TeacherExamsRoute() {
-  return <ExamsPage role="teacher" basePath="/teacher/exams" />;
+  return <TeacherExamsPage />;
 }

@@ -44,10 +44,6 @@ export function useAllowShare(lessonId: string) {
 }
 
 
-/**
- * Mikrofon so'rovi/ruxsati (MIC_REQUEST_GRANT.md §"Xato holatlari").
- * 403 ning sababi tomonga qarab boshqacha, shuning uchun matn tashqaridan.
- */
 function micError(error: unknown, forbidden: string): string {
   if (error instanceof AppError) {
     if (error.status === 404) return "Mikrofon so‘rovi serverda hali yoqilmagan.";
@@ -81,7 +77,6 @@ export function useDenyMic(lessonId: string) {
   });
 }
 
-/** Kamera so'rovi/ruxsati — mikrofon bilan bir xil xato holatlari. */
 function cameraError(error: unknown, forbidden: string): string {
   if (error instanceof AppError) {
     if (error.status === 404) return "Kamera so‘rovi serverda hali yoqilmagan.";

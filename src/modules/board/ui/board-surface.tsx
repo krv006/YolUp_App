@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, StyleSheet, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { useKeepAwake } from "expo-keep-awake";
-import { Atom, ArrowLeft, FilePlus2, Sigma, Trash2, UserRoundCheck } from "lucide-react-native";
+import { Atom, Calculator, Eye, FilePlus2, Pencil, UserCheck } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
 import type { FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
@@ -18,60 +17,43 @@ import {
   useSolveFormula,
 } from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
-import { AwayStudentsNotice } from "./away-students-notice";
 import { BoardCanvas } from "./board-canvas";
+import { BoardPagesSheet, BoardPermissionSheet, EraseReasonSheet } from "./board-dialogs";
 import { MathFieldSheet } from "./math-field-sheet";
 import { RichTextSheet } from "./rich-text-sheet";
 import { PeriodicTableSheet } from "./periodic-table-sheet";
 import { BoardToolbar, type BoardTool } from "./board-toolbar";
-import {
-  Badge,
-  Button,
-  Chip,
-  ChipRow,
-  IconButton,
-  Input,
-  ListItem,
-  radius,
-  Screen,
-  ScreenError,
-  ScreenLoading,
-  Separator,
-  Sheet,
-  Text,
-  toast,
-  useTheme,
-} from "@/shared/ui";
+import { Button, Input, radius, Sheet, Text, ThemeScope, toast, useTheme } from "@/shared/ui";
 
 export interface BoardSurfaceProps {
   lessonId: string;
-  /**
-   * Kurs — "chizishga ruxsat" ro'yxati uchun kerak: o'quvchilar shundan
-   * olinadi. Bo'lmasa tugma ko'rsatilmaydi — veb ham `courseId` ni
-   * `BoardPanel` ga prop qilib beradi.
-   */
+  /** Kurs — "chizishga ruxsat" ro'yxati uchun (veb `BoardPanel` ham shunday). */
   courseId?: string | null;
-  /**
-   * Jonli dars ichida ochilganmi. Shunda o'z sarlavhasi va "orqaga" tugmasi
-   * ko'rsatilmaydi — ular xona sarlavhasida allaqachon bor.
-   */
-  embedded?: boolean;
+  /** Holat yonidagi izoh, masalan "Dars tugagan" (veb `statusNote`). */
+  statusNote?: string;
+  /** Doska ustida, o'ng pastdagi amallar — arxiv sahifasi (veb `footerActions`). */
+  footerActions?: ReactNode;
 }
 
+/** Veb qorong'i `--success` (`bg-success`) — "Jonli" nuqtasi. */
+const LIVE_DOT = "#35c493";
+/** Veb `legacy.css` `.board-panel`: `--surface` va `--border` (qorong'i). */
+const PANEL_BG = "#161c23";
+const PANEL_BORDER = "#26313d";
+
 /**
- * Dars doskasi — veb `board-panel.tsx` (391 qator) ning mobil varianti.
+ * Dars doskasi — veb `modules/board/ui/board-panel.tsx` ning mobil porti.
  *
- * Dars tugagach backend kurs chatiga `.../boards/<lesson_id>` havolasini
- * yuboradi (docs/PROJECT.md §10) va u AYNAN shu ekranga tushadi.
+ * Tuzilishi vebdagidek: tepada holat qatori ("Chizish mumkin", "Jonli",
+ * sahifa, yechuvchi, davriy jadval, ruxsat), ostida oq kanvas kartasi va
+ * uning pastida suzib turgan asboblar. Chizish Skia'da (vebda SVG).
  *
- * Real-time (`useBoardRealtime`) 🟢 veb'dan ko'chirilgan: kelgan hodisalar
- * to'g'ridan-to'g'ri react-query keshiga qo'llanadi, shuning uchun har
- * chizmada qayta so'rov yuborilmaydi. Kanal ulanmasa `useBoard` pollingga
- * qaytadi — bu ham veb bilan bir xil.
+ * Real-time (`useBoardRealtime`) 🟢 veb'dan: kelgan hodisalar react-query
+ * keshiga qo'llanadi; kanal ulanmasa `useBoard` pollingga qaytadi.
  */
-export function BoardSurface({ lessonId, courseId = null, embedded = false }: BoardSurfaceProps) {
-  const { t } = useTranslation("mobile");
-  const router = useRouter();
+export function BoardSurface({ lessonId, courseId = null, statusNote, footerActions }: BoardSurfaceProps) {
+  const { t } = useTranslation("board");
+  const { t: tm } = useTranslation("mobile");
   const { palette } = useTheme();
   const { user } = useAuth();
 
@@ -97,89 +79,45 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
   const [reasonOpen, setReasonOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [grantOpen, setGrantOpen] = useState(false);
+  const [pagesOpen, setPagesOpen] = useState(false);
   const [formulaOpen, setFormulaOpen] = useState(false);
   const [formula, setFormula] = useState("");
   const [solution, setSolution] = useState<FormulaSolutionDto | null>(null);
 
   const state = board.data;
-  const members = useCourseStudents(
-    board.data?.isTeacher ? courseId : null,
-    { page_size: 100 }
-  );
+  const members = useCourseStudents(board.data?.isTeacher ? courseId : null, { page_size: 100 });
   const active = state?.sheets.find((item) => item.index === sheet) ?? state?.sheets[0];
   const canDraw = Boolean(state?.canDraw);
 
-  function goBack() {
-    if (router.canGoBack()) router.back();
-    else router.replace("/");
-  }
-
   /**
    * Chizmani real-time kanal orqali yuboramiz — server uni darhol hammaga
-   * tarqatadi. Kanal yopiq bo'lsa REST ishlatiladi (docs: ikkalasi teng kuchli).
-   * 🟢 Veb `board-panel.tsx` dagi bilan bir xil qoida.
+   * tarqatadi. Kanal yopiq bo'lsa REST ishlatiladi. 🟢 Veb bilan bir xil.
    */
   function commitStroke(stroke: StrokeShapeDto) {
     if (!realtime.sendStroke(sheet, stroke)) addStroke.mutate({ sheet, stroke });
   }
 
   /**
-   * MATN va FORMULA — HTTP orqali, soket orqali EMAS.
-   *
-   * Soket kanali faqat chizma strokelarini (qalam, shakl) qabul qiladi:
-   * matn yuborilsa `send` "yuborildi" deb qaytaradi, lekin server uni
-   * saqlamaydi va stroke jimgina yo'qoladi. Buni telefonda topdik —
-   * qalam chizig'i qayta yuklashdan keyin qoladi, matn esa yo'qoladi.
-   *
-   * Veb ham matnni `addStroke.mutate` bilan yuboradi
-   * (`board-panel.tsx:137`), soket orqali emas.
-   *
-   * Xato bu yerda ko'rsatiladi: `useAddStroke` da `onError` yo'q (u veb
-   * bilan bayt-bayt bir xil), shuning uchun aks holda xato yana jim
-   * qolardi.
+   * MATN va FORMULA — HTTP orqali, soket orqali EMAS: soket faqat chizma
+   * strokelarini saqlaydi, matn yuborilsa jimgina yo'qolardi. Veb ham
+   * matnni `addStroke.mutate` bilan yuboradi.
    */
   function commitTextStroke(stroke: StrokeShapeDto) {
-    addStroke.mutate(
-      { sheet, stroke },
-      { onError: (error: Error) => toast.error(error.message) }
-    );
+    addStroke.mutate({ sheet, stroke }, { onError: (error: Error) => toast.error(error.message) });
   }
 
-  /** Formula: matn state'iga tayanmaydi — qiymat to'g'ridan-to'g'ri keladi. */
   function placeMath(latex: string) {
     if (!placement) return;
-    commitTextStroke({
-      type: "math",
-      latex,
-      x: placement.point[0],
-      y: placement.point[1],
-      size: BOARD_TEXT_SIZE,
-      color,
-    });
+    commitTextStroke({ type: "math", latex, x: placement.point[0], y: placement.point[1], size: BOARD_TEXT_SIZE, color });
     setPlacement(null);
   }
 
-  /**
-   * Formatlangan matnni doskaga qo'yadi.
-   *
-   * `text` ham, `lines` ham yuboriladi — veb ham ikkalasini saqlaydi:
-   * `lines` formatni, `text` esa formatni tushunmaydigan joylar (qidiruv,
-   * eski mijozlar) uchun oddiy ko'rinishni beradi.
-   */
+  /** `lines` FAQAT haqiqiy format bo'lganda yuboriladi (veb ham shunday). */
   function placeRichText(lines: TextLineDto[], plainText: string) {
     if (!placement) return;
     commitTextStroke({
       type: "text",
       text: plainText,
-      /*
-       * `lines` FAQAT haqiqiy format bo'lganda yuboriladi — veb ham
-       * shunday qiladi (`board-panel.tsx:133`).
-       *
-       * Ilgari u har doim yuborilardi, hatto hamma bayroq `false`
-       * bo'lganda ham. Backend bunday strokeni QABUL QILMASDI va u
-       * jimgina yo'qolardi: soket orqali ketgani uchun xato ham
-       * ko'rinmasdi. Ya'ni oddiy matn doskaga umuman tushmasdi.
-       */
       ...(hasRichFormatting(lines) ? { lines } : {}),
       x: placement.point[0],
       y: placement.point[1],
@@ -189,313 +127,312 @@ export function BoardSurface({ lessonId, courseId = null, embedded = false }: Bo
     setPlacement(null);
   }
 
-  /**
-   * Formulani serverga yechtirish (SymPy). Xatoni oynada QOLDIRAMIZ:
-   * foydalanuvchi yozganini tuzatib qayta urinishi kerak, oyna yopilmaydi.
-   */
+  /** Formulani serverga yechtirish (SymPy). Xatoni mutatsiya o'zi ko'rsatadi. */
   async function solveFormula() {
     if (!formula.trim()) return;
     try {
       setSolution(await solve.mutateAsync(formula.trim()));
     } catch {
-      /*
-       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
-       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
-       * MARTA ko'rinardi.
-       *
-       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
-       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
-       */
+      /* `onError` toast chiqaradi — bu yerda ikkinchi marta emas. */
     }
   }
 
-  /** SymPy yechimini doskaga matn bloki qilib qo'yadi — 🟢 veb bilan bir xil. */
   function placeSolution() {
     if (!solution) return;
     const steps = solution.steps?.length ? `\n${solution.steps.join("\n")}` : "";
-    commitStroke({
-      type: "text",
-      text: `${solution.pretty}\n${solution.result}${steps}`,
-      x: 60,
-      y: 80,
-      size: BOARD_TEXT_SIZE,
-      color,
-    });
+    commitTextStroke({ type: "text", text: `${solution.pretty}\n${solution.result}${steps}`, x: 60, y: 80, size: BOARD_TEXT_SIZE, color });
     setFormulaOpen(false);
     setFormula("");
     setSolution(null);
   }
 
+  /** Veb `handleStrokeClick`: lastik bilan bosilgan element — sabab so'raladi. */
+  function selectForErase(id: string | null) {
+    if (!id || tool !== "erase" || !canDraw) return;
+    setSelected(id);
+    setReason("");
+    setReasonOpen(true);
+  }
+
+  function closeReason() {
+    setReasonOpen(false);
+    setSelected(null);
+    setReason("");
+  }
+
   function submitErase() {
     if (!selected || !reason.trim()) return;
-    // O'chirish SABABI majburiy — backend uni jurnalga yozadi
-    // (docs/PROJECT.md §3: "o'chirish SABABI majburiy").
     erase.mutate(
       { sheet, strokeIds: [selected], reason: reason.trim() },
       {
         onSuccess: () => {
-          setSelected(null);
-          setReason("");
-          setReasonOpen(false);
+          closeReason();
+          toast.success(t("eraseDialog.deleted"));
         },
         onError: (error) => toast.error(error.message),
       }
     );
   }
 
-  if (board.isLoading) {
+  if (board.isLoading)
     return (
-      <Screen>
-        <ScreenLoading label={t("board.doska_yuklanmoqda")} />
-      </Screen>
+      <View style={styles.center}>
+        <Text variant="label" style={[styles.regular, { color: palette["subtle-foreground"] }]}>
+          {t("status.loading")}
+        </Text>
+      </View>
     );
-  }
 
-  if (board.isError || !state) {
+  if (board.isError || !state)
     return (
-      <Screen>
-        <ScreenError message={t("board.doskani_ochib_bolmadi")} onRetry={() => void board.refetch()} />
-      </Screen>
+      <View style={[styles.center, styles.gap]}>
+        <Text variant="label" style={[styles.regular, { color: palette["muted-foreground"] }]}>
+          {board.error?.message}
+        </Text>
+        <Pressable accessibilityRole="button" onPress={() => void board.refetch()} style={[styles.retry, { backgroundColor: palette.primary }]}>
+          <Text variant="label" style={{ color: palette["primary-foreground"] }}>
+            {t("status.retry")}
+          </Text>
+        </Pressable>
+      </View>
     );
-  }
+
+  const chip = { backgroundColor: palette["surface-subtle"] };
 
   return (
-    <Screen padded={false}>
-      {embedded ? null : (
-      <View style={[styles.head, { borderBottomColor: palette.border }]}>
-        <IconButton accessibilityLabel={t("board.orqaga")} onPress={goBack}>
-          <ArrowLeft size={22} color={palette.foreground} />
-        </IconButton>
-        <View style={styles.headBody}>
-          <Text variant="label">Doska</Text>
-          <Text variant="caption" tone={realtime.connected ? "muted" : "danger"}>
-            {realtime.connected ? state.subject || "Jonli" : "Ulanish tiklanmoqda…"}
+    <View style={styles.root}>
+      {/* `flex flex-wrap items-center gap-2` */}
+      <View style={styles.status}>
+        <View style={[styles.statusItem, styles.statusFirst]}>
+          {canDraw ? <Pencil size={13} color={palette["success-strong"]} /> : <Eye size={13} color={palette["subtle-foreground"]} />}
+          <Text variant="caption" style={[styles.strong, { color: canDraw ? palette["success-strong"] : palette["subtle-foreground"] }]}>
+            {canDraw ? t("status.canDraw") : t("status.viewOnly")}
           </Text>
         </View>
 
-        {!canDraw ? <Badge label={t("board.faqat_korish")} tone="neutral" /> : null}
-
-        {selected ? (
-          <IconButton accessibilityLabel={t("board.tanlanganni_ochirish")} onPress={() => setReasonOpen(true)}>
-            <Trash2 size={20} color={palette.destructive} />
-          </IconButton>
-        ) : null}
-
-        {/*
-          * Davriy jadval — FORMULA bilan bir xil shartda: u ham fan
-          * vositasi va faqat o'qituvchida ma'noga ega.
-          */}
-        {state.isTeacher ? (
-          <IconButton accessibilityLabel={t("board.davriy_jadval")} onPress={() => setPeriodicOpen(true)}>
-            <Atom size={20} color={palette.foreground} />
-          </IconButton>
-        ) : null}
-
-        {state.mathEnabled ? (
-          <IconButton accessibilityLabel={t("board.formula_yordamchisi")} onPress={() => setFormulaOpen(true)}>
-            <Sigma size={20} color={palette.foreground} />
-          </IconButton>
-        ) : null}
-
-        {state.isTeacher && courseId ? (
-          <IconButton accessibilityLabel={t("board.chizishga_ruxsat")} onPress={() => setGrantOpen(true)}>
-            <UserRoundCheck size={20} color={palette.foreground} />
-          </IconButton>
-        ) : null}
-
-        {state.isTeacher ? (
-          <IconButton accessibilityLabel={t("board.yangi_varaq")} onPress={() => addSheet.mutate()}>
-            <FilePlus2 size={20} color={palette.foreground} />
-          </IconButton>
-        ) : null}
-      </View>
-      )}
-
-      {state.sheets.length > 1 ? (
-        <ChipRow>
-          {state.sheets.map((item) => (
-            <Chip
-              key={item.index}
-              label={`${item.index + 1}-varaq`}
-              selected={item.index === (active?.index ?? 0)}
-              onPress={() => {
-                setSheet(item.index);
-                setSelected(null);
-              }}
-            />
-          ))}
-        </ChipRow>
-      ) : null}
-
-      {/* Chiqib ketganlar — faqat o'qituvchida, doska so'rovini baham ko'radi. */}
-      <AwayStudentsNotice lessonId={lessonId} enabled={Boolean(state.isTeacher)} />
-
-      <BoardCanvas
-        strokes={active?.strokes ?? []}
-        width={state.width}
-        height={state.height}
-        tool={tool}
-        color={color}
-        strokeWidth={strokeWidth}
-        enabled={canDraw}
-        onCommit={commitStroke}
-        onPlacePoint={(point) => {
-          if (tool !== "text" && tool !== "math") return;
-          // Qoralama endi oynaning o'zida — bu yerda tozalash kerak emas.
-          setPlacement({ tool, point });
-        }}
-        onSelectStroke={setSelected}
-        selectedStrokeId={selected}
-      />
-
-      <BoardToolbar
-        tool={tool}
-        onToolChange={(next) => {
-          setTool(next);
-          if (next !== "select") setSelected(null);
-        }}
-        color={color}
-        onColorChange={setColor}
-        strokeWidth={strokeWidth}
-        onStrokeWidthChange={setStrokeWidth}
-        mathEnabled={state.mathEnabled}
-        disabled={!canDraw}
-      />
-
-      <RichTextSheet
-        open={placement?.tool === "text"}
-        onClose={() => setPlacement(null)}
-        onSubmit={placeRichText}
-      />
-
-      {/* Formula alohida oynada: u yozilayotgan LaTeX'ni jonli chizadi. */}
-      <PeriodicTableSheet
-        open={periodicOpen}
-        onClose={() => setPeriodicOpen(false)}
-        strokes={active?.strokes ?? []}
-        boardWidth={state.width}
-        boardHeight={state.height}
-        color={color}
-        onPlace={(next) => next.forEach((stroke) => commitStroke(stroke))}
-      />
-
-      <MathFieldSheet
-        open={placement?.tool === "math"}
-        onClose={() => setPlacement(null)}
-        onSubmit={placeMath}
-      />
-
-      {/*
-       * Chizishga ruxsat — o'qituvchi o'quvchini tanlaydi, backend unga
-       * `board_granted` signalini yuboradi. Ro'yxat KURS o'quvchilaridan
-       * olinadi (veb `board-panel.tsx` dagi kabi), darsdagilardan emas:
-       * darsga kirmagan o'quvchiga ham oldindan ruxsat berish mumkin.
-       */}
-      <Sheet
-        open={grantOpen}
-        onClose={() => setGrantOpen(false)}
-        title={t("board.chizishga_ruxsat")}
-        description={t("board.tanlangan_oquvchi_doskada_chiza_oladi")}
-      >
-        {members.isLoading ? <ScreenLoading label={t("board.oquvchilar_yuklanmoqda")} /> : null}
-
-        {(members.data?.items ?? []).map(({ student }, index) => (
-          <View key={student.id}>
-            {index > 0 ? <Separator /> : null}
-            <ListItem
-              title={student.name}
-              subtitle={`@${student.username}`}
-              disabled={grant.isPending}
-              onPress={() =>
-                grant.mutate(student.id, {
-                  onSuccess: () => toast.success(`${student.name} doskada chiza oladi`),
-                  onError: (error: Error) => toast.error(error.message),
-                })
-              }
-              trailing={<UserRoundCheck size={17} color={palette["muted-foreground"]} />}
-            />
-          </View>
-        ))}
-
-        {!members.isLoading && !members.data?.items?.length ? (
-          <Text variant="caption" tone="muted">
-            {t("board.oquvchi_topilmadi")}
-          </Text>
-        ) : null}
-      </Sheet>
-
-      {/* Formula yordamchisi — server SymPy bilan yechadi, natija doskaga qo'yiladi. */}
-      <Sheet
-        open={formulaOpen}
-        onClose={() => setFormulaOpen(false)}
-        title={t("board.formula_yordamchisi")}
-        description={t("board.masalan_2x_2_5x_3_0")}
-      >
-        <Input
-          label={t("board.formula")}
-          value={formula}
-          onChangeText={(value) => {
-            setFormula(value);
-            setSolution(null);
-          }}
-          placeholder={t("board.2x_2_5x_3_0")}
-          autoFocus
-        />
-
-        {solution ? (
-          <View style={[styles.solution, { backgroundColor: palette.muted }]}>
-            <Text variant="caption" tone="muted" style={styles.mono}>
-              {solution.pretty}
+        {statusNote ? (
+          <View style={styles.statusItem}>
+            <View style={[styles.dot, { backgroundColor: palette["subtle-foreground"] }]} />
+            <Text variant="caption" style={[styles.strong, { color: palette["subtle-foreground"] }]}>
+              {statusNote}
             </Text>
-            <Text variant="label">{solution.result}</Text>
-            {solution.steps?.map((step) => (
-              <Text key={step} variant="caption" tone="muted">
-                {step}
-              </Text>
-            ))}
           </View>
-        ) : null}
+        ) : (
+          <View style={styles.statusItem}>
+            <View style={[styles.dot, { backgroundColor: realtime.connected ? LIVE_DOT : palette["saffron-strong"] }]} />
+            <Text variant="caption" style={[styles.strong, { color: palette["subtle-foreground"] }]}>
+              {realtime.connected ? t("status.live") : t("status.slowMode")}
+            </Text>
+          </View>
+        )}
 
-        <Button
-          title={t("board.yechish")}
-          variant="secondary"
-          loading={solve.isPending}
-          disabled={!formula.trim()}
-          onPress={() => void solveFormula()}
+        <View style={styles.grow} />
+
+        <View style={styles.chips}>
+          <Pressable accessibilityRole="button" onPress={() => setPagesOpen(true)} style={[styles.chip, chip]}>
+            <FilePlus2 size={14} color={palette["muted-foreground"]} />
+            <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+              #{(active?.index ?? sheet) + 1}
+            </Text>
+          </Pressable>
+          {state.mathEnabled ? (
+            <Pressable accessibilityRole="button" onPress={() => setFormulaOpen(true)} style={[styles.chip, chip]}>
+              <Calculator size={14} color={palette["muted-foreground"]} />
+              <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+                {t("solver.button")}
+              </Text>
+            </Pressable>
+          ) : null}
+          {state.chemistryEnabled ? (
+            <Pressable accessibilityRole="button" onPress={() => setPeriodicOpen(true)} style={[styles.chip, chip]}>
+              <Atom size={14} color={palette["muted-foreground"]} />
+              <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+                {t("periodic.button")}
+              </Text>
+            </Pressable>
+          ) : null}
+          {state.isTeacher ? (
+            <Pressable accessibilityRole="button" onPress={() => setGrantOpen(true)} style={[styles.chip, chip]}>
+              <UserCheck size={14} color={palette["muted-foreground"]} />
+              <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+                {t("permission.grantButton")}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+      </View>
+
+      {/* Kanvas vebda ham `data-theme="light"` — oq. */}
+      <ThemeScope scheme="light">
+        <CanvasCard>
+          <BoardCanvas
+            strokes={active?.strokes ?? []}
+            width={state.width}
+            height={state.height}
+            tool={tool}
+            color={color}
+            strokeWidth={strokeWidth}
+            enabled={canDraw}
+            onCommit={commitStroke}
+            onPlacePoint={(point) => {
+              if (tool !== "text" && tool !== "math") return;
+              setPlacement({ tool, point });
+            }}
+            onSelectStroke={selectForErase}
+            selectedStrokeId={selected}
+          />
+
+          {canDraw ? (
+            <View style={styles.toolbar} pointerEvents="box-none">
+              <BoardToolbar
+                tool={tool}
+                color={color}
+                width={strokeWidth}
+                canDraw={canDraw}
+                onToolChange={(next) => {
+                  setTool(next);
+                  setSelected(null);
+                }}
+                onColorChange={setColor}
+                onWidthChange={setStrokeWidth}
+              />
+            </View>
+          ) : null}
+
+          {footerActions ? <View style={styles.footerActions}>{footerActions}</View> : null}
+        </CanvasCard>
+      </ThemeScope>
+
+      <ThemeScope scheme={null}>
+        <EraseReasonSheet
+          open={reasonOpen}
+          pending={erase.isPending}
+          reason={reason}
+          onReasonChange={setReason}
+          onCancel={closeReason}
+          onConfirm={submitErase}
         />
 
-        {solution && canDraw ? <Button title={t("board.doskaga_qoyish")} onPress={placeSolution} /> : null}
-      </Sheet>
-
-      <Sheet
-        open={reasonOpen}
-        onClose={() => setReasonOpen(false)}
-        title={t("board.ochirish_sababi")}
-        description={t("board.sabab_majburiy_u_dars_jurnaliga_yoziladi")}
-      >
-        <Input value={reason} onChangeText={setReason} placeholder={t("board.masalan_xato_yozildi")} autoFocus />
-        <Button
-          title={t("board.ochirish")}
-          variant="danger"
-          disabled={!reason.trim()}
-          loading={erase.isPending}
-          onPress={submitErase}
+        <BoardPagesSheet
+          open={pagesOpen}
+          onClose={() => setPagesOpen(false)}
+          sheets={state.sheets}
+          active={active?.index ?? sheet}
+          boardWidth={state.width}
+          boardHeight={state.height}
+          canAdd={state.isTeacher}
+          onSelect={(index) => {
+            setSheet(index);
+            setSelected(null);
+            setPagesOpen(false);
+          }}
+          onAdd={() => addSheet.mutate()}
         />
-      </Sheet>
-    </Screen>
+
+        <BoardPermissionSheet
+          open={grantOpen}
+          onClose={() => setGrantOpen(false)}
+          pending={grant.isPending}
+          students={(members.data?.items ?? []).map(({ student }) => ({ id: student.id, name: student.name, username: student.username }))}
+          onGrant={(studentIds) => {
+            let done = 0;
+            for (const studentId of studentIds)
+              grant.mutate(studentId, {
+                onSuccess: () => {
+                  done += 1;
+                  if (done === studentIds.length) {
+                    toast.success(t("permissionDialog.saved", { count: studentIds.length }));
+                    setGrantOpen(false);
+                  }
+                },
+                onError: (error: Error) => toast.error(error.message),
+              });
+          }}
+        />
+
+        <RichTextSheet open={placement?.tool === "text"} onClose={() => setPlacement(null)} onSubmit={placeRichText} />
+        <MathFieldSheet open={placement?.tool === "math"} onClose={() => setPlacement(null)} onSubmit={placeMath} />
+
+        <PeriodicTableSheet
+          open={periodicOpen}
+          onClose={() => setPeriodicOpen(false)}
+          strokes={active?.strokes ?? []}
+          boardWidth={state.width}
+          boardHeight={state.height}
+          color={color}
+          onPlace={(next) => next.forEach((stroke) => commitStroke(stroke))}
+        />
+
+        {/* Formula yechuvchi — server SymPy bilan yechadi, natija doskaga qo'yiladi. */}
+        <Sheet
+          open={formulaOpen}
+          onClose={() => setFormulaOpen(false)}
+          title={tm("board.formula_yordamchisi")}
+          description={tm("board.masalan_2x_2_5x_3_0")}
+        >
+          <Input
+            label={tm("board.formula")}
+            value={formula}
+            onChangeText={(value) => {
+              setFormula(value);
+              setSolution(null);
+            }}
+            placeholder={tm("board.2x_2_5x_3_0")}
+            autoFocus
+          />
+          {solution ? (
+            <View style={[styles.solution, { backgroundColor: palette.muted }]}>
+              <Text variant="caption" tone="muted" style={styles.mono}>
+                {solution.pretty}
+              </Text>
+              <Text variant="label">{solution.result}</Text>
+              {solution.steps?.map((step) => (
+                <Text key={step} variant="caption" tone="muted">
+                  {step}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+          <Button
+            title={tm("board.yechish")}
+            variant="secondary"
+            loading={solve.isPending}
+            disabled={!formula.trim()}
+            onPress={() => void solveFormula()}
+          />
+          {solution && canDraw ? <Button title={tm("board.doskaga_qoyish")} onPress={placeSolution} /> : null}
+        </Sheet>
+      </ThemeScope>
+    </View>
   );
 }
 
+/** `relative flex-1 overflow-hidden rounded-2xl bg-surface` */
+function CanvasCard({ children }: { children: ReactNode }) {
+  const { palette } = useTheme();
+  return <View style={[styles.card, { backgroundColor: palette.surface }]}>{children}</View>;
+}
+
 const styles = StyleSheet.create({
-  head: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  headBody: { flex: 1, gap: 2, paddingHorizontal: 4 },
+  /* `.board-panel`: chegarali qorong'i ramka, ichida holat qatori va kanvas. */
+  root: { flex: 1, gap: 12, overflow: "hidden", borderWidth: 1, borderColor: PANEL_BORDER, borderRadius: 16, backgroundColor: PANEL_BG },
+  grow: { flex: 1 },
+  gap: { gap: 12 },
+  regular: { fontWeight: "400" },
+  strong: { fontWeight: "600" },
+  center: { flex: 1, minHeight: 320, alignItems: "center", justifyContent: "center" },
+  retry: { height: 44, justifyContent: "center", paddingHorizontal: 20, borderRadius: radius.full },
+  status: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 },
+  statusItem: { height: 32, flexDirection: "row", alignItems: "center", gap: 6 },
+  statusFirst: { paddingHorizontal: 12 },
+  dot: { width: 6, height: 6, borderRadius: radius.full },
+  chips: { flexDirection: "row", alignItems: "center", gap: 6 },
+  /* `h-8 rounded-full bg-subtle px-3 gap-1.5` */
+  chip: { height: 32, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: radius.full },
+  card: { flex: 1, overflow: "hidden", borderRadius: radius["2xl"] },
+  /* `absolute inset-x-0 bottom-4 px-4` */
+  toolbar: { position: "absolute", left: 0, right: 0, bottom: 16, alignItems: "center", paddingHorizontal: 16 },
+  footerActions: { position: "absolute", right: 16, bottom: 16, flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 },
   solution: { gap: 4, padding: 12, borderRadius: radius.sm },
   mono: { fontFamily: Platform.select({ ios: "Menlo", default: "monospace" }) },
 });

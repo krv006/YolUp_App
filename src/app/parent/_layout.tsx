@@ -33,14 +33,19 @@ const TABS = [
     iconName: "nav-workspace",
     owns: ["attendance", "homework", "grades"],
   },
-  { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
+  {
+    name: "profile",
+    labelKey: "tabs.profile",
+    iconName: "nav-profile",
+    owns: ["profile-personal", "profile-account", "profile-system"],
+  },
 ] as const;
 
 export default function ParentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.PARENT]}>
-        <RoleTabs tabs={TABS} hidden={["attendance", "homework", "grades"]} />
+        <RoleTabs tabs={TABS} hidden={["attendance", "homework", "grades", "profile-personal", "profile-account", "profile-system"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

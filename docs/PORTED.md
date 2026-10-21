@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-09-28 (parent + notification qayta sinxronlandi)
+- **Oxirgi yangilanish:** 2026-10-21 (homework va auth domeni qayta sinxronlandi)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -61,25 +61,25 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/attendance/lib/attendance.mappers.ts` | 🟢 NUSXA | `7d0841bec8ec` | — |
 | `src/modules/attendance/lib/group-by-lesson.ts` | 🟢 NUSXA | `b4d5b820b1ce` | — |
 | `src/modules/attendance/model/attendance.queries.ts` | 🟢 NUSXA | `4fbbab2e9fec` | — |
-| `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `daecf1c10346` | — |
-| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `f66878b10a16` | — |
-| `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `883f8f109856` | — |
-| `src/modules/auth/index.ts` | 🟡 MOSLASH | `7d1bf9d84bbc` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `606294fd2be0` | — |
+| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `d4080e685551` | — |
+| `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `506aa2f1fdfa` | — |
+| `src/modules/auth/index.ts` | 🟡 MOSLASH | `1489096b2036` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/auth/lib/auth-session.ts` | 🟢 NUSXA | `4e39458e320b` | — |
-| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `8ddc534cf67d` | — |
+| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `4718c192fad7` | — |
 | `src/modules/auth/lib/describe-user-agent.ts` | 🟢 NUSXA | `ee0799ca7c53` | — |
 | `src/modules/auth/lib/resolve-home-route.ts` | 🟢 NUSXA | `86d9a3f708fc` | — |
-| `src/modules/auth/lib/teacher-approval.ts` | 🟢 NUSXA | `6cfe7eb8db46` | — |
-| `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `a9b35eac9e38` | — |
-| `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `3ff520568a17` | — |
+| `src/modules/auth/lib/teacher-approval.ts` | 🟢 NUSXA | `ea465e71f081` | — |
+| `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `92a4e4b6b9a7` | — |
+| `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `0b52138d2b10` | — |
 | `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `217cf656f39d` | — |
 | `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi va til sinxroni yo'q; sessiya raqami olindi |
 | `src/modules/auth/model/use-auth.ts` | 🟢 NUSXA | `800d84e26e18` | — |
 | `src/modules/board/api/board.api.ts` | 🟢 NUSXA | `4c54b3d918f0` | — |
-| `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `cd6bcb474ec4` | — |
+| `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `cb6691d2ce73` | — |
 | `src/modules/board/api/board.endpoints.ts` | 🟢 NUSXA | `6eaefaab2c55` | — |
-| `src/modules/board/constants/board.constants.ts` | 🟢 NUSXA | `2013dcc90778` | — |
-| `src/modules/board/index.ts` | 🟡 MOSLASH | `9e3000ef837b` | generatsiya: veb barrel minus `ui/` + mobil doska UI eksportlari |
+| `src/modules/board/constants/board.constants.ts` | 🟢 NUSXA | `a564616525a7` | — |
+| `src/modules/board/index.ts` | 🟡 MOSLASH | `baa27b7fd582` | generatsiya: veb barrel minus `ui/` + mobil doska UI eksportlari |
 | `src/modules/board/lib/board-channel.ts` | 🟢 NUSXA | `561ddd1ea25e` | — |
 | `src/modules/board/lib/board-flow.ts` | 🟢 NUSXA | `dbc83be61980` | — |
 | `src/modules/board/lib/board-socket-manager.ts` | 🟢 NUSXA | `7f8a96915773` | — |
@@ -119,14 +119,15 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/model/course.queries.ts` | 🟢 NUSXA | `9422e8345085` | — |
 | `src/modules/course/ui/add-student-sheet.tsx` | 🟡 MOSLASH | `23417d755aae` | manba: veb `add-student-dialog.tsx`; dialog o'rniga pastdan ochiladigan oyna, qidiruv debounce'siz (ro'yxat kichik) |
 | `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `67f8017c22aa` | veb bilan bir joyda — suhbat ma'lumoti oynasida; o'chirishni tasdiqlash `ConfirmSheet` bilan |
-| `src/modules/homework/api/homework.api.ts` | 🟡 MOSLASH | `36fced141fe9` | hisobot so'rovida `student_id`, veb'dagi `student` EMAS — backend aynan shu nomni kutadi (vebda bu xato hali turibdi) |
-| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `4cee08dbcf0f` | — |
-| `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `d4dba99a128d` | — |
+| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `3b6953669648` | — |
+| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `6d59c99d3e6d` | — |
+| `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `52669db62972` | — |
 | `src/modules/homework/constants/homework.constants.ts` | 🟢 NUSXA | `fccf69310542` | — |
-| `src/modules/homework/index.ts` | 🟡 MOSLASH | `3c108061ccd7` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/homework/index.ts` | 🟡 MOSLASH | `893597e4988d` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `c8327541f59b` | — |
-| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `f460f43aa2fb` | — |
-| `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `078c98e9912a` | — |
+| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `31627942d5ee` | — |
+| `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `6a6148929f3f` | — |
+| `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `677457db62d2` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; chiqishdagi oxirgi saqlash qoldi |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `b1cd81660536` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `3f7f3900f46d` | — |
 | `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `ab15866473ba` | — |
@@ -146,18 +147,18 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-detail-sheet.tsx` (AppDialog -> Sheet) |
 | `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-create-sheet.tsx` (AppDialog -> Sheet) |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
-| `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `111c8b0a89c6` | — |
-| `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `865100a4509c` | — |
+| `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `e0abe818a292` | — |
+| `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `2f9a569c29d6` | — |
 | `src/modules/live/api/live.endpoints.ts` | 🟢 NUSXA | `aa9f29631b19` | — |
-| `src/modules/live/index.ts` | 🟡 MOSLASH | `26e27b177eb0` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/live/lib/live-permissions.ts` | 🟢 NUSXA | `0101fb57aeb2` | — |
-| `src/modules/live/lib/live-token.ts` | 🟢 NUSXA | `1537aa3bd393` | — |
-| `src/modules/live/lib/live.mappers.ts` | 🟢 NUSXA | `9b780d71ffec` | — |
+| `src/modules/live/index.ts` | 🟡 MOSLASH | `f0c0619ec1c8` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/live/lib/live-permissions.ts` | 🟢 NUSXA | `9898296e9030` | — |
+| `src/modules/live/lib/live-token.ts` | 🟢 NUSXA | `1296d9f81423` | — |
+| `src/modules/live/lib/live.mappers.ts` | 🟢 NUSXA | `2de41c074a84` | — |
 | `src/modules/live/lib/screen-share-signal.ts` | 🟢 NUSXA | `b5c1de5417ea` | — |
-| `src/modules/live/lib/use-focus-tracker.ts` | 🔴 QAYTA | `fa7446fcc285` | visibilitychange/blur -> AppState; iOS `inactive` filtrlanadi |
-| `src/modules/live/model/live.queries.ts` | 🟢 NUSXA | `3c140339b7b0` | — |
-| `src/modules/live/model/use-camera-signals.ts` | 🟢 NUSXA | `1228853f5af6` | — |
-| `src/modules/live/model/use-mic-signals.ts` | 🟢 NUSXA | `0bfe2f48ef49` | — |
+| `src/modules/live/lib/use-focus-tracker.ts` | 🔴 QAYTA | `26ddec20b17b` | visibilitychange/blur -> AppState; iOS `inactive` filtrlanadi |
+| `src/modules/live/model/live.queries.ts` | 🟢 NUSXA | `9741a129e03f` | — |
+| `src/modules/live/model/use-camera-signals.ts` | 🟢 NUSXA | `3943fde8510a` | — |
+| `src/modules/live/model/use-mic-signals.ts` | 🟢 NUSXA | `fa66d2edff21` | — |
 | `src/modules/message/api/message.api.ts` | 🟢 NUSXA | `7b3783375bd9` | — |
 | `src/modules/message/api/message.dto.ts` | 🟢 NUSXA | `56135a06aec4` | — |
 | `src/modules/message/api/message.endpoints.ts` | 🟢 NUSXA | `a059ec7ac8e3` | — |
@@ -259,6 +260,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/i18n/intl-locale.ts` | 🟢 NUSXA | `b3f6b40c5b6f` | — |
 | `src/shared/i18n/locales/**` | 🟢 NUSXA | `—` | 17 bo'lim × 3 til, vebdan bayt-bayt; `mobile.json` mobilga xos |
 | `src/shared/model/language.store.ts` | 🔴 QAYTA | `0f01a0cbc3c6` | zustand `persist` (localStorage) o'rniga MMKV; qurilma tili `Intl` dan |
+| `src/shared/model/text-size.store.ts` | 🔴 QAYTA | `f61042795fd4` | `persist` o'rniga MMKV; `--text-scale` o'rniga `Text` komponenti ko'paytiruvchisi (`text-scale.tsx`) |
 | `src/shared/lib/app-state.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/lib/date.ts` | 🟢 NUSXA | `13624ad3dcd2` | — |
 | `src/shared/lib/download.ts` | 🔴 QAYTA | `af194a763a11` | <a download> -> expo-file-system + Share; ASYNC bo'ldi |
@@ -268,7 +270,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/lib/sanitize-html.ts` | 🔴 QAYTA | `0fffa4bdbf6c` | DOMPurify -> regex; WebView CSP bilan birga |
 | `src/shared/lib/storage.ts` | 🔴 QAYTA | `a49745b6789d` | localStorage -> MMKV; interfeys bir xil |
 | `src/shared/lib/utils.ts` | 🟢 NUSXA | `4dd93deacc31` | — |
-| `src/shared/types/auth.ts` | 🟢 NUSXA | `231c2b789a1f` | — |
+| `src/shared/types/auth.ts` | 🟢 NUSXA | `019a99721acc` | — |
 | `src/shared/types/chat.ts` | 🟢 NUSXA | `69dedcbdcc16` | — |
 | `src/shared/types/domain.ts` | 🟢 NUSXA | `cd4ce09bfc06` | — |
 | `src/shared/types/dto.ts` | 🟢 NUSXA | `626467937625` | — |

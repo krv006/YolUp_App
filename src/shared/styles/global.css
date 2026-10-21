@@ -51,6 +51,8 @@
   --warning: #e09e1f;
   --warning-soft: #fef8eb;
   --warning-strong: #8c5e12;
+  --saffron-soft: #fdefcf;
+  --saffron-strong: #b87d14;
   --chart-1: #4567f5;
   --chart-2: #2c9a78;
   --chart-3: #f4b942;
@@ -115,6 +117,8 @@
   --warning: #f7cb6b;
   --warning-soft: rgba(224, 158, 31, 0.22);
   --warning-strong: #fadd9c;
+  --saffron-soft: rgba(244, 185, 66, 0.2);
+  --saffron-strong: #f4b942;
   --chart-1: #90a5fa;
   --chart-2: #62bc9e;
   --chart-3: #f7cb6b;

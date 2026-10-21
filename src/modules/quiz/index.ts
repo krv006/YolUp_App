@@ -83,3 +83,6 @@ export { QuestionGroupEditor } from "./ui/question-group-editor";
 export type { QuestionGroupEditorProps } from "./ui/question-group-editor";
 export { QuizAttemptSheet } from "./ui/quiz-attempt-sheet";
 export type { QuizAttemptSheetProps } from "./ui/quiz-attempt-sheet";
+export { QUIZ_RADIUS, useQuizColors } from "./ui/quiz-colors";
+export { AiQuizCreator } from "./ui/ai-quiz-creator";
+export type { AiQuizCreatorProps } from "./ui/ai-quiz-creator";

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { AppBarAction, CountBadge } from "@/shared/ui";
+import { AppBarAction, Text, useTheme } from "@/shared/ui";
 import { useUnreadNotificationCount } from "../model/notification.queries";
 
 /**
@@ -15,6 +15,7 @@ import { useUnreadNotificationCount } from "../model/notification.queries";
 export function NotificationBell() {
   const { t } = useTranslation("mobile");
   const router = useRouter();
+  const { palette } = useTheme();
   const unread = useUnreadNotificationCount();
   const count = unread.data ?? 0;
 
@@ -25,8 +26,9 @@ export function NotificationBell() {
       onPress={() => router.push("/notifications")}
       badge={
         count > 0 ? (
-          <View style={styles.badge}>
-            <CountBadge count={count} />
+          // `.notification-badge` — qizil, 17px, atrofida 2px oq chegara.
+          <View style={[styles.badge, { backgroundColor: "#cd3a4b", borderColor: palette.surface }]}>
+            <Text style={styles.badgeText}>{count > 99 ? "99+" : count}</Text>
           </View>
         ) : null
       }
@@ -35,5 +37,17 @@ export function NotificationBell() {
 }
 
 const styles = StyleSheet.create({
-  badge: { position: "absolute", top: -2, right: -2 },
+  badge: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    minWidth: 17,
+    height: 17,
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: { color: "#ffffff", fontSize: 11, lineHeight: 13, fontWeight: "700" },
 });

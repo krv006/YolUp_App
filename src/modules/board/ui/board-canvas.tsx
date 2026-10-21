@@ -87,7 +87,7 @@ export function BoardCanvas({
   const draftEnd = useSharedValue<Point>([0, 0]);
 
   const drawKind: DrawKind | null =
-    tool === "text" || tool === "math" || tool === "select" ? null : (tool as DrawKind);
+    tool === "text" || tool === "math" || tool === "erase" ? null : (tool as DrawKind);
 
   /** Doskani ekranga sig'dirish koeffitsienti. */
   const fit = useDerivedValue(() => {
@@ -151,7 +151,7 @@ export function BoardCanvas({
       onPlacePoint(point);
       return;
     }
-    if (tool === "select" && onSelectStroke) {
+    if (tool === "erase" && onSelectStroke) {
       // Oxirgi chizilgani ustda turadi — teskari tartibda qidiramiz.
       const hit = [...strokes].reverse().find((stroke) => hitTestStroke(stroke, point));
       onSelectStroke(hit?.id ?? null);

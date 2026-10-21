@@ -1,5 +1,5 @@
 import { ProfilePage } from "@/pages/profile/profile-page";
 
-export default function ParentProfileRoute() {
-  return <ProfilePage roleKey="roles.parent" />;
+export default function ProfileRoute() {
+  return <ProfilePage />;
 }

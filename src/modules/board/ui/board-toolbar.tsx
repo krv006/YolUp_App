@@ -1,196 +1,157 @@
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import {
   Circle,
+  Eraser,
   Highlighter,
-  MousePointer2,
+  Minus,
   MoveRight,
-  Pencil,
-  Slash,
-  Square,
+  PenLine,
   Sigma,
+  Square,
   Type,
 } from "lucide-react-native";
-import { MIN_TOUCH_SIZE, radius, Text, useTheme } from "@/shared/ui";
+import { radius, useTheme } from "@/shared/ui";
 import { BOARD_COLORS, BOARD_WIDTHS } from "../constants/board.constants";
 import type { DrawKind } from "../lib/board.geometry";
 
-/** Veb `board-toolbar.tsx` bilan bir xil tur — `use-board-drawing` shunga tayanadi. */
-export type BoardTool = DrawKind | "text" | "math" | "select";
+/** Veb `board-toolbar.tsx` bilan bir xil tur. */
+export type BoardTool = DrawKind | "text" | "math" | "erase";
 
-interface ToolDefinition {
-  id: BoardTool;
-  /** Tarjima kaliti — ro'yxat modul darajasida, `t()` hali yo'q. */
-  labelKey: string;
-  icon: typeof Pencil;
-  /** Faqat matematika kurslarida (`math_enabled`). */
-  mathOnly?: boolean;
-}
-
-const TOOLS: readonly ToolDefinition[] = [
-  { id: "pen", labelKey: "board.qalam", icon: Pencil },
-  { id: "marker", labelKey: "board.marker", icon: Highlighter },
-  { id: "line", labelKey: "board.chiziq", icon: Slash },
-  { id: "arrow", labelKey: "board.strelka", icon: MoveRight },
-  { id: "rect", labelKey: "board.tortburchak", icon: Square },
-  { id: "ellipse", labelKey: "board.ellips", icon: Circle },
-  { id: "text", labelKey: "board.matn", icon: Type },
-  { id: "math", labelKey: "board.formula", icon: Sigma, mathOnly: true },
-  { id: "select", labelKey: "board.tanlash", icon: MousePointer2 },
+const TOOLS: ReadonlyArray<{ id: BoardTool; labelKey: string; icon: typeof PenLine }> = [
+  { id: "erase", labelKey: "tools.erase", icon: Eraser },
+  { id: "pen", labelKey: "tools.pen", icon: PenLine },
+  { id: "marker", labelKey: "tools.marker", icon: Highlighter },
+  { id: "line", labelKey: "tools.line", icon: Minus },
+  { id: "arrow", labelKey: "tools.arrow", icon: MoveRight },
+  { id: "rect", labelKey: "tools.rect", icon: Square },
+  { id: "ellipse", labelKey: "tools.ellipse", icon: Circle },
+  { id: "text", labelKey: "tools.text", icon: Type },
+  { id: "math", labelKey: "tools.math", icon: Sigma },
 ];
 
 export interface BoardToolbarProps {
   tool: BoardTool;
-  onToolChange: (tool: BoardTool) => void;
   color: string;
+  width: number;
+  canDraw: boolean;
+  onToolChange: (tool: BoardTool) => void;
   onColorChange: (color: string) => void;
-  strokeWidth: number;
-  onStrokeWidthChange: (width: number) => void;
-  /** Formula vositasi faqat matematika kurslarida ko'rinadi (docs/PROJECT.md §5.3). */
-  mathEnabled: boolean;
-  disabled?: boolean;
+  onWidthChange: (width: number) => void;
 }
 
 /**
- * Asboblar paneli. Veb'da u doskaning yon tomonida edi; mobilda pastda,
- * gorizontal skroll bilan — bosh barmoq yetadigan joyda.
+ * Doska asboblari — veb `board-toolbar.tsx`: oq karta, tepada asboblar,
+ * pastda ranglar va qalinliklar. Tor ekranda gorizontal aylantiriladi
+ * (vebda `overflow-x-auto`).
  */
-export function BoardToolbar({
-  tool,
-  onToolChange,
-  color,
-  onColorChange,
-  strokeWidth,
-  onStrokeWidthChange,
-  mathEnabled,
-  disabled = false,
-}: BoardToolbarProps) {
-  const { t } = useTranslation("mobile");
+export function BoardToolbar({ tool, color, width, canDraw, onToolChange, onColorChange, onWidthChange }: BoardToolbarProps) {
+  const { t } = useTranslation("board");
   const { palette } = useTheme();
-  const tools = TOOLS.filter((item) => !item.mathOnly || mathEnabled);
 
   return (
-    <View
-      style={[
-        styles.root,
-        { backgroundColor: palette.surface, borderTopColor: palette.border },
-        disabled && styles.disabled,
-      ]}
-      pointerEvents={disabled ? "none" : "auto"}
-    >
-      {/* `flexGrow: 0` — RN ScrollView aks holda vertikal cho'ziladi. */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollRow}
-        contentContainerStyle={styles.row}
-      >
-        {tools.map(({ id, labelKey, icon: Icon }) => {
-          const active = tool === id;
-          return (
-            <Pressable
-              key={id}
-              accessibilityRole="button"
-              accessibilityLabel={t(labelKey)}
-              accessibilityState={{ selected: active }}
-              onPress={() => onToolChange(id)}
-              style={[
-                styles.tool,
-                { backgroundColor: active ? palette.primary : palette.secondary },
-              ]}
-            >
-              <Icon
-                size={20}
-                color={active ? palette["primary-foreground"] : palette["muted-foreground"]}
-              />
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      <View style={styles.optionsRow}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.scrollRow}
-          contentContainerStyle={styles.row}
-        >
-          {BOARD_COLORS.map((item) => (
-            <Pressable
-              key={item}
-              accessibilityRole="button"
-              accessibilityLabel={`Rang ${item}`}
-              accessibilityState={{ selected: color === item }}
-              onPress={() => onColorChange(item)}
-              style={styles.colorHit}
-            >
-              <View
-                style={[
-                  styles.color,
-                  {
-                    backgroundColor: item,
-                    borderColor: color === item ? palette.foreground : palette.border,
-                    borderWidth: color === item ? 2.5 : 1,
-                  },
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <View accessibilityRole="toolbar" accessibilityLabel={t("tools.toolbarAria")} style={[styles.card, { backgroundColor: palette.surface }]}>
+        <View style={styles.row}>
+          {TOOLS.map(({ id, labelKey, icon: ToolIcon }) => {
+            const active = tool === id;
+            const erase = id === "erase";
+            return (
+              <Pressable
+                key={id}
+                accessibilityRole="button"
+                accessibilityLabel={t(labelKey)}
+                accessibilityState={{ selected: active, disabled: !canDraw }}
+                disabled={!canDraw}
+                onPress={() => onToolChange(id)}
+                style={({ pressed }) => [
+                  styles.tool,
+                  active
+                    ? { backgroundColor: erase ? palette["destructive-soft"] : palette.primary }
+                    : pressed && { backgroundColor: palette["surface-subtle"] },
+                  !canDraw && styles.dim,
                 ]}
-              />
-            </Pressable>
-          ))}
-        </ScrollView>
+              >
+                <ToolIcon
+                  size={17}
+                  color={active ? (erase ? palette["destructive-strong"] : palette["primary-foreground"]) : palette["muted-foreground"]}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
 
-        <View style={styles.widths}>
-          {BOARD_WIDTHS.map((item) => (
-            <Pressable
-              key={item}
-              accessibilityRole="button"
-              accessibilityLabel={`Qalinlik ${item}`}
-              accessibilityState={{ selected: strokeWidth === item }}
-              onPress={() => onStrokeWidthChange(item)}
-              style={styles.widthHit}
-            >
-              <View
-                style={[
-                  styles.widthDot,
-                  {
-                    width: item * 2 + 4,
-                    height: item * 2 + 4,
-                    borderRadius: item + 2,
-                    backgroundColor:
-                      strokeWidth === item ? palette["primary-text"] : palette["muted-foreground"],
-                  },
-                ]}
-              />
-            </Pressable>
-          ))}
+        <View style={styles.bottom}>
+          <View style={styles.colors}>
+            {BOARD_COLORS.map((value) => {
+              const on = color === value;
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("tools.colorLabel", { value })}
+                  accessibilityState={{ selected: on }}
+                  disabled={!canDraw}
+                  onPress={() => onColorChange(value)}
+                  style={[styles.swatchRing, on && { borderColor: palette.primary }, !canDraw && styles.dim]}
+                >
+                  <View style={[styles.swatch, { backgroundColor: value }]} />
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: palette.border }]} />
+
+          <View style={styles.widths}>
+            {BOARD_WIDTHS.map((value) => {
+              const on = width === value;
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("tools.widthLabel", { value })}
+                  accessibilityState={{ selected: on }}
+                  disabled={!canDraw}
+                  onPress={() => onWidthChange(value)}
+                  style={[styles.width, on && { backgroundColor: palette["primary-soft"] }, !canDraw && styles.dim]}
+                >
+                  <View style={[styles.widthBar, { height: Math.min(value, 10), backgroundColor: palette.foreground }]} />
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
       </View>
-
-      {disabled ? (
-        <Text variant="caption" tone="muted" style={styles.notice}>
-          {t("board.chizish_uchun_oqituvchidan_ruxsat_sorang")}
-        </Text>
-      ) : null}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { borderTopWidth: StyleSheet.hairlineWidth, paddingVertical: 6, gap: 4 },
-  disabled: { opacity: 0.5 },
-  scrollRow: { flexGrow: 0, flexShrink: 0 },
-  row: { gap: 8, paddingHorizontal: 12 },
-  tool: {
-    width: MIN_TOUCH_SIZE,
-    height: MIN_TOUCH_SIZE,
-    borderRadius: radius.sm,
-    alignItems: "center",
-    justifyContent: "center",
+  scroll: { flexGrow: 0, maxWidth: "100%", borderRadius: radius["2xl"] },
+  scrollContent: { flexGrow: 1 },
+  /* `flex-col gap-2 rounded-2xl bg-surface p-2 shadow-xl` */
+  card: {
+    gap: 8,
+    padding: 8,
+    borderRadius: radius["2xl"],
+    shadowColor: "#24264d",
+    shadowOpacity: 0.16,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
   },
-  optionsRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  colorHit: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
-  color: { width: 24, height: 24, borderRadius: 12 },
-  widths: { flexDirection: "row", paddingRight: 12, gap: 2 },
-  widthHit: { width: 34, height: 36, alignItems: "center", justifyContent: "center" },
-  widthDot: {},
-  notice: { textAlign: "center", paddingBottom: 4 },
+  row: { flexDirection: "row", alignItems: "center", gap: 4 },
+  tool: { width: 36, height: 36, borderRadius: radius.xl, alignItems: "center", justifyContent: "center" },
+  dim: { opacity: 0.4 },
+  bottom: { flexDirection: "row", alignItems: "center", gap: 12 },
+  // O'ram 32px (halqa uchun), doiralar markazlari orasi vebdagidek 30px.
+  colors: { flexDirection: "row", alignItems: "center", gap: -2 },
+  /* `size-6` + `ring-2 ring-offset-2` */
+  swatchRing: { width: 32, height: 32, borderRadius: radius.full, borderWidth: 2, borderColor: "transparent", alignItems: "center", justifyContent: "center" },
+  swatch: { width: 24, height: 24, borderRadius: radius.full },
+  divider: { width: 1, height: 24 },
+  widths: { flexDirection: "row", alignItems: "center", gap: 4 },
+  width: { width: 40, height: 36, borderRadius: radius.xl, alignItems: "center", justifyContent: "center" },
+  widthBar: { width: 20, borderRadius: radius.full },
 });

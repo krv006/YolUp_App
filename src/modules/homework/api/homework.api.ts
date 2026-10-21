@@ -1,7 +1,9 @@
 import { apiClient, type RequestOptions } from "@/shared/api";
+import type { StrokeDto } from "@/modules/board";
 import type { Submission } from "@/shared/types";
 import { homeworkEndpoints } from "./homework.endpoints";
 import type {
+  HomeworkBoardDto,
   AssignmentDto,
   AssignmentFormInput,
   HomeworkReportDto,
@@ -9,6 +11,7 @@ import type {
   SubmissionReviewInput,
 } from "./homework.dto";
 import {
+  mapBoardDto,
   mapAssignmentDto,
   mapAssignmentRequest,
   mapHomeworkReportDto,
@@ -54,6 +57,20 @@ export const homeworkApi = {
       await apiClient.post<SubmissionDto>(homeworkEndpoints.submit(assignmentId), body)
     );
   },
+  /** Uy vazifasi doskasi (o'quvchining shaxsiy holati): sheetlar, o'lcham, fanga xos asboblar. */
+  async getBoard(assignmentId: string, options?: RequestOptions) {
+    return mapBoardDto(await apiClient.get<HomeworkBoardDto>(homeworkEndpoints.board(assignmentId), options));
+  },
+  async saveBoard(assignmentId: string, sheets: StrokeDto[][]) {
+    return mapBoardDto(
+      await apiClient.put<HomeworkBoardDto>(homeworkEndpoints.board(assignmentId), {
+        sheets: sheets.map((strokes) => ({ strokes })),
+      })
+    );
+  },
+  async submitBoard(assignmentId: string): Promise<Submission | null> {
+    return mapSubmissionDto(await apiClient.post<SubmissionDto>(homeworkEndpoints.boardSubmit(assignmentId), {}));
+  },
   async getSubmission(id: string, options?: RequestOptions) {
     return mapSubmissionDto(await apiClient.get<SubmissionDto>(homeworkEndpoints.submission(id), options));
   },
@@ -73,16 +90,6 @@ export const homeworkApi = {
   async getReport(studentId?: string | null, options: RequestOptions = {}) {
     const dto = await apiClient.get<HomeworkReportDto>(homeworkEndpoints.report, {
       ...options,
-      /*
-       * `student_id`, `student` EMAS — backend aynan shu nomni kutadi:
-       *
-       *   400 { "student_id": "Bu maydon majburiy." }
-       *
-       * Qurilmada ota-ona hisobida aniqlandi: farzandning reytingi
-       * umuman ochilmasdi. Veb'da ham xuddi shu xato bor
-       * (`student` yuboradi) — ya'ni u yerda ham ota-ona reytingi
-       * ishlamaydi.
-       */
       query: studentId ? { student_id: studentId } : undefined,
     });
     return mapHomeworkReportDto(dto);

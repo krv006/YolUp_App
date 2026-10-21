@@ -1,158 +1,119 @@
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { Sparkles, TriangleAlert } from "lucide-react-native";
-import { Button, Input, Text, useTheme } from "@/shared/ui";
-import { useApproveAiBand, useExamStudentResult, useStartAiReview } from "../model/exam.queries";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Sparkles } from "lucide-react-native";
+import { radius, Text, useTheme } from "@/shared/ui";
+import { useExamStudentResult, useRequestWritingAi } from "../model/exam.queries";
+import { ExamWritingAiPanel } from "./exam-writing-ai";
 
 export interface ExamWritingReviewProps {
   examId: string;
   studentId: string;
+  /** Taklif etilgan bandni o'qituvchi ball maydoniga qo'yadi. */
+  onApplyBand?: (band: number) => void;
+}
+
+function countWords(text: string): number {
+  return text.trim() ? text.trim().split(/\s+/).length : 0;
 }
 
 /**
- * IELTS Writing — AI taklifi va o'qituvchi tasdig'i.
- *
- * Ball o'qituvchi tasdiqlamaguncha o'quvchiga ko'rinmaydi, shuning uchun
- * bu ekran faqat o'qituvchi natijalar oynasida ochiladi.
+ * Qo'lda baholanadigan bo'limlardagi (IELTS Writing) yozma javoblar va AI
+ * tahlili — veb `modules/exam/ui/exam-writing-review.tsx` porti.
  */
-export function ExamWritingReview({ examId, studentId }: ExamWritingReviewProps) {
+export function ExamWritingReview({ examId, studentId, onApplyBand }: ExamWritingReviewProps) {
   const { t } = useTranslation("exam");
   const { palette } = useTheme();
   const detail = useExamStudentResult(examId, studentId);
-  const start = useStartAiReview(examId);
-  const approve = useApproveAiBand(examId);
-  const [band, setBand] = useState("");
+  const ask = useRequestWritingAi(examId);
 
   if (detail.isLoading) {
     return (
-      <Text variant="caption" tone="muted">
+      <Text variant="label" style={[styles.bodySm, { color: palette["subtle-foreground"] }]}>
         {t("result.loading")}
       </Text>
     );
   }
   if (!detail.data) return null;
 
-  const result = detail.data;
-  const ai = result.ai;
+  const answers = detail.data.manualAnswers;
+  const ai = detail.data.writingAi;
+  const canAsk = answers.some((answer) => answer.answer.trim()) && ai?.status !== "queued";
 
   return (
     <View style={styles.root}>
-      {result.manualAnswers.map((answer, index) => (
-        <View key={`${answer.section}-${index}`} style={[styles.essay, { borderColor: palette.border }]}>
-          <Text variant="caption" tone="muted">
-            {answer.question}
-          </Text>
-          <Text style={styles.essayText}>{answer.answer}</Text>
-        </View>
-      ))}
-
-      {!ai ? (
-        <View style={styles.row}>
-          <Text variant="caption" tone="muted">
-            {t("ai.notStarted")}
-          </Text>
-          <Button
-            variant="secondary"
-            title={t("ai.start")}
-            icon={<Sparkles size={15} color={palette.foreground} />}
-            loading={start.isPending}
-            onPress={() => start.mutate(studentId)}
-          />
-        </View>
+      {canAsk ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={ask.isPending}
+          onPress={() => ask.mutate(studentId)}
+          style={({ pressed }) => [
+            styles.ask,
+            {
+              borderColor: palette.border,
+              backgroundColor: pressed ? palette["surface-subtle"] : palette.surface,
+              opacity: ask.isPending ? 0.5 : 1,
+            },
+          ]}
+        >
+          <Sparkles size={16} color={palette.foreground} />
+          <Text variant="label">{ai?.status === "done" ? t("writingAi.again") : t("writingAi.ask")}</Text>
+        </Pressable>
       ) : null}
 
-      {ai?.status === "running" ? (
-        <Text variant="caption" tone="muted">
-          {t("ai.running")}
-        </Text>
-      ) : null}
+      {ai ? <ExamWritingAiPanel ai={ai} onApply={onApplyBand} /> : null}
 
-      {ai?.status === "failed" ? (
-        <View style={styles.row}>
-          <TriangleAlert size={15} color={palette.destructive} />
-          <Text variant="caption" style={{ color: palette.destructive, flex: 1 }}>
-            {ai.error || t("ai.failed")}
-          </Text>
-          <Button
-            variant="secondary"
-            title={t("ai.retry")}
-            loading={start.isPending}
-            onPress={() => start.mutate(studentId)}
-          />
-        </View>
-      ) : null}
-
-      {ai && (ai.status === "proposed" || ai.status === "approved") ? (
-        <View style={[styles.result, { backgroundColor: palette["primary-tint"] }]}>
-          <View style={styles.row}>
-            <Text variant="title" style={{ color: palette["primary-text"] }}>
-              {ai.approvedBand ?? ai.proposedBand ?? ai.writingBand ?? "—"}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {ai.status === "approved" ? t("ai.approvedBand") : t("ai.proposedBand")}
-            </Text>
-          </View>
-
-          {ai.tasks.map((task) => (
-            <View key={task.taskNumber} style={styles.task}>
-              <Text variant="label">
-                {t("ai.task", { number: task.taskNumber })} · {task.band ?? "—"}
+      {answers.length ? (
+        answers.map((answer, index) => (
+          <View
+            key={`${answer.section}-${index}`}
+            style={[styles.card, { borderColor: palette.border, backgroundColor: palette.surface }]}
+          >
+            <View style={styles.cardHead}>
+              <Text variant="body" numberOfLines={1} style={[styles.title, styles.grow]}>
+                {t("mock.taskNumber", { number: index + 1 })}
               </Text>
-              {task.words !== null ? (
-                <Text variant="caption" tone="muted">
-                  {t("ai.words", { words: task.words, min: task.minWords ?? 0 })}
-                </Text>
-              ) : null}
-              <Text variant="caption" tone="muted">
-                {task.criteria
-                  .map((criterion) => `${t(`ai.criteria.${criterion.key}`)}: ${criterion.score ?? "—"}`)
-                  .join(" · ")}
+              <Text variant="caption" style={[styles.numeric, { color: palette["subtle-foreground"] }]}>
+                {t("mock.wordCount", { count: countWords(answer.answer) })}
               </Text>
-              {task.corrections.map((correction, index) => (
-                <Text key={index} variant="caption">
-                  {correction.original} → {correction.corrected}
-                </Text>
-              ))}
-              {task.feedback ? <Text variant="caption">{task.feedback}</Text> : null}
             </View>
-          ))}
-
-          {ai.overallComment ? <Text variant="caption">{ai.overallComment}</Text> : null}
-
-          {ai.status === "proposed" ? (
-            <View style={styles.approve}>
-              <View style={styles.bandInput}>
-                <Input
-                  label={t("ai.bandLabel")}
-                  value={band}
-                  keyboardType="decimal-pad"
-                  placeholder={String(ai.proposedBand ?? "")}
-                  onChangeText={(value) => setBand(value.replace(/[^\d.]/g, ""))}
-                />
+            {answer.question ? (
+              <View style={[styles.question, { backgroundColor: palette["surface-subtle"] }]}>
+                <Text variant="label" style={[styles.bodySm, { color: palette["muted-foreground"] }]}>
+                  {answer.question}
+                </Text>
               </View>
-              <Button
-                title={band.trim() ? t("ai.approveWithBand") : t("ai.approve")}
-                loading={approve.isPending}
-                onPress={() =>
-                  approve.mutate({ studentId, band: band.trim() ? Number(band) : undefined })
-                }
-              />
-            </View>
-          ) : null}
-        </View>
-      ) : null}
+            ) : null}
+            <Text variant="body">{answer.answer || t("writing.empty")}</Text>
+          </View>
+        ))
+      ) : (
+        <Text variant="label" style={[styles.bodySm, { color: palette["subtle-foreground"] }]}>
+          {t("mock.noEssays")}
+        </Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { gap: 10 },
-  essay: { gap: 4, padding: 10, borderWidth: 1, borderRadius: 13 },
-  essayText: { lineHeight: 21 },
-  row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  result: { gap: 10, padding: 12, borderRadius: 13 },
-  task: { gap: 3 },
-  approve: { gap: 8 },
-  bandInput: { width: 120 },
+  grow: { flex: 1, minWidth: 0 },
+  bodySm: { fontWeight: "400" },
+  numeric: { fontVariant: ["tabular-nums"] },
+  title: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
+  root: { gap: 16 },
+  /* `h-11 w-fit rounded-full border px-4 gap-2` */
+  ask: {
+    alignSelf: "flex-start",
+    height: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderRadius: radius.full,
+  },
+  /* `rounded-2xl border bg-surface p-4 gap-3` */
+  card: { gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
+  cardHead: { flexDirection: "row", alignItems: "baseline", gap: 12 },
+  question: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.xl },
 });

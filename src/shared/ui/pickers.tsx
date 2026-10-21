@@ -58,10 +58,12 @@ export interface DateFieldProps {
   value: string;
   onChange: (value: string) => void;
   minimumDate?: Date;
+  /** Veb `maxDate` — masalan tug'ilgan sana bugundan keyin bo'lmaydi. */
+  maximumDate?: Date;
   optional?: boolean;
 }
 
-export function DateField({ label, value, onChange, minimumDate, optional }: DateFieldProps) {
+export function DateField({ label, value, onChange, minimumDate, maximumDate, optional }: DateFieldProps) {
   const { t } = useTranslation("mobile");
   const { t: tc } = useTranslation("common");
   const months = tc("formPickers.months", { returnObjects: true }) as string[];
@@ -84,7 +86,7 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
       </Text>
       <Trigger
         icon={<CalendarDays size={17} color={palette["subtle-foreground"]} />}
-        text={value ? formatDateValue(value, months) : t("shared.tanlanmagan")}
+        text={value ? formatDateValue(value, months) : tc("formPickers.chooseDate")}
         muted={!value}
         onPress={openPicker}
       />
@@ -109,7 +111,7 @@ export function DateField({ label, value, onChange, minimumDate, optional }: Dat
             </Text>
 
             {open ? (
-              <MonthCalendar value={draft} minimumDate={minimumDate} onSelect={setDraft} />
+              <MonthCalendar value={draft} minimumDate={minimumDate} maximumDate={maximumDate} onSelect={setDraft} />
             ) : null}
 
             <View style={styles.timeActions}>
@@ -167,10 +169,12 @@ function startOfDay(date: Date): Date {
 function MonthCalendar({
   value,
   minimumDate,
+  maximumDate,
   onSelect,
 }: {
   value: Date;
   minimumDate?: Date;
+  maximumDate?: Date;
   onSelect: (date: Date) => void;
 }) {
   const { t, i18n } = useTranslation("mobile");
@@ -213,6 +217,7 @@ function MonthCalendar({
   }, [cursor]);
 
   const min = minimumDate ? startOfDay(minimumDate) : null;
+  const max = maximumDate ? startOfDay(maximumDate) : null;
   const selected = startOfDay(value).getTime();
 
   function shiftMonth(step: number) {
@@ -257,7 +262,7 @@ function MonthCalendar({
         {cells.map((date, index) => {
           if (!date) return <View key={`bo-${index}`} style={styles.calendarCell} />;
 
-          const disabled = min ? date.getTime() < min.getTime() : false;
+          const disabled = (min ? date.getTime() < min.getTime() : false) || (max ? date.getTime() > max.getTime() : false);
           const active = date.getTime() === selected;
 
           return (

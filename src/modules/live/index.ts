@@ -42,3 +42,5 @@ export type { MicRequest } from "./model/use-mic-signals";
 // --- Mobil UI ---
 export { LessonInviteSheet } from "./ui/lesson-invite-sheet";
 export type { LessonInviteSheetProps } from "./ui/lesson-invite-sheet";
+export { LessonPreJoin } from "./ui/lesson-pre-join";
+export type { LessonPreJoinChoices, LessonPreJoinProps } from "./ui/lesson-pre-join";

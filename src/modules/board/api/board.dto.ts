@@ -151,6 +151,20 @@ export interface PendingCameraRequest {
   name: string;
 }
 
+/**
+ * Doskaning ma'lumot manbai: dars doskasi uchun server (realtime), uy vazifasi uchun o'quvchining shaxsiy holati.
+ * `BoardPanel`ga berilsa, panel serverdagi dars o'rniga shu manbadan ishlaydi; o'chirishga sabab so'ralmaydi.
+ */
+export interface BoardSource {
+  state: BoardState;
+  addStroke: (sheet: number, stroke: StrokeInput) => void;
+  addStrokes: (sheet: number, strokes: StrokeInput[]) => void;
+  addSheet: () => void;
+  eraseStroke: (sheet: number, strokeId: string) => void;
+  /** Yechuvchi faqat dars doskasida (matematika); uy vazifasida yo'q. */
+  solve?: (expression: string) => Promise<FormulaSolutionDto>;
+}
+
 export interface BoardState {
   sheets: BoardSheet[];
   canDraw: boolean;

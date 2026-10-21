@@ -34,4 +34,4 @@ export { useSelectedChild, useSelectedChildStore } from "./model/selected-child.
 export type { UseSelectedChildResult } from "./model/selected-child.store";
 
 // --- Mobil UI ---
-export { ChildSelector, SelectedChildHeader } from "./ui/child-selector";
+export { ParentAppBar } from "./ui/parent-app-bar";

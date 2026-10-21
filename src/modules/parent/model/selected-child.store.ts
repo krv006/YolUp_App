@@ -9,7 +9,6 @@ interface SelectedChildState {
   selectChild: (id: string) => void;
 }
 
-/** Faqat tanlangan farzand ID'si — ro'yxatning o'zi server holati (react-query). */
 export const useSelectedChildStore = create<SelectedChildState>()(
   persist(
     (set) => ({
@@ -28,10 +27,6 @@ export interface UseSelectedChildResult {
   selectChild: (id: string) => void;
 }
 
-/**
- * Global tanlov (zustand) + farzandlar ro'yxati (react-query) birlashtiriladi.
- * Saqlangan ID endi mavjud bo'lmasa, birinchi farzandga qaytamiz.
- */
 export function useSelectedChild(): UseSelectedChildResult {
   const childrenQuery = useParentChildren();
   const storedId = useSelectedChildStore((state) => state.selectedChildId);

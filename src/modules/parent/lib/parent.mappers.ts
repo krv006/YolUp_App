@@ -32,7 +32,6 @@ export function mapParentLinkDto(dto: ParentLinkDto): ParentLink {
   };
 }
 
-/** Bola kartochkasi: bog'lanish + shu o'quvchining davomat yozuvlaridan yig'iladi. */
 export function mapChildFromLink(link: ParentLink, attendance: AttendanceRow[] = []): ParentChild {
   const rows = attendance.filter((item) => item.studentId === link.studentId);
   const minutes = rows.reduce((sum, item) => sum + item.minutes, 0);

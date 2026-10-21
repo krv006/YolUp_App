@@ -60,21 +60,21 @@ export const parentApi = {
   },
 
   /*
-   * O'QUVCHI LOGINI bilan ulanadi, taklif kodi bilan EMAS.
+   * O'quvchi LOGINI yoki `FK-...` TAKLIF KODI bilan ulanadi.
    *
    * Backend ikkala shaklni ham qabul qiladi (`username` va `invite_code`),
-   * ikkalasi kelsa `username` ustun turadi. Veb hali taklif kodini
-   * yuboradi — shuning uchun bu fayl veb bilan bir xil emas (🟡).
+   * ikkalasi kelsa `username` ustun turadi. Veb hamma qiymatni
+   * `invite_code` sifatida yuboradi; mobil esa `FK-` bilan boshlanganini
+   * kod, qolganini login deb yuboradi — shuning uchun bu fayl veb bilan
+   * bir xil emas (🟡).
    *
-   * Qiymat O'ZGARTIRILMASDAN yuboriladi (faqat `trim`): backend
+   * Login O'ZGARTIRILMASDAN yuboriladi (faqat `trim`): backend
    * katta-kichik harfdan qat'i nazar topadi, lekin avval AYNAN mos
-   * keladiganini qidiradi. Ilgari bu yerga `.toUpperCase()` qo'llanardi —
-   * u taklif kodi uchun to'g'ri edi, login uchun esa uni buzadi.
+   * keladiganini qidiradi. `.toUpperCase()` faqat taklif kodiga to'g'ri.
    */
-  async requestLink(username: string) {
-    return mapParentLinkDto(
-      await apiClient.post<ParentLinkDto>(authEndpoints.requestLink, { username })
-    );
+  async requestLink(value: string) {
+    const body = /^FK-/i.test(value) ? { invite_code: value.toUpperCase() } : { username: value };
+    return mapParentLinkDto(await apiClient.post<ParentLinkDto>(authEndpoints.requestLink, body));
   },
 
   async respondLink(id: string, action: LinkAction) {

@@ -128,7 +128,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `31627942d5ee` | — |
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `6a6148929f3f` | — |
 | `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `677457db62d2` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; chiqishdagi oxirgi saqlash qoldi |
-| `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `b1cd81660536` | farq qayd etilmagan — tekshiring |
+| `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `e63f770dcde0` | portal bloklari (`shared/ui/portal.tsx`) bilan; ko'rsatkichlar tor ekrandagidek bir ustun |
 | `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `3f7f3900f46d` | — |
 | `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `ab15866473ba` | — |
 | `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `b137e01f8817` | — |
@@ -185,12 +185,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/notification/api/push-device.api.ts` | 🆕 MOBIL | `—` | FCM qurilma tokeni; vebda Web Push obunasi (`push/subscribe/`) ishlatiladi |
 | `src/modules/notification/lib/device-id.ts` | 🆕 MOBIL | `—` | barqaror qurilma ID'si; backend kaliti `(user, device_id)`, token o'zgaruvchan |
 | `src/modules/notification/model/push-device.ts` | 🆕 MOBIL | `—` | chiqishda qurilmani ro'yxatdan chiqarish |
-| `src/modules/parent/api/parent.api.ts` | 🟡 MOSLASH | `c944f05ed9d5` | farzand ulashda `username` yuboriladi, veb'dagi `invite_code` EMAS — backend ikkalasini ham qabul qiladi |
-| `src/modules/parent/api/parent.dto.ts` | 🟢 NUSXA | `daad031b5dac` | — |
+| `src/modules/parent/api/parent.api.ts` | 🟡 MOSLASH | `c944f05ed9d5` | `FK-` bilan boshlangan qiymat `invite_code`, qolgani `username` sifatida yuboriladi (veb hammasini `invite_code` deb yuboradi) |
+| `src/modules/parent/api/parent.dto.ts` | 🟢 NUSXA | `25da4ec6dbda` | — |
 | `src/modules/parent/index.ts` | 🟡 MOSLASH | `f7f9585ba037` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/parent/lib/parent.mappers.ts` | 🟢 NUSXA | `d8fb049f6581` | — |
+| `src/modules/parent/lib/parent.mappers.ts` | 🟢 NUSXA | `bbf6f561d148` | — |
 | `src/modules/parent/model/parent.queries.ts` | 🟢 NUSXA | `b4bec42438a7` | — |
-| `src/modules/parent/model/selected-child.store.ts` | 🟢 NUSXA | `aa64d5eb60ce` | — |
+| `src/modules/parent/model/selected-child.store.ts` | 🟢 NUSXA | `75e6235a5ff2` | — |
+| `src/modules/parent/ui/selected-child-selector.tsx` | 🟡 MOSLASH | `32189c228848` | mobilda `parent-app-bar.tsx` ichida; `<select>` o'rniga pastdan chiqadigan ro'yxat |
 | `src/modules/permission/constants/permission-map.ts` | 🟢 NUSXA | `c9ed4b063642` | — |
 | `src/modules/permission/index.ts` | 🟡 MOSLASH | `5b5ffd8d4e1d` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/permission/lib/can.ts` | 🟢 NUSXA | `9f3189dc554c` | — |
@@ -234,10 +235,17 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `cbcaa1d3644e` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
 | `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `f6df598d6f72` | `AuthScreen` + maydon/tugma komponentlari bitta faylda; telefon maslahati toast orqali |
 | `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `3f62db0fe17c` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp` |
+| `src/modules/auth/ui/login-history-dialog.tsx` | 🟡 MOSLASH | `8127cad1ced2` | mobilda `login-history-sheet.tsx` (Dialog o'rniga Sheet) |
 | `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `b50a11868d3a` | til menyusi oddiy ochiluvchi ro'yxat |
 | `src/pages/auth/forgot-password-page.tsx` | 🟡 MOSLASH | `554ab26320d5` | mobilda `password-reset-pages.tsx` ichida |
 | `src/pages/auth/verify-code-page.tsx` | 🟡 MOSLASH | `1421f37f8743` | mobilda `password-reset-pages.tsx` ichida |
 | `src/pages/auth/new-password-page.tsx` | 🟡 MOSLASH | `6b541b378526` | mobilda `password-reset-pages.tsx` ichida |
+| `src/pages/parent/dashboard/parent-dashboard-page.tsx` | 🟡 MOSLASH | `aad62c96ad28` | mobilda `pages/parent/parent-dashboard-page.tsx`; sarlavha `ParentAppBar`, pastki tablar saqlangan |
+| `src/pages/parent/children/parent-children-page.tsx` | 🟡 MOSLASH | `fc3d24f1cb61` | mobilda `pages/parent/parent-children-page.tsx`; ruxsatlar sarlavhasi va "Kirishlar tarixi" ustma-ust (vebda tor ekranda sinadi) |
+| `src/pages/parent/attendance/parent-attendance-page.tsx` | 🟡 MOSLASH | `36689affc99d` | mobilda `pages/parent/parent-attendance-page.tsx`; "Hisobot" (window.print) yo'q; jadval o'rniga `AttendanceList` |
+| `src/pages/parent/homework/parent-homework-page.tsx` | 🟡 MOSLASH | `2851d3486787` | mobilda `pages/parent/parent-homework-page.tsx`; karta ichida 16 gorizontal bo'shliq (vebda qatorlar chetga yopishadi) |
+| `src/pages/parent/exams/parent-exams-page.tsx` | 🟡 MOSLASH | `6211f82e3125` | mobilda `pages/parent/parent-exams-page.tsx`; "Natija" tugmasi pastki qatorda (vebda sarlavhani siqadi) |
+| `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `3a6146c6e277` | mobilda `pages/parent/parent-grades-page.tsx` |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `2c6b375c7baf` | farq qayd etilmagan — tekshiring |
 | `src/pages/workspace/workspace-page.tsx` | 🟡 MOSLASH | `1310f75223c3` | vebda kartochkalar to'rda; telefonda bir ustunli ro'yxat — tor ekranda ikki ustunli matn sinib ketadi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |

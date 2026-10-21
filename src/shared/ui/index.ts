@@ -67,3 +67,15 @@ export { Switch } from "./switch";
 export type { SwitchProps } from "./switch";
 export { ViewSelect } from "./view-select";
 export type { ViewSelectOption, ViewSelectProps } from "./view-select";
+export { LEGACY_RADIUS, useLegacyColors } from "./legacy-colors";
+export {
+  PortalButton,
+  PortalCard,
+  PortalEmpty,
+  PortalHeading,
+  PortalListIcon,
+  PortalMetric,
+  PortalSectionHead,
+  portalPage,
+} from "./portal";
+export type { PortalButtonProps, PortalHeadingProps, PortalMetricTone } from "./portal";

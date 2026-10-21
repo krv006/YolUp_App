@@ -5,12 +5,16 @@ import {
   Camera,
   CheckCircle2,
   Clock3,
+  History,
   Link2,
   Plus,
+  ShieldCheck,
   Sparkles,
+  UsersRound,
   Video,
   type LucideIcon,
 } from "lucide-react-native";
+import { LoginHistorySheet } from "@/modules/auth/ui/login-history-sheet";
 import {
   useCreateChild,
   useParentChildren,
@@ -20,59 +24,27 @@ import {
   useSetParentConsent,
   type ConsentKind,
 } from "@/modules/parent";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Input,
-  radius,
-  Screen,
-  ScreenEmpty,
-  ScreenError,
-  ScreenLoading,
-  Sheet,
-  Text,
-  toast,
-  useTheme,
-} from "@/shared/ui";
+import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
+import { Avatar, Button, Input, PortalButton, PortalCard, PortalEmpty, PortalHeading, portalPage, Screen, ScreenError, ScreenLoading, Sheet, Text, useLegacyColors, useTheme } from "@/shared/ui";
 
-/**
- * Veb `parent-children-page.tsx` dagi ro'yxat bilan bir xil.
- *
- * Matn o'rniga tarjima kalitlari — ro'yxat modul darajasida va `t()`
- * faqat render paytida mavjud.
- */
-const CONSENT_KINDS: {
-  id: ConsentKind;
-  labelKey: string;
-  descriptionKey: string;
-  icon: LucideIcon;
-}[] = [
-  {
-    id: "recording",
-    labelKey: "parent.dars_yozuvi",
-    descriptionKey: "parent.darsni_yozib_olishga_ruxsat",
-    icon: Video,
-  },
-  {
-    id: "camera",
-    labelKey: "parent.kamera",
-    descriptionKey: "parent.jonli_darsda_kameradan_foydalanish",
-    icon: Camera,
-  },
-  {
-    id: "analytics",
-    labelKey: "parent.faollik_tahlili",
-    descriptionKey: "parent.davomat_diqqat_va_fokus_tahlili",
-    icon: Sparkles,
-  },
+const CONSENT_KINDS: ReadonlyArray<{ id: ConsentKind; icon: LucideIcon }> = [
+  { id: "recording", icon: Video },
+  { id: "camera", icon: Camera },
+  { id: "analytics", icon: Sparkles },
 ];
 
 const EMPTY_CHILD = { username: "", password: "", first_name: "", last_name: "" };
 
+/**
+ * Farzandlarim — veb `parent-children-page.tsx`: sarlavha va ikki amal,
+ * farzand kartasi (bosilsa tanlanadi), maxfiylik ruxsatlari, o'quvchini
+ * ulash va bola hisobini yaratish oynalari, kirishlar tarixi.
+ */
 export function ParentChildrenPage() {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("parent");
+  const { t: tn } = useTranslation("nav");
   const { palette } = useTheme();
+  const colors = useLegacyColors();
   const childrenQuery = useParentChildren();
   const consents = useParentConsents();
   const requestLink = useRequestChildLink();
@@ -82,72 +54,55 @@ export function ParentChildrenPage() {
 
   const [linkOpen, setLinkOpen] = useState(false);
   const [childOpen, setChildOpen] = useState(false);
-  const [childLogin, setChildLogin] = useState("");
+  const [loginsOpen, setLoginsOpen] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
   const [child, setChild] = useState(EMPTY_CHILD);
+  const [formError, setFormError] = useState("");
+
+  const appBar = <ParentAppBar a11yTitle={tn("parent.children")} />;
 
   async function submitLink() {
+    setFormError("");
     try {
-      /*
-       * Faqat `trim` — katta harfga o'girilmaydi. Sabab `parent.api.ts`
-       * dagi `requestLink` izohida.
-       */
-      await requestLink.mutateAsync(childLogin.trim());
-      setChildLogin("");
+      await requestLink.mutateAsync(inviteCode.trim());
+      setInviteCode("");
       setLinkOpen(false);
-      toast.success(t("parent.sorov_yuborildi_farzandingiz_tasdiqlashi_ker"));
-    } catch {
-      /*
-       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
-       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
-       * MARTA ko'rinardi.
-       *
-       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
-       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
-       */
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : t("children.genericError"));
     }
   }
 
   async function submitChild() {
+    setFormError("");
     try {
       await createChild.mutateAsync(child);
       setChild(EMPTY_CHILD);
       setChildOpen(false);
-      toast.success(t("parent.hisob_yaratildi"));
-    } catch {
-      /*
-       * XATO BU YERDA KO'RSATILMAYDI — uni mutatsiyaning `onError` i
-       * chiqaradi. Ilgari ikkalasi ham chiqarardi va toast EKRANDA IKKI
-       * MARTA ko'rinardi.
-       *
-       * `catch` o'zi kerak: `mutateAsync` rad javob bersa, quyidagi
-       * `close()` bajarilmasligi va rad javob e'tiborsiz qolmasligi shart.
-       */
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : t("children.genericError"));
     }
   }
 
   function toggleConsent(kind: ConsentKind) {
     if (!selectedChildId) return;
-    const current = (consents.data ?? []).find(
-      (item) => item.studentId === selectedChildId && item.kind === kind
-    );
+    const current = (consents.data ?? []).find((item) => item.studentId === selectedChildId && item.kind === kind);
     setConsent.mutate({ studentId: selectedChildId, kind, granted: !current?.granted });
   }
 
   if (childrenQuery.isLoading) {
     return (
-      <Screen>
-        <ScreenLoading label={t("parent.farzandlar_yuklanmoqda")} />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenLoading label={t("children.loading")} />
       </Screen>
     );
   }
 
   if (childrenQuery.isError) {
     return (
-      <Screen>
-        <ScreenError
-          message={t("parent.farzandlar_royxatini_yuklab_bolmadi")}
-          onRetry={() => void childrenQuery.refetch()}
-        />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenError message={t("children.loadError")} onRetry={() => void childrenQuery.refetch()} />
       </Screen>
     );
   }
@@ -156,252 +111,349 @@ export function ParentChildrenPage() {
 
   return (
     <Screen padded={false}>
+      {appBar}
       <ScrollView
-        contentContainerStyle={styles.body}
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={portalPage}
         refreshControl={
           <RefreshControl
             refreshing={childrenQuery.isRefetching}
-            onRefresh={() => void childrenQuery.refetch()}
+            onRefresh={() => {
+              void childrenQuery.refetch();
+              void consents.refetch();
+            }}
             tintColor={palette["muted-foreground"]}
           />
         }
       >
-        <View style={styles.head}>
-          <Text variant="heading">Farzandlarim</Text>
-          <Text variant="caption" tone="muted">
-            {t("parent.biriktirilgan_oquvchi_hisoblari_va_maxfiylik")}
-          </Text>
-        </View>
+        <PortalHeading
+          eyebrow={t("children.eyebrow")}
+          title={t("children.title")}
+          description={t("children.subtitle")}
+          actions={
+            <>
+              <PortalButton
+                size="dense"
+                icon={Link2}
+                label={t("children.linkChild")}
+                onPress={() => {
+                  setFormError("");
+                  setLinkOpen(true);
+                }}
+                style={styles.grow}
+              />
+              <PortalButton
+                size="dense"
+                variant="primary"
+                icon={Plus}
+                label={t("children.createChild")}
+                onPress={() => {
+                  setFormError("");
+                  setChildOpen(true);
+                }}
+                style={styles.grow}
+              />
+            </>
+          }
+        />
 
-        <View style={styles.actions}>
-          <Button
-            title={t("parent.oquvchini_ulash")}
-            variant="secondary"
-            fullWidth={false}
-            icon={<Link2 size={16} color={palette["secondary-foreground"]} />}
-            onPress={() => setLinkOpen(true)}
-            style={styles.action}
-          />
-          <Button
-            title={t("parent.bola_hisobi")}
-            fullWidth={false}
-            icon={<Plus size={16} color={palette["primary-foreground"]} />}
-            onPress={() => setChildOpen(true)}
-            style={styles.action}
-          />
-        </View>
-
-        {children.length === 0 ? (
-          <ScreenEmpty
-            title={t("parent.farzand_hali_ulanmagan")}
-            description={t("parent.oquvchi_taklif_kodini_kiriting_yoki_yangi_hi")}
-          />
-        ) : (
-          children.map((item) => {
-            const selected = item.id === selectedChildId;
-            return (
-              <Pressable
-                key={item.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected }}
-                onPress={() => selectChild(item.id)}
-                style={({ pressed }) => [
-                  styles.card,
-                  {
-                    backgroundColor: selected ? palette["primary-tint"] : palette.card,
-                    borderColor: selected ? palette["border-accent"] : palette.border,
-                    opacity: pressed ? 0.9 : 1,
-                  },
-                ]}
-              >
-                <View style={styles.cardHead}>
-                  <Avatar name={item.name} tone={item.avatarTone} size="lg" />
-                  <View style={styles.cardBody}>
-                    <Text variant="label" numberOfLines={1}>
-                      {item.name}
-                    </Text>
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {item.username} · {item.grade}
-                    </Text>
-                  </View>
-                  <Badge
-                    label={selected ? t("parent.tanlangan") : t("parent.tasdiqlangan")}
-                    tone={selected ? "brand" : "success"}
-                  />
-                </View>
-
-                <View style={styles.stats}>
-                  <Stat icon={<CheckCircle2 size={15} color={palette["muted-foreground"]} />} value={`${item.lessons}`} label={t("parent.dars")} />
-                  <Stat icon={<Clock3 size={15} color={palette["muted-foreground"]} />} value={`${item.minutes}`} label={t("parent.daqiqa")} />
-                </View>
-
-                <Text variant="caption" tone="muted">
-                  {t("parent.songgi_faollik", { value: item.lastActivity })}
+        {children.map((item) => {
+          const selected = item.id === selectedChildId;
+          return (
+            <Pressable
+              key={item.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              onPress={() => selectChild(item.id)}
+              style={({ pressed }) => [
+                styles.childCard,
+                {
+                  borderColor: selected ? palette.primary : colors.border,
+                  backgroundColor: palette.surface,
+                  opacity: pressed ? 0.92 : 1,
+                },
+                // `.is-selected` — tashqi ko'k halqa.
+                selected && { boxShadow: `0 0 0 3px ${palette["primary-soft"]}` },
+              ]}
+            >
+              <View style={[styles.status, { backgroundColor: palette["success-soft"] }]}>
+                <CheckCircle2 size={15} color={palette["tone-emerald-fg"]} />
+                <Text variant="caption" style={[styles.statusText, { color: palette["tone-emerald-fg"] }]}>
+                  {selected ? t("children.selected") : t("children.verified")}
                 </Text>
-              </Pressable>
-            );
-          })
-        )}
+              </View>
+              <Avatar name={item.name} tone={item.avatarTone} size="lg" />
+              <Text variant="body" style={styles.childName}>
+                {item.name}
+              </Text>
+              <Text variant="caption" style={{ color: colors.muted }}>
+                {item.username} · {item.grade}
+              </Text>
+              <View style={[styles.childStats, { borderColor: colors.border }]}>
+                <ChildStat icon={CheckCircle2} value={item.lessons} label={t("children.lessonsUnit")} />
+                <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
+                <ChildStat icon={Clock3} value={item.minutes} label={t("children.minutesUnit")} />
+              </View>
+              <View style={styles.childLast}>
+                <Text variant="caption" style={[styles.small, { color: colors.muted }]}>
+                  {t("children.lastActivity")}
+                </Text>
+                <Text variant="caption" style={styles.lastValue}>
+                  {item.lastActivity}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
+
+        {!children.length ? (
+          <PortalEmpty icon={UsersRound} title={t("children.emptyTitle")} description={t("children.emptyDescription")} />
+        ) : null}
 
         {selectedChild ? (
-          <View
-            style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}
-          >
-            <Text variant="label">
-              {t("parent.uchun_ruxsatlar", { name: selectedChild.name })}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {t("parent.bu_ruxsatlarni_istalgan_payt_qaytarib_olishi")}
-            </Text>
+          <PortalCard style={styles.consentPanel}>
+            {/*
+              * Vebda sarlavha va "Kirishlar tarixi" tugmasi bir qatorda turadi
+              * va tor ekranda sarlavha uch qatorga sinadi. Bu yerda tugma
+              * sarlavha ostida.
+              */}
+            <View style={styles.consentHead}>
+              <View style={styles.grow}>
+                <Text variant="caption" style={[styles.sectionEyebrow, { color: colors.muted }]}>
+                  {t("children.consentEyebrow")}
+                </Text>
+                <Text variant="body" style={styles.sectionTitle}>
+                  {t("children.consentTitle", { name: selectedChild.name })}
+                </Text>
+              </View>
+              <ShieldCheck size={22} color={colors.foreground} />
+            </View>
+            <PortalButton
+              size="sm"
+              icon={History}
+              label={t("children.loginsHistory")}
+              onPress={() => setLoginsOpen(true)}
+              style={styles.historyButton}
+            />
 
-            {CONSENT_KINDS.map(({ id, labelKey, descriptionKey, icon: Icon }) => {
-              const granted = (consents.data ?? []).some(
-                (item) => item.studentId === selectedChildId && item.kind === id && item.granted
-              );
-              return (
-                <Pressable
-                  key={id}
-                  accessibilityRole="switch"
-                  accessibilityState={{ checked: granted }}
-                  accessibilityLabel={`${t(labelKey)}. ${t(descriptionKey)}`}
-                  disabled={consents.isLoading || setConsent.isPending}
-                  onPress={() => toggleConsent(id)}
-                  style={({ pressed }) => [styles.consent, pressed && { opacity: 0.85 }]}
-                >
-                  <View style={[styles.consentIcon, { backgroundColor: palette["primary-tint"] }]}>
-                    <Icon size={18} color={palette["primary-text"]} />
-                  </View>
-                  <View style={styles.consentBody}>
-                    <Text variant="label">{t(labelKey)}</Text>
-                    <Text variant="caption" tone="muted">
-                      {t(descriptionKey)}
+            <View style={styles.consentList}>
+              {CONSENT_KINDS.map(({ id, icon: Icon }) => {
+                const granted = (consents.data ?? []).some(
+                  (item) => item.studentId === selectedChildId && item.kind === id && item.granted
+                );
+                const label = t(`children.consentKinds.${id}.label`);
+                const description = t(`children.consentKinds.${id}.description`);
+                return (
+                  <Pressable
+                    key={id}
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: granted }}
+                    accessibilityLabel={`${label}. ${description}`}
+                    disabled={consents.isLoading || setConsent.isPending}
+                    onPress={() => toggleConsent(id)}
+                    style={({ pressed }) => [
+                      styles.consent,
+                      pressed
+                        ? { borderColor: palette["border-accent"], backgroundColor: palette["primary-soft"] }
+                        : { borderColor: colors.border, backgroundColor: palette.surface },
+                    ]}
+                  >
+                    <View style={[styles.consentIcon, { backgroundColor: palette["primary-soft"] }]}>
+                      <Icon size={18} color={palette["primary-text"]} />
+                    </View>
+                    <View style={styles.consentBody}>
+                      <Text variant="body" style={styles.consentLabel}>
+                        {label}
+                      </Text>
+                      <Text variant="caption" style={[styles.consentText, { color: colors.muted }]}>
+                        {description}
+                      </Text>
+                    </View>
+                    <Text
+                      variant="caption"
+                      style={[
+                        styles.consentState,
+                        granted
+                          ? { color: palette["success-strong"], backgroundColor: palette["success-soft"] }
+                          : { color: colors.muted, backgroundColor: colors.mutedBg },
+                      ]}
+                    >
+                      {granted ? t("children.consentOn") : t("children.consentOff")}
                     </Text>
-                  </View>
-                  <Badge
-                    label={granted ? t("parent.yoqilgan") : t("parent.ochiq")}
-                    tone={granted ? "success" : "neutral"}
-                  />
-                </Pressable>
-              );
-            })}
-
+                  </Pressable>
+                );
+              })}
+            </View>
             {consents.isError ? (
-              <Text variant="caption" tone="danger">
-                {t("parent.ruxsatlarni_yuklab_bolmadi")}
+              <Text variant="label" style={{ color: palette["destructive-strong"] }}>
+                {t("children.consentLoadError")}
               </Text>
             ) : null}
-          </View>
+          </PortalCard>
         ) : null}
       </ScrollView>
 
       <Sheet
         open={linkOpen}
         onClose={() => setLinkOpen(false)}
-        title={t("parent.oquvchini_ulash")}
-        description={t("parent.oquvchi_profilidagi_loginni_kiriting")}
+        title={t("children.linkDialog.title")}
+        description={t("children.linkDialog.description")}
       >
         <Input
-          label={t("parent.oquvchi_logini")}
-          placeholder={t("parent.login_masalan")}
-          value={childLogin}
-          onChangeText={setChildLogin}
+          label={t("children.linkDialog.codeLabel")}
+          placeholder={t("children.linkDialog.codePlaceholder")}
+          value={inviteCode}
+          onChangeText={setInviteCode}
           autoCapitalize="none"
           autoCorrect={false}
           autoFocus
         />
-        <Button
-          title={t("parent.sorov_yuborish")}
-          loading={requestLink.isPending}
-          disabled={childLogin.trim().length === 0}
-          onPress={() => void submitLink()}
-        />
+        {formError ? <FormAlert message={formError} /> : null}
+        <View style={styles.dialogActions}>
+          <Button
+            title={t("children.linkDialog.cancel")}
+            variant="secondary"
+            onPress={() => setLinkOpen(false)}
+            style={styles.grow}
+          />
+          <Button
+            title={t("children.linkDialog.submit")}
+            loading={requestLink.isPending}
+            disabled={!inviteCode.trim()}
+            onPress={() => void submitLink()}
+            style={styles.grow}
+          />
+        </View>
       </Sheet>
 
       <Sheet
         open={childOpen}
         onClose={() => setChildOpen(false)}
-        title={t("parent.bola_hisobini_yaratish")}
-        description={t("parent.yaratilgan_oquvchi_sizga_avtomatik_ulanadi")}
+        title={t("children.childDialog.title")}
+        description={t("children.childDialog.description")}
       >
+        <View style={styles.namePair}>
+          <Input
+            label={t("children.childDialog.firstName")}
+            value={child.first_name}
+            onChangeText={(value) => setChild((current) => ({ ...current, first_name: value }))}
+            autoCapitalize="words"
+            containerStyle={styles.grow}
+          />
+          <Input
+            label={t("children.childDialog.lastName")}
+            value={child.last_name}
+            onChangeText={(value) => setChild((current) => ({ ...current, last_name: value }))}
+            autoCapitalize="words"
+            containerStyle={styles.grow}
+          />
+        </View>
         <Input
-          label={t("parent.ism")}
-          value={child.first_name}
-          onChangeText={(value) => setChild((current) => ({ ...current, first_name: value }))}
-          autoCapitalize="words"
-        />
-        <Input
-          label={t("parent.familiya")}
-          value={child.last_name}
-          onChangeText={(value) => setChild((current) => ({ ...current, last_name: value }))}
-          autoCapitalize="words"
-        />
-        <Input
-          label={t("parent.login")}
+          label={t("children.childDialog.username")}
           value={child.username}
           onChangeText={(value) => setChild((current) => ({ ...current, username: value }))}
+          autoCapitalize="none"
+          autoCorrect={false}
         />
         <Input
-          label={t("parent.vaqtinchalik_parol")}
+          label={t("children.childDialog.tempPassword")}
           secure
           value={child.password}
           onChangeText={(value) => setChild((current) => ({ ...current, password: value }))}
-          // Backend kamida 8 belgi talab qiladi (`auth.schemas.ts`).
-          error={
-            child.password.length > 0 && child.password.length < 8
-              ? t("parent.parol_kamida_8_ta_belgidan_iborat_bolsin")
-              : undefined
-          }
         />
-        <Button
-          title={t("parent.hisob_yaratish")}
-          loading={createChild.isPending}
-          disabled={
-            !child.first_name.trim() ||
-            !child.last_name.trim() ||
-            !child.username.trim() ||
-            child.password.length < 8
-          }
-          onPress={() => void submitChild()}
-        />
+        {formError ? <FormAlert message={formError} /> : null}
+        <View style={styles.dialogActions}>
+          <Button
+            title={t("children.childDialog.cancel")}
+            variant="secondary"
+            onPress={() => setChildOpen(false)}
+            style={styles.grow}
+          />
+          <Button
+            title={t("children.childDialog.submit")}
+            loading={createChild.isPending}
+            // Vebdagi `required` va `minLength={8}`.
+            disabled={
+              !child.first_name.trim() || !child.last_name.trim() || !child.username.trim() || child.password.length < 8
+            }
+            onPress={() => void submitChild()}
+            style={styles.grow}
+          />
+        </View>
       </Sheet>
+
+      <LoginHistorySheet
+        open={loginsOpen}
+        onClose={() => setLoginsOpen(false)}
+        studentId={selectedChildId}
+        title={t("children.loginHistoryTitle", { name: selectedChild?.name ?? t("children.loginHistoryStudentFallback") })}
+        description={t("children.loginHistoryDescription")}
+      />
     </Screen>
   );
 }
 
-function Stat({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
+function ChildStat({ icon: Icon, value, label }: { icon: LucideIcon; value: number | string; label: string }) {
+  const { palette } = useTheme();
+  const colors = useLegacyColors();
   return (
-    <View style={styles.stat}>
-      {icon}
-      <Text variant="label">{value}</Text>
-      <Text variant="caption" tone="muted">
+    <View style={styles.childStat}>
+      <Icon size={16} color={palette["primary-text"]} />
+      <Text variant="body" style={styles.statValue}>
+        {value}
+      </Text>
+      <Text variant="caption" style={[styles.small, { color: colors.muted }]}>
         {label}
       </Text>
     </View>
   );
 }
 
+/** `.form-alert` — qizil fonli xato qatori. */
+function FormAlert({ message }: { message: string }) {
+  const { palette } = useTheme();
+  return (
+    <Text
+      variant="label"
+      accessibilityRole="alert"
+      style={[styles.alert, { color: palette["destructive-strong"], backgroundColor: palette["destructive-soft"] }]}
+    >
+      {message}
+    </Text>
+  );
+}
+
 const styles = StyleSheet.create({
-  body: { padding: 16, gap: 12, paddingBottom: 40 },
-  head: { gap: 4, paddingTop: 8 },
-  actions: { flexDirection: "row", gap: 10 },
-  action: { flex: 1 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 14,
-    gap: 10,
-  },
-  cardHead: { flexDirection: "row", alignItems: "center", gap: 12 },
-  cardBody: { flex: 1, gap: 3 },
-  stats: { flexDirection: "row", gap: 20 },
-  stat: { flexDirection: "row", alignItems: "center", gap: 5 },
-  consent: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
-  consentIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  consentBody: { flex: 1, gap: 2 },
+  grow: { flex: 1, minWidth: 0 },
+  /* `.child-profile-card` — 24 bo'shliq, radius 20, markazlashgan */
+  childCard: { alignItems: "center", padding: 24, borderWidth: 1, borderRadius: 20 },
+  status: { position: "absolute", top: 13, right: 13, flexDirection: "row", alignItems: "center", gap: 4, paddingVertical: 5, paddingHorizontal: 8, borderRadius: 999 },
+  statusText: { fontSize: 11, lineHeight: 16.5, fontWeight: "700" },
+  childName: { marginTop: 12, marginBottom: 4, fontSize: 17, lineHeight: 25.5, fontWeight: "400" },
+  /* `.child-stats` — ustdan va pastdan chiziq, ikki teng ustun */
+  childStats: { alignSelf: "stretch", flexDirection: "row", marginVertical: 12, paddingVertical: 12, borderTopWidth: 1, borderBottomWidth: 1 },
+  childStat: { flex: 1, alignItems: "center", gap: 2 },
+  statDivider: { width: 1 },
+  statValue: { fontSize: 16, lineHeight: 24, fontWeight: "700" },
+  small: { fontSize: 11, lineHeight: 16.5 },
+  childLast: { alignSelf: "stretch", gap: 4 },
+  lastValue: { fontSize: 12, lineHeight: 18, fontWeight: "700" },
+  consentPanel: { padding: 18, gap: 14 },
+  consentHead: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  sectionEyebrow: { fontSize: 11, lineHeight: 16.5, fontWeight: "700", letterSpacing: 1.32 },
+  sectionTitle: { marginTop: 4, fontSize: 19, lineHeight: 28.5, fontWeight: "400" },
+  historyButton: { alignSelf: "flex-start" },
+  /* `.consent-list` — orasi 8 */
+  consentList: { gap: 8 },
+  /* `.consent-list > button` — 11 bo'shliq, radius 13 */
+  consent: { flexDirection: "row", alignItems: "center", gap: 11, padding: 11, borderWidth: 1, borderRadius: 13 },
+  consentIcon: { width: 40, height: 40, borderRadius: 13, alignItems: "center", justifyContent: "center" },
+  consentBody: { flex: 1, minWidth: 0, gap: 3 },
+  consentLabel: { fontWeight: "700" },
+  consentText: { fontSize: 12.8, lineHeight: 19.2 },
+  /* `.consent-list i` — 5 8, 12/800 */
+  consentState: { overflow: "hidden", paddingVertical: 5, paddingHorizontal: 8, borderRadius: 999, fontSize: 12, lineHeight: 18, fontWeight: "700" },
+  namePair: { flexDirection: "row", gap: 12 },
+  dialogActions: { flexDirection: "row", gap: 10 },
+  alert: { overflow: "hidden", paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, fontWeight: "500" },
 });

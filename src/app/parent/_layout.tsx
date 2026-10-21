@@ -14,15 +14,18 @@ import { ROLES } from "@/shared/constants";
  * bormasdi. O'qituvchi va o'quvchida profil tabi bor edi, shuning uchun
  * kamchilik ko'zga tashlanmagan.
  *
- * DAVOMAT, VAZIFALAR va REYTING tab EMAS — ular Ish maydonida.
+ * DAVOMAT, VAZIFALAR, MOCK TESTLAR va REYTING tab EMAS — ular Ish maydonida.
  *
- * Veb navigatsiyasi beshta bo'limdan iborat, mobilda ularning ustiga
- * Profil qo'shilib OLTITA tab chiqardi. Telefonning tor qatorida yorliqlar
+ * Veb navigatsiyasi oltita bo'limdan iborat, mobilda ularning ustiga
+ * Profil qo'shilib YETTITA tab chiqardi. Telefonning tor qatorida yorliqlar
  * kesilardi ("Davoma…", "Vazifa…", "Farzan…") va bo'limlar bir-biridan
- * ajralmay qolardi. Endi kundalik ikkitasi tabda, qolgan uchtasi Ish
+ * ajralmay qolardi. Endi kundalik ikkitasi tabda, qolgan to'rttasi Ish
  * maydonida — o'qituvchi va o'quvchidagi bilan bir xil naqsh.
  *
  * Marshrutlar o'zgarmadi, faqat panelda ko'rinmaydi.
+ *
+ * Har sahifaning tepasida vebdagi portal sarlavhasi turadi: logotip,
+ * farzand tanlagichi va qo'ng'iroq (`modules/parent/ui/parent-app-bar.tsx`).
  */
 const TABS = [
   { name: "dashboard", labelKey: "tabs.overview", iconName: "school" },
@@ -31,7 +34,7 @@ const TABS = [
     name: "workspace",
     labelKey: "tabs.workspace",
     iconName: "nav-workspace",
-    owns: ["attendance", "homework", "grades", "notifications"],
+    owns: ["attendance", "homework", "exams", "grades", "notifications"],
   },
   {
     name: "profile",
@@ -45,7 +48,7 @@ export default function ParentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.PARENT]}>
-        <RoleTabs tabs={TABS} hidden={["attendance", "homework", "grades", "profile-personal", "profile-account", "profile-system", "notifications"]} />
+        <RoleTabs tabs={TABS} hidden={["attendance", "homework", "exams", "grades", "profile-personal", "profile-account", "profile-system", "notifications"]} />
       </RoleRoute>
     </ProtectedRoute>
   );

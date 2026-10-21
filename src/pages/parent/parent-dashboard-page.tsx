@@ -1,10 +1,10 @@
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
+  ArrowRight,
   CalendarCheck2,
   CheckCircle2,
-  ChevronRight,
   Clock3,
   Hourglass,
   Timer,
@@ -14,18 +14,9 @@ import {
 import { useAttendance } from "@/modules/attendance";
 import { useAuth } from "@/modules/auth";
 import { useParentDashboard, useSelectedChild } from "@/modules/parent";
-import { ChildSelector } from "@/modules/parent/ui/child-selector";
+import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
 import { ROUTES } from "@/shared/config";
-import {
-  radius,
-  Screen,
-  ScreenEmpty,
-  ScreenError,
-  ScreenLoading,
-  Separator,
-  Text,
-  useTheme,
-} from "@/shared/ui";
+import { GradientFill, PortalButton, PortalCard, PortalMetric, portalPage, PortalSectionHead, type PortalMetricTone, Screen, ScreenError, ScreenLoading, Text, useLegacyColors, useTheme } from "@/shared/ui";
 
 /** Backend `metric.id` -> ikonka (veb `parent-dashboard-page.tsx` bilan bir xil). */
 const METRIC_ICONS: Record<string, LucideIcon> = {
@@ -35,60 +26,71 @@ const METRIC_ICONS: Record<string, LucideIcon> = {
   minutes: Timer,
 };
 
-const METRIC_TONES = ["violet", "amber", "emerald", "rose"] as const;
+const METRIC_TONES: readonly PortalMetricTone[] = ["violet", "amber", "emerald", "rose"];
 
-/** Ota-ona paneli — veb `parent-dashboard-page.tsx` porti. */
+/**
+ * Ota-ona bosh sahifasi — veb `parent-dashboard-page.tsx`: "OTA-ONA
+ * KABINETI" salomlashish kartasi, to'rtta ko'rsatkich (tor ekranda bir
+ * ustun) va so'nggi davomat.
+ */
 export function ParentDashboardPage() {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("parent");
+  const { t: tn } = useTranslation("nav");
   const router = useRouter();
   const { palette } = useTheme();
+  const colors = useLegacyColors();
   const { user } = useAuth();
-  const { children, childrenQuery, selectedChildId, selectedChild } = useSelectedChild();
-
+  const { selectedChildId, selectedChild, children, childrenQuery } = useSelectedChild();
   const dashboard = useParentDashboard(selectedChildId);
-  const attendance = useAttendance(selectedChildId ? { student: selectedChildId } : {});
+  const attendance = useAttendance(selectedChildId ? { student: selectedChildId } : {}, Boolean(selectedChildId));
 
-  const loading = childrenQuery.isLoading || dashboard.isLoading || attendance.isLoading;
-  const failed = dashboard.isError || attendance.isError;
+  const appBar = <ParentAppBar a11yTitle={tn("parent.dashboard")} />;
 
   function refresh() {
+    void childrenQuery.refetch();
     void dashboard.refetch();
     void attendance.refetch();
   }
 
-  /*
-   * Farzand biriktirilmagan bo'lsa bu XATO emas.
-   *
-   * Avval so'rovlar baribir yuborilardi, backend esa o'quvchisiz so'rovni
-   * rad etardi — natijada yangi ota-ona hisobi birinchi ochilishda
-   * "Ma'lumotlarni yuklab bo'lmadi" degan qizil ekranni ko'rardi va nima
-   * qilishni bilmasdi. Endi unga nima qilish kerakligi aytiladi.
-   *
-   * Xuddi shu naqsh `parent-grades-page` va `parent-homework-page` da ham.
-   */
-  if (!childrenQuery.isLoading && children.length === 0) {
+  if (childrenQuery.isLoading || dashboard.isLoading || attendance.isLoading) {
     return (
-      <Screen>
-        <ScreenEmpty
-          title={t("parent.farzand_biriktirilmagan")}
-          description={t("parent.farzand_bolimiga_oting_va_oquvchining_taklif")}
-        />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenLoading label={t("dashboard.loading")} />
       </Screen>
     );
   }
 
-  if (loading) {
+  // Vebdagi `RouteState`: farzand yo'q — xato emas, nima qilish kerakligi aytiladi.
+  if (!childrenQuery.isError && !children.length) {
     return (
-      <Screen>
-        <ScreenLoading label={t("parent.panel_yuklanmoqda")} />
+      <Screen padded={false}>
+        {appBar}
+        <View style={styles.state}>
+          <Text variant="caption" style={[styles.eyebrow, { color: palette["primary-text"] }]}>
+            {t("dashboard.eyebrow")}
+          </Text>
+          <Text variant="body" style={styles.stateTitle}>
+            {t("dashboard.noChildTitle")}
+          </Text>
+          <Text variant="label" style={[styles.stateText, { color: colors.muted }]}>
+            {t("dashboard.noChildDescription")}
+          </Text>
+          <PortalButton
+            variant="primary"
+            label={t("dashboard.noChildAction")}
+            onPress={() => router.push(ROUTES.parent.children)}
+          />
+        </View>
       </Screen>
     );
   }
 
-  if (failed) {
+  if (childrenQuery.isError || dashboard.isError || attendance.isError) {
     return (
-      <Screen>
-        <ScreenError message={t("parent.malumotlarni_yuklab_bolmadi")} onRetry={refresh} />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenError message={t("dashboard.loadError")} onRetry={refresh} />
       </Screen>
     );
   }
@@ -98,8 +100,10 @@ export function ParentDashboardPage() {
 
   return (
     <Screen padded={false}>
+      {appBar}
       <ScrollView
-        contentContainerStyle={styles.body}
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={portalPage}
         refreshControl={
           <RefreshControl
             refreshing={dashboard.isRefetching || attendance.isRefetching}
@@ -108,111 +112,108 @@ export function ParentDashboardPage() {
           />
         }
       >
-        <View style={styles.welcome}>
-          <Text variant="heading">Salom, {user?.name?.split(" ")[0] ?? "ota-ona"}</Text>
-          <Text tone="muted">
+        {/* `.portal-welcome.parent-welcome` — oqdan yashil-och rangga o'tuvchi fon. */}
+        <View style={[styles.welcome, { borderColor: palette["success-soft"] }]}>
+          <GradientFill colors={[palette.surface, palette["success-soft"]]} />
+          {/* `::after` — o'ng yuqoridagi och halqa. */}
+          <View pointerEvents="none" style={[styles.ring, { borderColor: palette["primary-soft"] }]} />
+          <Text variant="caption" style={[styles.eyebrow, { color: palette["primary-text"] }]}>
+            {t("dashboard.eyebrow")}
+          </Text>
+          <Text variant="body" style={styles.greeting}>
+            {t("dashboard.greeting", { name: user?.name?.split(" ")[0] })}
+          </Text>
+          <Text variant="label" style={[styles.subtitle, { color: colors.muted }]}>
             {selectedChild
-              ? `${selectedChild.name}ning ta'lim jarayoni.`
-              : "Farzandingizning ta'lim jarayonini kuzatib boring."}
+              ? t("dashboard.subtitleWithChild", { name: selectedChild.name })
+              : t("dashboard.subtitleNoChild")}
           </Text>
         </View>
 
-        <ChildSelector />
-
         <View style={styles.metrics}>
-          {metrics.map((metric, index) => {
-            const Icon = METRIC_ICONS[metric.id] ?? UsersRound;
-            const tone = METRIC_TONES[index % METRIC_TONES.length]!;
-            return (
-              <View
-                key={metric.id}
-                style={[
-                  styles.metric,
-                  { backgroundColor: palette[`tone-${tone}-bg`], borderColor: palette.border },
-                ]}
-              >
-                <Icon size={20} color={palette[`tone-${tone}-fg`]} />
-                <Text variant="subheading">{metric.value}</Text>
-                <Text variant="caption" tone="muted" numberOfLines={2}>
-                  {metric.label}
-                </Text>
-              </View>
-            );
-          })}
+          {metrics.map((metric, index) => (
+            <PortalMetric
+              key={metric.id}
+              icon={METRIC_ICONS[metric.id] ?? UsersRound}
+              tone={METRIC_TONES[index % METRIC_TONES.length]!}
+              value={metric.value}
+              label={metric.label}
+            />
+          ))}
         </View>
 
-        <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}>
-          <View style={styles.cardHead}>
-            <Text variant="label" style={styles.cardTitle}>
-              {t("parent.songgi_davomat")}
-            </Text>
-            <Text
-              accessibilityRole="button"
-              onPress={() => router.push(ROUTES.parent.attendance)}
-              variant="caption"
-              tone="brand"
-            >
-              {t("parent.barchasi")}
-            </Text>
-            <ChevronRight size={15} color={palette["primary-text"]} />
-          </View>
-
-          {recent.length === 0 ? (
-            <Text variant="caption" tone="muted">
-              {t("parent.tanlangan_farzand_uchun_davomat_topilmadi")}
-            </Text>
-          ) : (
-            recent.map((item, index) => (
-              <View key={item.id}>
-                {index > 0 ? <Separator /> : null}
-                <View style={styles.activity}>
-                  <CalendarCheck2 size={18} color={palette["muted-foreground"]} />
-                  <View style={styles.activityBody}>
-                    <Text variant="label" numberOfLines={1}>
-                      {item.lesson}
-                    </Text>
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {item.child} · {item.entered}
-                    </Text>
-                  </View>
-                  <View style={styles.duration}>
-                    <Clock3 size={13} color={palette["muted-foreground"]} />
-                    <Text variant="caption" tone="muted">
-                      {item.duration}
-                    </Text>
-                  </View>
+        <PortalCard style={styles.recent}>
+          <PortalSectionHead
+            eyebrow={t("dashboard.recentActivityEyebrow")}
+            title={t("dashboard.attendanceTitle")}
+            action={
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => router.push(ROUTES.parent.attendance)}
+                style={styles.link}
+              >
+                <Text variant="label" style={[styles.linkText, { color: palette["primary-text"] }]}>
+                  {t("dashboard.allAttendance")}
+                </Text>
+                <ArrowRight size={15} color={palette["primary-text"]} />
+              </Pressable>
+            }
+          />
+          <View style={styles.activity}>
+            {recent.map((item) => (
+              <View key={item.id} style={[styles.activityRow, { borderColor: colors.border }]}>
+                <View style={[styles.activityIcon, { backgroundColor: palette["primary-soft"] }]}>
+                  <CalendarCheck2 size={18} color={palette["primary-text"]} />
+                </View>
+                <View style={styles.activityBody}>
+                  <Text variant="label" numberOfLines={1}>
+                    {item.lesson}
+                  </Text>
+                  <Text variant="caption" numberOfLines={1} style={{ color: colors.muted }}>
+                    {item.child} · {item.entered}
+                  </Text>
+                </View>
+                <View style={styles.duration}>
+                  <Clock3 size={14} color={colors.muted} />
+                  <Text variant="caption" style={{ color: colors.muted }}>
+                    {item.duration}
+                  </Text>
                 </View>
               </View>
-            ))
-          )}
-        </View>
+            ))}
+            {!recent.length ? (
+              <Text variant="body" style={{ color: colors.muted }}>
+                {t("dashboard.emptyAttendance")}
+              </Text>
+            ) : null}
+          </View>
+        </PortalCard>
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: 16, gap: 16, paddingBottom: 40 },
-  welcome: { gap: 4, paddingTop: 8 },
-  metrics: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  metric: {
-    // Ikki ustun: 50% dan yarim oraliq ayiriladi.
-    width: "48%",
-    flexGrow: 1,
-    gap: 6,
-    padding: 14,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 16,
-    gap: 10,
-  },
-  cardHead: { flexDirection: "row", alignItems: "center", gap: 4 },
-  cardTitle: { flex: 1 },
-  activity: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
-  activityBody: { flex: 1, gap: 2 },
+  /* `.portal-eyebrow` */
+  eyebrow: { fontSize: 12, lineHeight: 18, fontWeight: "700", letterSpacing: 1.56 },
+  /* `.portal-welcome` — 23 20 bo'shliq, radius 20, 1px yashil-och chegara */
+  welcome: { overflow: "hidden", minHeight: 138, justifyContent: "center", paddingVertical: 23, paddingHorizontal: 20, borderWidth: 1, borderRadius: 20 },
+  ring: { position: "absolute", width: 210, height: 210, right: -65, top: -98, borderWidth: 35, borderRadius: 105, opacity: 0.6 },
+  /* `.portal-welcome h1` — 24/36/400, -0.035em */
+  greeting: { marginTop: 8, marginBottom: 7, fontSize: 24, lineHeight: 36, fontWeight: "400", letterSpacing: -0.84 },
+  subtitle: { fontSize: 13, lineHeight: 19.5, fontWeight: "400" },
+  /* `.portal-metric-grid` — tor ekranda bitta ustun, orasi 10 */
+  metrics: { gap: 10 },
+  /* `.parent-recent-card` — 22 bo'shliq */
+  recent: { padding: 22, gap: 18 },
+  link: { flexDirection: "row", alignItems: "center", gap: 4 },
+  linkText: { fontSize: 13, fontWeight: "700" },
+  activity: { gap: 0 },
+  activityRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 11, borderBottomWidth: 1 },
+  activityIcon: { width: 31, height: 31, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  activityBody: { flex: 1, minWidth: 0, gap: 3 },
   duration: { flexDirection: "row", alignItems: "center", gap: 4 },
+  state: { flex: 1, justifyContent: "center", alignItems: "flex-start", gap: 10, padding: 24 },
+  stateTitle: { fontSize: 24, lineHeight: 32, fontWeight: "400" },
+  stateText: { fontWeight: "400", marginBottom: 6 },
 });

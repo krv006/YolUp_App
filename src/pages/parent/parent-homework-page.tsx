@@ -1,71 +1,83 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useRouter } from "expo-router";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
-import { ArrowLeft, CheckCircle2, Clock3, ListChecks } from "lucide-react-native";
-import { HomeworkResultSheet } from "@/modules/homework/ui/homework-result-sheet";
+import { useRouter } from "expo-router";
+import { CheckCircle2, Clock3, ListChecks } from "lucide-react-native";
+import { HomeworkResultSheet } from "@/modules/homework";
 import { useParentHomework, useSelectedChild } from "@/modules/parent";
-import { ChildSelector } from "@/modules/parent/ui/child-selector";
-import { formatDayTime, useBackTo } from "@/shared/lib";
+import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
+import { toIntlLocale } from "@/shared/i18n/intl-locale";
+import { useBackTo } from "@/shared/lib";
 import type { Submission } from "@/shared/types";
-import {
-  Badge,
-  IconButton,
-  radius,
-  Screen,
-  ScreenEmpty,
-  ScreenError,
-  ScreenLoading,
-  Text,
-  useTheme,
-} from "@/shared/ui";
+import { PortalCard, PortalEmpty, PortalHeading, PortalListIcon, portalPage, Screen, ScreenError, ScreenLoading, Text, useLegacyColors, useTheme } from "@/shared/ui";
 
-/** Farzandning vazifalari va AI tekshiruvi — veb `parent-homework-page.tsx` porti. */
+const WORKSPACE_PATH = "/parent/workspace";
+
+/**
+ * Farzandning vazifalari — veb `parent-homework-page.tsx`: sarlavhada
+ * farzand ismi, ro'yxatda vazifa, guruh va muddat, holat belgisi
+ * (bosilsa AI tekshiruvi natijasi ochiladi).
+ *
+ * Vebda tor ekranda qatorlar karta chetiga yopishib qoladi (karta ichida
+ * gorizontal bo'shliq yo'q) — bu yerda 16 ichkarida.
+ */
 export function ParentHomeworkPage() {
-  const { t } = useTranslation("mobile");
+  const { t, i18n } = useTranslation("parent");
+  const { t: tn } = useTranslation("nav");
+  const { t: ts } = useTranslation("mobile");
   const { palette } = useTheme();
+  const colors = useLegacyColors();
   const router = useRouter();
-  useBackTo("/parent/workspace");
+  useBackTo(WORKSPACE_PATH);
   const { selectedChild, selectedChildId } = useSelectedChild();
   const homework = useParentHomework(selectedChildId);
   const [resultOf, setResultOf] = useState<Submission | null>(null);
 
+  const appBar = (
+    <ParentAppBar
+      a11yTitle={tn("parent.homework")}
+      back={{ label: ts("shared.orqaga"), onPress: () => router.replace(WORKSPACE_PATH) }}
+    />
+  );
+
   if (!selectedChild) {
     return (
-      <Screen>
-        <ScreenEmpty
-          title={t("parent.farzand_tanlanmagan")}
-          description={t("parent.avval_farzandlar_bolimida_oquvchi_hisobini_u")}
-        />
+      <Screen padded={false}>
+        {appBar}
+        <View style={portalPage}>
+          <PortalEmpty icon={ListChecks} title={t("homework.noChildTitle")} description={t("homework.noChildDescription")} />
+        </View>
       </Screen>
     );
   }
 
   if (homework.isLoading) {
     return (
-      <Screen>
-        <ScreenLoading label={t("parent.vazifalar_yuklanmoqda")} />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenLoading label={t("homework.loading")} />
       </Screen>
     );
   }
 
   if (homework.isError) {
     return (
-      <Screen>
-        <ScreenError
-          message={homework.error.message}
-          onRetry={() => void homework.refetch()}
-        />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenError message={homework.error.message || t("homework.loadError")} onRetry={() => void homework.refetch()} />
       </Screen>
     );
   }
 
   const items = homework.data ?? [];
+  const format = new Intl.DateTimeFormat(toIntlLocale(i18n.language), { dateStyle: "medium", timeStyle: "short" });
 
   return (
     <Screen padded={false}>
+      {appBar}
       <ScrollView
-        contentContainerStyle={styles.body}
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={portalPage}
         refreshControl={
           <RefreshControl
             refreshing={homework.isRefetching}
@@ -74,145 +86,88 @@ export function ParentHomeworkPage() {
           />
         }
       >
-        <View style={styles.head}>
-          {/*
-            * Ish maydoniga qaytish — bu sahifa endi TAB EMAS.
-            * Sabab `app/parent/_layout.tsx` da.
-            */}
-          <View style={styles.headRow}>
-            <IconButton
-              accessibilityLabel={t("shared.orqaga")}
-              onPress={() => router.replace("/parent/workspace")}
-            >
-              <ArrowLeft size={20} color={palette["muted-foreground"]} />
-            </IconButton>
-            <Text variant="heading">{selectedChild.name}</Text>
-          </View>
-          <Text variant="caption" tone="muted">
-            {t("parent.topshiriqlar_va_tekshiruv_natijalari")}
-          </Text>
-        </View>
+        <PortalHeading eyebrow={t("homework.eyebrow")} title={selectedChild.name} description={t("homework.subtitle")} />
 
-        <ChildSelector />
-
-        {items.length === 0 ? (
-          <ScreenEmpty title={t("parent.vazifa_topilmadi")} />
-        ) : (
-          items.map((item) => (
+        {/* `.parent-homework-list` */}
+        <PortalCard style={styles.list}>
+          {items.map((item, index) => (
             <View
               key={item.id}
-              style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}
+              style={[styles.row, index < items.length - 1 && { borderBottomWidth: 1, borderColor: colors.border }]}
             >
-              <View style={styles.cardHead}>
-                <View style={[styles.icon, { backgroundColor: palette["primary-tint"] }]}>
-                  <ListChecks size={18} color={palette["primary-text"]} />
-                </View>
-                <View style={styles.cardBody}>
-                  <Text variant="label" numberOfLines={2}>
-                    {item.title}
-                  </Text>
-                  <Text variant="caption" tone="muted" numberOfLines={1}>
-                    {item.courseTitle} ·{" "}
-                    {item.dueAt ? formatDayTime(item.dueAt) : "muddat yo'q"}
-                  </Text>
-                </View>
+              <PortalListIcon icon={ListChecks} />
+              <View style={styles.body}>
+                <Text variant="body" style={styles.title}>
+                  {item.title}
+                </Text>
+                <Text variant="caption" style={[styles.meta, { color: colors.muted }]}>
+                  {item.courseTitle} · {item.dueAt ? format.format(new Date(item.dueAt)) : t("homework.noDue")}
+                </Text>
+                <SubmissionPill submission={item.mySubmission} onOpen={setResultOf} />
               </View>
-
-              <SubmissionPill submission={item.mySubmission} onOpen={setResultOf} />
             </View>
-          ))
-        )}
+          ))}
+          {!items.length ? <PortalEmpty icon={ListChecks} title={t("homework.emptyTitle")} /> : null}
+        </PortalCard>
       </ScrollView>
 
-      <HomeworkResultSheet submission={resultOf} onClose={() => setResultOf(null)} />
+      <HomeworkResultSheet
+        submission={resultOf}
+        onClose={() => setResultOf(null)}
+        title={t("homework.resultDialogTitle", { name: selectedChild.name })}
+      />
     </Screen>
   );
 }
 
-/**
- * Topshirish holati. Bosiladigan bo'lishi faqat topshirilgan ishda ma'noli —
- * topshirilmagan vazifada ochadigan narsa yo'q.
- */
-function SubmissionPill({
-  submission,
-  onOpen,
-}: {
-  submission: Submission | null;
-  onOpen: (submission: Submission) => void;
-}) {
-  const { t } = useTranslation("mobile");
+/** `.grade-pill` — holatga qarab yashil, sariq yoki qizil. */
+function SubmissionPill({ submission, onOpen }: { submission: Submission | null; onOpen: (submission: Submission) => void }) {
+  const { t } = useTranslation("parent");
   const { palette } = useTheme();
 
   if (!submission) {
-    return <Badge label={t("parent.topshirilmagan")} tone="neutral" />;
+    return (
+      <View style={[styles.pill, { backgroundColor: palette["success-soft"] }]}>
+        <Text variant="caption" style={[styles.pillText, { color: palette["tone-emerald-fg"] }]}>
+          {t("homework.notSubmitted")}
+        </Text>
+      </View>
+    );
   }
 
-  const content =
-    submission.status === "done" ? (
-      <>
-        <CheckCircle2 size={15} color={palette["success-strong"]} />
-        <Text variant="caption" style={{ color: palette["success-strong"] }}>
-          {submission.overallScore} ball · {submission.grade}
-        </Text>
-      </>
-    ) : submission.status === "checking" ? (
-      <>
-        <Clock3 size={14} color={palette["warning-strong"]} />
-        <Text variant="caption" style={{ color: palette["warning-strong"] }}>
-          {t("parent.tekshirilmoqda")}
-        </Text>
-      </>
-    ) : (
-      <Text variant="caption" style={{ color: palette["destructive-strong"] }}>
-        {t("parent.tekshiruv_xatosi")}
-      </Text>
-    );
-
-  const background =
-    submission.status === "done"
-      ? palette["success-soft"]
-      : submission.status === "checking"
-        ? palette["warning-soft"]
-        : palette["destructive-soft"];
+  const done = submission.status === "done";
+  const checking = submission.status === "checking";
+  const color = done ? palette["tone-emerald-fg"] : checking ? palette["warning-strong"] : palette["destructive-strong"];
+  const background = done ? palette["success-soft"] : checking ? palette["warning-soft"] : palette["destructive-soft"];
+  const label = done ? t("homework.openResultAria") : checking ? t("homework.openCheckingAria") : t("homework.openErrorAria");
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t("parent.natijani_ochish")}
+      accessibilityLabel={label}
       onPress={() => onOpen(submission)}
       style={({ pressed }) => [styles.pill, { backgroundColor: background, opacity: pressed ? 0.85 : 1 }]}
     >
-      {content}
+      {done ? <CheckCircle2 size={15} color={color} /> : checking ? <Clock3 size={14} color={color} /> : null}
+      <Text variant="caption" style={[styles.pillText, { color }]}>
+        {done
+          ? `${submission.overallScore} ball · ${submission.grade}`
+          : checking
+            ? t("homework.checking")
+            : t("homework.checkError")}
+      </Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: 16, gap: 12, paddingBottom: 40 },
-  headRow: { flexDirection: "row", alignItems: "center", gap: 6, marginLeft: -8 },
-  head: { gap: 4, paddingTop: 8 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 14,
-    gap: 12,
-  },
-  cardHead: { flexDirection: "row", alignItems: "center", gap: 12 },
-  cardBody: { flex: 1, gap: 3 },
-  icon: {
-    width: 38,
-    height: 38,
-    borderRadius: radius.sm,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  pill: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: radius.full,
-  },
+  list: { paddingHorizontal: 16 },
+  /* `article` — 13 0, ikonka va matn orasi 12 */
+  row: { flexDirection: "row", alignItems: "flex-start", gap: 12, paddingVertical: 13 },
+  body: { flex: 1, minWidth: 0, gap: 4 },
+  title: { fontWeight: "700" },
+  meta: { fontSize: 12.8, lineHeight: 19.2 },
+  /* `.grade-pill` — 7 10, 12/800 */
+  pill: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 5, marginTop: 6, paddingVertical: 7, paddingHorizontal: 10, borderRadius: 999 },
+  pillText: { fontSize: 12, lineHeight: 18, fontWeight: "700" },
 });

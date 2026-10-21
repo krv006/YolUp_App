@@ -1,73 +1,77 @@
-import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { RefreshControl, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useBackTo } from "@/shared/lib";
-import { ArrowLeft } from "lucide-react-native";
+import { CalendarCheck2, Search } from "lucide-react-native";
 import { AttendanceList, useAttendance } from "@/modules/attendance";
 import { useSelectedChild } from "@/modules/parent";
-import { ChildSelector } from "@/modules/parent/ui/child-selector";
-import { IconButton, Screen, ScreenEmpty, ScreenError, ScreenLoading, Text, useTheme } from "@/shared/ui";
+import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
+import { formatDuration, useBackTo } from "@/shared/lib";
+import { PortalHeading, portalPage, Screen, ScreenError, ScreenLoading, Text, useLegacyColors, useTheme } from "@/shared/ui";
+
+const WORKSPACE_PATH = "/parent/workspace";
 
 /**
- * Davomat va fokus jurnali — veb `parent-attendance-page.tsx` porti.
+ * Davomat tarixi — veb `parent-attendance-page.tsx`: sarlavha, qidiruv,
+ * yozuvlar soni (va chalg'igan vaqt) hamda darslar ro'yxati.
  *
- * Veb'da bu keng JADVAL edi (ustunlar: dars, kirish, chiqish, davomiylik,
- * diqqat, fokus). Telefonda jadval o'qilmaydi, shuning uchun har qator
- * kartochkaga aylandi va fokus tafsiloti bosilganda pastdan ochiladi.
+ * Vebdagi "Hisobot" tugmasi YO'Q: u brauzerning chop etish oynasini
+ * (`window.print()`) ochadi, ilovada esa chop etish moduli yo'q.
+ * Jadval o'rniga `AttendanceList` kartochkalari — sababi o'sha faylda.
  */
 export function ParentAttendancePage() {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("parent");
+  const { t: tn } = useTranslation("nav");
+  const { t: ts } = useTranslation("mobile");
   const { palette } = useTheme();
+  const colors = useLegacyColors();
   const router = useRouter();
-  useBackTo("/parent/workspace");
-  const { children, childrenQuery, selectedChildId } = useSelectedChild();
-
+  useBackTo(WORKSPACE_PATH);
+  const { selectedChildId, selectedChild } = useSelectedChild();
   const attendance = useAttendance(selectedChildId ? { student: selectedChildId } : {});
+  const [search, setSearch] = useState("");
 
-  /*
-   * Farzand biriktirilmagan bo'lsa bu XATO emas.
-   *
-   * Avval so'rovlar baribir yuborilardi, backend esa o'quvchisiz so'rovni
-   * rad etardi — natijada yangi ota-ona hisobi birinchi ochilishda
-   * "Ma'lumotlarni yuklab bo'lmadi" degan qizil ekranni ko'rardi va nima
-   * qilishni bilmasdi. Endi unga nima qilish kerakligi aytiladi.
-   *
-   * Xuddi shu naqsh `parent-grades-page` va `parent-homework-page` da ham.
-   */
-  if (!childrenQuery.isLoading && children.length === 0) {
-    return (
-      <Screen>
-        <ScreenEmpty
-          title={t("parent.farzand_biriktirilmagan")}
-          description={t("parent.farzand_bolimiga_oting_va_oquvchining_taklif")}
-        />
-      </Screen>
-    );
-  }
+  const rows = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    const items = attendance.data ?? [];
+    if (!needle) return items;
+    return items.filter((item) => `${item.child} ${item.lesson}`.toLowerCase().includes(needle));
+  }, [attendance.data, search]);
 
-  if (childrenQuery.isLoading || attendance.isLoading) {
+  const totalAway = useMemo(() => rows.reduce((sum, item) => sum + item.focus.awaySeconds, 0), [rows]);
+
+  const appBar = (
+    <ParentAppBar
+      a11yTitle={tn("parent.attendance")}
+      back={{ label: ts("shared.orqaga"), onPress: () => router.replace(WORKSPACE_PATH) }}
+    />
+  );
+
+  if (attendance.isLoading) {
     return (
-      <Screen>
-        <ScreenLoading label={t("parent.davomat_yuklanmoqda")} />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenLoading label={t("attendance.loading")} />
       </Screen>
     );
   }
 
   if (attendance.isError) {
     return (
-      <Screen>
-        <ScreenError
-          message={t("parent.davomatni_yuklab_bolmadi")}
-          onRetry={() => void attendance.refetch()}
-        />
+      <Screen padded={false}>
+        {appBar}
+        <ScreenError message={t("attendance.loadError")} onRetry={() => void attendance.refetch()} />
       </Screen>
     );
   }
 
   return (
     <Screen padded={false}>
+      {appBar}
       <ScrollView
-        contentContainerStyle={styles.body}
+        style={{ backgroundColor: palette.background }}
+        contentContainerStyle={portalPage}
+        keyboardShouldPersistTaps="handled"
         refreshControl={
           <RefreshControl
             refreshing={attendance.isRefetching}
@@ -76,38 +80,56 @@ export function ParentAttendancePage() {
           />
         }
       >
-        <View style={styles.head}>
-          {/*
-            * Ish maydoniga qaytish — bu sahifa endi TAB EMAS.
-            * Sabab `app/parent/_layout.tsx` da.
-            */}
-          <View style={styles.headRow}>
-            <IconButton
-              accessibilityLabel={t("shared.orqaga")}
-              onPress={() => router.replace("/parent/workspace")}
-            >
-              <ArrowLeft size={20} color={palette["muted-foreground"]} />
-            </IconButton>
-            <Text variant="heading">Davomat</Text>
+        <PortalHeading
+          eyebrow={t("attendance.eyebrow")}
+          title={t("attendance.title")}
+          description={
+            selectedChild
+              ? t("attendance.subtitleWithChild", { name: selectedChild.name })
+              : t("attendance.subtitleNoChild")
+          }
+        />
+
+        {/* `.attendance-toolbar` — qidiruv va yozuvlar soni. */}
+        <View style={styles.toolbar}>
+          <View style={[styles.search, { borderColor: colors.border, backgroundColor: palette.surface }]}>
+            <Search size={18} color={colors.muted} />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t("attendance.searchPlaceholder")}
+              placeholderTextColor={colors.muted}
+              selectionColor={palette.primary}
+              returnKeyType="search"
+              style={[styles.searchInput, { color: colors.foreground }]}
+            />
           </View>
-          <Text variant="caption" tone="muted">
-            {t("parent.har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko")}
-          </Text>
+          <View style={styles.count}>
+            <CalendarCheck2 size={17} color={colors.muted} />
+            <Text variant="caption" style={{ color: colors.muted }}>
+              {t("attendance.recordsCount", { count: rows.length })}
+              {totalAway ? t("attendance.awaySuffix", { duration: formatDuration(totalAway) }) : ""}
+            </Text>
+          </View>
         </View>
 
-        <ChildSelector />
-
-        <AttendanceList
-          rows={attendance.data ?? []}
-          emptyLabel={t("parent.farzandingiz_darsga_kirgach_malumot_shu_yerd")}
-        />
+        {/* Vebdagi `AttendanceAccordion`: bo'sh bo'lsa oddiy kulrang matn. */}
+        {rows.length ? (
+          <AttendanceList rows={rows} />
+        ) : (
+          <Text variant="body" style={{ color: colors.muted }}>
+            {ts("attendance.davomat_yozuvi_topilmadi")}.
+          </Text>
+        )}
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: 16, gap: 12, paddingBottom: 40 },
-  headRow: { flexDirection: "row", alignItems: "center", gap: 6, marginLeft: -8 },
-  head: { gap: 4, paddingTop: 8 },
+  toolbar: { gap: 15 },
+  /* `.portal-search` — 44 balandlik, 0 14, radius 13 */
+  search: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: 9, paddingHorizontal: 14, borderWidth: 1, borderRadius: 13 },
+  searchInput: { flex: 1, minWidth: 0, paddingVertical: 10, fontSize: 14, fontFamily: "Onest-Regular" },
+  count: { flexDirection: "row", alignItems: "center", gap: 6 },
 });

@@ -25,6 +25,11 @@ export interface SheetButtonProps {
   variant?: "primary" | "secondary" | "danger";
   disabled?: boolean;
   loading?: boolean;
+  /**
+   * `true` (standart) — qatorni teng bo'lib to'ldiradi (`AppDialog`).
+   * `false` — o'z kengligida, bo'shliq 0 24 (eski `.dialog-actions`).
+   */
+  fill?: boolean;
 }
 
 export function SheetButton({
@@ -33,6 +38,7 @@ export function SheetButton({
   variant = "secondary",
   disabled = false,
   loading = false,
+  fill = true,
 }: SheetButtonProps) {
   const { palette } = useTheme();
   const filled = variant !== "secondary";
@@ -55,6 +61,7 @@ export function SheetButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        fill ? styles.fill : styles.auto,
         {
           backgroundColor: pressed ? pressedBackground : background,
           borderColor: filled ? "transparent" : palette.border,
@@ -79,8 +86,9 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderTopWidth: 1,
   },
+  fill: { flex: 1 },
+  auto: { paddingHorizontal: 24 },
   button: {
-    flex: 1,
     height: 48,
     flexDirection: "row",
     alignItems: "center",

@@ -135,6 +135,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `bd437aacb2a9` | — |
 | `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `677457db62d2` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; chiqishdagi oxirgi saqlash qoldi |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `e63f770dcde0` | portal bloklari (`shared/ui/portal.tsx`) bilan; ko'rsatkichlar tor ekrandagidek bir ustun |
+| `src/widgets/homework-workspace/assignment-form-dialog.tsx` | 🟡 MOSLASH | `59d4cea990ba` | mobilda `assignment-form-sheet.tsx` (AppDialog -> Sheet); `window.prompt` o'rniga havola oynasi |
+| `src/widgets/homework-workspace/homework-workspace.tsx` | 🟡 MOSLASH | `36636e5f6ad1` | telefon ko'rinishi: ro'yxat yoki tanlangan vazifa (avtomatik tanlov yo'q); eslatma oynasi `Sheet` |
+| `src/widgets/homework-workspace/submission-review.tsx` | 🟡 MOSLASH | `bd9efb95f694` | bitta ustun; qayta topshirish oynasi `Sheet` |
 | `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `bd820fbe51f4` | — |
 | `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `d32b70cc0eba` | — |
 | `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `9c384deb002f` | — |

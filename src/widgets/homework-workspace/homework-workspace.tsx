@@ -3,7 +3,14 @@ import { useQueries } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useCourses, useCourseStudents } from "@/modules/course";
-import { homeworkApi, homeworkKeys, useAssignments, useDeleteAssignment } from "@/modules/homework";
+import {
+  homeworkApi,
+  homeworkKeys,
+  useAssignmentAiSummary,
+  useAssignments,
+  useDeleteAssignment,
+  useRemindAssignment,
+} from "@/modules/homework";
 import { useLessons } from "@/modules/lesson";
 import { useSendNotification } from "@/modules/notification";
 import type { Assignment, Submission } from "@/shared/types";
@@ -14,8 +21,8 @@ import {
   Sheet,
   SheetButton,
   SheetFooter,
+  Switch,
   Text,
-  toast,
   useTheme,
   type IconName,
 } from "@/shared/ui";
@@ -30,6 +37,13 @@ export interface HomeworkWorkspaceProps {
 
 type ListFilter = "active" | "review" | "done" | "draft";
 type RowFilter = "all" | "unchecked" | "graded" | "missing";
+
+interface AiSummaryState {
+  assignmentId: string;
+  summary: string;
+  topics: string[];
+  recommendations: string[];
+}
 
 interface StudentRow {
   id: string;
@@ -78,10 +92,14 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
         isLoading: courses.isLoading || perCourse.some((query) => query.isLoading),
       };
   const remove = useDeleteAssignment();
+  const remind = useRemindAssignment();
+  const aiSummary = useAssignmentAiSummary();
 
   const [filter, setFilter] = useState<ListFilter>("active");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [remindOpen, setRemindOpen] = useState(false);
+  const [remindParents, setRemindParents] = useState(false);
+  const [aiResult, setAiResult] = useState<AiSummaryState | null>(null);
   const sendNotification = useSendNotification();
   const [rowFilter, setRowFilter] = useState<RowFilter>("all");
   const [search, setSearch] = useState("");
@@ -125,13 +143,17 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
   });
 
   const listItems = items.filter((item) => {
+    if (filter === "draft") return item.status === "draft";
+    if (item.status === "draft") return false;
     const due = item.dueAt ? new Date(item.dueAt).getTime() : null;
     const open = due === null || due >= now;
     if (filter === "active") return open;
     if (filter === "review") return item.submissions.some((entry) => !entry.grade);
-    if (filter === "done") return !open;
-    return false;
+    return !open;
   });
+
+  const draftCount = items.filter((item) => item.status === "draft").length;
+  const missingIds = rows.filter((row) => !row.submission).map((row) => row.id);
   const thisWeek = listItems.filter((item) => withinWeek(item.createdAt));
   const earlier = listItems.filter((item) => !withinWeek(item.createdAt));
 
@@ -141,6 +163,11 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
     if (Number.isNaN(date.getTime())) return "—";
     const time = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
     return `${date.getDate()}-${(months[date.getMonth()] ?? "").toLowerCase()}, ${time}`;
+  }
+
+  function closeRemind() {
+    setRemindOpen(false);
+    setRemindParents(false);
   }
 
   const reviewSubmission = reviewId ? (selected?.submissions.find((item) => item.id === reviewId) ?? null) : null;
@@ -190,6 +217,8 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
     return (
       <SubmissionReview
         submission={reviewSubmission}
+        grading={selected.grading}
+        maxScore={selected.maxScore}
         onClose={() => setReviewId(null)}
         onStep={(direction) => {
           const all = selected.submissions;
@@ -215,18 +244,15 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
                   ["active", t("workspace.filterActive", { count: items.length })],
                   ["review", t("workspace.filterReview", { count: unchecked })],
                   ["done", t("workspace.filterDone")],
-                  ["draft", t("workspace.filterDraft")],
+                  ["draft", t("workspace.filterDraftCount", { count: draftCount })],
                 ] as const
               ).map(([id, label]) => (
                 <Pressable
                   key={id}
                   accessibilityRole="button"
                   onPress={() => {
-                    if (id === "draft") {
-                      toast.info(t("workspace.draftPending"));
-                      return;
-                    }
                     setFilter(id);
+                    setSelectedId(null);
                   }}
                   style={[styles.chip, styles.chipWide, chip(filter === id)]}
                 >
@@ -281,6 +307,13 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
                               {item.courseTitle}
                             </Text>
                           </View>
+                          {item.status === "draft" ? (
+                            <View style={[styles.draftBadge, { backgroundColor: palette["surface-subtle"] }]}>
+                              <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+                                {t("workspace.draftBadge")}
+                              </Text>
+                            </View>
+                          ) : null}
                           <Text variant="caption" style={[styles.strong, { color: palette.primary }]}>
                             {total ? t("workspace.submittedOf", { done, total }) : t("workspace.submittedCount", { count: done })}
                           </Text>
@@ -382,15 +415,57 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
                 <Text variant="label" style={styles.grow}>
                   {t("workspace.aiSummary")}
                 </Text>
-                <Pressable accessibilityRole="button" onPress={() => toast.info(t("workspace.aiPending"))}>
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={aiSummary.isPending}
+                  onPress={() =>
+                    aiSummary.mutate(selected.id, {
+                      onSuccess: (data) =>
+                        setAiResult({
+                          assignmentId: selected.id,
+                          summary: data.summary,
+                          topics: data.topics,
+                          recommendations: data.recommendations,
+                        }),
+                    })
+                  }
+                  style={aiSummary.isPending && styles.dim}
+                >
                   <Text variant="label" style={{ color: palette.primary }}>
-                    {t("workspace.aiAction")}
+                    {aiSummary.isPending ? t("workspace.aiLoading") : t("workspace.aiAction")}
                   </Text>
                 </Pressable>
               </View>
               <Text variant="label" style={[styles.bodySm, { color: palette["muted-foreground"] }]}>
-                {summaryText(selected) || t("workspace.aiEmpty")}
+                {aiResult?.assignmentId === selected.id && aiResult.summary
+                  ? aiResult.summary
+                  : summaryText(selected) || t("workspace.aiEmpty")}
               </Text>
+              {aiResult?.assignmentId === selected.id && aiResult.topics.length ? (
+                <View style={styles.topics}>
+                  {aiResult.topics.map((topic) => (
+                    <View key={topic} style={[styles.topic, { backgroundColor: palette.surface }]}>
+                      <Text variant="caption" style={[styles.strong, { color: palette["muted-foreground"] }]}>
+                        {topic}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+              {aiResult?.assignmentId === selected.id && aiResult.recommendations.length ? (
+                <View style={styles.recommendations}>
+                  {aiResult.recommendations.map((item) => (
+                    <View key={item} style={styles.recommendation}>
+                      <View style={styles.recommendationIcon}>
+                        <Icon name="check-circle" size={14} color={palette.success} />
+                      </View>
+                      <Text variant="label" style={[styles.bodySm, styles.grow, { color: palette["muted-foreground"] }]}>
+                        {item}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
             </View>
 
             <View style={styles.chips}>
@@ -434,11 +509,21 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
                 <View style={styles.colChevron} />
               </View>
               {visibleRows.map((row, index) => {
-                const state = row.submission ? (row.submission.grade ? "graded" : row.submission.isLate ? "late" : "unchecked") : "missing";
+                const state = !row.submission
+                  ? "missing"
+                  : row.submission.status === "resubmit_requested"
+                    ? "resubmit"
+                    : row.submission.grade
+                      ? "graded"
+                      : row.submission.isLate
+                        ? "late"
+                        : "unchecked";
                 const tone =
                   state === "graded"
                     ? { bg: palette["success-soft"], fg: palette["success-strong"] }
-                    : state === "unchecked"
+                    : state === "resubmit"
+                      ? { bg: palette["primary-soft"], fg: palette.primary }
+                      : state === "unchecked"
                       ? { bg: palette["saffron-soft"], fg: palette["saffron-strong"] }
                       : { bg: palette["destructive-soft"], fg: palette["destructive-strong"] };
                 return (
@@ -486,32 +571,60 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
 
       <Sheet
         open={remindOpen}
-        onClose={() => setRemindOpen(false)}
+        onClose={closeRemind}
         title={t("workspace.remindTitle")}
         description={t("workspace.remindDescription", { count: missing })}
       >
-        <View style={[styles.message, { backgroundColor: palette["surface-subtle"] }]}>
-          <Text variant="caption" style={[styles.overline, { color: palette["subtle-foreground"] }]}>
-            {t("workspace.remindMessageLabel")}
-          </Text>
-          <Text variant="label" style={styles.bodySm}>
-            {t("workspace.remindMessage", { title: selected?.title ?? "", due: formatDue(selected?.dueAt ?? null) })}
-          </Text>
+        {/* `rounded-2xl border px-4 py-3 gap-3` — ota-onalarga ham yuborish. */}
+        <View style={[styles.parents, { borderColor: palette.border }]}>
+          <View style={[styles.parentsIcon, { backgroundColor: palette.primary }]}>
+            <Icon name="groups" size={17} color={palette["primary-foreground"]} />
+          </View>
+          <View style={styles.grow}>
+            <Text variant="label">{t("workspace.remindParents")}</Text>
+            <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
+              {t("workspace.remindParentsHint")}
+            </Text>
+          </View>
+          <Switch
+            checked={remindParents}
+            onCheckedChange={setRemindParents}
+            accessibilityLabel={t("workspace.remindParents")}
+          />
         </View>
+
+        {remindParents ? (
+          <View style={[styles.message, { backgroundColor: palette["surface-subtle"] }]}>
+            <Text variant="caption" style={[styles.overline, { color: palette["subtle-foreground"] }]}>
+              {t("workspace.remindMessageLabel")}
+            </Text>
+            <Text variant="label" style={styles.bodySm}>
+              {t("workspace.remindMessage", { title: selected?.title ?? "", due: formatDue(selected?.dueAt ?? null) })}
+            </Text>
+          </View>
+        ) : null}
+
         <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
-          {t("workspace.remindParentsNote")}
+          {t("workspace.remindThrottleNote")}
         </Text>
         <SheetFooter>
-          <SheetButton title={t("workspace.remindCancel")} onPress={() => setRemindOpen(false)} />
+          <SheetButton title={t("workspace.remindCancel")} onPress={closeRemind} />
           <SheetButton
             variant="primary"
             title={t("workspace.remindSend")}
-            disabled={sendNotification.isPending || !missing}
+            disabled={remind.isPending || sendNotification.isPending || !missing || !selected}
             onPress={() => {
-              const text = t("workspace.remindMessage", { title: selected?.title ?? "", due: formatDue(selected?.dueAt ?? null) });
-              for (const row of rows.filter((item) => !item.submission))
-                sendNotification.mutate({ description: text, targetType: "user", userId: row.id });
-              setRemindOpen(false);
+              if (!selected) return;
+              // O'quvchilarga — bitta server chaqiruvi; ota-onalarga — ixtiyoriy bildirishnoma.
+              remind.mutate(selected.id);
+              if (remindParents && missingIds.length)
+                sendNotification.mutate({
+                  description: t("workspace.remindMessage", { title: selected.title, due: formatDue(selected.dueAt) }),
+                  targetType: "parents_of",
+                  userIds: missingIds,
+                  kind: "homework_reminder",
+                });
+              closeRemind();
             }}
           />
         </SheetFooter>
@@ -613,4 +726,16 @@ const styles = StyleSheet.create({
   state: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.full },
   noRows: { paddingHorizontal: 16, paddingVertical: 40 },
   message: { gap: 8, padding: 14, borderRadius: radius.xl },
+  parents: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: radius["2xl"] },
+  /* `size-9 rounded-xl` */
+  parentsIcon: { width: 36, height: 36, borderRadius: radius.xl, alignItems: "center", justifyContent: "center" },
+  /* `rounded-full px-2 py-1` */
+  draftBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.full },
+  /* `flex flex-wrap gap-1.5`; har biri `rounded-full px-2.5 py-1` */
+  topics: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  topic: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.full },
+  recommendations: { gap: 4 },
+  recommendation: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+  recommendationIcon: { marginTop: 2 },
+  dim: { opacity: 0.6 },
 });

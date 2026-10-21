@@ -1,213 +1,276 @@
+import { useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "react-i18next";
-import { LockKeyhole, Phone, UserRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
-import { StyleSheet, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Redirect, useRouter } from "expo-router";
+import { Check } from "lucide-react-native";
+import { createRegisterSchema, resolveHomeRoute, useAuth, useRegisterMutation, type RegisterFormValues } from "@/modules/auth";
+import {
+  AuthButton,
+  AuthField,
+  AuthFieldError,
+  AuthPasswordField,
+  AuthPhoneField,
+  AuthScreen,
+} from "@/modules/auth/ui/auth-screen";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
-import { createRegisterSchema, useAuth, useRegisterMutation, useWelcomeStore } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
-import type { RegisterFormValues } from "@/modules/auth";
-import { Button, Chip, ChipRow, Input, Logo, Screen, Text, toast, useTheme } from "@/shared/ui";
+import type { AuthUser } from "@/shared/types";
+import { radius, Text, toast, useTheme } from "@/shared/ui";
+
+const ROLES = ["teacher", "parent", "student"] as const;
 
 /**
- * Veb `register-form.tsx` dagi tanlov bilan bir xil (o'quvchi ham mumkin).
- *
- * Faqat identifikatorlar — matn `roles.*` kalitlaridan render paytida
- * olinadi. Ilgari bu yerda o'zbekcha matn turardi va ilova boshqa tilda
- * ochilganda ham rollar o'zbekcha chiqardi.
- */
-const ROLE_OPTIONS: readonly RegisterFormValues["role"][] = [
-  "teacher",
-  "parent",
-  "student",
-];
-
-/**
- * Ro'yxatdan o'tish — veb `register-form.tsx` + `register-page.tsx` porti.
- *
- * Ro'yxatdan o'tgach AVTOMATIK kiritiladi: mobilda foydalanuvchini yana
- * login ekraniga qaytarib, parolni qayta yozdirish ortiqcha ishqalanish.
+ * Ro'yxatdan o'tish — veb `modules/auth/ui/mobile-register-form.tsx`:
+ * rol tanlagichi, ism/familiya, login, telefon, parol va tasdiq.
+ * Muvaffaqiyatdan keyin vebdagi "tayyor" ekrani, "Boshlash" bosh sahifaga
+ * olib boradi. Vebda kirgan foydalanuvchi darhol yo'naltirilgani uchun
+ * bu ekran ko'rinmaydi (xato) — mobilda u haqiqatan ko'rsatiladi.
  */
 export function RegisterPage() {
-  const { t } = useTranslation("mobile");
-  /* Veb `auth` lug'ati — forma xato matnlari o'sha yerdan. */
-  const { t: ta } = useTranslation("auth");
-  const router = useRouter();
+  const { t } = useTranslation("auth");
   const { palette } = useTheme();
-  const { login } = useAuth();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const register = useRegisterMutation();
+  const schema = useMemo(() => createRegisterSchema(t), [t]);
+  const [createdUser, setCreatedUser] = useState<AuthUser | null>(null);
+  const [confirm, setConfirm] = useState("");
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     control,
     handleSubmit,
+    getValues,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(createRegisterSchema(ta)),
-    defaultValues: {
-      username: "",
-      password: "",
-      firstName: "",
-      lastName: "",
-      phone: "",
-      role: "student",
-    },
+    resolver: zodResolver(schema),
+    defaultValues: { username: "", password: "", firstName: "", lastName: "", phone: "", role: "teacher" },
   });
 
+  // Allaqachon kirgan foydalanuvchi (ro'yxatdan o'tish jarayonidan tashqari) bosh sahifaga.
+  if (isAuthenticated && !createdUser && !isSubmitting) return <Redirect href={ROUTES.root} />;
+
   async function submit(values: RegisterFormValues) {
+    if (values.password !== confirm) {
+      setConfirmError(t("mobile.register.mismatch"));
+      return;
+    }
+    setConfirmError(null);
     try {
-      await register.mutateAsync(values);
-      /*
-       * "Xush kelibsiz" oynasi uchun BELGI. Oynaning o'zi bu yerda
-       * ochilmaydi — quyidagi `replace` bu ekranni darhol almashtiradi va
-       * oyna u bilan birga yo'qolardi. Izohi `auth/lib/welcome.ts` da.
-       */
-      useWelcomeStore.getState().mark();
-      // Ro'yxatdan o'tish tokenlar qaytarmaydi — darhol kirib olamiz.
-      await login({ login: values.username.trim(), password: values.password, remember: true });
-      router.replace(ROUTES.root);
+      setCreatedUser(await register.mutateAsync(values));
+      toast.success(t("register.accountCreated"));
     } catch (error) {
       const appError = error as AppError;
       if (!applyApiFieldErrors(appError, setError, { first_name: "firstName", last_name: "lastName" })) {
-        toast.error(appError.message);
+        setError("root", { message: appError.message });
       }
     }
   }
 
-  return (
-    <Screen scroll avoidKeyboard>
-      <View style={styles.header}>
-        <Logo size={48} variant="tile" />
-        <Text variant="title">Ro'yxatdan o'tish</Text>
-        <Text tone="muted">YolUp platformasida yangi hisob oching.</Text>
-      </View>
+  if (createdUser)
+    return (
+      <AuthScreen
+        onBack={() => router.replace(ROUTES.auth.login)}
+        action={
+          <AuthButton onPress={() => router.replace(resolveHomeRoute(createdUser))}>
+            {t("mobile.register.start")}
+          </AuthButton>
+        }
+      >
+        <View style={styles.done}>
+          <View style={[styles.doneIcon, { backgroundColor: palette["success-soft"] }]}>
+            <Check size={34} strokeWidth={3} color={palette["success-strong"]} />
+          </View>
+          <Text variant="title" style={styles.centerText}>
+            {t("mobile.register.doneTitle")}
+          </Text>
+          <Text variant="body" style={[styles.centerText, styles.doneText, { color: palette["muted-foreground"] }]}>
+            {t("mobile.register.doneDescription")}
+          </Text>
+        </View>
+      </AuthScreen>
+    );
 
+  return (
+    <AuthScreen
+      onBack={() => (router.canGoBack() ? router.back() : router.replace(ROUTES.root))}
+      title={t("mobile.register.title")}
+      description={t("register.subtitle")}
+      action={
+        <AuthButton loading={isSubmitting} loadingLabel={t("mobile.register.submitting")} onPress={handleSubmit(submit)}>
+          {t("mobile.login.registerLink")}
+        </AuthButton>
+      }
+      footer={
+        <>
+          {t("mobile.register.haveAccount")}{" "}
+          <Text variant="label" style={{ color: palette.primary }} onPress={() => router.replace(ROUTES.auth.login)}>
+            {t("form.submit")}
+          </Text>
+        </>
+      }
+    >
       <View style={styles.form}>
-        <View style={styles.roleGroup}>
-          <Text variant="label">Hisob turi</Text>
+        <Controller
+          control={control}
+          name="role"
+          render={({ field }) => (
+            <View accessibilityRole="radiogroup" accessibilityLabel={t("register.roleLabel")} style={[styles.roles, { backgroundColor: palette["surface-subtle"] }]}>
+              {ROLES.map((role) => {
+                const active = field.value === role;
+                return (
+                  <Pressable
+                    key={role}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: active }}
+                    onPress={() => field.onChange(role)}
+                    style={[styles.role, active && [styles.roleActive, { backgroundColor: palette.surface }]]}
+                  >
+                    <Text variant="label" style={{ color: active ? palette.foreground : palette["muted-foreground"] }}>
+                      {t(`register.role.${role}`)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        />
+
+        <View style={styles.pair}>
           <Controller
             control={control}
-            name="role"
-            render={({ field: { onChange, value } }) => (
-              <View style={styles.roles}>
-                <ChipRow>
-                  {ROLE_OPTIONS.map((role) => (
-                    <Chip
-                      key={role}
-                      label={t(`roles.${role}`)}
-                      selected={value === role}
-                      onPress={() => onChange(role)}
-                    />
-                  ))}
-                </ChipRow>
-              </View>
+            name="firstName"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthField
+                containerStyle={styles.grow}
+                autoComplete="given-name"
+                placeholder={t("register.form.firstName")}
+                accessibilityLabel={t("register.form.firstName")}
+                invalid={Boolean(errors.firstName)}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="lastName"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthField
+                containerStyle={styles.grow}
+                autoComplete="family-name"
+                placeholder={t("register.form.lastName")}
+                accessibilityLabel={t("register.form.lastName")}
+                invalid={Boolean(errors.lastName)}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
             )}
           />
         </View>
+        {errors.firstName || errors.lastName ? <AuthFieldError>{errors.firstName?.message ?? errors.lastName?.message}</AuthFieldError> : null}
 
-        <Field
-          control={control}
-          name="firstName"
-          label={t("auth.ism")}
-          autoCapitalize="words"
-          error={errors.firstName?.message}
-        />
-        <Field
-          control={control}
-          name="lastName"
-          label={t("auth.familiya")}
-          autoCapitalize="words"
-          error={errors.lastName?.message}
-        />
-        <Field
+        <Controller
           control={control}
           name="username"
-          label={t("auth.login")}
-          placeholder={t("auth.kamida_3_ta_belgi")}
-          icon={<UserRound size={18} color={palette["muted-foreground"]} />}
-          error={errors.username?.message}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <AuthField
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder={t("register.form.username")}
+              accessibilityLabel={t("register.form.username")}
+              invalid={Boolean(errors.username)}
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
-        <Field
+        {errors.username ? <AuthFieldError>{errors.username.message}</AuthFieldError> : null}
+
+        <Controller
           control={control}
           name="phone"
-          label={t("auth.telefon_ixtiyoriy")}
-          placeholder="+998 90 123 45 67"
-          keyboardType="phone-pad"
-          icon={<Phone size={18} color={palette["muted-foreground"]} />}
-          error={errors.phone?.message}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <AuthPhoneField
+              placeholder={t("mobile.reset.phonePlaceholder")}
+              accessibilityLabel={t("register.form.phone")}
+              hint={t("mobile.reset.phoneHint")}
+              value={value ?? ""}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
-        <Field
+
+        <Controller
           control={control}
           name="password"
-          label={t("auth.parol")}
-          placeholder={t("auth.kamida_8_ta_belgi")}
-          secure
-          icon={<LockKeyhole size={18} color={palette["muted-foreground"]} />}
-          error={errors.password?.message}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <AuthPasswordField
+              autoComplete="new-password"
+              textContentType="newPassword"
+              placeholder={t("register.form.password")}
+              accessibilityLabel={t("register.form.password")}
+              invalid={Boolean(errors.password) || Boolean(confirmError)}
+              visible={showPassword}
+              onToggle={() => setShowPassword((current) => !current)}
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+            />
+          )}
         />
+        {errors.password ? <AuthFieldError>{errors.password.message}</AuthFieldError> : null}
 
-        <Button
-          title={t("auth.royxatdan_otish")}
-          size="lg"
-          loading={isSubmitting || register.isPending}
-          onPress={handleSubmit(submit)}
+        <AuthPasswordField
+          autoComplete="new-password"
+          textContentType="newPassword"
+          placeholder={t("mobile.newPassword.confirmPlaceholder")}
+          accessibilityLabel={t("mobile.newPassword.confirmPlaceholder")}
+          value={confirm}
+          invalid={Boolean(confirmError)}
+          visible={showConfirm}
+          onToggle={() => setShowConfirm((current) => !current)}
+          onChangeText={(value) => {
+            setConfirmError(null);
+            setConfirm(value);
+          }}
+          onBlur={() => {
+            if (confirm && getValues("password") !== confirm) setConfirmError(t("mobile.register.mismatch"));
+          }}
         />
-
-        <Text
-          accessibilityRole="button"
-          onPress={() => router.replace(ROUTES.auth.login)}
-          variant="caption"
-          tone="brand"
-          style={styles.link}
-        >
-          {t("auth.hisobingiz_bormi_kirish")}
-        </Text>
+        {confirmError ? <AuthFieldError>{confirmError}</AuthFieldError> : null}
+        {errors.root ? <AuthFieldError>{errors.root.message}</AuthFieldError> : null}
       </View>
-    </Screen>
-  );
-}
-
-/** `Controller` + `Input` ni takrorlamaslik uchun kichik yordamchi. */
-function Field({
-  control,
-  name,
-  label,
-  error,
-  ...inputProps
-}: {
-  control: ReturnType<typeof useForm<RegisterFormValues>>["control"];
-  name: keyof RegisterFormValues;
-  label: string;
-  error?: string;
-  placeholder?: string;
-  secure?: boolean;
-  icon?: React.ReactNode;
-  autoCapitalize?: "none" | "words";
-  keyboardType?: "default" | "phone-pad";
-}) {
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field: { onChange, onBlur, value } }) => (
-        <Input
-          label={label}
-          value={typeof value === "string" ? value : ""}
-          onChangeText={onChange}
-          onBlur={onBlur}
-          error={error}
-          {...inputProps}
-        />
-      )}
-    />
+    </AuthScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { gap: 10, paddingTop: 28, paddingBottom: 24 },
-  form: { gap: 16, paddingBottom: 24 },
-  roleGroup: { gap: 8 },
-  roles: { marginHorizontal: -20 },
-  link: { textAlign: "center", paddingVertical: 12 },
+  grow: { flex: 1 },
+  centerText: { textAlign: "center" },
+  form: { gap: 12 },
+  /* `rounded-full bg-subtle p-1 gap-1` */
+  roles: { flexDirection: "row", gap: 4, padding: 4, borderRadius: radius.full },
+  role: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radius.full },
+  roleActive: {
+    shadowColor: "#000000",
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
+  pair: { flexDirection: "row", gap: 12 },
+  done: { alignItems: "center", gap: 16 },
+  doneIcon: { width: 80, height: 80, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  doneText: { maxWidth: 320 },
 });

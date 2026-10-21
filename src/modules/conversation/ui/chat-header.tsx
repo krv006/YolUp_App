@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Video } from "lucide-react-native";
+import { ArrowLeft } from "lucide-react-native";
 import { useChatUiStore } from "@/modules/message";
 import type { Conversation } from "@/shared/types";
 import { Avatar, Icon, IconButton, radius, Text, useTheme } from "@/shared/ui";
@@ -11,8 +11,6 @@ export interface ChatHeaderProps {
   onBack: () => void;
   /** Sarlavha bosilganda — suhbat ma'lumoti oynasi. */
   onOpenInfo?: () => void;
-  /** Shu guruhda dars ketyapti — tugma darsga olib kiradi. */
-  onJoinLive?: () => void;
   socketOffline?: boolean;
 }
 
@@ -27,7 +25,6 @@ export function ChatHeader({
   conversation,
   onBack,
   onOpenInfo,
-  onJoinLive,
   socketOffline,
 }: ChatHeaderProps) {
   const { t } = useTranslation("mobile");
@@ -52,10 +49,15 @@ export function ChatHeader({
   const subtitle = socketOffline
     ? "Ulanish tiklanmoqda…"
     : conversation.type === "group"
-      ? `${conversation.memberCount ?? 1} ishtirokchi`
+      ? [
+          tc("header.memberCount", { count: conversation.memberCount ?? 1 }),
+          conversation.onlineCount ? tc("header.onlineCount", { count: conversation.onlineCount }) : "",
+        ]
+          .filter(Boolean)
+          .join(" · ")
       : conversation.status === "online"
-        ? "Hozir onlayn"
-        : "Yaqinda faol edi";
+        ? tc("header.online")
+        : tc("header.recentlyActive");
 
   return (
     <View
@@ -147,6 +149,7 @@ export function ChatHeader({
             style={({ pressed }) => [styles.identityRow, pressed && { opacity: 0.8 }]}
           >
             <Avatar
+              variant="legacy"
               name={conversation.title}
               tone={conversation.avatarTone}
               src={conversation.imageUrl}
@@ -170,14 +173,6 @@ export function ChatHeader({
             </View>
           </Pressable>
 
-          {onJoinLive ? (
-            <IconButton
-              accessibilityLabel={t("conversation.jonli_darsga_kirish")}
-              onPress={onJoinLive}
-            >
-              <Video size={22} color={palette.destructive} />
-            </IconButton>
-          ) : null}
 
           {/*
            * Qidiruv — vebdagi kabi 40x40, oq fon, 1px chegara. Xabarlar

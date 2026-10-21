@@ -100,15 +100,15 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `d7353afa8564` | farq qayd etilmagan — tekshiring |
 | `src/modules/board/ui/formula-palette.tsx` | 🟡 MOSLASH | `c3db89716ff5` | MathLive placeholder'lari (#0, #?) olib tashlanadi — mobilda LaTeX oddiy TextInput da yoziladi |
 | `src/modules/board/ui/periodic-table-sheet.tsx` | 🟡 MOSLASH | `f354893b6a1a` | manba: veb `periodic-table-dialog.tsx`; veb 18 ustunli panjara, mobilda qidiruvli ro'yxat — telefonda panjara o'qilmaydi |
-| `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `f5a23ee833bb` | — |
-| `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `5c8dcc87f71a` | — |
-| `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `d2176507c224` | — |
+| `src/modules/conversation/api/conversation.api.ts` | 🟢 NUSXA | `4ee5ffcb78a3` | — |
+| `src/modules/conversation/api/conversation.dto.ts` | 🟢 NUSXA | `6b7d656e17ed` | — |
+| `src/modules/conversation/api/conversation.endpoints.ts` | 🟢 NUSXA | `0620e472cd90` | — |
 | `src/modules/conversation/constants/direct-status.ts` | 🟢 NUSXA | `32913399a614` | — |
 | `src/modules/conversation/index.ts` | 🟡 MOSLASH | `ef1ec60cb465` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
-| `src/modules/conversation/lib/conversation.mappers.ts` | 🟢 NUSXA | `f4b89ddbc7ed` | — |
+| `src/modules/conversation/lib/conversation.mappers.ts` | 🟢 NUSXA | `435b962a1ddb` | — |
 | `src/modules/conversation/model/conversation-filter.store.ts` | 🟢 NUSXA | `ea649aac1e44` | — |
 | `src/modules/conversation/model/conversation.keys.ts` | 🟢 NUSXA | `8dedfc078009` | — |
-| `src/modules/conversation/model/use-conversations.ts` | 🟢 NUSXA | `90900fd9fd03` | — |
+| `src/modules/conversation/model/use-conversations.ts` | 🟢 NUSXA | `c4994e3e0a80` | — |
 | `src/modules/conversation/ui/chat-header.tsx` | 🟡 MOSLASH | `106599ec34ab` | farq qayd etilmagan — tekshiring |
 | `src/modules/conversation/ui/conversation-item.tsx` | 🟡 MOSLASH | `e68e12cace5f` | farq qayd etilmagan — tekshiring |
 | `src/modules/course/api/course.api.ts` | 🟢 NUSXA | `3146648323dc` | — |

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { CheckCircle2, Clock3, ListChecks } from "lucide-react-native";
 import { HomeworkResultSheet } from "@/modules/homework";
@@ -9,7 +9,20 @@ import { ParentAppBar } from "@/modules/parent/ui/parent-app-bar";
 import { toIntlLocale } from "@/shared/i18n/intl-locale";
 import { useBackTo } from "@/shared/lib";
 import type { Submission } from "@/shared/types";
-import { PortalCard, PortalEmpty, PortalHeading, PortalListIcon, portalPage, Screen, ScreenError, ScreenLoading, Text, useLegacyColors, useTheme } from "@/shared/ui";
+import {
+  PortalCard,
+  PortalEmpty,
+  PortalHeading,
+  PortalListIcon,
+  portalPage,
+  PullRefresh,
+  Screen,
+  ScreenError,
+  ScreenLoading,
+  Text,
+  useLegacyColors,
+  useTheme,
+} from "@/shared/ui";
 
 const WORKSPACE_PATH = "/parent/workspace";
 
@@ -79,11 +92,7 @@ export function ParentHomeworkPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={homework.isRefetching}
-            onRefresh={() => void homework.refetch()}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={() => homework.refetch()} />
         }
       >
         <PortalHeading eyebrow={t("homework.eyebrow")} title={selectedChild.name} description={t("homework.subtitle")} />

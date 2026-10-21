@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { BackHandler, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { BackHandler, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/modules/notification";
 import { ROLES } from "@/shared/constants";
 import { formatMessageTime, htmlToPlainText } from "@/shared/lib";
-import { AppBar, AppBarAction, Icon, radius, Screen, Text, useTheme, type IconName } from "@/shared/ui";
+import { AppBar, AppBarAction, Icon, type IconName, PullRefresh, radius, Screen, Text, useTheme } from "@/shared/ui";
 
 const LESSON_REMINDER_KIND = "lesson_reminder";
 type GroupKey = "today" | "yesterday" | "earlier";
@@ -141,7 +141,7 @@ export function NotificationsPage() {
       <ScrollView
         style={styles.grow}
         contentContainerStyle={styles.body}
-        refreshControl={<RefreshControl refreshing={inbox.isRefetching} onRefresh={() => void inbox.refetch()} />}
+        refreshControl={<PullRefresh onRefresh={() => inbox.refetch()} />}
       >
         {/* `px-5 pt-4 pb-3` — o'ng tomonda "Hammasini o'qildi". */}
         <View style={styles.toolbar}>

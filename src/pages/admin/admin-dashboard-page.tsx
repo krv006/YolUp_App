@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
   BookOpen,
@@ -28,6 +28,7 @@ import {
   PortalButton,
   PortalHeading,
   portalPage,
+  PullRefresh,
   Screen,
   ScreenError,
   ScreenLoading,
@@ -67,8 +68,7 @@ export function AdminDashboardPage() {
   }
 
   function refresh() {
-    void summary.refetch();
-    void trends.refetch();
+    return Promise.all([summary.refetch(), trends.refetch()]);
   }
 
   if (summary.isLoading || trends.isLoading) {
@@ -101,11 +101,7 @@ export function AdminDashboardPage() {
         style={{ backgroundColor: palette.background }}
         contentContainerStyle={portalPage}
         refreshControl={
-          <RefreshControl
-            refreshing={summary.isRefetching || trends.isRefetching}
-            onRefresh={refresh}
-            tintColor={palette["muted-foreground"]}
-          />
+          <PullRefresh onRefresh={refresh} />
         }
       >
         <PortalHeading

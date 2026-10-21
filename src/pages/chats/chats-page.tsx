@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
 import { Plus } from "lucide-react-native";
@@ -21,6 +21,7 @@ import {
   AppBar,
   Chip,
   ChipRow,
+  PullRefresh,
   Screen,
   ScreenEmpty,
   ScreenError,
@@ -59,7 +60,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   const [search, setSearch] = useState("");
   const [enrollOpen, setEnrollOpen] = useState(false);
 
-  const { data = [], isLoading, isError, error, refetch, isRefetching } = useConversations(role);
+  const { data = [], isLoading, isError, error, refetch } = useConversations(role);
 
   /**
    * Qaysi guruhda dars ketyapti. Dars kurs bilan bog'langan, chat ham —
@@ -127,8 +128,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
           isLoading={isLoading}
           isError={isError}
           errorMessage={error instanceof Error ? error.message : undefined}
-          isRefetching={isRefetching}
-          onRefresh={() => void refetch()}
+          onRefresh={() => refetch()}
           onOpen={openConversation}
           hasFilter={Boolean(search.trim()) || filter !== "all"}
         />
@@ -165,8 +165,7 @@ interface ChatsListProps {
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string;
-  isRefetching: boolean;
-  onRefresh: () => void;
+  onRefresh: () => unknown;
   onOpen: (id: string) => void;
   hasFilter: boolean;
 }
@@ -178,7 +177,6 @@ function ChatsList({
   isLoading,
   isError,
   errorMessage,
-  isRefetching,
   onRefresh,
   onOpen,
   hasFilter,
@@ -186,7 +184,6 @@ function ChatsList({
   const { t } = useTranslation("mobile");
   // Guruh sarlavhalari veb bilan BIR XIL kalitdan: `chat:panel.groups.*`.
   const { t: tc } = useTranslation("chat");
-  const { palette } = useTheme();
 
   if (isLoading) return <ChatsSkeleton />;
 
@@ -217,11 +214,7 @@ function ChatsList({
       data={toRows(conversations)}
       keyExtractor={(row) => (row.kind === "header" ? `h-${row.key}` : row.conversation.id)}
       refreshControl={
-        <RefreshControl
-          refreshing={isRefetching}
-          onRefresh={onRefresh}
-          tintColor={palette["muted-foreground"]}
-        />
+        <PullRefresh onRefresh={onRefresh} />
       }
       renderItem={({ item: row }) =>
         row.kind === "header" ? (

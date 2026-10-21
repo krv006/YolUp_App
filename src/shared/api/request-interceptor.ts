@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { getStoredLanguage } from "@/shared/model";
 import { tokenStorage } from "./token-storage";
 import type { ResponseType } from "./api-response";
@@ -37,6 +38,18 @@ export function buildRequestUrl(baseUrl: string, path: string, query?: QueryPara
   return appendQuery(normalizedPath, query);
 }
 
+/**
+ * Seanslar ro'yxatida qurilma nomi (`X-Device-Name`, backend 8.4-bo'lim).
+ * Usiz mobil ilova "okhttp/4.12.0" bo'lib ko'rinadi. Faqat ASCII:
+ * Android'dagi OkHttp sarlavhadagi boshqa belgilarni rad etadi.
+ */
+const DEVICE_NAME = (() => {
+  const constants = Platform.constants as { Brand?: string; Model?: string; Release?: string };
+  const model = Platform.OS === "android" ? [constants.Brand, constants.Model].filter(Boolean).join(" ") : "iPhone";
+  const os = Platform.OS === "android" ? `Android ${constants.Release ?? ""}`.trim() : `iOS ${Platform.Version}`;
+  return `YolUp (${model}, ${os})`.replace(/[^\x20-\x7E]/g, "");
+})();
+
 export function createRequestInit(
   options: RequestOptions,
   signal: AbortSignal,
@@ -58,6 +71,7 @@ export function createRequestInit(
     headers: {
       ...defaultHeaders,
       "Accept-Language": getStoredLanguage(),
+      "X-Device-Name": DEVICE_NAME,
       ...(hasBody && !isRawBody ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.requestId ? { "X-Request-ID": options.requestId } : {}),

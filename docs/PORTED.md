@@ -268,7 +268,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/api/pagination.ts` | 🟢 NUSXA | `ff2532083aa9` | — |
 | `src/shared/api/realtime-socket.ts` | 🔴 QAYTA | `d64ba10c0dea` | AppState + NetInfo; fon rejimida uziladi, qaytganda onResync |
 | `src/shared/api/refresh-token-manager.ts` | 🔴 QAYTA | `d7216dbab64d` | CustomEvent o'rniga obuna ro'yxati; announceSessionChange va refresh poyga tuzatishi olindi |
-| `src/shared/api/request-interceptor.ts` | 🟡 MOSLASH | `f99b14fa30f2` | Accept-Language til saqlagichi o'rniga qat'iy "uz" (§13) |
+| `src/shared/api/request-interceptor.ts` | 🟡 MOSLASH | `f99b14fa30f2` | + `X-Device-Name` sarlavhasi (seanslarda qurilma nomi; vebda brauzer o'zi aniqlanadi) |
 | `src/shared/api/response-interceptor.ts` | 🟢 NUSXA | `283cbb28d435` | — |
 | `src/shared/api/token-storage.ts` | 🔴 QAYTA | `47a479a247f8` | SecureStore + xotira keshi; interfeys va sinxronligi bir xil |
 | `src/shared/config/env.ts` | 🔴 QAYTA | `ff591f4dcda1` | import.meta.env -> expo-constants; o'sha zod sxemasi |

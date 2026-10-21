@@ -81,3 +81,5 @@ export {
 export type { PortalButtonProps, PortalHeadingProps, PortalMetricTone } from "./portal";
 export { FullscreenDialog } from "./fullscreen-dialog";
 export type { FullscreenDialogProps } from "./fullscreen-dialog";
+export { BootScreen } from "./boot-screen";
+export type { BootScreenProps } from "./boot-screen";

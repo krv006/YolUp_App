@@ -541,6 +541,22 @@ function QuizCard({
             {meta}
           </Text>
         </View>
+        {/*
+          * O'chirish — sarlavha qatorida. Vebda u "Tahrirlash" yonida turadi
+          * va tor ekranda katakdan o'ngga chiqib ketadi; bu yerda joy yetmaydi.
+          */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("teacherPage.deleteAria")}
+          onPress={onDelete}
+          hitSlop={4}
+          style={({ pressed }) => [
+            styles.delete,
+            { backgroundColor: palette["destructive-soft"], opacity: pressed ? 0.8 : 1 },
+          ]}
+        >
+          <Trash2 size={16} color={palette["destructive-strong"]} />
+        </Pressable>
       </Pressable>
 
       <View style={styles.actions}>
@@ -549,20 +565,7 @@ function QuizCard({
         ) : null}
         <CardAction icon={History} label={t("teacherPage.attemptsButton")} onPress={onAttempts} />
         <CardAction icon={Download} label={t("teacherPage.exportShort")} onPress={onExport} />
-        <View style={styles.editCell}>
-          <CardAction icon={Pencil} label={t("teacherPage.editShort")} onPress={onEdit} grow />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("teacherPage.deleteAria")}
-            onPress={onDelete}
-            style={({ pressed }) => [
-              styles.delete,
-              { backgroundColor: palette["destructive-soft"], opacity: pressed ? 0.8 : 1 },
-            ]}
-          >
-            <Trash2 size={16} color={palette["destructive-strong"]} />
-          </Pressable>
-        </View>
+        <CardAction icon={Pencil} label={t("teacherPage.editShort")} onPress={onEdit} />
       </View>
     </View>
   );
@@ -574,13 +577,11 @@ function CardAction({
   label,
   onPress,
   tone = "plain",
-  grow = false,
 }: {
   icon: typeof Send;
   label: string;
   onPress: () => void;
   tone?: "plain" | "accent";
-  grow?: boolean;
 }) {
   const { palette } = useTheme();
   const accent = tone === "accent";
@@ -591,7 +592,7 @@ function CardAction({
       onPress={onPress}
       style={({ pressed }) => [
         styles.action,
-        grow ? styles.editAction : styles.half,
+        styles.half,
         accent
           ? { backgroundColor: palette["primary-soft"] }
           : {
@@ -602,11 +603,7 @@ function CardAction({
       ]}
     >
       <IconComponent size={16} color={color} />
-      <Text
-        variant="label"
-        numberOfLines={grow ? 1 : 2}
-        style={[grow ? null : styles.actionLabel, { color }]}
-      >
+      <Text variant="label" numberOfLines={2} style={[styles.actionLabel, { color }]}>
         {label}
       </Text>
     </Pressable>
@@ -663,14 +660,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
   },
   actionLabel: { flexShrink: 1, textAlign: "center" },
-  /*
-   * Vebda "Tahrirlash" tugmasi siqilmaydi (`flex-1`, matn bir qatorda) va
-   * yonidagi o'chirish tugmasi katakdan o'ngga chiqib turadi — telefonda
-   * aynan shunday ko'rinadi, shuning uchun bu yerda ham siqilmaydi.
-   */
-  editAction: { flexGrow: 1, flexShrink: 0 },
-  editCell: { width: "48.5%", flexDirection: "row", alignItems: "center", gap: 8 },
-  delete: { width: 44, height: 44, borderRadius: radius.xl, alignItems: "center", justifyContent: "center" },
+  delete: { width: 36, height: 36, borderRadius: radius.lg, alignItems: "center", justifyContent: "center" },
 
   /* Bo'sh holat — `rounded-2xl border border-dashed px-6 py-10 gap-3` */
   empty: {

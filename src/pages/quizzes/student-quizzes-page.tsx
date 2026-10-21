@@ -27,9 +27,11 @@ const LEGACY = { border: "#e2e7ef", muted: "#5a6672" } as const;
  *   "← Orqaga" tugmasi, "BARCHA KURSLAR", katta "Testlar" sarlavhasi,
  *   izoh, fan filtri, ostida kartalar ro'yxati.
  *
- * Kartada to'rt element bir qatorda turadi (ikonka, matn, tarix, "Yechish")
- * va vebda matn ustuni juda tor bo'lib qoladi — bu yerda ham shunday,
- * chunki o'lchamlar aynan vebdagidek.
+ * Vebda kartada to'rt element bir qatorda turadi (ikonka, matn, tarix,
+ * "Yechish") va tor ekranda matn ustuni ~40px ga siqilib, so'zlar
+ * bo'g'inlarga bo'linadi, tarix tugmasi matn ustiga chiqadi. Bu yerda
+ * birinchi qatorda ikonka va to'liq kenglikdagi matn, ikkinchisida
+ * (matn bilan bir chiziqdan) "Yechish" va tarix.
  *
  * Yechish va tarix — vebdagidek oynalarda (`QuizAttemptSheet`,
  * `QuizAttemptsSheet`), alohida sahifa emas.
@@ -192,29 +194,31 @@ export function StudentQuizzesPage() {
                     · {t("studentPage.questionCount", { count: item.questionCount })}
                   </Text>
                 </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("studentPage.historyAria")}
-                  onPress={() => setHistoryOf(item)}
-                  style={({ pressed }) => [
-                    styles.iconButton,
-                    { borderColor: LEGACY.border, backgroundColor: pressed ? palette["primary-soft"] : palette.surface },
-                  ]}
-                >
-                  <History size={16} color={palette.foreground} />
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => setAttemptOf(item)}
-                  style={({ pressed }) => [
-                    styles.solve,
-                    { backgroundColor: pressed ? palette["primary-hover"] : palette.primary },
-                  ]}
-                >
-                  <Text variant="body" style={[styles.solveText, { color: palette["primary-foreground"] }]}>
-                    {t("studentPage.solveButton")}
-                  </Text>
-                </Pressable>
+                <View style={styles.footer}>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => setAttemptOf(item)}
+                    style={({ pressed }) => [
+                      styles.solve,
+                      { backgroundColor: pressed ? palette["primary-hover"] : palette.primary },
+                    ]}
+                  >
+                    <Text variant="body" style={[styles.solveText, { color: palette["primary-foreground"] }]}>
+                      {t("studentPage.solveButton")}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t("studentPage.historyAria")}
+                    onPress={() => setHistoryOf(item)}
+                    style={({ pressed }) => [
+                      styles.iconButton,
+                      { borderColor: LEGACY.border, backgroundColor: pressed ? palette["primary-soft"] : palette.surface },
+                    ]}
+                  >
+                    <History size={16} color={palette.foreground} />
+                  </Pressable>
+                </View>
               </View>
             );
           })}
@@ -260,14 +264,17 @@ const styles = StyleSheet.create({
   /* `h1` — 28/42, -0.035em, 6 0 chekka */
   title: { marginVertical: 6, fontSize: 28, lineHeight: 42, fontWeight: "400", letterSpacing: -0.98 },
   subtitle: { fontSize: 14, lineHeight: 21, fontWeight: "400" },
-  /* `.quiz-subject-filter` — min(260px, 52vw) */
-  filter: { width: "56%" },
+  /*
+   * `.quiz-subject-filter` — vebda ~220px. Qat'iy 56% "Barcha fa…" deb
+   * kesardi; avtomatik kenglikda esa ichki matn (`flex: 1`) nolga tushadi.
+   */
+  filter: { alignSelf: "flex-start", minWidth: 230, maxWidth: "100%" },
   list: { gap: 9, padding: 15 },
   /* `article` — bo'shliq 14, chegara 1, radius 13, oraliq 12; telefonda yuqoridan tekislanadi */
   card: {
     flexDirection: "row",
     flexWrap: "wrap",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: 12,
     padding: 14,
     borderWidth: 1,
@@ -276,13 +283,14 @@ const styles = StyleSheet.create({
   icon: { width: 41, height: 41, borderRadius: 13, alignItems: "center", justifyContent: "center" },
   text: { flex: 1, minWidth: 0 },
   cardTitle: { fontSize: 14, lineHeight: 21, fontWeight: "700" },
-  meta: { marginTop: 4, fontSize: 11, lineHeight: 16 },
-  iconButton: { width: 44, height: 44, borderWidth: 1, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  meta: { marginTop: 4, fontSize: 12, lineHeight: 17 },
+  // To'liq kenglikdagi qator; ikonka (41) + oraliq (12) ichkarida.
+  footer: { width: "100%", flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 53 },
+  iconButton: { width: 38, height: 38, borderWidth: 1, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   /* `.button--primary.button--sm` — min-h 38, 0 13, 15/700, ko'k soya; telefonda chapdan 53 */
   solve: {
     minHeight: 38,
     justifyContent: "center",
-    marginLeft: 53,
     paddingHorizontal: 13,
     borderRadius: 10,
     boxShadow: "0 8px 20px rgba(69, 103, 245, 0.2)",

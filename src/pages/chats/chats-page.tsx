@@ -13,16 +13,14 @@ import {
 } from "@/modules/conversation";
 import { ConversationItem } from "@/modules/conversation/ui/conversation-item";
 import { useLiveLessons } from "@/modules/lesson";
-import { useUnreadNotificationCount } from "@/modules/notification";
+import { NotificationBell } from "@/modules/notification";
 import { NewGroupSheet } from "@/modules/conversation/ui/new-group-sheet";
 import { StudentEnrollmentSheet } from "@/modules/student";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import {
   AppBar,
-  AppBarAction,
   Chip,
   ChipRow,
-  CountBadge,
   Screen,
   ScreenEmpty,
   ScreenError,
@@ -62,7 +60,6 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   const [enrollOpen, setEnrollOpen] = useState(false);
 
   const { data = [], isLoading, isError, error, refetch, isRefetching } = useConversations(role);
-  const unread = useUnreadNotificationCount();
 
   /**
    * Qaysi guruhda dars ketyapti. Dars kurs bilan bog'langan, chat ham —
@@ -99,18 +96,7 @@ export function ChatsPage({ role }: { role: ConversationRole }) {
   return (
     <Screen padded={false}>
       <AppBar a11yTitle={t("chats.suhbatlar")}>
-        <AppBarAction
-          name="bell"
-          label={t("chats.bildirishnomalar")}
-          onPress={() => router.push("/notifications")}
-          badge={
-            (unread.data ?? 0) > 0 ? (
-              <View style={styles.bellBadge}>
-                <CountBadge count={unread.data ?? 0} />
-              </View>
-            ) : null
-          }
-        />
+        <NotificationBell />
       </AppBar>
 
       <View style={[styles.body, { backgroundColor: palette.surface }]}>
@@ -346,7 +332,6 @@ const styles = StyleSheet.create({
    * edi va qo'ng'iroq ikonkasini bosib qolardi. Vebda bu yerda nishon
    * umuman yo'q, lekin o'qilmagan sonni yo'qotmaslik uchun qoldirildi.
    */
-  bellBadge: { position: "absolute", top: -2, right: -2 },
   searchInput: { flex: 1 },
   // Suzuvchi tugma ro'yxat USTIDA — pastdagi tab paneli ustida turadi.
   fab: {

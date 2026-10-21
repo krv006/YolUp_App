@@ -31,6 +31,7 @@ import { ROLES } from "@/shared/constants";
 import { ROUTES } from "@/shared/config";
 import type { Lesson } from "@/shared/types";
 import { AppBar, AppBarAction, Icon, radius, Screen, Segmented, Text, useTheme } from "@/shared/ui";
+import { NotificationBell } from "@/modules/notification";
 
 const VIEWS: readonly ScheduleView[] = ["list", "day", "week", "month"];
 
@@ -164,11 +165,7 @@ export function SchedulePage() {
             onPress={() => setCreateOpen(true)}
           />
         ) : null}
-        <AppBarAction
-          name="bell"
-          label={tm("chats.bildirishnomalar")}
-          onPress={() => router.push("/notifications")}
-        />
+        <NotificationBell />
       </AppBar>
 
       {/* Boshqaruv — `flex-col gap-2.5 border-b bg-canvas px-4 pb-3` */}

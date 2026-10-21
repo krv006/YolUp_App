@@ -47,3 +47,4 @@ export { useNotificationFeed } from "./model/use-notification-feed";
 export { SendNotificationSheet } from "./ui/send-notification-sheet";
 export type { SendNotificationSheetProps } from "./ui/send-notification-sheet";
 export { SentNotificationsSheet } from "./ui/sent-notifications-sheet";
+export { NotificationBell } from "./ui/notification-bell";

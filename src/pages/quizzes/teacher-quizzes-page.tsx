@@ -49,6 +49,7 @@ import {
   Text,
   useTheme,
 } from "@/shared/ui";
+import { NotificationBell } from "@/modules/notification";
 
 /**
  * O'qituvchining testlari — veb `pages/teacher/quizzes/teacher-quizzes-page.tsx`
@@ -65,7 +66,6 @@ export function TeacherQuizzesPage() {
   const { t, i18n } = useTranslation("quiz");
   const { t: tn } = useTranslation("nav");
   const { t: tw } = useTranslation("workspace");
-  const { t: tm } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const params = useLocalSearchParams<{ quiz?: string }>();
@@ -151,11 +151,7 @@ export function TeacherQuizzesPage() {
         label={t("teacherPage.createButton")}
         onPress={() => setCreateOpen(true)}
       />
-      <AppBarAction
-        name="bell"
-        label={tm("chats.bildirishnomalar")}
-        onPress={() => router.push("/notifications")}
-      />
+      <NotificationBell />
     </AppBar>
   );
 

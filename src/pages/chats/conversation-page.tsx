@@ -27,7 +27,8 @@ import {
   type GroupTab,
 } from "@/widgets/group-workspace/group-workspace";
 import type { ChatMessage, ConversationRole } from "@/shared/types";
-import { AppBar, AppBarAction, Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
+import { AppBar, Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
+import { NotificationBell } from "@/modules/notification";
 
 /**
  * Suhbat oynasi — veb `pages/teacher/conversation-page.tsx` va
@@ -146,11 +147,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         * paneli esa uning ostida.
         */}
       <AppBar a11yTitle={conversation.title}>
-        <AppBarAction
-          name="bell"
-          label={t("chats.bildirishnomalar")}
-          onPress={() => router.push("/notifications")}
-        />
+        <NotificationBell />
       </AppBar>
       <ChatHeader
         conversation={conversation}

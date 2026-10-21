@@ -8,6 +8,7 @@ import { QuizAttemptSheet, QuizAttemptsSheet, quizDisplayTitle, useQuizzes } fro
 import { toIntlLocale } from "@/shared/i18n/intl-locale";
 import type { QuizSummary } from "@/shared/types";
 import { AppBar, AppBarAction, Screen, ScreenError, ScreenLoading, SelectField, Text, useTheme } from "@/shared/ui";
+import { NotificationBell } from "@/modules/notification";
 
 const WORKSPACE_PATH = "/student/workspace";
 
@@ -37,7 +38,6 @@ export function StudentQuizzesPage() {
   const { t, i18n } = useTranslation("quiz");
   const { t: tn } = useTranslation("nav");
   const { t: tw } = useTranslation("workspace");
-  const { t: tm } = useTranslation("mobile");
   const router = useRouter();
   const { palette } = useTheme();
   const params = useLocalSearchParams<{ quiz?: string }>();
@@ -72,7 +72,7 @@ export function StudentQuizzesPage() {
       back={{ label: tw("searchBack"), onPress: () => router.replace(WORKSPACE_PATH) }}
     >
       <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push("/student/search")} />
-      <AppBarAction name="bell" label={tm("chats.bildirishnomalar")} onPress={() => router.push("/notifications")} />
+      <NotificationBell />
     </AppBar>
   );
 
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   title: { marginVertical: 6, fontSize: 28, lineHeight: 42, fontWeight: "400", letterSpacing: -0.98 },
   subtitle: { fontSize: 14, lineHeight: 21, fontWeight: "400" },
   /* `.quiz-subject-filter` — min(260px, 52vw) */
-  filter: { width: "52%" },
+  filter: { width: "56%" },
   list: { gap: 9, padding: 15 },
   /* `article` — bo'shliq 14, chegara 1, radius 13, oraliq 12; telefonda yuqoridan tekislanadi */
   card: {

@@ -19,6 +19,7 @@ import { useAuth } from "@/modules/auth";
 import { useCourses } from "@/modules/course";
 import { ROLES } from "@/shared/constants";
 import { AppBar, AppBarAction, radius, Screen, Text, useTheme } from "@/shared/ui";
+import { NotificationBell } from "@/modules/notification";
 
 type WorkspaceRole = "teacher" | "student" | "parent";
 
@@ -125,11 +126,7 @@ export function WorkspacePage() {
           label={t("search")}
           onPress={() => router.push(`${rolePrefix}/search`)}
         />
-        <AppBarAction
-          name="bell"
-          label={tm("chats.bildirishnomalar")}
-          onPress={() => router.push("/notifications")}
-        />
+        <NotificationBell />
       </AppBar>
 
       <View style={styles.body}>

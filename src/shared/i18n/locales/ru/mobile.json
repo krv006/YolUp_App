@@ -9,7 +9,7 @@
     "children": "Дети",
     "attendance": "Посещаемость",
     "homework": "Задания",
-    "workspace": "Рабочее место"
+    "workspace": "Workspace"
   },
   "auth": {
     "accountType": "Тип аккаунта",

@@ -54,7 +54,10 @@ export {
 export type { CalendarDay } from "./lib/lesson-calendar";
 export {
   CLOSED_LESSON_STATUSES,
+  hasLessonTopic,
   isLessonClosed,
+  isLessonEditable,
+  isLessonJoinable,
   useLessonStatusMeta,
 } from "./lib/lesson-status";
 export {
@@ -76,8 +79,11 @@ export type { LessonStatusMeta } from "./lib/lesson-status";
 // --- Mobil UI ---
 export { LessonCalendar } from "./ui/lesson-calendar";
 export type { LessonCalendarProps } from "./ui/lesson-calendar";
-export { LessonCard } from "./ui/lesson-card";
-export type { LessonCardProps } from "./ui/lesson-card";
+export { LessonActions } from "./ui/lesson-actions";
+export type { LessonActionsProps } from "./ui/lesson-actions";
+export { LessonList } from "./ui/lesson-list";
+export { LessonViewSwitch } from "./ui/lesson-view-switch";
+export type { LessonListProps } from "./ui/lesson-list";
 export { LiveLessonBar } from "./ui/live-lesson-bar";
 export type { LiveLessonBarProps } from "./ui/live-lesson-bar";
 export { FinishLessonSheet, LessonRatingsSheet, RateLessonSheet } from "./ui/lesson-sheets";

@@ -48,6 +48,14 @@ export interface Conversation {
   avatarTone: string;
   memberCount: number;
   imageUrl: string | null;
+  isPinned?: boolean;
+  isMuted?: boolean;
+  hasUnreadMention?: boolean;
+  announcementOnly?: boolean;
+  onlineCount?: number;
+  firstUnreadMessageId?: string | null;
+  lastReadMessageId?: string | null;
+  pinnedMessages?: PinnedChatMessage[];
   subject?: string;
   subjectLabel?: string;
   description?: string;
@@ -130,6 +138,8 @@ export interface Course {
   isLanguageSubject: boolean;
   createdAt: string | null;
   color: string;
+  lessonsPerWeek: number | null;
+  monthlyFee: number | null;
 }
 
 export type EnrollmentStatus = "pending" | "approved" | "declined";

@@ -36,12 +36,12 @@ interface TabDefinition {
  * faqat shu to'rttasi.
  */
 const TABS: readonly TabDefinition[] = [
-  { id: "chat", labelKey: "groupworkspace.suhbat", icon: BookOpen },
-  { id: "lessons", labelKey: "groupworkspace.darslar", icon: CalendarDays },
-  { id: "assignments", labelKey: "groupworkspace.vazifalar", icon: ListChecks },
+  { id: "chat", labelKey: "tabs.chat", icon: BookOpen },
+  { id: "lessons", labelKey: "tabs.lessons", icon: CalendarDays },
+  { id: "assignments", labelKey: "tabs.assignments", icon: ListChecks },
   {
     id: "attendance",
-    labelKey: "groupworkspace.davomat",
+    labelKey: "tabs.attendance",
     icon: CheckCircle2,
     teacherOnly: true,
   },
@@ -56,7 +56,7 @@ export function GroupTabsRow({
   onChange: (tab: GroupTab) => void;
   isTeacher: boolean;
 }) {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("group");
   const { palette } = useTheme();
   const visible = TABS.filter((tab) => !tab.teacherOnly || isTeacher);
 
@@ -119,19 +119,16 @@ export function GroupWorkspaceSection({
   tab,
   courseId,
   isTeacher = false,
-  subject = "",
 }: {
   tab: Exclude<GroupTab, "chat">;
   courseId: string;
   isTeacher?: boolean;
-  /** Kurs fani — vazifa oynasidagi "tekshiruv turi" tanlovi shunga bog'liq. */
-  subject?: string;
 }) {
   return (
     <View style={styles.root}>
       {tab === "lessons" ? <LessonsSection courseId={courseId} isTeacher={isTeacher} /> : null}
       {tab === "assignments" ? (
-        <AssignmentsSection courseId={courseId} isTeacher={isTeacher} subject={subject} />
+        <AssignmentsSection courseId={courseId} isTeacher={isTeacher} />
       ) : null}
       {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}
     </View>

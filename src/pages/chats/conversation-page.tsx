@@ -154,7 +154,6 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         onBack={goBack}
         onOpenInfo={() => setInfoOpen(true)}
         socketOffline={chat.socketState !== "connected"}
-        onJoinLive={liveLesson ? () => router.push(`/live/${liveLesson.id}`) : undefined}
       />
 
       {/* Sarlavhadagi ikonka qaysi dars ketayotganini aytmaydi — chiziq aytadi. */}
@@ -172,7 +171,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         * u BIR MARTA chiziladi, shuning uchun o'sha xavotir yuzaga
         * kelmaydi.
         */}
-      {courseId ? <VoiceRoomBar courseId={courseId} isTeacher={role === "teacher"} /> : null}
+      {courseId ? <VoiceRoomBar courseId={courseId} /> : null}
 
       {/* Bo'limlar faqat GURUH chatida: shaxsiy suhbatda kurs, dars va
           vazifa tushunchasi yo'q. */}
@@ -185,7 +184,6 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
           tab={tab}
           courseId={courseId}
           isTeacher={role === "teacher"}
-          subject={conversation.subject ?? ""}
         />
       ) : (
         <KeyboardAvoidingView style={styles.body} behavior="padding">

@@ -1,8 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Video } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
-import { Button, radius, Text, useTheme } from "@/shared/ui";
+import { radius, Text, useTheme } from "@/shared/ui";
 
 export interface LiveLessonBarProps {
   /**
@@ -22,49 +22,44 @@ export interface LiveLessonBarProps {
  * Dars bo'lmasa umuman chizilmaydi: chat balandligi bekorga qisqarmaydi.
  */
 export function LiveLessonBar({ lesson, onJoin }: LiveLessonBarProps) {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("lesson");
   const { palette } = useTheme();
 
   if (!lesson) return null;
 
+  /* `.live-lesson-bar`: yashil chiziq, pastida chegara, ko'k "Qo'shilish". */
   return (
     <View
       accessibilityRole="summary"
-      style={[styles.bar, { backgroundColor: palette["destructive-soft"] }]}
+      style={[styles.bar, { backgroundColor: palette["success-soft"], borderBottomColor: palette.border }]}
     >
-      <View style={[styles.dot, { backgroundColor: palette.destructive }]} />
-
+      <View style={[styles.dot, { backgroundColor: palette["success-strong"] }]} />
       <View style={styles.body}>
-        <Text variant="label" style={{ color: palette["destructive-strong"] }}>
-          {t("lesson.dars_ketmoqda")}
+        <Text variant="label" style={{ color: palette["success-strong"] }}>
+          {t("liveBar.inProgress")}
         </Text>
-        <Text variant="caption" tone="muted" numberOfLines={1}>
-          {lesson.title || lesson.topic || lesson.courseTitle}
+        <Text variant="caption" numberOfLines={1} style={{ color: palette["muted-foreground"] }}>
+          {lesson.title}
         </Text>
       </View>
-
-      <Button
-        title={t("lesson.qoshilish")}
-        variant="danger"
-        fullWidth={false}
-        icon={<Video size={15} color={palette["destructive-foreground"]} />}
+      <Pressable
+        accessibilityRole="button"
         onPress={onJoin}
-      />
+        style={({ pressed }) => [styles.join, { backgroundColor: pressed ? palette["primary-hover"] : palette.primary }]}
+      >
+        <Video size={15} color={palette["primary-foreground"]} />
+        <Text variant="caption" style={[styles.joinText, { color: palette["primary-foreground"] }]}>
+          {t("liveBar.join")}
+        </Text>
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: radius.sm,
-    marginHorizontal: 8,
-    marginTop: 6,
-  },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  body: { flex: 1, gap: 1 },
+  bar: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 9, borderBottomWidth: 1 },
+  dot: { width: 8, height: 8, borderRadius: radius.full },
+  body: { flex: 1, minWidth: 0, gap: 1 },
+  join: { minHeight: 32, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 13, borderRadius: radius.full },
+  joinText: { fontSize: 13, lineHeight: 18, fontWeight: "800" },
 });

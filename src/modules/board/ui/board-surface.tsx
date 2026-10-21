@@ -5,7 +5,7 @@ import { useKeepAwake } from "expo-keep-awake";
 import { Atom, Calculator, Eye, FilePlus2, Pencil, UserCheck } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
-import type { FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
+import type { BoardSource, FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
 import { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "../constants/board.constants";
 import { hasRichFormatting } from "../lib/rich-text";
 import {
@@ -33,13 +33,14 @@ export interface BoardSurfaceProps {
   statusNote?: string;
   /** Doska ustida, o'ng pastdagi amallar — arxiv sahifasi (veb `footerActions`). */
   footerActions?: ReactNode;
+  /** Berilsa — doska dars o'rniga shu manbadan ishlaydi (uy vazifasi): real-time va ruxsatlarsiz. */
+  source?: BoardSource;
 }
 
 /** Veb qorong'i `--success` (`bg-success`) — "Jonli" nuqtasi. */
 const LIVE_DOT = "#35c493";
-/** Veb `legacy.css` `.board-panel`: `--surface` va `--border` (qorong'i). */
-const PANEL_BG = "#161c23";
-const PANEL_BORDER = "#26313d";
+/** Veb `legacy.css` `.board-panel` qorong'i mavzuda: `--surface` va `--border`. */
+const PANEL_DARK = { bg: "#161c23", border: "#26313d" };
 
 /**
  * Dars doskasi — veb `modules/board/ui/board-panel.tsx` ning mobil porti.
@@ -51,17 +52,17 @@ const PANEL_BORDER = "#26313d";
  * Real-time (`useBoardRealtime`) 🟢 veb'dan: kelgan hodisalar react-query
  * keshiga qo'llanadi; kanal ulanmasa `useBoard` pollingga qaytadi.
  */
-export function BoardSurface({ lessonId, courseId = null, statusNote, footerActions }: BoardSurfaceProps) {
+export function BoardSurface({ lessonId, courseId = null, statusNote, footerActions, source }: BoardSurfaceProps) {
   const { t } = useTranslation("board");
   const { t: tm } = useTranslation("mobile");
-  const { palette } = useTheme();
+  const { palette, scheme } = useTheme();
   const { user } = useAuth();
 
   // Doskada ishlayotganda ekran o'chib qolmasin.
   useKeepAwake();
 
-  const realtime = useBoardRealtime(lessonId ?? "", Boolean(lessonId), user?.id ?? null);
-  const board = useBoard(lessonId ?? "", { enabled: Boolean(lessonId), live: realtime.connected });
+  const realtime = useBoardRealtime(lessonId ?? "", Boolean(lessonId) && !source, user?.id ?? null);
+  const board = useBoard(lessonId ?? "", { enabled: Boolean(lessonId) && !source, live: realtime.connected });
   const addStroke = useAddStroke(lessonId ?? "");
   const addSheet = useAddSheet(lessonId ?? "");
   const erase = useEraseStrokes(lessonId ?? "");
@@ -84,7 +85,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
   const [formula, setFormula] = useState("");
   const [solution, setSolution] = useState<FormulaSolutionDto | null>(null);
 
-  const state = board.data;
+  const state = source ? source.state : board.data;
   const members = useCourseStudents(board.data?.isTeacher ? courseId : null, { page_size: 100 });
   const active = state?.sheets.find((item) => item.index === sheet) ?? state?.sheets[0];
   const canDraw = Boolean(state?.canDraw);
@@ -94,6 +95,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
    * tarqatadi. Kanal yopiq bo'lsa REST ishlatiladi. 🟢 Veb bilan bir xil.
    */
   function commitStroke(stroke: StrokeShapeDto) {
+    if (source) return source.addStroke(sheet, stroke);
     if (!realtime.sendStroke(sheet, stroke)) addStroke.mutate({ sheet, stroke });
   }
 
@@ -103,6 +105,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
    * matnni `addStroke.mutate` bilan yuboradi.
    */
   function commitTextStroke(stroke: StrokeShapeDto) {
+    if (source) return source.addStroke(sheet, stroke);
     addStroke.mutate({ sheet, stroke }, { onError: (error: Error) => toast.error(error.message) });
   }
 
@@ -131,7 +134,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
   async function solveFormula() {
     if (!formula.trim()) return;
     try {
-      setSolution(await solve.mutateAsync(formula.trim()));
+      setSolution(await (source?.solve ? source.solve(formula.trim()) : solve.mutateAsync(formula.trim())));
     } catch {
       /* `onError` toast chiqaradi — bu yerda ikkinchi marta emas. */
     }
@@ -149,6 +152,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
   /** Veb `handleStrokeClick`: lastik bilan bosilgan element — sabab so'raladi. */
   function selectForErase(id: string | null) {
     if (!id || tool !== "erase" || !canDraw) return;
+    if (source) return source.eraseStroke(sheet, id); // shaxsiy doska: o'chirishga sabab so'ralmaydi
     setSelected(id);
     setReason("");
     setReasonOpen(true);
@@ -174,7 +178,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
     );
   }
 
-  if (board.isLoading)
+  if (!source && board.isLoading)
     return (
       <View style={styles.center}>
         <Text variant="label" style={[styles.regular, { color: palette["subtle-foreground"] }]}>
@@ -183,7 +187,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
       </View>
     );
 
-  if (board.isError || !state)
+  if ((!source && board.isError) || !state)
     return (
       <View style={[styles.center, styles.gap]}>
         <Text variant="label" style={[styles.regular, { color: palette["muted-foreground"] }]}>
@@ -200,7 +204,14 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
   const chip = { backgroundColor: palette["surface-subtle"] };
 
   return (
-    <View style={styles.root}>
+    <View
+      style={[
+        styles.root,
+        scheme === "dark"
+          ? { backgroundColor: PANEL_DARK.bg, borderColor: PANEL_DARK.border }
+          : { backgroundColor: palette.surface, borderColor: palette.border },
+      ]}
+    >
       {/* `flex flex-wrap items-center gap-2` */}
       <View style={styles.status}>
         <View style={[styles.statusItem, styles.statusFirst]}>
@@ -217,7 +228,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
               {statusNote}
             </Text>
           </View>
-        ) : (
+        ) : source ? null : (
           <View style={styles.statusItem}>
             <View style={[styles.dot, { backgroundColor: realtime.connected ? LIVE_DOT : palette["saffron-strong"] }]} />
             <Text variant="caption" style={[styles.strong, { color: palette["subtle-foreground"] }]}>
@@ -320,13 +331,13 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
           active={active?.index ?? sheet}
           boardWidth={state.width}
           boardHeight={state.height}
-          canAdd={state.isTeacher}
+          canAdd={state.isTeacher || Boolean(source)}
           onSelect={(index) => {
             setSheet(index);
             setSelected(null);
             setPagesOpen(false);
           }}
-          onAdd={() => addSheet.mutate()}
+          onAdd={() => (source ? source.addSheet() : addSheet.mutate())}
         />
 
         <BoardPermissionSheet
@@ -360,7 +371,7 @@ export function BoardSurface({ lessonId, courseId = null, statusNote, footerActi
           boardWidth={state.width}
           boardHeight={state.height}
           color={color}
-          onPlace={(next) => next.forEach((stroke) => commitStroke(stroke))}
+          onPlace={(next) => (source ? source.addStrokes(sheet, next) : next.forEach((stroke) => commitStroke(stroke)))}
         />
 
         {/* Formula yechuvchi — server SymPy bilan yechadi, natija doskaga qo'yiladi. */}
@@ -415,7 +426,7 @@ function CanvasCard({ children }: { children: ReactNode }) {
 
 const styles = StyleSheet.create({
   /* `.board-panel`: chegarali qorong'i ramka, ichida holat qatori va kanvas. */
-  root: { flex: 1, gap: 12, overflow: "hidden", borderWidth: 1, borderColor: PANEL_BORDER, borderRadius: 16, backgroundColor: PANEL_BG },
+  root: { flex: 1, gap: 12, overflow: "hidden", borderWidth: 1, borderRadius: 16 },
   grow: { flex: 1 },
   gap: { gap: 12 },
   regular: { fontWeight: "400" },

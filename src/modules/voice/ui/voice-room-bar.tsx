@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
-import { Mic, Plus } from "lucide-react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import type { VoiceRoom, VoiceToken } from "@/shared/types";
+import { formatDayTime } from "@/shared/lib";
 import {
-  Badge,
   Button,
+  Icon,
   Input,
   radius,
   SelectField,
@@ -26,17 +26,17 @@ import { VoiceRoomSheet } from "./voice-room-sheet";
  * Guruh ichidagi ovozli suhbat chizig'i — veb `voice-room-bar.tsx` ning
  * mobil varianti.
  *
- * Xona ochiq bo'lsa qo'shilish tugmasi, o'qituvchida esa xona ochish
- * tugmasi chiqadi. "Taklif asosida" xonaga o'quvchi so'rov yuboradi va
+ * Xona ochiq bo'lsa qo'shilish tugmasi, aks holda (vebdagidek hamma
+ * uchun) xona ochish tugmasi chiqadi. "Taklif asosida" xonaga o'quvchi so'rov yuboradi va
  * o'qituvchi uni xona ichida tasdiqlaydi.
  */
 export interface VoiceRoomBarProps {
   courseId: string | null;
-  isTeacher: boolean;
 }
 
-export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
+export function VoiceRoomBar({ courseId }: VoiceRoomBarProps) {
   const { t } = useTranslation("mobile");
+  const { t: tv } = useTranslation("voice");
   const { palette } = useTheme();
   const { active } = useActiveVoiceRoom(courseId);
   const join = useJoinVoiceRoom();
@@ -73,59 +73,54 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
     );
   }
 
+  const scheduled = room?.status === "scheduled";
+
   return (
     <View style={[styles.bar, { borderBottomColor: palette.border }]}>
-      <View style={styles.head}>
-        {/* Ikonka OQ doirada — vebda ham shunday (36x36). */}
-        <View style={[styles.iconWrap, { backgroundColor: palette.surface }]}>
-          <Mic size={20} color={palette.primary} />
-        </View>
-        <View style={styles.headBody}>
-          <Text variant="label">{room?.title || "Ovozli suhbat"}</Text>
-          <Text variant="caption" tone="muted" style={styles.subtitle}>
-            {room
-              ? `${live ? "Hozir jonli" : "Rejalashtirilgan"} · ${room.participantCount} ishtirokchi`
-              : "Guruh a'zolari bilan mikrofon orqali gaplashing."}
-          </Text>
-        </View>
-        {room?.accessMode === "invite_only" ? (
-          <Badge label={t("voice.taklif_asosida")} tone="neutral" />
-        ) : null}
-
-        {/*
-          * Bitta tugmali holatda u SHU QATORDA, o'ngda — vebdagi kabi.
-          * Ikkita tugma bo'lganda (taklif asosidagi xonaga qo'shilish)
-          * ular matn bilan bitta qatorga sig'maydi, shuning uchun pastda
-          * qoladi.
-          */}
-        {!live && isTeacher ? (
-          <Button
-            title={t("voice.xona_ochish")}
-            icon={<Plus size={16} color={palette["primary-foreground"]} />}
-            onPress={() => setCreateOpen(true)}
-          />
-        ) : null}
+      {/* `size-9 rounded-full`: jonli xonada ko'k, aks holda oq doira. */}
+      <View style={[styles.iconWrap, { backgroundColor: live ? palette.primary : palette.surface }]}>
+        <Icon name="volume" size={18} color={live ? palette["primary-foreground"] : palette.primary} />
       </View>
-
-      {live && room ? (
-        <View style={styles.actions}>
-          <Button
-            title={t("voice.qoshilish")}
-            loading={join.isPending}
-            style={styles.grow}
+      {room ? (
+        <>
+          <View style={styles.headBody}>
+            <Text variant="label" numberOfLines={1}>
+              {room.title || tv("room.defaultTitle")}
+            </Text>
+            <Text variant="caption" numberOfLines={1} style={[styles.subtitle, { color: palette["muted-foreground"] }]}>
+              {scheduled && room.scheduledAt ? tv("bar.scheduledAt", { time: formatDayTime(room.scheduledAt) }) : tv("bar.live")}
+              {" · "}
+              {tv("bar.participants", { count: room.participantCount })}
+              {room.accessMode === "invite_only" ? ` · ${tv("access.inviteOnly")}` : ""}
+            </Text>
+          </View>
+          <BarButton
+            label={tv("bar.join")}
+            icon={<Icon name="groups" size={18} color={palette["primary-foreground"]} />}
+            disabled={join.isPending || requestJoin.isPending}
             onPress={() => enter(room)}
           />
           {room.accessMode === "invite_only" ? (
-            <Button
-              title={t("voice.kirish_sorovi")}
-              variant="secondary"
-              loading={requestJoin.isPending}
-              style={styles.grow}
-              onPress={() => requestJoin.mutate(room.id)}
-            />
+            <BarButton label={tv("bar.requestJoin")} secondary disabled={requestJoin.isPending} onPress={() => requestJoin.mutate(room.id)} />
           ) : null}
-        </View>
-      ) : null}
+        </>
+      ) : (
+        <>
+          <View style={styles.headBody}>
+            <Text variant="label" numberOfLines={1}>
+              {tv("bar.emptyTitle")}
+            </Text>
+            <Text variant="caption" numberOfLines={1} style={[styles.subtitle, { color: palette["muted-foreground"] }]}>
+              {tv("bar.emptyHint")}
+            </Text>
+          </View>
+          <BarButton
+            label={tv("bar.create")}
+            icon={<Icon name="volume" size={18} color={palette["primary-foreground"]} />}
+            onPress={() => setCreateOpen(true)}
+          />
+        </>
+      )}
 
       <Sheet
         open={createOpen}
@@ -168,6 +163,42 @@ export function VoiceRoomBar({ courseId, isTeacher }: VoiceRoomBarProps) {
   );
 }
 
+/** `h-10 rounded-full px-4 gap-2` — asosiy (ko'k) yoki chegarali oq tugma. */
+function BarButton({
+  label,
+  icon,
+  secondary = false,
+  disabled = false,
+  onPress,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  secondary?: boolean;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
+  const { palette } = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.button,
+        secondary
+          ? { borderWidth: 1, borderColor: palette.border, backgroundColor: palette.surface }
+          : { backgroundColor: pressed ? palette["primary-hover"] : palette.primary },
+        disabled && styles.dim,
+      ]}
+    >
+      {icon}
+      <Text variant="label" style={{ color: secondary ? palette.foreground : palette["primary-foreground"] }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   /*
    * O'lchamlar veb DOM'idan (390px): banner 65 balandlik, ko'kimtir fon
@@ -180,12 +211,16 @@ const styles = StyleSheet.create({
    * tugma O'SHA QATORNING o'ng tomonida.
    */
   bar: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "rgba(238, 242, 255, 0.5)",
     borderBottomWidth: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
     gap: 12,
   },
+  button: { height: 40, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, borderRadius: radius.full },
+  dim: { opacity: 0.6 },
   head: { flexDirection: "row", alignItems: "center", gap: 12 },
   iconWrap: {
     width: 36,
@@ -194,7 +229,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headBody: { flex: 1 },
+  headBody: { flex: 1, minWidth: 0 },
   subtitle: { fontWeight: "500" },
   actions: { flexDirection: "row", gap: 8 },
   grow: { flex: 1 },

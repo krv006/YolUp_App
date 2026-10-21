@@ -1,122 +1,103 @@
 import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import type { HomeworkReport, HomeworkReportSummary } from "@/shared/types";
-import { Badge, radius, Text, useTheme, type BadgeTone } from "@/shared/ui";
+import { BarChart3, BookOpen, ListChecks, TrendingUp } from "lucide-react-native";
+import type { CourseHomeworkReport, HomeworkReport } from "@/shared/types";
+import { PortalCard, PortalEmpty, PortalMetric, PortalSectionHead, Text, useLegacyColors, useTheme } from "@/shared/ui";
+
+function scoreLabel(score: number | null): string {
+  return score == null ? "—" : String(Math.round(score));
+}
 
 /**
- * Veb `homework-report-view.tsx` ning mobil varianti.
- *
- * Grafik ATAYLAB yo'q: hisobotda ko'rsatkich uchta (topshirilgan, foiz,
- * o'rtacha baho) va ular raqam sifatida aniqroq o'qiladi. Grafik kutubxona
- * (victory-native/Skia) bundle'ga ~300KB qo'shardi — Faza 3 ning keyingi
- * qadamida, tendensiya grafigi kerak bo'lganda kiritiladi.
+ * Uy vazifasi hisoboti — veb `homework-report-view.tsx`: to'rtta
+ * ko'rsatkich (tor ekranda bir ustun) va har bir kurs bo'yicha topshirish
+ * ulushi chizig'i.
  */
 export function HomeworkReportView({ report }: { report: HomeworkReport }) {
-  const { t } = useTranslation("mobile");
-  return (
-    <View style={styles.wrapper}>
-      <SummaryCard title={t("homework.barcha_fanlar")} summary={report.overall} highlight />
-
-      {report.courses.length > 0 ? (
-        <>
-          <Text variant="label" style={styles.sectionTitle}>
-            {t("homework.fanlar_boyicha")}
-          </Text>
-          {report.courses.map((course) => (
-            <SummaryCard key={course.courseId} title={course.courseTitle} summary={course} />
-          ))}
-        </>
-      ) : null}
-    </View>
-  );
-}
-
-/** Baho ohangi: 80+ yaxshi, 50+ o'rtacha, pastrog'i e'tibor talab qiladi. */
-function scoreTone(value: number | null): BadgeTone {
-  if (value === null) return "neutral";
-  if (value >= 80) return "success";
-  if (value >= 50) return "warning";
-  return "danger";
-}
-
-function SummaryCard({
-  title,
-  summary,
-  highlight = false,
-}: {
-  title: string;
-  summary: HomeworkReportSummary;
-  highlight?: boolean;
-}) {
-  const { t } = useTranslation("mobile");
-  const { palette } = useTheme();
+  const { t } = useTranslation("homework");
+  const { overall, courses } = report;
 
   return (
-    <View
-      style={[
-        styles.card,
-        {
-          backgroundColor: highlight ? palette["primary-tint"] : palette.card,
-          borderColor: highlight ? palette["border-accent"] : palette.border,
-        },
-      ]}
-    >
-      <View style={styles.cardHead}>
-        <Text variant="label" numberOfLines={2} style={styles.cardTitle}>
-          {title}
-        </Text>
-        <Badge
-          label={summary.averageScore === null ? "Baho yo'q" : `${Math.round(summary.averageScore)} ball`}
-          tone={scoreTone(summary.averageScore)}
-        />
-      </View>
-
+    <View style={styles.report}>
       <View style={styles.metrics}>
-        <Metric label={t("homework.berilgan")} value={String(summary.assignedCount)} />
-        <Metric label={t("homework.topshirilgan")} value={String(summary.submittedCount)} />
-        <Metric label={t("homework.topshirish")} value={`${Math.round(summary.submissionRate)}%`} />
+        <PortalMetric icon={BookOpen} tone="blue" value={overall.assignedCount} label={t("report.assignedCount")} />
+        <PortalMetric
+          icon={ListChecks}
+          tone="violet"
+          value={`${overall.submissionRate}%`}
+          label={t("report.submittedRate", { submitted: overall.submittedCount, assigned: overall.assignedCount })}
+        />
+        <PortalMetric icon={TrendingUp} tone="emerald" value={scoreLabel(overall.averageScore)} label={t("report.averageScore")} />
+        <PortalMetric icon={BarChart3} tone="amber" value={courses.length} label={t("report.subjectsCount")} />
       </View>
 
-      {/* Progress chizig'i — foizni bir qarashda ko'rsatadi. */}
-      <View style={[styles.track, { backgroundColor: palette.muted }]}>
-        <View
-          style={[
-            styles.fill,
-            {
-              width: `${Math.min(100, Math.max(0, summary.submissionRate))}%`,
-              backgroundColor: palette.primary,
-            },
-          ]}
-        />
-      </View>
+      {/* `.homework-report-list` — 20 bo'shliq */}
+      <PortalCard style={styles.list}>
+        <View style={styles.head}>
+          <PortalSectionHead eyebrow={t("report.bySubjectEyebrow")} title={t("report.bySubjectTitle")} />
+        </View>
+        {courses.map((course, index) => (
+          <CourseReportRow key={course.courseId} course={course} last={index === courses.length - 1} />
+        ))}
+        {!courses.length ? (
+          <PortalEmpty icon={BookOpen} title={t("report.emptyTitle")} description={t("report.emptyDescription")} />
+        ) : null}
+      </PortalCard>
     </View>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function CourseReportRow({ course, last }: { course: CourseHomeworkReport; last: boolean }) {
+  const { t } = useTranslation("homework");
+  const { palette } = useTheme();
+  const colors = useLegacyColors();
+  const rate = Math.min(100, Math.max(0, course.submissionRate));
+  const score = course.averageScore;
+  // `.grade-pill` ohanglari: 80+ yashil, 50+ sariq, past — qizil, baho yo'q — yashil.
+  const tone =
+    score == null || score >= 80
+      ? { fg: palette["tone-emerald-fg"], bg: palette["success-soft"] }
+      : score >= 50
+        ? { fg: palette["warning-strong"], bg: palette["warning-soft"] }
+        : { fg: palette["destructive-strong"], bg: palette["destructive-soft"] };
+
   return (
-    <View style={styles.metric}>
-      <Text variant="subheading">{value}</Text>
-      <Text variant="caption" tone="muted">
-        {label}
+    <View style={[styles.row, !last && { borderBottomWidth: 1, borderColor: colors.border }]}>
+      <View style={styles.rowHead}>
+        <Text variant="label" style={styles.course}>
+          {course.courseTitle}
+        </Text>
+        <Text variant="caption" style={[styles.pill, { color: tone.fg, backgroundColor: tone.bg }]}>
+          {score == null ? t("report.noGrade") : `${scoreLabel(score)} ${t("report.pointsSuffix")}`}
+        </Text>
+      </View>
+      <View
+        accessibilityRole="progressbar"
+        accessibilityLabel={t("report.progressAria", { course: course.courseTitle, rate })}
+        accessibilityValue={{ min: 0, max: 100, now: rate }}
+        style={[styles.progress, { backgroundColor: palette["primary-soft"] }]}
+      >
+        <View style={[styles.progressFill, { width: `${rate}%`, backgroundColor: palette.primary }]} />
+      </View>
+      <Text variant="caption" style={[styles.small, { color: colors.muted }]}>
+        {t("report.submittedOf", { submitted: course.submittedCount, assigned: course.assignedCount, rate })}
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: { gap: 12 },
-  sectionTitle: { paddingTop: 8 },
-  card: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radius.lg,
-    padding: 16,
-    gap: 12,
-  },
-  cardHead: { flexDirection: "row", alignItems: "center", gap: 10 },
-  cardTitle: { flex: 1 },
-  metrics: { flexDirection: "row", gap: 20 },
-  metric: { gap: 2 },
-  track: { height: 6, borderRadius: 3, overflow: "hidden" },
-  fill: { height: "100%", borderRadius: 3 },
+  /* `.homework-report` — orasi 18 */
+  report: { gap: 18 },
+  metrics: { gap: 10 },
+  list: { padding: 20, gap: 4 },
+  head: { marginBottom: 14 },
+  /* `.homework-report-row` — 14 4, orasi 8 */
+  row: { gap: 8, paddingVertical: 14, paddingHorizontal: 4 },
+  rowHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  course: { flex: 1, minWidth: 0, fontSize: 14, fontWeight: "700" },
+  pill: { overflow: "hidden", paddingVertical: 7, paddingHorizontal: 10, borderRadius: 999, fontSize: 12, lineHeight: 18, fontWeight: "700" },
+  progress: { height: 8, overflow: "hidden", borderRadius: 999 },
+  progressFill: { height: "100%", borderRadius: 999 },
+  small: { fontSize: 11, lineHeight: 16.5 },
 });

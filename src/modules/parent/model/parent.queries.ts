@@ -53,12 +53,11 @@ export function useParentHomework(selectedChildId: string | null) {
 export function useRequestChildLink() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (username: string) => parentApi.requestLink(username),
+    mutationFn: (inviteCode: string) => parentApi.requestLink(inviteCode),
     onSuccess: () => {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("Bog‘lash so‘rovi yuborildi");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -70,7 +69,6 @@ export function useCreateChild() {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("Bola hisobi yaratildi");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -83,7 +81,6 @@ export function useRespondParentLink() {
       client.invalidateQueries({ queryKey: parentKeys.all });
       toast.success("So‘rov yangilandi");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }
 
@@ -95,6 +92,5 @@ export function useSetParentConsent() {
       client.invalidateQueries({ queryKey: parentKeys.consents });
       toast.success("Maxfiylik ruxsati saqlandi");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 }

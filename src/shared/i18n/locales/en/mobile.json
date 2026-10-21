@@ -759,6 +759,10 @@
       "title": "Homework",
       "description": "Assigned and completed work."
     },
+    "examsChild": {
+      "title": "Mock tests",
+      "description": "Exams in your child's groups and their results."
+    },
     "ratingChild": {
       "title": "Rating",
       "description": "Your child's homework results."

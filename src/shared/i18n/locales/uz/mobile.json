@@ -759,6 +759,10 @@
       "title": "Vazifalar",
       "description": "Berilgan va bajarilgan vazifalar."
     },
+    "examsChild": {
+      "title": "Mock testlar",
+      "description": "Farzandingiz guruhlaridagi imtihonlar va natijalar."
+    },
     "ratingChild": {
       "title": "Reyting",
       "description": "Farzandingizning vazifalar bo'yicha natijalari."

@@ -2,7 +2,6 @@ import type { UserDto } from "@/shared/types";
 
 export type LinkStatus = "pending" | "approved" | "declined";
 
-/** `GET /api/v1/auth/links/` — ota-ona↔bola bog'lanishi. */
 export interface ParentLinkDto {
   id: string | number;
   parent?: UserDto;
@@ -12,7 +11,6 @@ export interface ParentLinkDto {
   responded_at?: string | null;
 }
 
-/** Backend `ConsentKindEnum`. */
 export type ConsentKind = "recording" | "camera" | "analytics";
 
 export interface ConsentDto {
@@ -23,7 +21,6 @@ export interface ConsentDto {
   updated_at: string;
 }
 
-// ─── Domen ko'rinishlari ────────────────────────────────────────────────────
 export interface ParentLinkPerson {
   id: string;
   name: string;

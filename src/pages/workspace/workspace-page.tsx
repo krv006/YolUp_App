@@ -64,10 +64,10 @@ interface WorkspaceCard {
  *     turadi; tor ekranda ikki ustunli kartochka matni uch qatorga sinib
  *     o'qilmaydi.
  *
- *  2. OTA-ONA ham bor. Vebda ota-onaning o'z navigatsiyasi beshta
+ *  2. OTA-ONA ham bor. Vebda ota-onaning o'z navigatsiyasi oltita
  *     bo'limdan iborat (`parent-layout.tsx`), telefonda esa ularning
- *     ustiga Profil qo'shilib oltita tab chiqardi va yorliqlar
- *     kesilardi ("Davoma…", "Vazifa…"). Ikkinchi darajali uchtasi shu
+ *     ustiga Profil qo'shilib yettita tab chiqardi va yorliqlar
+ *     kesilardi ("Davoma…", "Vazifa…"). Ikkinchi darajali to'rttasi shu
  *     yerga yig'ildi.
  *
  * Shu sababli roldan qat'i nazar BIR XIL naqsh: tab qatorida kundalik
@@ -85,6 +85,7 @@ const CARDS: readonly WorkspaceCard[] = [
   // --- ota-ona (mobilga xos, izohi yuqorida) ---
   { id: "attendance", icon: CalendarCheck2, to: "attendance", roles: ["parent"], mobileText: true },
   { id: "homework", icon: ListChecks, to: "homework", roles: ["parent"], mobileText: true },
+  { id: "examsChild", icon: ClipboardCheck, to: "exams", roles: ["parent"], mobileText: true, tone: "green" },
   /*
    * Ota-onada matn BOSHQA kalitdan: "natijalaringiz" o'quvchiga aytiladi,
    * ota-ona esa FARZANDINING natijalarini ko'radi.
@@ -170,7 +171,7 @@ export function WorkspacePage() {
           * Vebda bu qator faqat o'qituvchida va guruh bo'lganda
           * ko'rinadi — shu shart ham ko'chirildi.
           */}
-        {role !== "student" && courses.length > 0 ? (
+        {role === "teacher" && courses.length > 0 ? (
           <View style={styles.statsRow}>
             <StatCard
               icon={<Icon name="groups" size={18} color={palette["primary-foreground"]} />}

@@ -16,6 +16,8 @@ import {
 export interface HomeworkResultSheetProps {
   submission: Submission | null;
   onClose: () => void;
+  /** Sarlavha — ota-ona sahifasida farzand ismi bilan (veb `title`). */
+  title?: string;
 }
 
 /**
@@ -27,13 +29,13 @@ export interface HomeworkResultSheetProps {
  * Shuning uchun har element render qilishdan oldin matnga aylantiriladi —
  * kutilmagan shakl ekranni yiqitmaydi.
  */
-export function HomeworkResultSheet({ submission, onClose }: HomeworkResultSheetProps) {
+export function HomeworkResultSheet({ submission, onClose, title }: HomeworkResultSheetProps) {
   const { t } = useTranslation("mobile");
   return (
     <Sheet
       open={Boolean(submission)}
       onClose={onClose}
-      title={t("homework.tekshiruv_natijasi")}
+      title={title ?? t("homework.tekshiruv_natijasi")}
       description={submission?.fileName}
     >
       {submission ? <ResultBody submission={submission} /> : null}

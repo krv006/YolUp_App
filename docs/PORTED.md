@@ -146,8 +146,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `520a875a379e` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/schedule-grid.tsx` | 🟡 MOSLASH | `—` | faqat tor ekran shoxlari (Ro'yxat/Kun/Hafta/Oy); keng ekran to'rlari ko'chirilmadi |
 | `src/modules/lesson/ui/schedule-sidebar.tsx` | 🟡 MOSLASH | `—` | faqat telefon bloklari: hafta tasmasi va eng yaqin dars |
-| `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-detail-sheet.tsx` (AppDialog -> Sheet) |
-| `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `lesson-create-sheet.tsx` (AppDialog -> Sheet) |
+| `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `fe03b39eee02` | mobilda `lesson-detail-sheet.tsx` (AppDialog -> Sheet); bekor qilish tasdig'ida seriya tanlovi `ConfirmSheet` ichida |
+| `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `e1ad0ea3713b` | mobilda `lesson-create-sheet.tsx` (AppDialog -> Sheet) |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `ccb7d986e5bd` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `2f9a569c29d6` | — |
@@ -262,6 +262,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/workspace/workspace-page.tsx` | 🟡 MOSLASH | `1310f75223c3` | vebda kartochkalar to'rda; telefonda bir ustunli ro'yxat — tor ekranda ikki ustunli matn sinib ketadi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | `expo-video` pleeri; pleer QO'LDA to'xtatilmaydi — `useVideoPlayer` uni o'zi bo'shatadi |
+| `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `42684a8f0678` | mobilda `pages/recording/recording-page.tsx` ichida (pleer, statistika chiplari, meta) |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
 | `src/shared/api/api-config.ts` | 🟢 NUSXA | `0e6a5d2a4cc7` | — |

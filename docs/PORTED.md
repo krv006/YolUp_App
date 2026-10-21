@@ -73,7 +73,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `92a4e4b6b9a7` | — |
 | `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `0b52138d2b10` | — |
 | `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `217cf656f39d` | — |
-| `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi va til sinxroni yo'q; sessiya raqami olindi |
+| `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `754c0aea202c` | window hodisalari -> refreshTokenManager; tab obunasi yo'q; sessiya raqami olindi; til sinxroni vebdagidek |
 | `src/modules/auth/model/use-auth.ts` | 🟢 NUSXA | `800d84e26e18` | — |
 | `src/modules/board/api/board.api.ts` | 🟢 NUSXA | `4c54b3d918f0` | — |
 | `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `cb6691d2ce73` | — |

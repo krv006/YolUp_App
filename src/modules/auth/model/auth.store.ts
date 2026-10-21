@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { AppError, announceSessionChange, refreshTokenManager, tokenStorage } from "@/shared/api";
 import type { TokenPair } from "@/shared/api";
+import { SUPPORTED_LANGUAGES, useLanguageStore, type AppLanguage } from "@/shared/model";
 import type { AuthStatus, AuthUser, LoginCredentials } from "@/shared/types";
 import { unregisterPushDevice } from "@/modules/notification/model/push-device";
 import { authApi } from "../api/auth.api";
@@ -12,6 +13,22 @@ import {
   mapUserDto,
 } from "../lib/auth.mappers";
 import { configureAuthRefresh } from "../lib/auth-session";
+
+/*
+ * Til serverdagi profil bilan bog'liq — veb `auth.store.ts` dagi kabi.
+ * Kirish/tiklash paytida serverdagi `preferred_language` qo'llanadi;
+ * foydalanuvchi tilni o'zgartirsa, u serverga yoziladi. Serverdan kelgan
+ * tilni qo'llayotganda uni qaytarib serverga yubormaslik uchun bayroq.
+ */
+let suppressLanguagePush = false;
+
+function syncLanguageFromServer(preferred: string) {
+  if (!SUPPORTED_LANGUAGES.includes(preferred as AppLanguage)) return;
+  if (useLanguageStore.getState().language === preferred) return;
+  suppressLanguagePush = true;
+  useLanguageStore.getState().setLanguage(preferred as AppLanguage);
+  suppressLanguagePush = false;
+}
 
 export const AUTH_STATUS = Object.freeze({
   ANONYMOUS: "anonymous",
@@ -95,6 +112,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       try {
         const user = mapUserDto(await authApi.getCurrentUser());
         set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
+        syncLanguageFromServer(user.preferredLanguage);
       } catch (error) {
         const appError = toAppError(error);
         // 401 — token yaroqsiz: sessiyani jimgina tozalaymiz, xato ekrani chiqarmaymiz.
@@ -122,6 +140,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const user = mapUserDto(await authApi.getCurrentUser());
       if (seq !== sessionSeq) return user;
       set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
+      syncLanguageFromServer(user.preferredLanguage);
       return user;
     } catch (error) {
       // Yarim ochilgan sessiya qolmasin.
@@ -138,6 +157,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const user = mapUserDto(await authApi.getCurrentUser());
       if (seq !== sessionSeq) return user;
       set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
+      syncLanguageFromServer(user.preferredLanguage);
       return user;
     } catch (error) {
       endSession();
@@ -160,6 +180,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     const { tokens, user } = mapSwitchAccountResponse(response);
     beginSession(tokens, persistent);
     set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
+    syncLanguageFromServer(user.preferredLanguage);
     return user;
   },
 
@@ -207,6 +228,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 // ─── Bir martalik yon-effektlar ─────────────────────────────────────────────
 configureAuthRefresh();
 
+useLanguageStore.subscribe((state, prevState) => {
+  if (suppressLanguagePush || state.language === prevState.language) return;
+  if (useAuthStore.getState().status !== AUTH_STATUS.AUTHENTICATED) return;
+  // Saqlanmasa ham til qurilmada qoladi — keyingi o'zgarishda qayta yuboriladi.
+  authApi.updateLanguage(state.language).catch(() => undefined);
+});
+
 /*
  * 🟡 MOBIL FARQI (MOBILE_PLAN §4.2, DECISIONS §22):
  *
@@ -219,8 +247,8 @@ configureAuthRefresh();
  *      ishlaydi — bu obuna va u bilan kelgan `syncSessionFromOtherTab`
  *      ataylab OLIB TASHLANDI, ekvivalenti yo'q.
  *
- * Veb'dagi til (i18n) sinxroni ham ko'chirilmadi — mobilda i18n hali yo'q
- * (DECISIONS §13). Qo'shilganda `syncLanguageFromServer` shu yerga qaytadi.
+ * Til sinxroni (`syncLanguageFromServer`) i18n kiritilgach qaytarildi
+ * (DECISIONS §23) — fayl boshida.
  */
 refreshTokenManager.onSessionExpired(() => {
   useAuthStore.setState({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });

@@ -8,7 +8,7 @@
   yagona commit yo'q: har faylning hash'i o'zi ko'chirilgan paytdagi veb
   holatini bildiradi. Poydevor (shared + auth), chat, kurs va dars domeni `eb02cd7` da,
   qolganlari hali `1e53492` da.
-- **Oxirgi yangilanish:** 2026-10-21 (homework va auth domeni qayta sinxronlandi)
+- **Oxirgi yangilanish:** 2026-10-21 (veb `e88ca42` — yangi backend endpointlari: auth, kurs, vazifa, dars, jonli dars, doska, imtihon)
 - **Drift tekshiruvi:** `npm run check-sync`
 
 > ⚠️ `npm run build:ported` ni HOZIR ishga tushirmang. U butun manifestni
@@ -245,7 +245,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/admin/system-panels.tsx` | 🟡 MOSLASH | `1f10ae6fae56` | server holatida davr tugmalari sarlavha ostida (vebda tor ekranda ustun bo'lib izohni siqadi) |
 | `src/pages/admin/teachers/admin-teachers-page.tsx` | 🟡 MOSLASH | `73fbd40d4d08` | mobilda `pages/admin/admin-teachers-page.tsx`; ko'rinish tanlagichi sarlavha ostida; `?teacher=` qatorga aylantiradi va belgilaydi |
 | `src/pages/admin/teachers/teacher-stats-dialog.tsx` | 🟡 MOSLASH | `b15753cd64fc` | mobilda `pages/admin/teacher-stats-sheet.tsx` (Dialog o'rniga Sheet) |
-| `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `7ee0926f54e8` | mobilda ikki fayl: `add-lesson-dialog.tsx` (butun ekran, saqlash shu yerda) va `add-assignment-sheet.tsx`; vazifa matnidagi formatlash qatori YO'Q — vebda tugmalar `onClick` siz |
+| `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `528e45ee1d4f` | mobilda ikki fayl: `add-lesson-dialog.tsx` (butun ekran, saqlash shu yerda) va `add-assignment-sheet.tsx`; vazifa matnidagi formatlash qatori YO'Q — vebda tugmalar `onClick` siz |
 | `src/shared/ui/app-dialog.tsx` | 🟡 MOSLASH | `c4982b8cfc42` | faqat `fullscreen` varianti — mobilda `fullscreen-dialog.tsx`; `sheet` o'rniga `Sheet` |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `c94dcadd37cd` | mobilda `formula-solver-sheet.tsx` (AppDialog sheet o'rniga Sheet); joylash vebdagidek `nextTextPoint` bilan |
 | `src/pages/teacher/exams/teacher-exams-page.tsx` | 🟡 MOSLASH | `aaec2fc43c46` | mobilda `pages/exams/teacher-exams-page.tsx`; telefon ko'rinishi (ro'yxat yoki tanlangan imtihon) |

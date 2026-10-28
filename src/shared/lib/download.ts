@@ -70,7 +70,7 @@ function sanitizeFileName(name: string): string {
  * RN'ning Blob'ida `arrayBuffer()` yo'q, shuning uchun FileReader orqali
  * base64 ga o'giramiz — bu yo'l ikkala platformada ham ishonchli ishlaydi.
  */
-function blobToBase64(blob: Blob): Promise<string> {
+export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(reader.error ?? new Error("Faylni o'qib bo'lmadi"));

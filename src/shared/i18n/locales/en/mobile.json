@@ -107,7 +107,6 @@
     "javob_berish": "Reply",
     "nusxalash": "Copy",
     "nusxalandi": "Copied",
-    "faylni_ochib_bolmadi": "Could not open the file",
     "qayta_yuborish": "Send again",
     "javobni_bekor_qilish": "Cancel reply",
     "xabar_yozing": "Write a message…",
@@ -597,11 +596,6 @@
     "ball_0_100": "The score must be between 0 and 100"
   },
   "app": {
-    "sahifa_topilmadi": "Page not found",
-    "havola_eskirgan_yoki_notogri_bolishi_mumkin": "The link may be outdated or incorrect.",
-    "bosh_sahifaga_qaytish": "Back to home",
-    "bu_bolimga_ruxsat_yoq": "No access to this section",
-    "hisobingiz_ushbu_sahifani_korish_huquqiga_eg": "Your account does not have permission to view this page.",
     "sessiya_tekshirilmoqda": "Checking session…",
     "ai_yordamchi": "AI assistant",
     "bu_bolim_faza_3_da_qoshiladi": "This section is coming in Phase 3."

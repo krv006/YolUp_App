@@ -250,7 +250,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/model/message.keys.ts` | 🟢 NUSXA | `fadd16224f37` | — |
 | `src/modules/message/model/chat-ui.store.ts` | 🟢 NUSXA | `—` | xabar qidiruvi va tanlash holati (2026-10-20 qo'shildi) |
 | `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `809460742acb` | react-router useNavigate -> expo-router (2026-10-20 vebdan qayta sinxronlandi; literal matn moslashtirishi olib tashlandi — chat.json da `removedFromGroup` endi bor) |
-| `src/modules/message/ui/message-attachment.tsx` | 🟡 MOSLASH | `b2144ef8b905` | rasm xabar ichida (`Image`, nisbat yuklangach); `FileViewer` o'rniga fayl token bilan yuklanib tizim oynasida ochiladi |
+| `src/modules/message/ui/message-attachment.tsx` | 🟡 MOSLASH | `b2144ef8b905` | rasm xabar ichida (`Image`, nisbat yuklangach); bosilganda `FileViewer` — fayl ilova ichida ochiladi |
 | `src/modules/message/ui/message-actions-menu.tsx` | 🟡 MOSLASH | `9fc6953c0866` | faqat telefon varianti (`focus`): pufak `measureInWindow` bilan o'lchanib Modal'da ko'tariladi; chekkalarga tizim panellari qo'shilgan |
 | `src/modules/message/ui/attachment-sheet.tsx` | 🟡 MOSLASH | `9d80259f1011` | `Sheet variant="app"`; fayl tanlash `expo-image-picker`/`expo-document-picker`; so'nggi rasm keshga yozilib `PickedFile` bo'ladi |
 | `src/modules/message/ui/image-preview-screen.tsx` | 🟡 MOSLASH | `9e49e666fffd` | to'liq ekran Modal, tokenlar doim qorong'i (`useDs("dark")`), holat paneli oq |
@@ -332,6 +332,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/mobile-fields.tsx` | 🟡 MOSLASH | `e38ff871ee7c` | `select` — `MobileSelectSheet` (pastki oynadagi ro'yxat, vebda brauzer ro'yxati); `date`/`time` — `mobile-pickers.tsx`; `datetime` (veb `datetime-local`) — avval kalendar, keyin soat |
 | `src/shared/ui/mobile-pickers.tsx` | 🟡 MOSLASH | `d93f3cdcb26a` | `AppDialog` -> `Sheet variant="app" compact`; kalendar haftalar qatorida (foizli `flexWrap` yaxlitlanadi); `clearable` — bo'sh qiymat ("Hozir") |
 | `src/shared/ui/mobile-screen-dialog.tsx` | 🟡 MOSLASH | `1685aa64f0de` | Radix Dialog -> RN `Modal` + `KeyboardAvoidingView` |
+| `src/shared/ui/file-viewer.tsx` | 🟡 MOSLASH | `2bd15f8dcb80` | faqat tor ekran varianti (to'liq ekran `Modal`); PDF — WebView'da pdf.js, hujjat base64 bo'lib beriladi; rasm `Image`, video `expo-video` (tizim boshqaruvlari), audio `expo-audio` (ijro tugmasi, chiziq, vaqt — vebdagi `<audio controls>` o'rnida); rasm/video/audio keshdagi faylga yoziladi |
+| `src/shared/ui/pdf-page-canvas.tsx` | 🟡 MOSLASH | `0b762711f65c` | mobilda `file-viewer.tsx` dagi WebView HTML'ida (xuddi shu hisob: kenglik × `devicePixelRatio`) |
+| `src/shared/ui/route-status.tsx` | 🟡 MOSLASH | `b048e5dc1a1f` | faqat tor ekran shoxi; belgi rang oladigan funksiya bo'lib beriladi (`mobileIcon` o'rniga sahifalar tor ekran belgisini beradi); tugmalar `MobileButton` |
+| `src/app/router/route-status-pages.tsx` | 🟡 MOSLASH | `af1e4e3d62e9` | mobilda `pages/status/route-status-pages.tsx`; marshrutlar `app/+not-found.tsx` va `app/forbidden.tsx` |
+| `src/app/router/route-error-boundary.tsx` | 🟡 MOSLASH | `77593fa8b9dd` | mobilda `RouteErrorPage` (`pages/status/route-status-pages.tsx`) + `app/_layout.tsx` dagi Expo Router `ErrorBoundary`; "Qayta urinish" — `retry()` (vebda sahifani qayta yuklash); bo'lak (chunk) qayta yuklash mantig'i yo'q — mobil to'plam bitta |
 | `src/shared/ui/modal-card.tsx` | 🟡 MOSLASH | `c7b2169346f0` | tor ekranda `Sheet variant="app"` bilan bir xil — alohida komponent yo'q |
 | `src/shared/ui/switch.tsx` | 🟡 MOSLASH | `edc97d390894` | radix o'rniga Pressable; `lg` o'lcham; radius aniq yarim balandlik (Android `boxShadow` 999 ni kesmaydi) |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `a30c57d10aa4` | faqat tor ekran varianti (`Sheet variant="app" compact`); tezkor tugmalar kursor joyiga (`onSelectionChange` + `setSelection`). Eski `formula-solver-sheet.tsx` `ui/legacy/` da |
@@ -413,9 +418,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/model/use-online-status.ts` | 🔴 QAYTA | `db9f2e6a64f2` | `navigator.onLine` o'rniga NetInfo (`isInternetReachable` ustuvor) |
 | `src/shared/lib/app-state.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/lib/date.ts` | 🟢 NUSXA | `89c75c616d39` | — |
-| `src/shared/lib/download.ts` | 🔴 QAYTA | `af194a763a11` | <a download> -> expo-file-system + Share; ASYNC bo'ldi |
+| `src/shared/lib/download.ts` | 🔴 QAYTA | `cf70cbf439d2` | <a download> -> expo-file-system + Share; ASYNC bo'ldi; `blobToBase64` eksport (fayl ko'ruvchidagi PDF uchun) |
 | `src/shared/lib/file-kind.ts` | 🟢 NUSXA | `df2f7ffd380a` | — |
-| `src/shared/lib/index.ts` | 🟡 MOSLASH | `798c80d346e3` | barrel + app-state/network eksportlari; `pdf` (pdfjs) eksporti yo'q — vebdagi PDF ko'ruvchi brauzerga xos |
+| `src/shared/lib/index.ts` | 🟡 MOSLASH | `798c80d346e3` | barrel + app-state/network eksportlari; `pdf` (pdfjs) eksporti yo'q — pdf.js WebView ichida (`shared/ui/file-viewer.tsx`); qo'shimcha `blobToBase64` |
+| `src/shared/lib/pdf.ts` | 🟡 MOSLASH | `efa7cfa78c01` | mobilda yo'q — pdf.js (3.11, UMD) WebView ichida cdnjs'dan yuklanadi (`shared/ui/file-viewer.tsx`) |
 | `src/shared/lib/network.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/lib/sanitize-html.ts` | 🔴 QAYTA | `0fffa4bdbf6c` | DOMPurify -> regex; WebView CSP bilan birga |
 | `src/shared/lib/storage.ts` | 🔴 QAYTA | `a49745b6789d` | localStorage -> MMKV; interfeys bir xil |

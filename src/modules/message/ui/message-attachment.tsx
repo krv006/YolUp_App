@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from "react-native";
-import { downloadBlob, fileKindLabel, fileKindOf, formatFileSize } from "@/shared/lib";
+import { fileKindLabel, fileKindOf, formatFileSize } from "@/shared/lib";
 import type { MessageAttachment as Attachment } from "@/shared/types";
-import { dsAlpha, DsText, dsRadius, Icon, toast, useDs } from "@/shared/ui";
+import { dsAlpha, DsText, dsRadius, FileViewer, Icon, useDs } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
 
 /**
@@ -11,8 +11,7 @@ import { messageApi } from "../api/message.api";
  * (`max-h-[320px] w-full rounded-xl`), aks holda fayl kartasi (kengaytma
  * belgisi, nom, hajm, yuklab olish doirasi).
  *
- * Vebda bosilganda `FileViewer` ochiladi; mobilda fayl token bilan
- * yuklanib, tizimning ochish/ulashish oynasi chiqadi (`downloadBlob`).
+ * Bosilganda `FileViewer` ochiladi — fayl faqat ilova ichida ko'rinadi.
  */
 export function MessageAttachment({
   attachment,
@@ -24,9 +23,8 @@ export function MessageAttachment({
   uploading?: boolean;
 }) {
   const { t } = useTranslation("chat");
-  const { t: tm } = useTranslation("mobile");
   const ds = useDs();
-  const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(false);
   const [ratio, setRatio] = useState<number | null>(null);
   const kind = fileKindOf(attachment.mimeType, attachment.name);
   const extension = attachment.name.split(".").pop()?.slice(0, 4).toUpperCase() ?? "FILE";
@@ -37,43 +35,48 @@ export function MessageAttachment({
     .filter(Boolean)
     .join(" · ");
 
-  async function open() {
-    if (busy || failed) return;
-    setBusy(true);
-    try {
-      const blob = await messageApi.downloadFile(attachment.messageId);
-      const saved = await downloadBlob(blob as Blob, attachment.name);
-      if (!saved) toast.error(tm("message.faylni_ochib_bolmadi"));
-    } catch {
-      toast.error(tm("message.faylni_ochib_bolmadi"));
-    } finally {
-      setBusy(false);
-    }
-  }
+  const viewer = (
+    <FileViewer
+      open={open}
+      onOpenChange={setOpen}
+      name={attachment.name}
+      mimeType={attachment.mimeType}
+      load={(signal) => messageApi.downloadFile(attachment.messageId, { signal }) as Promise<Blob>}
+    />
+  );
 
   if (kind === "image" && attachment.url && !failed) {
     return (
-      <Pressable
-        accessibilityRole="imagebutton"
-        accessibilityLabel={t("attachment.openAria", { name: attachment.name })}
-        onPress={() => void open()}
-        style={styles.image}
-      >
-        <Image
-          source={{ uri: attachment.url }}
-          onLoad={(event) => {
-            const { width, height } = event.nativeEvent.source;
-            if (width && height) setRatio(width / height);
-          }}
-          style={[styles.picture, { aspectRatio: ratio ?? 4 / 3, backgroundColor: ds.c.subtle }]}
-          resizeMode="cover"
-        />
-        {uploading || busy ? (
-          <View style={[StyleSheet.absoluteFill, styles.center, { backgroundColor: "rgba(0,0,0,0.35)" }]}>
-            <ActivityIndicator color="#ffffff" />
-          </View>
-        ) : null}
-      </Pressable>
+      <>
+        <Pressable
+          accessibilityRole="imagebutton"
+          accessibilityLabel={t("attachment.openAria", { name: attachment.name })}
+          onPress={() => setOpen(true)}
+          style={styles.image}
+        >
+          <Image
+            source={{ uri: attachment.url }}
+            onLoad={(event) => {
+              const { width, height } = event.nativeEvent.source;
+              if (width && height) setRatio(width / height);
+            }}
+            style={[styles.picture, { aspectRatio: ratio ?? 4 / 3, backgroundColor: ds.c.subtle }]}
+            resizeMode="cover"
+          />
+          {uploading ? (
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                styles.center,
+                { backgroundColor: "rgba(0,0,0,0.35)" },
+              ]}
+            >
+              <ActivityIndicator color="#ffffff" />
+            </View>
+          ) : null}
+        </Pressable>
+        {viewer}
+      </>
     );
   }
 
@@ -83,7 +86,7 @@ export function MessageAttachment({
         accessibilityRole="button"
         accessibilityLabel={t("attachment.openAria", { name: attachment.name })}
         disabled={failed}
-        onPress={() => void open()}
+        onPress={() => setOpen(true)}
         style={({ pressed }) => [
           styles.file,
           failed
@@ -113,11 +116,11 @@ export function MessageAttachment({
           </DsText>
         </View>
         <View style={[styles.download, failed ? null : { backgroundColor: ds.c.subtle }]}>
-          {busy ? (
-            <ActivityIndicator size="small" color={ds.c["ink-secondary"]} />
-          ) : (
-            <Icon name={failed ? "refresh" : "download"} size={16} color={failed ? ds.c["error-text"] : ds.c["ink-secondary"]} />
-          )}
+          <Icon
+            name={failed ? "refresh" : "download"}
+            size={16}
+            color={failed ? ds.c["error-text"] : ds.c["ink-secondary"]}
+          />
         </View>
       </Pressable>
       {uploading && !failed ? (
@@ -125,6 +128,7 @@ export function MessageAttachment({
           <View style={[styles.progressFill, { backgroundColor: ds.c.action }]} />
         </View>
       ) : null}
+      {viewer}
     </>
   );
 }
@@ -135,9 +139,29 @@ const styles = StyleSheet.create({
   image: { width: "100%", overflow: "hidden", borderRadius: dsRadius.xl },
   picture: { width: "100%", maxHeight: 320 },
   /* `w-full items-center gap-3 rounded-xl border p-3` */
-  file: { width: "100%", flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderWidth: 1, borderRadius: dsRadius.xl },
-  extension: { width: 44, height: 44, borderRadius: dsRadius.lg, alignItems: "center", justifyContent: "center" },
-  download: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  file: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: dsRadius.xl,
+  },
+  extension: {
+    width: 44,
+    height: 44,
+    borderRadius: dsRadius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  download: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   progress: { marginTop: 4, height: 4, width: "100%", overflow: "hidden", borderRadius: 2 },
   progressFill: { height: "100%", width: "33%", borderRadius: 2 },
 });

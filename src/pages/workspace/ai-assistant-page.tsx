@@ -36,11 +36,6 @@ const MIN_QUESTIONS = 5;
 const MAX_QUESTIONS = 50;
 const FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/*"];
 
-/*
- * Tayyor test hozircha eski testlar sahifasida ochiladi — 5b bosqichida
- * `ROUTES.teacher.test(quizId)` ga ko'chadi.
- */
-const openQuizPath = (quizId: string) => `/teacher/quizzes?quiz=${encodeURIComponent(quizId)}`;
 
 /**
  * AI yordamchi — veb `ai-assistant-page.tsx` + `mobile-ai-assistant.tsx`
@@ -68,7 +63,7 @@ export function AiAssistantPage() {
         started={params.started === "1"}
         retrying={start.isPending}
         onBack={goBack}
-        onOpen={(job) => job.quizId && router.push(openQuizPath(job.quizId) as never)}
+        onOpen={(job) => job.quizId && router.push(ROUTES.teacher.test(job.quizId) as never)}
         onRetry={(job) =>
           start.mutate({
             files: [],

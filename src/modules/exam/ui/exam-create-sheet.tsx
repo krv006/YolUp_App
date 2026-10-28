@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { BookOpen, Check, Coffee, LayoutList } from "lucide-react-native";
 import { useQuizColors } from "@/modules/quiz";
+import { ROUTES } from "@/shared/config";
 import type { ExamTemplate, QuizSummary } from "@/shared/types";
 import {
   DateTimeField,
@@ -235,7 +236,7 @@ export function ExamCreateSheet({
                         accessibilityRole="link"
                         onPress={() => {
                           close();
-                          router.push(`/teacher/ai?exam=${encodeURIComponent(AI_EXAM_FOR_SECTION[item.key])}`);
+                          router.push(`${ROUTES.teacher.workspaceAi}?exam=${encodeURIComponent(AI_EXAM_FOR_SECTION[item.key])}`);
                         }}
                       >
                         <Text variant="caption" style={[styles.link, styles.aiLink, { color: palette["primary-text"] }]}>

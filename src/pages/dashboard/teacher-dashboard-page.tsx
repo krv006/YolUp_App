@@ -131,9 +131,8 @@ export function TeacherDashboardPage() {
   const hasGroups = groups.length > 0;
 
   const openLesson = (lesson: Lesson) => router.push(ROUTES.live(lesson.id) as never);
-  // Vebda `ROUTES.teacher.schedule` / `homework`; mobil marshrutlar 5-bosqichda vebdagidek bo'ladi.
-  const openSchedule = () => router.navigate("/teacher/schedule" as never);
-  const openReview = () => router.push("/teacher/assignments" as never);
+  const openSchedule = () => router.navigate(ROUTES.teacher.schedule as never);
+  const openReview = () => router.push(ROUTES.teacher.homework as never, { withAnchor: true });
   const openChat = (lesson: Lesson) => {
     const room = roomByCourse.get(lesson.courseId);
     router.push((room ? ROUTES.teacher.chat(room) : ROUTES.teacher.chats) as never);

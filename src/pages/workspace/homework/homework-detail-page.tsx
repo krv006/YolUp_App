@@ -97,7 +97,7 @@ export function HomeworkDetailPage() {
 
   function goBack() {
     if (router.canGoBack()) router.back();
-    else router.replace(ROUTES.teacher.workspace as never);
+    else router.replace(ROUTES.teacher.homework as never);
   }
 
   return (

@@ -27,7 +27,7 @@ const TABS = [
      * foydalanuvchi qayerdan kirganini bilmaydi.
      */
     owns: ["quizzes", "exams", "ai", "analytics", "search", "assignments", "notifications"],
-    inset: true,
+    // Pastki bo'shliq `workspace/_layout.tsx` da — faqat bosh sahifada.
   },
   { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar", inset: true },
   { name: "dashboard", labelKey: "tabs.home", iconName: "home", center: true },

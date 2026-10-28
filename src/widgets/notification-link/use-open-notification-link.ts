@@ -1,8 +1,11 @@
 import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { useConversations } from "@/modules/conversation";
+import { homeworkApi, homeworkKeys } from "@/modules/homework";
 import type { NotificationLink } from "@/modules/notification";
+import { ROUTES } from "@/shared/config";
 import { ROLES } from "@/shared/constants";
 
 /**
@@ -10,12 +13,14 @@ import { ROLES } from "@/shared/constants";
  * tur (dars, yozuv, vazifa, topshiriq, test, imtihon, guruh, suhbat) o'z
  * sahifasiga.
  *
- * Farq: marshrutlar mobilning hozirgi sahifalariga (Workspace ichidagi
- * test/vazifa sahifalari 5-bosqichda vebdagidek `/workspace/...` ga
- * ko'chadi). Admin uchun o'qituvchi havolasi o'qituvchilar ro'yxatini ochadi.
+ * Farq: o'qituvchining vazifa va topshiriq havolalari vebdagidek
+ * `/teacher/workspace/homework/...` ga; qolganlari mobilning hozirgi
+ * sahifalariga (testlar 5-bosqichda). Admin uchun o'qituvchi havolasi
+ * o'qituvchilar ro'yxatini ochadi.
  */
 export function useOpenNotificationLink() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const role = user?.role;
   const student = role === ROLES.STUDENT;
@@ -30,8 +35,22 @@ export function useOpenNotificationLink() {
       if (type === "teacher") return go(`/admin/teachers?teacher=${encodeURIComponent(link.id)}`);
       if (type === "lesson") return go(kind?.includes("recording") ? `/recordings/${link.id}` : `/live/${link.id}`);
       if (type === "recording") return go(`/recordings/${link.id}`);
+      if (prefix === "/teacher" && (type === "assignment" || type === "homework")) return go(ROUTES.teacher.homeworkItem(link.id));
+      if (prefix === "/teacher" && type === "submission") {
+        // Vebdagidek: topshiriqdan vazifani topib, tekshirish sahifasida o'sha topshiriq.
+        void queryClient
+          .fetchQuery({
+            queryKey: homeworkKeys.submission(link.id),
+            queryFn: ({ signal }) => homeworkApi.getSubmission(link.id, { signal }),
+          })
+          .then((submission) => {
+            if (!submission) throw new Error();
+            go(`${ROUTES.teacher.homeworkReview(submission.assignmentId)}?s=${encodeURIComponent(link.id)}`);
+          })
+          .catch(() => go("/teacher/assignments"));
+        return;
+      }
       if (type === "assignment" || type === "homework" || type === "submission") {
-        if (prefix === "/teacher") return go("/teacher/assignments");
         if (prefix === "/parent") return go("/parent/homework");
         return go("/student/chats");
       }
@@ -45,6 +64,6 @@ export function useOpenNotificationLink() {
         return go(`${prefix}/chats/${link.id}`);
       }
     },
-    [router, prefix, student, conversations.data]
+    [router, prefix, student, conversations.data, queryClient]
   );
 }

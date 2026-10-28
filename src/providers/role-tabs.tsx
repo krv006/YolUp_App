@@ -73,6 +73,15 @@ type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>
  * bir xil yo'llar saqlanishi kerak (masalan `/teacher/dashboard` chatsga
  * yo'naltiradi), aks holda `resolveHomeRoute` va eski havolalar sinadi.
  */
+/**
+ * Suzuvchi panel egallaydigan pastki joy. Ichki stack'li bo'lim (Workspace)
+ * uni faqat o'z bosh sahifasiga beradi — ichki sahifada panel yashiringan.
+ */
+export function useFloatingTabInset(): number {
+  const insets = useSafeAreaInsets();
+  return Math.max(30, insets.bottom) + FLOATING_HEIGHT + 14;
+}
+
 export function RoleTabs({
   tabs,
   hidden = [],
@@ -86,11 +95,10 @@ export function RoleTabs({
   conversationRole?: "teacher" | "student";
 }) {
   const { palette } = useTheme();
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation(variant === "floating" ? "nav" : "mobile");
   const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.iconName]));
   const ownsByRoute = new Map(tabs.map((tab) => [tab.name, tab.owns ?? []]));
-  const floatingInset = Math.max(30, insets.bottom) + FLOATING_HEIGHT + 14;
+  const floatingInset = useFloatingTabInset();
 
   return (
     <Tabs

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useCourses, useCourseStudents } from "@/modules/course";
@@ -8,11 +9,13 @@ import {
   homeworkKeys,
   useAssignmentAiSummary,
   useAssignments,
+  useCreateAssignment,
   useDeleteAssignment,
   useRemindAssignment,
 } from "@/modules/homework";
 import { useLessons } from "@/modules/lesson";
 import { useSendNotification } from "@/modules/notification";
+import { ROUTES } from "@/shared/config";
 import type { Assignment, Submission } from "@/shared/types";
 import {
   Avatar,
@@ -26,6 +29,7 @@ import {
   useTheme,
   type IconName,
 } from "@/shared/ui";
+import { AssignmentFormDialog } from "./assignment-form-dialog";
 import { AssignmentFormSheet } from "./assignment-form-sheet";
 import { SubmissionReview } from "./submission-review";
 
@@ -75,10 +79,12 @@ function summaryText(assignment: Assignment): string {
  */
 export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreateOpenChange }: HomeworkWorkspaceProps) {
   const { t } = useTranslation("homework");
+  const router = useRouter();
   const { palette } = useTheme();
   const months = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
   const scoped = useAssignments(courseId, Boolean(courseId));
   const courses = useCourses();
+  const createAssignment = useCreateAssignment();
   const perCourse = useQueries({
     queries: (courseId ? [] : (courses.data ?? [])).map((course) => ({
       queryKey: homeworkKeys.assignments(course.id),
@@ -173,8 +179,19 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
   const reviewSubmission = reviewId ? (selected?.submissions.find((item) => item.id === reviewId) ?? null) : null;
 
   const formSheet = (
+    <>
+    {/* Yangi vazifa — yangi dizayndagi forma (veb `assignment-form-dialog.tsx`); ro'yxat 5-bosqichda. */}
+    <AssignmentFormDialog
+      key={createOpen ? "create-open" : "create"}
+      open={createOpen}
+      onOpenChange={(next) => onCreateOpenChange?.(next)}
+      courses={(courses.data ?? []).map((course) => ({ id: course.id, title: course.title, studentCount: course.studentCount ?? 0 }))}
+      pending={createAssignment.isPending}
+      initial={courseId ? { courseId, title: "", body: "", dueAt: null, grading: "five", announceInChat: true } : null}
+      onSubmit={(values) => createAssignment.mutate(values, { onSuccess: () => onCreateOpenChange?.(false) })}
+    />
     <AssignmentFormSheet
-      open={createOpen || Boolean(editing)}
+      open={Boolean(editing)}
       onClose={() => {
         onCreateOpenChange?.(false);
         setEditing(null);
@@ -185,6 +202,7 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
       lessons={(courseLessons.data ?? []).map((lesson) => ({ id: lesson.id, title: lesson.title, date: lesson.date }))}
       onDelete={(item) => setDeleteTarget(item)}
     />
+    </>
   );
 
   if (!assignments.isLoading && !items.length) {
@@ -286,10 +304,8 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
                       <Pressable
                         key={item.id}
                         accessibilityRole="button"
-                        onPress={() => {
-                          setSelectedId(item.id);
-                          setRowFilter("all");
-                        }}
+                        // Yangi dizayndagi vazifa sahifasi (veb `/teacher/workspace/homework/:id`).
+                        onPress={() => router.push(ROUTES.teacher.homeworkItem(item.id) as never)}
                         style={({ pressed }) => [
                           styles.card,
                           { borderColor: palette.border, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface },

@@ -25,6 +25,8 @@ export type { HomeworkBoardSaveState } from "./model/use-homework-board";
 
 // --- Mobil UI ---
 export { HomeworkMessageCard } from "./ui/homework-message-card";
+export { HomeworkResultDialog } from "./ui/homework-result-dialog";
+export type { HomeworkResultDialogProps } from "./ui/homework-result-dialog";
 export type { HomeworkMessageCardProps } from "./ui/homework-message-card";
 export { HomeworkReportView } from "./ui/homework-report-view";
 export { HomeworkResultSheet } from "./ui/homework-result-sheet";

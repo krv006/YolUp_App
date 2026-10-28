@@ -66,7 +66,10 @@ export function useOpenNotificationLink() {
         if (prefix === "/teacher") return go(isResult(kind) ? ROUTES.teacher.testResults(link.id) : ROUTES.teacher.test(link.id));
         return go(`${prefix}/quizzes?quiz=${link.id}`);
       }
-      if (type === "exam" || type === "mock") return go(student ? `/student/exams/${link.id}` : `${prefix}/exams`);
+      if (type === "exam" || type === "mock") {
+        if (prefix === "/teacher") return go(ROUTES.teacher.mockResults(link.id));
+        return go(student ? `/student/exams/${link.id}` : `${prefix}/exams`);
+      }
       if (type === "course") {
         const room = conversations.data?.find((item) => item.courseId === link.id);
         return go(room ? `${prefix}/chats/${room.id}` : `${prefix}/chats`);

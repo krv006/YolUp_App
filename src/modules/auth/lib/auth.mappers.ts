@@ -61,6 +61,8 @@ export function mapCertificateDto(dto: unknown): Certificate {
     file: parsed.file,
     title: parsed.title || "",
     createdAt: parsed.created_at,
+    issuer: parsed.issuer ?? "",
+    verified: Boolean(parsed.verified),
   };
 }
 
@@ -120,7 +122,7 @@ export function mapSwitchAccountResponse(dto: unknown): { tokens: TokenPair; use
 export function mapLoginRecords(dto: unknown): LoginRecord[] {
   return loginRecordDtoSchema
     .array()
-    .parse(Array.isArray(dto) ? dto : [])
+    .parse(Array.isArray(dto) ? dto : ((dto as { results?: unknown[] } | null)?.results ?? []))
     .map((item) => ({
       id: `${item.at}-${item.ip ?? ""}`,
       at: item.at,

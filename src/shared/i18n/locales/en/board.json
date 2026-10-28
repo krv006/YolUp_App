@@ -9,13 +9,22 @@
     "liveConnectedTitle": "Real-time connected",
     "liveDisconnectedTitle": "Syncing in slow mode",
     "live": "Live",
-    "slowMode": "Slow mode"
+    "slowMode": "Slow mode",
+    "slowSyncNote": "Syncing in slow mode — your drawings are saved and will be sent once the connection is back"
   },
   "sheet": {
-    "addSheet": "Sheet"
+    "addSheet": "Sheet",
+    "pageOf": "Page {{page}} / {{total}}",
+    "prev": "Previous page",
+    "next": "Next page"
   },
   "permission": {
-    "grantButton": "Grant"
+    "grantButton": "Grant",
+    "modes": {
+      "teacher": "Access: only you",
+      "selected": "Access: selected students",
+      "everyone": "Access: everyone"
+    }
   },
   "solver": {
     "button": "Solver"
@@ -32,9 +41,12 @@
     "math": "Formula",
     "toolbarAria": "Board tools",
     "colorLabel": "Color {{value}}",
-    "widthLabel": "Thickness {{value}}"
+    "widthLabel": "Thickness {{value}}",
+    "styleAria": "Colour and width"
   },
   "inline": {
+    "cancel": "Cancel",
+    "add": "Add to board",
     "formula": "Formula",
     "text": "Text",
     "placeholder": "Type text…",
@@ -60,7 +72,8 @@
       "offTopic": "Off topic",
       "cleanup": "Clearing the board",
       "other": "Other"
-    }
+    },
+    "reasonPlaceholder": "Describe the reason"
   },
   "grantDialog": {
     "title": "Board drawing permission",
@@ -84,6 +97,20 @@
     "title": "Left the lesson"
   },
   "periodic": {
+    "searchMobile": "Element name or symbol",
+    "massMobile": "Atomic mass {{value}}",
+    "categories": {
+      "alkali": "Alkali metal",
+      "alkaline_earth": "Alkaline earth metal",
+      "transition": "Transition metal",
+      "post_transition": "Post-transition metal",
+      "metalloid": "Metalloid",
+      "nonmetal": "Nonmetal",
+      "halogen": "Halogen",
+      "noble_gas": "Noble gas",
+      "lanthanide": "Lanthanide",
+      "actinide": "Actinide"
+    },
     "button": "Periodic table",
     "title": "Periodic table",
     "description": "Pick an element — its symbol and data are added to the board.",
@@ -133,7 +160,9 @@
     "sendToChat": "Send to chat",
     "downloadPdf": "Download PDF",
     "sentToChat": "The board was sent to the group chat",
-    "pdfFailed": "Could not download the PDF"
+    "pdfFailed": "Could not download the PDF",
+    "sheetCount": "{{count}} pages",
+    "boardTitle": "{{title}} — board"
   },
   "permissionDialog": {
     "title": "Board access",
@@ -142,6 +171,7 @@
     "save": "Save",
     "saved": "Access granted to {{count}} students",
     "pickStudent": "Pick at least one student",
+    "teacherOnly": "Teacher only",
     "modes": {
       "teacher": {
         "title": "Only me",
@@ -156,11 +186,32 @@
         "hint": "All participants can draw"
       }
     },
-    "revoked": "Revoked access from {{count}}"
+    "revoked": "Revoked access from {{count}}",
+    "selectedCount": "Selected students · {{count}}"
   },
   "pages": {
     "title": "Pages",
     "hint": "Students see the page you open",
-    "new": "New"
+    "new": "New page",
+    "pageLabel": "Page {{index}}",
+    "emptyPage": "Empty page",
+    "renameAria": "Page {{index}} title"
+  },
+  "preview": {
+    "label": "Board · page {{page}}",
+    "empty": "The board is empty for now"
+  },
+  "mobile": {
+    "title": "Board · {{page}} / {{total}}",
+    "undo": "Undo",
+    "redo": "Redo",
+    "undoReason": "Step undone",
+    "modes": {
+      "teacher": "Only you",
+      "selected": "Selected",
+      "everyone": "Everyone"
+    },
+    "liveLesson": "Live lesson",
+    "menu": "Actions"
   }
 }

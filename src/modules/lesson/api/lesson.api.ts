@@ -2,6 +2,7 @@ import { API_ERROR_CODES, apiClient, AppError, type RequestOptions } from "@/sha
 import type { Lesson } from "@/shared/types";
 import { lessonEndpoints } from "./lesson.endpoints";
 import type {
+  LessonConflictsDto,
   LessonDto,
   LessonFormInput,
   LessonRatingDto,
@@ -9,6 +10,7 @@ import type {
   LessonRecordingDto,
   LessonScheduleRequestDto,
   LessonScheduleResponseDto,
+  LessonWaitingDto,
 } from "./lesson.dto";
 import {
   mapLessonDto,
@@ -25,6 +27,18 @@ function isMissingRatingApi(error: unknown): boolean {
     error instanceof AppError &&
     (error.status === 404 || error.code === API_ERROR_CODES.NOT_FOUND)
   );
+}
+
+/** Yozuv bo'lagining tartibi: sessiya id'si va shu sessiyadagi 0 dan boshlanuvchi raqam — server takror yuborilgan bo'lakni qayta yozmaydi. */
+export interface RecordingChunkSequence {
+  session: string;
+  index: number;
+}
+
+function appendSequence(formData: FormData, sequence?: RecordingChunkSequence) {
+  if (!sequence) return;
+  formData.append("session", sequence.session);
+  formData.append("index", String(sequence.index));
 }
 
 export const lessonApi = {
@@ -117,14 +131,51 @@ export const lessonApi = {
       throw error;
     }
   },
+  async getWaiting(id: string, options?: RequestOptions) {
+    const dto = await apiClient.get<LessonWaitingDto>(lessonEndpoints.waiting(id), options);
+    return {
+      waitingCount: dto.waiting_count ?? null,
+      totalCount: dto.total_count ?? null,
+      students: (dto.students ?? []).map((item) => ({
+        id: String(item.id),
+        name: item.name ?? "",
+        avatar: item.avatar ?? null,
+      })),
+    };
+  },
+  async shareRecording(id: string) {
+    await apiClient.post(lessonEndpoints.shareRecording(id), {});
+    return id;
+  },
+  async getConflicts(params: { start: string; duration: number; exclude?: string }, options?: RequestOptions) {
+    const dto = await apiClient.get<LessonConflictsDto>(lessonEndpoints.conflicts, {
+      ...options,
+      query: {
+        start: params.start,
+        duration: params.duration,
+        ...(params.exclude ? { exclude: params.exclude } : {}),
+      },
+    });
+    return {
+      hasConflict: Boolean(dto.has_conflict),
+      lessons: (dto.lessons ?? []).map((item) => ({
+        id: String(item.id),
+        title: item.title ?? "",
+        courseTitle: item.course_title ?? "",
+        startsAt: item.starts_at ?? "",
+        durationMinutes: Number(item.duration_min ?? 0),
+      })),
+    };
+  },
   async removeRecording(id: string) {
     await apiClient.delete(lessonEndpoints.recording(id));
     return id;
   },
-  async uploadRecordingAudio(id: string, chunk: Blob, startedAt?: string) {
+  async uploadRecordingAudio(id: string, chunk: Blob, startedAt?: string, sequence?: RecordingChunkSequence) {
     const formData = new FormData();
     formData.append("chunk", chunk, `lesson-${id}-${Date.now()}.webm`);
     if (startedAt) formData.append("started_at", startedAt);
+    appendSequence(formData, sequence);
     await apiClient.post<void>(lessonEndpoints.recordingAudio(id), formData, {
       timeoutMs: 60_000,
     });
@@ -132,10 +183,11 @@ export const lessonApi = {
   async finalizeRecordingAudio(id: string) {
     await apiClient.post<void>(lessonEndpoints.finalizeRecordingAudio(id));
   },
-  async uploadRecordingVideo(id: string, chunk: Blob, startedAt?: string) {
+  async uploadRecordingVideo(id: string, chunk: Blob, startedAt?: string, sequence?: RecordingChunkSequence) {
     const formData = new FormData();
     formData.append("chunk", chunk, `lesson-${id}-${Date.now()}.webm`);
     if (startedAt) formData.append("started_at", startedAt);
+    appendSequence(formData, sequence);
     await apiClient.post<void>(lessonEndpoints.recordingVideo(id), formData, {
       timeoutMs: 120_000,
     });

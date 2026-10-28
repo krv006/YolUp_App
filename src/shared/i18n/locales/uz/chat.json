@@ -7,7 +7,9 @@
     "noChatsTeacher": "Guruh yarating va o‘quvchilaringizni taklif qiling. Suhbatlar shu yerda paydo bo‘ladi.",
     "noChatsStudent": "Kursga yoziling yoki o‘qituvchi toping. Suhbatlar shu yerda paydo bo‘ladi.",
     "createGroup": "Guruh yaratish",
-    "findTeacher": "Kursga yozilish"
+    "findTeacher": "Kursga yozilish",
+    "newChat": "Yangi suhbat",
+    "joinGroup": "Guruhga qo‘shilish"
   },
   "header": {
     "backAria": "Suhbatlar ro'yxatiga qaytish",
@@ -20,7 +22,8 @@
     "closeSearchAria": "Qidiruvni yopish",
     "searchPrevAria": "Oldingi natija",
     "searchNextAria": "Keyingi natija",
-    "onlineCount": "{{count}} nafari onlayn"
+    "onlineCount": "{{count}} nafari onlayn",
+    "voiceAria": "Ovozli suhbat"
   },
   "directStatus": {
     "pending": "So'rov kutilmoqda",
@@ -34,8 +37,8 @@
     "memberCount": "{{count}} a’zo",
     "changeGroupImageAria": "Guruh rasmini o'zgartirish",
     "groupImageUpdated": "Guruh rasmi yangilandi",
-    "muteOn": "Ovozni yoqish",
-    "muteOff": "Ovozsiz qilish",
+    "muteOn": "Ovozli",
+    "muteOff": "Ovozsiz",
     "mutedOn": "Bildirishnomalar ovozsiz qilindi",
     "mutedOff": "Bildirishnomalar ovozi yoqildi",
     "editCourse": "Kursni tahrirlash",
@@ -53,7 +56,7 @@
     "conversationBlocked": "Suhbat bloklandi",
     "deleteCourse": "Kursni o'chirish",
     "editCourseTitle": "Kursni tahrirlash",
-    "editCourseDescription": "Kurs nomi, fan va tavsifini yangilang.",
+    "editCourseDescription": "Kurs nomi, fan va tavsifini yangilang",
     "courseName": "Guruh nomi",
     "subject": "Fan",
     "description": "Tavsif",
@@ -65,21 +68,21 @@
     "backAria": "Orqaga",
     "closeAria": "Yopish",
     "search": "Qidirish",
-    "invite": "Taklif qilish",
+    "invite": "Taklif",
     "announcementTitle": "E’lon rejimi",
     "announcementHint": "Faqat siz xabar yoza olasiz",
     "aboutGroupPlain": "Guruh haqida",
     "allMembers": "Hammasi",
     "membersTitle": "A’zolar",
-    "deleteCourseConfirmTitle": "“{{title}}” guruhini o‘chirasizmi?",
+    "deleteCourseConfirmTitle": "“{{title}}”ni o‘chirasizmi?",
     "deleteTypeName": "Tasdiqlash uchun guruh nomini yozing",
     "deleteConfirm": "O‘chirish",
-    "descriptionOptional": "Qisqa tavsif · ixtiyoriy",
+    "descriptionOptional": "Tavsif",
     "joinRequests": "Qo‘shilish so‘rovlari · {{count}}",
     "joinRequestsHint": "Taklif havolasi orqali kelganlar",
     "pinned": "Qadalgan",
     "pinHint": "Qadalgan xabar yo‘q",
-    "tabMembers": "A’zolar — {{count}}",
+    "tabMembers": "A’zolar · {{count}}",
     "tabFiles": "Fayllar",
     "tabMedia": "Media",
     "filesEmpty": "Fayllar yo‘q",
@@ -87,7 +90,12 @@
     "sectionPending": "Backend tayyor bo‘lgach shu yerda ko‘rinadi",
     "online": "onlayn",
     "onlineCount": "{{count}} nafari onlayn",
-    "teacherBadge": "O‘qituvchi"
+    "teacherBadge": "O‘qituvchi",
+    "deleteCourseWarning": "Guruh chati, darslar, vazifalar va video yozuvlar butunlay o‘chiriladi.",
+    "filesEmptyHint": "Guruhda yuborilgan fayllar shu yerda to‘planadi.",
+    "mediaEmptyHint": "Guruhda yuborilgan rasm va videolar shu yerda to‘planadi.",
+    "descriptionShort": "Tavsif",
+    "memberYou": "{{name}} (siz)"
   },
   "item": {
     "liveNow": "Dars ketmoqda",
@@ -102,26 +110,44 @@
     "approve": "Qabul qilish",
     "createdToast": "Kurs va guruh chat yaratildi",
     "noteTitle": "Yangi o'quv maydoni",
-    "noteDescription": "Chat, darslar, vazifalar va o'quvchilar bitta kursda.",
+    "noteDescription": "Chat, darslar, vazifalar va o‘quvchilar bitta kursda.",
     "courseNameLabel": "Guruh nomi",
     "courseNamePlaceholder": "Masalan: Matematika, kechki guruh",
     "subjectLabel": "Fan",
-    "descriptionLabel": "Qisqa tavsif",
+    "descriptionLabel": "Kurs tavsifi",
     "descriptionPlaceholder": "Kurs maqsadi va yo'nalishi...",
     "cancel": "Bekor qilish",
     "create": "Guruh yaratish",
     "lessonsPerWeekLabel": "Haftasiga darslar",
     "lessonsPerWeekValue": "{{count}} ta",
-    "feeLabel": "Oylik to‘lov (ixtiyoriy)",
+    "feeLabel": "Oylik to‘lov",
     "feePlaceholder": "450 000 so‘m",
     "inviteTitle": "O‘quvchilarni taklif qiling",
-    "inviteDescription": "Havola orqali qo‘shilgan o‘quvchilar avtomatik ravishda “{{title}}” guruhiga tushadi.",
+    "inviteDescription": "Havola orqali qo‘shilganlar avtomatik “{{title}}”ga tushadi.",
     "inviteCopy": "Nusxalash",
     "inviteCopied": "Havola nusxalandi",
     "inviteShare": "Havolani ulashish",
-    "invitePending": "Taklif havolasi backend tayyor bo‘lgach chiqadi"
+    "invitePending": "Havola tayyorlanmoqda…",
+    "courseNameHint": "Qisqa va tushunarli nom",
+    "footerHint": "Kurs yaratilganda guruh chati avtomatik ochiladi",
+    "readyTitle": "Guruh tayyor!",
+    "later": "Keyinroq",
+    "inviteCopyFailed": "Havolani nusxalab bo‘lmadi",
+    "inviteExpiry": "{{count}} kun amal qiladi",
+    "approvalLabel": "Tasdiqlash bilan",
+    "approvalHint": "Havola orqali kelganlarni siz tasdiqlaysiz",
+    "mobileSubtitle": "Chat, darslar va vazifalar bitta joyda",
+    "shortDescriptionLabel": "Qisqa tavsif",
+    "lessonsHint": "Jadvalni keyin qo‘shasiz",
+    "subjectPlaceholder": "Tanlang",
+    "decrease": "Kamaytirish",
+    "increase": "Ko‘paytirish"
   },
   "list": {
+    "emptyGroupTitle": "Guruhda hali xabar yo‘q",
+    "emptyGroupHint": "Birinchi bo‘lib salom bering yoki e’lon yozing — barcha a’zolarga boradi.",
+    "emptyTitle": "Hali xabar yo‘q",
+    "emptyHint": "Birinchi bo‘lib salom bering.",
     "today": "Bugun",
     "loadError": "Xabarlar yuklanmadi",
     "loadErrorHint": "Bir ozdan so'ng yana urinib ko'ring.",
@@ -130,7 +156,8 @@
     "searchEmptyHint": "“{{query}}” bo‘yicha xabar topilmadi. Boshqa so‘z bilan urinib ko‘ring.",
     "announcementOn": "E’lon rejimi yoqildi — faqat o‘qituvchilar yozadi",
     "announcementLocked": "Bu guruhda faqat o‘qituvchilar yozishi mumkin",
-    "searchOlder": "Yana {{count}} ta natija eski xabarlarda — yuqoriga suring"
+    "searchOlder": "Yana {{count}} ta natija eski xabarlarda — yuqoriga suring",
+    "announcementChip": "E’lon rejimi yoqildi"
   },
   "composer": {
     "editingLabel": "Xabarni tahrirlash",
@@ -153,7 +180,8 @@
     "recordCancel": "Yozuvni bekor qilish",
     "recordSend": "Ovozli xabarni yuborish",
     "micDenied": "Mikrofonga ruxsat berilmadi",
-    "recordHint": "‹ Bekor qilish uchun suring"
+    "recordHint": "‹ Bekor qilish uchun suring",
+    "recordSwipeCancel": "Bekor qilish uchun suring"
   },
   "actionsMenu": {
     "closeAria": "Xabar menyusini yopish",
@@ -179,7 +207,8 @@
     "scrollDown": "Pastga tushish",
     "mentionAria": "Eslatib o‘tish",
     "voiceAria": "Ovozli xabar",
-    "selectedMessages": "{{count}} ta xabar tanlandi"
+    "selectedMessages": "{{count}} ta xabar tanlandi",
+    "cancelShort": "Bekor"
   },
   "bubble": {
     "edited": "tahrirlangan",
@@ -224,7 +253,7 @@
       "group": "Guruhlar",
       "unread": "O'qilmagan"
     },
-    "searchPlaceholder": "Suhbatlarni qidirish",
+    "searchPlaceholder": "Suhbatlarni qidirish...",
     "searchAria": "Suhbatlarni qidirish",
     "openSearchAria": "Qidiruvni ochish",
     "closeSearchAria": "Qidiruvni yopish",
@@ -235,7 +264,7 @@
     "retry": "Qayta urinish",
     "peopleLabel": "ODAMLAR",
     "emptyTitle": "Suhbat topilmadi",
-    "emptyHint": "Qidiruv so‘zi yoki filtrlarni o‘zgartirib ko‘ring",
+    "emptyHint": "Qidiruv so‘zi yoki filtrlarni o‘zgartirib ko‘ring.",
     "clearFilters": "Filtrni tozalash",
     "newGroupAria": "Yangi guruh yoki suhbat yaratish",
     "findTeacherAria": "O'qituvchi yoki kurs topish",
@@ -256,7 +285,18 @@
     "noChatsTeacherHint": "Guruh yarating va o‘quvchilaringizni taklif qiling. Suhbatlar shu yerda paydo bo‘ladi.",
     "noChatsStudentHint": "Guruhga qo‘shiling — darslar va suhbatlar shu yerda paydo bo‘ladi.",
     "createGroup": "Guruh yaratish",
-    "joinGroup": "Guruhga qo‘shilish"
+    "joinGroup": "Guruhga qo‘shilish",
+    "title": "Chat",
+    "unreadCount": "{{count}} ta o‘qilmagan xabar",
+    "allRead": "Hammasi o‘qilgan",
+    "newDirect": "Yangi suhbat",
+    "newGroup": "Yangi guruh",
+    "typing": "{{name}} yozmoqda...",
+    "you": "Siz",
+    "peopleSection": "Odamlar",
+    "startChat": "Suhbat ochish",
+    "connectionLost": "Ulanish yo‘q",
+    "freshStart": "Yangi boshlanish"
   },
   "pinned": {
     "label": "Qadalgan xabar",
@@ -281,20 +321,25 @@
     "banner": "Internet aloqasi yo‘q. Xabarlar ulanish tiklanganda yuboriladi.",
     "composer": "Internet yo‘q — xabarlar ulanish tiklanganda yuboriladi",
     "failed": "Yuborilmadi",
-    "retry": "Qayta urinish"
+    "retry": "Qayta urinish",
+    "resend": "Qayta yuborish",
+    "composerShort": "Internet yo‘q — ulanganda yuboriladi"
   },
   "mention": {
     "title": "Guruh a’zolari",
     "empty": "A’zo topilmadi",
     "teacher": "O‘qituvchi",
-    "parent": "Ota-ona"
+    "parent": "Ota-ona",
+    "online": "onlayn"
   },
   "forward": {
     "title": "Xabarni uzatish",
     "description": "{{count}} ta xabar tanlangan suhbatlarga yuboriladi",
     "searchPlaceholder": "Suhbatni qidirish",
     "empty": "Suhbat topilmadi",
-    "done": "Xabar uzatildi"
+    "done": "Xabar uzatildi",
+    "submit": "Yuborish ({{count}})",
+    "memberCount": "{{count}} a’zo"
   },
   "system": {
     "recordingTitle": "Dars video yozuvi tayyor",
@@ -307,7 +352,8 @@
     "gallery": "Galereya",
     "camera": "Kamera",
     "document": "Hujjat",
-    "assignment": "Vazifa"
+    "assignment": "Vazifa",
+    "recentFailed": "Rasmni yuklab bo‘lmadi"
   },
   "preview": {
     "title": "{{count}} ta rasm",
@@ -318,5 +364,17 @@
     "selectAria": "{{number}}-rasm",
     "removeAria": "{{number}}-rasmni olib tashlash",
     "quality": "Rasmlar asl sifatda yuboriladi · {{size}}"
+  },
+  "listTime": {
+    "yesterday": "Kecha",
+    "weekdays": [
+      "Ya",
+      "Du",
+      "Se",
+      "Ch",
+      "Pa",
+      "Ju",
+      "Sh"
+    ]
   }
 }

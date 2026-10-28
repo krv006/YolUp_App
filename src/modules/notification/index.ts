@@ -10,6 +10,7 @@ export { notificationEndpoints } from "./api/notification.endpoints";
 export type {
   InboxNotification,
   NotificationLink,
+  OpenNotificationLink,
   NotificationDto,
   NotificationRecipientDto,
   NotificationRecipientRow,
@@ -42,6 +43,13 @@ export {
   useUnreadNotificationCount,
   useUserSearch,
 } from "./model/notification.queries";
+export {
+  notificationActionKey,
+  notificationGroupKey,
+  notificationIcon,
+  notificationLines,
+} from "./lib/notification-display";
+export type { NotificationGroupKey } from "./lib/notification-display";
 export { useNotificationFeed } from "./model/use-notification-feed";
 
 // --- Mobil UI ---

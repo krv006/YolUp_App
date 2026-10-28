@@ -19,6 +19,7 @@ export type { ConversationFilter } from "./model/conversation-filter.store";
 export {
   readCachedConversation,
   useConversations,
+  useGroupImages,
   useTeachersForDirect,
   useRequestDirect,
   useRespondDirect,

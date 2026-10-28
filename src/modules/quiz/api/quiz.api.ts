@@ -15,6 +15,7 @@ import type {
   AiQuizRequest,
   QuizAttemptResultDto,
   QuizAttemptSummaryDto,
+  QuizQuestionStatDto,
   QuizDto,
   QuizGroupDto,
   QuizImportPreviewDto,
@@ -24,7 +25,7 @@ import type {
 import {
   mapQuizAttemptRequest,
   mapQuizAttemptResultDto,
-  mapQuizAttemptSummaryDto,
+  mapQuizQuestionStatDto,
   mapQuizDto,
   mapImportWarningDtos,
   mapQuizEditRequest,
@@ -163,18 +164,31 @@ export const quizApi = {
   },
   async submitAttempt(
     quizId: string,
-    answers: QuizAttemptAnswerInput[]
+    answers: QuizAttemptAnswerInput[],
+    durationSeconds?: number | null
   ) {
     return mapQuizAttemptResultDto(
       await apiClient.post<QuizAttemptResultDto>(
         quizEndpoints.attempts(quizId),
-        mapQuizAttemptRequest(answers)
+        mapQuizAttemptRequest(answers, durationSeconds)
       )
+    );
+  },
+  async getQuestionStats(quizId: string, options?: RequestOptions) {
+    const dto = await apiClient.get<QuizQuestionStatDto[]>(quizEndpoints.stats(quizId), options);
+    return (Array.isArray(dto) ? dto : []).map(mapQuizQuestionStatDto);
+  },
+  async startAiMiniQuiz(quizId: string, wrongQuestionIds: string[]) {
+    return apiClient.post<{ id: string | number; status?: string }>(
+      quizEndpoints.aiGenerateMini,
+      { quiz_id: quizId, wrong_question_ids: wrongQuestionIds }
     );
   },
   async getAttempts(quizId: string, options?: RequestOptions) {
     const dto = await apiClient.get<unknown>(quizEndpoints.attempts(quizId), options);
-    return normalizePagination<QuizAttemptSummaryDto>(dto).items.map(mapQuizAttemptSummaryDto);
+    return normalizePagination<QuizAttemptSummaryDto & Partial<QuizAttemptResultDto>>(dto).items.map((item) =>
+      mapQuizAttemptResultDto({ ...item, answers: item.answers ?? [] })
+    );
   },
 
   exportAttempts(quizId: string, type: "xlsx" | "csv" = "xlsx") {

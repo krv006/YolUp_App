@@ -10,13 +10,37 @@
   "lessons": {
     "eyebrow": "LESSON SCHEDULE",
     "title": "Lessons",
-    "subtitle": "Scheduled live sessions.",
+    "subtitle": "Scheduled live lessons",
     "addLesson": "Add lesson",
     "deleteDialogTitle": "Delete lesson",
     "deleteDialogDescription": "The lesson leaves the schedule and students are notified. The attached quiz and attendance records go too.",
     "cancel": "Cancel",
     "delete": "Delete",
-    "deleteConfirmTitle": "Delete the “{{title}}” lesson?"
+    "deleteConfirmTitle": "Delete the “{{title}}” lesson?",
+    "today": "Today, {{date}}",
+    "yesterday": "Yesterday, {{date}}",
+    "countShort": "{{count}}",
+    "minutesShort": "{{count}} min",
+    "noTopic": "No topic yet",
+    "status": {
+      "live": "Live",
+      "scheduled": "Scheduled",
+      "finished": "Finished",
+      "cancelled": "Cancelled"
+    },
+    "joined": "{{joined}} / {{total}} joined",
+    "finishedMeta": "{{count}} participants",
+    "join": "Join the lesson",
+    "recording": "Recording",
+    "ratings": "Ratings",
+    "ratingsWith": "Ratings · {{value}}",
+    "edit": "Edit",
+    "emptyTitle": "No lessons scheduled yet",
+    "emptyHint": "Add the schedule — your students will get a reminder.",
+    "cancelLesson": "Cancel lesson",
+    "finishedStats": "{{joined}} / {{total}} joined · attendance {{rate}}%",
+    "cancelLessonLong": "Cancel lesson",
+    "finishedStatsShort": "{{joined}} attended · attendance {{rate}}%"
   },
   "assignments": {
     "eyebrow": "GROUP ASSIGNMENTS",
@@ -39,7 +63,20 @@
     "deleteDialogDescription": "\"{{title}}\" and its related data will be deleted.",
     "cancel": "Cancel",
     "delete": "Delete",
-    "fromBank": "From ready tests"
+    "fromBank": "From ready tests",
+    "subtitleShort": "Assignments and AI results",
+    "emptyHint": "Give the first homework — students will see it in the group chat.",
+    "addTest": "Add test",
+    "testMenu": {
+      "bank": {
+        "title": "From ready tests",
+        "hint": "Pick a test from the bank"
+      },
+      "create": {
+        "title": "Create a new test",
+        "hint": "From scratch or with AI"
+      }
+    }
   },
   "students": {
     "eyebrow": "PARTICIPANTS",
@@ -70,7 +107,11 @@
     "statLessons": "Lessons",
     "studentsTitle": "Students",
     "studentsMeta": "Attendance · focus",
-    "focusSuffix": "focus"
+    "focusSuffix": "focus",
+    "mobileBadge": "{{lessonCount}} lessons · {{recordCount}} records",
+    "studentsMetaShort": "Attendance · focus",
+    "filterMonthShort": "30 days",
+    "filterAllShort": "All"
   },
   "dialogs": {
     "lesson": {
@@ -122,7 +163,16 @@
       "quizNone": "No quiz attached",
       "editDescription": "Change the topic, time and attached quiz. Students get a notification.",
       "deleteLesson": "Delete the lesson",
-      "quizHint": "The quiz opens for students automatically once the lesson ends."
+      "quizHint": "The quiz opens for students automatically once the lesson ends.",
+      "repeatingSubtitle": "Recurring schedule",
+      "timeBusy": "This time is taken",
+      "scheduleFirst": "{{count}} lessons will be created{{limitNote}} · first on {{first}}, {{weekday}}",
+      "mobileSubtitle": "Set the lesson time for the group",
+      "todayDate": "Today, {{date}}",
+      "timeShort": "Time",
+      "startShort": "Start",
+      "durationMinutes": "Duration (minutes)",
+      "minutesValue": "{{count}} minutes"
     },
     "conflict": {
       "singleTitle": "You already have a lesson at this time",
@@ -180,7 +230,7 @@
     "submit": "Add ({{count}})",
     "added": "{{count}} students added",
     "createTitle": "New student account",
-    "createDescription": "If the student is not on the platform, you create the account and they join the group right away.",
+    "createDescription": "You create the account and the student joins the group",
     "firstName": "First name",
     "lastName": "Last name",
     "login": "Login",
@@ -192,17 +242,20 @@
     "createNote": "Send the login and password to the student. They change the password on first sign-in.",
     "createSubmit": "Create the account",
     "requestsTitle": "Join requests · {{count}}",
-    "requestsDescription": "Requests that came through the invite link. Accepted people join the group right away.",
+    "requestsDescription": "Requests that came through the invite link",
     "requestsEmpty": "No new requests.",
     "accept": "Accept",
     "decline": "Decline",
     "acceptAll": "Accept ({{count}})",
     "close": "Close",
-    "parentFor": "Parent · for {{name}}"
+    "parentFor": "Parent · for {{name}}",
+    "createAccountShort": "New student account",
+    "inviteShort": "Invite link",
+    "copy": "Copy"
   },
   "invite": {
     "title": "Invite link",
-    "description": "Send the link to your students — they join the group in one tap.",
+    "description": "Students join the group in one tap",
     "empty": "No link has been created for this group yet.",
     "create": "Create link",
     "created": "Link created",
@@ -221,7 +274,10 @@
     "noExpiry": "No expiry",
     "approvalLabel": "With approval",
     "approvalHint": "You approve everyone who joins through the link",
-    "approvalOn": "with approval"
+    "approvalOn": "with approval",
+    "linkLabel": "Link",
+    "share": "Share the link",
+    "cancelLink": "Revoke"
   },
   "join": {
     "title": "Join the group",
@@ -241,5 +297,32 @@
     "retry": "Try again",
     "openCourse": "Open the group",
     "home": "Go home"
+  },
+  "cancelLesson": {
+    "title": "Cancel this lesson?",
+    "description": "The lesson stays in the schedule marked as cancelled and students get a notification.",
+    "onlyThis": "Only this lesson ({{when}})",
+    "thisAndNext": "This and all following lessons",
+    "close": "Close",
+    "confirm": "Cancel lesson"
+  },
+  "announcementBanner": "Announcement mode on — only you can write",
+  "mobileAssignments": {
+    "draft": "Draft",
+    "review": "Review · {{count}}",
+    "finished": "Completed",
+    "noDue": "No due date",
+    "daysLeft": "{{count}} days left",
+    "draftMeta": "Unsent draft",
+    "due": "Due: {{date}}",
+    "notSent": "Not sent",
+    "average": "average {{value}}",
+    "submitted": "{{done}} / {{total}} submitted",
+    "quizMeta": "{{count}} questions · Quiz",
+    "open": "Open",
+    "edit": "Edit",
+    "delete": "Delete",
+    "results": "Results",
+    "menu": "Actions"
   }
 }

@@ -1,151 +1,176 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowLeft, Download, Send } from "lucide-react-native";
-import { boardApi, BoardSurface, useSendBoardToChat } from "@/modules/board";
+import { boardApi, BoardSurface, MobileBoardPageNav, useBoard, useSendBoardToChat } from "@/modules/board";
 import { useLesson } from "@/modules/lesson";
 import { downloadBlob } from "@/shared/lib";
-import { radius, Screen, ScreenLoading, Text, ThemeScope, toast, useTheme } from "@/shared/ui";
+import { DsText, Icon, PopoverMenu, PopoverMenuItem, ThemeScope, toast, useDs, usePopoverAnchor } from "@/shared/ui";
 import { LiveRoomState } from "@/widgets/live-room/live-room-state";
 
 /**
- * Doska sahifasi — veb `pages/board/board-page.tsx`. Dars tugagach chatdagi
- * `.../boards/<lesson_id>` havolasi shu yerga tushadi: qorong'i sarlavha,
- * doska va pastda "Chatga yuborish" / "PDF yuklab olish".
+ * Doska sahifasi — veb `pages/board/board-page.tsx` (tor ekran): dars
+ * tugagach chatdagi `.../boards/<lesson_id>` havolasi shu yerga tushadi.
+ * Chizish mumkin bo'lsa — doskaning o'zi; faqat ko'rish bo'lsa sarlavhada
+ * menyu, pastda sahifalar va "PDF yuklab olish" / "Chatga yuborish".
  */
 export function BoardPage() {
   const { t } = useTranslation("board");
+  const months = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
+  const ds = useDs();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const lesson = useLesson(lessonId ?? null);
+  const board = useBoard(lessonId ?? "", { live: false, enabled: Boolean(lessonId) });
+  const sendToChat = useSendBoardToChat(lessonId ?? "");
+  const { anchorRef, rect, open: openMenu, close: closeMenu } = usePopoverAnchor();
+  const [busy, setBusy] = useState(false);
+  const [sheet, setSheet] = useState(0);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace("/"));
 
   if (lesson.isLoading || (!lesson.isError && !lesson.data))
     return (
-      <ThemeScope scheme="dark">
-        <Screen>
-          <ScreenLoading label={t("page.loading")} />
-        </Screen>
-      </ThemeScope>
+      <View style={[styles.loading, { backgroundColor: ds.c.canvas }]}>
+        <ActivityIndicator color={ds.c.brand} />
+        <DsText v="body-sm" c="ink-secondary">
+          {t("page.loading")}
+        </DsText>
+      </View>
     );
 
-  if (lesson.isError || !lesson.data)
+  if (lesson.isError)
     return (
       <LiveRoomState
         title={t("page.notFound")}
         description={lesson.error?.message}
         actionLabel={t("status.retry")}
         onAction={() => void lesson.refetch()}
-        onBack={goBack}
+        secondaryLabel={t("page.back")}
+        onSecondary={goBack}
       />
     );
 
+  const data = lesson.data!;
+  const state = board.data ?? null;
+  const sheets = state?.sheets ?? [];
+  const editable = Boolean(state?.canDraw);
+  const day = new Date(`${data.date}T00:00`);
+  const dateLabel = Number.isNaN(day.getTime()) ? data.date : `${day.getDate()}-${(months[day.getMonth()] ?? "").toLowerCase()}`;
+
+  async function downloadPdf() {
+    setBusy(true);
+    try {
+      const blob = await boardApi.downloadPdf(data.id);
+      await downloadBlob(blob as Blob, `${data.title}.pdf`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("page.pdfFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function share() {
+    sendToChat.mutate(undefined, { onSuccess: () => toast.success(t("page.sentToChat")) });
+  }
+
   return (
-    <ThemeScope scheme="dark">
-      <BoardPageBody lessonId={lesson.data.id} onBack={goBack} />
+    <ThemeScope scheme="light">
+      <View
+        style={[
+          styles.root,
+          { backgroundColor: ds.c.subtle, paddingTop: insets.top + 20, paddingBottom: (editable ? 26 : 49) + insets.bottom },
+        ]}
+      >
+        <BoardSurface
+          lessonId={data.id}
+          courseId={data.courseId}
+          sheetIndex={sheet}
+          onSheetChange={setSheet}
+          mobile={{
+            title: editable ? undefined : data.title,
+            subtitle: editable
+              ? `${data.courseTitle} · ${t("mobile.liveLesson")}`
+              : [data.courseTitle, `${dateLabel}, ${data.time}`, t("page.sheetCount", { count: sheets.length })].join(" · "),
+            live: editable && data.status === "live",
+            backLabel: t("page.back"),
+            onBack: goBack,
+            action: editable ? undefined : (
+              <View ref={anchorRef} collapsable={false}>
+                <Pressable accessibilityRole="button" accessibilityLabel={t("mobile.menu")} onPress={openMenu} style={[styles.round, { backgroundColor: ds.c.surface }]}>
+                  <Icon name="more" size={20} color={ds.c.ink} />
+                </Pressable>
+                <ThemeScope scheme={null}>
+                  <PopoverMenu rect={rect} onClose={closeMenu} height={112}>
+                    <PopoverMenuItem
+                      label={t("page.downloadPdf")}
+                      onPress={() => {
+                        closeMenu();
+                        if (!busy) void downloadPdf();
+                      }}
+                    />
+                    <PopoverMenuItem
+                      label={t("page.sendToChat")}
+                      onPress={() => {
+                        closeMenu();
+                        if (!sendToChat.isPending) share();
+                      }}
+                    />
+                  </PopoverMenu>
+                </ThemeScope>
+              </View>
+            ),
+            footer: editable ? undefined : (
+              <View style={styles.footer}>
+                <MobileBoardPageNav
+                  height={60}
+                  page={sheet + 1}
+                  total={Math.max(1, sheets.length)}
+                  onPrev={() => setSheet(Math.max(0, sheet - 1))}
+                  onNext={() => setSheet(Math.min(sheets.length - 1, sheet + 1))}
+                  onPages={() => undefined}
+                />
+                <View style={styles.actions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={busy}
+                    onPress={() => void downloadPdf()}
+                    style={[styles.action, { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: ds.c.surface }, busy && styles.faded]}
+                  >
+                    <DsText v="title" w="600" numberOfLines={1}>
+                      {t("page.downloadPdf")}
+                    </DsText>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={sendToChat.isPending}
+                    onPress={share}
+                    style={[styles.action, { backgroundColor: ds.c.brand }, sendToChat.isPending && styles.faded]}
+                  >
+                    <DsText v="title" w="600" c="on-action" numberOfLines={1}>
+                      {t("page.sendToChat")}
+                    </DsText>
+                  </Pressable>
+                </View>
+              </View>
+            ),
+          }}
+        />
+      </View>
     </ThemeScope>
   );
 }
 
-function BoardPageBody({ lessonId, onBack }: { lessonId: string; onBack: () => void }) {
-  const { t } = useTranslation("board");
-  const { palette } = useTheme();
-  const insets = useSafeAreaInsets();
-  const lesson = useLesson(lessonId);
-  // PDF ni server o'zi yasab guruh chatiga yuboradi — veb `board-page.tsx` dagidek.
-  const sendToChat = useSendBoardToChat(lessonId);
-  const [busy, setBusy] = useState<"pdf" | null>(null);
-  const data = lesson.data;
-  if (!data) return null;
-  const current = data;
-
-  async function downloadPdf() {
-    setBusy("pdf");
-    try {
-      const blob = await boardApi.downloadPdf(current.id);
-      await downloadBlob(blob as Blob, `${current.title}.pdf`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("page.pdfFailed"));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  return (
-    <View style={[styles.root, { backgroundColor: palette.background, paddingTop: insets.top }]}>
-      {/* `px-5 pt-4 pb-3 gap-3` */}
-      <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel={t("page.back")} onPress={onBack} style={styles.back}>
-          <ArrowLeft size={20} color={palette["muted-foreground"]} />
-        </Pressable>
-        <View style={styles.grow}>
-          <View style={styles.titleRow}>
-            <View style={styles.dot} />
-            <Text variant="body" numberOfLines={1} style={[styles.grow, styles.heading]}>
-              {current.title}
-            </Text>
-          </View>
-          <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
-            {current.courseTitle} · {current.date} · {current.time}
-          </Text>
-        </View>
-      </View>
-
-      <View style={[styles.body, { paddingBottom: 20 + insets.bottom }]}>
-        <BoardSurface
-          lessonId={current.id}
-          courseId={current.courseId}
-          statusNote={current.status === "finished" ? t("page.lessonFinished") : undefined}
-          footerActions={
-            <>
-              <Pressable
-                accessibilityRole="button"
-                disabled={busy !== null || sendToChat.isPending}
-                onPress={() => sendToChat.mutate(undefined, { onSuccess: () => toast.success(t("page.sentToChat")) })}
-                style={[
-                  styles.action,
-                  styles.secondary,
-                  { borderColor: palette.border, backgroundColor: palette.surface },
-                  (busy !== null || sendToChat.isPending) && styles.dim,
-                ]}
-              >
-                <Send size={16} color={palette.foreground} />
-                <Text variant="label">{t("page.sendToChat")}</Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                disabled={busy !== null}
-                onPress={() => void downloadPdf()}
-                style={[styles.action, { backgroundColor: palette.primary }, busy !== null && styles.dim]}
-              >
-                <Download size={16} color={palette["primary-foreground"]} />
-                <Text variant="label" style={{ color: palette["primary-foreground"] }}>
-                  {t("page.downloadPdf")}
-                </Text>
-              </Pressable>
-            </>
-          }
-        />
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  grow: { flex: 1, minWidth: 0 },
-  caption: { fontWeight: "500" },
-  header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
-  back: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  heading: { fontFamily: "Unbounded-SemiBold", fontWeight: "600" },
-  dot: { width: 8, height: 8, borderRadius: radius.full, backgroundColor: "#35c493" },
-  /* `px-5 pb-5` */
-  body: { flex: 1, paddingHorizontal: 20 },
-  action: { height: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 20, borderRadius: radius.full },
-  secondary: { borderWidth: 1 },
-  dim: { opacity: 0.6 },
+  /* `flex-col bg-subtle px-3 pt-5`, pastda `pb-[26px]` (chizish) yoki `pb-[49px]` */
+  root: { flex: 1, paddingHorizontal: 12 },
+  loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
+  round: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
+  faded: { opacity: 0.5 },
+  /* `items-center pt-3`, tugmalar `-mt-px grid-cols-2 gap-3`, tugma `h-13 rounded-full` */
+  footer: { alignItems: "center", paddingTop: 12 },
+  actions: { marginTop: -1, alignSelf: "stretch", flexDirection: "row", gap: 12 },
+  action: { flex: 1, height: 52, alignItems: "center", justifyContent: "center", paddingHorizontal: 12, borderRadius: 26 },
 });

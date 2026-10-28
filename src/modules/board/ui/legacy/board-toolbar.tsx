@@ -12,11 +12,10 @@ import {
   Type,
 } from "lucide-react-native";
 import { radius, useTheme } from "@/shared/ui";
-import { BOARD_COLORS, BOARD_WIDTHS } from "../constants/board.constants";
-import type { DrawKind } from "../lib/board.geometry";
+import { BOARD_COLORS, BOARD_WIDTHS } from "../../constants/board.constants";
+import type { BoardTool } from "../board-mobile";
 
-/** Veb `board-toolbar.tsx` bilan bir xil tur. */
-export type BoardTool = DrawKind | "text" | "math" | "erase";
+export type { BoardTool };
 
 const TOOLS: ReadonlyArray<{ id: BoardTool; labelKey: string; icon: typeof PenLine }> = [
   { id: "erase", labelKey: "tools.erase", icon: Eraser },

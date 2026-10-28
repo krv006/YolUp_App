@@ -10,8 +10,10 @@ interface CenterDialogShellProps {
   children: ReactNode;
   /** Karta kengligi chegarasi — `max-w-82.5` (330) yoki to'liq `w-[calc(100%-48px)]`. */
   maxWidth?: number;
-  /** Chetlardan masofa (`w-[calc(100%-32px)]` -> 16). */
+  /** Chetlardan masofa (`w-[calc(100%-32px)]` -> 16). Fonga `padding` bo'lib beriladi: `width: 100%` + `margin` ekrandan chiqib ketardi. */
   inset?: number;
+  /** Markazdan siljish (veb `top-[calc(50%+Npx)]`), standart -22. */
+  shift?: number;
 }
 
 /**
@@ -19,16 +21,16 @@ interface CenterDialogShellProps {
  * `rounded-2xl bg-surface shadow-2xl`, ochilishda `fade-in zoom-in-95`).
  * Vebda karta markazdan 22px yuqorida (`top-[calc(50%-22px)]`).
  */
-function CenterDialogShell({ open, onClose, children, maxWidth, inset = 16 }: CenterDialogShellProps) {
+function CenterDialogShell({ open, onClose, children, maxWidth, inset = 16, shift = -22 }: CenterDialogShellProps) {
   const ds = useDs();
   return (
     <Modal visible={open} transparent animationType="none" statusBarTranslucent navigationBarTranslucent onRequestClose={onClose}>
       {open ? (
-        <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)} style={[styles.scrim, { backgroundColor: ds.c.scrim }]}>
+        <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)} style={[styles.scrim, { paddingHorizontal: inset, paddingTop: Math.max(0, shift * 2), paddingBottom: Math.max(0, -shift * 2), backgroundColor: ds.c.scrim }]}>
           <Pressable accessibilityRole="button" style={StyleSheet.absoluteFill} onPress={onClose} />
           <Animated.View
             entering={ZoomIn.duration(160).withInitialValues({ transform: [{ scale: 0.95 }] })}
-            style={[styles.card, { marginHorizontal: inset, maxWidth, backgroundColor: ds.c.surface, boxShadow: ds.shadow["2xl"] }]}
+            style={[styles.card, { maxWidth, backgroundColor: ds.c.surface, boxShadow: ds.shadow["2xl"] }]}
           >
             <ScrollView bounces={false} contentContainerStyle={styles.cardScroll}>
               {children}
@@ -139,6 +141,10 @@ export interface MobileAlertDialogProps {
   pending?: boolean;
   onConfirm: () => void;
   onCancel?: () => void;
+  /** Veb `titleClassName` — `title-lg`: `text-title-lg leading-[26px] font-medium` (doskadan o'chirish). */
+  titleVariant?: "h2" | "title-lg";
+  /** Veb `className="top-[calc(50%+Npx)]"` — markazdan siljish. */
+  shift?: number;
 }
 
 /**
@@ -160,16 +166,18 @@ export function MobileAlertDialog({
   pending = false,
   onConfirm,
   onCancel,
+  titleVariant = "h2",
+  shift,
 }: MobileAlertDialogProps) {
   const ds = useDs();
   const cancel = () => (onCancel ? onCancel() : onOpenChange(false));
   return (
-    <CenterDialogShell open={open} onClose={cancel} inset={24}>
+    <CenterDialogShell open={open} onClose={cancel} inset={24} shift={shift}>
       <View style={styles.alert}>
         <View style={[styles.alertIcon, { backgroundColor: tone === "danger" ? ds.c["danger-bg"] : ds.c["brand-subtle"] }]}>
           <Icon name={icon} size={26} color={tone === "danger" ? ds.c["error-text"] : ds.c.brand} />
         </View>
-        <DsText v="h2" heading style={styles.alertTitle}>
+        <DsText v={titleVariant} heading w={titleVariant === "title-lg" ? "500" : undefined} style={[styles.alertTitle, titleVariant === "title-lg" && styles.alertTitleSmall]}>
           {title}
         </DsText>
         <DsText v="body-sm" c="ink-secondary" style={styles.alertDescription}>
@@ -211,7 +219,7 @@ export function MobileAlertDialog({
 
 const styles = StyleSheet.create({
   /* `fixed inset-0 bg-scrim`, karta `top-[calc(50%-22px)]` */
-  scrim: { flex: 1, justifyContent: "center", alignItems: "center", paddingBottom: 44 },
+  scrim: { flex: 1, justifyContent: "center", alignItems: "center" },
   card: { width: "100%", maxHeight: "86%", borderRadius: dsRadius["2xl"], overflow: "hidden", alignSelf: "center" },
   cardScroll: { flexGrow: 1 },
   pressed: { opacity: 0.8 },
@@ -228,6 +236,7 @@ const styles = StyleSheet.create({
   alert: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 24 },
   alertIcon: { width: 52, height: 52, borderRadius: dsRadius.lg, alignItems: "center", justifyContent: "center" },
   alertTitle: { marginTop: 13 },
+  alertTitleSmall: { lineHeight: 26 },
   alertDescription: { marginTop: 13 },
   /* `mt-4 grid grid-cols-2 gap-2`; tugma `h-11 rounded-full text-button` */
   alertButtons: { marginTop: 16, flexDirection: "row", gap: 8 },

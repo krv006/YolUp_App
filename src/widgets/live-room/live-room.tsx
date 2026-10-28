@@ -221,7 +221,7 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
 
       {boardOpen ? (
         <ThemeScope scheme="light">
-          <BoardOverlay lesson={lesson} onBack={() => setBoardOpen(false)} />
+          <BoardOverlay lesson={lesson} currentUserId={user?.id ?? null} onBack={() => setBoardOpen(false)} />
         </ThemeScope>
       ) : null}
 
@@ -467,28 +467,23 @@ function ShareButton() {
 }
 
 /** Doska to'liq ekranda — veb `fixed inset-0 bg-subtle px-3 pt-5 pb-[26px]` (yorug'). */
-function BoardOverlay({ lesson, onBack }: { lesson: Lesson; onBack: () => void }) {
+function BoardOverlay({ lesson, currentUserId, onBack }: { lesson: Lesson; currentUserId: string | null; onBack: () => void }) {
   const { t } = useTranslation("live");
   const ds = useDs();
   const insets = useSafeAreaInsets();
   return (
-    <View style={[StyleSheet.absoluteFill, styles.board, { backgroundColor: ds.c.subtle, paddingTop: insets.top + 20, paddingBottom: Math.max(26, insets.bottom + 8) }]}>
-      <View style={styles.boardHeader}>
-        <Pressable accessibilityRole="button" accessibilityLabel={t("room.backToVideo")} onPress={onBack} style={[styles.back, { backgroundColor: ds.c.surface }]}>
-          <Icon name="chevron-left" size={22} color={ds.c.ink} />
-        </Pressable>
-        <View style={styles.fill}>
-          <DsText v="title" numberOfLines={1}>
-            {t("room.board")}
-          </DsText>
-          <DsText v="body-xs" c="ink-secondary" numberOfLines={1}>
-            {lesson.courseTitle} · {t("room.liveLesson")}
-          </DsText>
-        </View>
-      </View>
-      <View style={[styles.boardSurface, { backgroundColor: ds.c.surface }]}>
-        <BoardSurface lessonId={lesson.id} courseId={lesson.courseId} />
-      </View>
+    <View style={[StyleSheet.absoluteFill, styles.board, { backgroundColor: ds.c.subtle, paddingTop: insets.top + 20, paddingBottom: 26 + insets.bottom }]}>
+      <BoardSurface
+        lessonId={lesson.id}
+        courseId={lesson.courseId}
+        currentUserId={currentUserId}
+        mobile={{
+          subtitle: `${lesson.courseTitle} · ${t("room.liveLesson")}`,
+          live: true,
+          backLabel: t("room.backToVideo"),
+          onBack,
+        }}
+      />
     </View>
   );
 }
@@ -762,9 +757,7 @@ const styles = StyleSheet.create({
   toolbarCircle: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
   toolbarBadge: { position: "absolute", top: -2, right: -2, minWidth: 20, height: 20, paddingHorizontal: 4, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   toolbarLabel: { marginHorizontal: -8, fontSize: 11, lineHeight: 16 },
-  board: { paddingHorizontal: 12, gap: 12 },
-  boardHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
-  boardSurface: { flex: 1, overflow: "hidden", borderRadius: dsRadius["2xl"] },
+  board: { paddingHorizontal: 12 },
   reconnect: { position: "absolute", top: 72, left: 16, right: 16, zIndex: 20, alignItems: "center" },
   reconnectBody: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: dsRadius.xl },
   attentionClock: { textAlign: "center" },

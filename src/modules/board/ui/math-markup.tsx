@@ -20,13 +20,22 @@ import { radius, useTheme } from "@/shared/ui";
  * Internetsiz holatda formula xom LaTeX sifatida ko'rinadi — bu
  * "hech narsa ko'rinmaydi" dan yaxshiroq.
  */
-export function MathMarkup({ latex, size = 20 }: { latex: string; size?: number }) {
+/**
+ * MathLive'ning `\placeholder[id]{qiymat}` buyrug'i KaTeX'da yo'q (qizil xom
+ * matn bo'lib chiqadi) — qiymati bo'lsa o'zi, bo'sh bo'lsa katakcha qo'yiladi.
+ */
+function forKatex(latex: string): string {
+  return latex.replace(/\\placeholder(?:\[[^\]]*\])?\{([^{}]*)\}/g, (_, value: string) => (value.trim() ? value : "\\square"));
+}
+
+/** `framed={false}` — doskadagi formula: chegarasiz, shaffof va chapga tekislangan (vebdagidek). */
+export function MathMarkup({ latex, size = 20, framed = true, color }: { latex: string; size?: number; framed?: boolean; color?: string }) {
   const { palette } = useTheme();
   const [height, setHeight] = useState(size * 2.4);
 
   const document = useMemo(() => {
     // LaTeX satrini JS string sifatida xavfsiz joylashtiramiz.
-    const encoded = JSON.stringify(latex ?? "");
+    const encoded = JSON.stringify(forKatex(latex ?? ""));
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -38,12 +47,12 @@ export function MathMarkup({ latex, size = 20 }: { latex: string; size?: number 
   body {
     margin: 0; padding: 4px 0;
     background: transparent;
-    color: ${palette.foreground};
+    color: ${color ?? palette.foreground};
     font-size: ${size}px;
     font-family: -apple-system, Roboto, sans-serif;
     overflow-x: auto;
   }
-  #out { min-height: ${size}px; }
+  #out { min-height: ${size}px; }${framed ? "" : "\n  .katex-display, .katex-display > .katex { margin: 0; text-align: left; }\n  body { padding: 0; }"}
 </style>
 </head>
 <body>
@@ -66,12 +75,12 @@ export function MathMarkup({ latex, size = 20 }: { latex: string; size?: number 
 </script>
 </body>
 </html>`;
-  }, [latex, palette, size]);
+  }, [latex, palette, size, framed, color]);
 
   if (!latex?.trim()) return null;
 
   return (
-    <View style={[styles.math, { height, borderColor: palette.border }]}>
+    <View style={[styles.math, framed ? { borderWidth: StyleSheet.hairlineWidth, borderColor: palette.border } : null, { height }]}>
       <WebView
         source={{ html: document }}
         style={styles.web}
@@ -90,7 +99,6 @@ export function MathMarkup({ latex, size = 20 }: { latex: string; size?: number 
 const styles = StyleSheet.create({
   math: {
     width: "100%",
-    borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.sm,
     overflow: "hidden",
   },

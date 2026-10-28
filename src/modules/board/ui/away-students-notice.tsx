@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { UserMinus } from "lucide-react-native";
 import { radius, Text, useTheme } from "@/shared/ui";
-import { useBoard } from "../model/board.queries";
+import { useTeacherSignals } from "../model/board.queries";
 
 export interface AwayStudentsNoticeProps {
   lessonId: string;
@@ -16,14 +16,13 @@ export interface AwayStudentsNoticeProps {
  * Ataylab KICHIK va oynasiz: o'qituvchi dars o'tayotganda uni bo'lmaslik
  * kerak. Hech kim chiqib ketmagan bo'lsa umuman ko'rinmaydi.
  *
- * `useBoard` bilan bir xil so'rov kalitini ishlatadi — doska paneli bilan
- * bitta so'rovni baham ko'radi, ya'ni qo'shimcha trafik yo'q.
+ * Veb kabi `useTeacherSignals` — butun doska o'rniga kichik signal so'rovi.
  */
 export function AwayStudentsNotice({ lessonId, enabled }: AwayStudentsNoticeProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
-  const board = useBoard(lessonId, { enabled });
-  const away = enabled ? (board.data?.awayStudents ?? []) : [];
+  const signals = useTeacherSignals(lessonId, { enabled });
+  const away = enabled ? (signals.data?.awayStudents ?? []) : [];
 
   if (away.length === 0) return null;
 

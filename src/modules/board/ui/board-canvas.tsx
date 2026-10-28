@@ -1,19 +1,20 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
-import { Canvas, Group, Path, Skia } from "@shopify/react-native-skia";
+import { Canvas, Group, Path, Points, Skia, vec } from "@shopify/react-native-skia";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  type SharedValue,
 } from "react-native-reanimated";
-import { useTheme } from "@/shared/ui";
+import { useDs } from "@/shared/ui";
 import type { Point, StrokeDto, StrokeShapeDto } from "../api/board.dto";
 import { buildStroke, MARKER_OPACITY, type DrawKind } from "../lib/board.geometry";
 import { BoardStroke, hitTestStroke, useBoardFont } from "./board-stroke";
-import { MathMarkup } from "./math-field-sheet";
-import type { BoardTool } from "./board-toolbar";
+import type { BoardTool } from "./board-mobile";
+import { MathMarkup } from "./math-markup";
 
 export interface BoardCanvasProps {
   strokes: StrokeDto[];
@@ -30,7 +31,18 @@ export interface BoardCanvasProps {
   /** "Tanlash" asbobida stroke bosilganda — o'chirish uchun. */
   onSelectStroke?: (strokeId: string | null) => void;
   selectedStrokeId?: string | null;
+  /**
+   * `contain` — doska butunligicha sig'adi (jonli dars ko'rinishi); `width` —
+   * eni bo'yicha, tepaga tekislanadi (veb `.board-canvas { width: 100%; height: auto }`).
+   */
+  fit?: "contain" | "width";
+  /** Nuqtali fon rangi — veb `radial-gradient(...) 28px 28px`, 6px siljigan. Kattalashtirishda joyida qoladi. */
+  dotColor?: string;
 }
+
+/** Nuqtalar orasidagi masofa va birinchi nuqta (`background-position: 6px` + katakning yarmi). */
+const DOT_STEP = 28;
+const DOT_START = 6 + DOT_STEP / 2;
 
 /**
  * Doska maydoni — veb `board-panel.tsx` dagi SVG canvas'ning mobil varianti.
@@ -65,9 +77,11 @@ export function BoardCanvas({
   onPlacePoint,
   onSelectStroke,
   selectedStrokeId = null,
+  fit: fitMode = "contain",
+  dotColor,
 }: BoardCanvasProps) {
-  const { palette } = useTheme();
   const font = useBoardFont();
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   // Ekrandagi o'lcham — doska koordinatalarini shunga moslashtiramiz.
   const viewWidth = useSharedValue(0);
@@ -95,7 +109,7 @@ export function BoardCanvas({
     const vw = viewWidth.get();
     const vh = viewHeight.get();
     if (vw === 0 || vh === 0) return 1;
-    return Math.min(vw / width, vh / height);
+    return fitMode === "width" ? vw / width : Math.min(vw / width, vh / height);
   });
 
   const draftPath = useDerivedValue(() => {
@@ -236,25 +250,15 @@ export function BoardCanvas({
     tapGesture
   );
 
-  /** Canvas bilan bir xil transform — formula qatlami uni takrorlaydi. */
-  const overlayStyle = useAnimatedStyle(() => {
-    "worklet";
-    return {
-      transform: [
-        { translateX: translateX.get() },
-        { translateY: translateY.get() },
-        { scale: fit.get() * scale.get() },
-      ],
-    };
-  });
-
   const draftOpacity = drawKind === "marker" ? MARKER_OPACITY : 1;
 
   /**
    * Formula (`type: "math"`) Skia'da chizilmaydi — u yerda LaTeX dvigateli
    * yo'q. Shuning uchun formulalar canvas USTIDAGI qatlamda, WebView bilan
-   * chiziladi va canvas bilan BIR XIL transform'ga bo'ysunadi (pastdagi
-   * `overlayStyle`), ya'ni kattalashtirilganda ular ham birga suriladi.
+   * chiziladi. WebView'ni `scale` bilan kichraytirib bo'lmaydi: Android uni
+   * qayta chizganda (masalan Modal ochilganda) asl o'lchamiga qaytadi. Shu
+   * sabab shrift o'lchami doska masshtabiga JS'da ko'paytiriladi, joyi esa
+   * siljitish/kattalashtirishga UI thread'da ergashadi (`MathItem`).
    */
   const mathStrokes = useMemo(
     () => strokes.filter((stroke) => stroke.type === "math"),
@@ -275,15 +279,30 @@ export function BoardCanvas({
     [strokes, font, selectedStrokeId]
   );
 
+  /** JS tomonidagi masshtab (kattalashtirishsiz) — formula shrifti uchun. */
+  const mathScale = size.width && size.height ? (fitMode === "width" ? size.width / width : Math.min(size.width / width, size.height / height)) : 0;
+
+  const dots = useMemo(() => {
+    if (!dotColor || !size.width) return [];
+    const points = [];
+    for (let y = DOT_START; y < size.height; y += DOT_STEP) {
+      for (let x = DOT_START; x < size.width; x += DOT_STEP) points.push(vec(x, y));
+    }
+    return points;
+  }, [dotColor, size]);
+
   function handleLayout(event: LayoutChangeEvent) {
-    viewWidth.set(event.nativeEvent.layout.width);
-    viewHeight.set(event.nativeEvent.layout.height);
+    const layout = event.nativeEvent.layout;
+    viewWidth.set(layout.width);
+    viewHeight.set(layout.height);
+    setSize({ width: layout.width, height: layout.height });
   }
 
   return (
     <View style={styles.root} onLayout={handleLayout}>
       <GestureDetector gesture={gesture}>
-        <Canvas style={[styles.canvas, { backgroundColor: palette.surface }]}>
+        <Canvas style={styles.canvas}>
+          {dots.length ? <Points points={dots} mode="points" color={dotColor} style="stroke" strokeWidth={2.5} strokeCap="round" /> : null}
           <Group transform={canvasTransform}>
             {rendered}
             <Path
@@ -300,39 +319,55 @@ export function BoardCanvas({
       </GestureDetector>
 
       {/* Formulalar — teginishni o'tkazib yuboradi, chizishga xalaqit bermaydi. */}
-      {mathStrokes.length > 0 ? (
-        <Animated.View style={[styles.mathLayer, overlayStyle]} pointerEvents="none">
+      {mathStrokes.length > 0 && mathScale ? (
+        <View style={styles.mathLayer} pointerEvents="none">
           {mathStrokes.map((stroke) =>
             stroke.type === "math" ? (
-              <View
-                key={stroke.id}
-                style={[
-                  styles.mathItem,
-                  { left: stroke.x, top: stroke.y - (stroke.size ?? 20) },
-                ]}
-              >
-                <MathMarkup latex={stroke.latex} size={stroke.size ?? 20} />
-              </View>
+              <MathItem key={stroke.id} stroke={stroke} mathScale={mathScale} fit={fit} zoom={scale} translateX={translateX} translateY={translateY} selected={stroke.id === selectedStrokeId} />
             ) : null
           )}
-        </Animated.View>
+        </View>
       ) : null}
     </View>
+  );
+}
+
+/** Veb `foreignObject`: `x`, `y - size`, eni 640 (doska birligida). */
+function MathItem({
+  stroke,
+  mathScale,
+  fit,
+  zoom,
+  translateX,
+  translateY,
+  selected,
+}: {
+  stroke: Extract<StrokeDto, { type: "math" }>;
+  mathScale: number;
+  fit: SharedValue<number>;
+  zoom: SharedValue<number>;
+  translateX: SharedValue<number>;
+  translateY: SharedValue<number>;
+  selected: boolean;
+}) {
+  const ds = useDs();
+  const size = stroke.size ?? 24;
+  const position = useAnimatedStyle(() => {
+    "worklet";
+    const factor = fit.get() * zoom.get();
+    // `left/top` emas: React qayta chizganda Reanimated layout xossalarini boshlang'ich qiymatga qaytarib qo'yadi.
+    return { transform: [{ translateX: stroke.x * factor + translateX.get() }, { translateY: (stroke.y - size) * factor + translateY.get() }] };
+  });
+  return (
+    <Animated.View style={[styles.mathItem, { width: 640 * mathScale }, position]}>
+      <MathMarkup latex={stroke.latex} size={size * mathScale} framed={false} color={selected ? ds.c.danger : stroke.color} />
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
   canvas: { flex: 1 },
-  // Canvas ustidagi qatlam: transform origini chap-yuqori burchakda
-  // bo'lishi shart, aks holda formulalar canvas bilan bir joyda turmaydi.
-  mathLayer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: 1,
-    height: 1,
-    transformOrigin: "0 0",
-  },
-  mathItem: { position: "absolute", minWidth: 120 },
+  mathLayer: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, overflow: "hidden" },
+  mathItem: { position: "absolute", top: 0, left: 0 },
 });

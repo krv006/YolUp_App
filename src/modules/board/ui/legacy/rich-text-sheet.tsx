@@ -2,8 +2,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { Button, Chip, ChipRow, Input, radius, Sheet, Text, useTheme } from "@/shared/ui";
-import type { TextLineDto, TextListKind } from "../api/board.dto";
-import { linesToPlainText } from "../lib/rich-text";
+import type { TextLineDto, TextListKind } from "../../api/board.dto";
+import { linesToPlainText } from "../../lib/rich-text";
 
 /**
  * Doskaga formatlangan matn qo'shish — veb `rich-text-input.tsx` ning

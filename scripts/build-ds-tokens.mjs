@@ -115,7 +115,9 @@ for (const [scheme, scope] of Object.entries(scopes)) {
     }
   }
   for (const name of Object.keys(scope).filter((key) => key.startsWith("gradient-"))) {
-    out.gradients[scheme][name.slice(9)] = normalizeColors(resolveValue(scope[name], scope));
+    // RN birliksiz `0` pozitsiyani tushunmaydi (butun gradient tashlab yuboriladi) — `0%`.
+    const css = normalizeColors(resolveValue(scope[name], scope)).replace(/ 0(?=[,)])/g, " 0%");
+    out.gradients[scheme][name.slice(9)] = css;
   }
 }
 

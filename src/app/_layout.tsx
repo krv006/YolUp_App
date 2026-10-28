@@ -42,6 +42,8 @@ function ThemedStack() {
         }}
       >
         <Stack.Screen name="index" />
+        {/* Ochilishda BootScreen ustiga yumshoq chiqadi — vebda o'tish animatsiyasi yo'q. */}
+        <Stack.Screen name="welcome" options={{ animation: "fade" }} />
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
       </Stack>

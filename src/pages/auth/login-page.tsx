@@ -12,7 +12,7 @@ import { MobileTwoFactorForm } from "@/modules/auth/ui/two-factor-form";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import type { LoginCredentials } from "@/shared/types";
-import { radius, Text, toast, useTheme } from "@/shared/ui";
+import { DsText, dsRadius, showErrorToast, useDs } from "@/shared/ui";
 
 interface PendingChallenge {
   credentials: LoginCredentials;
@@ -20,9 +20,10 @@ interface PendingChallenge {
 }
 
 /**
- * Kirish — veb `modules/auth/ui/mobile-login-form.tsx` (veb tor ekranda
- * shuni ko'rsatadi): "Xush kelibsiz!", login va parol, "Parolni
- * unutdingizmi?", pastda "Kirish" va ro'yxatdan o'tish havolasi.
+ * Kirish (M2.1–2.6) — veb `modules/auth/ui/mobile-login-form.tsx` (veb tor
+ * ekranda shuni ko'rsatadi): "Xush kelibsiz!", yorliqli login va parol
+ * maydonlari, "Parolni unutdingizmi?", pastda "Kirish" va ro'yxatdan
+ * o'tish havolasi; xato bo'lsa maydonlar qizil va xato toast'i.
  * Xulqi o'zgarmagan: `loginSchema`, `applyApiFieldErrors`, `resolveHomeRoute`.
  *
  * Hisobda ikki bosqichli himoya yoqilgan bo'lsa, server token o'rniga
@@ -31,7 +32,7 @@ interface PendingChallenge {
  */
 export function LoginPage() {
   const { t } = useTranslation("auth");
-  const { palette } = useTheme();
+  const ds = useDs();
   const router = useRouter();
   const { login, completeTwoFactorLogin } = useAuth();
   const net = useNetInfo();
@@ -64,7 +65,7 @@ export function LoginPage() {
       if (!applyApiFieldErrors(appError, setError, { username: "login" })) {
         setError("root", { type: "server", message: t("mobile.login.failed") });
       }
-      toast.error(t("mobile.login.errorToastTitle"), { description: t("mobile.login.errorToastDescription") });
+      showErrorToast({ title: t("mobile.login.errorToastTitle"), description: t("mobile.login.errorToastDescription") });
     }
   }
 
@@ -101,16 +102,19 @@ export function LoginPage() {
 
   return (
     <AuthScreen
+      layout="spaced"
       onBack={() => (router.canGoBack() ? router.back() : router.replace(ROUTES.root))}
       title={t("mobile.login.title")}
       description={t("mobile.login.subtitle")}
       notice={
         online ? null : (
-          <View style={[styles.offline, { backgroundColor: palette["surface-subtle"] }]}>
-            <CloudOff size={18} color={palette["muted-foreground"]} />
-            <Text variant="label" style={[styles.offlineText, { color: palette["muted-foreground"] }]}>
+          <View style={[styles.offline, { backgroundColor: ds.c.subtle }]}>
+            <View style={styles.offlineIcon}>
+              <CloudOff size={18} color={ds.c["ink-secondary"]} />
+            </View>
+            <DsText v="body-sm" c="ink-secondary" style={styles.grow}>
               {t("mobile.login.offline")}
-            </Text>
+            </DsText>
           </View>
         )
       }
@@ -122,61 +126,67 @@ export function LoginPage() {
       footer={
         <>
           {t("mobile.login.noAccount")}{" "}
-          <Text variant="label" style={{ color: palette.primary }} onPress={() => router.push(ROUTES.auth.register)}>
+          <DsText v="body-sm" c="brand-strong" onPress={() => router.push(ROUTES.auth.register)}>
             {t("mobile.login.registerLink")}
-          </Text>
+          </DsText>
         </>
       }
     >
       <View style={styles.form}>
-        <Controller
-          control={control}
-          name="login"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <AuthField
-              autoComplete="username"
-              textContentType="username"
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholder={t("form.loginPlaceholder")}
-              accessibilityLabel={t("form.loginLabel")}
-              invalid={Boolean(errors.login) || failed}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              returnKeyType="next"
-            />
-          )}
-        />
-        {errors.login ? <AuthFieldError>{errors.login.message}</AuthFieldError> : null}
+        <View style={styles.group}>
+          <Controller
+            control={control}
+            name="login"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthField
+                autoComplete="username"
+                textContentType="username"
+                autoCapitalize="none"
+                autoCorrect={false}
+                label={t("form.loginLabel")}
+                placeholder={t("form.loginPlaceholder")}
+                accessibilityLabel={t("form.loginLabel")}
+                invalid={Boolean(errors.login) || failed}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="next"
+              />
+            )}
+          />
+          {errors.login ? <AuthFieldError>{errors.login.message}</AuthFieldError> : null}
+        </View>
 
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <AuthPasswordField
-              autoComplete="current-password"
-              textContentType="password"
-              placeholder={t("form.passwordPlaceholder")}
-              accessibilityLabel={t("form.passwordLabel")}
-              invalid={Boolean(errors.password) || failed}
-              visible={showPassword}
-              onToggle={() => setShowPassword((current) => !current)}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              returnKeyType="go"
-              onSubmitEditing={handleSubmit(submit)}
-            />
-          )}
-        />
-        {errors.password ? <AuthFieldError>{errors.password.message}</AuthFieldError> : null}
-        {failed ? <AuthFieldError>{errors.root?.message}</AuthFieldError> : null}
+        <View style={styles.group}>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AuthPasswordField
+                autoComplete="current-password"
+                textContentType="password"
+                label={t("form.passwordLabel")}
+                placeholder={t("form.passwordPlaceholder")}
+                accessibilityLabel={t("form.passwordLabel")}
+                invalid={Boolean(errors.password) || failed}
+                visible={showPassword}
+                onToggle={() => setShowPassword((current) => !current)}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                returnKeyType="go"
+                onSubmitEditing={handleSubmit(submit)}
+              />
+            )}
+          />
+          {errors.password ? <AuthFieldError>{errors.password.message}</AuthFieldError> : null}
+          {failed ? <AuthFieldError>{errors.root?.message}</AuthFieldError> : null}
+        </View>
 
         <Pressable accessibilityRole="link" onPress={() => router.push(ROUTES.auth.forgotPassword)} style={styles.forgot}>
-          <Text variant="label" style={{ color: palette.primary }}>
+          <DsText v="body-sm" c="brand-strong">
             {t("mobile.login.forgotPassword")}
-          </Text>
+          </DsText>
         </Pressable>
       </View>
     </AuthScreen>
@@ -184,8 +194,12 @@ export function LoginPage() {
 }
 
 const styles = StyleSheet.create({
-  form: { gap: 12 },
-  forgot: { alignSelf: "flex-end", paddingHorizontal: 8 },
-  offline: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingHorizontal: 16, paddingVertical: 14, borderRadius: radius["2xl"] },
-  offlineText: { flex: 1, fontWeight: "400" },
+  grow: { flex: 1 },
+  /* `flex-col gap-4`; har maydon guruhi `gap-1` */
+  form: { gap: 16 },
+  group: { gap: 4 },
+  forgot: { alignSelf: "flex-end" },
+  /* `items-start gap-2.5 rounded-2xl bg-subtle px-4 py-3.5` */
+  offline: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingHorizontal: 16, paddingVertical: 14, borderRadius: dsRadius["2xl"] },
+  offlineIcon: { marginTop: 2 },
 });

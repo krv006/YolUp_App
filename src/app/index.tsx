@@ -1,7 +1,6 @@
 import { Redirect } from "expo-router";
-import { useTranslation } from "react-i18next";
 import { resolveHomeRoute, useAuth } from "@/modules/auth";
-import { Screen, ScreenError, ScreenLoading } from "@/shared/ui";
+import { BootScreen, Screen, ScreenError } from "@/shared/ui";
 
 /**
  * Kirish nuqtasi — veb `RootLayout` dagi `<Navigate to={ROUTES.auth.login} />`
@@ -11,16 +10,9 @@ import { Screen, ScreenError, ScreenLoading } from "@/shared/ui";
  * yerda holat allaqachon ANIQ: yo authenticated, yo anonymous, yo xato.
  */
 export default function IndexRoute() {
-  const { t } = useTranslation("mobile");
   const { user, isAuthenticated, isInitializing, initializationError, retrySession } = useAuth();
 
-  if (isInitializing) {
-    return (
-      <Screen>
-        <ScreenLoading label={t("app.sessiya_tekshirilmoqda")} />
-      </Screen>
-    );
-  }
+  if (isInitializing) return <BootScreen />;
 
   /*
    * Tarmoq xatosi 401 dan FARQ qiladi: token yaroqsiz bo'lsa store uni
@@ -36,8 +28,16 @@ export default function IndexRoute() {
     );
   }
 
-  if (!isAuthenticated) return <Redirect href="/welcome" />;
-
-  // Rolga qarab bosh sahifa — 🟢 veb bilan bir xil `resolveHomeRoute`.
-  return <Redirect href={resolveHomeRoute(user)} />;
+  /*
+   * Yo'naltirish paytida ham ochilish ekrani turadi: bo'sh `index` oddiy fon
+   * bilan bir lahza ko'rinib, gradientli BootScreen va keyingi ekran orasida
+   * "miltillash" bo'lardi (2026-10-28, telefon yozuvida ko'rindi).
+   */
+  return (
+    <>
+      <BootScreen />
+      {/* Rolga qarab bosh sahifa — 🟢 veb bilan bir xil `resolveHomeRoute`. */}
+      <Redirect href={isAuthenticated ? resolveHomeRoute(user) : "/welcome"} />
+    </>
+  );
 }

@@ -136,8 +136,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           image: "./assets/splash-icon.png",
           resizeMode: "contain",
-          backgroundColor: "#f5f7fa",
-          dark: { backgroundColor: "#0f1319" },
+          // Yangi dizayndagi `bg-canvas` — BootScreen (veb splash) shu rangdan boshlanadi.
+          backgroundColor: "#f7f8fa",
+          dark: { backgroundColor: "#16172f" },
         },
       ],
       // Dars yozuvini "picture in picture" da ko'rish uchun.

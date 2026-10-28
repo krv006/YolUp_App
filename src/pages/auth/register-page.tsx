@@ -17,7 +17,7 @@ import {
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import type { AuthUser } from "@/shared/types";
-import { radius, Text, toast, useTheme } from "@/shared/ui";
+import { DsText, dsRadius, useDs } from "@/shared/ui";
 
 const ROLES = ["teacher", "parent", "student"] as const;
 
@@ -30,7 +30,7 @@ const ROLES = ["teacher", "parent", "student"] as const;
  */
 export function RegisterPage() {
   const { t } = useTranslation("auth");
-  const { palette } = useTheme();
+  const ds = useDs();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const register = useRegisterMutation();
@@ -63,7 +63,6 @@ export function RegisterPage() {
     setConfirmError(null);
     try {
       setCreatedUser(await register.mutateAsync(values));
-      toast.success(t("register.accountCreated"));
     } catch (error) {
       const appError = error as AppError;
       if (!applyApiFieldErrors(appError, setError, { first_name: "firstName", last_name: "lastName" })) {
@@ -83,15 +82,15 @@ export function RegisterPage() {
         }
       >
         <View style={styles.done}>
-          <View style={[styles.doneIcon, { backgroundColor: palette["success-soft"] }]}>
-            <Check size={34} strokeWidth={3} color={palette["success-strong"]} />
+          <View style={[styles.doneIcon, { backgroundColor: ds.c["success-bg"] }]}>
+            <Check size={34} strokeWidth={3} color={ds.c["success-text"]} />
           </View>
-          <Text variant="title" style={styles.centerText}>
+          <DsText v="h1" heading style={styles.centerText}>
             {t("mobile.register.doneTitle")}
-          </Text>
-          <Text variant="body" style={[styles.centerText, styles.doneText, { color: palette["muted-foreground"] }]}>
+          </DsText>
+          <DsText c="ink-secondary" style={[styles.centerText, styles.doneText]}>
             {t("mobile.register.doneDescription")}
-          </Text>
+          </DsText>
         </View>
       </AuthScreen>
     );
@@ -109,9 +108,9 @@ export function RegisterPage() {
       footer={
         <>
           {t("mobile.register.haveAccount")}{" "}
-          <Text variant="label" style={{ color: palette.primary }} onPress={() => router.replace(ROUTES.auth.login)}>
+          <DsText v="body-sm" c="action" onPress={() => router.replace(ROUTES.auth.login)}>
             {t("form.submit")}
-          </Text>
+          </DsText>
         </>
       }
     >
@@ -120,7 +119,7 @@ export function RegisterPage() {
           control={control}
           name="role"
           render={({ field }) => (
-            <View accessibilityRole="radiogroup" accessibilityLabel={t("register.roleLabel")} style={[styles.roles, { backgroundColor: palette["surface-subtle"] }]}>
+            <View accessibilityRole="radiogroup" accessibilityLabel={t("register.roleLabel")} style={[styles.roles, { backgroundColor: ds.c.subtle }]}>
               {ROLES.map((role) => {
                 const active = field.value === role;
                 return (
@@ -129,11 +128,11 @@ export function RegisterPage() {
                     accessibilityRole="radio"
                     accessibilityState={{ checked: active }}
                     onPress={() => field.onChange(role)}
-                    style={[styles.role, active && [styles.roleActive, { backgroundColor: palette.surface }]]}
+                    style={[styles.role, active && { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
                   >
-                    <Text variant="label" style={{ color: active ? palette.foreground : palette["muted-foreground"] }}>
+                    <DsText v="label-strong" c={active ? "ink" : "ink-secondary"}>
                       {t(`register.role.${role}`)}
-                    </Text>
+                    </DsText>
                   </Pressable>
                 );
               })}
@@ -146,32 +145,34 @@ export function RegisterPage() {
             control={control}
             name="firstName"
             render={({ field: { onChange, onBlur, value } }) => (
-              <AuthField
-                containerStyle={styles.grow}
-                autoComplete="given-name"
-                placeholder={t("register.form.firstName")}
-                accessibilityLabel={t("register.form.firstName")}
-                invalid={Boolean(errors.firstName)}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-              />
+              <View style={styles.grow}>
+                <AuthField
+                  autoComplete="given-name"
+                  placeholder={t("register.form.firstName")}
+                  accessibilityLabel={t("register.form.firstName")}
+                  invalid={Boolean(errors.firstName)}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+              </View>
             )}
           />
           <Controller
             control={control}
             name="lastName"
             render={({ field: { onChange, onBlur, value } }) => (
-              <AuthField
-                containerStyle={styles.grow}
-                autoComplete="family-name"
-                placeholder={t("register.form.lastName")}
-                accessibilityLabel={t("register.form.lastName")}
-                invalid={Boolean(errors.lastName)}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-              />
+              <View style={styles.grow}>
+                <AuthField
+                  autoComplete="family-name"
+                  placeholder={t("register.form.lastName")}
+                  accessibilityLabel={t("register.form.lastName")}
+                  invalid={Boolean(errors.lastName)}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                />
+              </View>
             )}
           />
         </View>
@@ -259,18 +260,11 @@ const styles = StyleSheet.create({
   grow: { flex: 1 },
   centerText: { textAlign: "center" },
   form: { gap: 12 },
-  /* `rounded-full bg-subtle p-1 gap-1` */
-  roles: { flexDirection: "row", gap: 4, padding: 4, borderRadius: radius.full },
-  role: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radius.full },
-  roleActive: {
-    shadowColor: "#000000",
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
+  /* `rounded-full bg-subtle p-1 gap-1`; tugma `h-11 rounded-full`, faoli `bg-surface shadow-sm` */
+  roles: { flexDirection: "row", gap: 4, padding: 4, borderRadius: dsRadius.full },
+  role: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: dsRadius.full },
   pair: { flexDirection: "row", gap: 12 },
   done: { alignItems: "center", gap: 16 },
-  doneIcon: { width: 80, height: 80, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  doneIcon: { width: 80, height: 80, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
   doneText: { maxWidth: 320 },
 });

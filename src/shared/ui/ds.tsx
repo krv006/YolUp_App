@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { TextStyle } from "react-native";
+import { StyleSheet, View, type TextStyle } from "react-native";
 import tokens from "./ds-tokens.json";
 import { headingFont, type FontWeightToken } from "./fonts";
 import { Text, type TextProps } from "./text";
@@ -16,7 +16,7 @@ import { useTheme } from "./theme";
  *   `text-body-sm`        -> `<DsText v="body-sm">`
  *   `font-heading`        -> `<DsText heading>`
  *   `shadow-md`           -> `{ boxShadow: ds.shadow.md }`
- *   `bg-auth-gradient`    -> `{ experimental_backgroundImage: ds.gradient.auth }`
+ *   `bg-auth-gradient`    -> `<DsGradient name="auth" />` (orqa fon qatlami)
  *   `rounded-2xl`         -> `{ borderRadius: dsRadius["2xl"] }`
  *
  * Eski ekranlar `palette` (shadcn nomlari) bilan qoladi; yangi dizayndagi
@@ -25,7 +25,7 @@ import { useTheme } from "./theme";
 export type DsColor = keyof typeof tokens.colors.light;
 export type DsType = keyof typeof tokens.type;
 export type DsShadow = keyof typeof tokens.shadows.light;
-export type DsGradient = keyof typeof tokens.gradients.light;
+export type DsGradientName = keyof typeof tokens.gradients.light;
 
 export const dsRadius = tokens.radius;
 export const dsType = tokens.type as Record<DsType, { fontSize: number; lineHeight: number; fontWeight: string; letterSpacing: number }>;
@@ -33,7 +33,7 @@ export const dsType = tokens.type as Record<DsType, { fontSize: number; lineHeig
 export interface Ds {
   c: Record<DsColor, string>;
   shadow: Record<DsShadow, string>;
-  gradient: Record<DsGradient, string>;
+  gradient: Record<DsGradientName, string>;
 }
 
 /** Joriy temaga mos tokenlar (yorug' / qorong'i). */
@@ -82,3 +82,28 @@ export function DsText({ v = "body", c = "ink", heading = false, w, numeric = fa
 
   return <Text style={[base, style]} {...rest} />;
 }
+
+/**
+ * Vebdagi `bg-*-gradient` — ota-elementning orqasidagi qatlam.
+ *
+ * RN `linear-gradient` da piksel pozitsiyani (`#f7f8fa 444px`) qo'llamaydi,
+ * butun gradientni jimgina tashlab yuboradi. Vebdagi ma'nosi esa aniq:
+ * rang tepadan 444px gacha o'tadi, undan pastda oxirgi rang davom etadi.
+ * Shuning uchun piksel bilan tugaydigan gradient o'sha balandlikdagi qatlam
+ * bo'lib chiziladi (0%→100%), pastki qismni ota-elementning foni beradi.
+ */
+export function DsGradient({ name }: { name: DsGradientName }) {
+  const ds = useDs();
+  const css = ds.gradient[name];
+  const pixelEnd = /,\s*([^,]+?)\s+(\d+(?:\.\d+)?)px\)$/.exec(css);
+  if (!pixelEnd) {
+    return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { experimental_backgroundImage: css }]} />;
+  }
+  const height = Number(pixelEnd[2]);
+  const gradient = `${css.slice(0, pixelEnd.index)}, ${pixelEnd[1]} 100%)`;
+  return <View pointerEvents="none" style={[styles.top, { height, experimental_backgroundImage: gradient }]} />;
+}
+
+const styles = StyleSheet.create({
+  top: { position: "absolute", top: 0, left: 0, right: 0 },
+});

@@ -257,18 +257,22 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `c94dcadd37cd` | mobilda `formula-solver-sheet.tsx` (AppDialog sheet o'rniga Sheet); joylash vebdagidek `nextTextPoint` bilan |
 | `src/pages/teacher/exams/teacher-exams-page.tsx` | 🟡 MOSLASH | `aaec2fc43c46` | mobilda `pages/exams/teacher-exams-page.tsx`; telefon ko'rinishi (ro'yxat yoki tanlangan imtihon) |
 | `src/pages/analytics/analytics-page.tsx` | 🟡 MOSLASH | `092cef5c60fa` | o'qituvchi jadvali (olti ustun) kartochkalarga aylandi — telefonda jadval o'qilmaydi |
-| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `9c9510af0702` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
-| `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `cbcaa1d3644e` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
-| `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `f6df598d6f72` | `AuthScreen` + maydon/tugma komponentlari bitta faylda; telefon maslahati toast orqali |
-| `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `3f62db0fe17c` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp` |
-| `src/modules/auth/ui/two-factor-form.tsx` | 🟡 MOSLASH | `f5e1e3feede6` | faqat `MobileTwoFactorForm` (veb tor ekranda shuni ko'rsatadi); `TwoFactorForm` (keng ekran) yo'q |
+| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
+| `src/modules/auth/ui/mobile-login-form.tsx` | 🟡 MOSLASH | `f2830b3adbe5` | mobilda `pages/auth/login-page.tsx` ichida |
+| `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `fd6ead08a2a2` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
+| `src/modules/auth/ui/mobile-register-form.tsx` | 🟡 MOSLASH | `eee88e0d2a0c` | mobilda `pages/auth/register-page.tsx` ichida |
+| `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `821d80dc5c6f` | `AuthScreen` (tor ekran varianti, M1–M4) + maydon/tugma komponentlari; `AuthShell` (keng ekran) yo'q; fon gradienti `DsGradient`, maydonlar klaviatura ustiga `KeyboardAwareScrollView` bilan suriladi; placeholder o'lchami RN'da alohida berilmagani uchun bo'sh maydonda shrift placeholder'nikiga o'tadi |
+| `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `56a812e2324e` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp`; fokus o'tishidan oldin kelgan raqam keyingi kataklarga tarqatiladi (vebda `maxLength=1`) |
+| `src/modules/auth/ui/two-factor-form.tsx` | 🟡 MOSLASH | `e6f1e33d6c41` | faqat `MobileTwoFactorForm` (veb tor ekranda shuni ko'rsatadi); `TwoFactorForm` (keng ekran) yo'q |
 | `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `c869627db2a3` | `AppDialog` -> `Sheet`; 2FA yoqish/kod/o'chirish oynalari vebdagidek |
 | `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | mobilda `pages/profile/system-settings-page.tsx` ichida; Web Push qatori yo'q (qurilma tokeni kirishda o'zi yoziladi) |
 | `src/modules/auth/ui/login-history-dialog.tsx` | 🟡 MOSLASH | `8127cad1ced2` | mobilda `login-history-sheet.tsx` (Dialog o'rniga Sheet) |
-| `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `b50a11868d3a` | til menyusi oddiy ochiluvchi ro'yxat |
-| `src/pages/auth/forgot-password-page.tsx` | 🟡 MOSLASH | `ab117d8b766a` | mobilda `password-reset-pages.tsx` ichida |
-| `src/pages/auth/verify-code-page.tsx` | 🟡 MOSLASH | `4fb19ea2d2db` | mobilda `password-reset-pages.tsx` ichida |
-| `src/pages/auth/new-password-page.tsx` | 🟡 MOSLASH | `76130023cdc7` | mobilda `password-reset-pages.tsx` ichida |
+| `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `c36d8a0a9983` | til menyusi oddiy ochiluvchi ro'yxat; Xush kelibsiz ochilishda `fade` bilan chiqadi |
+| `src/shared/ui/splash-screen.tsx` | 🟡 MOSLASH | `2a085985444d` | mobilda `shared/ui/boot-screen.tsx` (ilova ochilishi, sessiya tekshirilishi, `index` yo'naltirishi); nuqtalar Reanimated bilan |
+| `src/shared/ui/app-toast.tsx` | 🟡 MOSLASH | `dde01935d48d` | mobilda `shared/ui/toast.tsx` dagi `showErrorToast` (`appError` turi); tepada 16px |
+| `src/pages/auth/forgot-password-page.tsx` | 🟡 MOSLASH | `20a0829c7031` | mobilda `password-reset-pages.tsx` ichida; `location.state` o'rniga marshrut parametrlari |
+| `src/pages/auth/verify-code-page.tsx` | 🟡 MOSLASH | `16651bf7c720` | mobilda `password-reset-pages.tsx` ichida |
+| `src/pages/auth/new-password-page.tsx` | 🟡 MOSLASH | `91726b8fbfb1` | mobilda `password-reset-pages.tsx` ichida |
 | `src/pages/parent/dashboard/parent-dashboard-page.tsx` | 🟡 MOSLASH | `aad62c96ad28` | mobilda `pages/parent/parent-dashboard-page.tsx`; sarlavha `ParentAppBar`, pastki tablar saqlangan |
 | `src/pages/parent/children/parent-children-page.tsx` | 🟡 MOSLASH | `fc3d24f1cb61` | mobilda `pages/parent/parent-children-page.tsx`; ruxsatlar sarlavhasi va "Kirishlar tarixi" ustma-ust (vebda tor ekranda sinadi) |
 | `src/pages/parent/attendance/parent-attendance-page.tsx` | 🟡 MOSLASH | `36689affc99d` | mobilda `pages/parent/parent-attendance-page.tsx`; "Hisobot" (window.print) yo'q; jadval o'rniga `AttendanceList` |

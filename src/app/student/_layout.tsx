@@ -18,6 +18,7 @@
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
+import { NewConversationHost } from "@/widgets/new-conversation";
 
 const TABS = [
   { name: "chats", labelKey: "tabs.chats", iconName: "nav-chat" },
@@ -46,6 +47,7 @@ export default function StudentLayout() {
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
         <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams", "analytics", "search", "profile-personal", "profile-account", "profile-system", "notifications", "homework-board"]} />
+        <NewConversationHost role="student" />
       </RoleRoute>
     </ProtectedRoute>
   );

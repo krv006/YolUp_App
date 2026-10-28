@@ -10,10 +10,13 @@
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
+import { NewConversationHost } from "@/widgets/new-conversation";
 
+/**
+ * Yangi dizayndagi suzuvchi panel (veb `widgets/mobile-tab-bar`): Workspace,
+ * Jadval, markazda Asosiy, Chat, Profil. Yorliqlar `nav` lug'atidan.
+ */
 const TABS = [
-  { name: "chats", labelKey: "tabs.chats", iconName: "nav-chat" },
-  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar" },
   {
     name: "workspace",
     labelKey: "tabs.workspace",
@@ -24,12 +27,17 @@ const TABS = [
      * foydalanuvchi qayerdan kirganini bilmaydi.
      */
     owns: ["quizzes", "exams", "ai", "analytics", "search", "assignments", "notifications"],
+    inset: true,
   },
+  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar", inset: true },
+  { name: "dashboard", labelKey: "tabs.home", iconName: "home", center: true },
+  { name: "chats", labelKey: "tabs.chat", iconName: "nav-chat", unreadChats: true },
   {
     name: "profile",
     labelKey: "tabs.profile",
     iconName: "nav-profile",
     owns: ["profile-personal", "profile-account", "profile-system"],
+    inset: true,
   },
 ] as const;
 
@@ -37,7 +45,8 @@ export default function TeacherLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.TEACHER]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams", "analytics", "search", "assignments", "profile-personal", "profile-account", "profile-system", "notifications"]} />
+        <RoleTabs variant="floating" tabs={TABS} hidden={["ai", "quizzes", "exams", "analytics", "search", "assignments", "profile-personal", "profile-account", "profile-system", "notifications"]} />
+        <NewConversationHost role="teacher" />
       </RoleRoute>
     </ProtectedRoute>
   );

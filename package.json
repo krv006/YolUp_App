@@ -64,6 +64,7 @@
     "livekit-client": "^2.22.2",
     "lucide-react-native": "^1.41.0",
     "nativewind": "^4.2.6",
+    "qrcode": "^1.5.4",
     "react": "19.2.3",
     "react-hook-form": "^7.87.0",
     "react-i18next": "^17.0.15",
@@ -83,6 +84,7 @@
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "~19.2.2",
     "babel-preset-expo": "^57.0.10",
     "eslint": "^9.39.5",

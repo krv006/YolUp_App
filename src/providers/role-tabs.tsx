@@ -3,7 +3,8 @@ import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { Icon, radius, Text, useTheme, type IconName } from "@/shared/ui";
+import { useConversations } from "@/modules/conversation";
+import { DsText, Icon, radius, Text, useDs, useTheme, type IconName } from "@/shared/ui";
 
 export interface TabDefinition {
   /** Marshrut fayli nomi: `chats`, `schedule`, … */
@@ -33,7 +34,23 @@ export interface TabDefinition {
    * foydalanuvchi qayerdaligini bilmasdi.
    */
   owns?: readonly string[];
+  /** Suzuvchi panelda markazdagi ko'k doira ("Asosiy"). */
+  center?: boolean;
+  /**
+   * Suzuvchi panel kontent USTIDA turadi. Yangi dizayndagi sahifalar pastdan
+   * o'zi bo'shliq qoldiradi (vebda `pb-32`); hali eski ko'rinishdagi sahifalarga
+   * esa shu belgi bilan panel balandligicha bo'shliq qo'shiladi (vebdagi
+   * Jadval uchun qobiq `pb-28` beradi).
+   */
+  inset?: boolean;
+  /** O'qilmagan suhbatlar soni belgisi (`chat` tabi). */
+  unreadChats?: boolean;
 }
+
+export type RoleTabsVariant = "classic" | "floating";
+
+/** Suzuvchi panel: ekran pastidan `max(30px, safe-area)`, balandligi `h-17`. */
+const FLOATING_HEIGHT = 68;
 
 /*
  * Panel proplarining tipi `Tabs` ning O'ZIDAN chiqariladi.
@@ -59,27 +76,47 @@ type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>
 export function RoleTabs({
   tabs,
   hidden = [],
+  variant = "classic",
+  conversationRole = "teacher",
 }: {
   tabs: readonly TabDefinition[];
   hidden?: readonly string[];
+  /** `floating` — yangi dizayndagi suzuvchi panel (o'qituvchi, o'quvchi). */
+  variant?: RoleTabsVariant;
+  conversationRole?: "teacher" | "student";
 }) {
   const { palette } = useTheme();
-  const { t } = useTranslation("mobile");
+  const insets = useSafeAreaInsets();
+  const { t } = useTranslation(variant === "floating" ? "nav" : "mobile");
   const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.iconName]));
   const ownsByRoute = new Map(tabs.map((tab) => [tab.name, tab.owns ?? []]));
+  const floatingInset = Math.max(30, insets.bottom) + FLOATING_HEIGHT + 14;
 
   return (
     <Tabs
-      tabBar={(props) => (
-        <RoleTabBar {...props} iconByRoute={iconByRoute} ownsByRoute={ownsByRoute} />
-      )}
+      tabBar={(props) =>
+        variant === "floating" ? (
+          <FloatingTabBar {...props} tabs={tabs} conversationRole={conversationRole} />
+        ) : (
+          <RoleTabBar {...props} iconByRoute={iconByRoute} ownsByRoute={ownsByRoute} />
+        )
+      }
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: palette.background },
       }}
     >
-      {tabs.map(({ name, labelKey }) => (
-        <Tabs.Screen key={name} name={name} options={{ title: t(labelKey) }} />
+      {tabs.map(({ name, labelKey, inset }) => (
+        <Tabs.Screen
+          key={name}
+          name={name}
+          options={{
+            title: t(labelKey),
+            ...(variant === "floating" && inset
+              ? { sceneStyle: { backgroundColor: palette.background, paddingBottom: floatingInset } }
+              : null),
+          }}
+        />
       ))}
 
       {hidden.map((name) => (
@@ -235,6 +272,132 @@ function RoleTabBar({
     </View>
   );
 }
+
+/**
+ * Yangi dizayndagi suzuvchi panel — veb `widgets/mobile-tab-bar` (M5):
+ * `fixed inset-x-4 bottom-[max(30px,safe-area)] h-17 rounded-[28px]
+ * bg-surface px-2 shadow-lg`. Markazda "Asosiy" — `size-14` ko'k doira.
+ *
+ * Vebdagidek faqat bo'limlarning O'ZIDA ko'rinadi: ichki sahifalarda
+ * (Workspace ichidagi Test, profil sahifalari, bildirishnomalar, ochiq
+ * suhbat) yashiriladi.
+ */
+function FloatingTabBar({
+  state,
+  descriptors,
+  navigation,
+  tabs,
+  conversationRole,
+}: TabBarProps & { tabs: readonly TabDefinition[]; conversationRole: "teacher" | "student" }) {
+  const ds = useDs();
+  const insets = useSafeAreaInsets();
+  const conversations = useConversations(conversationRole);
+  const unread = (conversations.data ?? []).filter((item) => item.unreadCount > 0).length;
+
+  const activeRoute = state.routes[state.index];
+  const nestedIndex = activeRoute?.state?.index ?? 0;
+  const isTabRoot = tabs.some((tab) => tab.name === activeRoute?.name);
+  if (!isTabRoot || nestedIndex > 0) return null;
+
+  return (
+    <View
+      style={[
+        floating.bar,
+        { bottom: Math.max(30, insets.bottom), backgroundColor: ds.c.surface, boxShadow: ds.shadow.lg },
+      ]}
+    >
+      {tabs.map((tab) => {
+        const index = state.routes.findIndex((route) => route.name === tab.name);
+        const route = state.routes[index];
+        if (!route) return null;
+        const active = state.index === index;
+        const label = descriptors[route.key]?.options.title ?? route.name;
+
+        function onPress() {
+          const event = navigation.emit({ type: "tabPress", target: route!.key, canPreventDefault: true });
+          if (!active && !event.defaultPrevented) navigation.navigate(route!.name);
+        }
+
+        if (tab.center) {
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={label}
+              onPress={onPress}
+              style={floating.item}
+            >
+              <View style={[floating.home, { backgroundColor: ds.c.brand, boxShadow: ds.shadow.md }]}>
+                <Icon name={tab.iconName} size={26} color={ds.c["on-action"]} />
+              </View>
+              <DsText v="micro" w="500" c={active ? "brand" : "ink"} style={floating.label}>
+                {label}
+              </DsText>
+            </Pressable>
+          );
+        }
+
+        return (
+          <Pressable
+            key={route.key}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={label}
+            onPress={onPress}
+            style={[floating.item, floating.itemPlain]}
+          >
+            <View
+              style={[
+                floating.icon,
+                active && { backgroundColor: ds.c.surface, boxShadow: "0 2px 12px rgba(69, 103, 245, 0.2)" },
+              ]}
+            >
+              <Icon name={tab.iconName} size={27} color={active ? ds.c.brand : ds.c.ink} />
+              {tab.unreadChats && unread ? (
+                <View style={[floating.badge, { backgroundColor: ds.c.danger }]}>
+                  <Text style={[floating.badgeText, { color: ds.c["on-action"] }]}>{unread}</Text>
+                </View>
+              ) : null}
+            </View>
+            <DsText v="micro" w="500" c={active ? "brand" : "ink"} style={floating.label}>
+              {label}
+            </DsText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+const floating = StyleSheet.create({
+  bar: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    height: FLOATING_HEIGHT,
+    flexDirection: "row",
+    alignItems: "stretch",
+    paddingHorizontal: 8,
+    borderRadius: 28,
+  },
+  item: { flex: 1, alignItems: "center" },
+  /* `gap-1 pt-2` */
+  itemPlain: { gap: 4, paddingTop: 8 },
+  /* `h-8 w-14 rounded-full` */
+  /*
+   * Radius aniq balandlikning yarmi: Android `boxShadow` ni 999 radius bilan
+   * pill shakliga kesmaydi — faol tab ostida to'rtburchak soya chiqardi.
+   */
+  icon: { width: 56, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  /* `-mt-0.5 size-14 rounded-full bg-brand shadow-md` */
+  home: { marginTop: -2, width: 56, height: 56, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  /* `text-[11px] leading-3.5 font-medium` */
+  label: { fontSize: 11, lineHeight: 14, letterSpacing: 0 },
+  /* `absolute -top-1 right-1.5 h-4 min-w-4 rounded-full bg-danger px-1 text-[10px] font-semibold` */
+  badge: { position: "absolute", top: -4, right: 6, height: 16, minWidth: 16, paddingHorizontal: 4, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
+  badgeText: { fontSize: 10, lineHeight: 12, fontWeight: "600" },
+});
 
 const styles = StyleSheet.create({
   /*

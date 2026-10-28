@@ -102,7 +102,8 @@ const styles = StyleSheet.create({
   /* `justify-end pt-6` */
   top: { flexDirection: "row", justifyContent: "flex-end", paddingTop: 24 },
   /* `h-9 rounded-full px-2.5 gap-1 text-label-sm shadow-xs` */
-  language: { height: 36, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, borderRadius: dsRadius.full },
+  // Radius 18 (999 emas) — Android `boxShadow` ni 999 bilan pill shakliga kesmaydi.
+  language: { height: 36, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, borderRadius: 18 },
   flag: { fontSize: 14, lineHeight: 18 },
   /* `top-12 w-[140px] rounded-2xl border p-1.5 gap-0.5 shadow-xl` */
   menu: { position: "absolute", top: 72, right: 0, width: 140, gap: 2, padding: 6, borderWidth: 1, borderRadius: dsRadius["2xl"] },

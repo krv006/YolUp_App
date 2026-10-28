@@ -121,8 +121,22 @@ for (const [scheme, scope] of Object.entries(scopes)) {
   }
 }
 
-for (const [name, value] of Object.entries(themeVars)) {
+/*
+ * Radiuslar: `theme.css` dagi `@theme` ham `--radius-sm/md/lg/xl` ni beradi va
+ * brauzerda U USTUN (o'lchangan: rounded-sm 10px, rounded-md 13px). Shuning
+ * uchun avval design-tokens qiymatlari, ustidan theme.css qiymatlari.
+ */
+const themeCss = readFileSync(resolve(WEB, "src/shared/styles/theme.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+const radiusOverrides = Object.assign(
+  {},
+  ...blocks(themeCss).filter((block) => block.selector === "@theme").map((block) => declarations(block.body))
+);
+
+for (const [name, value] of Object.entries({ ...themeVars, ...radiusOverrides })) {
   if (name.startsWith("radius-")) out.radius[name.slice(7)] = px(value);
+}
+
+for (const [name, value] of Object.entries(themeVars)) {
   const match = /^text-([a-z0-9-]+?)$/.exec(name);
   if (!match || name.includes("--")) continue;
   const id = match[1];

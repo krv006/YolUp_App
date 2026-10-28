@@ -10,6 +10,7 @@ export type { ChatRoomDto, DirectAction, DirectTeacher, DirectTeacherDto } from 
 export { DIRECT_STATUS, useDirectStatusLabel } from "./constants/direct-status";
 export { mapConversationDto, mapConversationPage, mapTeacherDto } from "./lib/conversation.mappers";
 export { conversationKeys } from "./model/conversation.keys";
+export { useNewConversationStore } from "./model/new-conversation.store";
 export {
   matchesConversationFilter,
   useConversationFilter,
@@ -28,7 +29,6 @@ export {
 
 // --- Mobil UI ---
 export { ChatHeader } from "./ui/chat-header";
-export { ConversationItem } from "./ui/conversation-item";
 export { ConversationInfoSheet } from "./ui/conversation-info-sheet";
 export { NewGroupSheet } from "./ui/new-group-sheet";
 export { InviteStudentsSheet } from "./ui/invite-students-sheet";

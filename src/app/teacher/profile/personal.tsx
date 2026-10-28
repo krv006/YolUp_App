@@ -1,5 +1,5 @@
 import { PersonalInfoPage } from "@/pages/profile/personal-info-page";
 
-export default function ProfilePersonalInfoPageRoute() {
+export default function TeacherPersonalInfoPageRoute() {
   return <PersonalInfoPage />;
 }

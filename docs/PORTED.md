@@ -339,8 +339,19 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `821d80dc5c6f` | `AuthScreen` (tor ekran varianti, M1–M4) + maydon/tugma komponentlari; `AuthShell` (keng ekran) yo'q; fon gradienti `DsGradient`, maydonlar klaviatura ustiga `KeyboardAwareScrollView` bilan suriladi; placeholder o'lchami RN'da alohida berilmagani uchun bo'sh maydonda shrift placeholder'nikiga o'tadi |
 | `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `56a812e2324e` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp`; fokus o'tishidan oldin kelgan raqam keyingi kataklarga tarqatiladi (vebda `maxLength=1`) |
 | `src/modules/auth/ui/two-factor-form.tsx` | 🟡 MOSLASH | `e6f1e33d6c41` | faqat `MobileTwoFactorForm` (veb tor ekranda shuni ko'rsatadi); `TwoFactorForm` (keng ekran) yo'q |
-| `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `c869627db2a3` | `AppDialog` -> `Sheet`; 2FA yoqish/kod/o'chirish oynalari vebdagidek |
-| `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | mobilda `pages/profile/system-settings-page.tsx` ichida; Web Push qatori yo'q (qurilma tokeni kirishda o'zi yoziladi) |
+| `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `142fd170b299` | faqat tor ekran varianti; `AppDialog` -> `Sheet`; 2FA yoqish/kod/o'chirish oynalari vebdagidek. Ota-ona va o'quvchi hozircha `pages/profile/legacy/` dagi eski sahifada (o'quvchi — 6-bosqichda) |
+| `src/pages/profile/profile-page.tsx` | 🟡 MOSLASH | `a6e554a1a379` | faqat tor ekran varianti; avatar yuklash yo'q (veb tor ekranda ham yo'q); hozircha faqat o'qituvchi — ota-ona va o'quvchi `pages/profile/legacy/` da |
+| `src/pages/profile/profile-layout.tsx` | 🟡 MOSLASH | `35ce0f6b738c` | tor ekranda faqat `Outlet` — mobilda `app/teacher/profile/_layout.tsx` (Stack, `anchor: "index"`); keng ekran yon menyusi yo'q |
+| `src/pages/profile/profile-shell.tsx` | 🟡 MOSLASH | `282318c579f7` | `ProfileSubPage` — maydonlar klaviatura ustida (`KeyboardAwareScrollView`); orqaga — stekdan, bo'lmasa profil bosh sahifasiga |
+| `src/pages/profile/profile-dialogs.tsx` | 🟡 MOSLASH | `a2ea1873e2b1` | `AppDialog` -> `Sheet variant="app"` / `ConfirmDialog` |
+| `src/pages/profile/settings-tones.ts` | 🟢 NUSXA | `3d58b6ad30a4` | — |
+| `src/pages/profile/personal-info-page.tsx` | 🟡 MOSLASH | `c942534b1f5f` | faqat tor ekran varianti; fan va shahar `<select>` o'rniga `MobilePickerField`; xato `MobileActionBar` ustida |
+| `src/pages/profile/system-settings-page.tsx` | 🟡 MOSLASH | `e92e834bba3f` | faqat tor ekran varianti; push — veb Web Push o'rniga OS ruxsati (o'chirish tizim sozlamalarini ochadi, ilovaga qaytganda qayta o'qiladi); eski mobil sahifadagi kesh tozalash va bildirishnoma turlari olib tashlandi (vebda yo'q) |
+| `src/pages/profile/my-ratings-page.tsx` | 🟡 MOSLASH | `5842230d4b65` | faqat o'qituvchi (`TeacherRatings`) tor ekran shoxi; o'quvchi baholari (`student-ratings.tsx`) 6-bosqichda |
+| `src/pages/profile/certificates-page.tsx` | 🟡 MOSLASH | `57c03981d30b` | faqat tor ekran varianti; fayl `pickDocument` bilan; faylni ochish `Linking.openURL`; qator menyusi `PopoverMenu` |
+| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `0d1bbdb3c27d` | faqat tor ekran varianti |
+| `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `29932f6eb4da` | tanishuvni qayta ko'rsatish — `storage` dagi kalit o'chiriladi (vebda `localStorage`) |
+| `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | mobilda `pages/profile/legacy/system-settings-page.tsx` ichida (ota-ona, o'quvchi); Web Push qatori yo'q (qurilma tokeni kirishda o'zi yoziladi) |
 | `src/modules/auth/ui/login-history-dialog.tsx` | 🟡 MOSLASH | `8127cad1ced2` | mobilda `login-history-sheet.tsx` (Dialog o'rniga Sheet) |
 | `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `c36d8a0a9983` | til menyusi oddiy ochiluvchi ro'yxat; Xush kelibsiz ochilishda `fade` bilan chiqadi |
 | `src/shared/ui/splash-screen.tsx` | 🟡 MOSLASH | `2a085985444d` | mobilda `shared/ui/boot-screen.tsx` (ilova ochilishi, sessiya tekshirilishi, `index` yo'naltirishi); nuqtalar Reanimated bilan |

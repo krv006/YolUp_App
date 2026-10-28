@@ -1,231 +1,158 @@
-import { useCallback, type ReactNode } from "react";
+import { Children, isValidElement, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { BackHandler, Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useFocusEffect, usePathname, useRouter } from "expo-router";
-import { NotificationBell } from "@/modules/notification";
-import { AppBar, Icon, radius, Screen, Text, useTheme, type IconName } from "@/shared/ui";
+import { Pressable, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRoleRoutes } from "@/modules/auth";
+import { DsGradient, DsText, dsRadius, Icon, MobileActionBar, MobilePageHeader, toneColors, useDs, type IconName } from "@/shared/ui";
+import { SETTINGS_TONES } from "./settings-tones";
 
 /**
- * Profil sahifalari qobig'i — veb `pages/profile/profile-shell.tsx`.
- *
- * Vebda tor ekranda tepada "Profil" paneli (qo'ng'iroq bilan) turaveradi,
- * ichki sahifa esa o'z sarlavhasini orqaga tugmasi bilan chizadi. Pastki
- * "Saqlash" kabi tugmalar `footer` ga — u aylantirilmaydi.
+ * Profilning ichki sahifasi — veb `profile-shell.tsx` dagi `ProfileSubPage`
+ * (tor ekran): orqaga va sarlavha, ixtiyoriy izoh, bo'limlar `gap-5`;
+ * pastda `MobileActionBar` va uning ustida xato izohi.
  */
 export function ProfileSubPage({
   title,
   description,
   children,
   footer,
+  footerNote,
 }: {
   title: string;
   description?: string;
   children: ReactNode;
   footer?: ReactNode;
+  footerNote?: ReactNode;
 }) {
   const { t } = useTranslation("account");
-  const { t: tn } = useTranslation("nav");
-  const { palette } = useTheme();
-  const onBack = useProfileBack();
+  const ds = useDs();
+  const router = useRouter();
+  const routes = useRoleRoutes();
+  const insets = useSafeAreaInsets();
 
-  useFocusEffect(
-    useCallback(() => {
-      const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-        onBack();
-        return true;
-      });
-      return () => subscription.remove();
-    }, [onBack])
-  );
+  function goBack() {
+    if (router.canGoBack()) router.back();
+    else router.replace(routes.profile as never);
+  }
 
   return (
-    <Screen padded={false}>
-      <AppBar title={tn("titles.profile")}>
-        <NotificationBell />
-      </AppBar>
-      <View style={styles.subHeader}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("page.title")}
-          onPress={onBack}
-          style={({ pressed }) => [styles.back, pressed && { backgroundColor: palette["surface-subtle"] }]}
-        >
-          <Icon name="arrow-back" size={22} color={palette.foreground} />
-        </Pressable>
-        <Text variant="heading" numberOfLines={1} style={styles.grow}>
-          {title}
-        </Text>
-      </View>
-      <ScrollView style={styles.grow} contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+    <View style={[styles.fill, { backgroundColor: ds.c.canvas }]}>
+      <KeyboardAwareScrollView
+        style={styles.fill}
+        contentContainerStyle={[styles.page, { paddingTop: insets.top + 20, paddingBottom: footer ? 24 : insets.bottom + 24 }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={footer ? 110 : 24}
+      >
+        <DsGradient name="auth" />
+        <MobilePageHeader title={title} backLabel={t("page.back")} onBack={goBack} />
         {description ? (
-          <Text variant="label" style={[styles.bodySm, { color: palette["muted-foreground"] }]}>
+          <DsText v="body-sm" c="ink-secondary" style={styles.description}>
             {description}
-          </Text>
+          </DsText>
         ) : null}
-        {children}
-      </ScrollView>
+        <View style={[styles.body, { marginTop: description ? 14 : 20 }]}>{children}</View>
+      </KeyboardAwareScrollView>
+
       {footer ? (
-        <View style={[styles.footer, { borderTopColor: palette.border, backgroundColor: palette.surface }]}>{footer}</View>
+        <View>
+          {footerNote ? <View style={styles.footerNote}>{footerNote}</View> : null}
+          <MobileActionBar>{footer}</MobileActionBar>
+        </View>
       ) : null}
-    </Screen>
+    </View>
   );
 }
 
-/**
- * Ichki sahifadan "Profil"ga qaytish — vebdagi `navigate(-1)`.
- *
- * Ichki sahifalar tab ichidagi yashirin marshrutlar (`profile-personal`
- * va h.k.), tab tarixida `back()` boshqa tabga olib ketishi mumkin —
- * shuning uchun aniq manzilga qaytamiz.
- */
-export function useProfileBack(): () => void {
-  const router = useRouter();
-  const pathname = usePathname();
-  const target = pathname.replace(/\/profile-[a-z]+$/, "/profile");
-  return useCallback(() => router.replace(target as never), [router, target]);
-}
-
-/** `/teacher/profile` -> `/teacher/profile-personal` */
-export function useProfileLink(): (section: "personal" | "account" | "system") => void {
-  const router = useRouter();
-  const pathname = usePathname();
-  const base = pathname.replace(/\/profile(-[a-z]+)?$/, "");
-  return useCallback((section) => router.push(`${base}/profile-${section}` as never), [router, base]);
-}
-
-export function SectionLabel({ children }: { children: string }) {
-  const { palette } = useTheme();
-  return (
-    <Text variant="caption" style={[styles.sectionLabel, { color: palette["subtle-foreground"] }]}>
-      {children}
-    </Text>
-  );
-}
-
-/** `SettingsSection` — kichik sarlavha va ajratkichli ro'yxat kartasi. */
+/** Sozlamalar bo'limi — sarlavha va `rounded-xl bg-surface` ichida qatorlar (orasida chiziq). */
 export function SettingsSection({ label, children }: { label: string; children: ReactNode }) {
+  const ds = useDs();
+  const rows = Children.toArray(children).filter(isValidElement);
   return (
     <View style={styles.section}>
-      <SectionLabel>{label}</SectionLabel>
-      <SettingsCard>{children}</SettingsCard>
+      <DsText v="title" w="400" style={styles.sectionLabel}>
+        {label}
+      </DsText>
+      <View style={[styles.sectionCard, { backgroundColor: ds.c.surface }]}>
+        {rows.map((row, index) => (
+          <View key={row.key ?? index} style={index > 0 ? { borderTopWidth: 1, borderTopColor: ds.c.line } : undefined}>
+            {row}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
 
-/** `divide-y divide-line rounded-2xl border bg-surface` */
-export function SettingsCard({ children, danger = false }: { children: ReactNode; danger?: boolean }) {
-  const { palette } = useTheme();
-  const items = (Array.isArray(children) ? children : [children]).flat().filter(Boolean);
-  return (
-    <View
-      style={[
-        styles.card,
-        danger
-          ? { borderColor: palette["destructive-soft"], backgroundColor: palette["destructive-soft"] }
-          : { borderColor: palette.border, backgroundColor: palette.surface },
-      ]}
-    >
-      {items.map((child, index) => (
-        <View key={index} style={index > 0 && { borderTopWidth: 1, borderTopColor: palette.border }}>
-          {child}
-        </View>
-      ))}
-    </View>
-  );
-}
-
+/** Sozlamalar qatori — `min-h-[68px] px-4 py-[14px] gap-3`, chapda `size-10 rounded-md` belgi. */
 export function SettingsRow({
   icon,
-  tone,
+  tone = SETTINGS_TONES.brand,
   title,
   hint,
+  value,
   right,
   onPress,
   danger = false,
 }: {
   icon: IconName;
-  /** Ikonka doirasi foni; berilmasa — asosiy rang. */
   tone?: string;
   title: string;
-  hint?: string;
+  hint?: ReactNode;
+  value?: ReactNode;
   right?: ReactNode;
   onPress?: () => void;
   danger?: boolean;
 }) {
-  const { palette } = useTheme();
+  const ds = useDs();
+  const colors = toneColors(tone, ds);
   const content = (
     <>
-      <View style={[styles.rowIcon, { backgroundColor: tone ?? palette.primary }]}>
-        <Icon name={icon} size={18} color="#ffffff" />
+      <View style={[styles.rowIcon, { backgroundColor: colors.bg }]}>
+        <Icon name={icon} size={20} color={colors.fg ?? ds.c.ink} />
       </View>
       <View style={styles.grow}>
-        {/* Vebda bo'sh `<strong>` joy egallamaydi — masalan email yo'q bo'lsa. */}
-        {title ? (
-          <Text variant="label" numberOfLines={1} style={{ color: danger ? palette["destructive-strong"] : palette.foreground }}>
-            {title}
-          </Text>
-        ) : null}
+        <DsText v="title" c={danger ? "error-text" : "ink"} numberOfLines={1}>
+          {title}
+        </DsText>
         {hint ? (
-          <Text variant="caption" numberOfLines={1} style={[styles.hint, { color: palette["subtle-foreground"] }]}>
+          <DsText v="body-sm" c="ink-secondary" numberOfLines={1} style={styles.hint}>
             {hint}
-          </Text>
+          </DsText>
         ) : null}
       </View>
-      {right !== undefined ? right : onPress ? <Icon name="chevron-right" size={18} color={palette["subtle-foreground"]} /> : null}
+      {value ? (
+        <DsText v="body-xs" numberOfLines={1} style={styles.value}>
+          {value}
+        </DsText>
+      ) : null}
+      {right}
+      {onPress && !right ? <Icon name="chevron-right" size={20} color={ds.c["icon-secondary"]} /> : null}
     </>
   );
 
   if (!onPress) return <View style={styles.row}>{content}</View>;
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.row, pressed && { backgroundColor: palette["surface-subtle"] }]}
-    >
+    <Pressable accessibilityRole="button" onPress={onPress} style={({ pressed }) => [styles.row, pressed && { backgroundColor: ds.c.subtle }]}>
       {content}
     </Pressable>
   );
 }
 
-/** "Tasdiqlangan" / "Shu qurilma" kabi kichik yorliq. */
-export function RowPill({ label, color, background, icon }: { label: string; color: string; background: string; icon?: IconName }) {
-  return (
-    <View style={[styles.pill, { backgroundColor: background }]}>
-      {icon ? <Icon name={icon} size={14} color={color} /> : null}
-      <Text variant="caption" style={[styles.pillText, { color }]}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-export function initialsOf(name: string | null | undefined): string {
-  return (name ?? "")
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
-  bodySm: { fontWeight: "400" },
-  /* `px-4 py-3 gap-3` */
-  subHeader: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
-  back: { width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  /* `px-4 pb-6 gap-4` */
-  body: { gap: 16, paddingHorizontal: 16, paddingBottom: 24 },
-  footer: { paddingHorizontal: 16, paddingVertical: 16, borderTopWidth: 1 },
-  section: { gap: 8 },
-  /* `text-caption-strong tracking-wide uppercase px-1` */
-  sectionLabel: { paddingHorizontal: 4, fontWeight: "600", letterSpacing: 0.3, textTransform: "uppercase" },
-  card: { overflow: "hidden", borderWidth: 1, borderRadius: radius["2xl"] },
-  /* `px-4 py-3.5 gap-3` */
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  rowIcon: { width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  hint: { fontWeight: "500" },
-  pill: { height: 28, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, borderRadius: radius.full },
-  pillText: { fontWeight: "600" },
+  /* `px-4 pt-5 pb-6` */
+  page: { paddingHorizontal: 16 },
+  description: { marginTop: 20 },
+  body: { gap: 20 },
+  footerNote: { position: "absolute", left: 16, right: 16, bottom: "100%", marginBottom: 12 },
+  section: { gap: 13 },
+  sectionLabel: { lineHeight: 20 },
+  sectionCard: { overflow: "hidden", borderRadius: dsRadius.xl },
+  row: { minHeight: 68, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  rowIcon: { width: 40, height: 40, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
+  hint: { lineHeight: 22 },
+  value: { flexShrink: 1 },
 });

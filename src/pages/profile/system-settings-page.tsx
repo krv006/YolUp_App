@@ -1,358 +1,244 @@
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
-import { AlarmClock } from "lucide-react-native";
-import { useAuth, useUpdateLessonReminderMutation, useUpdateNotificationPrefsMutation } from "@/modules/auth";
+import { AppState, Linking, Pressable, StyleSheet, View } from "react-native";
+import * as Notifications from "expo-notifications";
+import { useAuth, useUpdateLessonReminderMutation } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
-import { useLanguageStore, useTextSizeStore, type AppLanguage, type TextSize } from "@/shared/model";
+import { useLanguageStore, useTextSizeStore, type TextSize } from "@/shared/model";
 import { useAppearanceStore, type ThemeMode } from "@/shared/model/theme.store";
-import {
-  GradientFill,
-  Icon,
-  radius,
-  SelectField,
-  Sheet,
-  SheetButton,
-  SheetFooter,
-  Slider,
-  Switch,
-  Text,
-  toast,
-  useTheme,
-  type IconName,
-} from "@/shared/ui";
-import { ProfileSubPage, SectionLabel, SettingsRow, SettingsSection } from "./profile-shell";
+import { DsText, dsRadius, Icon, MobileButton, Sheet, Switch, toast, toneColors, useDs, type IconName } from "@/shared/ui";
+import { ProfileSubPage, SettingsRow, SettingsSection } from "./profile-shell";
+import { SETTINGS_TONES } from "./settings-tones";
 
-const LANGUAGES: ReadonlyArray<{ id: AppLanguage; label: string }> = [
+const LANGUAGES = [
   { id: "uz", label: "O‘zbekcha" },
   { id: "ru", label: "Русский" },
   { id: "en", label: "English" },
-];
+] as const;
+
+type LanguageId = (typeof LANGUAGES)[number]["id"];
 
 const SIZES: TextSize[] = ["small", "medium", "large"];
-
 const MINUTE_OPTIONS = [5, 10, 15, 30, 60];
 
-/** Tizim sozlamalari — veb `pages/profile/system-settings-page.tsx`. */
+/**
+ * Bildirishnoma ruxsati — vebdagi `usePushNotifications` o'rniga OS ruxsati.
+ * Ilova ruxsatni o'zi bekor qila olmaydi, shuning uchun o'chirishda tizim
+ * sozlamalari ochiladi; ilovaga qaytilganda holat qayta o'qiladi.
+ */
+function usePushPermission() {
+  const [granted, setGranted] = useState(false);
+
+  const refresh = useCallback(() => {
+    void Notifications.getPermissionsAsync().then((result) => setGranted(result.granted));
+  }, []);
+
+  useEffect(() => {
+    refresh();
+    const subscription = AppState.addEventListener("change", (state) => state === "active" && refresh());
+    return () => subscription.remove();
+  }, [refresh]);
+
+  async function toggle(next: boolean) {
+    if (!next) {
+      await Linking.openSettings();
+      return;
+    }
+    const result = await Notifications.requestPermissionsAsync();
+    if (result.granted) setGranted(true);
+    else if (!result.canAskAgain) await Linking.openSettings();
+  }
+
+  return { granted, toggle };
+}
+
+function Segmented<T extends string>({ value, options, onChange }: { value: T; options: ReadonlyArray<{ id: T; label: string }>; onChange: (next: T) => void }) {
+  const ds = useDs();
+  return (
+    <View style={[styles.segmented, { backgroundColor: ds.c.subtle }]}>
+      {options.map((option) => {
+        const active = value === option.id;
+        return (
+          <Pressable
+            key={option.id}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            onPress={() => onChange(option.id)}
+            style={[styles.segment, active && { backgroundColor: ds.c.brand }]}
+          >
+            <DsText v="body-sm" w="500" c={active ? "on-action" : "ink"} numberOfLines={1}>
+              {option.label}
+            </DsText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** Belgi va sarlavha, ostida segment — `px-4 pt-3 pb-3.5 gap-[11px]`. */
+function SegmentedRow({ icon, tone, title, children }: { icon: IconName; tone: string; title: string; children: ReactNode }) {
+  const ds = useDs();
+  const colors = toneColors(tone, ds);
+  return (
+    <View style={styles.segmentedRow}>
+      <View style={styles.segmentedHead}>
+        <View style={[styles.rowIcon, { backgroundColor: colors.bg }]}>
+          <Icon name={icon} size={20} color={colors.fg ?? ds.c.ink} />
+        </View>
+        <DsText v="title" numberOfLines={1} style={styles.grow}>
+          {title}
+        </DsText>
+      </View>
+      {children}
+    </View>
+  );
+}
+
+function OptionRow({ label, selected, disabled, onPress }: { label: string; selected: boolean; disabled?: boolean; onPress: () => void }) {
+  const ds = useDs();
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ checked: selected }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.option, selected ? { backgroundColor: ds.c["brand-subtle"] } : pressed && { backgroundColor: ds.c.subtle }]}
+    >
+      <DsText c={selected ? "brand" : "ink"} numberOfLines={1} style={styles.grow}>
+        {label}
+      </DsText>
+      {selected ? <Icon name="check-circle" size={20} color={ds.c.brand} /> : null}
+    </Pressable>
+  );
+}
+
+/**
+ * Tizim sozlamalari — veb `system-settings-page.tsx` (tor ekran): til, mavzu
+ * va matn o'lchami; push-bildirishnomalar va dars eslatmasi.
+ */
 export function SystemSettingsPage() {
   const { t } = useTranslation("account");
-  const { palette } = useTheme();
-  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const language = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
   const mode = useAppearanceStore((state) => state.mode);
   const setMode = useAppearanceStore((state) => state.setMode);
   const size = useTextSizeStore((state) => state.size);
   const setSize = useTextSizeStore((state) => state.setSize);
+  const push = usePushPermission();
+  const reminder = useUpdateLessonReminderMutation();
   const [languageOpen, setLanguageOpen] = useState(false);
-  const [draftLanguage, setDraftLanguage] = useState(language);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [draftLanguage, setDraftLanguage] = useState<LanguageId>(language);
 
-  const themes: ReadonlyArray<{ id: ThemeMode; label: string }> = [
-    { id: "light", label: t("page.themeLight") },
-    { id: "dark", label: t("page.themeDark") },
-    { id: "system", label: t("page.themeSystem") },
-  ];
+  const minutes = user?.lessonReminderMinutes ?? (user?.role === ROLES.STUDENT ? 15 : 10);
+  const languageLabel = LANGUAGES.find((item) => item.id === language)?.label ?? "";
 
   return (
     <ProfileSubPage title={t("page.systemTitle")}>
-      <SettingsSection label={t("page.generalSection")}>
-        <View style={styles.block}>
-          <BlockHead icon="more" tone={palette.primary} title={t("page.language")} hint={t("page.languageHint")} />
-          <View style={[styles.segment, { backgroundColor: palette["surface-subtle"] }]}>
-            {LANGUAGES.map((item) => {
-              const active = language === item.id;
-              return (
-                <Pressable
-                  key={item.id}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  onPress={() => {
-                    setDraftLanguage(item.id);
-                    setLanguageOpen(true);
-                  }}
-                  style={[styles.segmentItem, active && [styles.segmentActive, { backgroundColor: palette.surface }]]}
-                >
-                  <Text variant="label" style={{ color: active ? palette.foreground : palette["muted-foreground"] }}>
-                    {item.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.block}>
-          <BlockHead icon="clock" tone={palette["saffron-strong"]} title={t("page.theme")} hint={t("page.themeHint")} />
-          <View style={styles.themes}>
-            {themes.map((item) => {
-              const active = mode === item.id;
-              return (
-                <Pressable
-                  key={item.id}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: active }}
-                  onPress={() => setMode(item.id)}
-                  style={[
-                    styles.theme,
-                    active
-                      ? { borderColor: palette.primary, backgroundColor: palette["primary-soft"] }
-                      : { borderColor: palette.border, backgroundColor: palette.surface },
-                  ]}
-                >
-                  <ThemePreview id={item.id} />
-                  <View style={styles.themeLabel}>
-                    <View style={[styles.radio, { borderColor: active ? palette.primary : palette.border }]}>
-                      {active ? <View style={[styles.radioDot, { backgroundColor: palette.primary }]} /> : null}
-                    </View>
-                    <Text variant="caption">{item.label}</Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.block}>
-          <View style={styles.head}>
-            <View style={[styles.headIcon, { backgroundColor: palette.primary }]}>
-              <Icon name="assign" size={18} color="#ffffff" />
-            </View>
-            <Text variant="label" style={styles.grow}>
-              {t("page.textSize")}
-            </Text>
-            <Text variant="label" style={{ color: palette.primary }}>
-              {t(`page.text${size === "small" ? "Small" : size === "large" ? "Large" : "Medium"}`)}
-            </Text>
-          </View>
-          <View style={styles.sizeRow}>
-            <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
-              A
-            </Text>
-            <View style={styles.grow}>
-              <Slider
-                value={SIZES.indexOf(size)}
-                min={0}
-                max={2}
-                step={1}
-                onChange={(value) => setSize(SIZES[Math.round(value)] ?? "medium")}
-                label={t("page.textSize")}
-              />
-            </View>
-            <Text variant="subheading" style={{ color: palette["subtle-foreground"] }}>
-              A
-            </Text>
-          </View>
-        </View>
-      </SettingsSection>
-
-      <View style={styles.section}>
-        <SectionLabel>{t("page.notificationsSection")}</SectionLabel>
-        <View style={[styles.notifications, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-          <NotificationSettings />
-        </View>
-      </View>
-
-      <SettingsSection label={t("page.dataSection")}>
+      <SettingsSection label={t("page.generalSectionTitle")}>
         <SettingsRow
-          icon="more"
-          tone={palette["subtle-foreground"]}
-          title={t("page.clearCache")}
+          icon="settings"
+          tone={SETTINGS_TONES.brand}
+          title={t("page.language")}
+          value={languageLabel}
           onPress={() => {
-            // Vebda saqlangan so'rovlar keshi o'chiriladi; mobilda kesh
-            // diskka yozilmaydi, shuning uchun hozir ishlatilmayotganlari.
-            queryClient.removeQueries({ type: "inactive" });
-            toast.success(t("page.cacheCleared"));
+            setDraftLanguage(language);
+            setLanguageOpen(true);
           }}
         />
+        <SegmentedRow icon="star" tone={SETTINGS_TONES.violet} title={t("page.theme")}>
+          <Segmented<ThemeMode>
+            value={mode}
+            onChange={setMode}
+            options={[
+              { id: "light", label: t("page.themeLight") },
+              { id: "dark", label: t("page.themeDark") },
+              { id: "system", label: t("page.themeSystem") },
+            ]}
+          />
+        </SegmentedRow>
+        <SegmentedRow icon="edit" tone={SETTINGS_TONES.warning} title={t("page.textSize")}>
+          <Segmented<TextSize>
+            value={size}
+            onChange={setSize}
+            options={[
+              { id: SIZES[0]!, label: t("page.textSmall") },
+              { id: SIZES[1]!, label: t("page.textMedium") },
+              { id: SIZES[2]!, label: t("page.textLarge") },
+            ]}
+          />
+        </SegmentedRow>
       </SettingsSection>
 
-      <Sheet open={languageOpen} onClose={() => setLanguageOpen(false)} title={t("page.language")}>
-        <View>
-          {LANGUAGES.map((item) => {
-            const active = draftLanguage === item.id;
-            return (
-              <Pressable
-                key={item.id}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: active }}
-                onPress={() => setDraftLanguage(item.id)}
-                style={[styles.languageOption, active && { backgroundColor: palette["primary-soft"] }]}
-              >
-                <Text variant="body" style={[styles.grow, { color: active ? palette.primary : palette.foreground }]}>
-                  {item.label}
-                </Text>
-                {active ? <Icon name="check-circle" size={20} color={palette.primary} /> : null}
-              </Pressable>
-            );
-          })}
+      <SettingsSection label={t("page.notificationsSectionTitle")}>
+        <SettingsRow
+          icon="bell"
+          tone={SETTINGS_TONES.brand}
+          title={t("page.pushTitle")}
+          hint={push.granted ? t("page.pushOn") : t("page.pushOff")}
+          right={<Switch size="lg" checked={push.granted} onCheckedChange={(next) => void push.toggle(next)} accessibilityLabel={t("page.pushTitle")} />}
+        />
+        <SettingsRow icon="clock" tone={SETTINGS_TONES.success} title={t("page.lessonReminder")} value={t("page.reminderValue", { count: minutes })} onPress={() => setReminderOpen(true)} />
+      </SettingsSection>
+
+      <Sheet
+        variant="app"
+        open={languageOpen}
+        onClose={() => setLanguageOpen(false)}
+        title={t("page.language")}
+        footer={
+          <>
+            <MobileButton variant="secondary" label={t("page.cancel")} onPress={() => setLanguageOpen(false)} />
+            <MobileButton
+              label={t("page.save")}
+              onPress={() => {
+                setLanguage(draftLanguage);
+                setLanguageOpen(false);
+              }}
+            />
+          </>
+        }
+      >
+        <View style={styles.options}>
+          {LANGUAGES.map((item) => (
+            <OptionRow key={item.id} label={item.label} selected={draftLanguage === item.id} onPress={() => setDraftLanguage(item.id)} />
+          ))}
         </View>
-        <SheetFooter>
-          <SheetButton title={t("page.cancel")} onPress={() => setLanguageOpen(false)} />
-          <SheetButton
-            variant="primary"
-            title={t("page.save")}
-            onPress={() => {
-              setLanguage(draftLanguage);
-              setLanguageOpen(false);
-            }}
-          />
-        </SheetFooter>
+      </Sheet>
+
+      <Sheet variant="app" open={reminderOpen} onClose={() => setReminderOpen(false)} title={t("page.lessonReminder")}>
+        <View style={[styles.options, styles.reminderOptions]}>
+          {MINUTE_OPTIONS.map((option) => (
+            <OptionRow
+              key={option}
+              label={t("page.reminderValue", { count: option })}
+              selected={minutes === option}
+              disabled={reminder.isPending}
+              onPress={() =>
+                reminder.mutate(option, {
+                  onSuccess: () => setReminderOpen(false),
+                  onError: (error: Error) => toast.error(error.message),
+                })
+              }
+            />
+          ))}
+        </View>
       </Sheet>
     </ProfileSubPage>
   );
 }
 
-function BlockHead({ icon, tone, title, hint }: { icon: IconName; tone: string; title: string; hint: string }) {
-  const { palette } = useTheme();
-  return (
-    <View style={styles.head}>
-      <View style={[styles.headIcon, { backgroundColor: tone }]}>
-        <Icon name={icon} size={18} color="#ffffff" />
-      </View>
-      <View style={styles.grow}>
-        <Text variant="label">{title}</Text>
-        <Text variant="caption" style={[styles.hint, { color: palette["subtle-foreground"] }]}>
-          {hint}
-        </Text>
-      </View>
-    </View>
-  );
-}
-
-/** `h-12 rounded-lg border` namunasi: oq, to'q va "tizim" (oqdan to'qqa gradient). */
-function ThemePreview({ id }: { id: ThemeMode }) {
-  const { palette } = useTheme();
-  if (id === "system")
-    return (
-      <View style={[styles.preview, { borderColor: palette.border }]}>
-        <GradientFill colors={[palette.surface, palette.foreground]} direction="horizontal" />
-      </View>
-    );
-  return (
-    <View
-      style={[
-        styles.preview,
-        { borderColor: palette.border, backgroundColor: id === "dark" ? palette.foreground : palette.surface },
-      ]}
-    />
-  );
-}
-
-/**
- * Bildirishnomalar — veb `widgets/account-menu/notification-settings.tsx`.
- *
- * Brauzer push qatori yo'q: vebdagi Web Push ilovada ishlamaydi, qurilma
- * tokeni esa kirishda o'zi ro'yxatdan o'tadi. Chat xabarlari va email
- * kalitlari hamda dars eslatmasi vebdagidek.
- */
-function NotificationSettings() {
-  const { t } = useTranslation("account");
-  const { palette } = useTheme();
-  const { user } = useAuth();
-  const reminder = useUpdateLessonReminderMutation();
-  const prefs = useUpdateNotificationPrefsMutation();
-  const minutes = user?.lessonReminderMinutes ?? (user?.role === ROLES.STUDENT ? 15 : 10);
-
-  return (
-    <>
-      <PrefRow
-        label={t("settingsDialog.messagesLabel")}
-        hint={t("settingsDialog.messagesHint")}
-        checked={user?.notifyMessages !== false}
-        disabled={prefs.isPending}
-        onChange={(next) => prefs.mutate({ notifyMessages: next })}
-      />
-      <PrefRow
-        label={t("settingsDialog.emailLabel")}
-        hint={t("settingsDialog.emailHint")}
-        checked={user?.notifyEmail === true}
-        disabled={prefs.isPending}
-        onChange={(next) => prefs.mutate({ notifyEmail: next })}
-      />
-      <View style={[styles.settingsRow, { borderColor: palette.border }]}>
-        <Text variant="label" style={styles.grow}>
-          {t("settingsDialog.reminderLabel")}
-        </Text>
-        <View style={styles.picker}>
-          <SelectField
-            hideLabel
-            label={t("settingsDialog.reminderLabel")}
-            icon={<AlarmClock size={17} color={palette["subtle-foreground"]} />}
-            value={String(minutes)}
-            onChange={(value) => reminder.mutate(Number(value))}
-            options={MINUTE_OPTIONS.map((value) => ({
-              value: String(value),
-              label: t("settingsDialog.reminderOption", { count: value }),
-            }))}
-          />
-        </View>
-      </View>
-    </>
-  );
-}
-
-/** `.account-settings-row` + `Switch`, ostida `.account-settings-hint`. */
-function PrefRow({
-  label,
-  hint,
-  checked,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  checked: boolean;
-  disabled: boolean;
-  onChange: (next: boolean) => void;
-}) {
-  const { palette } = useTheme();
-  return (
-    <>
-      <View style={[styles.settingsRow, { borderColor: palette.border }]}>
-        <Text variant="label" style={styles.grow}>
-          {label}
-        </Text>
-        <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} accessibilityLabel={label} />
-      </View>
-      <Text variant="caption" style={[styles.prefHint, { color: palette["muted-foreground"] }]}>
-        {hint}
-      </Text>
-    </>
-  );
-}
-
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
-  hint: { fontWeight: "500" },
-  section: { gap: 8 },
-  /* `flex flex-col gap-3 p-4` */
-  block: { gap: 12, padding: 16 },
-  head: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headIcon: { width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  /* `rounded-full bg-subtle p-1 gap-1` */
-  segment: { flexDirection: "row", gap: 4, padding: 4, borderRadius: radius.full },
-  segmentItem: { flex: 1, height: 40, alignItems: "center", justifyContent: "center", borderRadius: radius.full },
-  segmentActive: {
-    shadowColor: "#000000",
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
-  },
-  themes: { flexDirection: "row", gap: 8 },
-  /* `rounded-xl border p-2 gap-2` */
-  theme: { flex: 1, alignItems: "center", gap: 8, padding: 8, borderWidth: 1, borderRadius: radius.xl },
-  preview: { alignSelf: "stretch", height: 48, borderWidth: 1, borderRadius: radius.lg, overflow: "hidden" },
-  themeLabel: { flexDirection: "row", alignItems: "center", gap: 6 },
-  radio: { width: 14, height: 14, borderWidth: 1, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  radioDot: { width: 8, height: 8, borderRadius: radius.full },
-  sizeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  notifications: { gap: 8, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
-  /* `.account-settings-row` */
-  settingsRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 13, paddingVertical: 11, borderWidth: 1, borderRadius: 13 },
-  picker: { width: "52%", maxWidth: 210 },
-  /* `.account-settings-hint` — 12/1.5 */
-  prefHint: { marginTop: -2, fontSize: 12, lineHeight: 18, fontWeight: "400" },
-  languageOption: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14, borderRadius: radius.xl },
+  segmentedRow: { gap: 11, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 14 },
+  segmentedHead: { flexDirection: "row", alignItems: "center", gap: 12 },
+  rowIcon: { width: 40, height: 40, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
+  /* `rounded-full bg-subtle p-[5px] gap-1`, tugma `h-10` */
+  segmented: { flexDirection: "row", gap: 4, padding: 5, borderRadius: 999 },
+  segment: { flex: 1, minWidth: 0, height: 40, alignItems: "center", justifyContent: "center", borderRadius: 20 },
+  options: { gap: 4 },
+  reminderOptions: { paddingBottom: 20 },
+  option: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.md },
 });

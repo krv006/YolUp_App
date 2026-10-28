@@ -1,5 +1,5 @@
-import { WorkspacePage } from "@/pages/workspace/workspace-page";
+import { WorkspaceHomePage } from "@/pages/workspace/workspace-home-page";
 
 export default function TeacherWorkspaceRoute() {
-  return <WorkspacePage />;
+  return <WorkspaceHomePage />;
 }

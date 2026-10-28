@@ -2,9 +2,17 @@ import { Stack } from "expo-router";
 import { useFloatingTabInset } from "@/providers/role-tabs";
 import { useDs } from "@/shared/ui";
 
+/*
+ * Boshqa tabdan (asosiy sahifa, bildirishnoma) ichki sahifaga o'tganda ostida
+ * bosh sahifa turishi uchun: o'tish `router.push(href, { withAnchor: true })`
+ * bilan qilinadi. Aks holda ichki sahifa stekda yagona bo'lib, suzuvchi panel
+ * uning ustida qolar va "orqaga" ilovadan chiqarib yuborardi.
+ */
+export const unstable_settings = { anchor: "index" };
+
 /**
- * Workspace bo'limi ichidagi stack: bosh sahifa -> vazifa -> tekshirish
- * (veb `/teacher/workspace/homework/:id[/review]`). Ichki sahifada suzuvchi
+ * Workspace bo'limi ichidagi stack: bosh sahifa -> vazifalar, tahlil, AI ->
+ * vazifa -> tekshirish (veb `/teacher/workspace/...`). Ichki sahifada suzuvchi
  * panel yashiriladi (`RoleTabs` — ichki indeks > 0), shuning uchun panel
  * uchun pastki bo'shliq faqat bosh sahifaga beriladi.
  */

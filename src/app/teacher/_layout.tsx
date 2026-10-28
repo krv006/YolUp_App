@@ -26,7 +26,7 @@ const TABS = [
      * holda bo'lim ichida panelda birorta tab ajratilmay qoladi va
      * foydalanuvchi qayerdan kirganini bilmaydi.
      */
-    owns: ["quizzes", "exams", "ai", "analytics", "search", "assignments", "notifications"],
+    owns: ["quizzes", "exams", "search", "notifications"],
     // Pastki bo'shliq `workspace/_layout.tsx` da — faqat bosh sahifada.
   },
   // Jadval suzuvchi panel ostida aylanadi — bo'shliq sahifaning o'zida (`pb-32`).
@@ -46,7 +46,7 @@ export default function TeacherLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.TEACHER]}>
-        <RoleTabs variant="floating" tabs={TABS} hidden={["ai", "quizzes", "exams", "analytics", "search", "assignments", "profile-personal", "profile-account", "profile-system", "notifications"]} />
+        <RoleTabs variant="floating" tabs={TABS} hidden={["quizzes", "exams", "search", "profile-personal", "profile-account", "profile-system", "notifications"]} />
         <NewConversationHost role="teacher" />
       </RoleRoute>
     </ProtectedRoute>

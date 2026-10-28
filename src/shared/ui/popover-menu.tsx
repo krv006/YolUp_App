@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from "react-n
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DsText, dsRadius, useDs } from "./ds";
+import { Icon, type IconName } from "./icon";
 
 export interface PopoverRect {
   top: number;
@@ -78,7 +79,7 @@ export function PopoverMenu({ rect, onClose, width = 220, align = "end", offset 
 }
 
 /** Oddiy menyu qatori — veb `DropdownItem` (`destructive` qizil). */
-export function PopoverMenuItem({ label, danger = false, onPress }: { label: ReactNode; danger?: boolean; onPress: () => void }) {
+export function PopoverMenuItem({ label, icon, danger = false, onPress }: { label: ReactNode; icon?: IconName; danger?: boolean; onPress: () => void }) {
   const ds = useDs();
   return (
     <Pressable
@@ -86,7 +87,8 @@ export function PopoverMenuItem({ label, danger = false, onPress }: { label: Rea
       onPress={onPress}
       style={({ pressed }) => [styles.item, pressed && { backgroundColor: danger ? ds.c["danger-bg"] : ds.c.subtle }]}
     >
-      <DsText c={danger ? "error-text" : "ink"} numberOfLines={1}>
+      {icon ? <Icon name={icon} size={18} color={danger ? ds.c["error-text"] : ds.c.ink} /> : null}
+      <DsText c={danger ? "error-text" : "ink"} numberOfLines={1} style={styles.label}>
         {label}
       </DsText>
     </Pressable>
@@ -96,5 +98,6 @@ export function PopoverMenuItem({ label, danger = false, onPress }: { label: Rea
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   menu: { position: "absolute", overflow: "hidden", padding: 6, borderRadius: dsRadius.xl },
-  item: { minHeight: 44, justifyContent: "center", paddingHorizontal: 12, borderRadius: dsRadius.md },
+  item: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, borderRadius: dsRadius.md },
+  label: { flexShrink: 1 },
 });

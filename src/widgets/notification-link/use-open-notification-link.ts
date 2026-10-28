@@ -29,7 +29,8 @@ export function useOpenNotificationLink() {
 
   return useCallback(
     (link: NotificationLink, kind?: string | null) => {
-      const go = (href: string) => router.push(href as never);
+      // `withAnchor` — ichki sahifa ostida bo'lim bosh sahifasi ham turadi (`workspace/_layout.tsx`).
+      const go = (href: string) => router.push(href as never, { withAnchor: true });
       const type = link.type.toLowerCase();
 
       if (type === "teacher") return go(`/admin/teachers?teacher=${encodeURIComponent(link.id)}`);

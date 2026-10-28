@@ -553,7 +553,8 @@ const styles = StyleSheet.create({
   segmentScroller: { marginHorizontal: -16, flexGrow: 0 },
   segmentsScroll: { gap: 8, paddingHorizontal: 16 },
   segment: { height: 44, alignItems: "center", justifyContent: "center", paddingHorizontal: 16, borderWidth: 1, borderRadius: dsRadius.full },
-  segmentFlex: { flex: 1, minWidth: 0 },
+  // Vebda matn `px-4` ga sig'masa ham kesilmaydi (`whitespace-nowrap`), RN esa kesadi — shuning uchun ichki chet kichik.
+  segmentFlex: { flex: 1, minWidth: 0, paddingHorizontal: 4 },
   /*
    * `w-28.5` — CSS'da `whitespace-nowrap` matni ichki chetdan chiqib ham
    * to'liq ko'rinadi ("Hammasi · 14"); RN esa uni qisqartiradi. Matn baribir

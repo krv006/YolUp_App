@@ -105,7 +105,7 @@ export function NewLessonDialog({ open, onOpenChange, courses, pending = false, 
                   }}
                   style={[styles.course, active ? { borderColor: ds.c.brand, backgroundColor: ds.c["brand-subtle"] } : { borderColor: "transparent", backgroundColor: ds.c.subtle }]}
                 >
-                  <GroupTile name={course.title} tone={course.tone} src={course.image} box={32} radius={dsRadius.md} />
+                  <GroupTile name={course.title} tone={course.tone} src={course.image} box={32} radius={dsRadius.xl} />
                   <View style={styles.grow}>
                     <DsText v="body-sm" w="600" numberOfLines={1}>
                       {course.title}

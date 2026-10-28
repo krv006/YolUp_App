@@ -14,8 +14,8 @@ import {
   toast,
   useTheme,
 } from "@/shared/ui";
-import type { BoardSheet } from "../api/board.dto";
-import { BoardStroke, useBoardFont } from "./board-stroke";
+import type { BoardSheet } from "../../api/board.dto";
+import { BoardStroke, useBoardFont } from "../board-stroke";
 
 /* ────────────────────────────── Sahifalar ────────────────────────────── */
 

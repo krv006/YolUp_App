@@ -1,17 +1,17 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import type { Point, StrokeDto, StrokeInput } from "../api/board.dto";
+import type { Point, StrokeDto, StrokeInput } from "../../api/board.dto";
 import { Button, Input, MIN_TOUCH_SIZE, radius, Sheet, Text, useTheme } from "@/shared/ui";
-import { nextFlowPoint } from "../lib/board-flow";
+import { nextFlowPoint } from "../../lib/board-flow";
 import {
   bohrDiagramSize,
   buildBohrStrokes,
   buildElementCardStrokes,
   elementCardHeight,
-} from "../lib/periodic-board";
-import { usePeriodicTable } from "../model/board.queries";
-import { BohrModel } from "./bohr-model";
+} from "../../lib/periodic-board";
+import { usePeriodicTable } from "../../model/board.queries";
+import { BohrModel } from "../bohr-model";
 
 /**
  * Davriy jadval — element kartasini yoki Bor modelini doskaga qo'yadi.

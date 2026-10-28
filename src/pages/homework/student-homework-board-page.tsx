@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, CheckCircle2, Cloud, CloudOff, Send } from "lucide-react-native";
-import { BoardSurface } from "@/modules/board";
+import { BoardSurface } from "@/modules/board/ui/legacy/board-surface";
 import {
   useAssignment,
   useHomeworkBoard,

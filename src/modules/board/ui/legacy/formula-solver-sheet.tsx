@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, TextInput, View } from "react-native";
 import { Check, Type } from "lucide-react-native";
 import { Sheet, SheetButton, SheetFooter, Text, useTheme } from "@/shared/ui";
-import type { FormulaSolutionDto } from "../api/board.dto";
-import { FormulaPalette } from "./formula-palette";
+import type { FormulaSolutionDto } from "../../api/board.dto";
+import { FormulaPalette } from "../formula-palette";
 
 export interface FormulaSolverSheetProps {
   open: boolean;

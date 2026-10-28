@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button, Input, Sheet, Text } from "@/shared/ui";
-import { FormulaPalette } from "./formula-palette";
-import { MathMarkup } from "./math-markup";
+import { FormulaPalette } from "../formula-palette";
+import { MathMarkup } from "../math-markup";
 
-export { MathMarkup } from "./math-markup";
+export { MathMarkup } from "../math-markup";
 
 export interface MathFieldSheetProps {
   open: boolean;

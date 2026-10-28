@@ -8,10 +8,10 @@ import Animated, {
   withRepeat,
   withSequence,
   withTiming,
+  Easing,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Logo } from "./logo";
-import { useTheme } from "./theme";
+import { DsGradient, useDs } from "./ds";
 
 export interface BootScreenProps {
   /** Birinchi kadr chizilgach — tizim splash'ini shu paytda yopish kerak. */
@@ -19,70 +19,72 @@ export interface BootScreenProps {
 }
 
 const DOTS = [0, 1, 2] as const;
-/** Bir nuqtaning ko'tarilib tushishi; navbatdagisi shuncha kechikadi. */
-const STEP_MS = 160;
+/** Veb `splash-dot` — 1 s davr, nuqtalar orasida 150 ms kechikish. */
+const PERIOD_MS = 1000;
+const DELAY_MS = 150;
 
 /**
- * Ilova ochilish ekrani — tizim splash'i bilan bir xil fon va logo,
- * pastda navbat bilan sakraydigan uchta nuqta. Token tiklanib, profil va
- * shriftlar yuklanguncha turadi.
+ * Ilova ochilish ekrani (M1.3) — veb `shared/ui/splash-screen.tsx`: auth
+ * gradienti, markazda logotip, pastda (balandlikning 9.8%) navbat bilan
+ * sakraydigan uchta nuqta. Token tiklanib, profil va shriftlar yuklanguncha
+ * turadi.
  *
  * Tizim splash'i (Android 12+ `SplashScreen` API) faqat statik rasm
  * ko'rsata oladi, shuning uchun u birinchi kadrdayoq shu ekranga
  * almashtiriladi (`onReady`).
  */
 export function BootScreen({ onReady }: BootScreenProps) {
-  const { palette } = useTheme();
-  const insets = useSafeAreaInsets();
+  const ds = useDs();
 
   return (
     <View
       accessibilityRole="progressbar"
       accessibilityLabel="YolUp"
       onLayout={onReady}
-      style={[styles.root, { backgroundColor: palette.background }]}
+      style={[styles.root, { backgroundColor: ds.c.canvas }]}
     >
-      <Logo size={96} />
-      <View style={[styles.dots, { bottom: insets.bottom + 72 }]}>
+      <DsGradient name="auth" />
+      <Logo size={136} />
+      <View style={styles.dots}>
         {DOTS.map((index) => (
-          <Dot key={index} index={index} color={palette.primary} />
+          <Dot key={index} index={index} color={ds.c["brand-strong"]} />
         ))}
       </View>
     </View>
   );
 }
 
+/** `@keyframes splash-dot` — 0%, 60%, 100%: joyida; 30%: 4px yuqorida. */
 function Dot({ index, color }: { index: number; color: string }) {
-  const progress = useSharedValue(0);
+  const lift = useSharedValue(0);
 
   useEffect(() => {
-    progress.set(
+    const ease = Easing.inOut(Easing.ease);
+    lift.set(
       withDelay(
-        index * STEP_MS,
+        index * DELAY_MS,
         withRepeat(
           withSequence(
-            withTiming(1, { duration: STEP_MS * 2 }),
-            withTiming(0, { duration: STEP_MS * 2 }),
-            // Uchala nuqta o'z navbatini o'tkazguncha kutadi — to'lqin bir xil qadamda.
-            withTiming(0, { duration: STEP_MS * 2 })
+            withTiming(-4, { duration: PERIOD_MS * 0.3, easing: ease }),
+            withTiming(0, { duration: PERIOD_MS * 0.3, easing: ease }),
+            withTiming(0, { duration: PERIOD_MS * 0.4 })
           ),
           -1
         )
       )
     );
-    return () => cancelAnimation(progress);
-  }, [index, progress]);
+    return () => cancelAnimation(lift);
+  }, [index, lift]);
 
-  const style = useAnimatedStyle(() => ({
-    opacity: 0.45 + progress.get() * 0.55,
-    transform: [{ translateY: -6 * progress.get() }],
-  }));
+  const style = useAnimatedStyle(() => ({ transform: [{ translateY: lift.get() }] }));
 
   return <Animated.View style={[styles.dot, { backgroundColor: color }, style]} />;
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, alignItems: "center", justifyContent: "center" },
-  dots: { position: "absolute", flexDirection: "row", alignItems: "center", gap: 6 },
+  /* `absolute bottom-[9.8%] gap-[5px]` */
+  dots: { position: "absolute", bottom: "9.8%", flexDirection: "row", alignItems: "center", gap: 5 },
+  /* `size-2 rounded-full bg-brand-strong` */
   dot: { width: 8, height: 8, borderRadius: 4 },
 });

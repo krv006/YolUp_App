@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 import { Redirect } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { hasRole } from "@/modules/permission";
 import { ROUTES } from "@/shared/config";
 import type { Role } from "@/shared/constants";
-import { Screen, ScreenLoading } from "@/shared/ui";
+import { BootScreen } from "@/shared/ui";
 
 /**
  * Veb `src/app/router/protected-route.tsx` va `role-route.tsx` ning o'rni.
@@ -19,16 +18,10 @@ import { Screen, ScreenLoading } from "@/shared/ui";
  */
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { t } = useTranslation("mobile");
   const { isAuthenticated, isInitializing } = useAuth();
 
-  if (isInitializing) {
-    return (
-      <Screen>
-        <ScreenLoading label={t("shared.sessiya_tekshirilmoqda")} />
-      </Screen>
-    );
-  }
+  // Veb `protected-route.tsx`: sessiya tekshirilayotganda splash.
+  if (isInitializing) return <BootScreen />;
 
   if (!isAuthenticated) return <Redirect href={ROUTES.auth.login} />;
 

@@ -174,13 +174,13 @@
   },
   "gradients": {
     "light": {
-      "page": "linear-gradient(180deg, #dee3f9 0, #f7f8fa 380px)",
-      "auth": "linear-gradient(180deg, #d4dcf9 0, #f7f8fa 444px)",
+      "page": "linear-gradient(180deg, #dee3f9 0%, #f7f8fa 380px)",
+      "auth": "linear-gradient(180deg, #d4dcf9 0%, #f7f8fa 444px)",
       "brand": "linear-gradient(90deg, #4567f5 0%, #6b5af2 100%)"
     },
     "dark": {
-      "page": "linear-gradient(180deg, #dee3f9 0, #16172f 380px)",
-      "auth": "linear-gradient(180deg, #24264d 0, #16172f 488px)",
+      "page": "linear-gradient(180deg, #dee3f9 0%, #16172f 380px)",
+      "auth": "linear-gradient(180deg, #24264d 0%, #16172f 488px)",
       "brand": "linear-gradient(90deg, #4567f5 0%, #6b5af2 100%)"
     }
   },

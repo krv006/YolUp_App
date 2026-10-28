@@ -13,13 +13,16 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
+  Easing,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react-native";
+import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react-native";
 import { create } from "zustand";
 import { fontSize, MIN_TOUCH_SIZE, radius } from "./tokens";
 import { useTheme } from "./theme";
 import { Text } from "./text";
+import { DsText, dsRadius, useDs } from "./ds";
 
 /**
  * `sonner` ning mobil o'rnini bosuvchi (shim).
@@ -52,7 +55,8 @@ export interface ToastOptions {
   id?: string;
 }
 
-export type ToastVariant = "default" | "success" | "error" | "warning" | "info";
+/** `appError` — yangi dizayndagi xato kartasi (veb `shared/ui/app-toast.tsx`). */
+export type ToastVariant = "default" | "success" | "error" | "warning" | "info" | "appError";
 
 export interface ToastItem extends ToastOptions {
   id: string;
@@ -68,6 +72,7 @@ const DEFAULT_DURATION: Record<ToastVariant, number> = {
   error: 6_000,
   warning: 5_000,
   info: 4_000,
+  appError: 5_000,
 };
 
 /** Ekranni to'ldirib yubormaslik uchun bir vaqtda ko'rinadiganlari cheklangan. */
@@ -120,6 +125,21 @@ export const toast = Object.assign(
   }
 );
 
+export interface AppToastOptions {
+  title: string;
+  description?: string;
+  duration?: number;
+}
+
+/**
+ * Yangi dizayndagi xato xabari — veb `showErrorToast` (M2.6, M4.4):
+ * qizg'ish fon, to'q doira ichida X, sarlavha, izoh va pastda vaqt
+ * tugashini ko'rsatuvchi chiziq.
+ */
+export function showErrorToast({ title, description, duration }: AppToastOptions): string {
+  return show("appError", title, { description, duration });
+}
+
 // ─── Ko'rinish ──────────────────────────────────────────────────────────────
 
 /**
@@ -153,7 +173,7 @@ export function ToastHost() {
       onRequestClose={() => useToastStore.getState().dismiss()}
     >
       <GestureHandlerRootView style={styles.fill} pointerEvents="box-none">
-        <View pointerEvents="box-none" style={[styles.host, { top: insets.top + 10 }]}>
+        <View pointerEvents="box-none" style={[styles.host, { top: insets.top + 16 }]}>
           {items.map((item) => (
             <ToastCard key={item.id} item={item} />
           ))}
@@ -164,6 +184,7 @@ export function ToastHost() {
 }
 
 const ICONS: Record<ToastVariant, typeof CheckCircle2> = {
+  appError: XCircle,
   default: Info,
   success: CheckCircle2,
   error: XCircle,
@@ -172,6 +193,7 @@ const ICONS: Record<ToastVariant, typeof CheckCircle2> = {
 };
 
 const ACCENT: Record<ToastVariant, "success" | "destructive" | "warning" | "primary"> = {
+  appError: "destructive",
   default: "primary",
   success: "success",
   error: "destructive",
@@ -228,6 +250,18 @@ function ToastCard({ item }: { item: ToastItem }) {
 
   const Icon = ICONS[item.variant];
   const accent = palette[ACCENT[item.variant]];
+
+  if (item.variant === "appError") {
+    return (
+      <GestureDetector gesture={pan}>
+        <Animated.View entering={FadeInUp.duration(220)} exiting={FadeOutUp.duration(160)}>
+          <Animated.View accessibilityRole="alert" accessibilityLiveRegion="polite" style={cardStyle}>
+            <AppErrorCard item={item} onClose={close} closeLabel={t("shared.xabarni_yopish")} />
+          </Animated.View>
+        </Animated.View>
+      </GestureDetector>
+    );
+  }
 
   return (
     <GestureDetector gesture={pan}>
@@ -300,9 +334,60 @@ function ToastCard({ item }: { item: ToastItem }) {
   );
 }
 
+/**
+ * `rounded-md bg-danger-bg px-4 pt-4 pb-2.5 shadow-lg`; chapda `size-8`
+ * to'q doira ichida `size-5` qizil doira va X, pastda `h-2.5` chiziq
+ * toast muddati davomida o'ngdan chapga qisqaradi.
+ */
+function AppErrorCard({ item, onClose, closeLabel }: { item: ToastItem; onClose: () => void; closeLabel: string }) {
+  const ds = useDs();
+  const progress = useSharedValue(1);
+
+  useEffect(() => {
+    progress.set(withTiming(0, { duration: item.duration, easing: Easing.linear }));
+  }, [progress, item.duration]);
+
+  const barStyle = useAnimatedStyle(() => ({ transform: [{ scaleX: progress.get() }] }));
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={closeLabel}
+      onPress={onClose}
+      style={[styles.appError, { backgroundColor: ds.c["danger-bg"], boxShadow: ds.shadow.lg }]}
+    >
+      <View style={styles.appErrorRow}>
+        <View style={[styles.appErrorIcon, { backgroundColor: ds.c["surface-inverse"] }]}>
+          <View style={[styles.appErrorDot, { backgroundColor: ds.c["error-text"] }]}>
+            <X size={12} strokeWidth={3} color={ds.c["surface-inverse"]} />
+          </View>
+        </View>
+        <View style={styles.appErrorText}>
+          <DsText v="title-lg" heading c="error-text">
+            {item.message}
+          </DsText>
+          {item.description ? (
+            <DsText v="body-sm" c="ink-secondary">
+              {item.description}
+            </DsText>
+          ) : null}
+        </View>
+      </View>
+      <Animated.View style={[styles.appErrorBar, { backgroundColor: ds.c["error-text"] }, barStyle]} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  host: { position: "absolute", left: 12, right: 12, gap: 8 },
+  /* Veb `Toaster position="top-center" offset={16}` */
+  host: { position: "absolute", left: 16, right: 16, gap: 8 },
+  appError: { overflow: "hidden", paddingHorizontal: 16, paddingTop: 16, paddingBottom: 10, borderRadius: dsRadius.md },
+  appErrorRow: { flexDirection: "row", alignItems: "center", gap: 16 },
+  appErrorIcon: { width: 32, height: 32, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
+  appErrorDot: { width: 20, height: 20, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
+  appErrorText: { flex: 1, minWidth: 0, gap: 2 },
+  appErrorBar: { position: "absolute", left: 0, right: 0, bottom: 0, height: 10, transformOrigin: "left" },
   card: {
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: radius.lg,

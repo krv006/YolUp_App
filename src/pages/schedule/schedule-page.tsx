@@ -128,11 +128,18 @@ export function SchedulePage() {
           setDetail(null);
           openChat(lesson);
         }}
-        onJoin={joinLesson}
+        // Mobilda jadval stekda qoladi — qaytganda eski oyna ochiq turmasin.
+        onJoin={(lesson) => {
+          setDetail(null);
+          joinLesson(lesson);
+        }}
         student={student}
         teacherName={detail ? courseLook(detail.courseId).teacher : ""}
         onRemind={() => toast.info(t("schedule.soon"))}
-        onRecording={(lesson) => router.push(ROUTES.recording(lesson.id) as never)}
+        onRecording={(lesson) => {
+          setDetail(null);
+          router.push(ROUTES.recording(lesson.id) as never);
+        }}
         onRate={(lesson) => {
           setDetail(null);
           setRateTarget(lesson);

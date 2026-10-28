@@ -72,8 +72,12 @@ export function MobileFieldLabel({ label, aside, gap = 8, children }: { label: R
 }
 
 export interface MobilePickerFieldProps {
-  /** `select` — variantlar ro'yxati; `date`/`time` — kalendar va soat oynalari. */
-  type: "select" | "date" | "time";
+  /**
+   * `select` — variantlar ro'yxati; `date`/`time` — kalendar va soat oynalari;
+   * `datetime` — avval kalendar, keyin soat (`YYYY-MM-DDTHH:mm`, vebdagi
+   * `datetime-local`). Kalendarda "Tozalash" bo'sh qiymat qaytaradi.
+   */
+  type: "select" | "date" | "time" | "datetime";
   value: string;
   display: ReactNode;
   /** Qiymat tanlanmagan — matn `text-ink-secondary`. */
@@ -112,6 +116,8 @@ export function MobilePickerField({
 }: MobilePickerFieldProps) {
   const ds = useDs();
   const [open, setOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [pendingDate, setPendingDate] = useState("");
   return (
     <>
       <Pressable
@@ -120,7 +126,7 @@ export function MobilePickerField({
         onPress={() => setOpen(true)}
         style={[
           styles.picker,
-          { backgroundColor: surface ? ds.c.surface : ds.c.subtle, borderColor: invalid ? ds.c["error-text"] : open ? ds.c.focus : "transparent" },
+          { backgroundColor: surface ? ds.c.surface : ds.c.subtle, borderColor: invalid ? ds.c["error-text"] : open || timeOpen ? ds.c.focus : "transparent" },
         ]}
       >
         <DsText c={placeholder ? "ink-secondary" : "ink"} numberOfLines={1} style={styles.grow}>
@@ -130,6 +136,27 @@ export function MobilePickerField({
       </Pressable>
       {type === "date" ? <MobileDateSheet open={open} onOpenChange={setOpen} value={value} min={min} onChange={onChange} /> : null}
       {type === "time" ? <MobileTimeSheet open={open} onOpenChange={setOpen} value={value} duration={duration} onChange={onChange} /> : null}
+      {type === "datetime" ? (
+        <>
+          <MobileDateSheet
+            open={open}
+            onOpenChange={setOpen}
+            value={value.slice(0, 10)}
+            min={min}
+            clearable
+            onChange={(date) => {
+              if (!date) {
+                onChange("");
+                return;
+              }
+              setPendingDate(date);
+              // Kalendar oynasi yopilib bo'lgach soat oynasi ochiladi (ikki Modal bir vaqtda ochilmasin).
+              setTimeout(() => setTimeOpen(true), 350);
+            }}
+          />
+          <MobileTimeSheet open={timeOpen} onOpenChange={setTimeOpen} value={value.slice(11, 16) || "18:00"} onChange={(time) => onChange(`${pendingDate}T${time}`)} />
+        </>
+      ) : null}
       <Sheet variant="app" open={type === "select" && open} onClose={() => setOpen(false)} title={sheetTitle ?? ariaLabel}>
         <View style={[styles.options, { backgroundColor: ds.c.subtle }]}>
           {options.map((option, index) => {

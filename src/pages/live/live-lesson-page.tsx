@@ -154,15 +154,13 @@ export function LiveLessonPage() {
     const current = lesson.data;
     return (
       <LiveRoomState
-        lessonTitle={current.title}
-        subtitle={`${current.courseTitle} · ${current.date} · ${current.time}`}
-        title={t("state.joinFailedTitle")}
-        description={finished ? t("state.joinFailedFinished", { title: current.title, time: current.time }) : token.error?.message}
-        actionLabel={t("state.backToChat")}
-        onAction={handleLeave}
-        secondaryLabel={finished ? t("state.openRecording") : t("state.retry")}
-        onSecondary={finished ? () => router.replace(ROUTES.recording(current.id) as never) : () => void token.refetch()}
-        onBack={handleLeave}
+        tone="offline"
+        title={finished ? t("state.joinFailedTitle") : t("state.mobileJoinFailedTitle")}
+        description={finished ? t("state.joinFailedFinished", { title: current.title, time: current.time }) : t("state.mobileJoinFailedDescription")}
+        actionLabel={finished ? t("state.openRecording") : t("state.retry")}
+        onAction={finished ? () => router.replace(ROUTES.recording(current.id) as never) : () => void token.refetch()}
+        secondaryLabel={t("state.mobileBackToChat")}
+        onSecondary={handleLeave}
       />
     );
   }

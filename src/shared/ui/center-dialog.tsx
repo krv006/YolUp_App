@@ -84,8 +84,10 @@ export function ConfirmDialog({
     onCancel?.();
   }
 
+  // Fon yoki "orqaga" — faqat yopish (vebdagi `onOpenChange(false)`); `onCancel`
+  // faqat pastdagi tugmada (masalan "Faqat chiqish" darsdan chiqaradi).
   return (
-    <CenterDialogShell open={open} onClose={cancel} maxWidth={330}>
+    <CenterDialogShell open={open} onClose={() => onOpenChange(false)} maxWidth={330}>
       <View style={styles.confirm}>
         <View style={[styles.confirmIcon, { backgroundColor: danger ? ds.c["danger-bg"] : ds.c["brand-subtle"] }]}>
           <Icon name={icon} size={24} color={danger ? ds.c["error-text"] : ds.c.brand} />

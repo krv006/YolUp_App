@@ -186,7 +186,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         <LiveLessonBar lesson={liveLesson} onJoin={() => router.push(`/live/${liveLesson.id}` as never)} />
       ) : null}
 
-      {group ? <VoiceRoomBar courseId={courseId} hideIdle /> : null}
+      {group ? <VoiceRoomBar courseId={courseId} courseTitle={conversation.title} hideIdle /> : null}
       {group ? <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} compact={selectionMode} /> : null}
 
       {group && tab === "chat" && !selectionMode ? (

@@ -21,6 +21,8 @@ import { radius } from "./tokens";
 import { useTheme } from "./theme";
 import { Text } from "./text";
 import { IconButton } from "./misc";
+import { DsText, dsRadius, useDs } from "./ds";
+import { Icon } from "./icon";
 
 export interface SheetProps {
   open: boolean;
@@ -28,6 +30,13 @@ export interface SheetProps {
   title: string;
   description?: string;
   children: ReactNode;
+  /**
+   * `app` — yangi dizayndagi pastki oyna (veb `AppDialog` sheet): 24px
+   * burchak, ingichka tutqich, `text-h2` sarlavha, 44px yopish tugmasi.
+   */
+  variant?: "classic" | "app";
+  /** Faqat `app`: aylanmaydigan pastki tugmalar qatori (`px-4 pt-6 gap-3`). */
+  footer?: ReactNode;
 }
 
 /** Shu masofadan ko'p sudralsa yopiladi. */
@@ -76,9 +85,11 @@ const CLOSE_VELOCITY = 900;
  * │ dastlab qo'l bilan surilmagan edi.                                   │
  * └─────────────────────────────────────────────────────────────────────┘
  */
-export function Sheet({ open, onClose, title, description, children }: SheetProps) {
+export function Sheet({ open, onClose, title, description, children, variant = "classic", footer }: SheetProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
+  const ds = useDs();
+  const app = variant === "app";
   const insets = useSafeAreaInsets();
 
   const translateY = useSharedValue(0);
@@ -181,7 +192,7 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t("shared.yopish")}
-            style={[StyleSheet.absoluteFill, { backgroundColor: palette.overlay }]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: app ? ds.c.scrim : palette.overlay }]}
             onPress={onClose}
           />
         </Animated.View>
@@ -190,16 +201,40 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
           <Animated.View
             style={[
               styles.sheet,
-              {
-                backgroundColor: palette["surface-elevated"],
-                borderColor: palette.border,
-                paddingBottom: insets.bottom + 16,
-              },
+              app
+                ? [styles.appSheet, { backgroundColor: ds.c.surface, paddingBottom: footer ? 0 : insets.bottom + 16 }]
+                : {
+                    backgroundColor: palette["surface-elevated"],
+                    borderColor: palette.border,
+                    paddingBottom: insets.bottom + 16,
+                  },
               sheetStyle,
             ]}
           >
-            <View style={[styles.grabber, { backgroundColor: palette["border-strong"] }]} />
+            <View style={app ? [styles.appGrabber, { backgroundColor: ds.c.line }] : [styles.grabber, { backgroundColor: palette["border-strong"] }]} />
 
+            {app ? (
+              <View style={styles.appHead}>
+                <View style={styles.appTitle}>
+                  <DsText v="h2" w="600" style={styles.appTitleText}>
+                    {title}
+                  </DsText>
+                  {description ? (
+                    <DsText v="body-sm" c="ink-secondary">
+                      {description}
+                    </DsText>
+                  ) : null}
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("shared.yopish")}
+                  onPress={onClose}
+                  style={({ pressed }) => [styles.appClose, { backgroundColor: pressed ? ds.c.muted : ds.c.subtle }]}
+                >
+                  <Icon name="close" size={18} color={ds.c.ink} />
+                </Pressable>
+              </View>
+            ) : (
             <View style={styles.head}>
               <View style={styles.headBody}>
                 <Text variant="subheading">{title}</Text>
@@ -213,6 +248,7 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
                 <X size={20} color={palette["muted-foreground"]} />
               </IconButton>
             </View>
+            )}
 
             <GestureDetector gesture={scrollGesture}>
               <Animated.ScrollView
@@ -221,11 +257,14 @@ export function Sheet({ open, onClose, title, description, children }: SheetProp
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode="interactive"
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.body}
+                contentContainerStyle={app ? styles.appBody : styles.body}
               >
                 {children}
               </Animated.ScrollView>
             </GestureDetector>
+            {app && footer ? (
+              <View style={[styles.appFooter, { paddingBottom: Math.max(16, insets.bottom + 8) }]}>{footer}</View>
+            ) : null}
           </Animated.View>
         </GestureDetector>
         </KeyboardAvoidingView>
@@ -250,4 +289,17 @@ const styles = StyleSheet.create({
   head: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 16, gap: 8 },
   headBody: { flex: 1, gap: 2, paddingTop: 6 },
   body: { padding: 16, gap: 14 },
+  /* Veb `AppDialog` sheet: `rounded-t-2xl bg-surface` */
+  appSheet: { borderTopLeftRadius: dsRadius["2xl"], borderTopRightRadius: dsRadius["2xl"], borderWidth: 0, paddingTop: 0 },
+  /* `mx-auto mt-2 mb-px h-[5px] w-10 rounded-full bg-line` */
+  appGrabber: { alignSelf: "center", width: 40, height: 5, borderRadius: dsRadius.full, marginTop: 8, marginBottom: 1 },
+  /* `items-center gap-3 px-4 pt-4` */
+  appHead: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 16 },
+  appTitle: { flex: 1, minWidth: 0, gap: 2 },
+  appTitleText: { lineHeight: 24 },
+  appClose: { width: 44, height: 44, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
+  /* `-mx-1 gap-4 px-5 pt-4.5 pb-1` */
+  appBody: { gap: 16, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 4 },
+  /* `items-center gap-3 px-4 pt-6 pb-[max(16px,safe)]` */
+  appFooter: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 24 },
 });

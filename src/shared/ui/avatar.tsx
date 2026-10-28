@@ -24,6 +24,8 @@ export interface AvatarProps {
    * ro'yxatida ishlatiladi; qolgan joylarda yangi (tekis) avatar.
    */
   variant?: "default" | "legacy";
+  /** Aniq o'lcham (px) — vebdagi `[&_.avatar]:size-12` kabi; harf o'lchami `size` dan. */
+  box?: number;
 }
 
 const LEGACY_SIZES: Partial<Record<AvatarSize, { box: number; font: number }>> = {
@@ -60,12 +62,13 @@ function normalizeTone(tone: string | undefined): AvatarTone {
   return TONES.includes(tone as AvatarTone) ? (tone as AvatarTone) : "violet";
 }
 
-export function Avatar({ name, tone, size = "md", status, src, style, variant = "default" }: AvatarProps) {
+export function Avatar({ name, tone, size = "md", status, src, style, variant = "default", box }: AvatarProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   // Eski avatar o'lchamlari: sm 36/13, md 43/15, lg 50/16 (`.avatar--*`).
-  const metrics =
+  const base =
     variant === "legacy" && LEGACY_SIZES[size] ? { ...SIZES[size], ...LEGACY_SIZES[size] } : SIZES[size];
+  const metrics = box ? { ...base, box } : base;
   const resolved = normalizeTone(tone);
   const legacy = variant === "legacy";
 

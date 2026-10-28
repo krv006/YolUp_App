@@ -1,349 +1,260 @@
-import { useMemo, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
-import { FlashList } from "@shopify/flash-list";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Plus } from "lucide-react-native";
-import { useAuth } from "@/modules/auth";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRoleRoutes } from "@/modules/auth";
+import { useNewConversationStore } from "@/modules/conversation";
 import {
-  matchesConversationFilter,
-  useConversationFilter,
-  useConversations,
-  type ConversationFilter,
-} from "@/modules/conversation";
-import { ConversationItem } from "@/modules/conversation/ui/conversation-item";
-import { useLiveLessons } from "@/modules/lesson";
-import { NotificationBell } from "@/modules/notification";
-import { NewGroupSheet } from "@/modules/conversation/ui/new-group-sheet";
-import { StudentEnrollmentSheet } from "@/modules/student";
+  ConversationActionsSheet,
+  type ConversationActionsFocus,
+} from "@/modules/conversation/ui/conversation-actions-sheet";
 import type { Conversation, ConversationRole } from "@/shared/types";
 import {
-  AppBar,
-  Chip,
-  ChipRow,
+  Avatar,
+  DsGradient,
+  DsText,
+  dsRadius,
+  Icon,
+  MobileEmptyCard,
+  MobileRoundButton,
+  MobileSearchField,
+  MobileSegment,
+  MobileTitleHeader,
   PullRefresh,
-  Screen,
-  ScreenEmpty,
-  ScreenError,
-  SearchField,
-  Skeleton,
-  Text,
-  useTheme,
+  useDs,
 } from "@/shared/ui";
+import { ConversationRowBody } from "@/widgets/chat-shell/conversation-row";
+import { CONVERSATION_FILTERS, useConversationList } from "@/widgets/chat-shell/use-conversation-list";
+
+/** Uzoq bosish — vebdagi `LONG_PRESS_MS`. */
+const LONG_PRESS_MS = 450;
 
 /**
- * Suhbatlar ro'yxati — veb `widgets/conversation-panel` ning mobil varianti.
- *
- * Veb'da bu ustun chat oynasi bilan YONMA-YON turardi. Mobilda ular stack:
- * ro'yxatdan suhbatga o'tiladi, orqaga surish bilan qaytiladi (§6.3).
+ * Suhbatlar ro'yxati (M6.1–6.9) — veb `widgets/chat-shell/mobile-conversation-list.tsx`:
+ * holat sarlavhasi (o'qilmaganlar soni / "Hammasi o'qilgan" / aloqa uzildi),
+ * "+" (yangi guruh), qidiruv, filtrlar, qidiruvda "Odamlar" bo'limi, bo'sh va
+ * xato holatlari. Uzoq bosilganda qator joyida ko'tariladi va amallar
+ * menyusi ochiladi.
  */
-
-/*
- * Yorliqlar KALIT bilan — ro'yxat modul darajasida, hook chaqirib
- * bo'lmaydi. Uchtasi vebning `chat` lug'atidan (`panel.filters.*`),
- * "Guruhlar" esa u yerda yo'q, shuning uchun `mobile` bo'limida.
- */
-const FILTERS: readonly { id: ConversationFilter; labelKey: string; ns: "chat" | "mobile" }[] = [
-  { id: "all", labelKey: "panel.filters.all", ns: "chat" },
-  { id: "direct", labelKey: "panel.filters.direct", ns: "chat" },
-  { id: "group", labelKey: "chats.guruhlar", ns: "mobile" },
-  { id: "unread", labelKey: "panel.filters.unread", ns: "chat" },
-];
-
-export function ChatsPage({ role }: { role: ConversationRole }) {
-  const { t } = useTranslation("mobile");
-  const { t: tc } = useTranslation("chat");
+export function ChatsPage(_props: { role: ConversationRole }) {
+  const { t } = useTranslation("chat");
+  const ds = useDs();
   const router = useRouter();
-  const { palette } = useTheme();
-  const { user } = useAuth();
-  const { filter, setFilter } = useConversationFilter();
-  const [search, setSearch] = useState("");
-  const [enrollOpen, setEnrollOpen] = useState(false);
+  const insets = useSafeAreaInsets();
+  const routes = useRoleRoutes();
+  const openNewConversation = useNewConversationStore((state) => state.setOpen);
+  const { data, isLoading, isError, refetch, filter, setFilter, search, setSearch, query, visible, peopleRows, unreadTotal } =
+    useConversationList();
+  const [actionsFor, setActionsFor] = useState<Conversation | null>(null);
+  const [focus, setFocus] = useState<ConversationActionsFocus | null>(null);
+  const rows = useRef(new Map<string, View | null>());
 
-  const { data = [], isLoading, isError, error, refetch } = useConversations(role);
+  const fresh = !isLoading && !isError && data.length === 0;
+  const subtitle = isError
+    ? t("panel.connectionLost")
+    : fresh
+      ? t("panel.freshStart")
+      : unreadTotal
+        ? t("panel.unreadCount", { count: unreadTotal })
+        : t("panel.allRead");
 
-  /**
-   * Qaysi guruhda dars ketyapti. Dars kurs bilan bog'langan, chat ham —
-   * bog'lovchi kalit `courseId` (veb `conversation-panel` bilan bir xil).
-   */
-  const liveLessons = useLiveLessons(Boolean(user)).data;
-  const liveCourses = useMemo(
-    () => new Set((liveLessons ?? []).map((lesson) => lesson.courseId)),
-    [liveLessons]
-  );
-
-  const visible = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return data.filter((item) => {
-      const matchesSearch =
-        !query || `${item.title} ${item.lastMessage}`.toLowerCase().includes(query);
-      return matchesSearch && matchesConversationFilter(item, filter);
+  function openActions(conversation: Conversation) {
+    rows.current.get(conversation.id)?.measureInWindow((_x, y, width, height) => {
+      setActionsFor(conversation);
+      setFocus({
+        rect: { top: y, left: 16, width: width, height },
+        content: <ConversationRowBody conversation={conversation} />,
+      });
     });
-  }, [data, search, filter]);
-
-  const basePath = role === "teacher" ? "/teacher/chats" : "/student/chats";
-  /*
-   * FAB ikkala rolda ham bor, lekin BOSHQA ish qiladi:
-   *   o'quvchi  — kursga qo'shilish, o'qituvchiga so'rov (shaxsiy suhbatni
-   *               faqat o'quvchi boshlay oladi — backend qoidasi)
-   *   o'qituvchi — yangi kurs va guruh chat yaratish + yozilish so'rovlari
-   */
-  const isStudent = role === "student";
-
-  function openConversation(id: string) {
-    router.push(`${basePath}/${id}`);
   }
 
   return (
-    <Screen padded={false}>
-      <AppBar a11yTitle={t("chats.suhbatlar")}>
-        <NotificationBell />
-      </AppBar>
-
-      <View style={[styles.body, { backgroundColor: palette.surface }]}>
-        {/*
-         * Qidiruv DOIM ko'rinadi — vebdagi kabi. Ilgari u sarlavha
-         * yonidagi ikonka ortida yashiringan edi.
-         */}
-        <SearchField
-          value={search}
-          onChangeText={setSearch}
-          placeholder={t("chats.suhbat_qidirish")}
-        />
-
-        <ChipRow>
-          {FILTERS.map(({ id, labelKey, ns }) => (
-            <Chip
-              key={id}
-              label={ns === "chat" ? tc(labelKey) : t(labelKey)}
-              selected={filter === id}
-              onPress={() => setFilter(id)}
-            />
-          ))}
-        </ChipRow>
-
-        <ChatsList
-          conversations={visible}
-          liveCourses={liveCourses}
-          isLoading={isLoading}
-          isError={isError}
-          errorMessage={error instanceof Error ? error.message : undefined}
-          onRefresh={() => refetch()}
-          onOpen={openConversation}
-          hasFilter={Boolean(search.trim()) || filter !== "all"}
-        />
-      </View>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={
-          isStudent
-            ? "Yangi muloqot: kursga qo'shilish yoki o'qituvchiga yozish"
-            : "Yangi kurs va guruh chat yaratish"
-        }
-        onPress={() => setEnrollOpen(true)}
-        style={({ pressed }) => [
-          styles.fab,
-          { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
-        ]}
+    <View style={[styles.fill, { backgroundColor: ds.c.canvas }]}>
+      <ScrollView
+        style={styles.fill}
+        contentContainerStyle={[styles.page, { paddingTop: insets.top + 22 }]}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={<PullRefresh onRefresh={() => refetch()} />}
+        accessibilityLabel={t("panel.listAria")}
       >
-        <Plus size={24} color={palette["primary-foreground"]} />
-      </Pressable>
+        <DsGradient name="auth" />
+        <MobileTitleHeader
+          eyebrow={subtitle}
+          title={t("panel.title")}
+          action={<MobileRoundButton icon="add" iconSize={24} label={t("panel.newGroup")} onPress={() => openNewConversation(true)} />}
+        />
 
-      {isStudent ? (
-        <StudentEnrollmentSheet open={enrollOpen} onClose={() => setEnrollOpen(false)} />
-      ) : (
-        <NewGroupSheet open={enrollOpen} onClose={() => setEnrollOpen(false)} />
-      )}
-    </Screen>
-  );
-}
-
-interface ChatsListProps {
-  conversations: Conversation[];
-  liveCourses: Set<string | null>;
-  isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
-  onRefresh: () => unknown;
-  onOpen: (id: string) => void;
-  hasFilter: boolean;
-}
-
-/** Uch holat (loading / error / empty) ATAYLAB bitta joyda — §18.12. */
-function ChatsList({
-  conversations,
-  liveCourses,
-  isLoading,
-  isError,
-  errorMessage,
-  onRefresh,
-  onOpen,
-  hasFilter,
-}: ChatsListProps) {
-  const { t } = useTranslation("mobile");
-  // Guruh sarlavhalari veb bilan BIR XIL kalitdan: `chat:panel.groups.*`.
-  const { t: tc } = useTranslation("chat");
-
-  if (isLoading) return <ChatsSkeleton />;
-
-  if (isError) {
-    return (
-      <ScreenError message={errorMessage ?? "Suhbatlarni yuklab bo'lmadi"} onRetry={onRefresh} />
-    );
-  }
-
-  if (conversations.length === 0) {
-    return hasFilter ? (
-      <ScreenEmpty
-        title={t("chats.hech_narsa_topilmadi")}
-        description={t("chats.qidiruv_yoki_filtrni_ozgartiring")}
-      />
-    ) : (
-      <ScreenEmpty
-        title={t("chats.suhbatlar_yoq")}
-        description={t("chats.kursga_yozilganingizdan_keyin_guruh_chatlari")}
-      />
-    );
-  }
-
-  return (
-    // FlashList v2 qator balandligini o'zi o'lchaydi — `estimatedItemSize`
-    // kerak emas (v1 da majburiy edi).
-    <FlashList
-      data={toRows(conversations)}
-      keyExtractor={(row) => (row.kind === "header" ? `h-${row.key}` : row.conversation.id)}
-      refreshControl={
-        <PullRefresh onRefresh={onRefresh} />
-      }
-      renderItem={({ item: row }) =>
-        row.kind === "header" ? (
-          <Text variant="label" tone="muted" style={styles.groupHeader}>
-            {tc(`panel.groups.${row.key}`)}
-          </Text>
-        ) : (
-          <View style={styles.groupItem}>
-            <ConversationItem
-              conversation={row.conversation}
-              onPress={onOpen}
-              live={Boolean(
-                row.conversation.courseId && liveCourses.has(row.conversation.courseId)
-              )}
+        {fresh ? (
+          <View style={styles.firstBlock}>
+            <MobileEmptyCard
+              icon="chat"
+              iconColor="ink"
+              title={t("panel.noChatsTitle")}
+              description={t("panel.noChatsTeacherHint")}
+              action={{ label: t("panel.createGroup"), icon: "add", onPress: () => openNewConversation(true) }}
             />
           </View>
-        )
-      }
-    />
-  );
-}
+        ) : (
+          <>
+            <MobileSearchField
+              style={styles.firstBlock}
+              value={search}
+              onChange={setSearch}
+              placeholder={t("panel.searchPlaceholder")}
+              ariaLabel={t("panel.searchAria")}
+              clearLabel={t("panel.closeSearchAria")}
+            />
 
-type GroupKey = "today" | "yesterday" | "earlier";
+            {query ? (
+              <DsText style={styles.block}>{t("panel.resultCount", { count: visible.length + peopleRows.length })}</DsText>
+            ) : (
+              <View style={styles.block}>
+                <MobileSegment
+                  scroll
+                  items={CONVERSATION_FILTERS.map((id) => ({ id, label: t(`panel.filters.${id}`) }))}
+                  value={filter}
+                  onChange={setFilter}
+                />
+              </View>
+            )}
 
-/**
- * Suhbat qaysi sana guruhiga tushishi — veb `conversation-panel.tsx`
- * dagi `groupKeyOf` ning porti (chegaralar bayt-bayt bir xil).
- */
-function groupKeyOf(value: string): GroupKey {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "earlier";
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  if (date.getTime() >= start.getTime()) return "today";
-  if (date.getTime() >= start.getTime() - 86_400_000) return "yesterday";
-  return "earlier";
-}
+            {isLoading ? (
+              <View style={[styles.card, styles.block, { backgroundColor: ds.c.surface }]}>
+                {Array.from({ length: 6 }, (_, index) => (
+                  <View key={index} style={[styles.skeletonRow, index < 5 && { borderBottomWidth: 1, borderBottomColor: ds.c.line }]}>
+                    <View style={[styles.skeletonAvatar, { backgroundColor: ds.c.subtle }]} />
+                    <View style={styles.skeletonLines}>
+                      <View style={[styles.skeletonLine, { width: 128, backgroundColor: ds.c.subtle }]} />
+                      <View style={[styles.skeletonLine, { width: 192, backgroundColor: ds.c.subtle }]} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : null}
 
-/** Sarlavha va suhbatlar bitta tekis ro'yxatda — FlashList bo'lim bilmaydi. */
-type Row =
-  | { kind: "header"; key: GroupKey }
-  | { kind: "item"; conversation: Conversation };
+            {isError ? (
+              <View style={styles.block}>
+                <MobileEmptyCard
+                  icon="wifi"
+                  title={t("panel.loadError")}
+                  description={t("panel.loadErrorHint")}
+                  action={{ label: t("panel.retry"), icon: "refresh", onPress: () => void refetch() }}
+                />
+              </View>
+            ) : null}
 
-/**
- * Suhbatlarni sana guruhlariga ajratib, tekis ro'yxatga yoyadi.
- *
- * Vebda ro'yxat "Bugun / Kecha / Avvalgi" sarlavhalari bilan bo'linadi;
- * mobilda bu umuman yo'q edi.
- */
-function toRows(conversations: readonly Conversation[]): Row[] {
-  const buckets: { key: GroupKey; items: Conversation[] }[] = [
-    { key: "today", items: [] },
-    { key: "yesterday", items: [] },
-    { key: "earlier", items: [] },
-  ];
-  for (const item of conversations) {
-    buckets.find((entry) => entry.key === groupKeyOf(item.updatedAt))?.items.push(item);
-  }
-  return buckets
-    .filter((entry) => entry.items.length > 0)
-    .flatMap<Row>((entry) => [
-      { kind: "header", key: entry.key },
-      ...entry.items.map((conversation) => ({ kind: "item" as const, conversation })),
-    ]);
-}
+            {!isLoading && !isError && !visible.length && !peopleRows.length ? (
+              <View style={styles.block}>
+                <MobileEmptyCard
+                  icon="search"
+                  title={t("panel.emptyTitle")}
+                  description={t("panel.emptyHint")}
+                  action={{
+                    label: t("panel.clearFilters"),
+                    onPress: () => {
+                      setFilter("all");
+                      setSearch("");
+                    },
+                  }}
+                />
+              </View>
+            ) : null}
 
-function ChatsSkeleton() {
-  return (
-    <View style={styles.skeleton}>
-      {Array.from({ length: 8 }, (_, index) => (
-        <View key={index} style={styles.skeletonRow}>
-          <Skeleton width={46} height={46} style={styles.skeletonAvatar} />
-          <View style={styles.skeletonBody}>
-            <Skeleton width="55%" />
-            <Skeleton width="80%" height={11} />
-          </View>
-        </View>
-      ))}
+            {!isLoading && !isError && visible.length ? (
+              <View style={[styles.card, styles.list, query ? styles.listAfterCount : styles.block, { backgroundColor: ds.c.surface }]}>
+                {visible.map((conversation, index) => (
+                  <Fragment key={conversation.id}>
+                    {index > 0 ? <View style={[styles.divider, { backgroundColor: ds.c.line }]} /> : null}
+                    <Pressable
+                      ref={(node) => {
+                        rows.current.set(conversation.id, node);
+                      }}
+                      accessibilityRole="button"
+                      delayLongPress={LONG_PRESS_MS}
+                      onLongPress={() => openActions(conversation)}
+                      onPress={() => router.push(routes.chat(conversation.id) as never)}
+                      style={({ pressed }) => [styles.row, pressed && { backgroundColor: ds.c.subtle }]}
+                    >
+                      <ConversationRowBody conversation={conversation} />
+                    </Pressable>
+                  </Fragment>
+                ))}
+              </View>
+            ) : null}
+
+            {query && peopleRows.length ? (
+              <>
+                <DsText style={styles.peopleTitle}>{t("panel.peopleSection")}</DsText>
+                <View style={[styles.card, styles.people, { backgroundColor: ds.c.surface }]}>
+                  {peopleRows.map((person, index) => (
+                    <Pressable
+                      key={person.id}
+                      accessibilityRole="button"
+                      onPress={() => {
+                        if (person.roomId) {
+                          router.push(routes.chat(person.roomId) as never);
+                          setSearch("");
+                        }
+                      }}
+                      style={({ pressed }) => [
+                        styles.person,
+                        index < peopleRows.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line },
+                        pressed && { backgroundColor: ds.c.subtle },
+                      ]}
+                    >
+                      <Avatar variant="legacy" name={person.name} src={person.avatar} size="sm" box={48} />
+                      <View style={styles.grow}>
+                        <DsText v="title" numberOfLines={1}>
+                          {person.name}
+                        </DsText>
+                        <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
+                          @{person.username}
+                        </DsText>
+                      </View>
+                      <Icon name="more" size={22} color={ds.c["ink-secondary"]} />
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            ) : null}
+          </>
+        )}
+      </ScrollView>
+
+      <ConversationActionsSheet
+        conversation={actionsFor}
+        focus={focus}
+        onClose={() => {
+          setActionsFor(null);
+          setFocus(null);
+        }}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  /*
-   * Veb DOM'idan: bo'lim OQ fonda, bo'shlig'i 20, elementlar orasi 16.
-   * Sahifa foni (`--bg-canvas`) faqat tepa panelda qoladi.
-   */
-  body: { flex: 1, paddingHorizontal: 20, paddingTop: 20, gap: 16 },
-  /*
-   * Kartochkalar ORASIDA bo'shliq — vebdagi bo'limning `gap: 16`.
-   * Ilgari bu yerda ajratgich chiziq turardi; suhbatlar alohida
-   * kartochka bo'lgach u ortiqcha.
-   */
-  /*
-   * Veb: guruh sarlavhasi `px-1 pt-2` (chapda 4, tepada 8), guruh ichida
-   * elementlar orasi `gap-2` (8). Ilgari mobilda guruhlar umuman yo'q edi
-   * va qatorlar orasida ajratgich chiziq turardi.
-   */
-  groupHeader: { paddingLeft: 4, paddingTop: 8, paddingBottom: 8 },
-  groupItem: { paddingBottom: 8 },
-  header: { borderBottomWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
-  titleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, gap: 8 },
-  title: { flex: 1 },
-  searchRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12, gap: 4 },
-  // Qo'ng'iroq ustidagi hisoblagich — tugma maydonini o'zgartirmasligi kerak.
-  /*
-   * Nishon tugma doirasidan TASHQARIDA turadi. Ilgari u doira ichida
-   * edi va qo'ng'iroq ikonkasini bosib qolardi. Vebda bu yerda nishon
-   * umuman yo'q, lekin o'qilmagan sonni yo'qotmaslik uchun qoldirildi.
-   */
-  searchInput: { flex: 1 },
-  // Suzuvchi tugma ro'yxat USTIDA — pastdagi tab paneli ustida turadi.
-  fab: {
-    position: "absolute",
-    right: 18,
-    bottom: 22,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-    elevation: 4,
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  skeleton: { paddingTop: 8 },
-  skeletonRow: { flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  skeletonAvatar: { borderRadius: 23 },
-  skeletonBody: { flex: 1, gap: 8, justifyContent: "center" },
+  fill: { flex: 1 },
+  grow: { flex: 1, minWidth: 0 },
+  /* `px-4 pt-5.5 pb-32` — pastda suzuvchi panelga joy */
+  page: { paddingHorizontal: 16, paddingBottom: 128 },
+  /* `mt-5.5` */
+  firstBlock: { marginTop: 22 },
+  block: { marginTop: 20 },
+  card: { overflow: "hidden", borderRadius: dsRadius.xl },
+  /* `py-1` */
+  list: { paddingVertical: 4 },
+  listAfterCount: { marginTop: 10 },
+  divider: { height: 1 },
+  /* `px-4 py-3 gap-3` */
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  peopleTitle: { marginTop: 24 },
+  people: { marginTop: 12 },
+  /* `px-4 py-4 gap-3` */
+  person: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 16 },
+  skeletonRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  skeletonAvatar: { width: 48, height: 48, borderRadius: dsRadius.xl },
+  skeletonLines: { flex: 1, minWidth: 0, gap: 10 },
+  skeletonLine: { height: 12, maxWidth: "100%", borderRadius: dsRadius.full },
 });

@@ -1,6 +1,6 @@
-import { Redirect } from "expo-router";
+import { TeacherDashboardPage } from "@/pages/dashboard/teacher-dashboard-page";
 
-/** Veb'dagi kabi: bosh sahifa suhbatlarga yo'naltiradi (app-router.tsx). */
+/** O'qituvchining bosh sahifasi — veb `/teacher/dashboard` (M5). */
 export default function TeacherDashboardRoute() {
-  return <Redirect href="/teacher/chats" />;
+  return <TeacherDashboardPage />;
 }

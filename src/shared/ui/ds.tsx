@@ -45,6 +45,23 @@ export function useDs(): Ds {
   );
 }
 
+/**
+ * Vebdagi rang klasslari satri (`"bg-accent-saffron-bg text-accent-saffron-fg"`)
+ * -> `{ bg, fg }`. Domen qatlamidagi ohanglar (masalan `NOTIFICATION_TONES`)
+ * vebda Tailwind klass sifatida yozilgan — ular o'zgartirilmasdan shu
+ * yerda tokenga aylantiriladi.
+ */
+export function toneColors(className: string, ds: Ds): { bg?: string; fg?: string } {
+  const out: { bg?: string; fg?: string } = {};
+  for (const part of className.split(/\s+/)) {
+    const bg = /^bg-(.+)$/.exec(part)?.[1];
+    const fg = /^text-(.+)$/.exec(part)?.[1];
+    if (bg && bg in ds.c) out.bg = ds.c[bg as DsColor];
+    if (fg && fg in ds.c) out.fg = ds.c[fg as DsColor];
+  }
+  return out;
+}
+
 export interface DsTextProps extends Omit<TextProps, "variant" | "tone"> {
   /** Matn uslubi — vebdagi `text-*` (`body-sm`, `title`, `h1`...). */
   v?: DsType;

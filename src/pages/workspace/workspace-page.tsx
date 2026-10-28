@@ -17,7 +17,7 @@ import { useAuth } from "@/modules/auth";
 import { useCourses } from "@/modules/course";
 import { ROLES } from "@/shared/constants";
 import { useMemo, useState } from "react";
-import { InviteStudentsSheet, NewGroupSheet } from "@/modules/conversation";
+import { InviteStudentsSheet, useNewConversationStore } from "@/modules/conversation";
 import { useLessons } from "@/modules/lesson";
 import { AppBar, AppBarAction, Icon, radius, Screen, Text, useTheme, type IconName } from "@/shared/ui";
 import { NotificationBell } from "@/modules/notification";
@@ -120,7 +120,7 @@ export function WorkspacePage() {
   const rolePrefix = `/${role}`;
   const isStudent = role === "student";
   const [inviteFor, setInviteFor] = useState<string | null>(null);
-  const [newGroupOpen, setNewGroupOpen] = useState(false);
+  const setNewGroupOpen = useNewConversationStore((state) => state.setOpen);
   const lessons = useLessons({ page_size: 200 }, role === "teacher");
   const monthNames = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
 
@@ -361,7 +361,6 @@ export function WorkspacePage() {
       </View>
 
       <InviteStudentsSheet open={Boolean(inviteFor)} onClose={() => setInviteFor(null)} title={inviteFor ?? ""} />
-      <NewGroupSheet open={newGroupOpen} onClose={() => setNewGroupOpen(false)} />
     </Screen>
   );
 }

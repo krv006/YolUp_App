@@ -262,7 +262,8 @@ const styles = StyleSheet.create({
   form: { gap: 12 },
   /* `rounded-full bg-subtle p-1 gap-1`; tugma `h-11 rounded-full`, faoli `bg-surface shadow-sm` */
   roles: { flexDirection: "row", gap: 4, padding: 4, borderRadius: dsRadius.full },
-  role: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: dsRadius.full },
+  // Radius 22 (999 emas) — Android `boxShadow` ni 999 bilan pill shakliga kesmaydi.
+  role: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
   pair: { flexDirection: "row", gap: 12 },
   done: { alignItems: "center", gap: 16 },
   doneIcon: { width: 80, height: 80, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },

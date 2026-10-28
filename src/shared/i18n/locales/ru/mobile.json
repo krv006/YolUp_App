@@ -107,7 +107,6 @@
     "javob_berish": "Ответить",
     "nusxalash": "Копировать",
     "nusxalandi": "Скопировано",
-    "faylni_ochib_bolmadi": "Не удалось открыть файл",
     "qayta_yuborish": "Отправить снова",
     "javobni_bekor_qilish": "Отменить ответ",
     "xabar_yozing": "Напишите сообщение…",
@@ -597,11 +596,6 @@
     "ball_0_100": "Балл должен быть от 0 до 100"
   },
   "app": {
-    "sahifa_topilmadi": "Страница не найдена",
-    "havola_eskirgan_yoki_notogri_bolishi_mumkin": "Ссылка может быть устаревшей или неверной.",
-    "bosh_sahifaga_qaytish": "На главную",
-    "bu_bolimga_ruxsat_yoq": "Нет доступа к этому разделу",
-    "hisobingiz_ushbu_sahifani_korish_huquqiga_eg": "У вашего аккаунта нет прав на просмотр этой страницы.",
     "sessiya_tekshirilmoqda": "Проверка сессии…",
     "ai_yordamchi": "ИИ-помощник",
     "bu_bolim_faza_3_da_qoshiladi": "Этот раздел появится на этапе 3."

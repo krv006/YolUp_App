@@ -1,7 +1,7 @@
 export { storage, mmkvInstance } from "./storage";
 export { htmlToPlainText, sanitizeHtml } from "./sanitize-html";
 export { cn, initials } from "./utils";
-export { downloadBlob, writeBlobToCache } from "./download";
+export { blobToBase64, downloadBlob, writeBlobToCache } from "./download";
 export { isOnline, onOnline, refreshNetworkState } from "./network";
 export { currentAppState, isAppActive, onAppFocusChange, onAppStateChange } from "./app-state";
 export type { AppFocusState } from "./app-state";

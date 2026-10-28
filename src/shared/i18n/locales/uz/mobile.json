@@ -122,11 +122,6 @@
     "qiymatlarni_ko_rish_uchun_ustunni_bosin": "Qiymatlarni ko'rish uchun ustunni bosing."
   },
   "app": {
-    "sahifa_topilmadi": "Sahifa topilmadi",
-    "havola_eskirgan_yoki_notogri_bolishi_mumkin": "Havola eskirgan yoki noto'g'ri bo'lishi mumkin.",
-    "bosh_sahifaga_qaytish": "Bosh sahifaga qaytish",
-    "bu_bolimga_ruxsat_yoq": "Bu bo'limga ruxsat yo'q",
-    "hisobingiz_ushbu_sahifani_korish_huquqiga_eg": "Hisobingiz ushbu sahifani ko'rish huquqiga ega emas.",
     "sessiya_tekshirilmoqda": "Sessiya tekshirilmoqda…",
     "ai_yordamchi": "AI yordamchi",
     "bu_bolim_faza_3_da_qoshiladi": "Bu bo'lim Faza 3 da qo'shiladi."
@@ -307,7 +302,6 @@
     "javob_berish": "Javob berish",
     "nusxalash": "Nusxalash",
     "nusxalandi": "Nusxalandi",
-    "faylni_ochib_bolmadi": "Faylni ochib bo'lmadi",
     "qayta_yuborish": "Qayta yuborish",
     "javobni_bekor_qilish": "Javobni bekor qilish",
     "xabar_yozing": "Xabar yozing…",

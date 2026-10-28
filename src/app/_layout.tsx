@@ -1,9 +1,10 @@
 // ENG BIRINCHI import bo'lishi shart — izohi bootstrap.ts da.
 import "@/shared/lib/bootstrap";
-import { Stack } from "expo-router";
+import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AppProviders } from "@/providers/app-providers";
 import { NotificationBridge } from "@/providers/notification-bridge";
+import { RouteErrorPage } from "@/pages/status/route-status-pages";
 import { useTheme } from "@/shared/ui";
 
 /**
@@ -24,6 +25,18 @@ export default function RootLayout() {
       <ThemedStack />
       <NotificationBridge />
     </AppProviders>
+  );
+}
+
+/** Kutilmagan xatolik — veb `RouteErrorBoundary` (marshrut chizilayotganda tashlangan xato). */
+export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+  const { scheme } = useTheme();
+  return (
+    <>
+      {/* Ildiz layout o'rnida chiziladi — `ThemedStack` dagi holat paneli yo'q. */}
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
+      <RouteErrorPage retry={() => void retry()} />
+    </>
   );
 }
 

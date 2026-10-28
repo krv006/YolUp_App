@@ -7,7 +7,7 @@ import {
   ListChecks,
   type LucideIcon,
 } from "lucide-react-native";
-import { Text, useTheme } from "@/shared/ui";
+import { DsText, useDs } from "@/shared/ui";
 import { AssignmentsSection } from "./assignments-section";
 import { AttendanceSection } from "./attendance-section";
 import { LessonsSection } from "./lessons-section";
@@ -47,26 +47,28 @@ const TABS: readonly TabDefinition[] = [
   },
 ];
 
+/**
+ * Guruh bo'limlari — veb `group-workspace.tsx` tablari: teng ustunli
+ * `h-11 rounded-full` tugmalar, faoli `bg-brand text-ink-inverse`,
+ * qolganlari `bg-surface`. Tanlash rejimida tepa bo'shliq `pt-1`.
+ */
 export function GroupTabsRow({
   active,
   onChange,
   isTeacher,
+  compact = false,
 }: {
   active: GroupTab;
   onChange: (tab: GroupTab) => void;
   isTeacher: boolean;
+  compact?: boolean;
 }) {
   const { t } = useTranslation("group");
-  const { palette } = useTheme();
+  const ds = useDs();
   const visible = TABS.filter((tab) => !tab.teacherOnly || isTeacher);
 
   return (
-    <View
-      style={[
-        styles.tabRow,
-        { backgroundColor: palette.surface, borderBottomColor: palette.border },
-      ]}
-    >
+    <View accessibilityRole="tablist" style={[styles.tabRow, { paddingTop: compact ? 4 : 16 }]}>
       {visible.map((tab) => {
         const selected = active === tab.id;
         return (
@@ -75,27 +77,11 @@ export function GroupTabsRow({
             accessibilityRole="tab"
             accessibilityState={{ selected }}
             onPress={() => onChange(tab.id)}
-            style={styles.tab}
+            style={[styles.tab, { backgroundColor: selected ? ds.c.brand : ds.c.surface }]}
           >
-            <Text
-              numberOfLines={1}
-              style={[
-                styles.tabLabel,
-                { color: selected ? palette.primary : palette["muted-foreground"] },
-              ]}
-            >
+            <DsText v="body-sm" w="500" c={selected ? "ink-inverse" : "ink"} numberOfLines={1}>
               {t(tab.labelKey)}
-            </Text>
-            {/*
-              * Tagidagi chiziq — faol tabni shu belgilaydi. Vebda u
-              * `border-bottom` ham, `::after` ham emas, alohida element.
-              */}
-            <View
-              style={[
-                styles.tabUnderline,
-                selected && { backgroundColor: palette.primary },
-              ]}
-            />
+            </DsText>
           </Pressable>
         );
       })}
@@ -136,26 +122,8 @@ export function GroupWorkspaceSection({
 }
 
 const styles = StyleSheet.create({
-  /*
-   * O'lchamlar veb DOM'idan (390px): qator 49 balandlik, OQ fon, pastki
-   * chegara 1px, yon bo'shliq 4; tab 48 balandlik, pad 14/8, yorliq
-   * 14/20 qalinlik 600; faol rangi --action-primary, nofaolniki
-   * --text-secondary.
-   *
-   * ILGARI bu yerda CHIP qatori turardi (to'liq yumaloq, fonli). Vebda
-   * esa oddiy matn tablari va faolining TAGIDA ko'k chiziq.
-   */
-  tabRow: { flexDirection: "row", height: 49, paddingHorizontal: 4, borderBottomWidth: 1 },
-  tab: { flex: 1, justifyContent: "space-between", alignItems: "center", paddingTop: 14 },
-  tabLabel: { fontSize: 14, lineHeight: 20, fontWeight: "600" },
-  /* Chiziq doim chiziladi — nofaolida shaffof, shunda yorliq sakramaydi. */
-  tabUnderline: {
-    alignSelf: "stretch",
-    height: 3,
-    marginHorizontal: 8,
-    backgroundColor: "transparent",
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
-  },
+  /* `grid grid-cols-4 gap-2 px-4 pb-1 pt-4` */
+  tabRow: { flexDirection: "row", gap: 8, paddingHorizontal: 16, paddingBottom: 4 },
+  tab: { flex: 1, minWidth: 0, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
   root: { flex: 1 },
 });

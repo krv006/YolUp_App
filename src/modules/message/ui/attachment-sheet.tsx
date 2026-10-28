@@ -1,123 +1,145 @@
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
-import { Camera, ClipboardList, FolderClosed, Image as ImageIcon, type LucideIcon } from "lucide-react-native";
-import { pickDocument, pickImage, toUploadFile, type PickedFile } from "@/shared/lib/file-picker";
-import { radius, Sheet, Text, toast, useTheme } from "@/shared/ui";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import { pickDocuments, pickImage, pickImages, writeBlobToCache, type PickedFile } from "@/shared/lib";
+import type { ChatMessage } from "@/shared/types";
+import { DsText, dsRadius, Icon, Sheet, toast, toneColors, useDs, type IconName } from "@/shared/ui";
+import { messageApi } from "../api/message.api";
+import { messageKeys } from "../model/message.keys";
 
-/** Vebdagi chegara — `message-composer.tsx` dagi `MAX_FILE_MB`. */
-export const MAX_FILE_MB = 20;
+const RECENT_LIMIT = 3;
 
 export interface AttachmentSheetProps {
   open: boolean;
   onClose: () => void;
-  /** Tanlangan fayl — kompozitor uni xabar sifatida yuboradi. */
-  onPick: (file: File) => void;
-  /** O'qituvchida "Vazifa" plitkasi — berilmasa ko'rinmaydi (vebdagi kabi). */
+  /** Tanlangan fayllar; `images` — hammasi rasm (rasm yuborish ekrani ochiladi). */
+  onPick: (files: PickedFile[], images: boolean) => void;
   onAssignment?: () => void;
+  maxSizeMb: number;
+  roomId?: string;
 }
 
 /**
- * Biriktirma varag'i — veb `attachment-sheet.tsx` ning porti.
- *
- * Plitkalar va ranglari vebdan: Galereya (ko'k), Kamera (yashil),
- * Hujjat (sariq), Vazifa (qizil, faqat o'qituvchida). Plitka 56x56,
- * radius 24, ostida yorliq.
- *
- * Vebda fayl `<input type="file">` bilan tanlanadi; mobilda esa
- * platformaning o'z tanlagichlari (`shared/lib/file-picker`).
+ * Biriktirish oynasi — veb `attachment-sheet.tsx` ning tor ekran varianti:
+ * tepada kamera tugmasi va shu suhbatdagi so'nggi 3 ta rasm (`size-20
+ * rounded-xl`), ostida Galereya, Kamera, Hujjat va (o'qituvchi guruhida)
+ * Vazifa plitkalari. Fayl tanlash platformaning o'z oynalari orqali.
  */
-export function AttachmentSheet({ open, onClose, onPick, onAssignment }: AttachmentSheetProps) {
+export function AttachmentSheet({ open, onClose, onPick, onAssignment, maxSizeMb, roomId }: AttachmentSheetProps) {
   const { t } = useTranslation("chat");
-  const { palette } = useTheme();
+  const ds = useDs();
+  const client = useQueryClient();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  async function handle(picker: () => Promise<PickedFile | null>) {
-    const picked = await picker();
-    if (!picked) return;
-    // Vebdagi kabi chegara: katta fayl yuborilmaydi, foydalanuvchiga aytiladi.
-    if (picked.size > MAX_FILE_MB * 1024 * 1024) {
-      toast.error(t("attach.sizeHint", { size: MAX_FILE_MB }));
-      return;
-    }
+  const recent = roomId
+    ? (client.getQueryData<ChatMessage[]>(messageKeys.all(roomId)) ?? [])
+        .filter((message) => message.attachment?.kind === "image" && message.attachment.url)
+        .slice(-RECENT_LIMIT)
+        .reverse()
+    : [];
+
+  function pick(files: PickedFile[], images: boolean) {
+    if (!files.length) return;
     onClose();
-    onPick(toUploadFile(picked));
+    onPick(files, images);
   }
 
-  const tiles: { id: string; label: string; icon: LucideIcon; tone: string; onPress: () => void }[] = [
-    {
-      id: "gallery",
-      label: t("attach.gallery"),
-      icon: ImageIcon,
-      tone: palette.primary,
-      onPress: () => void handle(() => pickImage("library")),
-    },
-    {
-      id: "camera",
-      label: t("attach.camera"),
-      icon: Camera,
-      tone: palette.success,
-      onPress: () => void handle(() => pickImage("camera")),
-    },
-    {
-      id: "document",
-      label: t("attach.document"),
-      icon: FolderClosed,
-      tone: palette["warning-strong"],
-      onPress: () => void handle(() => pickDocument()),
-    },
-    ...(onAssignment
-      ? [
-          {
-            id: "assignment",
-            label: t("attach.assignment"),
-            icon: ClipboardList,
-            tone: palette.destructive,
-            onPress: () => {
-              onClose();
-              onAssignment();
-            },
-          },
-        ]
-      : []),
+  async function handleTile(id: string) {
+    if (id === "gallery") pick(await pickImages(), true);
+    if (id === "camera") {
+      const photo = await pickImage("camera");
+      if (photo) pick([photo], true);
+    }
+    if (id === "document") pick(await pickDocuments(), false);
+    if (id === "assignment") {
+      onClose();
+      onAssignment?.();
+    }
+  }
+
+  async function pickRecent(message: ChatMessage) {
+    const attachment = message.attachment;
+    if (!attachment) return;
+    setLoadingId(message.id);
+    try {
+      const blob = (await messageApi.downloadFile(message.id)) as Blob;
+      const file = await writeBlobToCache(blob, attachment.name || "image.jpg");
+      pick([{ uri: file.uri, name: attachment.name || "image.jpg", size: blob.size, mimeType: attachment.mimeType || blob.type || "image/jpeg" }], true);
+    } catch {
+      toast.error(t("attach.recentFailed"));
+    } finally {
+      setLoadingId(null);
+    }
+  }
+
+  const tiles: Array<{ id: string; label: string; icon: IconName; tone: string }> = [
+    { id: "gallery", label: t("attach.gallery"), icon: "folder", tone: "bg-brand-subtle text-brand" },
+    { id: "camera", label: t("attach.camera"), icon: "photo-camera-fill", tone: "bg-accent-green-bg text-success" },
+    { id: "document", label: t("attach.document"), icon: "assignment-check-fill", tone: "bg-accent-saffron-bg text-accent-saffron-fg" },
+    ...(onAssignment ? [{ id: "assignment", label: t("attach.assignment"), icon: "assign" as IconName, tone: "bg-accent-violet-bg text-accent-violet-fg" }] : []),
   ];
 
   return (
-    <Sheet
-      open={open}
-      onClose={onClose}
-      title={t("attach.title")}
-      description={t("attach.sizeHint", { size: MAX_FILE_MB })}
-    >
-      <View style={styles.grid}>
-        {tiles.map((tile) => (
+    <Sheet variant="app" open={open} onClose={onClose} title={t("attach.title")} description={t("attach.sizeHint", { size: maxSizeMb })}>
+      <View style={styles.body}>
+        <View style={styles.recent}>
           <Pressable
-            key={tile.id}
             accessibilityRole="button"
-            accessibilityLabel={tile.label}
-            onPress={tile.onPress}
-            style={({ pressed }) => [styles.tile, pressed && { opacity: 0.8 }]}
+            accessibilityLabel={t("attach.camera")}
+            onPress={() => void handleTile("camera")}
+            style={({ pressed }) => [styles.shot, { backgroundColor: pressed ? ds.c.muted : ds.c.subtle }]}
           >
-            <View style={[styles.tileIcon, { backgroundColor: tile.tone }]}>
-              <tile.icon size={24} color="#ffffff" />
-            </View>
-            <Text variant="caption" tone="muted">
-              {tile.label}
-            </Text>
+            <Icon name="photo-camera-fill" size={24} color={ds.c["ink-secondary"]} />
           </Pressable>
-        ))}
+          {recent.map((message) => (
+            <Pressable
+              key={message.id}
+              accessibilityRole="imagebutton"
+              accessibilityLabel={message.attachment?.name ?? ""}
+              disabled={loadingId !== null}
+              onPress={() => void pickRecent(message)}
+              style={[styles.shot, { backgroundColor: ds.c.subtle, opacity: loadingId === message.id ? 0.6 : 1 }]}
+            >
+              <Image source={{ uri: message.attachment?.url ?? "" }} style={styles.photo} resizeMode="cover" />
+            </Pressable>
+          ))}
+        </View>
+
+        <View style={styles.tiles}>
+          {tiles.map((tile) => {
+            const colors = toneColors(tile.tone, ds);
+            return (
+              <Pressable
+                key={tile.id}
+                accessibilityRole="button"
+                onPress={() => void handleTile(tile.id)}
+                style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+              >
+                <View style={[styles.tileIcon, { backgroundColor: colors.bg }]}>
+                  <Icon name={tile.icon} size={22} color={colors.fg ?? ds.c.ink} />
+                </View>
+                <DsText v="body-sm" numberOfLines={1}>
+                  {tile.label}
+                </DsText>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  /* Veb: `grid grid-cols-4 gap-3`. */
-  grid: { flexDirection: "row", gap: 12, paddingBottom: 8 },
-  tile: { flex: 1, alignItems: "center", gap: 8 },
-  tileIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: radius["2xl"],
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  pressed: { opacity: 0.8 },
+  /* `-mt-0.5 pb-7.5` */
+  body: { marginTop: -2, paddingBottom: 30 },
+  recent: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
+  shot: { width: 80, height: 80, overflow: "hidden", borderRadius: dsRadius.xl, alignItems: "center", justifyContent: "center" },
+  photo: { width: "100%", height: "100%" },
+  /* `grid grid-cols-4 gap-3` */
+  tiles: { flexDirection: "row", gap: 12 },
+  tile: { flex: 1, alignItems: "center", gap: 6 },
+  tileIcon: { width: 40, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center" },
 });

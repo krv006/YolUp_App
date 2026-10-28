@@ -31,7 +31,8 @@ export function MobilePageHeader({ title, backLabel, onBack, action }: MobilePag
 }
 
 export interface MobileRoundButtonProps {
-  icon: IconName;
+  /** `iconNode` berilsa shart emas. */
+  icon?: IconName;
   /** Tayyor ikonka (masalan vebdagi `lucide` belgisi) — `icon` o'rniga chiziladi. */
   iconNode?: ReactNode;
   label: string;
@@ -59,7 +60,7 @@ export function MobileRoundButton({ icon, iconNode, label, onPress, iconSize = 2
         disabled && styles.disabled,
       ]}
     >
-      {iconNode ?? <Icon name={icon} size={iconSize} color={ds.c.ink} />}
+      {iconNode ?? (icon ? <Icon name={icon} size={iconSize} color={ds.c.ink} /> : null)}
       {badge}
     </Pressable>
   );

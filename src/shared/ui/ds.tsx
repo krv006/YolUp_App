@@ -36,13 +36,25 @@ export interface Ds {
   gradient: Record<DsGradientName, string>;
 }
 
-/** Joriy temaga mos tokenlar (yorug' / qorong'i). */
-export function useDs(): Ds {
-  const { scheme } = useTheme();
+/**
+ * Joriy temaga mos tokenlar (yorug' / qorong'i). `force` — vebdagi
+ * `data-theme="dark"` kabi bitta ekranni doim bir temada chizish uchun.
+ */
+export function useDs(force?: "light" | "dark"): Ds {
+  const { scheme: current } = useTheme();
+  const scheme = force ?? current;
   return useMemo(
     () => ({ c: tokens.colors[scheme], shadow: tokens.shadows[scheme], gradient: tokens.gradients[scheme] }),
     [scheme]
   );
+}
+
+/** Vebdagi `bg-action/30` kabi shaffoflik — `#rrggbb` tokenga alfa qo'shadi. */
+export function dsAlpha(color: string, alpha: number): string {
+  const hex = /^#([0-9a-f]{6})$/i.exec(color)?.[1];
+  if (!hex) return color;
+  const value = Number.parseInt(hex, 16);
+  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
 }
 
 /**

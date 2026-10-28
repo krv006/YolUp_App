@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 /*
- * RN ning o'z `KeyboardAvoidingView` i EMAS.
- *
- * Androidda uning yagona ishlaydigan rejimi oynaning kichrayishiga
- * tayanadi, `edgeToEdgeEnabled=true` bo'lganda esa Android 15+ oynani
- * kichraytirmaydi va kompozitor klaviatura ostida qolib ketardi.
+ * RN ning o'z `KeyboardAvoidingView` i emas: Androidda u oynaning
+ * kichrayishiga tayanadi, `edgeToEdgeEnabled=true` bo'lganda esa Android 15+
+ * oynani kichraytirmaydi va kompozitor klaviatura ostida qolardi.
  */
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,64 +14,49 @@ import { useCourse } from "@/modules/course";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
 import { LiveLessonBar, useLiveLessons } from "@/modules/lesson";
-import { useChat } from "@/modules/message";
-import { MessageActionsSheet } from "@/modules/message/ui/message-actions-sheet";
+import { PinnedMessageBar, useChat, useChatUiStore } from "@/modules/message";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
 import { MessageList } from "@/modules/message/ui/message-list";
-import { VoiceRoomBar } from "@/modules/voice";
-import {
-  GroupTabsRow,
-  GroupWorkspaceSection,
-  type GroupTab,
-} from "@/widgets/group-workspace/group-workspace";
-import type { ChatMessage, ConversationRole } from "@/shared/types";
-import { AppBar, Screen, ScreenError, ScreenLoading, useTheme } from "@/shared/ui";
-import { NotificationBell } from "@/modules/notification";
+import { useActiveVoiceRoom, useVoiceUiStore, VoiceRoomBar } from "@/modules/voice";
+import type { ChatMessage, ConversationRole, SendMessagePayload } from "@/shared/types";
+import { DsGradient, DsText, dsRadius, Icon, Screen, ScreenError, ScreenLoading, toast, useDs } from "@/shared/ui";
+import { ForwardDialog } from "@/widgets/forward-dialog";
+import { GroupTabsRow, GroupWorkspaceSection, type GroupTab } from "@/widgets/group-workspace/group-workspace";
 
 /**
- * Suhbat oynasi — veb `pages/teacher/conversation-page.tsx` va
- * `pages/student/conversation-page.tsx` ning mobil varianti.
+ * Suhbat oynasi — veb `pages/teacher/conversation-page.tsx` (shaxsiy suhbat)
+ * va `widgets/group-workspace` (guruh chati) ning tor ekran varianti.
  *
- * Butun ma'lumot oqimi `useChat` dan keladi — u veb'dan ko'chirilgan va
- * WebSocket, optimistik yuborish, REST zaxira polling'ining hammasini o'zi
- * boshqaradi. Bu yerda faqat ko'rinish.
+ * Guruhda: `bg-auth-gradient` fon, sarlavha, ovozli xona chizig'i, 44px
+ * tablar, e'lon rejimi banneri yoki qadalgan xabar, xabarlar va kompozer.
+ * Tanlash rejimida kompozer o'rnini pastki amallar paneli egallaydi.
+ * Ma'lumot oqimi `useChat` da (WebSocket, optimistik yuborish, zaxira polling).
  */
 export function ConversationPage({ role }: { role: ConversationRole }) {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("chat");
+  const { t: tm } = useTranslation("mobile");
+  const { t: tg } = useTranslation("group");
+  const ds = useDs();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { palette } = useTheme();
-  /*
-   * `tab` — boshqa ekrandan aniq bo'limga ochish uchun (masalan jadvaldagi
-   * "Davomat qilish" -> davomat bo'limi). Vebda bu alohida sahifalar.
-   */
-  const { conversationId, tab: initialTab } = useLocalSearchParams<{
-    conversationId: string;
-    tab?: GroupTab;
-  }>();
+  /* `tab` — boshqa ekrandan aniq bo'limni ochish (masalan jadvaldan davomatga). */
+  const { conversationId, tab: initialTab } = useLocalSearchParams<{ conversationId: string; tab?: GroupTab }>();
   const { user } = useAuth();
+  const currentUserId = user?.id ?? null;
+  const selectionMode = useChatUiStore((state) => state.selected.length > 0);
 
-  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
-  const [actionMessage, setActionMessage] = useState<ChatMessage | null>(null);
-  const [tab, setTab] = useState<GroupTab>(
-    initialTab === "lessons" || initialTab === "assignments" || initialTab === "attendance"
-      ? initialTab
-      : "chat"
-  );
+  const [reply, setReply] = useState<ChatMessage | null>(null);
+  const [editing, setEditing] = useState<ChatMessage | null>(null);
+  const [forwardTarget, setForwardTarget] = useState<ChatMessage[]>([]);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [tab, setTab] = useState<GroupTab>(
+    initialTab === "lessons" || initialTab === "assignments" || initialTab === "attendance" ? initialTab : "chat"
+  );
 
-  const chat = useChat(conversationId, { role, senderId: user?.id ?? null });
+  const chat = useChat(conversationId, { role, senderId: currentUserId });
   const raw = chat.conversation.data;
 
-  /*
-   * Guruh ma'lumoti KURSDAN to'ldiriladi — veb ham shunday qiladi
-   * (`group-workspace.tsx:132-140`).
-   *
-   * Suhbatlar ro'yxati beradigan obyektda `memberCount` yo'q, shuning uchun
-   * sarlavhada har doim "0 ishtirokchi" turardi — guruhda to'rtta o'quvchi
-   * bo'lsa ham. Nom, fan va tavsif ham shu yerda yangilanadi: kurs tahrir
-   * qilingach sarlavha darhol ergashsin.
-   */
+  /* Guruh ma'lumoti kursdan to'ldiriladi — veb `group-workspace.tsx` dagi `hydrated`. */
   const course = useCourse(raw?.courseId ?? null);
   const conversation = useMemo(() => {
     if (!raw) return undefined;
@@ -82,25 +65,33 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
       ...raw,
       title: course.data.title || raw.title,
       subject: course.data.subject ?? raw.subject,
+      subjectLabel: course.data.subjectLabel ?? raw.subjectLabel,
       description: course.data.description ?? raw.description,
-      memberCount: course.data.studentCount,
+      memberCount: course.data.studentCount ?? 0,
     };
   }, [raw, course.data]);
 
-  /** Shu kursda dars ketyaptimi — sarlavhadagi tugma shunga qarab chiqadi. */
-  const liveLessons = useLiveLessons(Boolean(user)).data;
-  // `courseId` alohida o'zgaruvchiga olinadi: memo ichida `conversation` ga
-  // murojaat qilinsa React Compiler butun obyektni bog'liqlik deb hisoblaydi
-  // va memoizatsiyani saqlab qololmaydi.
   const courseId = conversation?.courseId ?? null;
+  const voice = useActiveVoiceRoom(courseId);
+  const openVoiceCreate = useVoiceUiStore((state) => state.setCreateOpen);
+
+  /* O'quvchida dars ketayotgan bo'lsa qo'shilish chizig'i (o'quvchi ekranlari 6-bosqichda). */
+  const liveLessons = useLiveLessons(role === "student" && Boolean(user)).data;
   const liveLesson = useMemo(
-    () =>
-      courseId ? (liveLessons ?? []).find((lesson) => lesson.courseId === courseId) : undefined,
+    () => (courseId ? (liveLessons ?? []).find((lesson) => lesson.courseId === courseId) : undefined),
     [courseId, liveLessons]
   );
 
-  const backPath = role === "teacher" ? "/teacher/chats" : "/student/chats";
+  const lastMessageId = chat.messages.data?.[chat.messages.data.length - 1]?.id ?? null;
+  const readRef = useRef<string | null>(null);
+  const markRead = chat.markRead;
+  useEffect(() => {
+    if (!lastMessageId || lastMessageId.startsWith("temp-") || readRef.current === lastMessageId) return;
+    readRef.current = lastMessageId;
+    markRead.mutate(lastMessageId);
+  }, [lastMessageId, markRead]);
 
+  const backPath = role === "teacher" ? "/teacher/chats" : "/student/chats";
   function goBack() {
     if (router.canGoBack()) router.back();
     else router.replace(backPath);
@@ -109,7 +100,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   if (chat.conversation.isLoading && !conversation) {
     return (
       <Screen>
-        <ScreenLoading label={t("chats.suhbat_ochilmoqda")} />
+        <ScreenLoading label={tm("chats.suhbat_ochilmoqda")} />
       </Screen>
     );
   }
@@ -117,117 +108,171 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   if (!conversation) {
     return (
       <Screen>
-        <ScreenError
-          message={t("chats.suhbat_topilmadi")}
-          onRetry={() => void chat.conversation.refetch()}
-        />
+        <ScreenError message={tm("chats.suhbat_topilmadi")} onRetry={() => void chat.conversation.refetch()} />
       </Screen>
     );
   }
 
-  /**
-   * Direct suhbat `pending` bo'lsa o'quvchi hali qabul qilinmagan, `blocked`
-   * bo'lsa rad etilgan — ikkalasida ham yozish yopiladi. Backend baribir
-   * rad etardi; sabab ko'rsatib, kompozitorni yopish halolroq.
-   */
-  const directStatus = conversation.directStatus;
-  const composerDisabled = directStatus === "pending" || directStatus === "blocked";
+  const group = conversation.type === "group" && Boolean(courseId);
+
+  /* Shaxsiy suhbat `pending` — o'quvchi hali qabul qilinmagan, `blocked` — rad etilgan. */
   const disabledReason =
-    directStatus === "pending"
+    conversation.directStatus === "pending"
       ? "So'rovingiz yuborildi. O'qituvchi qabul qilgach yozishingiz mumkin."
-      : directStatus === "blocked"
+      : conversation.directStatus === "blocked"
         ? "Bu suhbat yopilgan."
         : undefined;
 
+  async function send(payload: SendMessagePayload) {
+    if (!conversation) return;
+    try {
+      if (editing) {
+        await chat.updateMessage.mutateAsync({ messageId: editing.id, text: payload.text });
+        setEditing(null);
+        if (!group) toast.success(t("directPage.messageEdited"));
+        return;
+      }
+      await chat.sendMessage.mutateAsync({
+        ...payload,
+        replyToId: reply?.id ?? null,
+        replyTo: reply
+          ? {
+              author: group
+                ? reply.senderName || tg("replyFallback")
+                : reply.senderName || (reply.senderId === currentUserId ? t("composer.youLabel") : conversation.title),
+              text: reply.text,
+            }
+          : undefined,
+      });
+      setReply(null);
+    } catch {
+      toast.error(group ? tg("sendFailed") : t("directPage.actionFailedRetry"));
+    }
+  }
+
+  function deleteOne(message: ChatMessage, scope: "me" | "everyone") {
+    chat.deleteMessage.mutate(
+      { messageId: message.id, scope },
+      {
+        onSuccess: () => {
+          if (reply?.id === message.id) setReply(null);
+          if (editing?.id === message.id) setEditing(null);
+          if (!group) toast.success(scope === "everyone" ? t("directPage.deletedForEveryone") : t("directPage.deletedForMe"));
+        },
+        onError: () => {
+          if (!group) toast.error(t("directPage.deleteFailed"));
+        },
+      }
+    );
+  }
+
+  const chatTab = !group || tab === "chat";
+
   return (
-    <View style={[styles.root, { backgroundColor: palette["chat-bg"], paddingTop: insets.top }]}>
-      {/*
-        * IKKI QAVATLI tepa panel — vebdagi kabi. Suhbat ichida ham
-        * global panel (logotip + qo'ng'iroq) tepada qoladi, suhbat
-        * paneli esa uning ostida.
-        */}
-      <AppBar a11yTitle={conversation.title}>
-        <NotificationBell />
-      </AppBar>
+    <View style={[styles.root, { backgroundColor: ds.c.canvas }]}>
+      {group ? <DsGradient name="auth" /> : null}
       <ChatHeader
         conversation={conversation}
+        topInset={insets.top}
         onBack={goBack}
         onOpenInfo={() => setInfoOpen(true)}
-        socketOffline={chat.socketState !== "connected"}
+        onVoice={group && tab === "chat" && !voice.active ? () => openVoiceCreate(true) : undefined}
+        workspace={group}
+        onUnpin={(messageId) => chat.pinMessage.mutate({ messageId, pinned: true })}
       />
 
-      {/* Sarlavhadagi ikonka qaysi dars ketayotganini aytmaydi — chiziq aytadi. */}
-      <LiveLessonBar
-        lesson={liveLesson}
-        onJoin={() => liveLesson && router.push(`/live/${liveLesson.id}`)}
-      />
-
-      {/*
-        * Ovozli suhbat chizig'i TABLAR USTIDA — vebdagi kabi, ya'ni
-        * qaysi bo'lim ochiq bo'lishidan qat'i nazar ko'rinadi.
-        *
-        * Ilgari u Darslar bo'limining ichida edi: "har bo'limda
-        * takrorlansa joy yeb qo'yadi" degan xavotir bilan. Bu joylashuvda
-        * u BIR MARTA chiziladi, shuning uchun o'sha xavotir yuzaga
-        * kelmaydi.
-        */}
-      {courseId ? <VoiceRoomBar courseId={courseId} /> : null}
-
-      {/* Bo'limlar faqat GURUH chatida: shaxsiy suhbatda kurs, dars va
-          vazifa tushunchasi yo'q. */}
-      {courseId ? (
-        <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} />
+      {role === "student" && liveLesson ? (
+        <LiveLessonBar lesson={liveLesson} onJoin={() => router.push(`/live/${liveLesson.id}` as never)} />
       ) : null}
 
-      {courseId && tab !== "chat" ? (
-        <GroupWorkspaceSection
-          tab={tab}
-          courseId={courseId}
-          isTeacher={role === "teacher"}
-        />
-      ) : (
+      {group ? <VoiceRoomBar courseId={courseId} hideIdle /> : null}
+      {group ? <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} compact={selectionMode} /> : null}
+
+      {group && tab === "chat" && !selectionMode ? (
+        conversation.announcementOnly ? (
+          <View style={[styles.banner, { backgroundColor: ds.c["brand-subtle"] }]}>
+            <Icon name="bolt" size={18} color={ds.c.brand} />
+            <DsText v="body-sm" c="brand" numberOfLines={1} style={styles.grow}>
+              {tg("announcementBanner")}
+            </DsText>
+          </View>
+        ) : (
+          <PinnedMessageBar
+            roomId={conversation.id}
+            variant="workspace"
+            onUnpin={(messageId) => chat.pinMessage.mutate({ messageId, pinned: true })}
+          />
+        )
+      ) : null}
+
+      {chatTab ? (
         <KeyboardAvoidingView style={styles.body} behavior="padding">
           <MessageList
             messages={chat.messages.data}
+            conversation={conversation}
             loading={chat.messages.isLoading}
             error={chat.messages.isError}
             onRetry={() => void chat.messages.refetch()}
-            onLongPress={setActionMessage}
             onRetryMessage={chat.retryMessage}
-            currentUserId={user?.id ?? null}
-            conversationId={conversation.id}
-            typingName={conversation.typingName ?? null}
+            currentUserId={currentUserId}
+            onReply={(message) => {
+              setEditing(null);
+              setReply(message);
+            }}
+            onEdit={(message) => {
+              setReply(null);
+              setEditing(message);
+            }}
+            onDelete={deleteOne}
+            onReact={(message, emoji) => chat.toggleReaction.mutate({ messageId: message.id, emoji })}
+            pinnedIds={(chat.pinnedMessages.data ?? []).map((item) => item.messageId)}
+            onPin={(message, pinned) => chat.pinMessage.mutate({ messageId: message.id, pinned })}
+            onForward={setForwardTarget}
+            onBulkDelete={(messageIds, scope) => chat.deleteMessages.mutate({ messageIds, scope })}
           />
-
-          <MessageComposer
-            onSend={(payload) => chat.sendMessage.mutate(payload)}
-            /*
-             * O'qituvchida biriktirma varag'idagi "Vazifa" plitkasi
-             * Vazifalar bo'limini ochadi — vazifa o'sha yerdan yaratiladi.
-             */
-            onAssignment={
-              courseId && role === "teacher" ? () => setTab("assignments") : undefined
-            }
-            onTyping={chat.sendTyping}
-            replyTo={replyTo}
-            onCancelReply={() => setReplyTo(null)}
-            disabled={composerDisabled}
-            disabledReason={disabledReason}
-          />
+          {selectionMode ? null : (
+            <MessageComposer
+              key={editing?.id ?? "compose"}
+              onSend={send}
+              onTyping={chat.sendTyping}
+              sending={chat.sendMessage.isPending || chat.updateMessage.isPending}
+              replyTo={reply}
+              editingMessage={editing}
+              onCancelContext={() => {
+                setReply(null);
+                setEditing(null);
+              }}
+              currentUserId={currentUserId}
+              roomId={conversation.id}
+              onAssignment={group && role === "teacher" ? () => setTab("assignments") : undefined}
+              disabledReason={disabledReason}
+            />
+          )}
         </KeyboardAvoidingView>
-      )}
+      ) : courseId ? (
+        <GroupWorkspaceSection tab={tab} courseId={courseId} isTeacher={role === "teacher"} />
+      ) : null}
 
-      <MessageActionsSheet
-        message={actionMessage}
-        onClose={() => setActionMessage(null)}
-        onReply={setReplyTo}
+      <ForwardDialog
+        open={forwardTarget.length > 0}
+        onOpenChange={(open) => !open && setForwardTarget([])}
+        messages={forwardTarget}
+        role={role}
+        pending={chat.forwardMessages.isPending}
+        onConfirm={(roomIds) =>
+          chat.forwardMessages.mutate(
+            { messageIds: forwardTarget.map((item) => item.id), roomIds },
+            {
+              onSuccess: () => {
+                setForwardTarget([]);
+                toast.success(t("forward.done"));
+              },
+            }
+          )
+        }
       />
 
-      <ConversationInfoSheet
-        conversation={conversation}
-        open={infoOpen}
-        onClose={() => setInfoOpen(false)}
-      />
+      <ConversationInfoSheet conversation={conversation} open={infoOpen} onClose={() => setInfoOpen(false)} />
     </View>
   );
 }
@@ -235,4 +280,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   body: { flex: 1 },
+  grow: { flex: 1, minWidth: 0 },
+  /* `mx-4 mt-3 h-11 rounded-xl bg-brand-subtle px-4 gap-2.5` */
+  banner: { marginHorizontal: 16, marginTop: 12, height: 44, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, borderRadius: dsRadius.xl },
 });

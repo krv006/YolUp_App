@@ -24,6 +24,8 @@ export { useHomeworkBoardSource } from "./model/use-homework-board";
 export type { HomeworkBoardSaveState } from "./model/use-homework-board";
 
 // --- Mobil UI ---
+export { HomeworkMessageCard } from "./ui/homework-message-card";
+export type { HomeworkMessageCardProps } from "./ui/homework-message-card";
 export { HomeworkReportView } from "./ui/homework-report-view";
 export { HomeworkResultSheet } from "./ui/homework-result-sheet";
 export { SubmissionReviewSheet } from "./ui/submission-review-sheet";

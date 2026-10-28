@@ -171,3 +171,22 @@ export async function pickImage(source: "camera" | "library"): Promise<PickedFil
     mimeType: asset.mimeType || "image/jpeg",
   };
 }
+
+/**
+ * Galereyadan bir nechta rasm (vebdagi `<input accept="image/*" multiple>`).
+ * Bekor qilinsa — bo'sh ro'yxat. Ruxsat haqida: `pickImage` dagi izoh.
+ */
+export async function pickImages(): Promise<PickedFile[]> {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    quality: 0.7,
+    allowsMultipleSelection: true,
+  });
+  if (result.canceled || !result.assets?.length) return [];
+  return result.assets.map((asset, index) => ({
+    uri: asset.uri,
+    name: asset.fileName || `rasm-${Date.now()}-${index + 1}.jpg`,
+    size: asset.fileSize ?? 0,
+    mimeType: asset.mimeType || "image/jpeg",
+  }));
+}

@@ -18,8 +18,10 @@ export { useChat } from "./model/use-chat";
 export type { ChatController } from "./model/use-chat";
 
 // --- Mobil UI (veb'da ui/ ko'chirilmaydi, bular mobilga xos) ---
-export { MessageActionsSheet } from "./ui/message-actions-sheet";
-export { MessageBubble } from "./ui/message-bubble";
+export { MessageActionsMenu } from "./ui/message-actions-menu";
+export type { MessageMenuAnchor } from "./ui/message-actions-menu";
+export { MessageBubble, MessageBubbleCard } from "./ui/message-bubble";
+export { PinnedMessageBar } from "./ui/pinned-message-bar";
 export { MessageComposer } from "./ui/message-composer";
 export { MessageList } from "./ui/message-list";
 export { MessageText } from "./ui/message-text";

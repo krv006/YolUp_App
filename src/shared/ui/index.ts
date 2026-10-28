@@ -44,7 +44,7 @@ export type { InputProps } from "./input";
 export { Screen, ScreenEmpty, ScreenError, ScreenLoading } from "./screen";
 export type { ScreenProps } from "./screen";
 export { Text } from "./text";
-export { DsGradient, DsText, dsRadius, dsType, toneColors, useDs } from "./ds";
+export { dsAlpha, DsGradient, DsText, dsRadius, dsType, toneColors, useDs } from "./ds";
 export { GroupTile } from "./group-tile";
 export { QrCode } from "./qr-code";
 export { MobileChoiceChips, MobileFieldLabel, MobileInput, MobilePickerField, MobileRadio, MobileToggle } from "./mobile-fields";

@@ -6,11 +6,22 @@ import { Pause, Play } from "lucide-react-native";
 import { tokenStorage } from "@/shared/api";
 import { env } from "@/shared/config";
 import type { MessageAttachment } from "@/shared/types";
-import { radius, Text, toast, useTheme } from "@/shared/ui";
+import { dsAlpha, DsText, toast, useDs } from "@/shared/ui";
 import { messageEndpoints } from "../api/message.endpoints";
 
-/** Vebdagi to'lqin shakli bilan bir xil: 32 ustun, `6 + (i*5) % 16`. */
+/** Vebdagi to'lqin shakli: 32 ustun, `6 + (i*5) % 16`; tor ekranda birinchi 24 tasi. */
 const BARS = Array.from({ length: 32 }, (_, index) => 6 + ((index * 5) % 16));
+const MOBILE_BARS = 24;
+
+/** Backend bergan to'lqin (`waveform`) 32 ustunga keltiriladi — veb `barsFrom`. */
+function barsFrom(waveform: number[] | undefined): number[] {
+  if (!waveform?.length) return BARS;
+  const peak = Math.max(...waveform, 1);
+  return Array.from({ length: BARS.length }, (_, index) => {
+    const value = waveform[Math.floor((index / BARS.length) * waveform.length)] ?? 0;
+    return 6 + Math.round((value / peak) * 16);
+  });
+}
 
 /**
  * Ovozli xabar pleyeri — veb `voice-message.tsx` ning porti.
@@ -34,7 +45,7 @@ export function VoiceMessage({
   outgoing?: boolean;
 }) {
   const { t } = useTranslation("chat");
-  const { palette } = useTheme();
+  const ds = useDs();
   const player = useAudioPlayer(null);
   const status = useAudioPlayerStatus(player);
   const [loaded, setLoaded] = useState(false);
@@ -66,7 +77,10 @@ export function VoiceMessage({
   }
 
   const progress = status.duration > 0 ? status.currentTime / status.duration : 0;
-  const total = Math.round(status.currentTime || status.duration);
+  const total = Math.round(status.currentTime || status.duration || (attachment.durationMs ?? 0) / 1000);
+  const bars = barsFrom(attachment.waveform);
+  const played = outgoing ? ds.c["on-action"] : ds.c.action;
+  const rest = outgoing ? dsAlpha(ds.c["on-action"], 0.4) : dsAlpha(ds.c.action, 0.3);
 
   return (
     <View style={styles.row}>
@@ -74,41 +88,24 @@ export function VoiceMessage({
         accessibilityRole="button"
         accessibilityLabel={status.playing ? t("attachment.voicePause") : t("attachment.voicePlay")}
         onPress={toggle}
-        style={[
-          styles.button,
-          { backgroundColor: outgoing ? "rgba(255, 255, 255, 0.2)" : palette.primary },
-        ]}
+        style={[styles.button, { backgroundColor: outgoing ? dsAlpha("#ffffff", 0.2) : ds.c.action }]}
       >
         {status.playing ? (
-          <Pause size={18} color={palette["primary-foreground"]} />
+          <Pause size={16} color={ds.c["on-action"]} fill={ds.c["on-action"]} />
         ) : (
-          <Play size={18} color={palette["primary-foreground"]} />
+          <Play size={16} color={ds.c["on-action"]} fill={ds.c["on-action"]} />
         )}
       </Pressable>
 
       <View style={styles.bars} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        {BARS.map((height, index) => {
-          const played = index / BARS.length <= progress;
-          const color = played
-            ? outgoing
-              ? palette["primary-foreground"]
-              : palette.primary
-            : outgoing
-              ? "rgba(255, 255, 255, 0.4)"
-              : palette.muted;
-          return <View key={index} style={[styles.bar, { height, backgroundColor: color }]} />;
-        })}
+        {bars.slice(0, MOBILE_BARS).map((height, index) => (
+          <View key={index} style={[styles.bar, { height, backgroundColor: index / bars.length <= progress ? played : rest }]} />
+        ))}
       </View>
 
-      <Text
-        variant="caption"
-        style={[
-          styles.duration,
-          { color: outgoing ? "rgba(255, 255, 255, 0.8)" : palette["muted-foreground"] },
-        ]}
-      >
+      <DsText v="label-strong" numeric style={{ color: outgoing ? dsAlpha(ds.c["on-action"], 0.8) : ds.c.ink }}>
         {formatDuration(total)}
-      </Text>
+      </DsText>
     </View>
   );
 }
@@ -120,17 +117,11 @@ function formatDuration(total: number): string {
 }
 
 const styles = StyleSheet.create({
-  /* Veb: `min-w-[220px] items-center gap-3`. */
-  row: { minWidth: 220, flexDirection: "row", alignItems: "center", gap: 12 },
-  button: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  /* Veb: ustunlar 3px eni, oraliq 3px. */
-  bars: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 3, overflow: "hidden" },
-  bar: { width: 3, borderRadius: radius.full },
-  duration: { fontVariant: ["tabular-nums"] },
+  /* `min-w-[220px] items-center gap-2.75 py-0.5` */
+  row: { minWidth: 220, flexDirection: "row", alignItems: "center", gap: 11, paddingVertical: 2 },
+  /* `size-8.5 rounded-full` */
+  button: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
+  /* ustun `w-[3px]`, oraliq `gap-0.5` */
+  bars: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 2, overflow: "hidden" },
+  bar: { width: 3, borderRadius: 2 },
 });

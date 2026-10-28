@@ -1,81 +1,93 @@
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Platform, Pressable, StyleSheet, TextInput, View } from "react-native";
+import { ActivityIndicator, Image, Modal, Pressable, StyleSheet, TextInput, View } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboardState } from "react-native-keyboard-controller";
-import {
-  RecordingPresets,
-  requestRecordingPermissionsAsync,
-  setAudioModeAsync,
-  useAudioRecorder,
-} from "expo-audio";
-import { AtSign, Mic, Plus, SendHorizontal, Smile, Trash2, X } from "lucide-react-native";
-import { toUploadFile } from "@/shared/lib/file-picker";
+import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder } from "expo-audio";
+import { formatFileSize, toUploadFile, type PickedFile } from "@/shared/lib";
+import { useOnlineStatus } from "@/shared/model";
 import type { ChatMessage, SendMessagePayload } from "@/shared/types";
+import { Avatar, bodyFont, DsText, dsRadius, dsType, Icon, toast, useDs } from "@/shared/ui";
+import { messageApi } from "../api/message.api";
+import { messageKeys } from "../model/message.keys";
 import { AttachmentSheet } from "./attachment-sheet";
-import { IconButton, MIN_TOUCH_SIZE, radius, Text, toast, useTheme } from "@/shared/ui";
+import { ImagePreviewScreen } from "./image-preview-screen";
 
 export interface MessageComposerProps {
-  onSend: (payload: SendMessagePayload) => void;
-  /** Biriktirma varag'idagi "Vazifa" plitkasi — faqat o'qituvchida beriladi. */
+  onSend: (payload: SendMessagePayload) => void | Promise<void>;
+  sending?: boolean;
+  replyTo?: ChatMessage | null;
+  editingMessage?: ChatMessage | null;
+  onCancelContext: () => void;
+  currentUserId?: string | null;
+  onTyping?: () => void;
+  allowAttachments?: boolean;
+  roomId?: string | null;
+  /** Biriktirish oynasidagi "Vazifa" (faqat o'qituvchi guruhida). */
   onAssignment?: () => void;
-  onTyping: () => void;
-  replyTo: ChatMessage | null;
-  onCancelReply: () => void;
-  disabled?: boolean;
-  /** Blok holati sababi — direct suhbat `pending`/`blocked` bo'lsa. */
+  /** Shaxsiy suhbat `pending`/`blocked` — yozish yopiq, sababi ko'rsatiladi. */
   disabledReason?: string;
 }
 
+const EMOJIS = ["🔥", "💎", "🚀", "👑", "⚡", "🎯"];
+const MAX_FILE_MB = 20;
 /** "Yozmoqda" signali shu oraliqda bir martadan ko'p yuborilmaydi. */
 const TYPING_THROTTLE_MS = 2500;
 
-/**
- * Xabar yozish paneli.
- *
- * Balandligi matn bilan birga o'sadi, lekin cheklangan: aks holda uzun xabar
- * yozayotganda butun ekranni egallab, suhbatning o'zi ko'rinmay qoladi.
- */
-/** `mm:ss` — vebdagi `formatDuration` kabi. */
-function formatSeconds(total: number): string {
+function formatDuration(total: number): string {
   const minutes = Math.floor(total / 60);
-  const rest = total % 60;
-  return `${minutes}:${String(rest).padStart(2, "0")}`;
+  return `${minutes}:${String(total % 60).padStart(2, "0")}`;
 }
 
+/**
+ * Xabar yozish paneli — veb `message-composer.tsx` ning tor ekran varianti:
+ * `bg-surface px-4 pt-2.5`, chapda "+" (biriktirish), o'rtada `rounded-[22px]
+ * bg-subtle` maydon va emoji tugmasi, o'ngda yuborish yoki mikrofon.
+ * Ustida: offline ogohlantirishi, javob/tahrir konteksti, biriktirilgan
+ * hujjatlar va "@" yozilganda guruh a'zolari ro'yxati. Ovoz yozishda maydon
+ * o'rnini qizil panel egallaydi; rasm tanlansa rasm yuborish ekrani ochiladi.
+ */
 export function MessageComposer({
   onSend,
-  onAssignment,
-  onTyping,
+  sending = false,
   replyTo,
-  onCancelReply,
-  disabled = false,
+  editingMessage,
+  onCancelContext,
+  currentUserId = null,
+  onTyping,
+  allowAttachments = true,
+  roomId = null,
+  onAssignment,
   disabledReason,
 }: MessageComposerProps) {
-  const { t } = useTranslation("mobile");
-  const { palette } = useTheme();
+  const { t } = useTranslation("chat");
+  const ds = useDs();
   const insets = useSafeAreaInsets();
-  /*
-   * Klaviatura ochiq bo'lsa pastki xavfsiz zona QO'SHILMAYDI.
-   *
-   * Klaviatura tizim navigatsiya chizig'ini o'zi bekitadi, shuning uchun
-   * unga qo'shimcha `insets.bottom` berilsa, kompozitor bilan klaviatura
-   * orasida bo'sh tasma paydo bo'ladi.
-   */
   const keyboardVisible = useKeyboardState((state) => state.isVisible);
-  const bottomInset = keyboardVisible ? 8 : insets.bottom > 0 ? insets.bottom : 8;
-  const [text, setText] = useState("");
+  const online = useOnlineStatus();
   const inputRef = useRef<TextInput>(null);
+  const emojiRef = useRef<View>(null);
+  const [draft, setDraft] = useState(() => editingMessage?.text ?? "");
+  const draftRef = useRef(draft);
+  const caretRef = useRef(draft.length);
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [files, setFiles] = useState<PickedFile[]>([]);
   const [attachOpen, setAttachOpen] = useState(false);
-  const { t: tc } = useTranslation("chat");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [emojiAnchor, setEmojiAnchor] = useState<{ top: number; right: number } | null>(null);
+  const [mention, setMention] = useState<{ query: string; start: number } | null>(null);
+  const [mentioned, setMentioned] = useState<Record<string, string>>({});
 
-  /*
-   * OVOZLI XABAR — veb `message-composer.tsx` dagi oqim:
-   * mikrofon bosiladi -> yozish boshlanadi va kompozitor o'rnini yozish
-   * lentasi egallaydi -> "yuborish" yoki "bekor qilish".
-   * Backendga fayl, `duration_ms` (va vebda to'lqin shakli) ketadi —
-   * qayta ko'chirilgan `message.api.ts` buni `voice` maydoni orqali qiladi.
-   */
+  const members = useQuery({
+    queryKey: messageKeys.members(roomId ?? "", mention?.query ?? ""),
+    queryFn: ({ signal }) => messageApi.getMembers(roomId as string, mention?.query ?? "", { signal }),
+    enabled: Boolean(roomId) && Boolean(mention),
+  });
+  const suggestions = (members.data ?? []).slice(0, 6);
+
+  /* Ovozli xabar: mikrofon -> yozish paneli -> yuborish yoki bekor qilish. */
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -90,30 +102,130 @@ export function MessageComposer({
     return () => clearInterval(timer);
   }, [recording]);
 
+  useEffect(() => {
+    if (editingMessage || replyTo) inputRef.current?.focus();
+  }, [editingMessage, replyTo]);
+
+  useEffect(
+    () => () => {
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
+    },
+    []
+  );
+
+  function updateDraft(value: string) {
+    draftRef.current = value;
+    setDraft(value);
+  }
+
+  function detectMention(value: string, caret: number) {
+    const before = value.slice(0, caret);
+    const at = before.lastIndexOf("@");
+    if (at === -1) {
+      setMention(null);
+      return;
+    }
+    const previous = at === 0 ? " " : before[at - 1];
+    const query = before.slice(at + 1);
+    if (!/\s/.test(previous ?? "") || /\s/.test(query)) {
+      setMention(null);
+      return;
+    }
+    setMention({ query, start: at });
+  }
+
+  function applyMention(username: string, userId: string) {
+    if (!mention) return;
+    setMentioned((current) => ({ ...current, [username]: userId }));
+    const caret = caretRef.current;
+    const next = `${draft.slice(0, mention.start)}@${username} ${draft.slice(caret)}`;
+    const position = mention.start + username.length + 2;
+    updateDraft(next);
+    caretRef.current = position;
+    setMention(null);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelection?.(position, position);
+    });
+  }
+
+  function handleChange(value: string) {
+    const caret = Math.max(0, caretRef.current + (value.length - draftRef.current.length));
+    caretRef.current = caret;
+    updateDraft(value);
+    detectMention(value, caret);
+    if (onTyping && !typingTimerRef.current) {
+      onTyping();
+      typingTimerRef.current = setTimeout(() => {
+        typingTimerRef.current = null;
+      }, TYPING_THROTTLE_MS);
+    }
+  }
+
+  async function submit() {
+    const text = draft.trim();
+    if ((!text && !files.length) || sending) return;
+    const mentions = Object.entries(mentioned)
+      .filter(([username]) => text.includes(`@${username}`))
+      .map(([, id]) => id);
+    const queued = files;
+    updateDraft("");
+    setFiles([]);
+    setMention(null);
+    if (!queued.length) {
+      await onSend({ text, mentions, clientMessageId: crypto.randomUUID() });
+      return;
+    }
+    for (const [index, file] of queued.entries()) {
+      await onSend({
+        text: index === 0 ? text : "",
+        file: toUploadFile(file),
+        mentions: index === 0 ? mentions : [],
+        clientMessageId: crypto.randomUUID(),
+      });
+    }
+  }
+
+  function addFiles(picked: PickedFile[], images: boolean) {
+    const accepted = picked.filter((file) => {
+      if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        toast.error(t("composer.fileTooLarge"));
+        return false;
+      }
+      return true;
+    });
+    if (!accepted.length) return;
+    setFiles((current) => [...current, ...accepted]);
+    if (images) {
+      setPreviewOpen(true);
+      return;
+    }
+    toast.success(t("composer.fileAttached"));
+  }
+
   async function startRecording() {
     if (recording) return;
     const permission = await requestRecordingPermissionsAsync();
     if (!permission.granted) {
-      // Jim qolmaydi — vebdagi kabi foydalanuvchiga aytiladi.
-      toast.error(tc("composer.micDenied"));
+      toast.error(t("composer.micDenied"));
       return;
     }
     try {
-      // iOS'da yozish uchun audio sessiya rejimi yoqilishi SHART.
+      // iOS'da yozish uchun audio sessiya rejimi yoqilishi shart.
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record();
-      // Hisoblagich shu yerda nolga qaytadi — effekt ichida emas.
       secondsRef.current = 0;
       setSeconds(0);
       setRecording(true);
     } catch {
-      toast.error(tc("composer.micDenied"));
+      toast.error(t("composer.micDenied"));
     }
   }
 
   async function stopRecording(cancel: boolean) {
     setRecording(false);
+    setSeconds(0);
     try {
       await recorder.stop();
     } finally {
@@ -121,319 +233,368 @@ export function MessageComposer({
     }
     const uri = recorder.uri;
     if (cancel || !uri) return;
-    const file = toUploadFile({
-      uri,
-      name: `voice-${Date.now()}.m4a`,
-      mimeType: "audio/mp4",
-      size: 0,
-    });
-    onSend({
+    void onSend({
       text: "",
-      // Vebdagi kabi kamida 1 soniya — juda qisqa yozuv ham yuboriladi.
-      voice: { file, durationMs: Math.max(1000, secondsRef.current * 1000) },
+      clientMessageId: crypto.randomUUID(),
+      voice: {
+        file: toUploadFile({ uri, name: `voice-${Date.now()}.m4a`, mimeType: "audio/mp4", size: 0 }),
+        durationMs: Math.max(1000, secondsRef.current * 1000),
+      },
     });
   }
-  const [lastTypingAt, setLastTypingAt] = useState(0);
 
-  const canSend = text.trim().length > 0 && !disabled;
-
-  function handleChange(value: string) {
-    setText(value);
-    const now = Date.now();
-    if (now - lastTypingAt > TYPING_THROTTLE_MS) {
-      setLastTypingAt(now);
-      onTyping();
-    }
+  function openEmoji() {
+    emojiRef.current?.measureInWindow((x, y, width) => setEmojiAnchor({ top: y, right: x + width }));
   }
 
-  function send() {
-    const value = text.trim();
-    if (!value) return;
-    onSend({
-      text: value,
-      replyTo: replyTo ? { author: replyTo.senderName || "Xabar", text: replyTo.text } : undefined,
-    });
-    setText("");
-    onCancelReply();
-  }
+  const context = editingMessage || replyTo;
+  const hasContent = Boolean(draft.trim() || files.length);
+  const base = context ? 14 : 24;
+  const paddingBottom = keyboardVisible ? base : Math.max(base, insets.bottom + 8);
 
-  if (disabled && disabledReason) {
+  if (disabledReason) {
     return (
-      <View
-        style={[
-          styles.blocked,
-          {
-            backgroundColor: palette.surface,
-            borderTopColor: palette.border,
-            paddingBottom: bottomInset + 4,
-          },
-        ]}
-      >
-        <Text variant="caption" tone="muted" style={styles.blockedText}>
+      <View style={[styles.box, { backgroundColor: ds.c.surface, paddingBottom }]}>
+        <DsText v="body-sm" c="ink-secondary" style={styles.center}>
           {disabledReason}
-        </Text>
+        </DsText>
       </View>
     );
   }
 
   return (
-    <View
-      style={[
-        styles.wrapper,
-        {
-          backgroundColor: palette.surface,
-          borderTopColor: palette.border,
-          paddingBottom: bottomInset,
-        },
-      ]}
-    >
-      {replyTo ? (
-        <View style={[styles.replyBar, { backgroundColor: palette["primary-tint"] }]}>
-          <View style={[styles.replyAccent, { backgroundColor: palette["primary-text"] }]} />
-          <View style={styles.replyBody}>
-            <Text variant="caption" tone="brand" numberOfLines={1}>
-              {replyTo.senderName || "Xabar"}
-            </Text>
-            <Text variant="caption" tone="muted" numberOfLines={1}>
-              {replyTo.text}
-            </Text>
-          </View>
-          <IconButton
-            accessibilityLabel={t("message.javobni_bekor_qilish")}
-            onPress={onCancelReply}
-          >
-            <X size={18} color={palette["muted-foreground"]} />
-          </IconButton>
+    <View>
+      {mention ? (
+        <View style={[styles.mentions, { backgroundColor: ds.c.surface, boxShadow: ds.shadow.xl }]}>
+          <DsText v="caption" c="ink-secondary" style={styles.mentionTitle}>
+            {t("mention.title")}
+          </DsText>
+          {suggestions.length ? (
+            suggestions.map((member, index) => (
+              <Pressable
+                key={member.id}
+                accessibilityRole="button"
+                onPress={() => applyMention(member.username, member.id)}
+                style={({ pressed }) => [styles.mention, (index === 0 || pressed) && { backgroundColor: ds.c["brand-subtle"] }]}
+              >
+                <Avatar variant="legacy" name={member.name} src={member.avatarUrl} size="md" box={40} />
+                <View style={styles.grow}>
+                  <DsText v="title" numberOfLines={1} style={styles.mentionName}>
+                    {member.name}
+                  </DsText>
+                  <DsText v="body-sm" c={member.role === "teacher" ? "brand" : "ink-secondary"} numberOfLines={1}>
+                    {member.role === "teacher"
+                      ? t("mention.teacher")
+                      : `@${member.username}${member.isOnline ? ` · ${t("mention.online")}` : ""}`}
+                  </DsText>
+                </View>
+              </Pressable>
+            ))
+          ) : (
+            <DsText v="caption" c="ink-tertiary" style={styles.mentionEmpty}>
+              {members.isLoading ? "..." : t("mention.empty")}
+            </DsText>
+          )}
         </View>
       ) : null}
 
-      {recording ? (
-        /*
-         * Yozish lentasi — veb: radius 24, chegara 1px, fon `--bg-canvas`,
-         * bo'shliq 16/12, oraliq 12. Chapda bekor qilish (40), qizil
-         * nuqta, vaqt, izoh, o'ngda yuborish (44).
-         */
-        <View
-          style={[
-            styles.recordBar,
-            { backgroundColor: palette.background, borderColor: palette.border },
-          ]}
-        >
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={tc("composer.recordCancel")}
-            onPress={() => void stopRecording(true)}
-            style={styles.recordCancel}
-          >
-            <Trash2 size={19} color={palette["destructive-strong"]} />
-          </Pressable>
-          <View style={[styles.recordDot, { backgroundColor: palette.destructive }]} />
-          <Text variant="label" style={styles.recordTime}>
-            {formatSeconds(seconds)}
-          </Text>
-          <Text variant="caption" tone="muted" numberOfLines={1} style={styles.recordHint}>
-            {tc("composer.recordHint")}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={tc("composer.recordSend")}
-            onPress={() => void stopRecording(false)}
-            style={({ pressed }) => [
-              styles.send,
-              { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
-            ]}
-          >
-            <SendHorizontal size={19} color={palette["primary-foreground"]} />
-          </Pressable>
-        </View>
-      ) : (
-        <View style={styles.row}>
-          {/*
-           * "+" — biriktirma varag'ini ochadi: galereya, kamera, hujjat va
-           * o'qituvchida vazifa. Vebdagi kabi.
-           */}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("message.biriktirish")}
-            onPress={() => setAttachOpen(true)}
-            style={({ pressed }) => [
-              styles.circle48,
-              { backgroundColor: palette["surface-subtle"], opacity: pressed ? 0.85 : 1 },
-            ]}
-          >
-            <Plus size={22} color={palette.foreground} />
-          </Pressable>
+      <View style={[styles.box, { backgroundColor: ds.c.surface, paddingBottom }]}>
+        {online ? null : (
+          <View style={styles.offline}>
+            <Icon name="wifi" size={16} color={ds.c["saffron-strong"]} />
+            <DsText v="caption" c="saffron-strong" numberOfLines={1}>
+              {t("offline.composerShort")}
+            </DsText>
+          </View>
+        )}
 
-          {/*
-           * Maydon — vebdagi kabi ichida @ va emoji. O'lchamlar veb
-           * DOM'idan: 56 balandlik, radius 24, fon `--bg-canvas`,
-           * chegara 1px, bo'shliq 12/20, oraliq 8.
-           */}
-          <View
-            style={[
-              styles.inputWrap,
-              { backgroundColor: palette.background, borderColor: palette.border },
-            ]}
-          >
-            <TextInput
-              ref={inputRef}
-              style={[styles.input, { color: palette.foreground }]}
-              placeholder={t("message.xabar_yozing")}
-              placeholderTextColor={palette["muted-foreground"]}
-              value={text}
-              onChangeText={handleChange}
-              multiline
-              // iOS'da `multiline` bilan `blurOnSubmit=false` bo'lmasa Enter
-              // klaviaturani yopib yuboradi.
-              blurOnSubmit={false}
-              accessibilityLabel={t("message.xabar_matni")}
-              maxLength={4000}
-            />
-            {/* @ — vebdagi kabi matnga "@" qo'shadi. */}
+        {context ? (
+          <View style={styles.context}>
+            <View style={[styles.contextBar, { backgroundColor: ds.c.brand }]} />
+            <View style={styles.grow}>
+              <DsText v="caption-strong" c="brand" numberOfLines={1}>
+                {editingMessage
+                  ? t("composer.editingLabel")
+                  : replyTo?.senderName || (replyTo?.senderId === currentUserId ? t("composer.youLabel") : t("composer.replyFallback"))}
+              </DsText>
+              <DsText v="body-sm" c="ink-secondary" numberOfLines={1} style={styles.contextText}>
+                {context.text}
+              </DsText>
+            </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t("message.eslatish")}
-              hitSlop={8}
+              accessibilityLabel={editingMessage ? t("composer.cancelEditAria") : t("composer.cancelReplyAria")}
               onPress={() => {
-                handleChange(`${text}@`);
-                inputRef.current?.focus();
+                onCancelContext();
+                if (editingMessage) updateDraft("");
               }}
-              style={styles.inlineIcon}
+              style={({ pressed }) => [styles.contextClose, pressed && { backgroundColor: ds.c.subtle }]}
             >
-              <AtSign size={20} color={palette["muted-foreground"]} />
-            </Pressable>
-            {/*
-             * Emoji — telefon klaviaturasida emoji bo'limi bor, shuning
-             * uchun tugma maydonni ochadi va foydalanuvchi o'sha yerdan
-             * tanlaydi.
-             */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("message.emoji")}
-              hitSlop={8}
-              onPress={() => inputRef.current?.focus()}
-              style={styles.inlineIcon}
-            >
-              <Smile size={20} color={palette["muted-foreground"]} />
+              <Icon name="close" size={18} color={ds.c["ink-secondary"]} />
             </Pressable>
           </View>
+        ) : null}
 
-          {/* Matn bo'lsa YUBORISH (44), bo'lmasa MIKROFON (48) — vebdagi kabi. */}
-          {canSend ? (
+        {files.length && !previewOpen ? (
+          <View style={styles.files}>
+            {files.map((file, index) => {
+              const image = file.mimeType.startsWith("image/");
+              return (
+                <View
+                  key={`${file.uri}-${index}`}
+                  style={[styles.fileTile, image ? styles.fileImage : styles.fileDoc, { borderColor: ds.c.line, backgroundColor: ds.c.canvas }]}
+                >
+                  {image ? (
+                    <Image source={{ uri: file.uri }} style={styles.fill} resizeMode="cover" />
+                  ) : (
+                    <>
+                      <View style={[styles.fileExt, { backgroundColor: ds.c["error-bg"] }]}>
+                        <DsText v="caption-strong" c="error-text">
+                          {file.name.split(".").pop()?.slice(0, 4).toUpperCase() ?? "FILE"}
+                        </DsText>
+                      </View>
+                      <View style={styles.fileText}>
+                        <DsText v="caption-strong" numberOfLines={1}>
+                          {file.name}
+                        </DsText>
+                        <DsText v="caption" c="ink-tertiary">
+                          {formatFileSize(file.size)}
+                        </DsText>
+                      </View>
+                    </>
+                  )}
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t("composer.removeAttachmentAria")}
+                    onPress={() => setFiles((current) => current.filter((_, position) => position !== index))}
+                    hitSlop={6}
+                    style={[styles.fileRemove, { backgroundColor: ds.c.surface, boxShadow: ds.shadow.xs }]}
+                  >
+                    <Icon name="close" size={14} color={ds.c["ink-tertiary"]} />
+                  </Pressable>
+                </View>
+              );
+            })}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t("message.yuborish")}
-              onPress={send}
-              style={({ pressed }) => [
-                styles.send,
-                { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
-              ]}
+              accessibilityLabel={t("composer.attachAria")}
+              onPress={() => setAttachOpen(true)}
+              style={[styles.fileTile, styles.fileImage, styles.fileAdd, { borderColor: ds.c.line }]}
             >
-              <SendHorizontal size={20} color={palette["primary-foreground"]} />
+              <Icon name="add" size={20} color={ds.c["ink-tertiary"]} />
             </Pressable>
-          ) : (
+          </View>
+        ) : null}
+
+        {recording ? (
+          <View style={styles.row}>
+            <View style={[styles.recordPill, { backgroundColor: ds.c["danger-bg"] }]}>
+              <PulseDot color={ds.c.danger} />
+              <DsText v="title-sm" c="error-text" numeric>
+                {formatDuration(seconds)}
+              </DsText>
+              <Pressable accessibilityRole="button" onPress={() => void stopRecording(true)} style={styles.grow}>
+                <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
+                  ‹ {t("composer.recordSwipeCancel")}
+                </DsText>
+              </Pressable>
+            </View>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={t("message.ovozli_xabar")}
-              onPress={() => void startRecording()}
+              accessibilityLabel={t("composer.recordSend")}
+              onPress={() => void stopRecording(false)}
+              style={({ pressed }) => [styles.recordSend, { backgroundColor: ds.c.danger, opacity: pressed ? 0.85 : 1 }]}
+            >
+              <Icon name="mic" size={24} color={ds.c["on-action"]} />
+            </Pressable>
+          </View>
+        ) : (
+          <View style={styles.row}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("composer.attachAria")}
+              disabled={!allowAttachments || Boolean(editingMessage)}
+              onPress={() => setAttachOpen(true)}
               style={({ pressed }) => [
-                styles.circle48,
-                { backgroundColor: palette.primary, opacity: pressed ? 0.85 : 1 },
+                styles.round,
+                { backgroundColor: pressed ? ds.c.muted : ds.c.subtle },
+                (!allowAttachments || editingMessage) && styles.disabled,
               ]}
             >
-              <Mic size={22} color={palette["primary-foreground"]} />
+              <Icon name="add" size={22} color={ds.c.ink} />
             </Pressable>
-          )}
-        </View>
-      )}
+
+            {/* `min-h-11 rounded-[22px] bg-subtle py-2.5 pr-3 pl-4.5 gap-2` */}
+            <View style={[styles.field, { backgroundColor: ds.c.subtle }]}>
+              <TextInput
+                ref={inputRef}
+                value={draft}
+                onChangeText={handleChange}
+                onSelectionChange={(event) => {
+                  caretRef.current = event.nativeEvent.selection.end;
+                  detectMention(draftRef.current, event.nativeEvent.selection.end);
+                }}
+                multiline
+                submitBehavior="newline"
+                maxLength={4000}
+                placeholder={editingMessage ? t("composer.editPlaceholder") : t("composer.sendPlaceholder")}
+                placeholderTextColor={ds.c["ink-secondary"]}
+                accessibilityLabel={t("composer.textAria")}
+                selectionColor={ds.c.brand}
+                style={[styles.input, { color: ds.c.ink }]}
+              />
+              <View ref={emojiRef} collapsable={false}>
+                <Pressable accessibilityRole="button" accessibilityLabel={t("composer.emojiAria")} onPress={openEmoji} hitSlop={8} style={styles.emojiButton}>
+                  <Icon name="emoji" size={20} color={ds.c["ink-secondary"]} />
+                </Pressable>
+              </View>
+            </View>
+
+            {hasContent || editingMessage ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={editingMessage ? t("composer.saveEditAria") : t("composer.sendAria")}
+                disabled={(!draft.trim() && !files.length) || sending}
+                onPress={() => void submit()}
+                style={({ pressed }) => [
+                  styles.round,
+                  { backgroundColor: pressed ? ds.c["action-hover"] : ds.c.action },
+                  (!draft.trim() && !files.length) || sending ? styles.disabled : null,
+                ]}
+              >
+                {sending ? (
+                  <ActivityIndicator size="small" color={ds.c["on-action"]} />
+                ) : (
+                  <Icon name={editingMessage ? "check" : "send"} size={editingMessage ? 22 : 20} color={ds.c["on-action"]} />
+                )}
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("actionsMenu.voiceAria")}
+                onPress={() => void startRecording()}
+                style={({ pressed }) => [styles.round, { backgroundColor: pressed ? ds.c.muted : ds.c.subtle }]}
+              >
+                <Icon name="mic" size={22} color={ds.c.ink} />
+              </Pressable>
+            )}
+          </View>
+        )}
+      </View>
+
+      <Modal visible={Boolean(emojiAnchor)} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent onRequestClose={() => setEmojiAnchor(null)}>
+        <Pressable accessibilityRole="button" style={styles.fill} onPress={() => setEmojiAnchor(null)}>
+          {emojiAnchor ? (
+            <View
+              style={[
+                styles.emojiPill,
+                { top: emojiAnchor.top - 46 - 50, left: emojiAnchor.right + 11 - 266, backgroundColor: ds.c.surface, boxShadow: ds.shadow.xl },
+              ]}
+            >
+              {EMOJIS.map((emoji) => (
+                <Pressable
+                  key={emoji}
+                  accessibilityRole="button"
+                  onPress={() => {
+                    updateDraft(draftRef.current + emoji);
+                    setEmojiAnchor(null);
+                  }}
+                  style={({ pressed }) => [styles.emoji, pressed && { backgroundColor: ds.c.subtle }]}
+                >
+                  <DsText style={styles.emojiText}>{emoji}</DsText>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+        </Pressable>
+      </Modal>
 
       <AttachmentSheet
         open={attachOpen}
         onClose={() => setAttachOpen(false)}
-        // Fayl alohida xabar bo'lib ketadi — vebdagi kabi, matnsiz.
-        onPick={(file) => onSend({ text: "", file })}
+        roomId={roomId ?? undefined}
+        onPick={addFiles}
         onAssignment={onAssignment}
+        maxSizeMb={MAX_FILE_MB}
       />
+
+      {previewOpen && files.length ? (
+        <ImagePreviewScreen
+          files={files}
+          caption={draft}
+          onCaptionChange={updateDraft}
+          onRemove={(index) =>
+            setFiles((current) => {
+              const next = current.filter((_, position) => position !== index);
+              if (!next.length) setPreviewOpen(false);
+              return next;
+            })
+          }
+          onAddMore={() => {
+            setPreviewOpen(false);
+            setAttachOpen(true);
+          }}
+          onCancel={() => {
+            setFiles([]);
+            setPreviewOpen(false);
+          }}
+          onSend={() => {
+            setPreviewOpen(false);
+            void submit();
+          }}
+        />
+      ) : null}
     </View>
   );
 }
 
+/** Yozish paytidagi qizil nuqta — `animate-pulse`. */
+function PulseDot({ color }: { color: string }) {
+  const opacity = useSharedValue(1);
+  useEffect(() => {
+    opacity.set(withRepeat(withTiming(0.4, { duration: 800 }), -1, true));
+  }, [opacity]);
+  const style = useAnimatedStyle(() => ({ opacity: opacity.get() }));
+  return <Animated.View style={[styles.pulse, { backgroundColor: color }, style]} />;
+}
+
 const styles = StyleSheet.create({
-  wrapper: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 8,
-    paddingHorizontal: 10,
-    gap: 8,
-  },
-  /* Veb: `items-end gap-3` — oraliq 12. */
-  row: { flexDirection: "row", alignItems: "flex-end", gap: 12 },
-  recordBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: radius["2xl"],
-    borderWidth: 1,
-  },
-  recordCancel: { width: 40, height: 40, alignItems: "center", justifyContent: "center" },
-  recordDot: { width: 10, height: 10, borderRadius: radius.full },
-  recordTime: { fontVariant: ["tabular-nums"] },
-  recordHint: { flex: 1, textAlign: "center" },
-  /*
-   * O'lchamlar veb DOM'idan (390px): o'ram 56 balandlik, radius 24,
-   * fon `--bg-canvas`, chegara 1px, ichki bo'shliq 12/20, matn 16/24.
-   *
-   * Ilgari radius 16, chegara hairline va matn 15px edi.
-   */
-  /*
-   * Maydon o'rami — veb DOM'idan: 56 balandlik, radius 24, chegara 1px,
-   * bo'shliq 12/20, oraliq 8. Matnning o'zi shaffof, fon o'ramda.
-   */
-  inputWrap: {
-    flex: 1,
-    minHeight: 56,
-    maxHeight: 130,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 20,
-    borderRadius: radius["2xl"],
-    borderWidth: 1,
-  },
-  input: {
-    flex: 1,
-    maxHeight: 120,
-    paddingTop: Platform.OS === "ios" ? 16 : 12,
-    paddingBottom: Platform.OS === "ios" ? 16 : 12,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  /* Veb: @ va emoji tugmalari 28x28. */
-  inlineIcon: { width: 28, height: 28, alignItems: "center", justifyContent: "center" },
-  /* Veb: "+" va mikrofon `size-12` — 48x48. */
-  circle48: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.full,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  send: {
-    width: MIN_TOUCH_SIZE,
-    height: MIN_TOUCH_SIZE,
-    borderRadius: MIN_TOUCH_SIZE / 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  replyBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: radius.sm,
-    overflow: "hidden",
-  },
-  replyAccent: { width: 3, alignSelf: "stretch" },
-  replyBody: { flex: 1, paddingHorizontal: 10, paddingVertical: 6, gap: 2 },
-  blocked: { borderTopWidth: StyleSheet.hairlineWidth, padding: 16 },
-  blockedText: { textAlign: "center" },
+  fill: { flex: 1 },
+  grow: { flex: 1, minWidth: 0 },
+  center: { textAlign: "center" },
+  disabled: { opacity: 0.4 },
+  /* `bg-surface px-4 pt-2.5` */
+  box: { paddingHorizontal: 16, paddingTop: 10 },
+  offline: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
+  /* `right-4 left-4 rounded-xl bg-surface px-2 pt-6.5 pb-2 shadow-xl` */
+  mentions: { marginHorizontal: 16, marginBottom: 8, paddingHorizontal: 8, paddingTop: 26, paddingBottom: 8, borderRadius: dsRadius.xl },
+  mentionTitle: { paddingHorizontal: 10, paddingBottom: 3, textTransform: "uppercase" },
+  mention: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14, borderRadius: dsRadius.lg },
+  mentionName: { lineHeight: 20 },
+  mentionEmpty: { paddingHorizontal: 16, paddingBottom: 12 },
+  /* `mt-2.5 mb-4 gap-2.5 pl-1` */
+  context: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 10, marginBottom: 16, paddingLeft: 4 },
+  contextBar: { width: 3, alignSelf: "stretch", borderRadius: 2 },
+  contextText: { lineHeight: 16 },
+  contextClose: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  files: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8, marginBottom: 12 },
+  fileTile: { overflow: "hidden", borderWidth: 1, borderRadius: dsRadius.xl },
+  fileImage: { width: 64, height: 64 },
+  fileDoc: { height: 64, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 12, paddingRight: 36 },
+  fileAdd: { borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  fileExt: { width: 40, height: 40, borderRadius: dsRadius.lg, alignItems: "center", justifyContent: "center" },
+  fileText: { maxWidth: 150, minWidth: 0 },
+  fileRemove: { position: "absolute", top: 4, right: 4, width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  /* `items-end gap-2.25` */
+  row: { flexDirection: "row", alignItems: "flex-end", gap: 9 },
+  round: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  field: { flex: 1, minWidth: 0, minHeight: 44, flexDirection: "row", alignItems: "flex-end", gap: 8, paddingVertical: 10, paddingLeft: 18, paddingRight: 12, borderRadius: 22 },
+  input: { flex: 1, minWidth: 0, maxHeight: 120, padding: 0, fontSize: dsType.body.fontSize, lineHeight: 24, fontFamily: bodyFont("400"), marginVertical: -2 },
+  emojiButton: { width: 24, height: 24, alignItems: "center", justifyContent: "center" },
+  emojiPill: { position: "absolute", width: 266, height: 50, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 12, borderRadius: 25 },
+  emoji: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  emojiText: { fontSize: 22, lineHeight: 28 },
+  recordPill: { flex: 1, minWidth: 0, height: 44, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, borderRadius: 22 },
+  pulse: { width: 10, height: 10, borderRadius: 5 },
+  recordSend: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
 });

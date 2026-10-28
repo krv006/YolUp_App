@@ -1,57 +1,63 @@
-import { format, isToday, isYesterday } from "date-fns";
-import { uz } from "date-fns/locale";
 import type { ChatMessage } from "@/shared/types";
 
 /**
- * Xabarlar ro'yxatini sana ajratgichlari bilan tayyorlaydi.
+ * Xabarlar ro'yxati qatorlari: kun ajratgichlari, "N ta yangi xabar"
+ * chizig'i va ketma-ket xabarlarni guruhlash (veb `message-list.tsx`:
+ * bir odamning 5 daqiqa ichidagi xabarlarida ism faqat birinchisida,
+ * avatar faqat oxirgisida).
  *
- * Tartib TABIIY (eski -> yangi). Ro'yxat teskari ag'darilmaydi: FlashList v2
- * `inverted` ni olib tashlab, o'rniga `maintainVisibleContentPosition`
- * berdi — u yangi xabar kelganda skrollni o'zi joyida ushlab turadi va
- * `startRenderingFromBottom` bilan ro'yxat darhol pastdan ochiladi.
- *
- * Bu eski `inverted` hiylasidan yaxshiroq: kontent ag'darilmaydi, ya'ni
- * soyalar, ajratgichlar va screen reader tartibi tabiiy qoladi.
+ * Tartib TABIIY (eski -> yangi): FlashList v2 `inverted` o'rniga
+ * `maintainVisibleContentPosition` bilan pastdan ochiladi.
  */
-
 export type MessageRow =
-  | { kind: "message"; message: ChatMessage; showSender: boolean }
-  | { kind: "day"; label: string; key: string };
+  | { kind: "message"; key: string; message: ChatMessage; showName: boolean; showAvatar: boolean }
+  | { kind: "assignment"; key: string; message: ChatMessage }
+  | { kind: "day"; key: string; date: string }
+  | { kind: "unread"; key: string };
+
+const GROUP_WINDOW_MS = 5 * 60 * 1000;
 
 function dayKey(value: string): string {
   return new Date(value).toDateString();
 }
 
-function dayLabel(value: string): string {
-  const date = new Date(value);
-  if (isToday(date)) return "Bugun";
-  if (isYesterday(date)) return "Kecha";
-  return format(date, "d-MMMM yyyy", { locale: uz });
+function sameGroup(current: ChatMessage, other: ChatMessage | undefined): boolean {
+  return Boolean(
+    other &&
+      other.senderId === current.senderId &&
+      other.type !== "system" &&
+      dayKey(other.createdAt) === dayKey(current.createdAt) &&
+      Math.abs(new Date(other.createdAt).getTime() - new Date(current.createdAt).getTime()) < GROUP_WINDOW_MS
+  );
 }
 
-/** Ketma-ket bir odam yozgan xabarlarda ism takrorlanmaydi. */
-function shouldShowSender(current: ChatMessage, previous: ChatMessage | undefined): boolean {
-  if (!previous) return true;
-  if (previous.senderId !== current.senderId) return true;
-  return dayKey(previous.createdAt) !== dayKey(current.createdAt);
-}
-
-export function buildMessageRows(messages: readonly ChatMessage[]): MessageRow[] {
+export function buildMessageRows(
+  messages: readonly ChatMessage[],
+  options: { days?: boolean; dividerId?: string | null } = {}
+): MessageRow[] {
+  const { days = true, dividerId = null } = options;
   const rows: MessageRow[] = [];
 
   messages.forEach((message, index) => {
-    const previous = index > 0 ? messages[index - 1] : undefined;
+    const previous = messages[index - 1];
+    const next = messages[index + 1];
 
-    // Kun almashgan joyda — o'sha kunning birinchi xabari USTIDA ajratgich.
-    if (!previous || dayKey(previous.createdAt) !== dayKey(message.createdAt)) {
-      rows.push({
-        kind: "day",
-        label: dayLabel(message.createdAt),
-        key: `day-${dayKey(message.createdAt)}`,
-      });
+    if (days && (!previous || dayKey(previous.createdAt) !== dayKey(message.createdAt))) {
+      rows.push({ kind: "day", key: `day-${dayKey(message.createdAt)}`, date: message.createdAt });
     }
+    if (message.id === dividerId) rows.push({ kind: "unread", key: `unread-${message.id}` });
 
-    rows.push({ kind: "message", message, showSender: shouldShowSender(message, previous) });
+    if (message.type === "assignment" && message.assignment) {
+      rows.push({ kind: "assignment", key: message.id, message });
+      return;
+    }
+    rows.push({
+      kind: "message",
+      key: message.id,
+      message,
+      showName: !sameGroup(message, previous),
+      showAvatar: !sameGroup(message, next),
+    });
   });
 
   return rows;

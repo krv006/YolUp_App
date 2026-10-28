@@ -33,20 +33,15 @@ const TABS = [
   { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar" },
   { name: "dashboard", labelKey: "tabs.home", iconName: "home", center: true },
   { name: "chats", labelKey: "tabs.chat", iconName: "nav-chat", unreadChats: true },
-  {
-    name: "profile",
-    labelKey: "tabs.profile",
-    iconName: "nav-profile",
-    owns: ["profile-personal", "profile-account", "profile-system"],
-    inset: true,
-  },
+  // Pastki bo'shliq `profile/_layout.tsx` da — faqat bosh sahifada.
+  { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
 ] as const;
 
 export default function TeacherLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.TEACHER]}>
-        <RoleTabs variant="floating" tabs={TABS} hidden={["search", "profile-personal", "profile-account", "profile-system", "notifications"]} />
+        <RoleTabs variant="floating" tabs={TABS} hidden={["search", "notifications"]} />
         <NewConversationHost role="teacher" />
       </RoleRoute>
     </ProtectedRoute>

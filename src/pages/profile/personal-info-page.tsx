@@ -1,191 +1,134 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Image, Pressable, StyleSheet, View } from "react-native";
-import { useAuth, useUpdateAvatarMutation, useUpdateProfileMutation } from "@/modules/auth";
-import { useSubjects } from "@/modules/course";
-import { pickImage, toUploadFile } from "@/shared/lib";
-import { DateField, Icon, Input, radius, SelectField, Text, toast, useTheme } from "@/shared/ui";
-import { initialsOf, ProfileSubPage } from "./profile-shell";
+import { StyleSheet, View } from "react-native";
+import { useAuth, useIsStudent, useUpdateProfileMutation } from "@/modules/auth";
+import { useCourses, useSubjects } from "@/modules/course";
+import { bodyFont, DsText, dsRadius, dsType, Icon, MobileButton, MobileFieldLabel, MobileInput, MobilePickerField, toast, useDs } from "@/shared/ui";
+import { ProfileSubPage } from "./profile-shell";
 
-/** Shaxsiy ma'lumotlar — veb `pages/profile/personal-info-page.tsx`. */
+const CITIES = ["Toshkent", "Samarqand", "Buxoro", "Andijon", "Farg'ona", "Namangan", "Qarshi", "Nukus", "Urganch", "Jizzax", "Guliston", "Navoiy", "Termiz"];
+
+type TextField = "firstName" | "lastName" | "phone" | "email";
+
+/**
+ * Shaxsiy ma'lumotlar — veb `personal-info-page.tsx` (tor ekran): ism va
+ * familiya, telefon (izoh bilan), email, fan (o'quvchida o'qiyotgan fanlari)
+ * va shahar; pastda "Saqlash", xato bo'lsa uning ustida izoh.
+ */
 export function PersonalInfoPage() {
   const { t } = useTranslation("account");
-  const { palette } = useTheme();
+  const ds = useDs();
   const { user } = useAuth();
   const update = useUpdateProfileMutation();
-  const updateAvatar = useUpdateAvatarMutation();
   const subjects = useSubjects();
-  const [today] = useState(() => new Date());
+  const student = useIsStudent();
+  const courses = useCourses();
+  const studying = [...new Set((courses.data ?? []).map((course) => course.subjectLabel).filter(Boolean))].join(", ");
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
     lastName: user?.lastName ?? "",
     phone: user?.phone ?? "",
-    middleName: user?.middleName ?? "",
-    birthDate: user?.birthDate ?? "",
     email: user?.email ?? "",
     subject: user?.subject ?? "",
     city: user?.city ?? "",
-    bio: user?.bio ?? "",
   });
-  const [emailError, setEmailError] = useState(false);
 
-  const subjectOptions = [{ value: "", label: t("page.subjectNone") }, ...(subjects.data ?? [])];
+  const subjectOptions = [{ value: "", label: t("page.subjectNone") }, ...(subjects.data ?? []).map((item) => ({ value: item.value, label: item.label }))];
+  const subjectLabel = subjectOptions.find((item) => item.value === form.subject)?.label ?? "";
 
-  function patch(next: Partial<typeof form>) {
-    setForm((current) => ({ ...current, ...next }));
-  }
-
-  function submit() {
-    // Vebda `required` — bo'sh ism/familiya bilan forma yuborilmaydi.
+  function save() {
     if (!form.firstName.trim() || !form.lastName.trim()) return;
-    update.mutate(form, {
-      onSuccess: () => toast.success(t("page.saved")),
-      onError: (error: Error) => toast.error(error.message),
-    });
+    update.mutate(
+      { ...form, middleName: user?.middleName ?? "", birthDate: user?.birthDate ?? "", bio: user?.bio ?? "" },
+      { onSuccess: () => toast.success(t("page.mobile.saved")) }
+    );
   }
 
-  async function changeAvatar() {
-    const picked = await pickImage("library");
-    if (picked) updateAvatar.mutate(toUploadFile(picked), { onError: (error: Error) => toast.error(error.message) });
-  }
+  const field = (key: TextField, keyboardType?: "phone-pad" | "email-address") => (
+    <MobileInput
+      surface
+      value={form[key]}
+      keyboardType={keyboardType}
+      autoCapitalize={keyboardType ? "none" : "words"}
+      onChangeText={(value) => setForm((current) => ({ ...current, [key]: value }))}
+    />
+  );
 
   return (
     <ProfileSubPage
       title={t("page.personalTitle")}
-      footer={
-        <Pressable
-          accessibilityRole="button"
-          disabled={update.isPending}
-          onPress={submit}
-          style={({ pressed }) => [
-            styles.save,
-            { backgroundColor: pressed ? palette["primary-hover"] : palette.primary, opacity: update.isPending ? 0.6 : 1 },
-          ]}
-        >
-          {update.isPending ? <ActivityIndicator size="small" color={palette["primary-foreground"]} /> : null}
-          <Text variant="label" style={{ color: palette["primary-foreground"] }}>
-            {update.isPending ? t("page.saving") : t("page.save")}
-          </Text>
-        </Pressable>
-      }
-    >
-      <View style={[styles.avatarCard, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-        <View>
-          {user?.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, { backgroundColor: palette["primary-soft"] }]}>
-              <Text variant="subheading" style={[styles.initials, { color: palette.primary }]}>
-                {initialsOf(user?.name)}
-              </Text>
-            </View>
-          )}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("page.avatarUpload")}
-            onPress={() => void changeAvatar()}
-            style={[styles.camera, { borderColor: palette.surface, backgroundColor: palette.primary }]}
-          >
-            <Icon name="camera" size={14} color={palette["primary-foreground"]} />
-          </Pressable>
-        </View>
-        <View style={styles.grow}>
-          <Text variant="label">{t("page.avatarTitle")}</Text>
-          <Text variant="caption" style={[styles.caption, { color: palette["subtle-foreground"] }]}>
-            {t("page.avatarHint")}
-          </Text>
-          <View style={styles.avatarActions}>
-            <Pressable accessibilityRole="button" onPress={() => void changeAvatar()}>
-              <Text variant="label" style={{ color: palette.primary }}>
-                {t("page.avatarUpload")}
-              </Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" onPress={() => toast.info(t("page.notAvailable"))}>
-              <Text variant="label" style={{ color: palette["destructive-strong"] }}>
-                {t("page.avatarRemove")}
-              </Text>
-            </Pressable>
+      footerNote={
+        update.isError ? (
+          <View style={[styles.error, { backgroundColor: ds.c["danger-bg"] }]}>
+            <Icon name="warning-fill" size={20} color={ds.c.danger} />
+            <DsText v="body-sm" w="500" c="error-text" style={styles.grow}>
+              {t("page.mobile.saveFailed")}
+            </DsText>
           </View>
-        </View>
-      </View>
-
+        ) : null
+      }
+      footer={<MobileButton label={t("page.save")} disabled={update.isPending} onPress={save} />}
+    >
       <View style={styles.form}>
         <View style={styles.pair}>
-          <Input
-            label={t("page.firstName")}
-            value={form.firstName}
-            onChangeText={(value) => patch({ firstName: value })}
-            containerStyle={styles.grow}
-          />
-          <Input
-            label={t("page.lastName")}
-            value={form.lastName}
-            onChangeText={(value) => patch({ lastName: value })}
-            containerStyle={styles.grow}
-          />
+          <View style={styles.grow}>
+            <MobileFieldLabel gap={7} label={t("page.firstName")}>
+              {field("firstName")}
+            </MobileFieldLabel>
+          </View>
+          <View style={styles.grow}>
+            <MobileFieldLabel gap={7} label={t("page.lastName")}>
+              {field("lastName")}
+            </MobileFieldLabel>
+          </View>
         </View>
-
-        <Input
-          label={t("page.fatherName")}
-          value={form.middleName}
-          onChangeText={(value) => patch({ middleName: value })}
-          placeholder={t("page.fatherName")}
-        />
-
-        <DateField
-          label={t("page.birthDate")}
-          value={form.birthDate}
-          onChange={(value) => patch({ birthDate: value })}
-          maximumDate={today}
-        />
-
-        <View style={styles.withNote}>
-          <Input
-            label={t("page.phone")}
-            value={form.phone}
-            onChangeText={(value) => patch({ phone: value })}
-            keyboardType="phone-pad"
-          />
-          <Text variant="caption" style={[styles.caption, styles.note, { color: palette["subtle-foreground"] }]}>
+        <View style={styles.phone}>
+          <MobileFieldLabel gap={7} label={t("page.phone")}>
+            {field("phone", "phone-pad")}
+          </MobileFieldLabel>
+          <DsText v="caption" w="400" c="ink-secondary">
             {t("page.phoneNote")}
-          </Text>
+          </DsText>
         </View>
-
-        <Input
-          label={t("page.email")}
-          value={form.email}
-          onChangeText={(value) => patch({ email: value })}
-          onBlur={() => setEmailError(Boolean(form.email) && !form.email.includes("@"))}
-          error={emailError ? " " : undefined}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <SelectField
-          label={t("page.subject")}
-          value={form.subject}
-          onChange={(value) => patch({ subject: value })}
-          options={subjectOptions}
-          searchable
-        />
-
-        <Input label={t("page.city")} value={form.city} onChangeText={(value) => patch({ city: value })} placeholder="—" />
-
-        <Input
-          label={t("page.about")}
-          value={form.bio}
-          onChangeText={(value) => patch({ bio: value })}
-          placeholder="—"
-          multiline
-          numberOfLines={3}
-          inputStyle={styles.bio}
-        />
-
-        {update.isError ? (
-          <Text variant="label" style={[styles.error, { backgroundColor: palette["destructive-soft"], color: palette["destructive-strong"] }]}>
-            {update.error.message}
-          </Text>
-        ) : null}
+        <MobileFieldLabel gap={7} label={t("page.email")}>
+          {field("email", "email-address")}
+        </MobileFieldLabel>
+        <View style={styles.pair}>
+          <View style={styles.grow}>
+            <MobileFieldLabel gap={7} label={student ? t("page.studying") : t("page.subject")}>
+              {student ? (
+                <View style={[styles.readonly, { backgroundColor: ds.c.surface }]}>
+                  <DsText numberOfLines={1} style={styles.readonlyText}>
+                    {studying || "—"}
+                  </DsText>
+                </View>
+              ) : (
+                <MobilePickerField
+                  type="select"
+                  surface
+                  value={form.subject}
+                  display={subjectLabel}
+                  ariaLabel={t("page.subject")}
+                  options={subjectOptions}
+                  onChange={(value) => setForm((current) => ({ ...current, subject: value }))}
+                />
+              )}
+            </MobileFieldLabel>
+          </View>
+          <View style={styles.grow}>
+            <MobileFieldLabel gap={7} label={t("page.city")}>
+              <MobilePickerField
+                type="select"
+                surface
+                value={form.city}
+                display={form.city || t("page.subjectNone")}
+                ariaLabel={t("page.city")}
+                options={[...(form.city ? [] : [{ value: "", label: t("page.subjectNone") }]), ...CITIES.map((city) => ({ value: city, label: city }))]}
+                onChange={(value) => setForm((current) => ({ ...current, city: value }))}
+              />
+            </MobileFieldLabel>
+          </View>
+        </View>
       </View>
     </ProfileSubPage>
   );
@@ -193,29 +136,11 @@ export function PersonalInfoPage() {
 
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
-  caption: { fontWeight: "500" },
-  /* `flex items-center gap-4 rounded-2xl border p-4` */
-  avatarCard: { flexDirection: "row", alignItems: "center", gap: 16, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
-  avatar: { width: 64, height: 64, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  initials: { fontSize: 16, lineHeight: 24, fontWeight: "600" },
-  camera: {
-    position: "absolute",
-    right: 0,
-    bottom: 0,
-    width: 28,
-    height: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderRadius: radius.full,
-  },
-  avatarActions: { marginTop: 4, flexDirection: "row", alignItems: "center", gap: 16 },
-  form: { gap: 16 },
+  /* `-mt-[6px] gap-[15px]` */
+  form: { marginTop: -6, gap: 15 },
   pair: { flexDirection: "row", gap: 12 },
-  withNote: { gap: 6 },
-  note: { paddingHorizontal: 4 },
-  bio: { minHeight: 72 },
-  error: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.xl, fontWeight: "400", overflow: "hidden" },
-  /* `h-13 rounded-full bg-action` */
-  save: { height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: radius.full },
+  phone: { gap: 8 },
+  readonly: { height: 52, justifyContent: "center", paddingHorizontal: 16, borderRadius: dsRadius.lg },
+  readonlyText: { fontSize: dsType.body.fontSize, fontFamily: bodyFont("400") },
+  error: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.xl },
 });

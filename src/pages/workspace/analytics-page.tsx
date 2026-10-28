@@ -32,8 +32,7 @@ function percent(value: number | null): string {
  * (tor ekran): joriy oy kartasi (o'rtacha baho, baholar soni, ishonchlilik),
  * guruhlar bo'yicha test va davomat foizi; guruh bosilsa uning chati ochiladi.
  *
- * "Batafsil" vebda profildagi "Baholarim" sahifasini ochadi — u mobilda
- * 5d bosqichida qo'shiladi, hozircha profilning o'zi ochiladi.
+ * "Batafsil" profildagi "Baholarim" sahifasini ochadi.
  */
 export function WorkspaceAnalyticsPage() {
   const { t } = useTranslation("workspace");
@@ -73,7 +72,7 @@ export function WorkspaceAnalyticsPage() {
             empty ? (
               <View style={styles.spacer} />
             ) : (
-              <MobileRoundButton icon="settings" label={t("analytics.mobile.settings")} onPress={() => router.push("/teacher/profile-system" as never)} />
+              <MobileRoundButton icon="settings" label={t("analytics.mobile.settings")} onPress={() => router.push(`${ROUTES.teacher.profile}/system` as never, { withAnchor: true })} />
             )
           }
         />
@@ -87,7 +86,7 @@ export function WorkspaceAnalyticsPage() {
             <MobileStatsCard
               label={month}
               actionLabel={t("home.mobile.details")}
-              onAction={() => router.push(ROUTES.teacher.profile as never)}
+              onAction={() => router.push(`${ROUTES.teacher.profile}/ratings` as never, { withAnchor: true })}
               items={[
                 { id: "rating", value: stats?.avgRating == null ? "—" : stats.avgRating.toFixed(1).replace(".", ","), label: t("analytics.avgRating") },
                 { id: "count", value: stats?.ratingCount ?? 0, label: t("analytics.mobile.ratings") },

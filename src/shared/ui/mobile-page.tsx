@@ -100,7 +100,8 @@ export function MobileButton({ label, onPress, variant = "primary", icon, disabl
       ]}
     >
       {icon ? <Icon name={icon} size={20} color={ds.c[tone.fg]} /> : null}
-      <DsText v="title" w="600" c={tone.fg} numberOfLines={1}>
+      {/* Android shrifti brauzernikidan kengroq — sig'masa matn biroz kichrayadi (kesilmaydi). */}
+      <DsText v="title" w="600" c={tone.fg} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={styles.buttonLabel}>
         {label}
       </DsText>
     </Pressable>
@@ -511,6 +512,7 @@ const styles = StyleSheet.create({
   header: { height: 44, flexDirection: "row", alignItems: "center", gap: 12 },
   headerTitle: { flex: 1, minWidth: 0, textAlign: "center" },
   round: { width: 44, height: 44, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
+  buttonLabel: { flexShrink: 1 },
   button: { flex: 1, minWidth: 0, height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 20, borderRadius: dsRadius.full },
   buttonDisabled: { opacity: 0.4 },
   actionBar: { flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingTop: 12, borderTopLeftRadius: dsRadius["2xl"], borderTopRightRadius: dsRadius["2xl"] },

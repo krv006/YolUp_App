@@ -111,32 +111,37 @@ export function MobileDateSheet({ open, onOpenChange, value, min, onChange }: Mo
           ))}
         </View>
 
-        <View style={styles.grid}>
-          {cells.map((date, index) => {
-            if (!date) return <View key={`empty-${index}`} style={styles.cell} />;
-            const dateValue = toDateValue(date);
-            const selected = dateValue === draft;
-            const blocked = Boolean(min && dateValue < min);
-            const weekend = date.getDay() === 0 || date.getDay() === 6;
-            const color = selected ? "on-action" : dateValue <= today ? "brand-strong" : weekend ? "error-text" : "ink";
-            return (
-              <Pressable
-                key={dateValue}
-                accessibilityRole="button"
-                accessibilityState={{ selected, disabled: blocked }}
-                accessibilityLabel={`${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`}
-                disabled={blocked}
-                onPress={() => setDraft(dateValue)}
-                style={styles.cell}
-              >
-                <View style={[styles.day, selected && { backgroundColor: ds.c.brand }]}>
-                  <DsText v="body-sm" w={selected ? "600" : dateValue === today ? "700" : "500"} c={color}>
-                    {date.getDate()}
-                  </DsText>
-                </View>
-              </Pressable>
-            );
-          })}
+        {/* Haftalar alohida qatorda — foizli kenglik `flexWrap` da yaxlitlanib 6 tadan o'ralardi. */}
+        <View>
+          {Array.from({ length: cells.length / 7 }, (_, week) => (
+            <View key={week} style={styles.gridRow}>
+              {cells.slice(week * 7, week * 7 + 7).map((date, index) => {
+                if (!date) return <View key={`empty-${week}-${index}`} style={styles.cell} />;
+                const dateValue = toDateValue(date);
+                const selected = dateValue === draft;
+                const blocked = Boolean(min && dateValue < min);
+                const weekend = date.getDay() === 0 || date.getDay() === 6;
+                const color = selected ? "on-action" : dateValue <= today ? "brand-strong" : weekend ? "error-text" : "ink";
+                return (
+                  <Pressable
+                    key={dateValue}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected, disabled: blocked }}
+                    accessibilityLabel={`${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`}
+                    disabled={blocked}
+                    onPress={() => setDraft(dateValue)}
+                    style={styles.cell}
+                  >
+                    <View style={[styles.day, selected && { backgroundColor: ds.c.brand }]}>
+                      <DsText v="body-sm" w={selected ? "600" : dateValue === today ? "700" : "500"} c={color}>
+                        {date.getDate()}
+                      </DsText>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
         </View>
       </View>
     </Sheet>
@@ -290,8 +295,8 @@ const styles = StyleSheet.create({
   monthTitle: { flex: 5, textAlign: "center" },
   weekdays: { marginTop: 12, flexDirection: "row" },
   weekday: { flex: 1, textAlign: "center", lineHeight: 18 },
-  grid: { flexDirection: "row", flexWrap: "wrap" },
-  cell: { width: `${100 / 7}%`, height: 46, alignItems: "center", justifyContent: "center" },
+  gridRow: { flexDirection: "row" },
+  cell: { flex: 1, height: 46, alignItems: "center", justifyContent: "center" },
   day: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
   time: { marginTop: 4 },
   columns: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 14 },

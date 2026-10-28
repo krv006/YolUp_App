@@ -29,7 +29,8 @@ const TABS = [
     owns: ["quizzes", "exams", "ai", "analytics", "search", "assignments", "notifications"],
     // Pastki bo'shliq `workspace/_layout.tsx` da — faqat bosh sahifada.
   },
-  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar", inset: true },
+  // Jadval suzuvchi panel ostida aylanadi — bo'shliq sahifaning o'zida (`pb-32`).
+  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar" },
   { name: "dashboard", labelKey: "tabs.home", iconName: "home", center: true },
   { name: "chats", labelKey: "tabs.chat", iconName: "nav-chat", unreadChats: true },
   {

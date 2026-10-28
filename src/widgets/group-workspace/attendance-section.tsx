@@ -1,23 +1,22 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { CheckCircle2 } from "lucide-react-native";
 import { useAttendance, useAttendanceSummary } from "@/modules/attendance";
 import { useLessons } from "@/modules/lesson";
-import { Avatar, radius, Text, useTheme } from "@/shared/ui";
+import { Avatar, DsText, dsRadius, Icon, MobileEmptyCard, useDs } from "@/shared/ui";
 import { PanelHeading } from "./panel-heading";
 
 type Range = "all" | "month" | "current";
 
 /**
- * Kurs davomati — veb `group-workspace.tsx` dagi `AttendancePanel`:
- * 3 ta statistika kartasi, davr filtrlari va o'quvchilar ro'yxati
- * (davomat chizig'i, fokus foizi). Backend xulosasi bo'lsa u ishlatiladi,
- * bo'lmasa yozuvlardan hisoblanadi — vebdagidek.
+ * Kurs davomati — veb `group-workspace.tsx` dagi `AttendancePanel` ning tor
+ * ekran varianti: davr filtrlari, ko'k xulosa kartasi (davomat, fokus,
+ * darslar) va o'quvchilar ro'yxati (davomat chizig'i, fokus foizi). Backend
+ * xulosasi bo'lsa u ishlatiladi, bo'lmasa yozuvlardan hisoblanadi.
  */
 export function AttendanceSection({ courseId }: { courseId: string }) {
   const { t } = useTranslation("group");
-  const { palette } = useTheme();
+  const ds = useDs();
   const [range, setRange] = useState<Range>("all");
   const lessons = useLessons({ course: courseId, page_size: 100 }, Boolean(courseId));
   const attendance = useAttendance({ page_size: 100 });
@@ -80,148 +79,146 @@ export function AttendanceSection({ courseId }: { courseId: string }) {
   const avgFocus =
     summary.data?.focusPercent ?? (focusValues.length ? Math.round(focusValues.reduce((sum, value) => sum + value, 0) / focusValues.length) : 0);
 
-  if (attendance.isLoading)
-    return (
-      <View style={[styles.page, { backgroundColor: palette.background }]}>
-        {Array.from({ length: 3 }, (_, index) => (
-          <View key={index} style={[styles.skeleton, { backgroundColor: palette.muted }]} />
-        ))}
-      </View>
-    );
-
   const FILTERS: Array<{ id: Range; label: string }> = [
-    { id: "all", label: t("attendance.filterAll") },
-    { id: "month", label: t("attendance.filterMonth") },
+    { id: "all", label: t("attendance.filterAllShort") },
+    { id: "month", label: t("attendance.filterMonthShort") },
     { id: "current", label: t("attendance.filterCurrent") },
   ];
 
   return (
-    <ScrollView style={{ backgroundColor: palette.background }} contentContainerStyle={styles.page}>
-      <PanelHeading
-        eyebrow={t("attendance.eyebrow")}
-        title={t("attendance.title")}
-        subtitle={t("attendance.summary", { lessonCount, recordCount: filtered.length })}
-      />
+    <ScrollView style={styles.fill} contentContainerStyle={styles.page}>
+      <PanelHeading eyebrow={t("attendance.eyebrow")} title={t("attendance.title")} style={styles.heading} />
 
-      {rows.length ? (
-        <View style={styles.filters}>
-          {FILTERS.map((item) => {
-            const active = range === item.id;
-            return (
-              <Pressable
-                key={item.id}
-                accessibilityRole="button"
-                onPress={() => setRange(item.id)}
-                style={[styles.filter, { backgroundColor: active ? palette.primary : palette["surface-subtle"] }]}
-              >
-                <Text variant="label" style={{ color: active ? palette["primary-foreground"] : palette["muted-foreground"] }}>
-                  {item.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      ) : null}
-
-      {students.length ? (
-        <>
-          <View style={styles.tiles}>
-            {[
-              { value: `${avgAttendance}%`, label: t("attendance.statAttendance") },
-              { value: `${avgFocus}%`, label: t("attendance.statFocus") },
-              { value: String(lessonCount), label: t("attendance.statLessons") },
-            ].map((tile) => (
-              <View key={tile.label} style={[styles.tile, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-                <Text variant="heading">{tile.value}</Text>
-                <Text variant="label" style={[styles.regular, { color: palette["muted-foreground"] }]}>
-                  {tile.label}
-                </Text>
+      {attendance.isLoading ? (
+        <View style={[styles.list, { backgroundColor: ds.c.surface }]}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <View key={index} style={[styles.skeletonRow, index < 3 && { borderBottomWidth: 1, borderBottomColor: ds.c.line }]}>
+              <View style={[styles.skeletonAvatar, { backgroundColor: ds.c.skeleton }]} />
+              <View style={styles.skeletonLines}>
+                <View style={[styles.skeletonLine, { width: 140, backgroundColor: ds.c.skeleton }]} />
+                <View style={[styles.skeletonLine, { width: 90, backgroundColor: ds.c.skeleton }]} />
               </View>
-            ))}
-          </View>
-
-          <View style={[styles.card, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-            <View style={styles.cardHead}>
-              <Text variant="body" style={[styles.grow, styles.strong]}>
-                {t("attendance.studentsTitle")}
-              </Text>
-              <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
-                {t("attendance.studentsMeta")}
-              </Text>
             </View>
-            {students.map((student, index) => {
-              const good = student.attendance >= 70;
+          ))}
+        </View>
+      ) : students.length ? (
+        <>
+          <View style={styles.filters}>
+            {FILTERS.map((item) => {
+              const active = range === item.id;
               return (
-                <View key={student.id} style={[styles.row, index > 0 && { borderTopWidth: 1, borderTopColor: palette.border }]}>
-                  <Avatar variant="legacy" name={student.name} tone={student.tone} size="sm" />
-                  <View style={[styles.grow, styles.rowBody]}>
-                    <Text variant="label" numberOfLines={1}>
-                      {student.name}
-                    </Text>
-                    <View style={styles.barRow}>
-                      <View style={[styles.track, { backgroundColor: palette["surface-subtle"] }]}>
-                        <View
-                          style={[
-                            styles.bar,
-                            { width: `${student.attendance}%`, backgroundColor: good ? palette.success : palette.destructive },
-                          ]}
-                        />
-                      </View>
-                      <Text variant="caption" style={{ color: good ? palette["muted-foreground"] : palette["destructive-strong"] }}>
-                        {student.attendance}%
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.focus}>
-                    <Text variant="body" style={styles.strong}>
-                      {student.focus === null ? "—" : `${student.focus}%`}
-                    </Text>
-                    <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
-                      {t("attendance.focusSuffix")}
-                    </Text>
-                  </View>
-                </View>
+                <Pressable
+                  key={item.id}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => setRange(item.id)}
+                  style={[styles.filter, { backgroundColor: active ? ds.c.brand : ds.c.surface }]}
+                >
+                  <DsText v="body-sm" w="500" c={active ? "on-action" : "ink"} numberOfLines={1}>
+                    {item.label}
+                  </DsText>
+                </Pressable>
               );
             })}
           </View>
+
+          {/* `rounded-xl bg-brand p-4 gap-3 text-on-action` */}
+          <View style={[styles.summary, { backgroundColor: ds.c.brand }]}>
+            <View style={[styles.badge, { backgroundColor: ds.c["on-brand-subtle"] }]}>
+              <Icon name="bar-chart" size={14} color={ds.c["on-action"]} />
+              <DsText v="caption-strong" c="on-action">
+                {t("attendance.mobileBadge", { lessonCount, recordCount: filtered.length })}
+              </DsText>
+            </View>
+            <View style={styles.tiles}>
+              {[
+                { value: `${avgAttendance}%`, label: t("attendance.statAttendance") },
+                { value: `${avgFocus}%`, label: t("attendance.statFocus") },
+                { value: String(lessonCount), label: t("attendance.statLessons") },
+              ].map((tile) => (
+                <View key={tile.label} style={[styles.tile, { backgroundColor: ds.c["on-brand-subtle"] }]}>
+                  <DsText v="title-lg" c="on-action" style={styles.tileValue}>
+                    {tile.value}
+                  </DsText>
+                  <DsText v="caption" c="on-action" numberOfLines={1}>
+                    {tile.label}
+                  </DsText>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.listHead}>
+            <DsText w="600" style={styles.grow}>
+              {t("attendance.studentsTitle")}
+            </DsText>
+            <DsText v="body-sm" c="brand-strong">
+              {t("attendance.studentsMetaShort")}
+            </DsText>
+          </View>
+
+          <View style={[styles.list, styles.listTight, { backgroundColor: ds.c.surface }]}>
+            {students.map((student, index) => (
+              <View key={student.id} style={[styles.row, index < students.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line }]}>
+                <Avatar variant="legacy" name={student.name} tone={student.tone} size="sm" box={44} />
+                <View style={styles.rowBody}>
+                  <DsText v="title" numberOfLines={1}>
+                    {student.name}
+                  </DsText>
+                  <View style={styles.barRow}>
+                    <View style={[styles.track, { backgroundColor: ds.c.subtle }]}>
+                      <View style={[styles.bar, { width: `${student.attendance}%`, backgroundColor: student.attendance >= 50 ? ds.c.brand : ds.c.danger }]} />
+                    </View>
+                    <DsText v="caption" c="brand" numeric style={styles.percent}>
+                      {student.attendance}%
+                    </DsText>
+                  </View>
+                </View>
+                <View style={styles.focus}>
+                  <DsText v="title" numeric>
+                    {student.focus === null ? "—" : `${student.focus}%`}
+                  </DsText>
+                  <DsText v="caption" c="ink-secondary">
+                    {t("attendance.focusSuffix")}
+                  </DsText>
+                </View>
+              </View>
+            ))}
+          </View>
         </>
       ) : (
-        <View style={[styles.empty, { borderColor: palette.border }]}>
-          <View style={[styles.emptyIcon, { backgroundColor: palette.primary }]}>
-            <CheckCircle2 size={30} color={palette["primary-foreground"]} />
-          </View>
-          <Text variant="subheading" style={styles.center}>
-            {t("attendance.emptyTitle")}
-          </Text>
-          <Text variant="label" style={[styles.regular, styles.center, { color: palette["muted-foreground"] }]}>
-            {t("attendance.emptyDescription")}
-          </Text>
-        </View>
+        <MobileEmptyCard icon="check-circle" title={t("attendance.emptyTitle")} description={t("attendance.emptyDescription")} />
       )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { gap: 20, padding: 16 },
+  fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
-  regular: { fontWeight: "400" },
-  strong: { fontWeight: "600" },
-  center: { textAlign: "center" },
-  skeleton: { height: 96, borderRadius: radius["2xl"] },
-  filters: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 },
-  filter: { height: 44, justifyContent: "center", paddingHorizontal: 16, borderRadius: radius.full },
-  /* `grid-cols-3 gap-3` */
-  tiles: { flexDirection: "row", gap: 12 },
-  tile: { flex: 1, gap: 4, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: radius["2xl"] },
-  card: { gap: 12, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
-  cardHead: { flexDirection: "row", alignItems: "baseline", gap: 12 },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 12 },
-  rowBody: { gap: 6 },
+  /* `gap-5 px-4 pt-5 pb-8` */
+  page: { gap: 20, paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32 },
+  heading: { flex: 0, marginBottom: 4 },
+  filters: { flexDirection: "row", gap: 8 },
+  filter: { flex: 1, minWidth: 0, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
+  summary: { gap: 12, padding: 16, borderRadius: dsRadius.xl },
+  badge: { alignSelf: "flex-start", height: 24, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, borderRadius: 12 },
+  tiles: { flexDirection: "row", gap: 8 },
+  tile: { flex: 1, minWidth: 0, height: 64, justifyContent: "center", paddingHorizontal: 12, borderRadius: dsRadius.xl },
+  tileValue: { lineHeight: 24 },
+  listHead: { flexDirection: "row", alignItems: "center", gap: 12 },
+  list: { overflow: "hidden", borderRadius: dsRadius.xl },
+  listTight: { marginTop: -4 },
+  /* `gap-3 border-b px-4 py-3.5` */
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  rowBody: { flex: 1, minWidth: 0, gap: 6 },
   barRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  track: { flex: 1, maxWidth: 160, height: 6, overflow: "hidden", borderRadius: radius.full },
-  bar: { height: "100%", borderRadius: radius.full },
-  focus: { alignItems: "flex-end" },
-  empty: { alignItems: "center", gap: 12, paddingHorizontal: 24, paddingVertical: 48, borderWidth: 1, borderStyle: "dashed", borderRadius: radius["2xl"] },
-  emptyIcon: { width: 64, height: 64, borderRadius: radius["2xl"], alignItems: "center", justifyContent: "center" },
+  track: { flex: 1, minWidth: 0, height: 6, overflow: "hidden", borderRadius: 3 },
+  bar: { height: "100%", borderRadius: 3 },
+  percent: { width: 32, textAlign: "right" },
+  focus: { width: 48, alignItems: "flex-end" },
+  skeletonRow: { height: 74, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
+  skeletonAvatar: { width: 44, height: 44, borderRadius: 22 },
+  skeletonLines: { gap: 8 },
+  skeletonLine: { height: 12, borderRadius: 6 },
 });

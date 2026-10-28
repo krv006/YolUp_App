@@ -13,6 +13,7 @@ import { useAuth } from "@/modules/auth";
 import { useCourse } from "@/modules/course";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
+import { GroupInfoScreen } from "@/modules/conversation/ui/group-info-screen";
 import { LiveLessonBar, useLiveLessons } from "@/modules/lesson";
 import { PinnedMessageBar, useChat, useChatUiStore } from "@/modules/message";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
@@ -250,7 +251,13 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
           )}
         </KeyboardAvoidingView>
       ) : courseId ? (
-        <GroupWorkspaceSection tab={tab} courseId={courseId} isTeacher={role === "teacher"} />
+        <GroupWorkspaceSection
+          tab={tab}
+          courseId={courseId}
+          isTeacher={role === "teacher"}
+          studentCount={conversation.memberCount ?? 0}
+          groupImage={conversation.imageUrl}
+        />
       ) : null}
 
       <ForwardDialog
@@ -272,7 +279,11 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         }
       />
 
-      <ConversationInfoSheet conversation={conversation} open={infoOpen} onClose={() => setInfoOpen(false)} />
+      {group ? (
+        <GroupInfoScreen conversation={conversation} open={infoOpen} onClose={() => setInfoOpen(false)} />
+      ) : (
+        <ConversationInfoSheet conversation={conversation} open={infoOpen} onClose={() => setInfoOpen(false)} />
+      )}
     </View>
   );
 }

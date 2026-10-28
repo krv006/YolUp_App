@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputP
 import { bodyFont } from "./fonts";
 import { DsText, dsRadius, dsType, useDs } from "./ds";
 import { Icon } from "./icon";
+import { MobileDateSheet, MobileTimeSheet, type MobileTimeSheetProps } from "./mobile-pickers";
 import { Sheet } from "./sheet";
 
 /*
@@ -71,8 +72,8 @@ export function MobileFieldLabel({ label, aside, gap = 8, children }: { label: R
 }
 
 export interface MobilePickerFieldProps {
-  /** Hozircha faqat `select` (sana va vaqt oynalari 4-bosqichda). */
-  type: "select";
+  /** `select` — variantlar ro'yxati; `date`/`time` — kalendar va soat oynalari. */
+  type: "select" | "date" | "time";
   value: string;
   display: ReactNode;
   /** Qiymat tanlanmagan — matn `text-ink-secondary`. */
@@ -80,6 +81,10 @@ export interface MobilePickerFieldProps {
   invalid?: boolean;
   surface?: boolean;
   options?: Array<{ value: string; label: string }>;
+  /** `date`: shundan oldingi kunlar tanlanmaydi (`YYYY-MM-DD`). */
+  min?: string;
+  /** `time`: oynada davomiylik ham tanlanadi. */
+  duration?: MobileTimeSheetProps["duration"];
   ariaLabel: string;
   /** Tanlov oynasining sarlavhasi (standart — `ariaLabel`). */
   sheetTitle?: string;
@@ -87,17 +92,20 @@ export interface MobilePickerFieldProps {
 }
 
 /**
- * Tanlov maydoni — `h-13 rounded-lg bg-subtle px-4`, o'ngda `chevron-down`.
- * Vebda ustiga shaffof `<select>` qo'yilgan (brauzer ro'yxatini ochadi);
- * mobilda bosilganda pastki oynada variantlar ro'yxati ochiladi.
+ * Tanlov maydoni — `h-13 rounded-lg bg-subtle px-4`, o'ngda `chevron-down`
+ * (xato bo'lsa `warning`). `select` — pastki oynadagi variantlar ro'yxati
+ * (vebda brauzer ro'yxati), `date`/`time` — `MobileDateSheet`/`MobileTimeSheet`.
  */
 export function MobilePickerField({
+  type,
   value,
   display,
   placeholder = false,
   invalid = false,
   surface = false,
   options = [],
+  min,
+  duration,
   ariaLabel,
   sheetTitle,
   onChange,
@@ -120,7 +128,9 @@ export function MobilePickerField({
         </DsText>
         <Icon name={invalid ? "warning" : "chevron-down"} size={20} color={invalid ? ds.c["error-text"] : ds.c["ink-secondary"]} />
       </Pressable>
-      <Sheet variant="app" open={open} onClose={() => setOpen(false)} title={sheetTitle ?? ariaLabel}>
+      {type === "date" ? <MobileDateSheet open={open} onOpenChange={setOpen} value={value} min={min} onChange={onChange} /> : null}
+      {type === "time" ? <MobileTimeSheet open={open} onOpenChange={setOpen} value={value} duration={duration} onChange={onChange} /> : null}
+      <Sheet variant="app" open={type === "select" && open} onClose={() => setOpen(false)} title={sheetTitle ?? ariaLabel}>
         <View style={[styles.options, { backgroundColor: ds.c.subtle }]}>
           {options.map((option, index) => {
             const selected = option.value === value;

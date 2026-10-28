@@ -1,29 +1,40 @@
-import { StyleSheet, View } from "react-native";
-import { Text, useTheme } from "@/shared/ui";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { DsText } from "@/shared/ui";
 
 /**
- * Bo'lim sarlavhasi — veb guruh panellaridagi blok: ko'k kichik yozuv
- * ("DARS JADVALI"), katta sarlavha va izoh.
+ * Bo'lim sarlavhasi — veb `panel-heading.tsx`: `text-caption` katta harfli
+ * yorliq, `text-[24px]/[26px] font-bold` sarlavha va `text-body-sm` izoh.
  */
-export function PanelHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle?: string }) {
-  const { palette } = useTheme();
+export function PanelHeading({
+  eyebrow,
+  title,
+  subtitle,
+  style,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+  style?: StyleProp<ViewStyle>;
+}) {
   return (
-    <View style={styles.root}>
-      <Text variant="caption" style={[styles.eyebrow, { color: palette.primary }]}>
+    <View style={[styles.root, style]}>
+      <DsText v="caption" c="ink-secondary" style={styles.eyebrow}>
         {eyebrow}
-      </Text>
-      <Text variant="heading">{title}</Text>
+      </DsText>
+      <DsText w="700" style={styles.title}>
+        {title}
+      </DsText>
       {subtitle ? (
-        <Text variant="label" style={[styles.subtitle, { color: palette["muted-foreground"] }]}>
+        <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
           {subtitle}
-        </Text>
+        </DsText>
       ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { gap: 4 },
-  eyebrow: { fontWeight: "600", letterSpacing: 0.3, textTransform: "uppercase" },
-  subtitle: { fontWeight: "400" },
+  root: { flex: 1, minWidth: 0, gap: 3 },
+  eyebrow: { textTransform: "uppercase" },
+  title: { fontSize: 24, lineHeight: 26 },
 });

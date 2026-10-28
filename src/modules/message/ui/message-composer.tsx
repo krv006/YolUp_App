@@ -87,20 +87,8 @@ export function MessageComposer({
   });
   const suggestions = (members.data ?? []).slice(0, 6);
 
-  /* Ovozli xabar: mikrofon -> yozish paneli -> yuborish yoki bekor qilish. */
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  /* Ovozli xabar: mikrofon -> yozish paneli (`RecordingPanel`) -> yuborish yoki bekor qilish. */
   const [recording, setRecording] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const secondsRef = useRef(0);
-
-  useEffect(() => {
-    if (!recording) return undefined;
-    const timer = setInterval(() => {
-      secondsRef.current += 1;
-      setSeconds(secondsRef.current);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [recording]);
 
   useEffect(() => {
     if (editingMessage || replyTo) inputRef.current?.focus();
@@ -210,35 +198,18 @@ export function MessageComposer({
       toast.error(t("composer.micDenied"));
       return;
     }
-    try {
-      // iOS'da yozish uchun audio sessiya rejimi yoqilishi shart.
-      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
-      await recorder.prepareToRecordAsync();
-      recorder.record();
-      secondsRef.current = 0;
-      setSeconds(0);
-      setRecording(true);
-    } catch {
-      toast.error(t("composer.micDenied"));
-    }
+    setRecording(true);
   }
 
-  async function stopRecording(cancel: boolean) {
+  function finishRecording(result: { uri: string; seconds: number } | null) {
     setRecording(false);
-    setSeconds(0);
-    try {
-      await recorder.stop();
-    } finally {
-      await setAudioModeAsync({ allowsRecording: false }).catch(() => undefined);
-    }
-    const uri = recorder.uri;
-    if (cancel || !uri) return;
+    if (!result) return;
     void onSend({
       text: "",
       clientMessageId: crypto.randomUUID(),
       voice: {
-        file: toUploadFile({ uri, name: `voice-${Date.now()}.m4a`, mimeType: "audio/mp4", size: 0 }),
-        durationMs: Math.max(1000, secondsRef.current * 1000),
+        file: toUploadFile({ uri: result.uri, name: `voice-${Date.now()}.m4a`, mimeType: "audio/mp4", size: 0 }),
+        durationMs: Math.max(1000, result.seconds * 1000),
       },
     });
   }
@@ -387,27 +358,7 @@ export function MessageComposer({
         ) : null}
 
         {recording ? (
-          <View style={styles.row}>
-            <View style={[styles.recordPill, { backgroundColor: ds.c["danger-bg"] }]}>
-              <PulseDot color={ds.c.danger} />
-              <DsText v="title-sm" c="error-text" numeric>
-                {formatDuration(seconds)}
-              </DsText>
-              <Pressable accessibilityRole="button" onPress={() => void stopRecording(true)} style={styles.grow}>
-                <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
-                  ‹ {t("composer.recordSwipeCancel")}
-                </DsText>
-              </Pressable>
-            </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("composer.recordSend")}
-              onPress={() => void stopRecording(false)}
-              style={({ pressed }) => [styles.recordSend, { backgroundColor: ds.c.danger, opacity: pressed ? 0.85 : 1 }]}
-            >
-              <Icon name="mic" size={24} color={ds.c["on-action"]} />
-            </Pressable>
-          </View>
+          <RecordingPanel onDone={finishRecording} />
         ) : (
           <View style={styles.row}>
             <Pressable
@@ -544,6 +495,90 @@ export function MessageComposer({
           }}
         />
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * Ovoz yozish paneli — veb tor ekran varianti: `h-11 rounded-full
+ * bg-danger-bg` ichida qizil nuqta, vaqt va "‹ Bekor qilish uchun suring",
+ * o'ngda `size-13 bg-danger` yuborish tugmasi.
+ *
+ * Yozgich (`useAudioRecorder`) shu panel bilan birga yaratiladi: kompozer
+ * ochilishi bilan yaratilsa, Android faoliyati almashgan paytda (masalan
+ * rasm tanlagichdan qaytganda) nativ konstruktor rad etilib ekran yiqilardi.
+ */
+function RecordingPanel({ onDone }: { onDone: (result: { uri: string; seconds: number } | null) => void }) {
+  const { t } = useTranslation("chat");
+  const ds = useDs();
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const [seconds, setSeconds] = useState(0);
+  const secondsRef = useRef(0);
+  const stoppedRef = useRef(false);
+  const doneRef = useRef(onDone);
+  useEffect(() => {
+    doneRef.current = onDone;
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        // iOS'da yozish uchun audio sessiya rejimi yoqilishi shart.
+        await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+        await recorder.prepareToRecordAsync();
+        if (cancelled) return;
+        recorder.record();
+      } catch {
+        toast.error(t("composer.micDenied"));
+        doneRef.current(null);
+      }
+    })();
+    const timer = setInterval(() => {
+      secondsRef.current += 1;
+      setSeconds(secondsRef.current);
+    }, 1000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      if (!stoppedRef.current) void recorder.stop().catch(() => undefined);
+      void setAudioModeAsync({ allowsRecording: false }).catch(() => undefined);
+    };
+  }, [recorder, t]);
+
+  async function stop(cancel: boolean) {
+    if (stoppedRef.current) return;
+    stoppedRef.current = true;
+    try {
+      await recorder.stop();
+    } catch {
+      // Yozuv boshlanmagan bo'lsa ham panel yopiladi.
+    }
+    const uri = recorder.uri;
+    onDone(cancel || !uri ? null : { uri, seconds: secondsRef.current });
+  }
+
+  return (
+    <View style={styles.row}>
+      <View style={[styles.recordPill, { backgroundColor: ds.c["danger-bg"] }]}>
+        <PulseDot color={ds.c.danger} />
+        <DsText v="title-sm" c="error-text" numeric>
+          {formatDuration(seconds)}
+        </DsText>
+        <Pressable accessibilityRole="button" onPress={() => void stop(true)} style={styles.grow}>
+          <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
+            ‹ {t("composer.recordSwipeCancel")}
+          </DsText>
+        </Pressable>
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("composer.recordSend")}
+        onPress={() => void stop(false)}
+        style={({ pressed }) => [styles.recordSend, { backgroundColor: ds.c.danger, opacity: pressed ? 0.85 : 1 }]}
+      >
+        <Icon name="mic" size={24} color={ds.c["on-action"]} />
+      </Pressable>
     </View>
   );
 }

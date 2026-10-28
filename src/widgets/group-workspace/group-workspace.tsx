@@ -8,9 +8,11 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { DsText, useDs } from "@/shared/ui";
-import { AssignmentsSection } from "./assignments-section";
 import { AttendanceSection } from "./attendance-section";
+import { LessonsPanel } from "./lessons-panel";
 import { LessonsSection } from "./lessons-section";
+import { StudentAssignments } from "./student-assignments";
+import { TeacherAssignments } from "./teacher-assignments";
 
 export type GroupTab = "chat" | "lessons" | "assignments" | "attendance";
 
@@ -90,31 +92,41 @@ export function GroupTabsRow({
 }
 
 /**
- * Guruh chatidagi bo'limlar — veb'da bu chat ustidagi tab qatori edi,
- * mobilda ham shunday: suhbat ekranining o'zida qoladi.
+ * Guruh chatidagi bo'limlar — chat ustidagi tablar orqali, shu ekranning
+ * o'zida (alohida marshrut emas: bo'limlar orasida o'tish tez bo'lsin va
+ * suhbat soketi uzilmasin). Ochilmagan bo'lim so'rov yubormaydi.
  *
- * ALOHIDA MARSHRUT QILINMADI: bo'limlar bir xil guruh kontekstida ishlaydi
- * va ular orasida o'tish tez bo'lishi kerak. Har biri marshrut bo'lsa,
- * har o'tishda ekran to'liq qayta mount bo'lardi va suhbat soketi uzilib
- * qayta ulanardi.
- *
- * Bo'limlar TALAB BO'YICHA render qilinadi — ochilmagan bo'lim so'rov
- * yubormaydi (veb'dagi qoida bilan bir xil).
+ * O'qituvchida yangi dizayn (`LessonsPanel`, `TeacherAssignments`,
+ * `AttendanceSection`); o'quvchi bo'limlari 6-bosqichda.
  */
 export function GroupWorkspaceSection({
   tab,
   courseId,
   isTeacher = false,
+  studentCount = 0,
+  groupImage = null,
 }: {
   tab: Exclude<GroupTab, "chat">;
   courseId: string;
   isTeacher?: boolean;
+  studentCount?: number;
+  groupImage?: string | null;
 }) {
   return (
     <View style={styles.root}>
-      {tab === "lessons" ? <LessonsSection courseId={courseId} isTeacher={isTeacher} /> : null}
+      {tab === "lessons" ? (
+        isTeacher ? (
+          <LessonsPanel courseId={courseId} studentCount={studentCount} />
+        ) : (
+          <LessonsSection courseId={courseId} />
+        )
+      ) : null}
       {tab === "assignments" ? (
-        <AssignmentsSection courseId={courseId} isTeacher={isTeacher} />
+        isTeacher ? (
+          <TeacherAssignments courseId={courseId} groupImage={groupImage} />
+        ) : (
+          <StudentAssignments courseId={courseId} />
+        )
       ) : null}
       {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}
     </View>

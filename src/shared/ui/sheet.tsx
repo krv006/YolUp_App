@@ -37,6 +37,8 @@ export interface SheetProps {
   variant?: "classic" | "app";
   /** Faqat `app`: aylanmaydigan pastki tugmalar qatori (`px-4 pt-6 gap-3`). */
   footer?: ReactNode;
+  /** Faqat `app`: kichik sarlavha (`text-title-lg font-semibold`) va `pt-5` pastki qator — tanlagich oynalari. */
+  compact?: boolean;
 }
 
 /** Shu masofadan ko'p sudralsa yopiladi. */
@@ -85,7 +87,7 @@ const CLOSE_VELOCITY = 900;
  * │ dastlab qo'l bilan surilmagan edi.                                   │
  * └─────────────────────────────────────────────────────────────────────┘
  */
-export function Sheet({ open, onClose, title, description, children, variant = "classic", footer }: SheetProps) {
+export function Sheet({ open, onClose, title, description, children, variant = "classic", footer, compact = false }: SheetProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const ds = useDs();
@@ -216,7 +218,7 @@ export function Sheet({ open, onClose, title, description, children, variant = "
             {app ? (
               <View style={styles.appHead}>
                 <View style={styles.appTitle}>
-                  <DsText v="h2" w="600" style={styles.appTitleText}>
+                  <DsText v={compact ? "title-lg" : "h2"} w="600" style={compact ? null : styles.appTitleText}>
                     {title}
                   </DsText>
                   {description ? (
@@ -263,7 +265,7 @@ export function Sheet({ open, onClose, title, description, children, variant = "
               </Animated.ScrollView>
             </GestureDetector>
             {app && footer ? (
-              <View style={[styles.appFooter, { paddingBottom: Math.max(16, insets.bottom + 8) }]}>{footer}</View>
+              <View style={[styles.appFooter, compact && styles.appFooterCompact, { paddingBottom: Math.max(compact ? 24 : 16, insets.bottom + 8) }]}>{footer}</View>
             ) : null}
           </Animated.View>
         </GestureDetector>
@@ -302,4 +304,5 @@ const styles = StyleSheet.create({
   appBody: { gap: 16, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 4 },
   /* `items-center gap-3 px-4 pt-6 pb-[max(16px,safe)]` */
   appFooter: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 24 },
+  appFooterCompact: { paddingTop: 20 },
 });

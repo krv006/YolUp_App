@@ -15,10 +15,13 @@
  * bo'ladi. Vebda ular yangilansa, fayllarni qayta ko'chirib shu buyruqni
  * ishlatish kifoya.
  *
- * RANG. Vebda ikonkalar `fill="#24264D"` bilan qotirilgan. Bu yerda u
- * `currentColor` ga almashtiriladi, shunda `<Icon color=... />` orqali
+ * RANG — veb `shared/ui/icon.tsx` dagi `normalize` bilan AYNAN bir xil:
+ * `fill`/`stroke` (`none` dan boshqasi) `currentColor` ga almashtiriladi,
+ * ildiz `<svg>` ga esa `fill="currentColor"` qo'yiladi (yangi Material
+ * ikonkalarda rang umuman yozilmagan). Shunda `<Icon color=... />` orqali
  * istalgan rang beriladi (`react-native-svg` `color` propini
- * `currentColor` sifatida uzatadi).
+ * `currentColor` sifatida uzatadi). Vebda ko'p rangli ikonka ham bir
+ * rangga keltiriladi — bu yerda ham.
  *
  * Ishlatilishi:  npm run build:ui-icons
  */
@@ -30,19 +33,26 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = resolve(ROOT, "assets/icons");
 const OUT = resolve(ROOT, "src/shared/ui/icons-svg.ts");
 
-/** Vebdagi qotirilgan rang — `--ink-900`. */
-const HARDCODED = /fill="#24264D"/gi;
+/** Veb `normalize()` — ildiz teg, viewBox va rangni bir xil qoidada ajratadi. */
+function normalize(source) {
+  const viewBox = /viewBox="([^"]+)"/.exec(source)?.[1] ?? "0 0 24 24";
+  const body = source
+    .replace(/<\?xml[^>]*\?>/g, "")
+    .replace(/<svg[^>]*>/, "")
+    .replace(/<\/svg>/, "")
+    .replace(/<metadata>[\s\S]*?<\/metadata>/g, "")
+    .replace(/fill="(?!none)[^"]*"/g, 'fill="currentColor"')
+    .replace(/stroke="(?!none)[^"]*"/g, 'stroke="currentColor"')
+    .trim();
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" fill="currentColor">${body}</svg>`;
+}
 
 const files = readdirSync(SRC).filter((name) => name.endsWith(".svg")).sort();
 if (files.length === 0) throw new Error("assets/icons/ bo'sh");
 
 const entries = files.map((name) => {
   const id = name.replace(/\.svg$/, "");
-  let svg = readFileSync(resolve(SRC, name), "utf8").trim();
-
-  // Rangni almashtiramiz; `fill="none"` TEGILMAYDI — u ildizdagi qiymat
-  // va uni ham bo'yasak, ikonka to'liq to'ldirilgan kvadrat bo'lib qolardi.
-  svg = svg.replace(HARDCODED, 'fill="currentColor"');
+  const svg = normalize(readFileSync(resolve(SRC, name), "utf8").trim());
 
   return [id, svg];
 });

@@ -43,4 +43,5 @@ export {
   useSubjects,
   useUnenrollStudent,
   useUpdateCourse,
+  useUpdateCourseAvatar,
 } from "./model/course.queries";

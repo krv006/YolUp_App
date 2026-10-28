@@ -10,13 +10,37 @@
   "lessons": {
     "eyebrow": "РАСПИСАНИЕ УРОКОВ",
     "title": "Уроки",
-    "subtitle": "Запланированные живые занятия.",
+    "subtitle": "Запланированные живые занятия",
     "addLesson": "Добавить урок",
     "deleteDialogTitle": "Удалить урок",
     "deleteDialogDescription": "Занятие исчезнет из расписания, ученики получат уведомление. Привязанный тест и отметки посещаемости тоже удалятся.",
     "cancel": "Отмена",
     "delete": "Удалить",
-    "deleteConfirmTitle": "Удалить занятие «{{title}}»?"
+    "deleteConfirmTitle": "Удалить занятие «{{title}}»?",
+    "today": "Сегодня, {{date}}",
+    "yesterday": "Вчера, {{date}}",
+    "countShort": "{{count}}",
+    "minutesShort": "{{count}} мин",
+    "noTopic": "Тема не указана",
+    "status": {
+      "live": "В эфире",
+      "scheduled": "Запланирован",
+      "finished": "Завершён",
+      "cancelled": "Отменён"
+    },
+    "joined": "{{joined}} / {{total}} подключились",
+    "finishedMeta": "{{count}} участников",
+    "join": "Войти в урок",
+    "recording": "Видеозапись",
+    "ratings": "Оценки",
+    "ratingsWith": "Оценки · {{value}}",
+    "edit": "Редактировать",
+    "emptyTitle": "Уроки ещё не запланированы",
+    "emptyHint": "Добавьте расписание — ученики получат напоминание.",
+    "cancelLesson": "Отменить",
+    "finishedStats": "{{joined}} / {{total}} участвовали · посещаемость {{rate}}%",
+    "cancelLessonLong": "Отменить урок",
+    "finishedStatsShort": "{{joined}} участников · посещаемость {{rate}}%"
   },
   "assignments": {
     "eyebrow": "ЗАДАНИЯ ГРУППЫ",
@@ -39,7 +63,20 @@
     "deleteDialogDescription": "«{{title}}» и связанные с ним данные будут удалены.",
     "cancel": "Отмена",
     "delete": "Удалить",
-    "fromBank": "Из готовых тестов"
+    "fromBank": "Из готовых тестов",
+    "subtitleShort": "Задания и результаты AI",
+    "emptyHint": "Дайте первое задание — ученики увидят его в чате группы.",
+    "addTest": "Добавить тест",
+    "testMenu": {
+      "bank": {
+        "title": "Из готовых тестов",
+        "hint": "Выберите тест из банка"
+      },
+      "create": {
+        "title": "Создать новый тест",
+        "hint": "С нуля или с помощью AI"
+      }
+    }
   },
   "students": {
     "eyebrow": "УЧАСТНИКИ",
@@ -70,7 +107,11 @@
     "statLessons": "Занятий",
     "studentsTitle": "Ученики",
     "studentsMeta": "Посещаемость · фокус",
-    "focusSuffix": "фокус"
+    "focusSuffix": "фокус",
+    "mobileBadge": "{{lessonCount}} уроков · {{recordCount}} записей",
+    "studentsMetaShort": "Посещаемость · фокус",
+    "filterMonthShort": "30 дней",
+    "filterAllShort": "Все"
   },
   "dialogs": {
     "lesson": {
@@ -122,7 +163,16 @@
       "quizNone": "Тест не прикреплён",
       "editDescription": "Измените тему, время и привязанный тест. Ученики получат уведомление.",
       "deleteLesson": "Удалить занятие",
-      "quizHint": "После урока тест автоматически откроется ученикам."
+      "quizHint": "После урока тест автоматически откроется ученикам.",
+      "repeatingSubtitle": "Повторяющееся расписание",
+      "timeBusy": "Это время занято",
+      "scheduleFirst": "Будет создано уроков: {{count}}{{limitNote}} · первый {{first}}, {{weekday}}",
+      "mobileSubtitle": "Укажите время занятия для группы",
+      "todayDate": "Сегодня, {{date}}",
+      "timeShort": "Время",
+      "startShort": "Начало",
+      "durationMinutes": "Длительность (мин)",
+      "minutesValue": "{{count}} минут"
     },
     "conflict": {
       "singleTitle": "У вас уже есть урок в это время",
@@ -180,7 +230,7 @@
     "submit": "Добавить ({{count}})",
     "added": "Добавлено учеников: {{count}}",
     "createTitle": "Новый аккаунт ученика",
-    "createDescription": "Если ученика нет на платформе, вы создаёте аккаунт — он сразу попадёт в группу.",
+    "createDescription": "Вы создаёте аккаунт, ученик сразу попадёт в группу",
     "firstName": "Имя",
     "lastName": "Фамилия",
     "login": "Логин",
@@ -192,17 +242,20 @@
     "createNote": "Отправьте логин и пароль ученику. При первом входе он сменит пароль.",
     "createSubmit": "Создать аккаунт",
     "requestsTitle": "Заявки на вступление · {{count}}",
-    "requestsDescription": "Заявки по ссылке-приглашению. Принятые сразу попадают в группу.",
+    "requestsDescription": "Заявки, пришедшие по ссылке-приглашению",
     "requestsEmpty": "Новых заявок нет.",
     "accept": "Принять",
     "decline": "Отклонить",
     "acceptAll": "Принять ({{count}})",
     "close": "Закрыть",
-    "parentFor": "Родитель · для {{name}}"
+    "parentFor": "Родитель · для {{name}}",
+    "createAccountShort": "Новый аккаунт ученика",
+    "inviteShort": "Ссылка-приглашение",
+    "copy": "Копировать"
   },
   "invite": {
     "title": "Ссылка-приглашение",
-    "description": "Отправьте ссылку ученикам — они вступят в группу одним нажатием.",
+    "description": "Ученики присоединяются к группе в одно касание",
     "empty": "Для этой группы ссылка ещё не создана.",
     "create": "Создать ссылку",
     "created": "Ссылка создана",
@@ -221,7 +274,10 @@
     "noExpiry": "Без срока",
     "approvalLabel": "С подтверждением",
     "approvalHint": "Пришедших по ссылке подтверждаете вы",
-    "approvalOn": "с подтверждением"
+    "approvalOn": "с подтверждением",
+    "linkLabel": "Ссылка",
+    "share": "Поделиться ссылкой",
+    "cancelLink": "Отменить"
   },
   "join": {
     "title": "Вступить в группу",
@@ -241,5 +297,32 @@
     "retry": "Попробовать снова",
     "openCourse": "Открыть группу",
     "home": "На главную"
+  },
+  "cancelLesson": {
+    "title": "Отменить урок?",
+    "description": "Урок останется в расписании со статусом «отменён», ученики получат уведомление.",
+    "onlyThis": "Только этот урок ({{when}})",
+    "thisAndNext": "Этот и все следующие уроки",
+    "close": "Закрыть",
+    "confirm": "Отменить урок"
+  },
+  "announcementBanner": "Режим объявлений — пишете только вы",
+  "mobileAssignments": {
+    "draft": "Черновик",
+    "review": "Проверить · {{count}}",
+    "finished": "Завершено",
+    "noDue": "Без срока",
+    "daysLeft": "Осталось {{count}} дн.",
+    "draftMeta": "Неотправленный черновик",
+    "due": "Срок: {{date}}",
+    "notSent": "Не отправлено",
+    "average": "среднее {{value}}",
+    "submitted": "{{done}} / {{total}} сдали",
+    "quizMeta": "{{count}} вопросов · Тест",
+    "open": "Открыть",
+    "edit": "Изменить",
+    "delete": "Удалить",
+    "results": "Результаты",
+    "menu": "Действия"
   }
 }

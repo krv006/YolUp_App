@@ -48,7 +48,16 @@
     "attendance": "Davomat",
     "noCourses": "Baholar, test natijalari va davomat kiritilgach, kurslar bo‘yicha ko‘rsatkichlar shu yerda chiqadi.",
     "studentCountValue": "{{count}} o‘quvchi",
-    "emptyTitle": "Hali ma’lumot yo‘q"
+    "emptyTitle": "Hali ma’lumot yo‘q",
+    "emptyDescription": "Baholar, test natijalari va davomat kiritilgach, kurslar bo'yicha ko'rsatkichlar shu yerda chiqadi.",
+    "emptyAction": "Test yaratish",
+    "mobile": {
+      "eyebrow": "Shaxsiy tahlil",
+      "settings": "Sozlamalar",
+      "ratings": "Baholar",
+      "test": "Test {{value}}",
+      "attendance": "Davomat {{value}}"
+    }
   },
   "createGroup": "Guruh yaratish",
   "statGroups": "Guruh",
@@ -97,5 +106,132 @@
   "searchSubtitle": "Guruhlar, darslar, testlar, o‘quvchilar va xabarlar bo‘yicha",
   "searchHotkeys": "↑↓ tanlash · Enter ochish · Esc yopish",
   "searchAllResults": "Barcha natijalar",
-  "searchBack": "Orqaga"
+  "searchBack": "Orqaga",
+  "searchKeySelect": "tanlash",
+  "searchKeyOpen": "ochish",
+  "searchKeyClose": "yopish",
+  "searchEmptyTitle": "“{{query}}” bo‘yicha hech narsa topilmadi",
+  "searchEmptyHint": "Boshqa so‘z bilan urinib ko‘ring yoki filtrlarni o‘zgartiring",
+  "home": {
+    "eyebrow": "O‘qituvchi ish maydoni",
+    "createTest": "Test yaratish",
+    "modules": "Modullar",
+    "stats": {
+      "tests": "Testlar",
+      "testsHint": "{{count}} ta qoralama",
+      "assignments": "Faol vazifalar",
+      "assignmentsHint": "{{count}} ta tekshirish",
+      "mock": "Mock imtihon",
+      "mockHint": "{{count}} tasi ketmoqda",
+      "rating": "O‘rtacha baho",
+      "ratingHint": "bu oy"
+    },
+    "moduleCounts": {
+      "tests": "{{count}} ta test",
+      "assignments": "{{count}} ta faol",
+      "mock": "{{count}} ta ketmoqda",
+      "ai": "{{count}} ta yaratilmoqda",
+      "analytics": "Reyting {{value}}",
+      "materials": "{{count}} ta fayl"
+    },
+    "modules_list": {
+      "tests": {
+        "title": "Testlar",
+        "description": "8 xil savol turi — baholash avtomatik va darhol"
+      },
+      "assignments": {
+        "title": "Vazifalar",
+        "description": "Uy vazifalarini berish va AI yordamida tekshirish"
+      },
+      "mock": {
+        "title": "Mock testlar",
+        "description": "IELTS, SAT, Milliy sertifikat va o‘z mock testingiz"
+      },
+      "ai": {
+        "title": "AI yordamchi",
+        "description": "Mavzu yoki materialdan test tuzish"
+      },
+      "analytics": {
+        "title": "Tahlil",
+        "description": "Natijalar va faollik bo‘yicha ko‘rsatkichlar"
+      },
+      "materials": {
+        "title": "Materiallar",
+        "description": "Darsliklar, audio va fayllar"
+      }
+    },
+    "mobile": {
+      "eyebrow": "Ish maydoni",
+      "create": "Yaratish",
+      "overview": "Umumiy holat",
+      "details": "Batafsil",
+      "stats": {
+        "unchecked": "Tekshirilmagan",
+        "tests": "Test",
+        "mock": "Mock imtihon"
+      },
+      "createItems": {
+        "test": "Yangi test",
+        "homework": "Vazifa berish",
+        "mock": "Mock imtihon",
+        "ai": "AI bilan test"
+      },
+      "modules": {
+        "tests": {
+          "title": "Test",
+          "description": "Testlar yaratish va natijalarni ko‘rish"
+        },
+        "analytics": {
+          "title": "Tahlil",
+          "description": "Natijalar va faollik statistikasi"
+        },
+        "ai": {
+          "title": "AI yordamchi",
+          "description": "AI yordamida test tuzish"
+        },
+        "mock": {
+          "title": "Mock test",
+          "description": "IELTS, SAT, Milliy sertifikat"
+        },
+        "assignments": {
+          "title": "Vazifalar",
+          "description": "Uy vazifalarini berish va tekshirish"
+        },
+        "materials": {
+          "title": "Materiallar",
+          "description": "Darsliklar, audio va fayllar"
+        }
+      }
+    }
+  },
+  "stats": {
+    "eyebrow": "Baholar, kurslar va darslar bo‘yicha umumiy ko‘rsatkichlar",
+    "ratingHint": "{{count}} ta bahodan",
+    "cancelledHint": "{{count}} tasi bekor",
+    "monthHint": "bu oy",
+    "reliabilityHint": "darslar o‘z vaqtida",
+    "chartTitle": "Test natijalari — o‘rtacha ball",
+    "chartRange": "Oxirgi 8 hafta",
+    "chartEmpty": "Haftalik test natijalari backenddan kelgach chiziladi.",
+    "quizShort": "test {{value}}%"
+  },
+  "results": {
+    "hardestEmpty": "Hali urinish yo'q — statistika testdan keyin chiqadi.",
+    "aiStarted": "AI mini-test tayyorlamoqda"
+  },
+  "ai": {
+    "fileTooBig": "“{{name}}” juda katta — har bir fayl {{size}} MB gacha bo'lishi kerak.",
+    "removeFile": "Faylni olib tashlash"
+  },
+  "mobileSearch": {
+    "groups": "Guruhlar · {{count}}",
+    "lessons": "Darslar · {{count}}",
+    "quizzes": "Testlar · {{count}}",
+    "messages": "Xabarlar · {{count}}",
+    "today": "Bugun",
+    "tomorrow": "Ertaga",
+    "emptyTitle": "Hech narsa topilmadi",
+    "emptyHint": "“{{query}}” bo‘yicha guruh, dars, test yoki xabar topilmadi. Boshqa so‘z bilan urinib ko‘ring.",
+    "clear": "Tozalash"
+  }
 }

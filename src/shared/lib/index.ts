@@ -13,6 +13,7 @@ export {
   formatDayTime,
   formatDuration,
   formatMessageTime,
+  formatRelativeShort,
 } from "./date";
 export { pickDocument, pickDocuments, pickImage, toUploadFile } from "./file-picker";
 export { useBackTo } from "./use-back-to";

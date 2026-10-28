@@ -20,7 +20,8 @@
     "sentToAll": "Invitation sent to everyone",
     "linkCopied": "Link copied",
     "linkCopyFailed": "Could not copy the link",
-    "online": "Online"
+    "online": "Online",
+    "offline": "offline"
   },
   "preJoin": {
     "you": "You",
@@ -48,7 +49,27 @@
     "join": "Join the lesson",
     "mobileTitle": "Join the lesson",
     "minutes": "minutes",
-    "recordingNote": "The lesson is recorded automatically — audio and video"
+    "recordingNote": "The lesson is recorded automatically — audio and video",
+    "minutesValue": "{{count}} min",
+    "waiting": "{{count}} / {{total}} students waiting",
+    "waitingNames_zero": "{{names}} is waiting",
+    "waitingNames": "{{names}} and {{count}} more are waiting",
+    "defaultMic": "Default microphone",
+    "defaultCamera": "Default camera",
+    "cameraOnTitle": "Camera on",
+    "cameraOffTitle": "Camera off",
+    "start": "Start lesson",
+    "mobileBothOn": "Microphone and camera on",
+    "mobileMicOnly": "Microphone on, camera off",
+    "mobileCameraOnly": "Camera on, microphone off",
+    "mobileBothOff": "Microphone and camera off",
+    "mobileChangeLater": "you can change this later",
+    "mobileRecordingNote": "The lesson is recorded — students can watch it later",
+    "mobileCancel": "Cancel",
+    "mobileJoin": "Join lesson",
+    "teacher": "Teacher: {{name}}",
+    "inLessonNames": "{{names}} and {{count}} more in the lesson",
+    "recordingNoteStudent": "The lesson is recorded — you can watch it later under “Lesson recording”."
   },
   "connection": {
     "connecting": "Connecting…",
@@ -95,13 +116,29 @@
     "finishTitle": "Finish the lesson for everyone — the video recording is saved afterward",
     "youLabel": "You",
     "reconnecting": "Connection lost — reconnecting ({{attempt}}/{{total}}). The lesson continues.",
+    "reconnectingMobile": "Connection lost — reconnecting... The lesson continues.",
     "participantsCount": "Participants ({{count}})",
     "moreAria": "More actions",
     "switch": {
       "video": "Back to video",
       "board": "Board",
       "people": "Participants"
-    }
+    },
+    "rec": "REC",
+    "studentsPresent": "{{count}} students",
+    "teacherRole": "teacher",
+    "wantsToSpeak": "Wants to speak ({{count}})",
+    "allow": "Allow",
+    "mobileShare": "Share",
+    "mobilePeople": "People",
+    "mobileParticipantsCount": "Participants · {{count}}",
+    "liveLesson": "Live lesson",
+    "peopleInLesson": "{{count}} in the lesson",
+    "recordingStudent": "Recording — audio and video",
+    "queueTitle": "You’re in the queue ({{count}})",
+    "handRaised": "hand raised",
+    "cancelRequest": "Cancel",
+    "soon": "Coming soon"
   },
   "mic": {
     "label": "Microphone",
@@ -132,7 +169,8 @@
     "requestFailedToast": "Couldn't send the request",
     "requestNotifyTitle": "{{name}} wants to share their screen",
     "requestNotifyDescription": "Allow the student to share their screen?",
-    "grantAction": "Allow"
+    "grantAction": "Allow",
+    "denyAction": "Decline"
   },
   "participantsPanel": {
     "micRequestsAria": "Students requesting the microphone",
@@ -155,7 +193,14 @@
     "raisedHand": "Raised hand",
     "muteAll": "Mute everyone",
     "invite": "Invite",
-    "muteAllDone": "Muted {{count}} participants"
+    "muteAllDone": "Muted {{count}} participants",
+    "online": "Online",
+    "micOff": "Microphone off",
+    "studentRole": "student",
+    "mobileMicRequesting": "Wants to speak ✋",
+    "mobileCameraRequesting": "Wants to turn on camera",
+    "teacherYouMobile": "You · teacher",
+    "studentYouMobile": "You · student"
   },
   "permissionDialog": {
     "title": "Camera and microphone access needed",
@@ -173,6 +218,10 @@
     "joinFailedTitle": "Could not join the lesson",
     "joinFailedFinished": "The “{{title}}” lesson ended at {{time}}. The recording goes to the group chat once it is ready.",
     "backToChat": "Back to group chat",
-    "openRecording": "Watch the recording"
+    "openRecording": "Watch the recording",
+    "joinFailedDescription": "The connection dropped — we could not join the lesson. The lesson is still running.",
+    "mobileJoinFailedTitle": "Couldn't connect to the lesson",
+    "mobileJoinFailedDescription": "Check your internet connection. The lesson is still going — try again.",
+    "mobileBackToChat": "Back to chat"
   }
 }

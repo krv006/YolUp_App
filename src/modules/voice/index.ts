@@ -19,6 +19,7 @@ export {
   useVoiceRooms,
   voiceKeys,
 } from "./model/voice.queries";
+export { useVoiceUiStore } from "./model/voice-ui.store";
 
 // --- Mobil UI ---
 export { VoiceRoomBar } from "./ui/voice-room-bar";

@@ -616,7 +616,7 @@ export function HomeworkWorkspace({ courseId = null, createOpen = false, onCreat
             onPress={() => {
               if (!selected) return;
               // O'quvchilarga — bitta server chaqiruvi; ota-onalarga — ixtiyoriy bildirishnoma.
-              remind.mutate(selected.id);
+              remind.mutate({ assignmentId: selected.id, notifyParents: remindParents });
               if (remindParents && missingIds.length)
                 sendNotification.mutate({
                   description: t("workspace.remindMessage", { title: selected.title, due: formatDue(selected.dueAt) }),

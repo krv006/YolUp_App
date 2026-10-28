@@ -9,13 +9,22 @@
     "liveConnectedTitle": "Real-time ulangan",
     "liveDisconnectedTitle": "Sinxronlash sekin rejimda",
     "live": "Jonli",
-    "slowMode": "Sekin rejim"
+    "slowMode": "Sekin rejim",
+    "slowSyncNote": "Sinxronlash sekin rejimda — chizganlaringiz saqlanadi va ulanish tiklanganda yuboriladi"
   },
   "sheet": {
-    "addSheet": "Sahifa"
+    "addSheet": "Sahifa",
+    "pageOf": "Sahifa {{page}} / {{total}}",
+    "prev": "Oldingi sahifa",
+    "next": "Keyingi sahifa"
   },
   "permission": {
-    "grantButton": "Ruxsat"
+    "grantButton": "Ruxsat",
+    "modes": {
+      "teacher": "Ruxsat: Faqat siz",
+      "selected": "Ruxsat: Tanlangan o'quvchilar",
+      "everyone": "Ruxsat: Hamma"
+    }
   },
   "solver": {
     "button": "Yechuvchi"
@@ -32,9 +41,12 @@
     "math": "Formula",
     "toolbarAria": "Doska asboblari",
     "colorLabel": "Rang {{value}}",
-    "widthLabel": "Qalinlik {{value}}"
+    "widthLabel": "Qalinlik {{value}}",
+    "styleAria": "Rang va qalinlik"
   },
   "inline": {
+    "cancel": "Bekor qilish",
+    "add": "Doskaga qo‘shish",
     "formula": "Formula",
     "text": "Matn",
     "placeholder": "Matn yozing…",
@@ -60,7 +72,8 @@
       "offTopic": "Mavzuga aloqasiz",
       "cleanup": "Doskani tozalash",
       "other": "Boshqa"
-    }
+    },
+    "reasonPlaceholder": "Sababni yozing"
   },
   "grantDialog": {
     "title": "Doskada chizish ruxsati",
@@ -84,6 +97,20 @@
     "title": "Darsdan chiqqan"
   },
   "periodic": {
+    "searchMobile": "Element nomi yoki belgisi",
+    "massMobile": "Atom massasi {{value}}",
+    "categories": {
+      "alkali": "Ishqoriy metall",
+      "alkaline_earth": "Ishqoriy-yer metali",
+      "transition": "O‘tish metali",
+      "post_transition": "O‘tishdan keyingi metall",
+      "metalloid": "Metalloid",
+      "nonmetal": "Nometall",
+      "halogen": "Galogen",
+      "noble_gas": "Inert gaz",
+      "lanthanide": "Lantanoid",
+      "actinide": "Aktinoid"
+    },
     "button": "Davriy jadval",
     "title": "Davriy jadval",
     "description": "Elementni tanlang — belgisi va ma’lumoti doskaga qo‘yiladi.",
@@ -105,7 +132,7 @@
     "close": "Yopish",
     "tableNote": "1–4-davrlar ko‘rsatilgan · {{count}} ta element",
     "periodShort": "{{value}}-davr",
-    "groupShort": "{{value}} guruh"
+    "groupShort": "{{value}}-guruh"
   },
   "palette": {
     "aria": "Formula konstruktori",
@@ -133,7 +160,9 @@
     "sendToChat": "Chatga yuborish",
     "downloadPdf": "PDF yuklab olish",
     "sentToChat": "Doska guruh chatiga yuborildi",
-    "pdfFailed": "PDF yuklab bo‘lmadi"
+    "pdfFailed": "PDF yuklab bo‘lmadi",
+    "sheetCount": "{{count}} sahifa",
+    "boardTitle": "{{title}} — doska"
   },
   "permissionDialog": {
     "title": "Doskaga ruxsat",
@@ -142,6 +171,7 @@
     "save": "Saqlash",
     "saved": "{{count}} ta o‘quvchiga ruxsat berildi",
     "pickStudent": "Kamida bitta o‘quvchini tanlang",
+    "teacherOnly": "Faqat o‘qituvchi",
     "modes": {
       "teacher": {
         "title": "Faqat men",
@@ -156,11 +186,32 @@
         "hint": "Barcha ishtirokchilar chiza oladi"
       }
     },
-    "revoked": "{{count}} ta o‘quvchidan ruxsat olindi"
+    "revoked": "{{count}} ta o‘quvchidan ruxsat olindi",
+    "selectedCount": "Tanlangan o‘quvchilar · {{count}}"
   },
   "pages": {
     "title": "Sahifalar",
     "hint": "O‘quvchilar siz ochgan sahifani ko‘radi",
-    "new": "Yangi"
+    "new": "Yangi sahifa",
+    "pageLabel": "{{index}}-sahifa",
+    "emptyPage": "Bo'sh sahifa",
+    "renameAria": "{{index}}-sahifa nomi"
+  },
+  "preview": {
+    "label": "Doska · {{page}}-sahifa",
+    "empty": "Doska hozircha bo‘sh"
+  },
+  "mobile": {
+    "title": "Doska · {{page}} / {{total}}",
+    "undo": "Bekor qilish",
+    "redo": "Qaytarish",
+    "undoReason": "Qadam bekor qilindi",
+    "modes": {
+      "teacher": "Faqat siz",
+      "selected": "Tanlanganlar",
+      "everyone": "Hamma"
+    },
+    "liveLesson": "Jonli dars",
+    "menu": "Amallar"
   }
 }

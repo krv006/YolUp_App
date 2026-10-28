@@ -18,6 +18,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "check-sync": "node scripts/check-sync.mjs",
     "doctor": "npx expo-doctor",
+    "build:ds-tokens": "node scripts/build-ds-tokens.mjs",
     "build:tokens": "node scripts/build-tokens.mjs",
     "build:icons": "node scripts/build-icons.mjs",
     "build:ui-icons": "node scripts/build-ui-icons.mjs",

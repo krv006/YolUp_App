@@ -47,8 +47,10 @@ export {
   useQuiz,
   useQuizAttempts,
   useQuizDetailLoader,
+  useQuizQuestionStats,
   useQuizzes,
   useRemoveGroupAudio,
+  useStartAiMiniQuiz,
   useStartAiQuiz,
   useSubmitQuizAttempt,
   useUploadGroupAudio,
@@ -56,6 +58,22 @@ export {
 } from "./model/quiz.queries";
 export { blankTextForDisplay, emptyAnswer, stableShuffle } from "./lib/answer-value";
 export { groupQuestions } from "./lib/group-questions";
+export {
+  DEFAULT_POINTS,
+  MAX_OPTIONS,
+  MAX_POINTS,
+  MIN_POINTS,
+  QUESTION_TYPE_ORDER,
+  changeDraftType,
+  createDraft,
+  draftToFormValues,
+  draftToStudentQuestion,
+  hasDraftContent,
+  optionLetter,
+  questionToDraft,
+  validateDraft,
+} from "./lib/question-draft";
+export type { GroupDraft, KeyFactory, QuestionDraft } from "./lib/question-draft";
 export type { QuestionBlock } from "./lib/group-questions";
 export type { QuizAttemptAnswerInput } from "./lib/quiz.mappers";
 export { quizErrorMessage } from "./lib/quiz-errors";

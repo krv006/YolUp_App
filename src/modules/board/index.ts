@@ -33,10 +33,12 @@ export {
   useEraseStrokes,
   useGrantDraw,
   usePeriodicTable,
+  useRenameSheet,
   useRevokeDraw,
   useSendBoardToChat,
   useSetBoardPermissions,
   useSolveFormula,
+  useTeacherSignals,
 } from "./model/board.queries";
 export { useBoardChannel } from "./model/use-board-channel";
 export { useBoardRealtime } from "./model/use-board-realtime";

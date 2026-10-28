@@ -9,13 +9,22 @@
     "liveConnectedTitle": "Подключено в реальном времени",
     "liveDisconnectedTitle": "Синхронизация в медленном режиме",
     "live": "В сети",
-    "slowMode": "Медленный режим"
+    "slowMode": "Медленный режим",
+    "slowSyncNote": "Синхронизация в медленном режиме — ваши записи сохранятся и отправятся после восстановления связи"
   },
   "sheet": {
-    "addSheet": "Страница"
+    "addSheet": "Страница",
+    "pageOf": "Страница {{page}} / {{total}}",
+    "prev": "Предыдущая страница",
+    "next": "Следующая страница"
   },
   "permission": {
-    "grantButton": "Разрешение"
+    "grantButton": "Разрешение",
+    "modes": {
+      "teacher": "Доступ: только вы",
+      "selected": "Доступ: выбранные ученики",
+      "everyone": "Доступ: все"
+    }
   },
   "solver": {
     "button": "Решатель"
@@ -32,9 +41,12 @@
     "math": "Формула",
     "toolbarAria": "Инструменты доски",
     "colorLabel": "Цвет {{value}}",
-    "widthLabel": "Толщина {{value}}"
+    "widthLabel": "Толщина {{value}}",
+    "styleAria": "Цвет и толщина"
   },
   "inline": {
+    "cancel": "Отмена",
+    "add": "Добавить на доску",
     "formula": "Формула",
     "text": "Текст",
     "placeholder": "Введите текст…",
@@ -60,7 +72,8 @@
       "offTopic": "Не по теме",
       "cleanup": "Очистка доски",
       "other": "Другое"
-    }
+    },
+    "reasonPlaceholder": "Укажите причину"
   },
   "grantDialog": {
     "title": "Разрешение рисовать на доске",
@@ -84,6 +97,20 @@
     "title": "Вышел из урока"
   },
   "periodic": {
+    "searchMobile": "Название или символ элемента",
+    "massMobile": "Атомная масса {{value}}",
+    "categories": {
+      "alkali": "Щелочной металл",
+      "alkaline_earth": "Щёлочноземельный металл",
+      "transition": "Переходный металл",
+      "post_transition": "Постпереходный металл",
+      "metalloid": "Металлоид",
+      "nonmetal": "Неметалл",
+      "halogen": "Галоген",
+      "noble_gas": "Благородный газ",
+      "lanthanide": "Лантаноид",
+      "actinide": "Актиноид"
+    },
     "button": "Таблица Менделеева",
     "title": "Периодическая таблица",
     "description": "Выберите элемент — его символ и данные добавятся на доску.",
@@ -133,7 +160,9 @@
     "sendToChat": "Отправить в чат",
     "downloadPdf": "Скачать PDF",
     "sentToChat": "Доска отправлена в чат группы",
-    "pdfFailed": "Не удалось скачать PDF"
+    "pdfFailed": "Не удалось скачать PDF",
+    "sheetCount": "{{count}} страниц",
+    "boardTitle": "{{title}} — доска"
   },
   "permissionDialog": {
     "title": "Доступ к доске",
@@ -142,6 +171,7 @@
     "save": "Сохранить",
     "saved": "Доступ выдан {{count}} ученикам",
     "pickStudent": "Выберите хотя бы одного ученика",
+    "teacherOnly": "Только учитель",
     "modes": {
       "teacher": {
         "title": "Только я",
@@ -156,11 +186,32 @@
         "hint": "Рисовать могут все участники"
       }
     },
-    "revoked": "Доступ отозван у {{count}}"
+    "revoked": "Доступ отозван у {{count}}",
+    "selectedCount": "Выбранные ученики · {{count}}"
   },
   "pages": {
     "title": "Страницы",
     "hint": "Ученики видят открытую вами страницу",
-    "new": "Новая"
+    "new": "Новая страница",
+    "pageLabel": "Страница {{index}}",
+    "emptyPage": "Пустая страница",
+    "renameAria": "Название страницы {{index}}"
+  },
+  "preview": {
+    "label": "Доска · стр. {{page}}",
+    "empty": "Доска пока пуста"
+  },
+  "mobile": {
+    "title": "Доска · {{page}} / {{total}}",
+    "undo": "Отменить",
+    "redo": "Повторить",
+    "undoReason": "Шаг отменён",
+    "modes": {
+      "teacher": "Только вы",
+      "selected": "Выбранные",
+      "everyone": "Все"
+    },
+    "liveLesson": "Онлайн-урок",
+    "menu": "Действия"
   }
 }

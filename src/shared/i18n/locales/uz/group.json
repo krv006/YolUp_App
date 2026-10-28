@@ -10,13 +10,37 @@
   "lessons": {
     "eyebrow": "DARS JADVALI",
     "title": "Darslar",
-    "subtitle": "Rejalashtirilgan jonli mashg'ulotlar.",
+    "subtitle": "Rejalashtirilgan jonli mashg‘ulotlar",
     "addLesson": "Dars qo'shish",
     "deleteDialogTitle": "Darsni o'chirish",
     "deleteDialogDescription": "Dars jadvaldan olib tashlanadi va o‘quvchilarga xabar boradi. Biriktirilgan test va davomat yozuvlari ham o‘chadi.",
     "cancel": "Bekor",
     "delete": "O'chirish",
-    "deleteConfirmTitle": "“{{title}}” darsini o‘chirasizmi?"
+    "deleteConfirmTitle": "“{{title}}” darsini o‘chirasizmi?",
+    "today": "Bugun, {{date}}",
+    "yesterday": "Kecha, {{date}}",
+    "countShort": "{{count}} ta",
+    "minutesShort": "{{count}} daq",
+    "noTopic": "Mavzu yozilmagan",
+    "status": {
+      "live": "Jonli efirda",
+      "scheduled": "Rejalashtirilgan",
+      "finished": "Tugagan",
+      "cancelled": "Bekor qilingan"
+    },
+    "joined": "{{joined}} / {{total}} qo‘shildi",
+    "finishedMeta": "{{count}} ishtirokchi",
+    "join": "Darsga kirish",
+    "recording": "Video yozuv",
+    "ratings": "Baholar",
+    "ratingsWith": "Baholar · {{value}}",
+    "edit": "Tahrirlash",
+    "emptyTitle": "Hali dars rejalashtirilmagan",
+    "emptyHint": "Dars jadvalini qo‘shing — o‘quvchilaringiz eslatma oladi.",
+    "cancelLesson": "Bekor qilish",
+    "finishedStats": "{{joined}} / {{total}} qatnashdi · davomat {{rate}}%",
+    "cancelLessonLong": "Darsni bekor qilish",
+    "finishedStatsShort": "{{joined}} ishtirokchi · davomat {{rate}}%"
   },
   "assignments": {
     "eyebrow": "GURUH VAZIFALARI",
@@ -39,7 +63,20 @@
     "deleteDialogDescription": "\"{{title}}\" va unga bog'liq ma'lumotlar o'chadi.",
     "cancel": "Bekor",
     "delete": "O'chirish",
-    "fromBank": "Tayyor testdan"
+    "fromBank": "Tayyor testdan",
+    "subtitleShort": "Topshiriqlar va AI natijalari",
+    "emptyHint": "Birinchi uy vazifasini bering — o‘quvchilar uni guruh chatida ko‘radi.",
+    "addTest": "Test qo‘shish",
+    "testMenu": {
+      "bank": {
+        "title": "Tayyor testdan",
+        "hint": "Bankdagi testni tanlang"
+      },
+      "create": {
+        "title": "Yangi test yaratish",
+        "hint": "Noldan yoki AI yordamida"
+      }
+    }
   },
   "students": {
     "eyebrow": "ISHTIROKCHILAR",
@@ -61,7 +98,7 @@
     "summary": "{{lessonCount}} ta dars · {{recordCount}} ta yozuv",
     "empty": "Davomat hali yo'q.",
     "emptyTitle": "Davomat hali yo‘q",
-    "emptyDescription": "Dars o‘tkazilgach, o‘quvchilarning qatnashuvi va fokus ko‘rsatkichi shu yerda chiqadi.",
+    "emptyDescription": "Dars o‘tkazilgach, o‘quvchilar qatnashuvi va fokus ko‘rsatkichlari shu yerda chiqadi.",
     "filterAll": "Barcha darslar",
     "filterMonth": "Oxirgi 30 kun",
     "filterCurrent": "Shu oy",
@@ -70,7 +107,11 @@
     "statLessons": "Dars",
     "studentsTitle": "O‘quvchilar",
     "studentsMeta": "Davomat · fokus",
-    "focusSuffix": "fokus"
+    "focusSuffix": "fokus",
+    "mobileBadge": "{{lessonCount}} ta dars · {{recordCount}} ta yozuv",
+    "studentsMetaShort": "Davomat · fokus",
+    "filterMonthShort": "30 kun",
+    "filterAllShort": "Barchasi"
   },
   "dialogs": {
     "lesson": {
@@ -122,7 +163,16 @@
       "quizNone": "Test biriktirilmagan",
       "editDescription": "Mavzu, vaqt va biriktirilgan testni o‘zgartiring. O‘quvchilarga bildirishnoma boradi.",
       "deleteLesson": "Darsni o‘chirish",
-      "quizHint": "Dars tugagach test o‘quvchilarga avtomatik ochiladi."
+      "quizHint": "Dars tugagach test o‘quvchilarga avtomatik ochiladi.",
+      "repeatingSubtitle": "Takrorlanuvchi jadval",
+      "timeBusy": "Bu vaqt band",
+      "scheduleFirst": "{{count}} ta dars yaratiladi{{limitNote}} · birinchisi {{first}}, {{weekday}}",
+      "mobileSubtitle": "Guruh uchun mashg‘ulot vaqtini belgilang",
+      "todayDate": "Bugun, {{date}}",
+      "timeShort": "Vaqt",
+      "startShort": "Boshlanish",
+      "durationMinutes": "Davomiyligi (daqiqa)",
+      "minutesValue": "{{count}} daqiqa"
     },
     "conflict": {
       "singleTitle": "Bu vaqtda darsingiz bor",
@@ -180,7 +230,7 @@
     "submit": "Qo‘shish ({{count}})",
     "added": "{{count}} ta o‘quvchi qo‘shildi",
     "createTitle": "Yangi o‘quvchi hisobi",
-    "createDescription": "O‘quvchi platformada bo‘lmasa, hisobni siz yaratasiz va guruhga avtomatik qo‘shiladi.",
+    "createDescription": "Hisobni siz yaratasiz va guruhga qo‘shiladi",
     "firstName": "Ism",
     "lastName": "Familiya",
     "login": "Login",
@@ -192,17 +242,20 @@
     "createNote": "Login va parolni o‘quvchiga yuboring. Birinchi kirishda u parolini o‘zgartiradi.",
     "createSubmit": "Hisob yaratish",
     "requestsTitle": "Qo‘shilish so‘rovlari · {{count}}",
-    "requestsDescription": "Taklif havolasi orqali kelgan so‘rovlar. Qabul qilinganlar guruhga darhol qo‘shiladi.",
+    "requestsDescription": "Taklif havolasi orqali kelgan so‘rovlar",
     "requestsEmpty": "Yangi so‘rov yo‘q.",
     "accept": "Qabul qilish",
     "decline": "Rad etish",
     "acceptAll": "Qabul qilish ({{count}})",
     "close": "Yopish",
-    "parentFor": "Ota-ona · {{name}} uchun"
+    "parentFor": "Ota-ona · {{name}} uchun",
+    "createAccountShort": "Yangi o‘quvchi hisobi",
+    "inviteShort": "Taklif havolasi",
+    "copy": "Nusxalash"
   },
   "invite": {
     "title": "Taklif havolasi",
-    "description": "Havolani o‘quvchilarga yuboring — ular bir bosishda guruhga qo‘shiladi.",
+    "description": "O‘quvchilar bir bosishda guruhga qo‘shiladi",
     "empty": "Bu guruh uchun havola hali yaratilmagan.",
     "create": "Havola yaratish",
     "created": "Havola yaratildi",
@@ -221,7 +274,10 @@
     "noExpiry": "Muddatsiz",
     "approvalLabel": "Tasdiqlash bilan",
     "approvalHint": "Havola orqali kelganlarni siz tasdiqlaysiz",
-    "approvalOn": "tasdiqlash bilan"
+    "approvalOn": "tasdiqlash bilan",
+    "linkLabel": "Havola",
+    "share": "Havolani ulashish",
+    "cancelLink": "Bekor qilish"
   },
   "join": {
     "title": "Guruhga qo‘shilish",
@@ -241,5 +297,32 @@
     "retry": "Qaytadan urinish",
     "openCourse": "Guruhni ochish",
     "home": "Bosh sahifaga"
+  },
+  "cancelLesson": {
+    "title": "Darsni bekor qilasizmi?",
+    "description": "Dars jadvalda “bekor qilingan” bo‘lib qoladi va o‘quvchilarga bildirishnoma boradi.",
+    "onlyThis": "Faqat shu dars ({{when}})",
+    "thisAndNext": "Shu va keyingi barcha darslar",
+    "close": "Yopish",
+    "confirm": "Bekor qilish"
+  },
+  "announcementBanner": "E’lon rejimi yoqildi — faqat siz yozasiz",
+  "mobileAssignments": {
+    "draft": "Qoralama",
+    "review": "Tekshirish · {{count}}",
+    "finished": "Yakunlangan",
+    "noDue": "Muddatsiz",
+    "daysLeft": "{{count}} kun qoldi",
+    "draftMeta": "Yuborilmagan qoralama",
+    "due": "Muddat: {{date}}",
+    "notSent": "Yuborilmagan",
+    "average": "o‘rtacha {{value}}",
+    "submitted": "{{done}} / {{total}} topshirdi",
+    "quizMeta": "{{count}} ta savol · Test",
+    "open": "Ochish",
+    "edit": "Tahrirlash",
+    "delete": "O‘chirish",
+    "results": "Natijalar",
+    "menu": "Amallar"
   }
 }

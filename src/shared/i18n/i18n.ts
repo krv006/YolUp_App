@@ -8,6 +8,7 @@
 import i18next, { type Resource } from "i18next";
 import { initReactI18next } from "react-i18next";
 import { DEFAULT_LANGUAGE, useLanguageStore } from "@/shared/model/language.store";
+import legacyKeys from "./legacy-keys.json";
 
 /*
  * 🟡 VEB'DAN FARQ — lug'atlar QO'LDA import qilinadi.
@@ -28,6 +29,7 @@ import enAuth from "./locales/en/auth.json";
 import enBoard from "./locales/en/board.json";
 import enChat from "./locales/en/chat.json";
 import enCommon from "./locales/en/common.json";
+import enDashboard from "./locales/en/dashboard.json";
 import enGroup from "./locales/en/group.json";
 import enHomework from "./locales/en/homework.json";
 import enNotification from "./locales/en/notification.json";
@@ -48,6 +50,7 @@ import ruAuth from "./locales/ru/auth.json";
 import ruBoard from "./locales/ru/board.json";
 import ruChat from "./locales/ru/chat.json";
 import ruCommon from "./locales/ru/common.json";
+import ruDashboard from "./locales/ru/dashboard.json";
 import ruGroup from "./locales/ru/group.json";
 import ruHomework from "./locales/ru/homework.json";
 import ruNotification from "./locales/ru/notification.json";
@@ -68,6 +71,7 @@ import uzAuth from "./locales/uz/auth.json";
 import uzBoard from "./locales/uz/board.json";
 import uzChat from "./locales/uz/chat.json";
 import uzCommon from "./locales/uz/common.json";
+import uzDashboard from "./locales/uz/dashboard.json";
 import uzGroup from "./locales/uz/group.json";
 import uzHomework from "./locales/uz/homework.json";
 import uzNotification from "./locales/uz/notification.json";
@@ -90,6 +94,7 @@ const resources: Resource = {
     board: enBoard,
     chat: enChat,
     common: enCommon,
+    dashboard: enDashboard,
     group: enGroup,
     homework: enHomework,
     notification: enNotification,
@@ -111,6 +116,7 @@ const resources: Resource = {
     board: ruBoard,
     chat: ruChat,
     common: ruCommon,
+    dashboard: ruDashboard,
     group: ruGroup,
     homework: ruHomework,
     notification: ruNotification,
@@ -132,6 +138,7 @@ const resources: Resource = {
     board: uzBoard,
     chat: uzChat,
     common: uzCommon,
+    dashboard: uzDashboard,
     group: uzGroup,
     homework: uzHomework,
     notification: uzNotification,
@@ -147,6 +154,35 @@ const resources: Resource = {
     mobile: uzMobile,
   },
 };
+
+/*
+ * VAQTINCHALIK QATLAM — `legacy-keys.json`.
+ *
+ * Veb 2026-10 qayta dizaynida ba'zi kalitlar (eski mock, vazifa formasi,
+ * test va o'quvchi sahifalari) o'chirildi. Lug'atlar vebdan bayt-bayt
+ * ko'chiriladi, lekin o'sha kalitlarni ishlatadigan eski mobil ekranlar
+ * yangi dizaynga bosqichma-bosqich o'tadi. Shu oraliqda ular kalit nomini
+ * ko'rsatib qolmasligi uchun eski qiymatlar OSTIGA qo'yiladi: vebdagi
+ * qiymat bor bo'lsa, doim u ustun.
+ */
+type Tree = { [key: string]: string | Tree };
+
+function underlay(base: Tree, top: Tree): Tree {
+  const out: Tree = { ...base };
+  for (const [key, value] of Object.entries(top)) {
+    const below = out[key];
+    out[key] =
+      typeof value === "object" && typeof below === "object" ? underlay(below, value) : value;
+  }
+  return out;
+}
+
+for (const language of ["uz", "ru", "en"] as const) {
+  const legacy = legacyKeys[language] as Record<string, Tree>;
+  for (const [namespace, keys] of Object.entries(legacy)) {
+    resources[language]![namespace] = underlay(keys, resources[language]![namespace] as Tree);
+  }
+}
 
 void i18next.use(initReactI18next).init({
   resources,

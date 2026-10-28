@@ -44,6 +44,8 @@ export type { InputProps } from "./input";
 export { Screen, ScreenEmpty, ScreenError, ScreenLoading } from "./screen";
 export type { ScreenProps } from "./screen";
 export { Text } from "./text";
+export { DsText, dsRadius, dsType, useDs } from "./ds";
+export type { Ds, DsColor, DsGradient, DsShadow, DsTextProps, DsType } from "./ds";
 export type { TextProps, TextTone, TextVariant } from "./text";
 export { ThemeScope, useTheme } from "./theme";
 export type { Palette } from "./theme";

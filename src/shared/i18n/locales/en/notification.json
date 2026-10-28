@@ -1,6 +1,6 @@
 {
   "title": "Notifications",
-  "markAllRead": "Mark all read",
+  "markAllRead": "Mark all as read",
   "openAria": "Notifications",
   "unreadAria": "Notifications ({{count}} new)",
   "groups": {
@@ -9,7 +9,7 @@
     "earlier": "Earlier"
   },
   "emptyTitle": "No notifications yet",
-  "emptyDescription": "Updates about assignments, lessons and payments will show up here.",
+  "emptyDescription": "Updates about assignments, lessons and join requests will appear here.",
   "loadError": "Could not load notifications",
   "retry": "Try again",
   "loading": "Loading",
@@ -24,5 +24,18 @@
     "default": "Open"
   },
   "filterAll": "All",
-  "filterUnread": "Unread · {{count}}"
+  "filterUnread": "Unread · {{count}}",
+  "tabs": {
+    "all": "All",
+    "unread": "Unread · {{count}}",
+    "unreadPlain": "Unread"
+  },
+  "actions": {
+    "openAssignment": "Open the assignment",
+    "openQuiz": "Go to the quiz",
+    "review": "Review",
+    "open": "Open"
+  },
+  "back": "Back",
+  "openFailed": "Couldn’t open the notification"
 }

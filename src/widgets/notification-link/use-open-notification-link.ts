@@ -8,6 +8,12 @@ import type { NotificationLink } from "@/modules/notification";
 import { ROUTES } from "@/shared/config";
 import { ROLES } from "@/shared/constants";
 
+const RESULT_KINDS = ["result", "graded", "grade", "attempt", "finished"];
+
+function isResult(kind?: string | null): boolean {
+  return Boolean(kind) && RESULT_KINDS.some((part) => kind!.includes(part));
+}
+
 /**
  * Bildirishnoma havolasini ochish — veb `widgets/notification-link`: har
  * tur (dars, yozuv, vazifa, topshiriq, test, imtihon, guruh, suhbat) o'z
@@ -48,14 +54,18 @@ export function useOpenNotificationLink() {
             if (!submission) throw new Error();
             go(`${ROUTES.teacher.homeworkReview(submission.assignmentId)}?s=${encodeURIComponent(link.id)}`);
           })
-          .catch(() => go("/teacher/assignments"));
+          .catch(() => go(ROUTES.teacher.homework));
         return;
       }
       if (type === "assignment" || type === "homework" || type === "submission") {
         if (prefix === "/parent") return go("/parent/homework");
         return go("/student/chats");
       }
-      if (type === "quiz" || type === "test") return go(`${prefix}/quizzes?quiz=${link.id}`);
+      if (type === "quiz" || type === "test") {
+        // O'qituvchida vebdagidek: natija xabari — natijalar, qolgani — muharrir. O'quvchi 6-bosqichda.
+        if (prefix === "/teacher") return go(isResult(kind) ? ROUTES.teacher.testResults(link.id) : ROUTES.teacher.test(link.id));
+        return go(`${prefix}/quizzes?quiz=${link.id}`);
+      }
       if (type === "exam" || type === "mock") return go(student ? `/student/exams/${link.id}` : `${prefix}/exams`);
       if (type === "course") {
         const room = conversations.data?.find((item) => item.courseId === link.id);

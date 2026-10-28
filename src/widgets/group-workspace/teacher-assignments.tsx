@@ -7,7 +7,7 @@ import { AssignmentDetailSheet } from "@/modules/homework/ui/assignment-detail-s
 import { useLessons } from "@/modules/lesson";
 import {
   AddQuizDialog,
-  AssignQuizSheet,
+  AssignQuizDialog,
   QuizAttemptsSheet,
   quizDisplayTitle,
   quizErrorMessage,
@@ -212,13 +212,13 @@ export function TeacherAssignments({
         />
       ) : null}
 
-      <AssignQuizSheet
+      <AssignQuizDialog
         open={bankDialog}
-        onClose={() => setBankDialog(false)}
+        onOpenChange={setBankDialog}
         quizzes={bankOptions}
         courseId={courseId}
         pending={assignQuiz.isPending}
-        onSubmit={(value) => assignQuiz.mutateAsync(value).then(() => setBankDialog(false))}
+        onSubmit={(value) => void assignQuiz.mutateAsync(value).then(() => setBankDialog(false))}
       />
 
       {quizDialog ? (

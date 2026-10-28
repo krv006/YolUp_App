@@ -8,6 +8,7 @@ import { useConversations } from "@/modules/conversation";
 import { useCourses } from "@/modules/course";
 import { useLessons } from "@/modules/lesson";
 import { quizDisplayTitle, useQuizzes } from "@/modules/quiz";
+import { ROUTES } from "@/shared/config";
 import {
   bodyFont,
   DsGradient,
@@ -192,7 +193,15 @@ export function WorkspaceSearchPage() {
                 title={quizDisplayTitle(quiz)}
                 hint={`${quiz.status === "draft" ? t("draft") : t("published")} · ${t("quizQuestions", { count: quiz.questionCount })}`}
                 last={index === quizHits.length - 1}
-                onPress={() => go(`${prefix}/quizzes?quiz=${quiz.id}`)}
+                onPress={() =>
+                  go(
+                    isStudent
+                      ? `${prefix}/quizzes?quiz=${quiz.id}`
+                      : quiz.status === "draft"
+                        ? ROUTES.teacher.test(quiz.id)
+                        : ROUTES.teacher.testResults(quiz.id)
+                  )
+                }
               />
             ))}
           </ResultSection>

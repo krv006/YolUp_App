@@ -1,15 +1,15 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ArrowLeft, CircleX } from "lucide-react-native";
-import { radius, Text, ThemeScope, useTheme } from "@/shared/ui";
+import { DsText, Icon, ThemeScope, useDs } from "@/shared/ui";
 
 export interface LiveRoomStateProps {
   title: string;
-  description?: string;
+  description?: ReactNode;
   lessonTitle?: string;
   subtitle?: string;
-  tone?: "error" | "neutral";
+  tone?: "error" | "neutral" | "offline";
   actionLabel?: string;
   onAction?: () => void;
   secondaryLabel?: string;
@@ -18,8 +18,9 @@ export interface LiveRoomStateProps {
 }
 
 /**
- * Jonli dars holat ekrani — veb `widgets/live-room/live-room-state.tsx`:
- * dars topilmadi, kirib bo'lmadi, dars yakunlandi. Doim qorong'i.
+ * Jonli dars holat ekrani — veb `live-room-state.tsx` ning tor ekran
+ * varianti (doim qorong'i): yopish tugmasi, katta belgi, dars nomi,
+ * sarlavha va izoh, "Qayta urinish" va ikkinchi tugma.
  */
 export function LiveRoomState(props: LiveRoomStateProps) {
   return (
@@ -29,101 +30,75 @@ export function LiveRoomState(props: LiveRoomStateProps) {
   );
 }
 
-function StateBody({
-  title,
-  description,
-  lessonTitle,
-  subtitle,
-  tone = "error",
-  actionLabel,
-  onAction,
-  secondaryLabel,
-  onSecondary,
-  onBack,
-}: LiveRoomStateProps) {
+function StateBody({ title, description, lessonTitle, tone = "error", actionLabel, onAction, secondaryLabel, onSecondary, onBack }: LiveRoomStateProps) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   const insets = useSafeAreaInsets();
+  const close = onBack ?? onSecondary;
 
   return (
-    <View style={[styles.root, { backgroundColor: palette.background, paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+    <ScrollView
+      style={{ backgroundColor: ds.c.canvas }}
+      contentContainerStyle={[styles.page, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 36 }]}
+    >
       <View style={styles.header}>
-        {onBack ? (
-          <Pressable accessibilityRole="button" accessibilityLabel={t("room.leaveAria")} onPress={onBack} style={styles.back}>
-            <ArrowLeft size={20} color={palette["muted-foreground"]} />
+        {close ? (
+          <Pressable accessibilityRole="button" accessibilityLabel={t("room.leaveAria")} onPress={close} style={[styles.close, { backgroundColor: ds.c["surface-inverse"] }]}>
+            <Icon name="close" size={22} color={ds.c["ink-inverse"]} />
           </Pressable>
-        ) : null}
-        {lessonTitle ? (
-          <View style={styles.grow}>
-            <View style={styles.titleRow}>
-              <View style={[styles.dot, { backgroundColor: LIVE_SUCCESS }]} />
-              <Text variant="body" numberOfLines={1} style={[styles.grow, styles.heading]}>
-                {lessonTitle}
-              </Text>
-            </View>
-            {subtitle ? (
-              <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
-                {subtitle}
-              </Text>
-            ) : null}
-          </View>
         ) : null}
       </View>
 
       <View style={styles.body}>
-        {tone === "error" ? (
-          <View style={[styles.errorIcon, { backgroundColor: "#fdeeee" }]}>
-            <CircleX size={30} color="#b93636" />
+        {tone !== "neutral" ? (
+          <View style={[styles.icon, { backgroundColor: ds.c.subtle }]}>
+            <Icon name={tone === "offline" ? "wifi" : "error"} size={40} color={ds.c["error-text"]} />
           </View>
         ) : null}
-        <Text variant="title" style={styles.center}>
+        {lessonTitle ? (
+          <DsText v="body-sm" c="ink-secondary" style={styles.lesson}>
+            {lessonTitle}
+          </DsText>
+        ) : null}
+        <DsText v="title-lg" heading style={[styles.center, styles.title]}>
           {title}
-        </Text>
+        </DsText>
         {description ? (
-          <Text variant="body" style={[styles.center, styles.description, { color: palette["muted-foreground"] }]}>
+          <DsText v="body-sm" c="ink-secondary" style={[styles.center, styles.description]}>
             {description}
-          </Text>
+          </DsText>
         ) : null}
         {actionLabel && onAction ? (
-          <Pressable
-            accessibilityRole="button"
-            onPress={onAction}
-            style={({ pressed }) => [styles.action, { backgroundColor: pressed ? palette["primary-hover"] : palette.primary }]}
-          >
-            <Text variant="label" style={{ color: palette["primary-foreground"] }}>
+          <Pressable accessibilityRole="button" onPress={onAction} style={({ pressed }) => [styles.button, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}>
+            {tone === "neutral" ? null : <Icon name="refresh" size={20} color={ds.c["on-action"]} />}
+            <DsText v="title" w="600" c="on-action">
               {actionLabel}
-            </Text>
+            </DsText>
           </Pressable>
         ) : null}
         {secondaryLabel && onSecondary ? (
-          <Pressable accessibilityRole="button" onPress={onSecondary}>
-            <Text variant="label" style={{ color: palette.primary }}>
+          <Pressable accessibilityRole="button" onPress={onSecondary} style={({ pressed }) => [styles.button, { backgroundColor: ds.c["surface-inverse"], opacity: pressed ? 0.85 : 1 }]}>
+            <DsText v="title" w="600" c="ink-inverse">
               {secondaryLabel}
-            </Text>
+            </DsText>
           </Pressable>
         ) : null}
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
-/** Veb qorong'i `--success` (`bg-success`): yashil "jonli" nuqta. */
-export const LIVE_SUCCESS = "#35c493";
-
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  grow: { flex: 1, minWidth: 0 },
   center: { textAlign: "center" },
-  caption: { fontWeight: "500" },
-  /* `px-5 pt-4 pb-3 gap-3` */
-  header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
-  back: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  heading: { fontFamily: "Unbounded-SemiBold", fontWeight: "600" },
-  dot: { width: 8, height: 8, borderRadius: radius.full },
-  /* `items-center justify-center gap-4 px-6` */
-  body: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16, paddingHorizontal: 24 },
-  errorIcon: { width: 64, height: 64, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  description: { maxWidth: 460 },
-  action: { marginTop: 8, minWidth: 260, height: 48, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, borderRadius: radius.full },
+  /* `px-4 pt-5 pb-9` */
+  page: { flexGrow: 1, paddingHorizontal: 16 },
+  header: { height: 44, flexDirection: "row", alignItems: "center" },
+  close: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  /* `items-center justify-center px-2 pb-25` */
+  body: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 8, paddingBottom: 100 },
+  icon: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
+  lesson: { marginTop: 12 },
+  title: { marginTop: 14 },
+  description: { marginTop: 20, paddingHorizontal: 24 },
+  button: { marginTop: 16, alignSelf: "stretch", height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 26 },
 });

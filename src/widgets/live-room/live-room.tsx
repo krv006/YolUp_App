@@ -13,26 +13,9 @@ import {
   type TrackReferenceOrPlaceholder,
 } from "@livekit/react-native";
 import { ConnectionState, DisconnectReason, RoomEvent, Track, type Participant } from "livekit-client";
-import {
-  ArrowLeft,
-  CircleStop,
-  Hand,
-  Info,
-  LayoutDashboard,
-  Mic,
-  MicOff,
-  MonitorUp,
-  MoreHorizontal,
-  PhoneOff,
-  UserRoundPlus,
-  UserRoundX,
-  Users,
-  Video,
-  VideoOff,
-  X,
-} from "lucide-react-native";
+import { Hand, Info, MicOff, MonitorUp, UserRoundX, VideoOff, X } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
-import { AwayStudentsNotice, BoardSurface } from "@/modules/board";
+import { AwayStudentsNotice, BoardPreview, BoardSurface } from "@/modules/board";
 import { FinishLessonSheet } from "@/modules/lesson";
 import {
   CAMERA_SOURCE,
@@ -46,10 +29,10 @@ import {
   useAnswerAttention,
   useAttentionCheck,
   useBanFromLesson,
-  useMuteAll,
   useCameraSignals,
   useFocusTracker,
   useMicSignals,
+  useMuteAll,
   type AttentionCheck,
   type CameraRequest,
   type MicRequest,
@@ -57,25 +40,22 @@ import {
 import type { Lesson } from "@/shared/types";
 import {
   Avatar,
-  radius,
+  ConfirmDialog,
+  dsAlpha,
+  DsText,
+  dsRadius,
+  Icon,
+  MobileButton,
   Sheet,
-  SheetButton,
-  SheetFooter,
-  Text,
   ThemeScope,
   toast,
-  useTheme,
+  useDs,
 } from "@/shared/ui";
-import { LIVE_SUCCESS } from "./live-room-state";
 import { LiveWatermark } from "./live-watermark";
-
-type SidePanel = "board" | "people" | null;
+import { formatElapsed, useElapsedSeconds } from "./use-elapsed-seconds";
 
 const MAX_RECONNECT_ATTEMPTS = 5;
-/** Veb `#d93a3a` — darsdan chiqish tugmasi. */
-const LEAVE_RED = "#d93a3a";
-/** "Boshqa amallar" menyusi foni (veb qorong'i `bg-surface` qatlami). */
-const MENU_BG = "#161c23";
+const MAX_TILES = 6;
 
 function firstName(value: string): string {
   return value.trim().split(/\s+/)[0] ?? value;
@@ -88,12 +68,14 @@ export interface LiveRoomProps {
 }
 
 /**
- * Jonli dars xonasi — veb `widgets/live-room/live-room.tsx` ning tor ekran
- * ko'rinishi: qorong'i sarlavha, 2 ustunli kamera setkasi, pastda dumaloq
- * boshqaruvlar, "Boshqa amallar" menyusi, ishtirokchilar oynasi va doska.
+ * Jonli dars xonasi — veb `live-room.tsx` + `mobile-live-room.tsx` (tor
+ * ekran, qorong'i): sarlavhada orqaga, o'tgan vaqt va ishtirokchilar soni;
+ * yorug' sahna kartasi (ekran ulashish yoki doska ko'rinishi), 3 ustunli
+ * kamera plitkalari, pastda mikrofon, kamera, ulashish, doska, ishtirokchilar
+ * va yakunlash/chiqish tugmalari.
  *
  * Vebdan farqi: o'qituvchining brauzerdagi audio/video yozuvi mobilda yo'q
- * (yozuv server tomonda), shuning uchun "Audio yozilmoqda" belgisi ham yo'q.
+ * (yozuv server tomonda), shuning uchun "REC" belgisi ko'rsatilmaydi.
  */
 export function LiveRoom(props: LiveRoomProps) {
   return (
@@ -105,14 +87,15 @@ export function LiveRoom(props: LiveRoomProps) {
 
 function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const [panel, setPanel] = useState<SidePanel>(null);
+  const [boardOpen, setBoardOpen] = useState(false);
+  const [peopleOpen, setPeopleOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const connectionState = useConnectionState();
+  const [shareRequest, setShareRequest] = useState<{ identity: string; name: string } | null>(null);
+  const [joinedAt] = useState(() => new Date());
   const participants = useParticipants();
   const room = useRoomContext();
   const attention = useAttentionCheck(lesson.id, !isTeacher);
@@ -128,25 +111,15 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
     ],
     { onlySubscribed: false }
   );
-  const screenTracks = tracks.filter((track) => track.source === Track.Source.ScreenShare);
   const cameraTracks = tracks.filter((track) => track.source === Track.Source.Camera);
-  const activeShare = screenTracks[0] ?? null;
-  const pendingRequestsCount = mic.requests.length + camera.requests.length;
+  const activeShare = tracks.find((track) => track.source === Track.Source.ScreenShare) ?? null;
+  const requests = mic.requests.length + camera.requests.length;
 
-  const boardOpen = panel === "board";
-  const peopleOpen = panel === "people";
-  const [joinedAt] = useState(() => new Date());
-  const joinedLabel = `${String(joinedAt.getHours()).padStart(2, "0")}:${String(joinedAt.getMinutes()).padStart(2, "0")}`;
-  const connected = connectionState === ConnectionState.Connected;
-  const connectionLabel =
-    {
-      [ConnectionState.Connecting]: t("connection.connecting"),
-      [ConnectionState.Connected]: t("connection.connected"),
-      [ConnectionState.Reconnecting]: t("connection.reconnecting"),
-      [ConnectionState.Disconnected]: t("connection.disconnected"),
-    }[connectionState as string] ?? connectionState;
+  const ordered = [...cameraTracks.filter((track) => track.participant.isLocal), ...cameraTracks.filter((track) => !track.participant.isLocal)];
+  const visible = ordered.length > MAX_TILES ? ordered.slice(0, MAX_TILES - 1) : ordered;
+  const overflow = ordered.length - visible.length;
 
-  /* Veb `onDisconnected`: o'qituvchi chetlashtirganda sababi aytiladi. */
+  /* O'qituvchi chetlashtirganda sababi aytiladi (veb `onDisconnected`). */
   useEffect(() => {
     function onDisconnected(reason?: DisconnectReason) {
       if (reason === DisconnectReason.PARTICIPANT_REMOVED) toast.error("Siz darsdan chetlashtirildingiz");
@@ -157,231 +130,112 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
     };
   }, [room]);
 
-  /* Veb `ShareRequestListener`: o'quvchi ekran ulashish so'rovi. */
+  /* O'quvchining ekran ulashish so'rovi — tor ekranda tasdiqlash oynasi (veb `ShareRequestListener`). */
   useEffect(() => {
     if (!isTeacher) return undefined;
     function receive(payload: Uint8Array, participant?: Participant, _kind?: unknown, topic?: string) {
       const request = decodeScreenShareRequest(payload, topic);
       if (!request || !participant) return;
-      const identity = participant.identity;
-      const name = request.name || participant.name || identity;
-      toast(t("share.requestNotifyTitle", { name }), {
-        description: t("share.requestNotifyDescription"),
-        duration: 12_000,
-        action: { label: t("share.grantAction"), onClick: () => allowShare.mutate(identity) },
-      });
+      setShareRequest({ identity: participant.identity, name: request.name || participant.name || participant.identity });
     }
     room.on(RoomEvent.DataReceived, receive);
     return () => {
       room.off(RoomEvent.DataReceived, receive);
     };
-  }, [allowShare, isTeacher, room, t]);
+  }, [isTeacher, room]);
 
   return (
-    <View style={[styles.root, { backgroundColor: palette.background, paddingTop: insets.top }]}>
-      {/* `px-4 pt-3 pb-2.5 gap-2.5` */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Pressable accessibilityRole="button" accessibilityLabel={t("room.leaveAria")} onPress={onLeave} style={styles.back}>
-            <ArrowLeft size={20} color={palette["muted-foreground"]} />
-          </Pressable>
-          <View style={styles.grow}>
-            <View style={styles.titleRow}>
-              <View style={[styles.dot, { backgroundColor: connected ? LIVE_SUCCESS : palette["saffron-strong"] }]} />
-              <Text variant="body" numberOfLines={1} style={[styles.grow, styles.heading]}>
-                {lesson.title}
-              </Text>
-            </View>
-            <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
-              {lesson.courseTitle} · {connectionLabel}
-              {connected ? ` · ${joinedLabel}` : ""}
-            </Text>
-          </View>
-          <View style={[styles.count, { backgroundColor: palette["surface-subtle"] }]}>
-            <Users size={15} color={palette.foreground} />
-            <Text variant="label">{participants.length}</Text>
-          </View>
-          {isTeacher ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("room.inviteAria")}
-              onPress={() => setInviteOpen(true)}
-              style={[styles.invite, { backgroundColor: palette["surface-subtle"] }]}
-            >
-              <UserRoundPlus size={18} color={palette.foreground} />
-            </Pressable>
-          ) : null}
-        </View>
-      </View>
-
-      {boardOpen || peopleOpen ? (
-        <View style={styles.switch}>
-          {(["video", "board", "people"] as const).map((item) => {
-            const active = item === "video" ? !boardOpen && !peopleOpen : item === "board" ? boardOpen : peopleOpen;
-            return (
-              <Pressable
-                key={item}
-                accessibilityRole="button"
-                onPress={() => setPanel(item === "video" ? null : item)}
-                style={[styles.switchItem, active && { backgroundColor: palette["surface-subtle"] }]}
-              >
-                <Text variant="label" style={{ color: active ? palette.foreground : palette["subtle-foreground"] }}>
-                  {t(`room.switch.${item}`)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      ) : null}
-
+    <View style={[styles.root, { backgroundColor: ds.c.canvas, paddingTop: insets.top + 20 }]}>
       <ReconnectBanner />
 
-      {/* `px-4 pb-24` — pastki boshqaruvlar ustiga chiqmasin. */}
-      <View style={[styles.stage, { paddingBottom: 96 + insets.bottom }]}>
-        {boardOpen ? (
-          <BoardSurface lessonId={lesson.id} courseId={lesson.courseId} />
-        ) : activeShare ? (
-          <View style={styles.shareLayout}>
-            <View style={[styles.shareMain, { backgroundColor: palette["surface-subtle"] }]}>
-              <VideoTrack trackRef={activeShare as never} style={styles.fill} objectFit="contain" />
-            </View>
-            <ScrollView style={styles.filmstrip} contentContainerStyle={styles.filmstripContent}>
-              {cameraTracks.map((track) => (
-                <CameraTile key={`${track.participant.identity}-${track.source}`} track={track} compact />
-              ))}
-            </ScrollView>
-          </View>
-        ) : cameraTracks.length ? (
-          <ScrollView contentContainerStyle={styles.grid}>
-            {cameraTracks.map((track) => (
-              <View key={`${track.participant.identity}-${track.source}`} style={styles.gridCell}>
-                <CameraTile track={track} />
-              </View>
-            ))}
-          </ScrollView>
-        ) : (
-          <View style={styles.empty}>
-            <Video size={30} color={palette["subtle-foreground"]} />
-            <Text variant="label" style={[styles.regular, { color: palette["subtle-foreground"] }]}>
-              {t("room.empty")}
-            </Text>
-          </View>
-        )}
-        {!boardOpen ? <LiveWatermark name={user?.name ?? user?.username ?? ""} id={user?.id ?? ""} /> : null}
-      </View>
-
-      {moreOpen ? (
-        <Pressable accessibilityRole="button" onPress={() => setMoreOpen(false)} style={StyleSheet.absoluteFill} />
-      ) : null}
-
-      <View style={[styles.footer, { paddingBottom: 20 + insets.bottom }]} pointerEvents="box-none">
-        <View style={styles.controls}>
-          <MicControl
-            isTeacher={isTeacher}
-            onRequest={mic.requestMic}
-            requesting={mic.requesting}
-            waiting={mic.waiting}
-          />
-          <CameraControl
-            isTeacher={isTeacher}
-            onRequest={camera.requestCamera}
-            requesting={camera.requesting}
-            waiting={camera.waiting}
-          />
-          {!isTeacher ? <StudentShareControl /> : null}
-
-          <ControlButton
-            label={t("room.openBoardAria")}
-            active={boardOpen}
-            onPress={() => setPanel(boardOpen ? null : "board")}
-          >
-            <LayoutDashboard size={19} color={boardOpen ? palette["primary-foreground"] : palette.foreground} />
-          </ControlButton>
-
-          <View>
-            <ControlButton label={t("room.moreAria")} active={moreOpen} onPress={() => setMoreOpen((current) => !current)}>
-              <MoreHorizontal size={19} color={moreOpen ? palette["primary-foreground"] : palette.foreground} />
-              {pendingRequestsCount ? (
-                <View style={styles.badge}>
-                  <Text variant="caption" style={styles.badgeText}>
-                    {pendingRequestsCount}
-                  </Text>
-                </View>
-              ) : null}
-            </ControlButton>
-
-            {moreOpen ? (
-              <View style={[styles.menu, { backgroundColor: MENU_BG }]}>
-                <MenuItem
-                  icon={<Users size={17} color={palette.foreground} />}
-                  label={t("room.participants")}
-                  onPress={() => {
-                    setMoreOpen(false);
-                    setPanel(peopleOpen ? null : "people");
-                  }}
-                  trailing={
-                    pendingRequestsCount ? (
-                      <View style={[styles.menuBadge, { backgroundColor: palette.primary }]}>
-                        <Text variant="caption" style={[styles.strong, { color: palette["primary-foreground"] }]}>
-                          {pendingRequestsCount}
-                        </Text>
-                      </View>
-                    ) : null
-                  }
-                />
-                {isTeacher ? (
-                  <MenuItem
-                    icon={<CircleStop size={17} color={palette["destructive-strong"]} />}
-                    label={t("room.finish")}
-                    color={palette["destructive-strong"]}
-                    onPress={() => {
-                      setMoreOpen(false);
-                      setFinishOpen(true);
-                    }}
-                  />
-                ) : null}
-              </View>
-            ) : null}
-          </View>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("room.leave")}
-            onPress={() => void room.disconnect()}
-            style={({ pressed }) => [styles.leave, { opacity: pressed ? 0.9 : 1 }]}
-          >
-            <PhoneOff size={19} color="#ffffff" />
-          </Pressable>
+      {/* `h-11 px-4 gap-3`: orqaga, o'tgan vaqt, ishtirokchilar */}
+      <View style={styles.header}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t("room.leaveAria")} onPress={onLeave} style={[styles.back, { backgroundColor: ds.c["surface-inverse"] }]}>
+          <Icon name="chevron-left" size={22} color={ds.c["ink-inverse"]} />
+        </Pressable>
+        <View style={styles.headerCenter}>
+          <Elapsed startedAt={joinedAt} />
         </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("room.participants")}
+          onPress={() => setPeopleOpen(true)}
+          style={[styles.count, { backgroundColor: ds.c.subtle }]}
+        >
+          <Icon name="person" size={16} color={ds.c.ink} />
+          <DsText v="title-sm" w="600" numeric>
+            {participants.length}
+          </DsText>
+          {requests ? <View style={[styles.countDot, { backgroundColor: ds.c.danger, borderColor: ds.c.canvas }]} /> : null}
+        </Pressable>
       </View>
+
+      <ScrollView style={styles.fill} contentContainerStyle={styles.content}>
+        {/* Sahna — `h-75.5 rounded-2xl bg-surface`, doim yorug' */}
+        <ThemeScope scheme="light">
+          <StageCard>
+            {activeShare && "publication" in activeShare ? (
+              <VideoTrack trackRef={activeShare as never} style={styles.fill} objectFit="contain" />
+            ) : (
+              <BoardPreview lessonId={lesson.id} currentUserId={room.localParticipant.identity} />
+            )}
+          </StageCard>
+        </ThemeScope>
+
+        {/* `grid grid-cols-3 gap-x-2 gap-y-1.5`, plitka `aspect-[114/86] rounded-xl` */}
+        <View style={styles.tiles}>
+          {visible.map((track) => (
+            <CameraTile key={`${track.participant.identity}-${track.source}`} track={track} />
+          ))}
+          {overflow ? (
+            <View style={[styles.tile, styles.overflow, { backgroundColor: ds.c.subtle }]}>
+              <DsText v="title" w="600">
+                +{overflow}
+              </DsText>
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
+
+      {/* `rounded-t-2xl bg-subtle/40 px-4 pt-0.5 pb-6.5 justify-between` */}
+      <View style={[styles.toolbar, { backgroundColor: dsAlpha(ds.c.subtle, 0.4), paddingBottom: Math.max(26, insets.bottom + 8) }]}>
+        <MicButton isTeacher={isTeacher} requesting={mic.requesting} waiting={mic.waiting} onRequest={mic.requestMic} />
+        <CameraButton isTeacher={isTeacher} requesting={camera.requesting} waiting={camera.waiting} onRequest={camera.requestCamera} />
+        <ShareButton />
+        <ToolbarButton icon={<Icon name="edit" size={22} color={boardOpen ? ds.c["on-action"] : ds.c.ink} />} label={t("room.board")} tone={boardOpen ? "active" : "default"} onPress={() => setBoardOpen(!boardOpen)} />
+        <ToolbarButton
+          icon={<Icon name="person" size={22} color={ds.c.ink} />}
+          label={t("room.mobilePeople")}
+          badge={isTeacher ? requests : undefined}
+          onPress={() => setPeopleOpen(true)}
+        />
+        <ToolbarButton
+          icon={<Icon name="logout" size={22} color={ds.c["on-action"]} />}
+          label={isTeacher ? t("room.finish") : t("room.leave")}
+          tone="danger"
+          onPress={() => (isTeacher ? setFinishOpen(true) : void room.disconnect())}
+        />
+      </View>
+
+      <LiveWatermark name={user?.name ?? user?.username ?? ""} id={user?.id ?? ""} />
+
+      {boardOpen ? (
+        <ThemeScope scheme="light">
+          <BoardOverlay lesson={lesson} onBack={() => setBoardOpen(false)} />
+        </ThemeScope>
+      ) : null}
 
       <AwayStudentsNotice lessonId={lesson.id} enabled={isTeacher} />
 
-      {/* Vebda quyidagi oynalar portal orqali ilova mavzusida chiqadi. */}
+      {/* Oynalar ilova mavzusida (vebda portal orqali). */}
       <ThemeScope scheme={null}>
-        {isTeacher ? (
-          <LessonInviteSheet
-            lessonId={lesson.id}
-            courseId={lesson.courseId}
-            open={inviteOpen}
-            onClose={() => setInviteOpen(false)}
-          />
-        ) : null}
+        {isTeacher ? <LessonInviteSheet lessonId={lesson.id} courseId={lesson.courseId} open={inviteOpen} onClose={() => setInviteOpen(false)} /> : null}
 
         {isTeacher ? (
-          <FinishLessonSheet
-            lesson={finishOpen ? lesson : null}
-            onClose={() => setFinishOpen(false)}
-            onFinished={onLeave}
-            onLeaveOnly={onLeave}
-          />
+          <FinishLessonSheet lesson={finishOpen ? lesson : null} onClose={() => setFinishOpen(false)} onFinished={onLeave} onLeaveOnly={onLeave} />
         ) : null}
 
-        <Sheet
-          open={peopleOpen}
-          onClose={() => setPanel(null)}
-          title={t("room.participantsCount", { count: participants.length })}
-        >
+        <Sheet variant="app" open={peopleOpen} onClose={() => setPeopleOpen(false)} title={t("room.mobileParticipantsCount", { count: participants.length })}>
           <ParticipantsPanel
             lessonId={lesson.id}
             isTeacher={isTeacher}
@@ -394,11 +248,24 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
             onDenyCamera={camera.deny.mutate}
             cameraAnswerPending={camera.grant.isPending || camera.deny.isPending}
             onInvite={() => {
-              setPanel(null);
+              setPeopleOpen(false);
               setInviteOpen(true);
             }}
           />
         </Sheet>
+
+        <ConfirmDialog
+          open={Boolean(shareRequest)}
+          onOpenChange={(open) => !open && setShareRequest(null)}
+          tone="brand"
+          icon="laptop"
+          title={t("share.requestNotifyTitle", { name: shareRequest?.name ?? "" })}
+          description={t("share.requestNotifyDescription")}
+          confirmLabel={t("share.grantAction")}
+          cancelLabel={t("share.denyAction")}
+          pending={allowShare.isPending}
+          onConfirm={() => shareRequest && allowShare.mutate(shareRequest.identity, { onSettled: () => setShareRequest(null) })}
+        />
 
         {!isTeacher ? <AttentionCheckSheet lessonId={lesson.id} check={attention.data} /> : null}
       </ThemeScope>
@@ -406,39 +273,221 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
   );
 }
 
-function CameraTile({ track, compact = false }: { track: TrackReferenceOrPlaceholder; compact?: boolean }) {
+function Elapsed({ startedAt }: { startedAt: Date }) {
+  const seconds = useElapsedSeconds(startedAt);
+  return (
+    <DsText v="title" w="600" numeric>
+      {formatElapsed(seconds)}
+    </DsText>
+  );
+}
+
+function StageCard({ children }: { children: ReactNode }) {
+  const ds = useDs();
+  return <View style={[styles.stage, { backgroundColor: ds.c.surface }]}>{children}</View>;
+}
+
+/** Kamera plitkasi — `aspect-[114/86] rounded-xl bg-subtle`, gapirganda yashil hoshiya, pastda ism va mikrofon. */
+function CameraTile({ track }: { track: TrackReferenceOrPlaceholder }) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   const publication = "publication" in track ? track.publication : undefined;
-  const cameraOff = !publication || publication.isMuted;
+  const cameraOn = Boolean(publication && !publication.isMuted);
   const name = track.participant.name || track.participant.identity;
-  const speaking = track.participant.isSpeaking;
   const micOn = track.participant.isMicrophoneEnabled;
 
   return (
-    <View
-      style={[
-        styles.tile,
-        compact && styles.tileCompact,
-        {
-          backgroundColor: palette["surface-subtle"],
-          borderColor: speaking ? LIVE_SUCCESS : palette.border,
-          borderWidth: speaking ? 2 : 1,
-        },
-      ]}
-    >
-      {cameraOff ? (
-        <View style={styles.placeholder} accessibilityLabel={t("room.cameraOffAria", { name })}>
-          <Avatar variant="legacy" name={name} size={compact ? "sm" : "xl"} />
-        </View>
+    <View style={[styles.tile, { backgroundColor: ds.c.subtle }]}>
+      {cameraOn ? (
+        <VideoTrack trackRef={track as never} style={StyleSheet.absoluteFill} objectFit="cover" mirror={track.participant.isLocal} />
       ) : (
-        <VideoTrack trackRef={track as never} style={styles.fill} objectFit="cover" mirror={track.participant.isLocal} />
+        <View style={styles.tileAvatar} accessibilityLabel={t("room.cameraOffAria", { name })}>
+          <Avatar variant="legacy" name={name} size="sm" box={40} />
+        </View>
       )}
-      <View style={styles.tileName}>
-        {micOn ? <Mic size={15} color="#ffffff" /> : <MicOff size={15} color="rgba(255,255,255,0.7)" />}
-        <Text variant="label" numberOfLines={1} style={styles.white}>
+      {track.participant.isSpeaking ? <View pointerEvents="none" style={[styles.speaking, { borderColor: ds.c.success }]} /> : null}
+      <View style={[styles.tileName, { backgroundColor: dsAlpha(ds.c.canvas, 0.7) }]}>
+        <Icon name="mic" size={12} color={micOn ? ds.c.ink : ds.c["error-text"]} />
+        <DsText v="caption-strong" numberOfLines={1} style={styles.shrink}>
           {track.participant.isLocal ? t("room.youLabel") : firstName(name)}
-        </Text>
+        </DsText>
+      </View>
+    </View>
+  );
+}
+
+type ToolbarTone = "default" | "off" | "danger" | "active";
+
+/** Pastki panel tugmasi — `size-13 rounded-full` va ostida 11px yorliq. */
+function ToolbarButton({
+  icon,
+  label,
+  tone = "default",
+  disabled = false,
+  badge,
+  onPress,
+}: {
+  icon: ReactNode;
+  label: string;
+  tone?: ToolbarTone;
+  disabled?: boolean;
+  badge?: number;
+  onPress?: () => void;
+}) {
+  const ds = useDs();
+  const background: Record<ToolbarTone, string> = {
+    default: ds.c.subtle,
+    off: ds.c["danger-bg"],
+    danger: dsAlpha(ds.c.danger, 0.85),
+    active: ds.c.brand,
+  };
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled, selected: tone === "active" }}
+      disabled={disabled}
+      onPress={onPress}
+      style={[styles.toolbarItem, disabled && styles.dim]}
+    >
+      <View style={[styles.toolbarCircle, { backgroundColor: background[tone] }]}>
+        {icon}
+        {badge ? (
+          <View style={[styles.toolbarBadge, { backgroundColor: ds.c.danger }]}>
+            <DsText v="micro" w="600" c="on-action">
+              {badge}
+            </DsText>
+          </View>
+        ) : null}
+      </View>
+      <DsText numberOfLines={1} style={styles.toolbarLabel}>
+        {label}
+      </DsText>
+    </Pressable>
+  );
+}
+
+interface RequestProps {
+  isTeacher: boolean;
+  requesting: boolean;
+  waiting: boolean;
+  onRequest: () => void;
+}
+
+function MicButton({ isTeacher, requesting, waiting, onRequest }: RequestProps) {
+  const { t } = useTranslation("live");
+  const ds = useDs();
+  const permissions = useLocalParticipantPermissions();
+  const { localParticipant } = useLocalParticipant();
+  const allowed = canPublishSource(permissions, MICROPHONE_SOURCE);
+  const on = localParticipant.isMicrophoneEnabled;
+
+  if (allowed || isTeacher)
+    return (
+      <ToolbarButton
+        icon={on ? <Icon name="mic" size={22} color={ds.c.ink} /> : <MicOff size={22} color={ds.c["error-text"]} />}
+        label={t("mic.label")}
+        tone={on ? "default" : "off"}
+        onPress={() => (allowed ? void localParticipant.setMicrophoneEnabled(!on).catch(() => undefined) : toast.error(t("mic.disabledTitle")))}
+      />
+    );
+  return (
+    <ToolbarButton
+      icon={<Hand size={22} color={waiting ? ds.c["on-action"] : ds.c.ink} />}
+      label={t("mic.label")}
+      tone={waiting ? "active" : "default"}
+      disabled={requesting || waiting}
+      onPress={onRequest}
+    />
+  );
+}
+
+function CameraButton({ isTeacher, requesting, waiting, onRequest }: RequestProps) {
+  const { t } = useTranslation("live");
+  const ds = useDs();
+  const permissions = useLocalParticipantPermissions();
+  const { localParticipant } = useLocalParticipant();
+  const allowed = canPublishSource(permissions, CAMERA_SOURCE);
+  const on = localParticipant.isCameraEnabled;
+
+  if (allowed || isTeacher)
+    return (
+      <ToolbarButton
+        icon={on ? <Icon name="videocam-fill" size={22} color={ds.c.ink} /> : <VideoOff size={22} color={ds.c["error-text"]} />}
+        label={t("camera.label")}
+        tone={on ? "default" : "off"}
+        onPress={() => (allowed ? void localParticipant.setCameraEnabled(!on).catch(() => undefined) : toast.error(t("camera.disabledTitle")))}
+      />
+    );
+  return (
+    <ToolbarButton
+      icon={<Hand size={22} color={waiting ? ds.c["on-action"] : ds.c.ink} />}
+      label={t("camera.label")}
+      tone={waiting ? "active" : "default"}
+      disabled={requesting || waiting}
+      onPress={onRequest}
+    />
+  );
+}
+
+/** Ekran ulashish: ruxsat bo'lsa yoqadi/o'chiradi (Android MediaProjection), bo'lmasa o'qituvchidan so'raydi. */
+function ShareButton() {
+  const { t } = useTranslation("live");
+  const ds = useDs();
+  const permissions = useLocalParticipantPermissions();
+  const { localParticipant } = useLocalParticipant();
+  const [requesting, setRequesting] = useState(false);
+  const sharing = localParticipant.isScreenShareEnabled;
+
+  if (canPublishSource(permissions, SCREEN_SHARE_SOURCE))
+    return (
+      <ToolbarButton
+        icon={<Icon name="send" size={22} color={sharing ? ds.c["on-action"] : ds.c.ink} />}
+        label={t("room.mobileShare")}
+        tone={sharing ? "active" : "default"}
+        onPress={() => void localParticipant.setScreenShareEnabled(!sharing).catch(() => toast.error(t("share.failedToast")))}
+      />
+    );
+
+  async function request() {
+    if (requesting) return;
+    setRequesting(true);
+    try {
+      const signal = encodeScreenShareRequest(localParticipant.name || localParticipant.identity);
+      await localParticipant.publishData(signal.payload, { reliable: true, topic: signal.topic });
+      toast.success(t("share.requestSentToast"));
+    } catch {
+      toast.error(t("share.requestFailedToast"));
+    } finally {
+      setRequesting(false);
+    }
+  }
+
+  return <ToolbarButton icon={<Icon name="send" size={22} color={ds.c.ink} />} label={t("room.mobileShare")} disabled={requesting} onPress={() => void request()} />;
+}
+
+/** Doska to'liq ekranda — veb `fixed inset-0 bg-subtle px-3 pt-5 pb-[26px]` (yorug'). */
+function BoardOverlay({ lesson, onBack }: { lesson: Lesson; onBack: () => void }) {
+  const { t } = useTranslation("live");
+  const ds = useDs();
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[StyleSheet.absoluteFill, styles.board, { backgroundColor: ds.c.subtle, paddingTop: insets.top + 20, paddingBottom: Math.max(26, insets.bottom + 8) }]}>
+      <View style={styles.boardHeader}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t("room.backToVideo")} onPress={onBack} style={[styles.back, { backgroundColor: ds.c.surface }]}>
+          <Icon name="chevron-left" size={22} color={ds.c.ink} />
+        </Pressable>
+        <View style={styles.fill}>
+          <DsText v="title" numberOfLines={1}>
+            {t("room.board")}
+          </DsText>
+          <DsText v="body-xs" c="ink-secondary" numberOfLines={1}>
+            {lesson.courseTitle} · {t("room.liveLesson")}
+          </DsText>
+        </View>
+      </View>
+      <View style={[styles.boardSurface, { backgroundColor: ds.c.surface }]}>
+        <BoardSurface lessonId={lesson.id} courseId={lesson.courseId} />
       </View>
     </View>
   );
@@ -446,7 +495,7 @@ function CameraTile({ track, compact = false }: { track: TrackReferenceOrPlaceho
 
 function ReconnectBanner() {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   const room = useRoomContext();
   const connectionState = useConnectionState();
   const [attempt, setAttempt] = useState(0);
@@ -465,263 +514,27 @@ function ReconnectBanner() {
   if (connectionState !== ConnectionState.Reconnecting) return null;
   return (
     <View style={styles.reconnect} pointerEvents="none">
-      <View style={[styles.reconnectBody, { backgroundColor: "#fdefcf" }]}>
-        <Info size={17} color="#b87d14" />
-        <Text variant="label" style={[styles.regular, styles.shrink, { color: palette.background }]}>
+      <View style={[styles.reconnectBody, { backgroundColor: ds.c["warning-bg"] }]}>
+        <Info size={17} color={ds.c["warning-fg"]} />
+        <DsText v="body-sm" c="warning-fg" style={styles.shrink}>
           {t("room.reconnecting", { attempt: Math.max(1, attempt), total: MAX_RECONNECT_ATTEMPTS })}
-        </Text>
+        </DsText>
       </View>
     </View>
   );
 }
 
-/** `.live-control`: 48px doira; `is-active` — asosiy rang. */
-function ControlButton({
-  label,
-  active = false,
-  tone,
-  disabled = false,
-  onPress,
-  children,
-}: {
-  label: string;
-  active?: boolean;
-  tone?: string;
-  disabled?: boolean;
-  onPress?: () => void;
-  children: ReactNode;
-}) {
-  const { palette } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ selected: active, disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.control,
-        { backgroundColor: tone ?? (active ? palette.primary : pressed ? palette.muted : palette.surface) },
-        disabled && styles.dim,
-      ]}
-    >
-      {children}
-    </Pressable>
-  );
-}
-
-/** `.live-control--mic-request`: saffron fon, burchakda qo'l. */
-function RequestButton({
-  label,
-  waiting,
-  disabled,
-  onPress,
-  icon,
-}: {
-  label: string;
-  waiting: boolean;
-  disabled: boolean;
-  onPress: () => void;
-  icon: ReactNode;
-}) {
-  const { palette } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled, busy: waiting }}
-      disabled={disabled}
-      onPress={onPress}
-      style={[
-        styles.control,
-        { backgroundColor: palette["saffron-soft"] },
-        waiting && { borderWidth: 1, borderColor: palette["saffron-strong"] },
-        disabled && !waiting && styles.dim,
-      ]}
-    >
-      {icon}
-      <View style={styles.corner}>
-        <Hand size={13} color={palette["saffron-strong"]} />
-      </View>
-    </Pressable>
-  );
-}
-
-function MicControl({
-  isTeacher,
-  onRequest,
-  requesting,
-  waiting,
-}: {
-  isTeacher: boolean;
-  onRequest: () => void;
-  requesting: boolean;
-  waiting: boolean;
-}) {
-  const { t } = useTranslation("live");
-  const { palette } = useTheme();
-  const permissions = useLocalParticipantPermissions();
-  const { localParticipant } = useLocalParticipant();
-  const on = localParticipant.isMicrophoneEnabled;
-
-  if (canPublishSource(permissions, MICROPHONE_SOURCE))
-    return (
-      <ControlButton
-        label={t("mic.label")}
-        tone={on ? undefined : palette.destructive}
-        onPress={() => void localParticipant.setMicrophoneEnabled(!on).catch(() => undefined)}
-      >
-        {on ? <Mic size={19} color={palette.foreground} /> : <MicOff size={19} color="#ffffff" />}
-      </ControlButton>
-    );
-  if (isTeacher)
-    return (
-      <ControlButton label={t("mic.disabledAria")} disabled>
-        <MicOff size={19} color={palette.foreground} />
-      </ControlButton>
-    );
-  return (
-    <RequestButton
-      label={waiting ? t("mic.requestSentAria") : t("mic.requestAria")}
-      waiting={waiting}
-      disabled={requesting || waiting}
-      onPress={onRequest}
-      icon={<MicOff size={19} color={palette["saffron-strong"]} />}
-    />
-  );
-}
-
-function CameraControl({
-  isTeacher,
-  onRequest,
-  requesting,
-  waiting,
-}: {
-  isTeacher: boolean;
-  onRequest: () => void;
-  requesting: boolean;
-  waiting: boolean;
-}) {
-  const { t } = useTranslation("live");
-  const { palette } = useTheme();
-  const permissions = useLocalParticipantPermissions();
-  const { localParticipant } = useLocalParticipant();
-  const on = localParticipant.isCameraEnabled;
-
-  if (canPublishSource(permissions, CAMERA_SOURCE))
-    return (
-      <ControlButton
-        label={t("camera.label")}
-        tone={on ? undefined : palette.destructive}
-        onPress={() => void localParticipant.setCameraEnabled(!on).catch(() => undefined)}
-      >
-        {on ? <Video size={19} color={palette.foreground} /> : <VideoOff size={19} color="#ffffff" />}
-      </ControlButton>
-    );
-  if (isTeacher)
-    return (
-      <ControlButton label={t("camera.disabledAria")} disabled>
-        <VideoOff size={19} color={palette.foreground} />
-      </ControlButton>
-    );
-  return (
-    <RequestButton
-      label={waiting ? t("camera.requestSentAria") : t("camera.requestAria")}
-      waiting={waiting}
-      disabled={requesting || waiting}
-      onPress={onRequest}
-      icon={<VideoOff size={19} color={palette["saffron-strong"]} />}
-    />
-  );
-}
-
-/**
- * O'quvchi ekran ulashishi — veb `StudentShareControl`. Ruxsat bo'lsa
- * ulashadi (Android MediaProjection), bo'lmasa o'qituvchidan so'raydi.
- */
-function StudentShareControl() {
-  const { t } = useTranslation("live");
-  const { palette } = useTheme();
-  const permissions = useLocalParticipantPermissions();
-  const { localParticipant } = useLocalParticipant();
-  const [requesting, setRequesting] = useState(false);
-  const sharing = localParticipant.isScreenShareEnabled;
-
-  if (canPublishSource(permissions, SCREEN_SHARE_SOURCE))
-    return (
-      <ControlButton
-        label={t("share.studentAria")}
-        active={sharing}
-        onPress={() => void localParticipant.setScreenShareEnabled(!sharing).catch(() => toast.error(t("share.failedToast")))}
-      >
-        <MonitorUp size={19} color={sharing ? palette["primary-foreground"] : palette.foreground} />
-      </ControlButton>
-    );
-
-  async function requestShare() {
-    if (requesting) return;
-    setRequesting(true);
-    try {
-      const signal = encodeScreenShareRequest(localParticipant.name || localParticipant.identity);
-      await localParticipant.publishData(signal.payload, { reliable: true, topic: signal.topic });
-      toast.success(t("share.requestSentToast"));
-    } catch {
-      toast.error(t("share.requestFailedToast"));
-    } finally {
-      setRequesting(false);
-    }
-  }
-
-  return (
-    <ControlButton label={t("share.requestAria")} disabled={requesting} onPress={() => void requestShare()}>
-      <MonitorUp size={19} color={palette.foreground} />
-      <View style={styles.requestDot} />
-    </ControlButton>
-  );
-}
-
-function MenuItem({
-  icon,
-  label,
-  color,
-  trailing,
-  onPress,
-}: {
-  icon: ReactNode;
-  label: string;
-  color?: string;
-  trailing?: ReactNode;
-  onPress: () => void;
-}) {
-  const { palette } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.menuItem, pressed && { backgroundColor: palette["surface-subtle"] }]}
-    >
-      {icon}
-      <Text variant="label" style={[styles.grow, { color: color ?? palette.foreground }]}>
-        {label}
-      </Text>
-      {trailing}
-    </Pressable>
-  );
-}
-
 const ATTENTION_WINDOW_MS = 15_000;
 
-/** Veb `AttentionCheckDialog`: katta soat va bitta "Ha, shu yerdaman" tugmasi. */
+/** Diqqat tekshiruvi — katta soat va bitta "Ha, shu yerdaman" tugmasi. */
 function AttentionCheckSheet({ lessonId, check }: { lessonId: string; check: AttentionCheck | null | undefined }) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
   const answer = useAnswerAttention(lessonId);
   const [seconds, setSeconds] = useState(ATTENTION_WINDOW_MS / 1000);
 
   useEffect(() => {
     if (!check) return undefined;
-    const update = () =>
-      setSeconds(Math.max(0, Math.ceil((new Date(check.dueAt).getTime() + ATTENTION_WINDOW_MS - Date.now()) / 1000)));
+    const update = () => setSeconds(Math.max(0, Math.ceil((new Date(check.dueAt).getTime() + ATTENTION_WINDOW_MS - Date.now()) / 1000)));
     update();
     const id = setInterval(update, 250);
     return () => clearInterval(id);
@@ -730,22 +543,16 @@ function AttentionCheckSheet({ lessonId, check }: { lessonId: string; check: Att
   const clock = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   return (
     <Sheet
+      variant="app"
       open={Boolean(check)}
       onClose={() => undefined}
       title={t("attentionCheck.title")}
       description={t("attentionCheck.description", { time: clock })}
+      footer={<MobileButton label={t("attentionCheck.respond")} disabled={seconds <= 0 || answer.isPending} onPress={() => check && answer.mutate(check.id)} />}
     >
-      <Text variant="title" style={[styles.clock, { color: palette.primary }]}>
+      <DsText v="display" heading c="brand" style={styles.attentionClock}>
         {clock}
-      </Text>
-      <SheetFooter>
-        <SheetButton
-          variant="primary"
-          title={t("attentionCheck.respond")}
-          disabled={seconds <= 0 || answer.isPending}
-          onPress={() => check && answer.mutate(check.id)}
-        />
-      </SheetFooter>
+      </DsText>
     </Sheet>
   );
 }
@@ -764,57 +571,39 @@ interface ParticipantsPanelProps {
   onInvite: () => void;
 }
 
-function RequestRow({
-  name,
-  index,
-  note,
-  pending,
-  onGrant,
-  onDeny,
-}: {
-  name: string;
-  index: number;
-  note: string;
-  pending: boolean;
-  onGrant: () => void;
-  onDeny: () => void;
-}) {
+/** So'rov qatori — `h-16 rounded-xl bg-accent-saffron-bg px-3 gap-3`. */
+function RequestRow({ name, note, pending, secondary = false, onGrant, onDeny }: { name: string; note: string; pending: boolean; secondary?: boolean; onGrant: () => void; onDeny: () => void }) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   return (
-    <View style={[styles.requestRow, { backgroundColor: palette["surface-subtle"] }]}>
-      <View style={[styles.requestIndex, { backgroundColor: palette.primary }]}>
-        <Text variant="caption" style={[styles.strong, { color: palette["primary-foreground"] }]}>
-          {index + 1}
-        </Text>
-      </View>
-      <Avatar variant="legacy" name={name} size="sm" />
-      <View style={styles.grow}>
-        <Text variant="label" numberOfLines={1}>
+    <View style={[styles.request, { backgroundColor: ds.c["accent-saffron-bg"] }]}>
+      <Avatar variant="legacy" name={name} size="sm" box={36} />
+      <View style={styles.fill}>
+        <DsText v="title" w="600" numberOfLines={1}>
           {name}
-        </Text>
-        <Text variant="caption" numberOfLines={1} style={[styles.caption, { color: palette["subtle-foreground"] }]}>
+        </DsText>
+        <DsText v="body-xs" c="warning-fg" numberOfLines={1}>
           {note}
-        </Text>
+        </DsText>
       </View>
-      <Pressable
-        accessibilityRole="button"
-        disabled={pending}
-        onPress={onGrant}
-        style={[styles.grant, { backgroundColor: palette.primary }, pending && styles.dim]}
-      >
-        <Text variant="label" style={{ color: palette["primary-foreground"] }}>
-          {t("participantsPanel.grant")}
-        </Text>
-      </Pressable>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("participantsPanel.denyAria", { name })}
         disabled={pending}
         onPress={onDeny}
-        style={styles.deny}
+        style={[styles.deny, { backgroundColor: ds.c.surface }, pending && styles.dim]}
       >
-        <X size={16} color={palette["destructive-strong"]} />
+        <X size={16} color={ds.c.ink} />
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        disabled={pending}
+        onPress={onGrant}
+        style={[styles.grant, { backgroundColor: secondary ? ds.c["brand-subtle"] : ds.c.brand }, pending && styles.dim]}
+      >
+        <DsText v="button-sm" c={secondary ? "brand" : "on-action"}>
+          {t("participantsPanel.grant")}
+        </DsText>
       </Pressable>
     </View>
   );
@@ -834,7 +623,7 @@ function ParticipantsPanel({
   onInvite,
 }: ParticipantsPanelProps) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   const participants = useParticipants();
   const allowShare = useAllowShare(lessonId);
   const ban = useBanFromLesson(lessonId);
@@ -843,93 +632,55 @@ function ParticipantsPanel({
 
   return (
     <View style={styles.panel}>
-      {micRequests.length ? (
-        <View style={styles.requestGroup}>
-          <View style={styles.groupHead}>
-            <Hand size={13} color={palette["subtle-foreground"]} />
-            <Text variant="caption" style={[styles.overline, { color: palette["subtle-foreground"] }]}>
-              {t("participantsPanel.wantsToSpeak", { count: micRequests.length })}
-            </Text>
-          </View>
-          {micRequests.map((request, index) => (
-            <RequestRow
-              key={request.studentId}
-              name={request.name}
-              index={index}
-              note={t("participantsPanel.micRequesting")}
-              pending={micAnswerPending}
-              onGrant={() => onGrantMic(request.studentId)}
-              onDeny={() => onDenyMic(request.studentId)}
-            />
-          ))}
-        </View>
-      ) : null}
-
-      {cameraRequests.length ? (
-        <View style={styles.requestGroup}>
-          <View style={styles.groupHead}>
-            <Video size={13} color={palette["subtle-foreground"]} />
-            <Text variant="caption" style={[styles.overline, { color: palette["subtle-foreground"] }]}>
-              {t("participantsPanel.wantsCamera", { count: cameraRequests.length })}
-            </Text>
-          </View>
-          {cameraRequests.map((request, index) => (
-            <RequestRow
-              key={request.studentId}
-              name={request.name}
-              index={index}
-              note={t("participantsPanel.cameraRequesting")}
-              pending={cameraAnswerPending}
-              onGrant={() => onGrantCamera(request.studentId)}
-              onDeny={() => onDenyCamera(request.studentId)}
-            />
-          ))}
-        </View>
-      ) : null}
+      {micRequests.map((request) => (
+        <RequestRow
+          key={`mic-${request.studentId}`}
+          name={request.name}
+          note={t("participantsPanel.mobileMicRequesting")}
+          pending={micAnswerPending}
+          onGrant={() => onGrantMic(request.studentId)}
+          onDeny={() => onDenyMic(request.studentId)}
+        />
+      ))}
+      {cameraRequests.map((request) => (
+        <RequestRow
+          key={`camera-${request.studentId}`}
+          name={request.name}
+          note={t("participantsPanel.mobileCameraRequesting")}
+          secondary
+          pending={cameraAnswerPending}
+          onGrant={() => onGrantCamera(request.studentId)}
+          onDeny={() => onDenyCamera(request.studentId)}
+        />
+      ))}
 
       <View>
         {participants.map((participant) => {
           const name = participant.name || participant.identity;
-          const speaking = participant.isSpeaking;
+          const micOn = participant.isMicrophoneEnabled;
           const raisedHand = raisedHands.has(name);
-          const note = participant.isLocal
-            ? isTeacher
-              ? t("participantsPanel.teacherYou")
-              : t("participantsPanel.you")
-            : speaking
-              ? t("participantsPanel.speaking")
-              : raisedHand
-                ? t("participantsPanel.raisedHand")
-                : t("participantsPanel.participant");
+          const note = participant.isSpeaking
+            ? t("participantsPanel.speaking")
+            : raisedHand
+              ? t("participantsPanel.raisedHand")
+              : micOn
+                ? t("participantsPanel.online")
+                : t("participantsPanel.micOff");
           return (
             <View key={participant.identity} style={styles.person}>
-              <Avatar variant="legacy" name={name} size="sm" />
-              <View style={styles.grow}>
-                <Text variant="label" numberOfLines={1}>
-                  {name}
-                </Text>
-                <Text
-                  variant="caption"
-                  numberOfLines={1}
-                  style={[styles.caption, { color: speaking ? palette["success-strong"] : palette["subtle-foreground"] }]}
-                >
+              <Avatar variant="legacy" name={name} size="sm" box={36} />
+              <View style={styles.fill}>
+                <DsText v="title" w="600" numberOfLines={1}>
+                  {participant.isLocal ? (isTeacher ? t("participantsPanel.teacherYouMobile") : t("participantsPanel.studentYouMobile")) : name}
+                </DsText>
+                <DsText v="body-xs" c="ink-secondary" numberOfLines={1}>
                   {note}
-                </Text>
+                </DsText>
               </View>
-              {raisedHand ? <Hand size={16} color={palette["saffron-strong"]} /> : null}
-              {participant.isMicrophoneEnabled ? (
-                <Mic size={16} color={palette["muted-foreground"]} />
-              ) : (
-                <MicOff size={16} color={palette["destructive-strong"]} />
-              )}
-              {participant.isCameraEnabled ? (
-                <Video size={16} color={palette["muted-foreground"]} />
-              ) : (
-                <VideoOff size={16} color={palette["destructive-strong"]} />
-              )}
+              {raisedHand ? <Hand size={16} color={ds.c["warning-fg"]} /> : null}
               {/* Vebda bu tugmalar sichqoncha ustida chiqadi; telefonda doim ko'rinadi. */}
               {isTeacher && !participant.isLocal ? (
-                <View style={styles.personActions}>
+                <>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={t("participantsPanel.allowShare")}
@@ -937,7 +688,7 @@ function ParticipantsPanel({
                     onPress={() => allowShare.mutate(participant.identity)}
                     style={styles.personAction}
                   >
-                    <MonitorUp size={15} color={palette["muted-foreground"]} />
+                    <MonitorUp size={15} color={ds.c["ink-secondary"]} />
                   </Pressable>
                   <Pressable
                     accessibilityRole="button"
@@ -946,38 +697,39 @@ function ParticipantsPanel({
                     onPress={() => ban.mutate(participant.identity)}
                     style={styles.personAction}
                   >
-                    <UserRoundX size={15} color={palette["destructive-strong"]} />
+                    <UserRoundX size={15} color={ds.c.danger} />
                   </Pressable>
-                </View>
+                </>
               ) : null}
+              <Icon name="mic" size={20} color={micOn ? ds.c.brand : ds.c["ink-disabled"]} />
             </View>
           );
         })}
         {!participants.length ? (
-          <Text variant="label" style={[styles.regular, styles.emptyPeople, { color: palette["subtle-foreground"] }]}>
+          <DsText v="body-sm" c="ink-tertiary" style={styles.emptyPeople}>
             {t("participantsPanel.empty")}
-          </Text>
+          </DsText>
         ) : null}
       </View>
 
       {isTeacher ? (
-        <View style={[styles.panelFooter, { borderTopColor: palette.border }]}>
+        <View style={styles.panelFooter}>
           <Pressable
             accessibilityRole="button"
             disabled={muteAll.isPending}
-            onPress={() =>
-              muteAll.mutate([], {
-                onSuccess: (count) => toast.success(t("participantsPanel.muteAllDone", { count })),
-              })
-            }
-            style={[styles.panelButton, { borderWidth: 1, borderColor: palette.border }, muteAll.isPending && { opacity: 0.6 }]}
+            onPress={() => muteAll.mutate([], { onSuccess: (count) => toast.success(t("participantsPanel.muteAllDone", { count })) })}
+            style={({ pressed }) => [styles.panelButton, { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }, muteAll.isPending && styles.dim]}
           >
-            <Text variant="label">{t("participantsPanel.muteAll")}</Text>
+            <Icon name="notifications-off" size={18} color={ds.c.ink} />
+            <DsText v="button" numberOfLines={1}>
+              {t("participantsPanel.muteAll")}
+            </DsText>
           </Pressable>
-          <Pressable accessibilityRole="button" onPress={onInvite} style={[styles.panelButton, { backgroundColor: palette.primary }]}>
-            <Text variant="label" style={{ color: palette["primary-foreground"] }}>
+          <Pressable accessibilityRole="button" onPress={onInvite} style={({ pressed }) => [styles.panelButton, { backgroundColor: ds.c["brand-subtle"], opacity: pressed ? 0.85 : 1 }]}>
+            <Icon name="person" size={18} color={ds.c.brand} />
+            <DsText v="button" c="brand" numberOfLines={1}>
               {t("participantsPanel.invite")}
-            </Text>
+            </DsText>
           </Pressable>
         </View>
       ) : null}
@@ -987,106 +739,42 @@ function ParticipantsPanel({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  grow: { flex: 1, minWidth: 0 },
+  fill: { flex: 1, minWidth: 0 },
   shrink: { flexShrink: 1 },
-  fill: { width: "100%", height: "100%" },
-  regular: { fontWeight: "400" },
-  strong: { fontWeight: "600" },
-  caption: { fontWeight: "500" },
-  white: { color: "#ffffff" },
-  overline: { fontWeight: "600", letterSpacing: 0.3, textTransform: "uppercase" },
-  header: { gap: 10, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10 },
-  headerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  back: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  heading: { fontFamily: "Unbounded-SemiBold", fontWeight: "600" },
-  dot: { width: 8, height: 8, borderRadius: radius.full },
-  count: { height: 36, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: radius.full },
-  invite: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  /* `px-4 pb-2 gap-1` */
-  switch: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 16, paddingBottom: 8 },
-  switchItem: { height: 36, justifyContent: "center", paddingHorizontal: 14, borderRadius: radius.full },
-  stage: { flex: 1, paddingHorizontal: 16 },
-  shareLayout: { flex: 1, flexDirection: "row", gap: 12 },
-  shareMain: { flex: 1, overflow: "hidden", borderRadius: radius["2xl"] },
-  filmstrip: { width: 180, flexGrow: 0 },
-  filmstripContent: { gap: 12 },
-  /* `grid-cols-2 gap-4` */
-  grid: { flexDirection: "row", flexWrap: "wrap", marginHorizontal: -8, rowGap: 16 },
-  gridCell: { width: "50%", paddingHorizontal: 8 },
-  tile: { aspectRatio: 4 / 3, overflow: "hidden", borderRadius: radius["2xl"] },
-  tileCompact: { borderRadius: 12 },
-  placeholder: { position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0, alignItems: "center", justifyContent: "center" },
-  tileName: {
-    position: "absolute",
-    left: 12,
-    bottom: 12,
-    maxWidth: "80%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-    backgroundColor: "rgba(0,0,0,0.55)",
-  },
-  empty: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-  reconnect: { position: "absolute", left: 0, right: 0, top: 12, zIndex: 30, alignItems: "center", paddingHorizontal: 16 },
-  reconnectBody: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.xl },
-  footer: { position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 20, alignItems: "center", paddingHorizontal: 16 },
-  controls: { flexDirection: "row", alignItems: "center", gap: 12 },
-  control: { width: 48, height: 48, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  dim: { opacity: 0.65 },
-  corner: { position: "absolute", right: 6, bottom: 5 },
-  requestDot: { position: "absolute", top: 5, right: 5, width: 7, height: 7, borderRadius: radius.full, backgroundColor: "#f0ac57" },
-  badge: {
-    position: "absolute",
-    top: 2,
-    right: 2,
-    minWidth: 18,
-    height: 18,
-    paddingHorizontal: 5,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius.full,
-    backgroundColor: "#f0ac57",
-  },
-  badgeText: { color: "#241a08", fontWeight: "700", fontSize: 11, lineHeight: 14 },
-  leave: { width: 52, height: 52, borderRadius: radius.full, alignItems: "center", justifyContent: "center", backgroundColor: LEAVE_RED },
-  /* `bottom-[calc(100%+10px)] right-0 w-[230px] rounded-2xl p-2 gap-1` */
-  menu: {
-    position: "absolute",
-    right: 0,
-    bottom: 58,
-    width: 230,
-    gap: 4,
-    padding: 8,
-    borderRadius: radius["2xl"],
-    shadowColor: "#000000",
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
-  },
-  menuItem: { height: 44, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, borderRadius: radius.xl },
-  menuBadge: { width: 24, height: 24, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  finishIcon: { width: 44, height: 44, borderRadius: radius["2xl"], alignItems: "center", justifyContent: "center" },
-  clock: { fontSize: 40, lineHeight: 48 },
-  panel: { gap: 12 },
-  requestGroup: { gap: 8 },
-  groupHead: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 4 },
-  requestRow: { flexDirection: "row", alignItems: "center", gap: 10, padding: 10, borderRadius: radius.xl },
-  requestIndex: { width: 24, height: 24, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  grant: { height: 32, justifyContent: "center", paddingHorizontal: 12, borderRadius: radius.full },
-  deny: { width: 32, height: 32, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  person: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 4, paddingVertical: 8 },
-  personActions: { flexDirection: "row", alignItems: "center", gap: 4 },
-  personAction: { width: 32, height: 32, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  emptyPeople: { paddingHorizontal: 4, paddingVertical: 12 },
-  panelFooter: { flexDirection: "row", alignItems: "center", gap: 8, paddingTop: 12, borderTopWidth: 1 },
-  panelButton: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: radius.full },
+  dim: { opacity: 0.5 },
+  header: { height: 44, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
+  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  headerCenter: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10 },
+  /* `h-9 w-13 rounded-full bg-subtle gap-1.5` */
+  count: { width: 52, height: 36, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 18 },
+  countDot: { position: "absolute", top: -2, right: -2, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
+  /* `gap-4 px-4 pt-4 pb-4` */
+  content: { gap: 16, paddingHorizontal: 16, paddingVertical: 16 },
+  stage: { height: 302, overflow: "hidden", borderRadius: dsRadius["2xl"] },
+  tiles: { flexDirection: "row", flexWrap: "wrap", alignItems: "flex-start", columnGap: 8, rowGap: 6 },
+  tile: { width: "31.8%", aspectRatio: 114 / 86, overflow: "hidden", borderRadius: dsRadius.xl },
+  overflow: { alignItems: "center", justifyContent: "center" },
+  tileAvatar: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, alignItems: "center", justifyContent: "center", paddingBottom: 12 },
+  speaking: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0, borderWidth: 3, borderRadius: dsRadius.xl },
+  tileName: { position: "absolute", left: 6, bottom: 6, maxWidth: "88%", height: 22, flexDirection: "row", alignItems: "center", gap: 4, paddingLeft: 6, paddingRight: 8, borderRadius: 11 },
+  toolbar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 2, borderTopLeftRadius: dsRadius["2xl"], borderTopRightRadius: dsRadius["2xl"] },
+  toolbarItem: { width: 52, alignItems: "center", gap: 4 },
+  toolbarCircle: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
+  toolbarBadge: { position: "absolute", top: -2, right: -2, minWidth: 20, height: 20, paddingHorizontal: 4, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  toolbarLabel: { marginHorizontal: -8, fontSize: 11, lineHeight: 16 },
+  board: { paddingHorizontal: 12, gap: 12 },
+  boardHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
+  boardSurface: { flex: 1, overflow: "hidden", borderRadius: dsRadius["2xl"] },
+  reconnect: { position: "absolute", top: 72, left: 16, right: 16, zIndex: 20, alignItems: "center" },
+  reconnectBody: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: dsRadius.xl },
+  attentionClock: { textAlign: "center" },
+  panel: { gap: 8 },
+  request: { height: 64, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 12, borderRadius: dsRadius.xl },
+  deny: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  grant: { height: 44, justifyContent: "center", paddingHorizontal: 12, borderRadius: 22 },
+  person: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 7 },
+  personAction: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  emptyPeople: { paddingVertical: 12 },
+  panelFooter: { flexDirection: "row", gap: 10, paddingTop: 8 },
+  panelButton: { flex: 1, minWidth: 0, height: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 24 },
 });

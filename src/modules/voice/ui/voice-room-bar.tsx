@@ -1,32 +1,24 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import type { VoiceRoom, VoiceToken } from "@/shared/types";
 import { formatDayTime } from "@/shared/lib";
-import {
-  Button,
-  DsText,
-  dsRadius,
-  Icon,
-  Input,
-  SelectField,
-  Sheet,
-  Text,
-  toast,
-  useDs,
-  type IconName,
-} from "@/shared/ui";
+import { DsText, dsRadius, Icon, useDs, type IconName } from "@/shared/ui";
 import {
   useActiveVoiceRoom,
+  useCloseVoiceRoom,
   useCreateVoiceRoom,
   useJoinVoiceRoom,
+  useLeaveVoiceRoom,
   useRequestVoiceJoin,
 } from "../model/voice.queries";
 import { useVoiceUiStore } from "../model/voice-ui.store";
-import { VoiceRoomSheet } from "./voice-room-sheet";
+import { VoiceRoomCreateDialog } from "./voice-room-create-dialog";
+import { VoiceRoomPanel } from "./voice-room-panel";
 
 export interface VoiceRoomBarProps {
   courseId: string | null;
+  courseTitle?: string;
   /** Xona ochilmagan bo'lsa chiziq ko'rinmaydi (guruh chati — xona sarlavhadagi tugmadan ochiladi). */
   hideIdle?: boolean;
 }
@@ -38,47 +30,44 @@ export interface VoiceRoomBarProps {
  * Xona ochish oynasi `useVoiceUiStore` orqali — sarlavhadagi tugma ham shuni ochadi.
  * "Taklif asosida" xonaga o'quvchi so'rov yuboradi, o'qituvchi xona ichida tasdiqlaydi.
  */
-export function VoiceRoomBar({ courseId, hideIdle = false }: VoiceRoomBarProps) {
-  const { t } = useTranslation("mobile");
-  const { t: tv } = useTranslation("voice");
+export function VoiceRoomBar({ courseId, courseTitle, hideIdle = false }: VoiceRoomBarProps) {
+  const { t } = useTranslation("voice");
   const ds = useDs();
   const { active } = useActiveVoiceRoom(courseId);
-  const join = useJoinVoiceRoom();
-  const requestJoin = useRequestVoiceJoin();
   const create = useCreateVoiceRoom();
+  const join = useJoinVoiceRoom();
+  const leave = useLeaveVoiceRoom();
+  const close = useCloseVoiceRoom();
+  const requestJoin = useRequestVoiceJoin();
   const createOpen = useVoiceUiStore((state) => state.createOpen);
   const setCreateOpen = useVoiceUiStore((state) => state.setCreateOpen);
-
   const [joined, setJoined] = useState<{ room: VoiceRoom; token: VoiceToken } | null>(null);
-  const [title, setTitle] = useState("");
-  const [accessMode, setAccessMode] = useState<"open" | "invite_only">("open");
+  // `onDisconnected` ham chiqishni chaqiradi — chiqish so'rovi ikki marta ketmasin.
+  const leavingRef = useRef(false);
 
-  const room = active;
-
-  function enter(target: VoiceRoom) {
-    join.mutate(target.id, { onSuccess: (token) => setJoined({ room: target, token }) });
+  function enterRoom(room: VoiceRoom) {
+    leavingRef.current = false;
+    join.mutate(room.id, { onSuccess: (token) => setJoined({ room, token }) });
   }
 
-  function submitCreate() {
-    if (!courseId) return;
-    if (!title.trim()) {
-      toast.error(t("voice.xona_nomini_kiriting"));
-      return;
-    }
-    create.mutate(
-      { courseId, title: title.trim(), accessMode, scheduledAt: null },
-      {
-        onSuccess: (created) => {
-          setCreateOpen(false);
-          setTitle("");
-          setAccessMode("open");
-          if (created.status === "live") enter(created);
-        },
-      }
-    );
+  function leaveRoom() {
+    const current = joined;
+    if (!current || leavingRef.current) return;
+    leavingRef.current = true;
+    setJoined(null);
+    leave.mutate(current.room.id);
+  }
+
+  function closeRoom() {
+    const current = joined;
+    if (!current || leavingRef.current) return;
+    leavingRef.current = true;
+    setJoined(null);
+    leave.mutate(current.room.id, { onSettled: () => close.mutate(current.room.id) });
   }
 
   if (!courseId) return null;
+  const room = active;
   const scheduled = room?.status === "scheduled";
 
   return (
@@ -92,76 +81,64 @@ export function VoiceRoomBar({ courseId, hideIdle = false }: VoiceRoomBarProps) 
             <>
               <View style={styles.headBody}>
                 <DsText v="label-strong" numberOfLines={1}>
-                  {room.title || tv("room.defaultTitle")}
+                  {room.title || t("room.defaultTitle")}
                 </DsText>
                 <DsText v="caption" c="ink-secondary" numberOfLines={1}>
-                  {scheduled && room.scheduledAt ? tv("bar.scheduledAt", { time: formatDayTime(room.scheduledAt) }) : tv("bar.live")}
+                  {scheduled && room.scheduledAt ? t("bar.scheduledAt", { time: formatDayTime(room.scheduledAt) }) : t("bar.live")}
                   {" · "}
-                  {tv("bar.participants", { count: room.participantCount })}
-                  {room.accessMode === "invite_only" ? ` · ${tv("access.inviteOnly")}` : ""}
+                  {t("bar.participants", { count: room.participantCount })}
+                  {room.accessMode === "invite_only" ? ` · ${t("access.inviteOnly")}` : ""}
                 </DsText>
               </View>
               <BarButton
-                label={tv("bar.join")}
+                label={t("bar.join")}
                 icon="groups"
                 disabled={join.isPending || requestJoin.isPending}
-                onPress={() => enter(room)}
+                onPress={() => enterRoom(room)}
               />
               {room.accessMode === "invite_only" ? (
-                <BarButton label={tv("bar.requestJoin")} secondary disabled={requestJoin.isPending} onPress={() => requestJoin.mutate(room.id)} />
+                <BarButton label={t("bar.requestJoin")} secondary disabled={requestJoin.isPending} onPress={() => requestJoin.mutate(room.id)} />
               ) : null}
             </>
           ) : (
             <>
               <View style={styles.headBody}>
                 <DsText v="label-strong" numberOfLines={1}>
-                  {tv("bar.emptyTitle")}
+                  {t("bar.emptyTitle")}
                 </DsText>
                 <DsText v="caption" c="ink-secondary" numberOfLines={1}>
-                  {tv("bar.emptyHint")}
+                  {t("bar.emptyHint")}
                 </DsText>
               </View>
-              <BarButton label={tv("bar.create")} icon="volume" onPress={() => setCreateOpen(true)} />
+              <BarButton label={t("bar.create")} icon="volume" onPress={() => setCreateOpen(true)} />
             </>
           )}
         </View>
       )}
 
-      <Sheet
+      <VoiceRoomCreateDialog
+        courseId={courseId}
         open={createOpen}
-        onClose={() => setCreateOpen(false)}
-        title={t("voice.ovozli_xona")}
-        description={t("voice.faqat_mikrofon_kamera_va_ekran_ulashish_yoq")}
-      >
-        <Input
-          label={t("voice.xona_nomi")}
-          placeholder={t("voice.masalan_kechqurungi_muhokama")}
-          value={title}
-          onChangeText={setTitle}
-        />
-        <SelectField
-          label={t("voice.kirish")}
-          value={accessMode}
-          options={[
-            { value: "open", label: t("voice.ochiq_guruh_azolari_kira_oladi") },
-            { value: "invite_only", label: t("voice.taklif_asosida") },
-          ]}
-          onChange={(value) => setAccessMode(value === "invite_only" ? "invite_only" : "open")}
-        />
-        <Text variant="caption" tone="muted">
-          {accessMode === "open"
-            ? "Guruhning istalgan a'zosi to'g'ridan-to'g'ri kira oladi."
-            : "O'quvchilar so'rov yuboradi, siz tasdiqlaysiz."}
-        </Text>
-        <Button title={t("voice.ochish")} size="lg" loading={create.isPending} onPress={submitCreate} />
-      </Sheet>
+        pending={create.isPending}
+        onOpenChange={setCreateOpen}
+        onCreate={(values) =>
+          create.mutate(values, {
+            onSuccess: (created) => {
+              setCreateOpen(false);
+              if (created.status === "live") enterRoom(created);
+            },
+          })
+        }
+      />
 
       {joined ? (
-        <VoiceRoomSheet
-          open
+        <VoiceRoomPanel
           room={joined.room}
           token={joined.token}
-          onClose={() => setJoined(null)}
+          courseTitle={courseTitle}
+          closing={close.isPending}
+          onLeave={leaveRoom}
+          onClose={closeRoom}
         />
       ) : null}
     </>

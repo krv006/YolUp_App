@@ -24,5 +24,7 @@ export { useVoiceUiStore } from "./model/voice-ui.store";
 // --- Mobil UI ---
 export { VoiceRoomBar } from "./ui/voice-room-bar";
 export type { VoiceRoomBarProps } from "./ui/voice-room-bar";
-export { VoiceRoomSheet } from "./ui/voice-room-sheet";
-export type { VoiceRoomSheetProps } from "./ui/voice-room-sheet";
+export { VoiceRoomCreateDialog } from "./ui/voice-room-create-dialog";
+export type { VoiceRoomCreateDialogProps } from "./ui/voice-room-create-dialog";
+export { VoiceRoomPanel } from "./ui/voice-room-panel";
+export type { VoiceRoomPanelProps } from "./ui/voice-room-panel";

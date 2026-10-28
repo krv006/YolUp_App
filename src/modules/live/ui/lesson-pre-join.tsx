@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VideoView } from "@livekit/react-native";
 import { createLocalVideoTrack, type LocalVideoTrack } from "livekit-client";
-import { Mic, MicOff, Video, VideoOff, Volume2, X } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
-import { Avatar, radius, Text, ThemeScope, useTheme } from "@/shared/ui";
+import { Avatar, dsAlpha, DsText, dsRadius, Icon, ThemeScope, useDs } from "@/shared/ui";
 
 export interface LessonPreJoinChoices {
   micOn: boolean;
@@ -21,14 +20,13 @@ export interface LessonPreJoinProps {
   onCancel: () => void;
 }
 
-/** Veb `#d93a3a` — o'chiq mikrofon/kamera tugmasi. */
-const OFF_RED = "#d93a3a";
-
 /**
- * Darsga kirishdan oldingi ekran — veb `modules/live/ui/lesson-pre-join.tsx`
- * ning tor ekran (`isCompact`) ko'rinishi. Vebda o'qituvchi kompyuterda
- * ekran ulashishni ham shu yerda yoqadi; telefonda bu shoxcha yo'q (vebda
- * ham `isCompact` da o'tkazib yuboriladi).
+ * Darsga kirishdan oldingi ekran — veb `lesson-pre-join.tsx` ning tor ekran
+ * varianti (doim qorong'i): yopish va "Guruh · 18:00", kamera ko'rinishi va
+ * ustida mikrofon/kamera tugmalari, dars nomi, qurilmalar holati, yozib
+ * olinishi haqida izoh; pastda "Bekor qilish" va "Qo'shilish". Vebda
+ * o'qituvchi kompyuterda ekran ulashishni ham shu yerda yoqadi — tor
+ * ekranda bu shoxcha yo'q.
  */
 export function LessonPreJoin(props: LessonPreJoinProps) {
   return (
@@ -40,10 +38,10 @@ export function LessonPreJoin(props: LessonPreJoinProps) {
 
 function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: LessonPreJoinProps) {
   const { t } = useTranslation("live");
-  const { palette } = useTheme();
+  const ds = useDs();
   const insets = useSafeAreaInsets();
-  const [micOn, setMicOn] = useState(false);
-  const [cameraOn, setCameraOn] = useState(false);
+  const [micOn, setMicOn] = useState(micAllowed);
+  const [cameraOn, setCameraOn] = useState(true);
   const [deviceError, setDeviceError] = useState<string | null>(null);
   const [videoTrack, setVideoTrack] = useState<LocalVideoTrack | null>(null);
 
@@ -74,140 +72,140 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
     onJoin({ micOn, cameraOn });
   }
 
-  const tone = (on: boolean) => ({ backgroundColor: on ? palette["surface-subtle"] : OFF_RED });
+  const start = new Date(lesson.startsAt);
+  const startClock = Number.isNaN(start.getTime())
+    ? lesson.time
+    : `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
+  const devices = micOn
+    ? cameraOn
+      ? t("preJoin.mobileBothOn")
+      : t("preJoin.mobileMicOnly")
+    : cameraOn
+      ? t("preJoin.mobileCameraOnly")
+      : t("preJoin.mobileBothOff");
 
   return (
-    <View
-      style={[
-        styles.root,
-        { backgroundColor: palette.background, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 },
-      ]}
+    <ScrollView
+      style={{ backgroundColor: ds.c.canvas }}
+      contentContainerStyle={[styles.page, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 36 }]}
     >
       <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel={t("preJoin.cancel")} onPress={onCancel} style={styles.close}>
-          <X size={22} color={palette.foreground} />
+        <Pressable accessibilityRole="button" accessibilityLabel={t("preJoin.cancel")} onPress={onCancel} style={[styles.round, { backgroundColor: ds.c["surface-inverse"] }]}>
+          <Icon name="close" size={22} color={ds.c["ink-inverse"]} />
         </Pressable>
-        <Text variant="body" style={styles.strong}>
-          {t("preJoin.mobileTitle")}
-        </Text>
+        <DsText v="title" w="600" numberOfLines={1} style={styles.headerTitle}>
+          {lesson.courseTitle} · {startClock}
+        </DsText>
+        <View style={styles.spacer} />
       </View>
 
-      <View style={[styles.preview, { backgroundColor: palette["surface-subtle"] }]}>
+      {/* `aspect-[358/421] rounded-2xl bg-subtle` */}
+      <View style={[styles.preview, { backgroundColor: ds.c.subtle }]}>
         {cameraOn && videoTrack ? (
-          <VideoView videoTrack={videoTrack} objectFit="cover" mirror style={styles.video} />
+          <VideoView videoTrack={videoTrack} objectFit="cover" mirror style={styles.fill} />
         ) : (
           <View style={styles.placeholder}>
             <Avatar variant="legacy" name={userName || t("preJoin.you")} size="lg" />
-            <Text variant="label" style={[styles.regular, { color: palette["subtle-foreground"] }]}>
+            <DsText v="body-sm" c="ink-secondary">
               {t("preJoin.cameraOff")}
-            </Text>
+            </DsText>
           </View>
         )}
-        <View style={styles.you}>
-          {micOn ? <Mic size={15} color="#ffffff" /> : <MicOff size={15} color="#ffffff" />}
-          <Text variant="label" style={styles.white}>
-            {t("preJoin.you")}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.toggles}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ selected: micOn, disabled: !micAllowed }}
-          accessibilityLabel={micOn ? t("preJoin.muteMicAria") : t("preJoin.unmuteMicAria")}
-          disabled={!micAllowed}
-          onPress={() => {
-            setDeviceError(null);
-            setMicOn((value) => !value);
-          }}
-          style={[styles.toggle, tone(micOn), !micAllowed && styles.disabled]}
-        >
-          {micOn ? <Mic size={20} color={palette.foreground} /> : <MicOff size={20} color="#ffffff" />}
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ selected: cameraOn }}
-          accessibilityLabel={cameraOn ? t("preJoin.muteCameraAria") : t("preJoin.unmuteCameraAria")}
-          onPress={() => {
-            setDeviceError(null);
-            setCameraOn((value) => !value);
-          }}
-          style={[styles.toggle, tone(cameraOn)]}
-        >
-          {cameraOn ? <Video size={20} color={palette.foreground} /> : <VideoOff size={20} color="#ffffff" />}
-        </Pressable>
-        <View style={[styles.toggle, { backgroundColor: palette["surface-subtle"] }]}>
-          <Volume2 size={20} color={palette.foreground} />
-        </View>
-      </View>
-
-      <View style={styles.footer}>
-        <View style={styles.info}>
-          <Text variant="heading">{lesson.title}</Text>
-          <Text variant="label" style={[styles.regular, { color: palette["subtle-foreground"] }]}>
-            {lesson.courseTitle} · {lesson.date} · {lesson.time} · {lesson.durationMinutes} {t("preJoin.minutes")}
-          </Text>
-        </View>
-
-        {deviceError ? (
-          <Text
-            variant="label"
-            style={[styles.error, { backgroundColor: palette["destructive-soft"], color: palette["destructive-strong"] }]}
+        <View style={styles.toggles}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: micOn, disabled: !micAllowed }}
+            accessibilityLabel={micOn ? t("preJoin.muteMicAria") : t("preJoin.unmuteMicAria")}
+            disabled={!micAllowed}
+            onPress={() => {
+              setDeviceError(null);
+              setMicOn((value) => !value);
+            }}
+            style={[styles.toggle, { backgroundColor: micOn ? ds.c.subtle : ds.c.danger }, !micAllowed && styles.dim]}
           >
-            {t("preJoin.deviceErrorMessage", { error: deviceError })}
-          </Text>
-        ) : null}
-
-        <Pressable
-          accessibilityRole="button"
-          onPress={join}
-          style={({ pressed }) => [styles.join, { backgroundColor: pressed ? palette["primary-hover"] : palette.primary }]}
-        >
-          <Text variant="body" style={[styles.strong, { color: palette["primary-foreground"] }]}>
-            {t("preJoin.join")}
-          </Text>
-        </Pressable>
-
-        <Text variant="caption" style={[styles.note, { color: palette["subtle-foreground"] }]}>
-          {t("preJoin.recordingNote")}
-        </Text>
+            <Icon name="mic" size={22} color={micOn ? ds.c.ink : ds.c["on-action"]} />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: cameraOn }}
+            accessibilityLabel={cameraOn ? t("preJoin.muteCameraAria") : t("preJoin.unmuteCameraAria")}
+            onPress={() => {
+              setDeviceError(null);
+              setCameraOn((value) => !value);
+            }}
+            style={[styles.toggle, { backgroundColor: cameraOn ? ds.c.subtle : ds.c.danger }]}
+          >
+            <Icon name="videocam-fill" size={22} color={cameraOn ? ds.c.ink : ds.c["on-action"]} />
+          </Pressable>
+          <View style={[styles.toggle, { backgroundColor: ds.c.subtle }]}>
+            <Icon name="settings" size={22} color={ds.c.ink} />
+          </View>
+        </View>
       </View>
-    </View>
+
+      <DsText v="title-lg" heading style={[styles.center, styles.title]}>
+        {lesson.title || lesson.courseTitle}
+      </DsText>
+      <DsText v="body-sm" c="ink-secondary" style={[styles.center, styles.devices]}>
+        {devices} · {t("preJoin.mobileChangeLater")}
+      </DsText>
+
+      {deviceError ? (
+        <View style={[styles.error, { backgroundColor: ds.c["danger-bg"] }]}>
+          <DsText v="body-sm" c="error-text">
+            {t("preJoin.deviceErrorMessage", { error: deviceError })}
+          </DsText>
+        </View>
+      ) : null}
+
+      <View style={[styles.note, { backgroundColor: dsAlpha(ds.c.subtle, 0.4) }]}>
+        <View style={[styles.noteDot, { backgroundColor: ds.c.danger }]} />
+        <DsText v="body-sm" style={styles.noteText}>
+          {t("preJoin.mobileRecordingNote")}
+        </DsText>
+      </View>
+
+      <View style={styles.flexSpace} />
+
+      <View style={styles.actions}>
+        <Pressable accessibilityRole="button" onPress={onCancel} style={({ pressed }) => [styles.action, { backgroundColor: ds.c["surface-inverse"], opacity: pressed ? 0.85 : 1 }]}>
+          <DsText v="title" w="600" c="ink-inverse">
+            {t("preJoin.mobileCancel")}
+          </DsText>
+        </Pressable>
+        <Pressable accessibilityRole="button" onPress={join} style={({ pressed }) => [styles.action, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}>
+          <Icon name="videocam-fill" size={20} color={ds.c["on-action"]} />
+          <DsText v="title" w="600" c="on-action">
+            {t("preJoin.mobileJoin")}
+          </DsText>
+        </Pressable>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  /* `px-4 pt-3 pb-6` */
-  root: { flex: 1, paddingHorizontal: 16 },
-  strong: { fontWeight: "600" },
-  regular: { fontWeight: "400" },
-  white: { color: "#ffffff" },
-  header: { height: 44, flexDirection: "row", alignItems: "center", gap: 8 },
-  close: { marginLeft: -8, width: 40, height: 40, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  /* `mt-2 flex-1 rounded-2xl bg-subtle` */
-  preview: { marginTop: 8, flex: 1, overflow: "hidden", borderRadius: radius["2xl"] },
-  video: { flex: 1 },
+  fill: { flex: 1 },
+  center: { textAlign: "center" },
+  dim: { opacity: 0.6 },
+  /* `px-4 pt-5 pb-9` */
+  page: { flexGrow: 1, paddingHorizontal: 16 },
+  header: { height: 44, flexDirection: "row", alignItems: "center", gap: 12 },
+  headerTitle: { flex: 1, minWidth: 0, textAlign: "center" },
+  round: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
+  spacer: { width: 44, height: 44 },
+  preview: { marginTop: 16, width: "100%", aspectRatio: 358 / 421, overflow: "hidden", borderRadius: dsRadius["2xl"] },
   placeholder: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-  you: {
-    position: "absolute",
-    left: 12,
-    bottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-    backgroundColor: "rgba(0,0,0,0.55)",
-  },
-  /* `justify-center gap-4 py-4` */
-  toggles: { flexDirection: "row", justifyContent: "center", gap: 16, paddingVertical: 16 },
-  toggle: { width: 48, height: 48, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  disabled: { opacity: 0.5 },
-  footer: { gap: 12 },
-  info: { gap: 4 },
-  error: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.xl, overflow: "hidden", fontWeight: "400" },
-  join: { height: 56, alignItems: "center", justifyContent: "center", borderRadius: radius.full },
-  note: { textAlign: "center", fontWeight: "500" },
+  /* `absolute inset-x-0 bottom-3.5 gap-3.5` */
+  toggles: { position: "absolute", left: 0, right: 0, bottom: 14, flexDirection: "row", justifyContent: "center", gap: 14 },
+  toggle: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
+  title: { marginTop: 14 },
+  devices: { marginTop: 6, paddingHorizontal: 16 },
+  error: { marginTop: 16, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.xl },
+  note: { marginTop: 20, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14, paddingVertical: 7, borderRadius: dsRadius.xl },
+  noteDot: { width: 10, height: 10, borderRadius: 5 },
+  noteText: { flex: 1, minWidth: 0, lineHeight: 18 },
+  flexSpace: { flex: 1, minHeight: 24 },
+  actions: { flexDirection: "row", gap: 12 },
+  action: { flex: 1, minWidth: 0, height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 26 },
 });

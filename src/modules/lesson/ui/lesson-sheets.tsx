@@ -1,22 +1,19 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
-import { LogOut } from "lucide-react-native";
 import type { Lesson } from "@/shared/types";
 import { formatDayTime } from "@/shared/lib";
 import {
   Avatar,
   Button,
+  ConfirmDialog,
   Input,
   ScreenEmpty,
   ScreenLoading,
   radius,
   Separator,
   Sheet,
-  SheetButton,
-  SheetFooter,
   Text,
-  useTheme,
 } from "@/shared/ui";
 import { useFinishLesson, useLessonRatings, useRateLesson } from "../model/lesson.queries";
 import { StarRating } from "./star-rating";
@@ -102,46 +99,34 @@ export function FinishLessonSheet({
   onLeaveOnly?: () => void;
 }) {
   const { t } = useTranslation("lesson");
-  const { palette } = useTheme();
   const finish = useFinishLesson();
 
+  /* Veb `finish-lesson-dialog.tsx` ning tor ekran varianti — markazdagi `ConfirmDialog` (brand). */
   return (
-    <Sheet
+    <ConfirmDialog
       open={Boolean(lesson)}
-      onClose={onClose}
+      onOpenChange={(open) => !open && onClose()}
+      tone="brand"
+      icon="logout"
       title={t("finishDialog.title")}
-      description={t("finishDialog.description", { title: lesson?.title ?? "" })}
-    >
-      <View style={[styles.finishIcon, { backgroundColor: palette["destructive-soft"] }]}>
-        <LogOut size={20} color={palette["destructive-strong"]} />
-      </View>
-      <SheetFooter>
-        <SheetButton
-          title={onLeaveOnly ? t("finishDialog.leaveOnly") : t("finishDialog.cancel")}
-          onPress={() => {
-            onClose();
-            onLeaveOnly?.();
-          }}
-        />
-        <SheetButton
-          variant="danger"
-          title={t("finishDialog.confirm")}
-          disabled={finish.isPending}
-          onPress={() => {
-            if (!lesson) return;
-            finish.mutate(
-              { id: lesson.id },
-              {
-                onSuccess: () => {
-                  onClose();
-                  onFinished?.();
-                },
-              }
-            );
-          }}
-        />
-      </SheetFooter>
-    </Sheet>
+      description={t("finishDialog.mobileDescription")}
+      confirmLabel={t("finishDialog.confirm")}
+      cancelLabel={onLeaveOnly ? t("finishDialog.leaveOnly") : t("finishDialog.cancel")}
+      pending={finish.isPending}
+      onCancel={onLeaveOnly}
+      onConfirm={() => {
+        if (!lesson) return;
+        finish.mutate(
+          { id: lesson.id },
+          {
+            onSuccess: () => {
+              onClose();
+              onFinished?.();
+            },
+          }
+        );
+      }}
+    />
   );
 }
 

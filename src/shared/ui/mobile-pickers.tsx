@@ -34,10 +34,12 @@ export interface MobileDateSheetProps {
   onOpenChange: (open: boolean) => void;
   value: string;
   min?: string;
+  /** "Tozalash" dan keyin bo'sh qiymat ham tanlanadi (masalan "Hozir"). */
+  clearable?: boolean;
   onChange: (value: string) => void;
 }
 
-export function MobileDateSheet({ open, onOpenChange, value, min, onChange }: MobileDateSheetProps) {
+export function MobileDateSheet({ open, onOpenChange, value, min, clearable = false, onChange }: MobileDateSheetProps) {
   const { t } = useTranslation("common");
   const ds = useDs();
   const months = t("formPickers.months", { returnObjects: true }) as string[];
@@ -81,7 +83,7 @@ export function MobileDateSheet({ open, onOpenChange, value, min, onChange }: Mo
           <MobileButton variant="secondary" label={t("formPickers.clear")} onPress={() => setDraft("")} />
           <MobileButton
             label={t("formPickers.choose")}
-            disabled={!draft}
+            disabled={!draft && !clearable}
             onPress={() => {
               onChange(draft);
               onOpenChange(false);

@@ -26,14 +26,12 @@ import {
   type IconName,
 } from "@/shared/ui";
 
-/* Mock imtihon hozircha eski sahifada — 5c bosqichida `ROUTES.teacher.mockExams` ga ko'chadi. */
-const MOCK_PATH = "/teacher/exams";
 
 const MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: string | null }> = [
   { id: "tests", icon: "quiz", tone: "bg-accent-blue-bg text-accent-blue-fg", to: ROUTES.teacher.tests },
   { id: "analytics", icon: "bar-chart", tone: "bg-accent-green-bg text-accent-green-fg", to: ROUTES.teacher.workspaceAnalytics },
   { id: "ai", icon: "sparkles-fill", tone: "bg-accent-saffron-bg text-accent-saffron-fg", to: ROUTES.teacher.workspaceAi },
-  { id: "mock", icon: "assignment-check-fill", tone: "bg-accent-violet-bg text-accent-violet-fg", to: MOCK_PATH },
+  { id: "mock", icon: "assignment-check-fill", tone: "bg-accent-violet-bg text-accent-violet-fg", to: ROUTES.teacher.mockExams },
   { id: "assignments", icon: "assign", tone: "bg-accent-red-bg text-accent-red-fg", to: ROUTES.teacher.homework },
   { id: "materials", icon: "folder", tone: "bg-accent-violet-bg text-accent-red-fg", to: null },
 ];
@@ -41,7 +39,7 @@ const MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: str
 const CREATE: ReadonlyArray<{ id: string; icon: IconName; to: string }> = [
   { id: "test", icon: "quiz", to: `${ROUTES.teacher.tests}?new=1` },
   { id: "homework", icon: "assign", to: `${ROUTES.teacher.homework}?new=1` },
-  { id: "mock", icon: "assignment-check-fill", to: MOCK_PATH },
+  { id: "mock", icon: "assignment-check-fill", to: `${ROUTES.teacher.mockExams}?new=1` },
   { id: "ai", icon: "sparkles-fill", to: ROUTES.teacher.workspaceAi },
 ];
 

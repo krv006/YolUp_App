@@ -33,20 +33,19 @@ export {
 // --- Mobil UI ---
 export {
   ExamCountdown,
-  ExamCreateSheet,
+  ExamCreateDialog,
   ExamListeningPlayer,
   ExamRunner,
   ExamResultCard,
   ExamReview,
-  ExamScoreSheet,
+  ExamScoreDialog,
   ExamWritingAiPanel,
-  ExamTemplateSheet,
+  ExamTemplateDialog,
   ExamTimer,
-  ExamWritingReview,
 } from "./ui";
 export type {
-  ExamCreateSheetProps,
-  ExamTemplateSheetProps,
+  ExamCreateDialogProps,
+  ExamScoreDialogProps,
+  ExamTemplateDialogProps,
   ExamTimerProps,
-  ExamWritingReviewProps,
 } from "./ui";

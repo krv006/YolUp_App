@@ -9,10 +9,9 @@ import {
   dsRadius,
   dsType,
   Icon,
-  MobileRadio,
+  MobileSelectSheet,
   PopoverMenu,
   PopoverMenuItem,
-  Sheet,
   useDs,
   usePopoverAnchor,
   type DsType,
@@ -359,30 +358,14 @@ export function QuestionCard({ draft, index, locked, newKey, onChange, onRemove 
         </View>
       ) : null}
 
-      <Sheet variant="app" compact open={typeOpen} onClose={() => setTypeOpen(false)} title={t("editor.mobile.typeAria")}>
-        <View style={[styles.types, { backgroundColor: ds.c.subtle }]}>
-          {QUESTION_TYPE_ORDER.map((type, typeIndex) => {
-            const selected = type === draft.type;
-            return (
-              <Pressable
-                key={type}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: selected }}
-                onPress={() => {
-                  setTypeOpen(false);
-                  if (!selected) onChange((current) => changeDraftType(current, type as QuizQuestionType, newKey));
-                }}
-                style={({ pressed }) => [styles.typeRow, typeIndex < QUESTION_TYPE_ORDER.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line }, pressed && { backgroundColor: ds.c.muted }]}
-              >
-                <DsText c={selected ? "brand" : "ink"} w={selected ? "500" : undefined} numberOfLines={1} style={styles.grow}>
-                  {t(`editor.mobile.types.${type}`)}
-                </DsText>
-                <MobileRadio checked={selected} />
-              </Pressable>
-            );
-          })}
-        </View>
-      </Sheet>
+      <MobileSelectSheet
+        open={typeOpen}
+        onOpenChange={setTypeOpen}
+        title={t("editor.mobile.typeAria")}
+        value={draft.type}
+        options={QUESTION_TYPE_ORDER.map((type) => ({ value: type, label: t(`editor.mobile.types.${type}`) }))}
+        onChange={(type) => type !== draft.type && onChange((current) => changeDraftType(current, type as QuizQuestionType, newKey))}
+      />
     </View>
   );
 }
@@ -593,6 +576,4 @@ const styles = StyleSheet.create({
   blank: { minHeight: 48, paddingHorizontal: 12, paddingVertical: 12, borderRadius: dsRadius.lg, textAlignVertical: "top" },
   essay: { flexDirection: "row", alignItems: "center", gap: 12 },
   minWords: { width: 90, height: 40, paddingHorizontal: 12, textAlign: "center" },
-  types: { overflow: "hidden", borderRadius: dsRadius.lg },
-  typeRow: { minHeight: 52, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
 });

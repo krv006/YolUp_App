@@ -157,35 +157,55 @@ export function MobilePickerField({
           <MobileTimeSheet open={timeOpen} onOpenChange={setTimeOpen} value={value.slice(11, 16) || "18:00"} onChange={(time) => onChange(`${pendingDate}T${time}`)} />
         </>
       ) : null}
-      <Sheet variant="app" open={type === "select" && open} onClose={() => setOpen(false)} title={sheetTitle ?? ariaLabel}>
-        <View style={[styles.options, { backgroundColor: ds.c.subtle }]}>
-          {options.map((option, index) => {
-            const selected = option.value === value;
-            return (
-              <Pressable
-                key={option.value}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: selected }}
-                onPress={() => {
-                  onChange(option.value);
-                  setOpen(false);
-                }}
-                style={({ pressed }) => [
-                  styles.option,
-                  index < options.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line },
-                  pressed && { backgroundColor: ds.c.muted },
-                ]}
-              >
-                <DsText c={selected ? "brand" : "ink"} w={selected ? "500" : undefined} numberOfLines={1} style={styles.grow}>
-                  {option.label}
-                </DsText>
-                <MobileRadio checked={selected} />
-              </Pressable>
-            );
-          })}
-        </View>
-      </Sheet>
+      <MobileSelectSheet open={type === "select" && open} onOpenChange={setOpen} title={sheetTitle ?? ariaLabel} value={value} options={options} onChange={onChange} />
     </>
+  );
+}
+
+export interface MobileSelectSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  value: string;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+}
+
+/**
+ * Variantlar ro'yxati pastki oynada (vebdagi `<select>` o'rniga): har qator
+ * o'ngida `MobileRadio`, tanlanganda oyna yopiladi.
+ */
+export function MobileSelectSheet({ open, onOpenChange, title, value, options, onChange }: MobileSelectSheetProps) {
+  const ds = useDs();
+  return (
+    <Sheet variant="app" open={open} onClose={() => onOpenChange(false)} title={title}>
+      <View style={[styles.options, { backgroundColor: ds.c.subtle }]}>
+        {options.map((option, index) => {
+          const selected = option.value === value;
+          return (
+            <Pressable
+              key={option.value}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              onPress={() => {
+                onChange(option.value);
+                onOpenChange(false);
+              }}
+              style={({ pressed }) => [
+                styles.option,
+                index < options.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line },
+                pressed && { backgroundColor: ds.c.muted },
+              ]}
+            >
+              <DsText c={selected ? "brand" : "ink"} w={selected ? "500" : undefined} numberOfLines={1} style={styles.grow}>
+                {option.label}
+              </DsText>
+              <MobileRadio checked={selected} />
+            </Pressable>
+          );
+        })}
+      </View>
+    </Sheet>
   );
 }
 

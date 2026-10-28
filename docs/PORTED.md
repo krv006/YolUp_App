@@ -186,10 +186,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/model/schedule.store.ts` | 🟢 NUSXA | `—` | jadval ko'rinishi, tayanch sana va qadam (2026-10-20 qo'shildi) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `b2d68d725254` | farq qayd etilmagan — tekshiring |
 | `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `520a875a379e` | farq qayd etilmagan — tekshiring |
-| `src/modules/lesson/ui/schedule-grid.tsx` | 🟡 MOSLASH | `—` | faqat tor ekran shoxlari (Ro'yxat/Kun/Hafta/Oy); keng ekran to'rlari ko'chirilmadi |
-| `src/modules/lesson/ui/schedule-sidebar.tsx` | 🟡 MOSLASH | `—` | faqat telefon bloklari: hafta tasmasi va eng yaqin dars |
-| `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `fe03b39eee02` | mobilda `lesson-detail-sheet.tsx` (AppDialog -> Sheet); bekor qilish tasdig'ida seriya tanlovi `ConfirmSheet` ichida |
-| `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `e1ad0ea3713b` | mobilda `lesson-create-sheet.tsx` (AppDialog -> Sheet) |
+| `src/modules/lesson/ui/schedule-grid.tsx` | 🟡 MOSLASH | `4be7763e297a` | mobilda ishlatilmaydi — jadval yangi dizaynda `pages/schedule/mobile-schedule.tsx` (vebda ham faqat keng ekranda) |
+| `src/modules/lesson/ui/schedule-sidebar.tsx` | 🟡 MOSLASH | `a33c07fd337b` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
+| `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `fe03b39eee02` | mobilda ishlatilmaydi — jadvalda `pages/schedule/lesson-detail-drawer.tsx` |
+| `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `e1ad0ea3713b` | mobilda ishlatilmaydi — jadvalda `pages/schedule/new-lesson-dialog.tsx`, guruhda `add-lesson-dialog.tsx` |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `48d221a7c01f` | farq qayd etilmagan — tekshiring |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `ccb7d986e5bd` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `2f9a569c29d6` | — |
@@ -290,7 +290,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/confirm-dialog.tsx` | 🟡 MOSLASH | `647991246a4a` | faqat tor ekran varianti; mobilda `shared/ui/center-dialog.tsx` |
 | `src/shared/ui/mobile-alert-dialog.tsx` | 🟡 MOSLASH | `2dc5f552c93b` | mobilda `shared/ui/center-dialog.tsx` |
 | `src/shared/ui/mobile-fields.tsx` | 🟡 MOSLASH | `e38ff871ee7c` | `select` — pastki oynadagi ro'yxat (vebda brauzer ro'yxati); `date`/`time` — `mobile-pickers.tsx` |
-| `src/shared/ui/mobile-pickers.tsx` | 🟡 MOSLASH | `d93f3cdcb26a` | `AppDialog` -> `Sheet variant="app" compact` |
+| `src/shared/ui/mobile-pickers.tsx` | 🟡 MOSLASH | `d93f3cdcb26a` | `AppDialog` -> `Sheet variant="app" compact`; kalendar haftalar qatorida (foizli `flexWrap` yaxlitlanadi) |
 | `src/shared/ui/modal-card.tsx` | 🟡 MOSLASH | `c7b2169346f0` | tor ekranda `Sheet variant="app"` bilan bir xil — alohida komponent yo'q |
 | `src/shared/ui/switch.tsx` | 🟡 MOSLASH | `edc97d390894` | radix o'rniga Pressable; `lg` o'lcham; radius aniq yarim balandlik (Android `boxShadow` 999 ni kesmaydi) |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `c94dcadd37cd` | mobilda `formula-solver-sheet.tsx` (AppDialog sheet o'rniga Sheet); joylash vebdagidek `nextTextPoint` bilan |
@@ -323,7 +323,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `b0b1a939b1a1` | farq qayd etilmagan — tekshiring |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `224fb405dfbe` | `expo-video` pleeri; pleer QO'LDA to'xtatilmaydi — `useVideoPlayer` uni o'zi bo'shatadi |
 | `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `42684a8f0678` | mobilda `pages/recording/recording-page.tsx` ichida (pleer, statistika chiplari, meta) |
-| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `c05e6da877ab` | farq qayd etilmagan — tekshiring |
+| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `1a69f46b0718` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id` |
+| `src/pages/schedule/mobile-schedule.tsx` | 🟡 MOSLASH | `108bc38855cf` | — |
+| `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `0cbc7b0f3a80` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
+| `src/pages/schedule/lesson-ratings-dialog.tsx` | 🟡 MOSLASH | `15d30680181e` | faqat tor ekran varianti |
+| `src/pages/schedule/new-lesson-dialog.tsx` | 🟡 MOSLASH | `ff60f937bf6c` | faqat tor ekran varianti |
+| `src/pages/schedule/schedule-states.tsx` | 🟡 MOSLASH | `11c7ac9f6fea` | faqat `MobileScheduleSkeleton` va `ScheduleError` |
+| `src/pages/schedule/lesson-tone.ts` | 🟢 NUSXA | `5c79242889d9` | — |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `7d61f7ccadf0` | navigator.onLine -> NetInfo |
 | `src/shared/api/api-config.ts` | 🟢 NUSXA | `0e6a5d2a4cc7` | — |
 | `src/shared/api/api-error.ts` | 🟢 NUSXA | `7d4c958b715c` | — |

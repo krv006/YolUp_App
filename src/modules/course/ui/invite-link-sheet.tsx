@@ -1,19 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, Share, StyleSheet, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import {
-  Icon,
-  radius,
-  SelectField,
-  Sheet,
-  SheetButton,
-  SheetFooter,
-  Switch,
-  Text,
-  toast,
-  useTheme,
-} from "@/shared/ui";
+import { DsText, dsRadius, Icon, MobileButton, MobileFieldLabel, MobilePickerField, Sheet, Switch, toast, useDs } from "@/shared/ui";
 import { useCreateInviteLink, useDeleteInviteLink, useInviteLink } from "../model/course.queries";
 
 export interface InviteLinkSheetProps {
@@ -25,16 +14,17 @@ export interface InviteLinkSheetProps {
 const EXPIRY_DAYS = ["7", "30", "90", "365"];
 
 /**
- * Guruhga taklif havolasi — veb `invite-link-dialog.tsx` porti
- * (`AppDialog` -> `Sheet`).
+ * Guruhga taklif havolasi — veb `invite-link-dialog.tsx` (`AppDialog
+ * variant="adaptive"`, tor ekranda pastki oyna).
  *
- * Havola yo'q bo'lsa: muddat va "o'qituvchi tasdiqlaydi" tanlovi bilan
- * yaratiladi. Bor bo'lsa: nusxalash, yangilash (ikki bosqichli — eski
- * havola ishlamay qoladi) va bekor qilish.
+ * Havola yo'q bo'lsa: muddat va "tasdiqlash bilan" tanlovi, pastda "Havola
+ * yaratish". Bor bo'lsa: havola va "Nusxalash", o'sha sozlamalar, "Yangi
+ * havola" (ikki bosqichli — eski havola ishlamay qoladi) va "Bekor qilish",
+ * pastda "Havolani ulashish" (tizimning ulashish oynasi).
  */
 export function InviteLinkSheet({ courseId, open, onClose }: InviteLinkSheetProps) {
   const { t } = useTranslation("group");
-  const { palette } = useTheme();
+  const ds = useDs();
   const link = useInviteLink(courseId, open);
   const create = useCreateInviteLink();
   const remove = useDeleteInviteLink();
@@ -78,101 +68,115 @@ export function InviteLinkSheet({ courseId, open, onClose }: InviteLinkSheetProp
     }
   }
 
-  return (
-    <Sheet open={open} onClose={close} title={t("invite.title")} description={t("invite.description")}>
-      {link.isLoading ? (
-        <View style={[styles.skeleton, { backgroundColor: palette.muted }]} />
-      ) : current ? (
-        <View style={styles.stack}>
-          {/* `rounded-2xl border bg-subtle px-4 py-3` */}
-          <View style={[styles.linkRow, { borderColor: palette.border, backgroundColor: palette["surface-subtle"] }]}>
-            <Text variant="label" numberOfLines={1} style={[styles.grow, styles.regular]}>
-              {current.url}
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("invite.copy")}
-              onPress={() => void copy()}
-              style={({ pressed }) => [
-                styles.copy,
-                { backgroundColor: pressed ? palette.background : palette.surface },
-              ]}
-            >
-              <Icon name="assign" size={17} color={palette.foreground} />
-            </Pressable>
-          </View>
+  async function share() {
+    if (!current) return;
+    try {
+      await Share.share({ title: t("invite.title"), message: current.url });
+    } catch {
+      await copy();
+    }
+  }
 
-          <Text variant="caption" style={[styles.note, { color: palette["subtle-foreground"] }]}>
-            {current.expiresAt ? t("invite.expiresAt", { value: formatDate(current.expiresAt) }) : t("invite.noExpiry")}
-            {current.requireApproval ? ` · ${t("invite.approvalOn")}` : ""}
-          </Text>
+  const settings = (
+    <>
+      <MobileFieldLabel label={t("invite.expiryLabel")}>
+        <MobilePickerField
+          type="select"
+          value={expiresInDays}
+          display={expiryOptions.find((option) => option.value === expiresInDays)?.label ?? ""}
+          options={expiryOptions}
+          ariaLabel={t("invite.expiryLabel")}
+          onChange={setExpiresInDays}
+        />
+      </MobileFieldLabel>
 
-          {confirmRefresh ? (
-            <Text variant="caption" style={[styles.note, { color: palette["destructive-strong"] }]}>
-              {t("invite.refreshWarning")}
-            </Text>
-          ) : null}
-
-          <Pressable
-            accessibilityRole="button"
-            disabled={pending || !courseId}
-            onPress={() =>
-              courseId && remove.mutate(courseId, { onSuccess: () => toast.success(t("invite.revoked")) })
-            }
-            style={[styles.revoke, (pending || !courseId) && styles.disabled]}
-          >
-            <Icon name="trash" size={17} color={palette["destructive-strong"]} />
-            <Text variant="label" style={{ color: palette["destructive-strong"] }}>
-              {t("invite.revoke")}
-            </Text>
-          </Pressable>
+      <View style={styles.approval}>
+        {/* `size-9 rounded-md bg-accent-green-bg` */}
+        <View style={[styles.approvalIcon, { backgroundColor: ds.c["accent-green-bg"] }]}>
+          <Icon name="check-circle" size={18} color={ds.c["accent-green-fg"]} />
         </View>
-      ) : (
-        <View style={styles.form}>
-          <Text variant="label" style={[styles.regular, { color: palette["muted-foreground"] }]}>
-            {t("invite.empty")}
-          </Text>
+        <View style={styles.grow}>
+          <DsText v="title-sm">{t("invite.approvalLabel")}</DsText>
+          <DsText v="body-xs" c="ink-tertiary" numberOfLines={1}>
+            {t("invite.approvalHint")}
+          </DsText>
+        </View>
+        <Switch checked={requireApproval} onCheckedChange={setRequireApproval} accessibilityLabel={t("invite.approvalLabel")} />
+      </View>
+    </>
+  );
 
-          <SelectField
-            label={t("invite.expiryLabel")}
-            value={expiresInDays}
-            onChange={setExpiresInDays}
-            options={expiryOptions}
-          />
+  return (
+    <Sheet
+      variant="app"
+      open={open}
+      onClose={close}
+      title={t("invite.title")}
+      description={t("invite.description")}
+      footer={
+        current ? (
+          <MobileButton label={t("invite.share")} onPress={() => void share()} />
+        ) : (
+          <MobileButton label={t("invite.create")} disabled={pending || !courseId} onPress={generate} />
+        )
+      }
+    >
+      {link.isLoading ? (
+        <View style={[styles.skeleton, { backgroundColor: ds.c.muted }]} />
+      ) : current ? (
+        <>
+          <MobileFieldLabel label={t("invite.linkLabel")}>
+            {/* `h-12.5 rounded-md bg-subtle pr-1.5 pl-4 gap-2` */}
+            <View style={[styles.linkRow, { backgroundColor: ds.c.subtle }]}>
+              <DsText numberOfLines={1} style={styles.grow}>
+                {current.url}
+              </DsText>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => void copy()}
+                style={({ pressed }) => [styles.copy, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}
+              >
+                <DsText v="button" c="ink-inverse">
+                  {t("invite.copy")}
+                </DsText>
+              </Pressable>
+            </View>
+          </MobileFieldLabel>
 
-          {/* `rounded-2xl border px-4 py-3 gap-3` */}
-          <View style={[styles.approval, { borderColor: palette.border }]}>
-            <View style={[styles.approvalIcon, { backgroundColor: palette.primary }]}>
-              <Icon name="check-circle" size={17} color={palette["primary-foreground"]} />
-            </View>
-            <View style={styles.grow}>
-              <Text variant="label">{t("invite.approvalLabel")}</Text>
-              <Text variant="caption" style={{ color: palette["subtle-foreground"] }}>
-                {t("invite.approvalHint")}
-              </Text>
-            </View>
-            <Switch
-              checked={requireApproval}
-              onCheckedChange={setRequireApproval}
-              accessibilityLabel={t("invite.approvalLabel")}
+          {settings}
+
+          <View style={styles.pair}>
+            <MobileButton
+              variant="secondary"
+              icon="refresh"
+              label={confirmRefresh ? t("invite.refreshConfirm") : t("invite.refresh")}
+              disabled={pending || !courseId}
+              onPress={() => (confirmRefresh ? generate() : setConfirmRefresh(true))}
+              style={styles.half}
+            />
+            <MobileButton
+              variant="danger"
+              icon="close"
+              label={t("invite.cancelLink")}
+              disabled={pending || !courseId}
+              onPress={() => courseId && remove.mutate(courseId, { onSuccess: () => toast.success(t("invite.revoked")) })}
+              style={styles.half}
             />
           </View>
-        </View>
-      )}
 
-      <SheetFooter>
-        <SheetButton title={t("invite.close")} onPress={close} />
-        {current ? (
-          <SheetButton
-            variant="primary"
-            title={confirmRefresh ? t("invite.refreshConfirm") : t("invite.refresh")}
-            disabled={pending}
-            onPress={() => (confirmRefresh ? generate() : setConfirmRefresh(true))}
-          />
-        ) : (
-          <SheetButton variant="primary" title={t("invite.create")} disabled={pending || !courseId} onPress={generate} />
-        )}
-      </SheetFooter>
+          <DsText v="body-xs" c="ink-tertiary">
+            {t("invite.refreshWarning")}
+            {current.expiresAt ? ` · ${t("invite.expiresAt", { value: formatDate(current.expiresAt) })}` : ""}
+          </DsText>
+        </>
+      ) : (
+        <>
+          <DsText v="body-sm" c="ink-secondary">
+            {t("invite.empty")}
+          </DsText>
+          {settings}
+        </>
+      )}
     </Sheet>
   );
 }
@@ -187,20 +191,14 @@ function formatDate(value: string): string {
 
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
-  regular: { fontWeight: "400" },
-  /* `h-24 rounded-2xl` */
-  skeleton: { height: 96, borderRadius: radius["2xl"] },
-  /* `flex-col gap-3` */
-  stack: { gap: 12 },
-  /* `flex-col gap-4` */
-  form: { gap: 16 },
-  linkRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: radius["2xl"] },
-  /* `size-9 rounded-full` */
-  copy: { width: 36, height: 36, borderRadius: radius.full, alignItems: "center", justifyContent: "center" },
-  note: { paddingHorizontal: 4 },
-  revoke: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 4 },
-  disabled: { opacity: 0.6 },
-  approval: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: radius["2xl"] },
-  /* `size-9 rounded-xl` */
-  approvalIcon: { width: 36, height: 36, borderRadius: radius.xl, alignItems: "center", justifyContent: "center" },
+  /* `h-25 rounded-md` */
+  skeleton: { height: 100, borderRadius: dsRadius.md },
+  linkRow: { height: 50, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 16, paddingRight: 6, borderRadius: dsRadius.md },
+  /* `h-9 rounded-full px-4` */
+  copy: { height: 36, justifyContent: "center", paddingHorizontal: 16, borderRadius: dsRadius.full },
+  approval: { flexDirection: "row", alignItems: "center", gap: 12 },
+  approvalIcon: { width: 36, height: 36, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
+  /* `grid-cols-2 gap-3` */
+  pair: { flexDirection: "row", gap: 12 },
+  half: { flex: 1 },
 });

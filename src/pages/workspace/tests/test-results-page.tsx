@@ -20,6 +20,7 @@ import {
   useDs,
   type DsColor,
 } from "@/shared/ui";
+import { ShareResultsDialog } from "./share-results-dialog";
 
 interface Row {
   id: string;
@@ -48,6 +49,7 @@ export function TestResultsPage() {
   const insets = useSafeAreaInsets();
   const { quizId = null } = useLocalSearchParams<{ quizId: string }>();
   const [attemptsOpen, setAttemptsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const quiz = useQuiz(quizId);
   const courses = useCourses();
   const attempts = useQuizAttempts(quizId, Boolean(quizId));
@@ -99,7 +101,10 @@ export function TestResultsPage() {
         <DsGradient name="auth" />
         <View style={styles.header}>
           <MobileRoundButton icon="chevron-left" label={t("tests.mobile.back")} onPress={goBack} />
-          <MobileRoundButton icon="assign" label={t("tests.attempts")} onPress={() => setAttemptsOpen(true)} />
+          <View style={styles.headerActions}>
+            <MobileRoundButton icon="send" label={t("results.share")} onPress={() => setShareOpen(true)} />
+            <MobileRoundButton icon="assign" label={t("tests.attempts")} onPress={() => setAttemptsOpen(true)} />
+          </View>
         </View>
 
         <View style={styles.title}>
@@ -167,6 +172,7 @@ export function TestResultsPage() {
         )}
       </ScrollView>
 
+      {quizId ? <ShareResultsDialog quizId={quizId} open={shareOpen} onOpenChange={setShareOpen} /> : null}
       <QuizAttemptsDrawer
         open={attemptsOpen}
         onOpenChange={setAttemptsOpen}
@@ -185,6 +191,7 @@ const styles = StyleSheet.create({
   center: { textAlign: "center" },
   page: { paddingHorizontal: 16 },
   header: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
   title: { marginTop: 14 },
   stats: { marginTop: 22, flexDirection: "row", gap: 8 },
   statCell: { flex: 1, flexBasis: 0 },

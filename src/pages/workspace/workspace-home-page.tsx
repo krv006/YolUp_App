@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTeacherDashboard } from "@/modules/analytics";
 import { useCourses } from "@/modules/course";
 import { useExams } from "@/modules/exam";
 import { homeworkApi, homeworkKeys } from "@/modules/homework";
@@ -20,20 +21,19 @@ import {
   PopoverMenu,
   PopoverMenuItem,
   PullRefresh,
-  toast,
   useDs,
   usePopoverAnchor,
   type IconName,
 } from "@/shared/ui";
 
 
-const MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: string | null }> = [
+const MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: string }> = [
   { id: "tests", icon: "quiz", tone: "bg-accent-blue-bg text-accent-blue-fg", to: ROUTES.teacher.tests },
   { id: "analytics", icon: "bar-chart", tone: "bg-accent-green-bg text-accent-green-fg", to: ROUTES.teacher.workspaceAnalytics },
   { id: "ai", icon: "sparkles-fill", tone: "bg-accent-saffron-bg text-accent-saffron-fg", to: ROUTES.teacher.workspaceAi },
   { id: "mock", icon: "assignment-check-fill", tone: "bg-accent-violet-bg text-accent-violet-fg", to: ROUTES.teacher.mockExams },
   { id: "assignments", icon: "assign", tone: "bg-accent-red-bg text-accent-red-fg", to: ROUTES.teacher.homework },
-  { id: "materials", icon: "folder", tone: "bg-accent-violet-bg text-accent-red-fg", to: null },
+  { id: "materials", icon: "folder", tone: "bg-accent-violet-bg text-accent-red-fg", to: ROUTES.teacher.materials },
 ];
 
 const CREATE: ReadonlyArray<{ id: string; icon: IconName; to: string }> = [
@@ -58,6 +58,7 @@ export function WorkspaceHomePage() {
   const courses = useCourses();
   const quizzes = useQuizzes(null);
   const exams = useExams(null);
+  const dashboard = useTeacherDashboard();
 
   const groups = useMemo(() => courses.data ?? [], [courses.data]);
   const assignmentQueries = useQueries({
@@ -67,10 +68,11 @@ export function WorkspaceHomePage() {
     })),
   });
   const assignments = assignmentQueries.flatMap((query) => query.data ?? []);
-  const unchecked = assignments.reduce((sum, item) => sum + item.submissions.filter((entry) => !entry.grade).length, 0);
+  // 🟡 Vebdan farqi: ro'yxat API'si `submissions` ni qaytarmaydi, shuning uchun hisob doim 0 chiqardi — asosiy sahifadagi kabi server soni.
+  const unchecked = dashboard.data?.submissionsPending ?? assignments.reduce((sum, item) => sum + item.submissions.filter((entry) => !entry.grade).length, 0);
 
   function refresh() {
-    return Promise.all([courses.refetch(), quizzes.refetch(), exams.refetch(), ...assignmentQueries.map((query) => query.refetch())]);
+    return Promise.all([courses.refetch(), quizzes.refetch(), exams.refetch(), dashboard.refetch(), ...assignmentQueries.map((query) => query.refetch())]);
   }
 
   return (
@@ -126,7 +128,7 @@ export function WorkspaceHomePage() {
                 title={t(`home.mobile.modules.${module.id}.title`)}
                 subtitle={t(`home.mobile.modules.${module.id}.description`)}
                 last={index === MODULES.length - 1}
-                onPress={() => (module.to ? router.push(module.to as never) : toast.info(t("soon")))}
+                onPress={() => router.push(module.to as never)}
               />
             ))}
           </MobileListCard>

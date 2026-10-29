@@ -317,7 +317,7 @@ function MockLive({
           const percent = done ? 100 : row.participated && row.answered != null && row.questionsTotal ? Math.round((row.answered / row.questionsTotal) * 100) : 0;
           return (
             <View key={row.studentId} style={styles.liveRow}>
-              <Avatar variant="legacy" name={row.studentName} size="sm" box={36} />
+              <Avatar variant="legacy" name={row.studentName} src={row.avatarUrl ?? undefined} size="sm" box={36} />
               <View style={styles.grow}>
                 <View style={styles.liveName}>
                   <DsText v="title-sm" numberOfLines={1} style={styles.shrink}>
@@ -441,7 +441,7 @@ function MockResults(props: {
                   key={row.studentId}
                   chevron={false}
                   last={index === props.rows.length - 1}
-                  leading={<Avatar variant="legacy" name={row.studentName} size="sm" box={44} />}
+                  leading={<Avatar variant="legacy" name={row.studentName} src={row.avatarUrl ?? undefined} size="sm" box={44} />}
                   title={row.studentName}
                   subtitle={row.participated ? undefined : t("results.notJoined")}
                   trailing={

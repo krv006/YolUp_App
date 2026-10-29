@@ -286,6 +286,7 @@ export function HomeworkDetailPage() {
             dueAt: item.dueAt,
             grading: item.grading,
             announceInChat: item.announceInChat,
+            aiCheck: item.aiCheck,
           }}
           onSubmit={(values) => update.mutate({ id: item.id, form: values }, { onSuccess: () => setEditOpen(false) })}
         />

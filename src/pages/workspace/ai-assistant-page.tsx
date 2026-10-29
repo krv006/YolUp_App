@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSubjects } from "@/modules/course";
-import { useAiQuizJobs, useStartAiQuiz, type AiQuizJob, type AiQuizStandard } from "@/modules/quiz";
+import { useAiQuizJobs, useGenerateQuizFromBank, useStartAiQuiz, type AiQuizJob, type AiQuizStandard } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import { pickDocuments, toUploadFile, type PickedFile } from "@/shared/lib";
 import {
@@ -49,6 +49,7 @@ export function AiAssistantPage() {
   const subjects = useSubjects();
   const jobs = useAiQuizJobs();
   const start = useStartAiQuiz();
+  const bank = useGenerateQuizFromBank();
 
   function goBack() {
     if (router.canGoBack()) router.back();
@@ -80,6 +81,11 @@ export function AiAssistantPage() {
       error={start.isError ? (start.error?.message ?? null) : null}
       onBack={goBack}
       onHistory={() => router.push(`${ROUTES.teacher.workspaceAi}?view=jobs` as never)}
+      bankPending={bank.isPending}
+      bankError={bank.isError ? (bank.error?.message ?? null) : null}
+      onBank={(value) =>
+        bank.mutate({ topic: value.topic, count: value.count }, { onSuccess: (quiz) => router.push(ROUTES.teacher.test(quiz.id) as never) })
+      }
       onSubmit={(value) =>
         start.mutate(
           {
@@ -105,10 +111,13 @@ interface AiFormProps {
   onBack: () => void;
   onHistory: () => void;
   onSubmit: (value: { files: PickedFile[]; subject: string; topic: string; count: number; standard: AiQuizStandard | null }) => void;
+  bankPending: boolean;
+  bankError: string | null;
+  onBank: (value: { topic: string; count: number }) => void;
 }
 
-/** AI test formasi — oddiy / qoidali (imtihon turi) / bank (tez orada). */
-function AiForm({ subjects, pending, error, onBack, onHistory, onSubmit }: AiFormProps) {
+/** AI test formasi — oddiy / qoidali (imtihon turi) / bank (oldingi testlardagi savollardan, veb #162). */
+function AiForm({ subjects, pending, error, onBack, onHistory, onSubmit, bankPending, bankError, onBank }: AiFormProps) {
   const { t } = useTranslation("quiz");
   const ds = useDs();
   const insets = useSafeAreaInsets();
@@ -121,6 +130,33 @@ function AiForm({ subjects, pending, error, onBack, onHistory, onSubmit }: AiFor
   const [fileError, setFileError] = useState<string | null>(null);
 
   const subjectLabel = subjects.find((item) => item.value === subject)?.label ?? "";
+
+  // `h-13 rounded-full bg-subtle p-1.5 gap-1`
+  const stepper = (
+    <View style={[styles.stepper, { backgroundColor: ds.c.subtle }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("ai.less")}
+        disabled={count <= MIN_QUESTIONS}
+        onPress={() => setCount((value) => Math.max(MIN_QUESTIONS, value - 5))}
+        style={[styles.step, { backgroundColor: ds.c.surface }, count <= MIN_QUESTIONS && styles.faded]}
+      >
+        <Icon name="remove" size={22} color={ds.c.ink} />
+      </Pressable>
+      <DsText v="title-sm" style={styles.countValue}>
+        {t("ai.mobile.count", { count })}
+      </DsText>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("ai.more")}
+        disabled={count >= MAX_QUESTIONS}
+        onPress={() => setCount((value) => Math.min(MAX_QUESTIONS, value + 5))}
+        style={[styles.step, { backgroundColor: ds.c.surface }, count >= MAX_QUESTIONS && styles.faded]}
+      >
+        <Icon name="add" size={22} color={ds.c.ink} />
+      </Pressable>
+    </View>
+  );
 
   async function chooseFiles() {
     const picked = (await pickDocuments(FILE_TYPES)).slice(0, MAX_FILES);
@@ -150,8 +186,31 @@ function AiForm({ subjects, pending, error, onBack, onHistory, onSubmit }: AiFor
         </View>
 
         {tab === "bank" ? (
-          <View style={styles.bank}>
-            <MobileEmptyCard icon="quiz" title={t("ai.mobile.bankTitle")} description={t("ai.mobile.bankHint")} />
+          // `mt-[15px] flex-col gap-[15px]`
+          <View style={styles.fields}>
+            <View style={[styles.info, { backgroundColor: ds.c["brand-subtle"] }]}>
+              <Icon name="info" size={18} color={ds.c.brand} />
+              <DsText v="body-sm" c="brand" style={styles.grow}>
+                {t("ai.bankHint")}
+              </DsText>
+            </View>
+            <MobileFieldLabel gap={7} label={t("ai.topic")}>
+              <MobileInput surface value={topic} placeholder={t("ai.topicPlaceholder")} onChangeText={setTopic} />
+            </MobileFieldLabel>
+            {bankError ? (
+              <View style={[styles.info, { backgroundColor: ds.c["danger-bg"] }]}>
+                <Icon name="warning-fill" size={18} color={ds.c.danger} />
+                <DsText v="body-sm" c="error-text" style={styles.grow}>
+                  {bankError}
+                </DsText>
+              </View>
+            ) : null}
+            <View style={styles.bankCount}>
+              <DsText v="body-sm" style={styles.grow}>
+                {t("ai.questionCount")}
+              </DsText>
+              {stepper}
+            </View>
           </View>
         ) : (
           <>
@@ -220,36 +279,17 @@ function AiForm({ subjects, pending, error, onBack, onHistory, onSubmit }: AiFor
                   {t("ai.mobile.countRange", { min: MIN_QUESTIONS, max: MAX_QUESTIONS })}
                 </DsText>
               </View>
-              {/* `h-13 rounded-full bg-subtle p-1.5 gap-1` */}
-              <View style={[styles.stepper, { backgroundColor: ds.c.subtle }]}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("ai.less")}
-                  disabled={count <= MIN_QUESTIONS}
-                  onPress={() => setCount((value) => Math.max(MIN_QUESTIONS, value - 5))}
-                  style={[styles.step, { backgroundColor: ds.c.surface }, count <= MIN_QUESTIONS && styles.faded]}
-                >
-                  <Icon name="remove" size={22} color={ds.c.ink} />
-                </Pressable>
-                <DsText v="title-sm" style={styles.countValue}>
-                  {t("ai.mobile.count", { count })}
-                </DsText>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("ai.more")}
-                  disabled={count >= MAX_QUESTIONS}
-                  onPress={() => setCount((value) => Math.min(MAX_QUESTIONS, value + 5))}
-                  style={[styles.step, { backgroundColor: ds.c.surface }, count >= MAX_QUESTIONS && styles.faded]}
-                >
-                  <Icon name="add" size={22} color={ds.c.ink} />
-                </Pressable>
-              </View>
+              {stepper}
             </View>
           </>
         )}
       </ScrollView>
 
-      {tab === "bank" ? null : (
+      {tab === "bank" ? (
+        <MobileActionBar>
+          <MobileButton icon="quiz" label={t("ai.bankSubmit")} disabled={bankPending || !topic.trim()} onPress={() => onBank({ topic: topic.trim(), count })} />
+        </MobileActionBar>
+      ) : (
         <MobileActionBar>
           <MobileButton
             icon="sparkles-fill"
@@ -376,7 +416,8 @@ const styles = StyleSheet.create({
   faded: { opacity: 0.4 },
   page: { paddingHorizontal: 16 },
   tabs: { marginTop: 14 },
-  bank: { marginTop: 20 },
+  info: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.lg },
+  bankCount: { flexDirection: "row", alignItems: "center", gap: 12 },
   fields: { marginTop: 15, gap: 15 },
   drop: { marginTop: 16, height: 117, alignItems: "center", justifyContent: "center", paddingHorizontal: 24, borderWidth: 1.5, borderStyle: "dashed", borderRadius: dsRadius.lg },
   dropTitle: { marginTop: 8, textAlign: "center" },

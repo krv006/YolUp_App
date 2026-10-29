@@ -169,7 +169,7 @@ export function NotificationsPage() {
                 const { icon, tone } = notificationIcon(item);
                 const colors = toneColors(tone, ds);
                 const action = notificationActionKey(item.link);
-                const { title, body } = splitHtml(item.html);
+                const { title, body } = item.title ? { title: "", body: "" } : splitHtml(item.html);
                 return (
                   <Pressable
                     key={item.id}
@@ -188,15 +188,29 @@ export function NotificationsPage() {
                       <Icon name={icon as IconName} size={22} color={colors.fg ?? ds.c.brand} />
                     </View>
                     <View style={styles.text}>
-                      <DsText v="body-sm" c="ink-secondary" numberOfLines={3}>
-                        {title ? (
-                          <DsText v="title">
-                            {title}
-                            {body ? "\n" : ""}
+                      {/* Veb #159: server `title`/`body` bersa — alohida qatorlar, aks holda HTML'dan ajratiladi */}
+                      {item.title ? (
+                        <View style={styles.text}>
+                          <DsText v="title" numberOfLines={2}>
+                            {item.title}
                           </DsText>
-                        ) : null}
-                        {body}
-                      </DsText>
+                          {item.body ? (
+                            <DsText v="body-sm" c="ink-secondary" numberOfLines={3}>
+                              {item.body}
+                            </DsText>
+                          ) : null}
+                        </View>
+                      ) : (
+                        <DsText v="body-sm" c="ink-secondary" numberOfLines={3}>
+                          {title ? (
+                            <DsText v="title">
+                              {title}
+                              {body ? "\n" : ""}
+                            </DsText>
+                          ) : null}
+                          {body}
+                        </DsText>
+                      )}
                       {action ? (
                         <DsText v="body-sm" w="600" c="brand-strong">
                           {t(`actions.${action}`)}

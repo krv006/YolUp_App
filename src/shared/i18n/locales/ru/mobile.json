@@ -255,7 +255,9 @@
     "darsga_kirish": "Войти на урок",
     "bekor_qilish": "Отмена",
     "ha_shu_yerdaman": "Да, я здесь",
-    "darsda_ekaningizni_tasdiqlang_javob_bermasan": "Подтвердите, что вы на уроке. Без ответа это попадёт в отчёт о посещаемости."
+    "darsda_ekaningizni_tasdiqlang_javob_bermasan": "Подтвердите, что вы на уроке. Без ответа это попадёт в отчёт о посещаемости.",
+    "ruxsat_sozlamalarda": "Разрешите приложению YolUp доступ к камере и микрофону в настройках телефона. Без разрешения вы войдёте только как слушатель.",
+    "sozlamalarni_ochish": "Открыть настройки"
   },
   "quiz": {
     "fan": "Предмет",

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { AppState, Linking, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VideoView } from "@livekit/react-native";
 import { createLocalVideoTrack, type LocalVideoTrack } from "livekit-client";
 import type { Lesson } from "@/shared/types";
-import { Avatar, dsAlpha, DsText, dsRadius, Icon, ThemeScope, useDs } from "@/shared/ui";
+import { Avatar, ConfirmDialog, dsAlpha, DsText, dsRadius, Icon, ThemeScope, useDs } from "@/shared/ui";
 
 export interface LessonPreJoinChoices {
   micOn: boolean;
@@ -38,12 +38,17 @@ export function LessonPreJoin(props: LessonPreJoinProps) {
 
 function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: LessonPreJoinProps) {
   const { t } = useTranslation("live");
+  const { t: tm } = useTranslation("mobile");
   const ds = useDs();
   const insets = useSafeAreaInsets();
   const [micOn, setMicOn] = useState(micAllowed);
   const [cameraOn, setCameraOn] = useState(true);
-  const [deviceError, setDeviceError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [failure, setFailure] = useState<{ attempt: number; denied: boolean; message: string } | null>(null);
   const [videoTrack, setVideoTrack] = useState<LocalVideoTrack | null>(null);
+  const current = failure?.attempt === attempt ? failure : null;
+  const deviceError = current?.message ?? null;
+  const permissionDenied = Boolean(current?.denied);
 
   /* Vebdagi `usePreviewTracks`: kamera yoqilganda oldindan ko'rinish. */
   useEffect(() => {
@@ -59,13 +64,37 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
         created = track;
         setVideoTrack(track);
       })
-      .catch((error: Error) => setDeviceError(error.message || t("preJoin.deviceErrorFallback")));
+      .catch((error: Error) => {
+        if (cancelled) return;
+        setFailure({
+          attempt,
+          // react-native-webrtc rad etilgan ruxsatni `NotAllowedError` yoki "Permission denied" bilan qaytaradi.
+          denied: /NotAllowed|Security|permission|denied/i.test(`${error.name} ${error.message}`),
+          message: error.message || t("preJoin.deviceErrorFallback"),
+        });
+      });
     return () => {
       cancelled = true;
       created?.stop();
       setVideoTrack(null);
     };
-  }, [cameraOn, t]);
+  }, [cameraOn, attempt, t]);
+
+  /*
+   * 🟡 Vebdagi "Qayta tekshirish" brauzerda ruxsatni qayta so'raydi. Telefonda
+   * "boshqa so'ralmasin" tanlangan bo'lsa so'rov darhol rad etiladi — shuning
+   * uchun tizim sozlamalari ochiladi, ilovaga qaytganda kamera qayta so'raladi.
+   */
+  useEffect(() => {
+    if (!permissionDenied) return undefined;
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state !== "active") return;
+      setFailure(null);
+      setAttempt((value) => value + 1);
+    });
+    return () => subscription.remove();
+  }, [permissionDenied]);
+
 
   function join() {
     videoTrack?.stop();
@@ -118,7 +147,7 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
             accessibilityLabel={micOn ? t("preJoin.muteMicAria") : t("preJoin.unmuteMicAria")}
             disabled={!micAllowed}
             onPress={() => {
-              setDeviceError(null);
+              setFailure(null);
               setMicOn((value) => !value);
             }}
             style={[styles.toggle, { backgroundColor: micOn ? ds.c.subtle : ds.c.danger }, !micAllowed && styles.dim]}
@@ -130,7 +159,7 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
             accessibilityState={{ selected: cameraOn }}
             accessibilityLabel={cameraOn ? t("preJoin.muteCameraAria") : t("preJoin.unmuteCameraAria")}
             onPress={() => {
-              setDeviceError(null);
+              setFailure(null);
               setCameraOn((value) => !value);
             }}
             style={[styles.toggle, { backgroundColor: cameraOn ? ds.c.subtle : ds.c.danger }]}
@@ -150,7 +179,7 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
         {devices} · {t("preJoin.mobileChangeLater")}
       </DsText>
 
-      {deviceError ? (
+      {deviceError && !permissionDenied ? (
         <View style={[styles.error, { backgroundColor: ds.c["danger-bg"] }]}>
           <DsText v="body-sm" c="error-text">
             {t("preJoin.deviceErrorMessage", { error: deviceError })}
@@ -180,6 +209,25 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
           </DsText>
         </Pressable>
       </View>
+
+      <ConfirmDialog
+        open={permissionDenied}
+        onOpenChange={(open) => {
+          if (!open) setFailure(null);
+        }}
+        tone="brand"
+        icon="videocam-fill"
+        confirmIcon="settings"
+        title={t("permissionDialog.title")}
+        description={tm("live.ruxsat_sozlamalarda")}
+        confirmLabel={tm("live.sozlamalarni_ochish")}
+        cancelLabel={t("permissionDialog.joinWithout")}
+        onConfirm={() => void Linking.openSettings()}
+        onCancel={() => {
+          videoTrack?.stop();
+          onJoin({ micOn: false, cameraOn: false });
+        }}
+      />
     </ScrollView>
   );
 }

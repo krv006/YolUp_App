@@ -106,6 +106,4 @@ export { QuestionEditor } from "./ui/question-editor";
 export type { QuestionEditorProps } from "./ui/question-editor";
 export { QuestionGroupEditor } from "./ui/question-group-editor";
 export type { QuestionGroupEditorProps } from "./ui/question-group-editor";
-export { QuizAttemptSheet } from "./ui/quiz-attempt-sheet";
-export type { QuizAttemptSheetProps } from "./ui/quiz-attempt-sheet";
 export { QUIZ_RADIUS, useQuizColors } from "./ui/quiz-colors";

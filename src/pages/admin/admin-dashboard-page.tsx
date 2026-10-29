@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
+  Award,
   BookOpen,
   CalendarCheck,
   CheckCircle2,
   GraduationCap,
+  LifeBuoy,
   LogOut,
   ShieldCheck,
   Star,
@@ -119,6 +121,9 @@ export function AdminDashboardPage() {
                 label={t("dashboard.teachersLink")}
                 onPress={() => router.push(ROUTES.admin.teachers)}
               />
+              {/* Veb #159: sertifikatlar va murojaatlar */}
+              <PortalButton variant="primary" size="link" icon={Award} label={t("dashboard.certificatesLink")} onPress={() => router.push(ROUTES.admin.certificates)} />
+              <PortalButton variant="primary" size="link" icon={LifeBuoy} label={t("dashboard.supportLink")} onPress={() => router.push(ROUTES.admin.support)} />
               <NotificationBell />
               <PortalButton size="dense" icon={LogOut} label={t("dashboard.logout")} onPress={() => void signOut()} style={styles.grow} />
             </View>
@@ -346,7 +351,7 @@ function DashPanel({
 const styles = StyleSheet.create({
   grow: { flexGrow: 1 },
   /* `.heading-actions` — orasi 9 */
-  actions: { flex: 1, flexDirection: "row", alignItems: "center", gap: 9 },
+  actions: { flex: 1, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 9 },
   /* `.dash-period-switch` — 3 bo'shliq, radius 10 */
   periods: { alignSelf: "flex-start", flexDirection: "row", gap: 2, padding: 3, borderRadius: 10 },
   period: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 },

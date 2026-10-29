@@ -23,8 +23,16 @@ export interface TokenPair {
  * yozilmaydi; ya'ni "meni eslab qolma" ilova qayta ochilganda chiqib ketadi.
  */
 
+const TOKEN_KEYS = [STORAGE_KEYS.ACCESS_TOKEN, STORAGE_KEYS.REFRESH_TOKEN] as const;
 /** Diskka yoziladigan (persistent) kalitlar. */
-const PERSISTED_KEYS = [STORAGE_KEYS.ACCESS_TOKEN, STORAGE_KEYS.REFRESH_TOKEN] as const;
+const PERSISTED_KEYS = [...TOKEN_KEYS, STORAGE_KEYS.USER_SNAPSHOT] as const;
+
+/**
+ * SecureStore 2048 baytdan katta qiymatni rad etishi mumkin. Profil odatda
+ * 0,5–1 KB; kattaroq bo'lsa (uzun bio, ko'p sertifikat) faqat xotirada
+ * qoladi — keyingi ochilishda ilova `me/` javobini kutadi.
+ */
+const SECURE_VALUE_LIMIT = 2048;
 
 const memory = new Map<string, string>();
 /** Xotirada bor, lekin ataylab diskka yozilmagan kalitlar. */
@@ -82,8 +90,18 @@ export const tokenStorage = {
     return memory.has(STORAGE_KEYS.REFRESH_TOKEN) && !ephemeral.has(STORAGE_KEYS.REFRESH_TOKEN);
   },
 
+  /**
+   * 🟡 Vebdan farqi: profil keshi bu yerda O'CHIRILMAYDI — aks holda har
+   * token yangilanishida (refresh ham shu metodni chaqiradi) kesh yo'qolib,
+   * keyingi ochilishda ilova yana `me/` ni kutardi. Yangi sessiyada keshni
+   * `auth.store` dagi `beginSession` tozalaydi; chiqishda — `clearTokens`.
+   */
   setTokens({ accessToken, refreshToken }: TokenPair, { persistent = true } = {}): void {
-    this.clearTokens();
+    for (const key of TOKEN_KEYS) {
+      memory.delete(key);
+      ephemeral.delete(key);
+      persist(key, null);
+    }
     const entries: [string, string | null | undefined][] = [
       [STORAGE_KEYS.ACCESS_TOKEN, accessToken],
       [STORAGE_KEYS.REFRESH_TOKEN, refreshToken],
@@ -101,6 +119,30 @@ export const tokenStorage = {
       memory.delete(key);
       ephemeral.delete(key);
       persist(key, null);
+    }
+  },
+
+  /** Keshlangan profil (JSON) — faqat sessiya bor bo'lsa. */
+  readUser(): string | null {
+    return this.hasSession() ? (memory.get(STORAGE_KEYS.USER_SNAPSHOT) ?? null) : null;
+  },
+
+  /** Profilni tokenlar bilan bir joyda saqlaydi: "meni eslab qol" bo'lmasa — faqat xotirada. */
+  writeUser(value: string | null): void {
+    const key = STORAGE_KEYS.USER_SNAPSHOT;
+    if (value && this.hasSession() && memory.get(key) === value) return;
+    const wasPersisted = memory.has(key) && !ephemeral.has(key);
+    memory.delete(key);
+    ephemeral.delete(key);
+    if (!value || !this.hasSession()) {
+      if (wasPersisted) persist(key, null);
+      return;
+    }
+    memory.set(key, value);
+    if (this.isPersistent() && value.length <= SECURE_VALUE_LIMIT) persist(key, value);
+    else {
+      ephemeral.add(key);
+      if (wasPersisted) persist(key, null);
     }
   },
 

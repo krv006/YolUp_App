@@ -7,7 +7,7 @@ import { StyleSheet } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { tokenStorage } from "@/shared/api";
-import { useAuthStore } from "@/modules/auth";
+import { AUTH_STATUS, useAuthStore } from "@/modules/auth";
 import { BootScreen, FONT_ASSETS, ToastHost } from "@/shared/ui";
 import { queryClient } from "./query-client";
 
@@ -31,7 +31,8 @@ import "@/shared/i18n";
  * Boot tartibi (MOBILE_PLAN §4.2) — tartib MUHIM:
  *   1. tokenStorage.hydrate()  — Keychain'dan tokenni XOTIRAGA o'qish
  *   2. useAuthStore.bootstrap() — GET /auth/me/ (1-qadam tugamasdan
- *      chaqirilsa token topilmaydi va foydalanuvchi har safar login qiladi)
+ *      chaqirilsa token topilmaydi va foydalanuvchi har safar login qiladi);
+ *      Keychain'da keshlangan profil bo'lsa javob kutilmaydi
  *   3. Shu vaqt davomida `BootScreen` (logo + harakatlanuvchi nuqtalar)
  *      turadi; marshrutlar faqat undan keyin chiziladi — aks holda login
  *      ekrani bir lahza "miltillab" o'tib, bosh sahifaga sakrardi
@@ -60,8 +61,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
       await tokenStorage.hydrate();
       if (cancelled) return;
       // Saqlangan token bo'lsa profil tiklanadi; bo'lmasa store darhol
-      // ANONYMOUS ga o'tadi va so'rov umuman yuborilmaydi.
-      await bootstrap();
+      // ANONYMOUS ga o'tadi va so'rov umuman yuborilmaydi. Keshdagi profil
+      // bo'lsa holat darhol AUTHENTICATED — `me/` fonda yangilanadi (veb #157).
+      const pending = bootstrap();
+      if (useAuthStore.getState().status !== AUTH_STATUS.AUTHENTICATED) await pending;
       if (cancelled) return;
       setReady(true);
     })();

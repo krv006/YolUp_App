@@ -77,6 +77,20 @@ function toAppError(error: unknown): AppError {
 }
 
 /**
+ * Oxirgi ma'lum profil — ilova `me/` javobini kutmasdan ochilishi uchun.
+ * 🟡 Vebda modul yuklanganda o'qiladi; mobilda tokenlar Keychain'dan
+ * `hydrate()` bilan keyinroq keladi, shuning uchun `bootstrap()` ichida.
+ */
+function cachedUser(): AuthUser | null {
+  try {
+    const raw = tokenStorage.readUser();
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Ketayotgan `me/` so'rovi. React StrictMode (dev) effektni ikki marta
  * chaqiradi, shuningdek daraxt qayta mount bo'lishi ham mumkin — ikkalasida
  * ham bitta so'rov yetarli, chaqiruvchilar bir xil natijani kutadi.
@@ -97,6 +111,8 @@ let sessionSeq = 0;
 function beginSession(tokens: TokenPair, persistent: boolean): number {
   sessionSeq += 1;
   announceSessionChange();
+  // Mobilda `setTokens` profil keshini saqlab qoladi — yangi sessiyada eskisi qolmasin.
+  tokenStorage.writeUser(null);
   tokenStorage.setTokens(tokens, { persistent });
   return sessionSeq;
 }
@@ -118,7 +134,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         set({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });
         return;
       }
-      set({ status: AUTH_STATUS.INITIALIZING, error: null });
+      const cached = get().user ?? cachedUser();
+      if (cached) set({ user: cached, status: AUTH_STATUS.AUTHENTICATED, error: null });
+      else set({ status: AUTH_STATUS.INITIALIZING, error: null });
       try {
         const user = mapUserDto(await authApi.getCurrentUser());
         set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
@@ -131,6 +149,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
           set({ user: null, status: AUTH_STATUS.ANONYMOUS, error: null });
           return;
         }
+        // Keshdagi profil bilan ochilgan — tarmoq xatosida ham shu holatda qoladi.
+        if (cached) return;
         set({ user: null, status: AUTH_STATUS.ERROR, error: appError });
       }
     })();
@@ -258,6 +278,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
 // ─── Bir martalik yon-effektlar ─────────────────────────────────────────────
 configureAuthRefresh();
+
+useAuthStore.subscribe((state, prevState) => {
+  if (state.user === prevState.user) return;
+  tokenStorage.writeUser(state.user ? JSON.stringify(state.user) : null);
+});
 
 useLanguageStore.subscribe((state, prevState) => {
   if (suppressLanguagePush || state.language === prevState.language) return;

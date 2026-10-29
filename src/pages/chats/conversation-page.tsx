@@ -88,7 +88,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   useEffect(() => {
     if (!lastMessageId || lastMessageId.startsWith("temp-") || readRef.current === lastMessageId) return;
     readRef.current = lastMessageId;
-    markRead.mutate(lastMessageId);
+    markRead.mutate();
   }, [lastMessageId, markRead]);
 
   const backPath = role === "teacher" ? "/teacher/chats" : "/student/chats";

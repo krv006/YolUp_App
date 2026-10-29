@@ -34,6 +34,7 @@ export {
   useGrantDraw,
   usePeriodicTable,
   useRenameSheet,
+  useSetCurrentSheet,
   useRevokeDraw,
   useSendBoardToChat,
   useSetBoardPermissions,

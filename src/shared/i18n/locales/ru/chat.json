@@ -87,7 +87,6 @@
     "tabMedia": "Медиа",
     "filesEmpty": "Файлов нет",
     "mediaEmpty": "Медиа нет",
-    "sectionPending": "Появится, когда бэкенд будет готов",
     "online": "в сети",
     "onlineCount": "{{count}} в сети",
     "teacherBadge": "Учитель",
@@ -95,12 +94,14 @@
     "filesEmptyHint": "Здесь собираются файлы из группы.",
     "mediaEmptyHint": "Здесь собираются фото и видео из группы.",
     "descriptionShort": "Описание",
-    "memberYou": "{{name}} (вы)"
+    "memberYou": "{{name}} (вы)",
+    "messageTeacher": "Написать"
   },
   "item": {
     "liveNow": "Идёт урок",
     "typing": "печатает...",
-    "mentionTitle": "Вас упомянули"
+    "mentionTitle": "Вас упомянули",
+    "recordingVoice": "записывает голосовое..."
   },
   "newDialog": {
     "title": "Новая группа",
@@ -148,6 +149,7 @@
     "emptyGroupHint": "Поздоровайтесь первым или напишите объявление — его получат все участники.",
     "emptyTitle": "Сообщений пока нет",
     "emptyHint": "Поздоровайтесь первым.",
+    "emptyLockedHint": "Сообщения появятся здесь, когда диалог будет открыт.",
     "today": "Сегодня",
     "loadError": "Не удалось загрузить сообщения",
     "loadErrorHint": "Повторите попытку через некоторое время.",
@@ -222,7 +224,8 @@
     "recordingHint": "Открыть запись урока"
   },
   "typing": {
-    "suffix": "печатает"
+    "suffix": "печатает",
+    "voiceSuffix": "записывает голосовое"
   },
   "attachment": {
     "openAria": "{{name}} — открыть",
@@ -250,8 +253,7 @@
     "filters": {
       "all": "Все",
       "direct": "Личные",
-      "group": "Группы",
-      "unread": "Непрочитанные"
+      "group": "Группы"
     },
     "searchPlaceholder": "Поиск бесед...",
     "searchAria": "Поиск бесед",
@@ -296,7 +298,11 @@
     "peopleSection": "Люди",
     "startChat": "Начать чат",
     "connectionLost": "Нет соединения",
-    "freshStart": "Новое начало"
+    "freshStart": "Новое начало",
+    "voiceMessage": "Голосовое сообщение",
+    "imageMessage": "Фото",
+    "videoMessage": "Видео",
+    "recordingVoice": "{{name}} записывает голосовое..."
   },
   "pinned": {
     "label": "Закреплённое сообщение",
@@ -344,7 +350,10 @@
   "system": {
     "recordingTitle": "Видеозапись урока готова",
     "recordingHint": "Запись доступна только на платформе",
-    "recordingAction": "Смотреть"
+    "recordingAction": "Смотреть",
+    "boardTitle": "Доска занятия",
+    "boardAction": "Открыть",
+    "boardName": "Доска «{{title}}»"
   },
   "attach": {
     "title": "Прикрепить",
@@ -376,5 +385,19 @@
       "Пт",
       "Сб"
     ]
+  },
+  "directGate": {
+    "studentPendingTitle": "Запрос отправлен",
+    "studentPendingHint": "Вы сможете писать здесь, когда преподаватель примет запрос.",
+    "studentBlockedTitle": "Диалог закрыт",
+    "studentBlockedHint": "Преподаватель закрыл этот диалог. Можно отправить запрос снова.",
+    "resend": "Отправить запрос снова",
+    "teacherPendingTitle": "{{name}} хочет написать вам",
+    "teacherPendingHint": "Примите запрос, чтобы вы оба могли писать в этом чате.",
+    "teacherBlockedTitle": "Диалог заблокирован",
+    "teacherBlockedHint": "Ученик не может вам писать.",
+    "accept": "Принять",
+    "block": "Заблокировать",
+    "unblock": "Разблокировать"
   }
 }

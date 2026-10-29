@@ -161,10 +161,39 @@ export function useUpdateAvatarMutation() {
   });
 }
 
+export function useRemoveAvatarMutation() {
+  return useMutation({
+    mutationFn: async (): Promise<AuthUser> => {
+      const dto = await authApi.removeAvatar();
+      if (dto && typeof dto === "object") return mapUserDto(dto);
+      return mapUserDto(await authApi.getCurrentUser());
+    },
+    onSuccess: (user) => useAuthStore.getState().setUser(user),
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useUpdateSettingsMutation() {
+  return useMutation({
+    mutationFn: async (dto: { theme?: string; text_size?: string; target_band?: number | null; username?: string }) =>
+      mapUserDto(await authApi.updateSettings(dto)),
+    onSuccess: (user) => useAuthStore.getState().setUser(user),
+  });
+}
+
 export function useUploadCertificate() {
   return useMutation({
-    mutationFn: async ({ file, title }: { file: File; title?: string }) =>
-      mapCertificateDto(await authApi.uploadCertificate(file, title)),
+    mutationFn: async ({
+      file,
+      title,
+      issuer,
+      issuedYear,
+    }: {
+      file: File;
+      title?: string;
+      issuer?: string;
+      issuedYear?: number | null;
+    }) => mapCertificateDto(await authApi.uploadCertificate(file, title, issuer, issuedYear)),
     onSuccess: (certificate) => {
       const { user, setUser } = useAuthStore.getState();
       if (user) setUser({ ...user, certificates: [...user.certificates, certificate] });

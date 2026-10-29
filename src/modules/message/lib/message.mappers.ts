@@ -68,6 +68,7 @@ export function mapMessageDto(dto: MessageDto, currentUserId?: string | null): C
     senderName: [sender.first_name, sender.last_name].filter(Boolean).join(" ") || sender.username,
     senderUsername: sender.username,
     senderRole: sender.role,
+    senderAvatarUrl: normalizeMediaUrl(sender.avatar ?? null),
     text: dto.reply_to ? dto.text : legacyReply ? legacyReply[3] : dto.text,
     replyTo: dto.reply_to
       ? { author: dto.reply_to.sender_name ?? "", text: dto.reply_to.text ?? "" }
@@ -139,13 +140,14 @@ export function mapChatMemberDto(dto: ChatMemberDto): ChatMember {
     username: dto.username ?? "",
     role: dto.role ?? "student",
     isOnline: Boolean(dto.is_online),
+    lastSeenAt: dto.last_seen_at ?? null,
     avatarUrl: normalizeMediaUrl(dto.avatar_url ?? null),
   };
 }
 
 export type ParsedSocketEvent =
   | { type: "message"; message: ChatMessage }
-  | { type: "typing"; userId: string; name: string }
+  | { type: "typing"; userId: string; name: string; kind: "text" | "voice" }
   | { type: "removed" }
   | { type: "edited"; messageId: string; text: string; editedAt: string | null }
   | { type: "deleted"; messageIds: string[]; scope: "me" | "everyone" }
@@ -174,7 +176,12 @@ export function parseSocketEvent(raw: unknown, currentUserId?: string | null): P
     case "message":
       return event.message ? { type: "message", message: mapMessageDto(event.message, currentUserId) } : null;
     case "typing":
-      return { type: "typing", userId: String(event.user_id), name: event.name ?? "" };
+      return {
+        type: "typing",
+        userId: String(event.user_id),
+        name: event.name ?? "",
+        kind: payload.kind === "voice" ? "voice" : "text",
+      };
     case "removed":
       return { type: "removed" };
     case "message_edited":

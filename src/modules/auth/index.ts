@@ -35,6 +35,10 @@ export {
   useTeacherStats,
   useTeachers,
   useTwoFactorStatus,
+  useLoginHistoryPage,
+  useAdminCertificates,
+  useVerifyCertificate,
+  useRejectCertificate,
 } from "./model/auth.queries";
 export { describeUserAgent } from "./lib/describe-user-agent";
 export { useAuth, useCurrentUser, useIsAuthenticated } from "./model/use-auth";
@@ -60,6 +64,8 @@ export {
   useUpdateNotificationPrefsMutation,
   useUpdateProfileMutation,
   useUploadCertificate,
+  useRemoveAvatarMutation,
+  useUpdateSettingsMutation,
 } from "./model/auth.mutations";
 export {
   mapCertificateDto,

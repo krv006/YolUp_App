@@ -3,7 +3,7 @@ import { useLocalParticipantPermissions, useRoomContext } from "@livekit/compone
 import { toast } from "sonner";
 import { useBoardChannel, useTeacherSignals, type BoardSocketEvent } from "@/modules/board";
 import { CAMERA_SOURCE, canPublishSource } from "../lib/live-permissions";
-import { useDenyCamera, useGrantCamera, useRequestCamera } from "./live.queries";
+import { useCancelCameraRequest, useDenyCamera, useGrantCamera, useRequestCamera } from "./live.queries";
 
 export interface CameraRequest {
   studentId: string;
@@ -16,6 +16,7 @@ export function useCameraSignals(lessonId: string, isTeacher: boolean) {
   const grant = useGrantCamera(lessonId);
   const deny = useDenyCamera(lessonId);
   const request = useRequestCamera(lessonId);
+  const cancel = useCancelCameraRequest(lessonId);
 
   const [live, setLive] = useState<CameraRequest[]>([]);
   const [answered, setAnswered] = useState<string[]>([]);
@@ -37,7 +38,11 @@ export function useCameraSignals(lessonId: string, isTeacher: boolean) {
   const pendingEnable = useRef(false);
 
   const enableCamera = useCallback(() => {
-    room.localParticipant.setCameraEnabled(true).catch(() => undefined);
+    room.localParticipant.setCameraEnabled(true).catch(() => {
+      toast.error("Kamera yoqilmadi", {
+        description: "Brauzerda kameraga ruxsat berilganini va boshqa ilova kamerani band qilmaganini tekshiring.",
+      });
+    });
   }, [room]);
 
   const { mutate: grantCamera } = grant;
@@ -65,6 +70,12 @@ export function useCameraSignals(lessonId: string, isTeacher: boolean) {
           action: { label: "Ruxsat berish", onClick: () => grantCamera(incoming.studentId) },
           cancel: { label: "Rad etish", onClick: () => denyCamera(incoming.studentId) },
         });
+        return;
+      }
+
+      if (event.type === "camera_request_cancelled") {
+        setAnswered((current) => (current.includes(event.studentId) ? current : [...current, event.studentId]));
+        if (isMine(event.studentId)) setWaiting(false);
         return;
       }
 
@@ -102,11 +113,16 @@ export function useCameraSignals(lessonId: string, isTeacher: boolean) {
     [sendRequest]
   );
 
+  const { mutate: sendCancel } = cancel;
+  const cancelCamera = useCallback(() => sendCancel(undefined, { onSuccess: () => setWaiting(false) }), [sendCancel]);
+
   return {
     requests,
     grant,
     deny,
     requestCamera,
+    cancelCamera,
+    cancelling: cancel.isPending,
     requesting: request.isPending,
     waiting,
   };

@@ -137,8 +137,7 @@
     "recordingStudent": "Recording — audio and video",
     "queueTitle": "You’re in the queue ({{count}})",
     "handRaised": "hand raised",
-    "cancelRequest": "Cancel",
-    "soon": "Coming soon"
+    "cancelRequest": "Cancel"
   },
   "mic": {
     "label": "Microphone",
@@ -170,7 +169,14 @@
     "requestNotifyTitle": "{{name}} wants to share their screen",
     "requestNotifyDescription": "Allow the student to share their screen?",
     "grantAction": "Allow",
-    "denyAction": "Decline"
+    "denyAction": "Decline",
+    "previewSelf": "You are sharing",
+    "previewRemote": "{{name}} is sharing the screen",
+    "surface": {
+      "browser": "Browser tab",
+      "window": "Window",
+      "monitor": "Entire screen"
+    }
   },
   "participantsPanel": {
     "micRequestsAria": "Students requesting the microphone",

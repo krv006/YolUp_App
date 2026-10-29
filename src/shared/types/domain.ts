@@ -15,6 +15,7 @@ export interface DomainUser {
   phone?: string | null;
   inviteCode?: string | null;
   avatarTone?: string;
+  avatarUrl?: string | null;
   status?: string;
 }
 
@@ -40,11 +41,14 @@ export interface Conversation {
   directStatus: DirectStatus | null;
   lastMessage: string;
   lastSender: string | null;
+  lastSenderId?: string | null;
+  lastMessageType?: string | null;
   updatedAt: string;
   unreadCount: number;
   status: PresenceStatus;
   typing: boolean;
   typingName?: string | null;
+  typingKind?: "text" | "voice";
   avatarTone: string;
   memberCount: number;
   imageUrl: string | null;
@@ -95,6 +99,12 @@ export interface MessageAttachment {
   kind?: "voice" | "image" | "file";
 }
 
+export interface RoomAttachment extends MessageAttachment {
+  thumbnailUrl: string | null;
+  senderName: string;
+  createdAt: string;
+}
+
 export interface MessageForwardSource {
   messageId: string;
   authorId: string;
@@ -124,6 +134,7 @@ export interface ChatMember {
   username: string;
   role: string;
   isOnline: boolean;
+  lastSeenAt: string | null;
   avatarUrl: string | null;
 }
 
@@ -134,6 +145,7 @@ export interface ChatMessage {
   senderName: string;
   senderUsername: string;
   senderRole?: string;
+  senderAvatarUrl?: string | null;
   text: string;
   replyTo?: MessageReply;
   type: string;
@@ -219,6 +231,7 @@ export interface LessonRecording {
   chapters: LessonRecordingChapter[];
   boardPreviews: BoardPagePreview[];
   pdfUrl: string | null;
+  thumbnailUrl: string | null;
 }
 
 export interface Lesson {
@@ -246,6 +259,11 @@ export interface Lesson {
   joinedCount: number | null;
   myRating: number | null;
   attended: boolean | null;
+  recordingActive: boolean;
+  recordingStartedAt: string | null;
+  attendanceOpensAt: string | null;
+  hasReminder: boolean;
+  reminderMinutes: number | null;
   assignment: { id: string; title: string } | null;
   recurrence: LessonRecurrence | null;
 }
@@ -332,6 +350,16 @@ export interface Submission {
   gradeValue: number | null;
   shareWithParent: boolean;
   resubmitComment: string;
+  comment: string;
+  teacherComment: string;
+  files: SubmissionFile[];
+}
+
+export interface SubmissionFile {
+  name: string;
+  size: number | null;
+  mimeType: string;
+  index: number;
 }
 
 export interface AssignmentStats {
@@ -362,6 +390,9 @@ export interface Assignment {
   status: AssignmentStatus;
   announceInChat: boolean;
   allowLate: boolean;
+  aiCheck: boolean;
+  attachmentSize: number | null;
+  lessonStartsAt: string | null;
   grading: GradingScale;
   maxScore: number;
   aiGroupSummary: AiGroupSummary | null;
@@ -549,6 +580,9 @@ export interface ExamSummary {
   totalMinutes: number;
   state: Exclude<ExamState, "submitted">;
   serverNow: string;
+  hasReminder: boolean;
+  reminderMinutes: number | null;
+  myTotal: { score: number | null; max: number | null; label: string } | null;
 }
 
 export interface ExamDetail extends ExamSummary {
@@ -611,6 +645,7 @@ export interface ExamStudentResult {
   studentId: string;
   studentName: string;
   username: string;
+  avatarUrl: string | null;
   participated: boolean;
   finishedAt: string | null;
   approximate: boolean;
@@ -684,10 +719,47 @@ export interface ExamStudentResultDetail extends ExamStudentResult {
   writingAi: ExamWritingAi | null;
 }
 
+export type MaterialKind = "pdf" | "doc" | "audio" | "video" | "image" | "other";
+
+export interface Material {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  title: string;
+  name: string;
+  size: number | null;
+  kind: MaterialKind;
+  mimeType: string;
+  uploadedBy: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface PracticeQuestion {
+  text: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+export interface PracticeSet {
+  topic: string;
+  questions: PracticeQuestion[];
+  used: number | null;
+  limit: number | null;
+}
+
+export interface AiExplanation {
+  explanation: string;
+  tip: string;
+  used: number | null;
+  limit: number | null;
+}
+
 export interface ExamResults {
   hidden: boolean;
   engine: string;
   state: string;
+  groupAverage: number | null;
   results: ExamStudentResult[];
 }
 
@@ -710,6 +782,7 @@ export interface QuizSummary {
 }
 
 export interface QuizDetail extends QuizSummary {
+  groupAvgPercentage: number | null;
   groups: QuizGroup[];
   questions: QuizQuestion[];
 }
@@ -913,6 +986,17 @@ export interface StudentAnalytics {
   attemptCount: number;
   avgPercentage: number | null;
   recentAttempts: StudentAttemptSummary[];
+  overview: StudentOverview | null;
+}
+
+export interface StudentOverview {
+  avgGrade: number | null;
+  gradesCount: number;
+  attendanceRateMonth: number | null;
+  lessonsAttended: number;
+  lessonsMissed: number;
+  homeworkOnTimeRate: number | null;
+  courses: Array<{ courseId: string; courseTitle: string; testAvg: number | null; gradeAvg: number | null }>;
 }
 
 export interface TeacherCourseAnalytics {

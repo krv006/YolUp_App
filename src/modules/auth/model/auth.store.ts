@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { AppError, announceSessionChange, refreshTokenManager, tokenStorage } from "@/shared/api";
 import type { TokenPair } from "@/shared/api";
-import { SUPPORTED_LANGUAGES, useLanguageStore, type AppLanguage } from "@/shared/model";
+import { SUPPORTED_LANGUAGES, useLanguageStore, useTextSizeStore, type AppLanguage } from "@/shared/model";
+import { useAppearanceStore } from "@/shared/model/theme.store";
 import type { AuthStatus, AuthUser, LoginCredentials } from "@/shared/types";
 import { unregisterPushDevice } from "@/modules/notification/model/push-device";
 import { authApi } from "../api/auth.api";
@@ -22,6 +23,15 @@ import { configureAuthRefresh } from "../lib/auth-session";
  * tilni qo'llayotganda uni qaytarib serverga yubormaslik uchun bayroq.
  */
 let suppressLanguagePush = false;
+
+/*
+ * 🟡 Vebdagi `useThemeStore` mobilda `useAppearanceStore` (mavzu, urg'u rangi,
+ * xabar o'lchami bir do'konda).
+ */
+function syncPreferencesFromServer(user: AuthUser) {
+  if (user.theme && useAppearanceStore.getState().mode !== user.theme) useAppearanceStore.getState().setMode(user.theme);
+  if (user.textSize && useTextSizeStore.getState().size !== user.textSize) useTextSizeStore.getState().setSize(user.textSize);
+}
 
 function syncLanguageFromServer(preferred: string) {
   if (!SUPPORTED_LANGUAGES.includes(preferred as AppLanguage)) return;
@@ -141,6 +151,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         const user = mapUserDto(await authApi.getCurrentUser());
         set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
         syncLanguageFromServer(user.preferredLanguage);
+        syncPreferencesFromServer(user);
       } catch (error) {
         const appError = toAppError(error);
         // 401 — token yaroqsiz: sessiyani jimgina tozalaymiz, xato ekrani chiqarmaymiz.
@@ -174,6 +185,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (seq !== sessionSeq) return { status: "authenticated", user };
       set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
       syncLanguageFromServer(user.preferredLanguage);
+      syncPreferencesFromServer(user);
       return { status: "authenticated", user };
     } catch (error) {
       endSession();
@@ -192,6 +204,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (seq !== sessionSeq) return user;
       set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
       syncLanguageFromServer(user.preferredLanguage);
+      syncPreferencesFromServer(user);
       return user;
     } catch (error) {
       // Yarim ochilgan sessiya qolmasin.
@@ -209,6 +222,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       if (seq !== sessionSeq) return user;
       set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
       syncLanguageFromServer(user.preferredLanguage);
+      syncPreferencesFromServer(user);
       return user;
     } catch (error) {
       endSession();
@@ -232,6 +246,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     beginSession(tokens, persistent);
     set({ user, status: AUTH_STATUS.AUTHENTICATED, error: null });
     syncLanguageFromServer(user.preferredLanguage);
+    syncPreferencesFromServer(user);
     return user;
   },
 

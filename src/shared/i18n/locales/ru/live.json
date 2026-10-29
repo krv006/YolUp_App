@@ -137,8 +137,7 @@
     "recordingStudent": "Идёт запись — аудио и видео",
     "queueTitle": "Вы в очереди ({{count}})",
     "handRaised": "рука поднята",
-    "cancelRequest": "Отменить",
-    "soon": "Скоро"
+    "cancelRequest": "Отменить"
   },
   "mic": {
     "label": "Микрофон",
@@ -170,7 +169,14 @@
     "requestNotifyTitle": "{{name}} хочет показать свой экран",
     "requestNotifyDescription": "Разрешить ученику показать экран?",
     "grantAction": "Разрешить",
-    "denyAction": "Отклонить"
+    "denyAction": "Отклонить",
+    "previewSelf": "Вы показываете",
+    "previewRemote": "{{name}} показывает экран",
+    "surface": {
+      "browser": "Вкладка браузера",
+      "window": "Окно",
+      "monitor": "Весь экран"
+    }
   },
   "participantsPanel": {
     "micRequestsAria": "Ученики, запросившие микрофон",

@@ -43,6 +43,11 @@ export function notificationGroupKey(value: string): NotificationGroupKey {
   return "earlier";
 }
 
+export function notificationContent(item: { html: string; title?: string; body?: string }): { title: string; body: string } {
+  if (item.title) return { title: item.title, body: item.body ?? "" };
+  return notificationLines(item.html);
+}
+
 export function notificationLines(html: string): { title: string; body: string } {
   // Mobil: `DOMParser` RN'da yo'q — har qator `htmlToPlainText` bilan matnga aylanadi.
   const lines = html

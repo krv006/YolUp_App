@@ -215,7 +215,8 @@
     "mobileReadyNote": "We'll post to the chat as soon as it's ready.",
     "joinedYou": "You attended",
     "minutesShort": "{{count}} min",
-    "download": "Download"
+    "download": "Download",
+    "volume": "Volume"
   },
   "schedule": {
     "now": "NOW",
@@ -332,7 +333,6 @@
     "attendanceStat": "Attendance",
     "emptyStudentHint": "Lessons appear here once your teacher schedules them.",
     "remind": "Set reminder",
-    "soon": "Coming soon",
     "recording": "Recording",
     "rate": "Rate",
     "myRating": "Your rating · {{value}}",
@@ -344,7 +344,10 @@
       "cancelled": "Cancelled"
     },
     "dayToday": "Today",
-    "dayTomorrow": "Tomorrow"
+    "dayTomorrow": "Tomorrow",
+    "reminderOn": "Reminder · {{count}} min before",
+    "reminderSet": "We'll remind you {{count}} minutes before the lesson",
+    "reminderCleared": "Reminder removed"
   },
   "scheduleDialog": {
     "title": "New lesson",
@@ -357,8 +360,6 @@
     "date": "Date",
     "start": "Starts",
     "duration": "Duration (min)",
-    "quiz": "Attach a quiz",
-    "noQuiz": "No quiz attached",
     "submit": "Save the lesson",
     "mobileDescription": "Pick a group and set the time",
     "weeksValue": "{{count}} weeks",

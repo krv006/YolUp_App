@@ -10,8 +10,7 @@ import {
 import { DsText, useDs } from "@/shared/ui";
 import { AttendanceSection } from "./attendance-section";
 import { LessonsPanel } from "./lessons-panel";
-import { LessonsSection } from "./lessons-section";
-import { StudentAssignments } from "./student-assignments";
+import { StudentGroupSection } from "@/widgets/student-group-workspace/student-group-workspace";
 import { TeacherAssignments } from "./teacher-assignments";
 
 export type GroupTab = "chat" | "lessons" | "assignments" | "attendance";
@@ -96,8 +95,8 @@ export function GroupTabsRow({
  * o'zida (alohida marshrut emas: bo'limlar orasida o'tish tez bo'lsin va
  * suhbat soketi uzilmasin). Ochilmagan bo'lim so'rov yubormaydi.
  *
- * O'qituvchida yangi dizayn (`LessonsPanel`, `TeacherAssignments`,
- * `AttendanceSection`); o'quvchi bo'limlari 6-bosqichda.
+ * O'qituvchida `LessonsPanel`, `TeacherAssignments`, `AttendanceSection`;
+ * o'quvchida veb `student-group-workspace.tsx` dagi bo'limlar.
  */
 export function GroupWorkspaceSection({
   tab,
@@ -118,14 +117,14 @@ export function GroupWorkspaceSection({
         isTeacher ? (
           <LessonsPanel courseId={courseId} studentCount={studentCount} />
         ) : (
-          <LessonsSection courseId={courseId} />
+          <StudentGroupSection tab="lessons" courseId={courseId} groupImage={groupImage} />
         )
       ) : null}
       {tab === "assignments" ? (
         isTeacher ? (
           <TeacherAssignments courseId={courseId} groupImage={groupImage} />
         ) : (
-          <StudentAssignments courseId={courseId} />
+          <StudentGroupSection tab="assignments" courseId={courseId} groupImage={groupImage} />
         )
       ) : null}
       {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}

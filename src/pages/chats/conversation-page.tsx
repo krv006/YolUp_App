@@ -11,14 +11,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { useCourse } from "@/modules/course";
+import { useAssignments } from "@/modules/homework";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
 import { GroupInfoScreen } from "@/modules/conversation/ui/group-info-screen";
-import { LiveLessonBar, useLiveLessons } from "@/modules/lesson";
 import { PinnedMessageBar, useChat, useChatUiStore } from "@/modules/message";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
 import { MessageList } from "@/modules/message/ui/message-list";
 import { useActiveVoiceRoom, useVoiceUiStore, VoiceRoomBar } from "@/modules/voice";
+import { ROUTES } from "@/shared/config";
 import type { ChatMessage, ConversationRole, SendMessagePayload } from "@/shared/types";
 import { DsGradient, DsText, dsRadius, Icon, Screen, ScreenError, ScreenLoading, toast, useDs } from "@/shared/ui";
 import { ForwardDialog } from "@/widgets/forward-dialog";
@@ -76,12 +77,10 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const voice = useActiveVoiceRoom(courseId);
   const openVoiceCreate = useVoiceUiStore((state) => state.setCreateOpen);
 
-  /* O'quvchida dars ketayotgan bo'lsa qo'shilish chizig'i (o'quvchi ekranlari 6-bosqichda). */
-  const liveLessons = useLiveLessons(role === "student" && Boolean(user)).data;
-  const liveLesson = useMemo(
-    () => (courseId ? (liveLessons ?? []).find((lesson) => lesson.courseId === courseId) : undefined),
-    [courseId, liveLessons]
-  );
+  /* O'quvchida xabardagi vazifa kartasi topshirilganini ko'rsatadi — veb `student-group-workspace.tsx` dagi `submittedById`. */
+  const studentGroup = role === "student" && conversation?.type === "group" && Boolean(courseId);
+  const assignments = useAssignments(courseId, studentGroup);
+  const submittedById = useMemo(() => new Map((assignments.data ?? []).map((item) => [item.id, Boolean(item.mySubmission)])), [assignments.data]);
 
   const lastMessageId = chat.messages.data?.[chat.messages.data.length - 1]?.id ?? null;
   const readRef = useRef<string | null>(null);
@@ -182,10 +181,6 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
         onUnpin={(messageId) => chat.pinMessage.mutate({ messageId, pinned: true })}
       />
 
-      {role === "student" && liveLesson ? (
-        <LiveLessonBar lesson={liveLesson} onJoin={() => router.push(`/live/${liveLesson.id}` as never)} />
-      ) : null}
-
       {group ? <VoiceRoomBar courseId={courseId} courseTitle={conversation.title} hideIdle /> : null}
       {group ? <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} compact={selectionMode} /> : null}
 
@@ -194,7 +189,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
           <View style={[styles.banner, { backgroundColor: ds.c["brand-subtle"] }]}>
             <Icon name="bolt" size={18} color={ds.c.brand} />
             <DsText v="body-sm" c="brand" numberOfLines={1} style={styles.grow}>
-              {tg("announcementBanner")}
+              {role === "student" ? t("list.announcementLocked") : tg("announcementBanner")}
             </DsText>
           </View>
         ) : (
@@ -230,8 +225,10 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
             onPin={(message, pinned) => chat.pinMessage.mutate({ messageId: message.id, pinned })}
             onForward={setForwardTarget}
             onBulkDelete={(messageIds, scope) => chat.deleteMessages.mutate({ messageIds, scope })}
+            onOpenAssignment={studentGroup ? (id) => router.push(ROUTES.student.homeworkItem(id) as never) : undefined}
+            assignmentSubmitted={studentGroup ? (id) => submittedById.get(id) ?? null : undefined}
           />
-          {selectionMode ? null : (
+          {selectionMode || (role === "student" && group && conversation.announcementOnly) ? null : (
             <MessageComposer
               key={editing?.id ?? "compose"}
               onSend={send}

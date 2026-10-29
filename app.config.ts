@@ -168,6 +168,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
              * Talab: expo >= 57.0.29, expo-build-properties >= 57.0.22.
              */
             enableSceneSupport: true,
+            /*
+             * Expo modullari MANBADAN yig'iladi. Tayyor XCFramework'lar
+             * Swift 6.3.1 bilan kompilyatsiya qilingan, Xcode 27.1 esa
+             * Swift 6.4 — kompilyator ularning `.swiftinterface` ini o'qiy
+             * olmaydi ("cannot find type '__ObjC::expo' in scope") va iOS
+             * build yiqiladi. Manbadan yig'ish sekinroq, lekin istalgan
+             * Xcode bilan ishlaydi.
+             */
+            usePrecompiledModules: false,
           },
         },
       ],

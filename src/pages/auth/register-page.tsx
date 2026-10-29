@@ -17,7 +17,7 @@ import {
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import type { AuthUser } from "@/shared/types";
-import { DsText, dsRadius, useDs } from "@/shared/ui";
+import { DsText, dsRadius, dsShadowHidden, useDs } from "@/shared/ui";
 
 const ROLES = ["teacher", "parent", "student"] as const;
 
@@ -128,7 +128,7 @@ export function RegisterPage() {
                     accessibilityRole="radio"
                     accessibilityState={{ checked: active }}
                     onPress={() => field.onChange(role)}
-                    style={[styles.role, active && { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
+                    style={[styles.role, { backgroundColor: active ? ds.c.surface : "transparent", boxShadow: active ? ds.shadow.sm : dsShadowHidden(ds.shadow.sm) }]}
                   >
                     <DsText v="label-strong" c={active ? "ink" : "ink-secondary"}>
                       {t(`register.role.${role}`)}

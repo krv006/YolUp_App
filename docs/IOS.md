@@ -121,9 +121,9 @@ Program ichida beriladi. Ya'ni $99 to'lanmaguncha iOS'da push yo'q.
 
 ---
 
-## Yo'lda uchragan ikki to'siq
+## Yo'lda uchragan to'siqlar
 
-Ikkalasi ham kodda emas, muhitda edi. Qaytarilmasligi uchun yozib
+Uchalasi ham kodda emas, muhitda edi. Qaytarilmasligi uchun yozib
 qo'yildi.
 
 ### 1. Skia'ning simulyator kutubxonasi yetishmasdi
@@ -189,6 +189,29 @@ Natijada `Info.plist` ga quyidagi tushadi:
 UIApplicationSceneManifest
   UISceneDelegateClassName = EXExpoAppSceneDelegate
 ```
+
+### 3. Xcode 27.1 — Swift 6.4 (2026-10-29)
+
+Xcode 27.1 ga yangilangach build yiqildi:
+
+```
+cannot find type '__ObjC::expo' in scope
+failed to build module 'ExpoModulesCore'; this SDK is not supported by
+the compiler (the SDK is built with 'Apple Swift version 6.3.1', while
+this compiler is 'Apple Swift version 6.4')
+```
+
+Ikki sabab bor edi:
+
+1. Expo modullarining tayyor XCFramework'lari Swift 6.3.1 bilan
+   kompilyatsiya qilingan — Swift 6.4 ularni o'qiy olmaydi.
+   Yechim: `app.config.ts` da `ios.usePrecompiledModules: false` —
+   modullar manbadan yig'iladi (sekinroq, lekin istalgan Xcode bilan).
+2. `expo-modules-jsi` 57.1.2 ning `.swiftinterface` ida C++ turi
+   kengaytmasi qolib ketgan, Swift 6.4 uni rad etadi. 57.1.3 da
+   tuzatilgan — SDK 57 patch'lari yana ko'tarildi
+   (`expo` 57.0.31, `expo-modules-core` 57.0.24, `expo-modules-jsi`
+   57.1.3).
 
 ---
 

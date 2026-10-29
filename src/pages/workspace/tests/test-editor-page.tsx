@@ -29,6 +29,7 @@ import {
   DsGradient,
   DsText,
   dsRadius,
+  dsShadowHidden,
   Icon,
   MobileActionBar,
   MobileButton,
@@ -224,7 +225,7 @@ export function TestEditorPage() {
                 accessibilityRole="tab"
                 accessibilityState={{ selected: tab === item }}
                 onPress={() => setTab(item)}
-                style={[styles.tab, tab === item && { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
+                style={[styles.tab, { backgroundColor: tab === item ? ds.c.surface : "transparent", boxShadow: tab === item ? ds.shadow.sm : dsShadowHidden(ds.shadow.sm) }]}
               >
                 <DsText v="body-sm" w="500" c={tab === item ? "ink" : "ink-secondary"}>
                   {t(`editor.mobile.tabs.${item}`)}

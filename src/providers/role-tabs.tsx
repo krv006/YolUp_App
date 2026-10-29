@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import { useConversations } from "@/modules/conversation";
-import { DsText, Icon, radius, Text, useDs, useTheme, type IconName } from "@/shared/ui";
+import { dsShadowHidden, DsText, Icon, radius, Text, useDs, useTheme, type IconName } from "@/shared/ui";
 
 export interface TabDefinition {
   /** Marshrut fayli nomi: `chats`, `schedule`, … */
@@ -358,7 +358,8 @@ function FloatingTabBar({
             <View
               style={[
                 floating.icon,
-                active && { backgroundColor: ds.c.surface, boxShadow: "0 2px 12px rgba(69, 103, 245, 0.2)" },
+                // Soya doim turadi, faol emasida shaffof — izohi `dsShadowHidden` da.
+                { backgroundColor: active ? ds.c.surface : "transparent", boxShadow: active ? ACTIVE_TAB_SHADOW : dsShadowHidden(ACTIVE_TAB_SHADOW) },
               ]}
             >
               <Icon name={tab.iconName} size={27} color={active ? ds.c.brand : ds.c.ink} />
@@ -377,6 +378,9 @@ function FloatingTabBar({
     </View>
   );
 }
+
+/** Faol tab ostidagi ko'kish soya (`shadow-[0_2px_12px_rgba(69,103,245,0.2)]`). */
+const ACTIVE_TAB_SHADOW = "0 2px 12px rgba(69, 103, 245, 0.2)";
 
 const floating = StyleSheet.create({
   bar: {

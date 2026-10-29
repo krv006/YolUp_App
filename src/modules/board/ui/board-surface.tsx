@@ -6,7 +6,7 @@ import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useKeepAwake } from "expo-keep-awake";
 import { Eye, Pencil, Users, Wifi } from "lucide-react-native";
 import { useCourseStudents } from "@/modules/course";
-import { DsText, dsRadius, Icon, ThemeScope, toast, useDs } from "@/shared/ui";
+import { DsText, dsRadius, dsShadowHidden, Icon, ThemeScope, toast, useDs } from "@/shared/ui";
 import type { BoardSource, FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
 import { BOARD_TEXT_SIZE, MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
 import { FLOW_MARGIN, nextTextPoint, strokeSpan } from "../lib/board-flow";
@@ -370,7 +370,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
                       setDraftLines([]);
                       setPlacement({ ...placement, tool: kind });
                     }}
-                    style={[styles.tab, on && { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
+                    style={[styles.tab, { backgroundColor: on ? ds.c.surface : "transparent", boxShadow: on ? ds.shadow.sm : dsShadowHidden(ds.shadow.sm) }]}
                   >
                     <DsText v="body-sm" w={on ? "600" : "500"} c={on ? "ink" : "ink-secondary"}>
                       {kind === "math" ? t("inline.formula") : t("inline.text")}

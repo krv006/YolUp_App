@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
+import { useEventListener } from "expo";
 import { useAudioPlayer, useAudioPlayerStatus, type AudioSource } from "expo-audio";
 import { Pause, Play } from "lucide-react-native";
 import { tokenStorage } from "@/shared/api";
@@ -49,6 +50,17 @@ export function VoiceMessage({
   const player = useAudioPlayer(null);
   const status = useAudioPlayerStatus(player);
   const [loaded, setLoaded] = useState(false);
+
+  /*
+   * Ijro xatosi (masalan iOS: vebdagi Chrome yozgan WebM/Opus — AVFoundation
+   * uni ocholmaydi, "Cannot Open"). Usiz tugma jim qolardi. Xato `status`
+   * ga `error` bo'lib keladi (turida yo'q); manba qayta bosilganda yana beriladi.
+   */
+  useEventListener(player, "playbackStatusUpdate", (update) => {
+    if (!(update as { error?: string }).error) return;
+    toast.error(t("attachment.voiceFailed"));
+    setLoaded(false);
+  });
 
   function toggle() {
     try {

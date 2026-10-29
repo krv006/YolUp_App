@@ -1,20 +1,8 @@
 /**
  * `student` modulining mobil barrel'i.
  *
- * Veb `src/modules/student/index.ts` dan generatsiya qilingan (scripts/port-barrels.mjs):
- * domen qatlami to'liq, `ui/` eksportlari olib tashlangan — mobil UI alohida
- * yoziladi va o'z fayllaridan import qilinadi.
+ * Vebda modul faqat `StudentEnrollmentDialog` dan iborat — mobilda uning
+ * o'rnida pastdan chiquvchi oyna.
  */
-export { studentApi } from "./api/student.api";
-export type {
-  StudentAssignmentPreview,
-  StudentDashboard,
-  StudentMetric,
-  StudentNextLesson,
-} from "./api/student.dto";
-export { studentKeys, useStudentDashboard } from "./model/student.queries";
-
-// --- Mobil UI ---
 export { StudentEnrollmentSheet } from "./ui/student-enrollment-sheet";
 export type { StudentEnrollmentSheetProps } from "./ui/student-enrollment-sheet";
-

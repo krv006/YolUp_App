@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ExamRunner, useExam, useExamCurrent } from "@/modules/exam";
 import { NotificationBell } from "@/modules/notification";
+import { ROUTES } from "@/shared/config";
 import { AppBar, AppBarAction, Screen, ScreenError, ScreenLoading } from "@/shared/ui";
 
 /** Imtihonni topshirish sahifasi — veb `pages/student/exams/student-exam-page.tsx` porti. */
@@ -13,8 +14,8 @@ export function StudentExamPage() {
   const { t: tw } = useTranslation("workspace");
   // Vebda bu sahifa ham umumiy tepa panel ostida ochiladi.
   const appBar = (
-    <AppBar title={tn("titles.workspace")} back={{ label: tw("searchBack"), onPress: () => router.replace("/student/exams") }}>
-      <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push("/student/search")} />
+    <AppBar title={tn("titles.workspace")} back={{ label: tw("searchBack"), onPress: () => router.replace(ROUTES.student.mockExams as never) }}>
+      <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push(ROUTES.student.search as never)} />
       <NotificationBell />
     </AppBar>
   );
@@ -48,7 +49,7 @@ export function StudentExamPage() {
         title={exam.data?.title ?? ""}
         current={current.data}
         onRefresh={() => void current.refetch()}
-        onExit={() => router.replace("/student/exams")}
+        onExit={() => router.replace(ROUTES.student.mockExams as never)}
       />
     </Screen>
   );

@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef } from "react";
-import { useRouter } from "expo-router";
+import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import { useIsAuthenticated } from "@/modules/auth";
 import { useNotificationFeed, type NotificationLink } from "@/modules/notification";
+import { useOpenNotificationLink } from "@/widgets/notification-link";
 import { usePushRegistration } from "./use-push-registration";
 
 /**
@@ -18,27 +18,20 @@ import { usePushRegistration } from "./use-push-registration";
  * olardi.
  */
 export function NotificationBridge() {
-  const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
-
-  const openLink = useCallback(
-    (link: NotificationLink) => {
-      if (link.type === "quiz") router.push(`/student/quizzes?quiz=${link.id}`);
-      else if (link.type === "assignment") router.push("/student/chats");
-    // Topshiriq (`homework_pending_review` / `homework_reviewed`) bildirishnomasi:
-    // natija guruh chatining "Vazifalar" bo'limida ochiladi.
-    else if (link.type === "submission") router.push("/student/chats");
-    else if (link.type === "exam") router.push(`/student/exams/${link.id}`);
-      else if (link.type === "lesson") router.push(`/live/${link.id}`);
-      else if (link.type === "recording") router.push(`/recordings/${link.id}`);
-    },
-    [router]
-  );
-
-  useNotificationFeed(isAuthenticated, openLink);
   usePushRegistration(isAuthenticated);
-  usePushResponse(isAuthenticated, openLink);
+  return isAuthenticated ? <NotificationLinks /> : null;
+}
 
+/**
+ * Kanal va push bosilishi — faqat kirgandan keyin chiziladi: havola ochuvchi
+ * (`widgets/notification-link`, rol bo'yicha sahifa) suhbatlar ro'yxatini
+ * so'raydi, tokensiz u 401 olardi.
+ */
+function NotificationLinks() {
+  const openLink = useOpenNotificationLink();
+  useNotificationFeed(true, openLink);
+  usePushResponse(true, openLink);
   return null;
 }
 

@@ -1,10 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useMyAnalytics } from "@/modules/analytics";
-import { useAuth, useMyRatings } from "@/modules/auth";
+import { useAuth, useIsStudent, useMyRatings } from "@/modules/auth";
 import { formatDayTime } from "@/shared/lib";
 import { Avatar, DsText, dsRadius, Icon, MobileEmptyCard, MobileListSkeleton, useDs } from "@/shared/ui";
 import { ProfileSubPage } from "./profile-shell";
+import { StudentRatings } from "./student-ratings";
 
 function Stars({ value, size }: { value: number; size: number }) {
   const ds = useDs();
@@ -28,13 +29,16 @@ function relativeDay(value: string, labels: { today: string; yesterday: string }
   return formatDayTime(value);
 }
 
-/**
- * Baholarim (o'qituvchi) — veb `my-ratings-page.tsx` dagi `TeacherRatings`
- * (tor ekran): o'rtacha baho, yulduzlar va baholar soni, yulduzlar bo'yicha
- * taqsimot; so'nggi izohlar. O'quvchining baholari (`student-ratings.tsx`)
- * 6-bosqichda.
- */
+/** Mening baholarim — veb `my-ratings-page.tsx`: o'quvchida o'qituvchilar bergan baholar. */
 export function MyRatingsPage() {
+  return useIsStudent() ? <StudentRatings /> : <TeacherRatings />;
+}
+
+/**
+ * O'qituvchining baholari — veb `TeacherRatings` (tor ekran): o'rtacha baho,
+ * yulduzlar va baholar soni, yulduzlar bo'yicha taqsimot; so'nggi izohlar.
+ */
+function TeacherRatings() {
   const { t } = useTranslation("account");
   const ds = useDs();
   const { user } = useAuth();

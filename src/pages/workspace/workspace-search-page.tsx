@@ -43,7 +43,6 @@ export function WorkspaceSearchPage() {
   const insets = useSafeAreaInsets();
   const isStudent = useIsStudent();
   const routes = useRoleRoutes();
-  const prefix = isStudent ? "/student" : "/teacher";
 
   const [term, setTerm] = useState("");
   const [focused, setFocused] = useState(false);
@@ -110,7 +109,7 @@ export function WorkspaceSearchPage() {
         <MobilePageHeader
           title={t("searchTitle")}
           backLabel={t("searchBack")}
-          onBack={() => (router.canGoBack() ? router.back() : router.replace(`${prefix}/workspace` as never))}
+          onBack={() => (router.canGoBack() ? router.back() : router.replace((isStudent ? ROUTES.student.workspace : ROUTES.teacher.workspace) as never))}
         />
 
         {/* `mt-5 h-12 rounded-full border-[1.5px] bg-surface px-4.5 gap-3` */}
@@ -196,7 +195,7 @@ export function WorkspaceSearchPage() {
                 onPress={() =>
                   go(
                     isStudent
-                      ? `${prefix}/quizzes?quiz=${quiz.id}`
+                      ? ROUTES.student.test(quiz.id)
                       : quiz.status === "draft"
                         ? ROUTES.teacher.test(quiz.id)
                         : ROUTES.teacher.testResults(quiz.id)

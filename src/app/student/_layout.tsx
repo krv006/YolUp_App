@@ -1,52 +1,34 @@
-/*
- * Bo'limlar veb yon panelidagi kabi: Chat, Kalendar, Workspace
- * (`nav.json:rail`) — ustiga Reyting va Profil.
- *
- * TEST ALOHIDA TAB EMAS. Veb'da ham u Workspace ichida, Tahlil va Mock
- * Test bilan birga. Ilgari mobilda "Test" tab edi va Mock Test hech
- * qayerdan ochilmasdi — marshruti bor, havolasi yo'q edi.
- *
- * "AI" o'quvchida umuman ko'rsatilmaydi (veb ham shunday:
- * `workspace-page.tsx` da `hiddenForStudent`), lekin marshrut saqlanadi.
- *
- * REYTING OLIB TASHLANDI — tab ham, marshrut ham. Vebda u nav'da umuman
- * yo'q (`/student/grades` marshruti bor, lekin unga havola berilmaydi),
- * loyiha egasi esa uni mobilda ham kerak emas dedi. Hisobotning o'zi
- * qoladi: ota-ona farzandining natijalarini `parent-grades-page.tsx`
- * orqali ko'radi.
- */
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
 import { RoleTabs } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
 import { NewConversationHost } from "@/widgets/new-conversation";
 
+/**
+ * O'quvchining suzuvchi paneli — veb `widgets/mobile-tab-bar` (o'qituvchidagi
+ * bilan bir xil): Workspace, Jadval, markazda Asosiy, Chat, Profil.
+ * Testlar, mock, vazifalar va tahlil Workspace ichida (`workspace/...`).
+ */
 const TABS = [
-  { name: "chats", labelKey: "tabs.chats", iconName: "nav-chat" },
-  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar" },
   {
     name: "workspace",
     labelKey: "tabs.workspace",
     iconName: "nav-workspace",
-    /*
-     * Ish maydonidan ochiladigan hamma narsa shu yerda sanaladi — aks
-     * holda bo'lim ichida panelda birorta tab ajratilmay qoladi va
-     * foydalanuvchi qayerdan kirganini bilmaydi.
-     */
-    owns: ["quizzes", "exams", "ai", "analytics", "search", "notifications", "homework-board"],
+    owns: ["search", "notifications"],
+    // Pastki bo'shliq `workspace/_layout.tsx` da — faqat bosh sahifada.
   },
-  {
-    name: "profile",
-    labelKey: "tabs.profile",
-    iconName: "nav-profile",
-    owns: ["profile-personal", "profile-account", "profile-system"],
-  },
+  // Jadval suzuvchi panel ostida aylanadi — bo'shliq sahifaning o'zida (`pb-32`).
+  { name: "schedule", labelKey: "tabs.schedule", iconName: "nav-calendar" },
+  { name: "dashboard", labelKey: "tabs.home", iconName: "home", center: true },
+  { name: "chats", labelKey: "tabs.chat", iconName: "nav-chat", unreadChats: true },
+  // Pastki bo'shliq `profile/_layout.tsx` da — faqat bosh sahifada.
+  { name: "profile", labelKey: "tabs.profile", iconName: "nav-profile" },
 ] as const;
 
 export default function StudentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.STUDENT]}>
-        <RoleTabs tabs={TABS} hidden={["dashboard", "ai", "quizzes", "exams", "analytics", "search", "profile-personal", "profile-account", "profile-system", "notifications", "homework-board"]} />
+        <RoleTabs variant="floating" tabs={TABS} hidden={["search", "notifications"]} />
         <NewConversationHost role="student" />
       </RoleRoute>
     </ProtectedRoute>

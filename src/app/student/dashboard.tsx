@@ -1,6 +1,6 @@
-import { Redirect } from "expo-router";
+import { StudentDashboardPage } from "@/pages/student/dashboard/student-dashboard-page";
 
-/** Veb'dagi kabi: bosh sahifa suhbatlarga yo'naltiradi (app-router.tsx). */
+/** O'quvchining bosh sahifasi — veb `/student/dashboard`. */
 export default function StudentDashboardRoute() {
-  return <Redirect href="/student/chats" />;
+  return <StudentDashboardPage />;
 }

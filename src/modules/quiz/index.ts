@@ -81,6 +81,10 @@ export { quizErrorMessage } from "./lib/quiz-errors";
 
 // --- Mobil UI ---
 export { QuestionAnswerInput, QuestionPrompt } from "./ui/question-answer-input";
+export { QuizGroupPanel } from "./ui/quiz-group-panel";
+export { MathText } from "./ui/math-text";
+export type { MathTextProps } from "./ui/math-text";
+export type { QuizGroupPanelProps } from "./ui/quiz-group-panel";
 export type { QuestionAnswerInputProps } from "./ui/question-answer-input";
 
 export { Choice } from "./ui/question-answer-input";
@@ -102,6 +106,4 @@ export { QuestionEditor } from "./ui/question-editor";
 export type { QuestionEditorProps } from "./ui/question-editor";
 export { QuestionGroupEditor } from "./ui/question-group-editor";
 export type { QuestionGroupEditorProps } from "./ui/question-group-editor";
-export { QuizAttemptSheet } from "./ui/quiz-attempt-sheet";
-export type { QuizAttemptSheetProps } from "./ui/quiz-attempt-sheet";
 export { QUIZ_RADIUS, useQuizColors } from "./ui/quiz-colors";

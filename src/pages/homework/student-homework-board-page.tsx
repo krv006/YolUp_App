@@ -12,6 +12,7 @@ import {
   type HomeworkBoardSaveState,
 } from "@/modules/homework";
 import { NotificationBell } from "@/modules/notification";
+import { ROUTES } from "@/shared/config";
 import { sanitizeHtml } from "@/shared/lib";
 import type { Assignment } from "@/shared/types";
 import {
@@ -42,7 +43,7 @@ export function StudentHomeworkBoardPage() {
   const { assignmentId } = useLocalSearchParams<{ assignmentId: string }>();
   const assignment = useAssignment(assignmentId ?? null);
   const board = useHomeworkBoard(assignmentId ?? null);
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace("/student/chats"));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(ROUTES.student.chats as never));
 
   if (assignment.isLoading || board.isLoading)
     return (
@@ -62,7 +63,7 @@ export function StudentHomeworkBoardPage() {
       assignment={assignment.data}
       board={board.data}
       onBack={goBack}
-      onSubmitted={() => router.replace("/student/chats")}
+      onSubmitted={() => router.dismissTo(ROUTES.student.homeworkItem(assignment.data.id) as never)}
     />
   );
 }
@@ -101,7 +102,7 @@ function HomeworkBoardScreen({
   return (
     <Screen padded={false}>
       <AppBar title={tw("title")} back={{ label: t("board.back"), onPress: onBack }}>
-        <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push("/student/search")} />
+        <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push(ROUTES.student.search as never)} />
         <NotificationBell />
       </AppBar>
 

@@ -88,8 +88,6 @@ export type { LessonActionsProps } from "./ui/lesson-actions";
 export { LessonList } from "./ui/lesson-list";
 export { LessonViewSwitch } from "./ui/lesson-view-switch";
 export type { LessonListProps } from "./ui/lesson-list";
-export { LiveLessonBar } from "./ui/live-lesson-bar";
-export type { LiveLessonBarProps } from "./ui/live-lesson-bar";
 export { FinishLessonSheet, LessonRatingsSheet, RateLessonSheet } from "./ui/lesson-sheets";
 export { RatingSummary, StarRating } from "./ui/star-rating";
 export { LessonRatingForm } from "./ui/lesson-rating-form";

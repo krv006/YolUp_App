@@ -19,9 +19,8 @@ function isResult(kind?: string | null): boolean {
  * tur (dars, yozuv, vazifa, topshiriq, test, imtihon, guruh, suhbat) o'z
  * sahifasiga.
  *
- * Farq: o'qituvchining vazifa va topshiriq havolalari vebdagidek
- * `/teacher/workspace/homework/...` ga; qolganlari mobilning hozirgi
- * sahifalariga (testlar 5-bosqichda). Admin uchun o'qituvchi havolasi
+ * Ota-onada test va imtihon havolalari mobilning hozirgi sahifalariga
+ * (ota-ona ekranlari yangilanmagan). Admin uchun o'qituvchi havolasi
  * o'qituvchilar ro'yxatini ochadi.
  */
 export function useOpenNotificationLink() {
@@ -43,8 +42,9 @@ export function useOpenNotificationLink() {
       if (type === "lesson") return go(kind?.includes("recording") ? `/recordings/${link.id}` : `/live/${link.id}`);
       if (type === "recording") return go(`/recordings/${link.id}`);
       if (prefix === "/teacher" && (type === "assignment" || type === "homework")) return go(ROUTES.teacher.homeworkItem(link.id));
-      if (prefix === "/teacher" && type === "submission") {
-        // Vebdagidek: topshiriqdan vazifani topib, tekshirish sahifasida o'sha topshiriq.
+      if (student && (type === "assignment" || type === "homework")) return go(ROUTES.student.homeworkItem(link.id));
+      if (prefix !== "/parent" && type === "submission") {
+        // Vebdagidek: topshiriqdan vazifani topadi — o'qituvchida tekshirish sahifasida o'sha topshiriq.
         void queryClient
           .fetchQuery({
             queryKey: homeworkKeys.submission(link.id),
@@ -52,23 +52,22 @@ export function useOpenNotificationLink() {
           })
           .then((submission) => {
             if (!submission) throw new Error();
-            go(`${ROUTES.teacher.homeworkReview(submission.assignmentId)}?s=${encodeURIComponent(link.id)}`);
+            go(student ? ROUTES.student.homeworkItem(submission.assignmentId) : `${ROUTES.teacher.homeworkReview(submission.assignmentId)}?s=${encodeURIComponent(link.id)}`);
           })
-          .catch(() => go(ROUTES.teacher.homework));
+          .catch(() => go(student ? ROUTES.student.homework : ROUTES.teacher.homework));
         return;
       }
-      if (type === "assignment" || type === "homework" || type === "submission") {
-        if (prefix === "/parent") return go("/parent/homework");
-        return go("/student/chats");
-      }
+      if (type === "assignment" || type === "homework" || type === "submission") return go("/parent/homework");
       if (type === "quiz" || type === "test") {
-        // O'qituvchida vebdagidek: natija xabari — natijalar, qolgani — muharrir. O'quvchi 6-bosqichda.
+        // Vebdagidek: natija xabari — natijalar, qolgani — test sahifasi.
         if (prefix === "/teacher") return go(isResult(kind) ? ROUTES.teacher.testResults(link.id) : ROUTES.teacher.test(link.id));
+        if (student) return go(isResult(kind) ? ROUTES.student.testResults(link.id) : ROUTES.student.test(link.id));
         return go(`${prefix}/quizzes?quiz=${link.id}`);
       }
       if (type === "exam" || type === "mock") {
         if (prefix === "/teacher") return go(ROUTES.teacher.mockResults(link.id));
-        return go(student ? `/student/exams/${link.id}` : `${prefix}/exams`);
+        if (student) return go(isResult(kind) ? ROUTES.student.mockResults(link.id) : ROUTES.student.mockExams);
+        return go(`${prefix}/exams`);
       }
       if (type === "course") {
         const room = conversations.data?.find((item) => item.courseId === link.id);

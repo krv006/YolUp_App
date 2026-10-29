@@ -453,8 +453,11 @@ export interface MobileSegmentProps<T extends string> {
   items: Array<{ id: T; label: ReactNode }>;
   value: T;
   onChange: (value: T) => void;
-  /** Gorizontal suriladigan (`w-28.5` tugmalar) yoki teng bo'lingan (`flex-1`). */
-  scroll?: boolean;
+  /**
+   * Gorizontal suriladigan (`w-28.5` tugmalar) yoki teng bo'lingan (`flex-1`);
+   * `"auto"` — suriladi, eni matnga qarab (`px-4`, o'quvchining filtr chiplari).
+   */
+  scroll?: boolean | "auto";
 }
 
 /** `h-11 rounded-full border px-4 text-body-sm font-medium`; faoli `bg-brand`. */
@@ -470,7 +473,7 @@ export function MobileSegment<T extends string>({ items, value, onChange, scroll
         onPress={() => onChange(item.id)}
         style={({ pressed }) => [
           styles.segment,
-          scroll ? styles.segmentScroll : styles.segmentFlex,
+          scroll === "auto" ? null : scroll ? styles.segmentScroll : styles.segmentFlex,
           active
             ? { borderColor: ds.c.brand, backgroundColor: ds.c.brand }
             : { borderColor: ds.c.line, backgroundColor: pressed ? ds.c.subtle : ds.c.surface },

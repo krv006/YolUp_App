@@ -33,6 +33,8 @@ export {
 
 // --- Mobil UI ---
 export { ChatHeader } from "./ui/chat-header";
+export { DirectRequestBar } from "./ui/direct-request-bar";
+export type { DirectRequestBarProps } from "./ui/direct-request-bar";
 export { ConversationInfoSheet } from "./ui/conversation-info-sheet";
 export { NewGroupSheet } from "./ui/new-group-sheet";
 export { InviteStudentsSheet } from "./ui/invite-students-sheet";

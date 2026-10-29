@@ -30,9 +30,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **174**
-- 🟡/🔴 moslashtirilgan: **276**
+- 🟡/🔴 moslashtirilgan: **279**
 - 🆕 mobilga xos: **13**
-- Jami: **463**
+- Jami: **466**
 
 ## Olib tashlangan bo'limlar
 
@@ -126,12 +126,12 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/conversation/model/conversation.keys.ts` | 🟢 NUSXA | `8dedfc078009` | — |
 | `src/modules/conversation/model/use-conversations.ts` | 🟢 NUSXA | `184b90b38513` | — |
 | `src/modules/conversation/ui/chat-header.tsx` | 🟡 MOSLASH | `5da11d27ca42` | faqat tor ekran varianti: tanlash sarlavhasi, qidiruv rejimi, guruh rasmi, ovozli xona tugmasi; `topInset` — holat paneli ostidan boshlanadi; ma'lumot oynasi sahifada (`onOpenInfo`) |
-| `src/modules/conversation/ui/mobile-group-info.tsx` | 🟡 MOSLASH | `98c571e07833` | mobilda `group-info-screen.tsx` (`variant="screen"`, to'liq ekran Modal); kursni tahrirlash/o'chirish va boshqaruv (`conversation-info-panel.tsx` dagi) shu faylda; guruh rasmi galereyadan |
+| `src/modules/conversation/ui/mobile-group-info.tsx` | 🟡 MOSLASH | `036954840cc0` | mobilda `group-info-screen.tsx` (`variant="screen"`, to'liq ekran Modal); kursni tahrirlash/o'chirish va boshqaruv (`conversation-info-panel.tsx` dagi) shu faylda; guruh rasmi galereyadan; o'quvchida o'qituvchi qatorida "O'qituvchiga yozish" (`MemberRow` `action`); fayllar/media tablari `RoomAttachments` |
 | `src/modules/conversation/model/new-conversation.store.ts` | 🟢 NUSXA | `a1588dade042` | — |
 | `src/modules/conversation/ui/conversation-actions-sheet.tsx` | 🟡 MOSLASH | `ffc54aadd8a9` | faqat telefon varianti (`focusMenu`): qator `measureInWindow` bilan o'lchanib Modal'da joyida ko'tariladi; o'chirish `ConfirmDialog` orqali |
-| `src/modules/conversation/ui/new-conversation-dialog.tsx` | 🟡 MOSLASH | `31bf606509b4` | mobilda `new-group-sheet.tsx` (tor ekran varianti, `Sheet variant="app"`); QR — o'sha `qrcode` kutubxonasi, SVG bilan chiziladi; "Ulashish" — tizim `Share` |
-| `src/widgets/chat-shell/mobile-conversation-list.tsx` | 🟡 MOSLASH | `0f462ddaa042` | mobilda `pages/chats/chats-page.tsx`; uzoq bosish `onLongPress` (450ms) |
-| `src/widgets/chat-shell/conversation-row.tsx` | 🟡 MOSLASH | `508f0dfd43bb` | mobilda `widgets/chat-shell/conversation-row.tsx` |
+| `src/modules/conversation/ui/new-conversation-dialog.tsx` | 🟡 MOSLASH | `f13bed00fc32` | mobilda `new-group-sheet.tsx` (tor ekran varianti, `Sheet variant="app"`); QR — o'sha `qrcode` kutubxonasi, SVG bilan chiziladi; "Ulashish" — tizim `Share`; oylik to'lov maydoni (`formatFee`) vebda faqat keng ekranda — mobilda yo'q |
+| `src/widgets/chat-shell/mobile-conversation-list.tsx` | 🟡 MOSLASH | `bd4e8c22efd4` | mobilda `pages/chats/chats-page.tsx`; uzoq bosish `onLongPress` (450ms); tablardagi o'qilmaganlar soni `MobileSegment` `badge` |
+| `src/widgets/chat-shell/conversation-row.tsx` | 🟡 MOSLASH | `fa3d74766546` | mobilda `widgets/chat-shell/conversation-row.tsx` |
 | `src/widgets/chat-shell/use-conversation-list.ts` | 🟢 NUSXA | `581727dc7f31` | mantiq bir xil, faqat mobil import yo'llari |
 | `src/widgets/mobile-tab-bar/mobile-tab-bar.tsx` | 🟡 MOSLASH | `da37f448a0b4` | mobilda `providers/role-tabs.tsx` dagi `FloatingTabBar` (`variant="floating"`); faqat bo'limlarning o'zida ko'rinadi; eski bo'limlarga `inset`, Workspace'da bo'shliq stack bosh sahifasida (`useFloatingTabInset`); faol tab soyasi doim turadi, faol emasida shaffof (`dsShadowHidden`) — Android keyin qo'shilgan `boxShadow` ga radius qo'llamaydi |
 | `src/widgets/mobile-user-header/mobile-user-header.tsx` | 🟡 MOSLASH | `458790186999` | qo'ng'iroq — `MobileRoundButton` + `lucide` Bell, o'qilmagan bo'lsa qizil nuqta |
@@ -241,7 +241,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/api/message.api.ts` | 🟢 NUSXA | `24271d99af1e` | — |
 | `src/modules/message/api/message.dto.ts` | 🟢 NUSXA | `71ce15df2b54` | — |
 | `src/modules/message/api/message.endpoints.ts` | 🟢 NUSXA | `cbc1e68e5a1e` | — |
-| `src/modules/message/index.ts` | 🟡 MOSLASH | `6cf40e162ad6` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/message/index.ts` | 🟡 MOSLASH | `beef9cff4479` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs); mobil UI bo'limida `RoomAttachments` |
 | `src/modules/message/lib/chat-socket-manager.ts` | 🟢 NUSXA | `7ac301894804` | — |
 | `src/modules/message/lib/linkify.ts` | 🟢 NUSXA | `5a21a96293c4` | — |
 | `src/modules/message/lib/message.mappers.ts` | 🟢 NUSXA | `66da89b2fca6` | — |
@@ -253,9 +253,12 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/ui/attachment-sheet.tsx` | 🟡 MOSLASH | `9d80259f1011` | `Sheet variant="app"`; fayl tanlash `expo-image-picker`/`expo-document-picker`; so'nggi rasm keshga yozilib `PickedFile` bo'ladi |
 | `src/modules/message/ui/image-preview-screen.tsx` | 🟡 MOSLASH | `9e49e666fffd` | to'liq ekran Modal, tokenlar doim qorong'i (`useDs("dark")`), holat paneli oq |
 | `src/modules/message/ui/voice-message.tsx` | 🟡 MOSLASH | `5961e0e20cd6` | `expo-audio` token sarlavhasi bilan oqim (Blob emas); tor ekranda 24 ustun; ijro xatosida toast (iOS vebdagi WebM xabarlarni ocholmaydi — `docs/BACKEND-IOS.md`) |
-| `src/modules/message/ui/message-bubble.tsx` | 🟡 MOSLASH | `d9888fe9389e` | tor ekran varianti; pufak `MessageBubbleCard` ga ajratilgan (fokus menyusidagi nusxa uchun); sudrab javob berish yo'q (orqaga qaytish imo-ishorasi bilan to'qnashadi) — javob menyudan |
-| `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `4dee1f13d3ae` | tor ekran varianti; fayllar `PickedFile` (uri), yuborishda `toUploadFile`; ovoz `expo-audio`; @ ro'yxati kompozer ustida oqimda (Android'da ota-chegaradan tashqaridagi bosish yetib bormaydi); emoji paneli Modal'da tugma o'rniga qarab |
-| `src/modules/message/ui/message-list.tsx` | 🟡 MOSLASH | `c460932a1ff3` | FlashList (pastdan ochiladi); kun ajratgichlari har kun uchun (vebda bitta "Bugun"); qidiruvda joriy natija `scrollToIndex` bilan o'rtaga; o'chirish tasdig'i `ConfirmDialog`; `date-separator`, `typing-indicator` shu faylda |
+| `src/modules/message/ui/message-bubble.tsx` | 🟡 MOSLASH | `8f304d5f9201` | tor ekran varianti; pufak `MessageBubbleCard` ga ajratilgan (fokus menyusidagi nusxa uchun); sudrab javob berish yo'q (orqaga qaytish imo-ishorasi bilan to'qnashadi) — javob menyudan; tizim kartalari (`SystemCard`): yozuv — vaqt bilan, doska PDF'i — `FileViewer` da |
+| `src/modules/message/ui/message-composer.tsx` | 🟡 MOSLASH | `2dd19ea16487` | tor ekran varianti; fayllar `PickedFile` (uri), yuborishda `toUploadFile`; ovoz `expo-audio`; @ ro'yxati kompozer ustida oqimda (Android'da ota-chegaradan tashqaridagi bosish yetib bormaydi); emoji paneli Modal'da tugma o'rniga qarab; "ovozli xabar yozmoqda" signali `RecordingPanel` ichida |
+| `src/modules/message/ui/message-list.tsx` | 🟡 MOSLASH | `91d85c9f2dfc` | FlashList (pastdan ochiladi); kun ajratgichlari har kun uchun (vebda bitta "Bugun"); qidiruvda joriy natija `scrollToIndex` bilan o'rtaga; o'chirish tasdig'i `ConfirmDialog`; `date-separator`, `typing-indicator` shu faylda; qator kaliti `clientMessageId || id` (`message-day.ts`) — yuborilganda sakrash yo'q; `TypingIndicator` ovoz turi bilan |
+| `src/modules/conversation/ui/direct-request-bar.tsx` | 🟡 MOSLASH | `5c20d6da7f3a` | faqat tor ekran varianti; tugmalar `MobileButton`, pastda xavfsiz hudud |
+| `src/modules/message/ui/room-attachments.tsx` | 🟡 MOSLASH | `5c106d66e10b` | media plitkasi faqat rasm/eskizni chizadi (backend `media` ga doska PDF'ini ham qo'shadi — vebda buzilgan rasm), boshqasiga belgi |
+| `src/modules/message/ui/typing-indicator.tsx` | 🟡 MOSLASH | `ab2967c41ff4` | mobilda `message-list.tsx` ichida (`TypingIndicator`) |
 | `src/modules/message/ui/message-text.tsx` | 🟡 MOSLASH | `9ba5cb9dd097` | havolalar `Text onPress`; ichki havola ilova ichida, tashqisi brauzerda |
 | `src/modules/message/ui/pinned-message-bar.tsx` | 🟡 MOSLASH | `d8b8f14c948f` | faqat tor ekran ko'rinishi |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `554c9d1ed288` | — |
@@ -308,7 +311,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/ui/quiz-import-dialog.tsx` | 🟡 MOSLASH | `35556e107370` | faqat tor ekran varianti; fayl `pickDocument` + `toUploadFile` |
 | `src/pages/teacher/quizzes/teacher-quizzes-page.tsx` | 🟡 MOSLASH | `6181c5192d3a` | mobilda yo'q — vebda ham ulanmagan (`/teacher/quizzes` -> `/teacher/workspace/tests`) |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `b64689876640` | vebdagidek faqat yozilish oynasi; `StudentEnrollmentDialog` o'rniga `StudentEnrollmentSheet` |
-| `src/modules/student/ui/student-enrollment-dialog.tsx` | 🟡 MOSLASH | `6a9055c814b2` | mobilda `ui/student-enrollment-sheet.tsx` (pastdan chiquvchi oyna); eski uslubda — vebda ham `shared/ui/legacy` |
+| `src/modules/student/ui/student-enrollment-dialog.tsx` | 🟡 MOSLASH | `b337e126089a` | mobilda `ui/student-enrollment-sheet.tsx` (pastdan chiquvchi oyna); eski uslubda — vebda ham `shared/ui/legacy` |
 | `src/modules/voice/api/voice.api.ts` | 🟢 NUSXA | `c02578716398` | — |
 | `src/modules/voice/api/voice.dto.ts` | 🟢 NUSXA | `2c89acae27a3` | — |
 | `src/modules/voice/api/voice.endpoints.ts` | 🟢 NUSXA | `8604722f505d` | — |
@@ -324,7 +327,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/admin/teachers/teacher-stats-dialog.tsx` | 🟡 MOSLASH | `b15753cd64fc` | mobilda `pages/admin/teacher-stats-sheet.tsx` (Dialog o'rniga Sheet) |
 | `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `e51a1ebf0d13` | `AddLessonDialog` — mobilda `add-lesson-dialog.tsx` (tor ekran `ModalCard` -> `Sheet variant="app"`, sana/vaqt `MobilePickerField`); `AddAssignmentDialog` — hozircha eski `add-assignment-sheet.tsx` (4b) |
 | `src/shared/ui/app-dialog.tsx` | 🟡 MOSLASH | `4dcce350160d` | `fullscreen` — mobilda `fullscreen-dialog.tsx`; `sheet` — `Sheet variant="app"` (tutqich, `text-h2` sarlavha, 44px yopish, qotirilgan `footer`; `icon`, `headingTitle`, `footerPadding` — vebdagi `icon`, `titleClassName`, `footerClassName`) |
-| `src/shared/ui/mobile-page.tsx` | 🟡 MOSLASH | `186ad722b47e` | barcha bloklar RN'da; `mobileRoundButton`/`mobileButton` klasslari o'rniga `MobileRoundButton`/`MobileButton`; segmentda matn kesilmasligi uchun ichki chet kichik — suriladiganda 0, teng kenglikda 4 (CSS'da `nowrap` matn chetdan chiqib ko'rinadi) |
+| `src/shared/ui/mobile-page.tsx` | 🟡 MOSLASH | `b0985a99e686` | barcha bloklar RN'da; `mobileRoundButton`/`mobileButton` klasslari o'rniga `MobileRoundButton`/`MobileButton`; segmentda matn kesilmasligi uchun ichki chet kichik — suriladiganda 0, teng kenglikda 4 (CSS'da `nowrap` matn chetdan chiqib ko'rinadi); `MobileSegment` `badge`; `scroll` rejimida eni `minWidth: 114`, ichki chet 12 |
 | `src/shared/ui/group-tile.tsx` | 🟡 MOSLASH | `74b48cf68e56` | `box`/`radius` — vebdagi `className="size-11 rounded-xl"` o'rnida |
 | `src/shared/ui/confirm-dialog.tsx` | 🟡 MOSLASH | `647991246a4a` | faqat tor ekran varianti; mobilda `shared/ui/center-dialog.tsx`; fon/orqaga faqat `onOpenChange(false)` (vebdagidek), `onCancel` faqat tugmadan |
 | `src/shared/ui/mobile-alert-dialog.tsx` | 🟡 MOSLASH | `2dc5f552c93b` | mobilda `shared/ui/center-dialog.tsx`; `titleVariant` va `shift` — vebdagi `titleClassName` va `className` (`top-[calc(50%+Npx)]`) o'rniga |
@@ -477,7 +480,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/student-group-workspace/student-tasks.tsx` | 🟡 MOSLASH | `ad5dcf56cfb0` | faqat tor ekran varianti |
 | `src/widgets/student-group-workspace/use-assignment-rows.ts` | 🟡 MOSLASH | `4572affcc7ef` | `navigate` o'rniga `router.push(..., { withAnchor: true })` |
 | `src/widgets/forward-dialog/forward-dialog.tsx` | 🟡 MOSLASH | `c22c79a14efe` | pastki oyna (`Sheet variant="app"`) |
-| `src/pages/teacher/conversation-page.tsx` | 🟡 MOSLASH | `389086575b2b` | mobilda `pages/chats/conversation-page.tsx` (guruh qismi `group-workspace.tsx` dagi chat bilan birga). Tor ekrandagidek jonli dars chizig'i yo'q. O'quvchida vazifa kartasi vazifa sahifasini ochadi va topshirilganini ko'rsatadi; e'lonlar kanalida yozish maydoni o'rniga ogohlantirish. Qadalgan xabarni olib tashlash `pinned: true` bilan (vebda `false` ketadi — xabar qayta qadaladi, `useChat.pinMessage` ma'nosiga zid) |
+| `src/pages/teacher/conversation-page.tsx` | 🟡 MOSLASH | `f471acd9e1cc` | mobilda `pages/chats/conversation-page.tsx` (guruh qismi `group-workspace.tsx` dagi chat bilan birga). Tor ekrandagidek jonli dars chizig'i yo'q. O'quvchida vazifa kartasi vazifa sahifasini ochadi va topshirilganini ko'rsatadi; e'lonlar kanalida yozish maydoni o'rniga ogohlantirish. Qadalgan xabarni olib tashlash `pinned: true` bilan (vebda `false` ketadi — xabar qayta qadaladi, `useChat.pinMessage` ma'nosiga zid); o'qilganlik faqat kelgan xabarga (`readKey`); kutilayotgan/bloklangan shaxsiy chatda `DirectRequestBar` (oldingi qattiq yozilgan o'zbekcha izoh olib tashlandi) |
 | `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `4ee83c735ebd` | tor ekran shoxi (`mobile-live-room.tsx` bilan bitta faylda): sahna, 3 ustunli plitkalar, pastki panel; brauzerdagi yozuv va REC belgisi yo'q (yozuv server tomonda); `MediaPermissionDialog` yo'q — ruxsatni Android so'raydi; doska to'liq ekranda hozircha `BoardSurface` (5-bosqichda `BoardPanel` mobil ko'rinishi) |
 | `src/widgets/live-room/mobile-live-room.tsx` | 🟡 MOSLASH | `738a487f3ec9` | mobilda `live-room.tsx` ichida (`RoomBody`, `ToolbarButton`, `CameraTile`) |
 | `src/widgets/live-room/live-room-state.tsx` | 🟡 MOSLASH | `83ff7305c2e7` | faqat tor ekran varianti (doim qorong'i) |

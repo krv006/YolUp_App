@@ -48,12 +48,13 @@ export function buildMessageRows(
     if (message.id === dividerId) rows.push({ kind: "unread", key: `unread-${message.id}` });
 
     if (message.type === "assignment" && message.assignment) {
-      rows.push({ kind: "assignment", key: message.id, message });
+      // `clientMessageId` — yuborilgach vaqtinchalik id almashganda qator qayta yaratilmasin (sakrash bo'lmasin).
+      rows.push({ kind: "assignment", key: message.clientMessageId || message.id, message });
       return;
     }
     rows.push({
       kind: "message",
-      key: message.id,
+      key: message.clientMessageId || message.id,
       message,
       showName: !sameGroup(message, previous),
       showAvatar: !sameGroup(message, next),

@@ -22,6 +22,8 @@ import { JoinRequestsSheet } from "@/modules/course/ui/join-requests-sheet";
 import { messageApi } from "@/modules/message/api/message.api";
 import { useChatUiStore } from "@/modules/message/model/chat-ui.store";
 import { messageKeys } from "@/modules/message/model/message.keys";
+import { RoomAttachments } from "@/modules/message/ui/room-attachments";
+import { ROUTES } from "@/shared/config";
 import { formatRelativeShort, pickImage, storage, toUploadFile } from "@/shared/lib";
 import type { Conversation, DomainUser } from "@/shared/types";
 import {
@@ -47,7 +49,8 @@ import {
   usePopoverAnchor,
   type IconName,
 } from "@/shared/ui";
-import { useAnnouncementMode, useSetRoomImage } from "../model/use-conversations";
+import { DIRECT_STATUS } from "../constants/direct-status";
+import { useAnnouncementMode, useConversations, useRequestDirect, useSetRoomImage } from "../model/use-conversations";
 
 export interface GroupInfoScreenProps {
   conversation: Conversation;
@@ -74,6 +77,9 @@ export function GroupInfoScreen({ conversation, open, onClose }: GroupInfoScreen
   const { user } = useAuth();
   const courseId = conversation.courseId;
   const canManage = user?.role === "TEACHER";
+  const studentViewer = user?.role === "STUDENT";
+  const studentRooms = useConversations("student");
+  const requestDirect = useRequestDirect();
   const muteKey = `fokus_muted_${conversation.id}`;
 
   const [muted, setMuted] = useState(() => storage.get(muteKey) === "true");
@@ -106,6 +112,26 @@ export function GroupInfoScreen({ conversation, open, onClose }: GroupInfoScreen
 
   const presenceById = useMemo(() => new Map((presence.data ?? []).map((item) => [item.id, item])), [presence.data]);
   const members = (students.data?.items ?? []).map((item) => item.student);
+  /** Veb #162: o'quvchi guruh ma'lumotidan o'qituvchiga yozadi (o'quvchilarga emas). */
+  function messageTeacher(teacherId: string) {
+    const existing = (studentRooms.data ?? []).find((item) => item.type === "direct" && item.participantId === teacherId);
+    const openRoom = (roomId: string) => {
+      onClose();
+      router.push(ROUTES.student.chat(roomId) as never);
+    };
+    if (existing?.directStatus === DIRECT_STATUS.ACTIVE) {
+      openRoom(existing.id);
+      return;
+    }
+    requestDirect.mutate(teacherId, {
+      onSuccess: (room) => {
+        if (room.directStatus === DIRECT_STATUS.ACTIVE) openRoom(room.id);
+        else toast.success(t("panel.directRequestSent"));
+      },
+      onError: (error: Error) => toast.error(error.message),
+    });
+  }
+
   const roomList = roomMembers.data ?? [];
   const roomTeachers = roomList.filter((member) => member.role.toLowerCase() === "teacher");
   const roomStudents = roomList.filter((member) => member.role.toLowerCase() !== "teacher");
@@ -316,18 +342,35 @@ export function GroupInfoScreen({ conversation, open, onClose }: GroupInfoScreen
                           key={member.id}
                           name={member.id === user?.id ? t("info.memberYou", { name: member.name }) : member.name}
                           src={member.avatarUrl}
-                          subtitle={teacher ? t("info.teacherBadge") : `@${member.username}${member.isOnline ? ` · ${t("info.online")}` : ""}`}
+                          subtitle={
+                            teacher
+                              ? t("info.teacherBadge")
+                              : `@${member.username}${
+                                  member.isOnline ? ` · ${t("info.online")}` : member.lastSeenAt ? ` · ${formatRelativeShort(member.lastSeenAt)}` : ""
+                                }`
+                          }
                           subtitleBrand={teacher}
                           last={index === list.length - 1}
+                          action={
+                            teacher && studentViewer && member.id !== user?.id
+                              ? { label: t("info.messageTeacher"), disabled: requestDirect.isPending, onPress: () => messageTeacher(member.id) }
+                              : undefined
+                          }
                         />
                       );
                     })}
               </View>
             ) : (
-              <MobileEmptyCard
-                icon={tab === "files" ? "folder" : "photo-camera-fill"}
-                title={tab === "files" ? t("info.filesEmpty") : t("info.mediaEmpty")}
-                description={tab === "files" ? t("info.filesEmptyHint") : t("info.mediaEmptyHint")}
+              <RoomAttachments
+                roomId={conversation.id}
+                type={tab === "files" ? "file" : "media"}
+                empty={
+                  <MobileEmptyCard
+                    icon={tab === "files" ? "folder" : "photo-camera-fill"}
+                    title={tab === "files" ? t("info.filesEmpty") : t("info.mediaEmpty")}
+                    description={tab === "files" ? t("info.filesEmptyHint") : t("info.mediaEmptyHint")}
+                  />
+                }
               />
             )}
           </View>
@@ -393,6 +436,7 @@ function MemberRow({
   subtitleBrand = false,
   last,
   menu,
+  action,
 }: {
   name: string;
   tone?: string;
@@ -401,6 +445,8 @@ function MemberRow({
   subtitleBrand?: boolean;
   last: boolean;
   menu?: { label: string; removeLabel: string; onRemove: () => void };
+  /** `h-9 rounded-full bg-brand-subtle px-3` — masalan "O'qituvchiga yozish". */
+  action?: { label: string; disabled?: boolean; onPress: () => void };
 }) {
   const ds = useDs();
   const { anchorRef, rect, open, close } = usePopoverAnchor();
@@ -415,6 +461,20 @@ function MemberRow({
           {subtitle}
         </DsText>
       </View>
+      {action ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={action.label}
+          disabled={action.disabled}
+          onPress={action.onPress}
+          style={({ pressed }) => [styles.memberAction, { backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] }, action.disabled && styles.dim]}
+        >
+          <Icon name="chat" size={16} color={ds.c.brand} />
+          <DsText v="caption-strong" c="brand">
+            {action.label}
+          </DsText>
+        </Pressable>
+      ) : null}
       {menu ? (
         <View ref={anchorRef} collapsable={false}>
           <Pressable accessibilityRole="button" accessibilityLabel={menu.label} onPress={open} style={styles.more}>
@@ -575,6 +635,8 @@ const styles = StyleSheet.create({
   tabs: { flexDirection: "row", gap: 8 },
   tab: { flex: 1, minWidth: 0, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
   member: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  dim: { opacity: 0.6 },
+  memberAction: { height: 36, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingHorizontal: 12, borderRadius: dsRadius.full },
   more: { width: 36, height: 36, marginRight: -8, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   delete: { marginTop: 24, height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 26 },
   warning: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingHorizontal: 16, paddingVertical: 14, borderRadius: dsRadius.xl },

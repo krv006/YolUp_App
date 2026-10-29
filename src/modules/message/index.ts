@@ -26,6 +26,8 @@ export { MessageComposer } from "./ui/message-composer";
 export { MessageList } from "./ui/message-list";
 export { MessageText } from "./ui/message-text";
 export { MessageAttachment } from "./ui/message-attachment";
+export { RoomAttachments } from "./ui/room-attachments";
+export type { RoomAttachmentsProps } from "./ui/room-attachments";
 export { buildMessageRows } from "./lib/message-day";
 export type { MessageRow } from "./lib/message-day";
 export { useChatUiStore } from "./model/chat-ui.store";

@@ -12,7 +12,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "@/modules/auth";
 import { useCourse } from "@/modules/course";
 import { useAssignments } from "@/modules/homework";
+import { isDirectLocked } from "@/modules/conversation";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
+import { DirectRequestBar } from "@/modules/conversation/ui/direct-request-bar";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
 import { GroupInfoScreen } from "@/modules/conversation/ui/group-info-screen";
 import { PinnedMessageBar, useChat, useChatUiStore } from "@/modules/message";
@@ -82,14 +84,16 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const assignments = useAssignments(courseId, studentGroup);
   const submittedById = useMemo(() => new Map((assignments.data ?? []).map((item) => [item.id, Boolean(item.mySubmission)])), [assignments.data]);
 
-  const lastMessageId = chat.messages.data?.[chat.messages.data.length - 1]?.id ?? null;
+  // Veb #163: chat ochilganda va yangi KELGAN xabarda o'qilgan deb belgilanadi (o'zimiz yuborganda emas).
+  const lastIncomingId = chat.messages.data?.filter((item) => !item.pending && item.senderId !== currentUserId).at(-1)?.id ?? "";
+  const readKey = chat.messages.data ? `${conversationId}:${lastIncomingId}` : null;
   const readRef = useRef<string | null>(null);
   const markRead = chat.markRead;
   useEffect(() => {
-    if (!lastMessageId || lastMessageId.startsWith("temp-") || readRef.current === lastMessageId) return;
-    readRef.current = lastMessageId;
+    if (!readKey || readRef.current === readKey) return;
+    readRef.current = readKey;
     markRead.mutate();
-  }, [lastMessageId, markRead]);
+  }, [readKey, markRead]);
 
   const backPath = role === "teacher" ? "/teacher/chats" : "/student/chats";
   function goBack() {
@@ -114,14 +118,6 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   }
 
   const group = conversation.type === "group" && Boolean(courseId);
-
-  /* Shaxsiy suhbat `pending` — o'quvchi hali qabul qilinmagan, `blocked` — rad etilgan. */
-  const disabledReason =
-    conversation.directStatus === "pending"
-      ? "So'rovingiz yuborildi. O'qituvchi qabul qilgach yozishingiz mumkin."
-      : conversation.directStatus === "blocked"
-        ? "Bu suhbat yopilgan."
-        : undefined;
 
   async function send(payload: SendMessagePayload) {
     if (!conversation) return;
@@ -228,7 +224,9 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
             onOpenAssignment={studentGroup ? (id) => router.push(ROUTES.student.homeworkItem(id) as never) : undefined}
             assignmentSubmitted={studentGroup ? (id) => submittedById.get(id) ?? null : undefined}
           />
-          {selectionMode || (role === "student" && group && conversation.announcementOnly) ? null : (
+          {selectionMode || (role === "student" && group && conversation.announcementOnly) ? null : isDirectLocked(conversation) ? (
+            <DirectRequestBar conversation={conversation} role={role} />
+          ) : (
             <MessageComposer
               key={editing?.id ?? "compose"}
               onSend={send}
@@ -243,7 +241,6 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
               currentUserId={currentUserId}
               roomId={conversation.id}
               onAssignment={group && role === "teacher" ? () => setTab("assignments") : undefined}
-              disabledReason={disabledReason}
             />
           )}
         </KeyboardAvoidingView>

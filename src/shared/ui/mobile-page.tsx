@@ -450,7 +450,8 @@ export function MobileEmptyCard({ icon, title, description, action, iconColor = 
 }
 
 export interface MobileSegmentProps<T extends string> {
-  items: Array<{ id: T; label: ReactNode }>;
+  /** `badge` — matn yonidagi son (masalan o'qilmagan chatlar), 0 bo'lsa ko'rinmaydi. */
+  items: Array<{ id: T; label: ReactNode; badge?: number }>;
   value: T;
   onChange: (value: T) => void;
   /**
@@ -460,7 +461,7 @@ export interface MobileSegmentProps<T extends string> {
   scroll?: boolean | "auto";
 }
 
-/** `h-11 rounded-full border px-4 text-body-sm font-medium`; faoli `bg-brand`. */
+/** `h-11 rounded-full border px-4 gap-1.5 text-body-sm font-medium`; faoli `bg-brand`. */
 export function MobileSegment<T extends string>({ items, value, onChange, scroll = false }: MobileSegmentProps<T>) {
   const ds = useDs();
   const buttons = items.map((item) => {
@@ -482,6 +483,14 @@ export function MobileSegment<T extends string>({ items, value, onChange, scroll
         <DsText v="body-sm" w="500" c={active ? "on-action" : "ink"} numberOfLines={1}>
           {item.label}
         </DsText>
+        {item.badge ? (
+          // `h-5 min-w-5 rounded-full px-1.5 text-caption-strong`
+          <View style={[styles.segmentBadge, { backgroundColor: active ? ds.c.surface : ds.c.brand }]}>
+            <DsText v="caption-strong" c={active ? "brand" : "on-action"}>
+              {item.badge}
+            </DsText>
+          </View>
+        ) : null}
       </Pressable>
     );
   });
@@ -555,13 +564,14 @@ const styles = StyleSheet.create({
   segments: { flexDirection: "row", gap: 8 },
   segmentScroller: { marginHorizontal: -16, flexGrow: 0 },
   segmentsScroll: { gap: 8, paddingHorizontal: 16 },
-  segment: { height: 44, alignItems: "center", justifyContent: "center", paddingHorizontal: 16, borderWidth: 1, borderRadius: dsRadius.full },
+  segment: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingHorizontal: 16, borderWidth: 1, borderRadius: dsRadius.full },
+  segmentBadge: { height: 20, minWidth: 20, alignItems: "center", justifyContent: "center", paddingHorizontal: 6, borderRadius: dsRadius.full },
   // Vebda matn `px-4` ga sig'masa ham kesilmaydi (`whitespace-nowrap`), RN esa kesadi — shuning uchun ichki chet kichik.
   segmentFlex: { flex: 1, minWidth: 0, paddingHorizontal: 4 },
   /*
-   * `w-28.5` — CSS'da `whitespace-nowrap` matni ichki chetdan chiqib ham
-   * to'liq ko'rinadi ("Hammasi · 14"); RN esa uni qisqartiradi. Matn baribir
-   * markazda, shuning uchun ichki chet olib tashlanadi.
+   * `min-w-28.5` — eni kamida 114, yonida son bo'lsa kengayadi. Vebdagi
+   * `px-4` o'rniga 12: CSS'da `whitespace-nowrap` matni ichki chetdan chiqib
+   * ham to'liq ko'rinadi ("Hammasi · 14"), RN esa uni qisqartiradi.
    */
-  segmentScroll: { width: 114, paddingHorizontal: 0 },
+  segmentScroll: { minWidth: 114, paddingHorizontal: 12 },
 });

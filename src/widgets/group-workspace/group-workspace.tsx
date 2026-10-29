@@ -33,7 +33,7 @@ interface TabDefinition {
  * Veb `group-workspace.tsx` / `student-group-workspace.tsx` dagi bo'limlar.
  *
  * "O'quvchilar" BO'LIM EMAS — u guruh nomi bosilganda ochiladigan ma'lumot
- * oynasida turadi (`CourseMembersSection`), veb'dagi kabi. Veb'da ham tablar
+ * oynasida turadi (`GroupInfoScreen`), veb'dagi kabi. Veb'da ham tablar
  * faqat shu to'rttasi.
  */
 const TABS: readonly TabDefinition[] = [

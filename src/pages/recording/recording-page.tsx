@@ -385,6 +385,12 @@ function RecordingVideo({ src }: { src: string }) {
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [trackWidth, setTrackWidth] = useState(0);
+  /*
+   * Faqat audio yozuv (dars kamerasiz o'tgan). iOS AVPlayer video yo'lagi
+   * bo'lmasa o'rniga QuickTime belgisini chizadi — native ko'rinish
+   * yashiriladi, Android va vebdagidek qorong'i ramka qoladi.
+   */
+  const [audioOnly, setAudioOnly] = useState(false);
 
   const player = useVideoPlayer(src, (instance) => {
     // Avtomatik boshlanmaydi: mobil internetda foydalanuvchi o'zi qaror qilsin.
@@ -395,7 +401,10 @@ function RecordingVideo({ src }: { src: string }) {
   const { isPlaying } = useEvent(player, "playingChange", { isPlaying: player.playing });
   const { muted } = useEvent(player, "mutedChange", { muted: player.muted });
   useEventListener(player, "timeUpdate", (payload) => setCurrent(payload.currentTime));
-  useEventListener(player, "sourceLoad", (payload) => setDuration(payload.duration));
+  useEventListener(player, "sourceLoad", (payload) => {
+    setDuration(payload.duration);
+    setAudioOnly(payload.availableVideoTracks.length === 0);
+  });
   useEventListener(player, "playingChange", (payload) => payload.isPlaying && setStarted(true));
 
   /*
@@ -442,7 +451,7 @@ function RecordingVideo({ src }: { src: string }) {
     <View style={[styles.frame, { backgroundColor: ds.c["surface-inverse"] }]}>
       <VideoView
         ref={viewRef}
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, audioOnly && styles.hidden]}
         player={player}
         nativeControls={false}
         fullscreenOptions={{ enable: true }}
@@ -485,9 +494,11 @@ function RecordingVideo({ src }: { src: string }) {
           <Pressable accessibilityRole="button" accessibilityLabel={muted ? t("recording.unmute") : t("recording.mute")} onPress={() => setMuted(player, !muted)} hitSlop={8} style={styles.control}>
             {muted ? <VolumeX size={16} color={ds.c["ink-inverse"]} /> : <Volume2 size={16} color={ds.c["ink-inverse"]} />}
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel={tm("recording.toliq_ekran")} onPress={() => void viewRef.current?.enterFullscreen()} hitSlop={8} style={styles.control}>
-            <Maximize2 size={15} color={ds.c["ink-inverse"]} />
-          </Pressable>
+          {audioOnly ? null : (
+            <Pressable accessibilityRole="button" accessibilityLabel={tm("recording.toliq_ekran")} onPress={() => void viewRef.current?.enterFullscreen()} hitSlop={8} style={styles.control}>
+              <Maximize2 size={15} color={ds.c["ink-inverse"]} />
+            </Pressable>
+          )}
         </View>
       ) : null}
     </View>
@@ -519,6 +530,7 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
   center: { textAlign: "center" },
+  hidden: { opacity: 0 },
   errorCard: { marginTop: 16 },
   top: { marginTop: 16 },
   frame: { width: "100%", aspectRatio: 358 / 211, overflow: "hidden", borderRadius: dsRadius["2xl"] },

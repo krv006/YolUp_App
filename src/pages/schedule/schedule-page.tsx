@@ -115,8 +115,8 @@ export function SchedulePage() {
         onJoin={joinLesson}
         student={student}
         onCreate={student ? undefined : () => setCreateOpen(true)}
-        // O'qituvchida suzuvchi panel ustida aylanadi (`pb-32`); o'quvchi panellari 6-bosqichda.
-        bottomInset={student ? 24 : floatingInset + 16}
+        // Suzuvchi panel ustida aylanadi (`pb-32`).
+        bottomInset={floatingInset + 16}
       />
 
       <LessonDetailDrawer

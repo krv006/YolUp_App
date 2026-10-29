@@ -9,6 +9,7 @@ import {
   useAppearanceStore,
   type ThemeMode,
 } from "@/shared/model/theme.store";
+import { useUpdateSettingsMutation } from "@/modules/auth";
 import { SUPPORTED_LANGUAGES, useLanguageStore, type AppLanguage } from "@/shared/model";
 import {
   ACCENTS,
@@ -63,6 +64,8 @@ const MODES: { value: ThemeMode; labelKey: string; icon: typeof Sun }[] = [
  */
 export function AppearancePage() {
   const { t } = useTranslation("mobile");
+  // Mavzu serverga ham yoziladi — kirishda serverdagisi qo'llanadi (veb #159).
+  const settings = useUpdateSettingsMutation();
   const router = useRouter();
   const { palette } = useTheme();
   const language = useLanguageStore((state) => state.language);
@@ -108,7 +111,10 @@ export function AppearancePage() {
                   key={value}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
-                  onPress={() => setMode(value)}
+                  onPress={() => {
+                    setMode(value);
+                    settings.mutate({ theme: value });
+                  }}
                   style={({ pressed }) => [
                     styles.segmentItem,
                     {

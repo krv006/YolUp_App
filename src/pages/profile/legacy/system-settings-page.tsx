@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { AlarmClock } from "lucide-react-native";
-import { useAuth, useUpdateLessonReminderMutation, useUpdateNotificationPrefsMutation } from "@/modules/auth";
+import { useAuth, useUpdateLessonReminderMutation, useUpdateNotificationPrefsMutation, useUpdateSettingsMutation } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
 import { useLanguageStore, useTextSizeStore, type AppLanguage, type TextSize } from "@/shared/model";
 import { useAppearanceStore, type ThemeMode } from "@/shared/model/theme.store";
@@ -45,6 +45,8 @@ export function SystemSettingsPage() {
   const setMode = useAppearanceStore((state) => state.setMode);
   const size = useTextSizeStore((state) => state.size);
   const setSize = useTextSizeStore((state) => state.setSize);
+  // Mavzu va matn o'lchami serverga ham yoziladi — kirishda serverdagisi qo'llanadi (veb #159).
+  const settings = useUpdateSettingsMutation();
   const [languageOpen, setLanguageOpen] = useState(false);
   const [draftLanguage, setDraftLanguage] = useState(language);
 
@@ -92,7 +94,10 @@ export function SystemSettingsPage() {
                   key={item.id}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: active }}
-                  onPress={() => setMode(item.id)}
+                  onPress={() => {
+                    setMode(item.id);
+                    settings.mutate({ theme: item.id });
+                  }}
                   style={[
                     styles.theme,
                     active
@@ -135,7 +140,12 @@ export function SystemSettingsPage() {
                 min={0}
                 max={2}
                 step={1}
-                onChange={(value) => setSize(SIZES[Math.round(value)] ?? "medium")}
+                onChange={(value) => {
+                  const next = SIZES[Math.round(value)] ?? "medium";
+                  if (next === size) return;
+                  setSize(next);
+                  settings.mutate({ text_size: next });
+                }}
                 label={t("page.textSize")}
               />
             </View>

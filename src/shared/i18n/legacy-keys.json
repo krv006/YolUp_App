@@ -62,13 +62,7 @@
         "twoFactorDisabled": "Ikki bosqichli tasdiqlash o‘chirildi",
         "twoFactorSmsUnavailable": "SMS xizmati hozircha ulanmagan, shuning uchun yoqib bo‘lmaydi.",
         "enable": "Yoqish",
-        "confirmCode": "Tasdiqlash",
-        "resendCode": "Qayta yuborish",
-        "changeNumber": "Raqamni o'zgartirish",
-        "mobile": {
-          "codeSentTo": "{{phone}} raqamiga yuborilgan 5 xonali kod",
-          "resendIn": "Qayta yuborish · {{time}}"
-        }
+        "confirmCode": "Tasdiqlash"
       }
     },
     "group": {
@@ -172,13 +166,7 @@
         "twoFactorDisabled": "Двухэтапное подтверждение отключено",
         "twoFactorSmsUnavailable": "SMS-сервис пока не подключён, поэтому включить нельзя.",
         "enable": "Включить",
-        "confirmCode": "Подтвердить",
-        "resendCode": "Отправить снова",
-        "changeNumber": "Изменить номер",
-        "mobile": {
-          "codeSentTo": "5-значный код, отправленный на {{phone}}",
-          "resendIn": "Отправить снова · {{time}}"
-        }
+        "confirmCode": "Подтвердить"
       }
     },
     "group": {
@@ -282,13 +270,7 @@
         "twoFactorDisabled": "Two-step verification is off",
         "twoFactorSmsUnavailable": "The SMS service is not connected yet, so this cannot be turned on.",
         "enable": "Turn on",
-        "confirmCode": "Verify",
-        "resendCode": "Resend",
-        "changeNumber": "Change number",
-        "mobile": {
-          "codeSentTo": "The 5-digit code sent to {{phone}}",
-          "resendIn": "Resend · {{time}}"
-        }
+        "confirmCode": "Verify"
       }
     },
     "group": {

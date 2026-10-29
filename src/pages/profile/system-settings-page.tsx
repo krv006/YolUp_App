@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { AppState, Linking, Pressable, StyleSheet, View } from "react-native";
 import * as Notifications from "expo-notifications";
-import { useAuth, useUpdateLessonReminderMutation } from "@/modules/auth";
+import { useAuth, useUpdateLessonReminderMutation, useUpdateSettingsMutation } from "@/modules/auth";
 import { ROLES } from "@/shared/constants";
 import { useLanguageStore, useTextSizeStore, type TextSize } from "@/shared/model";
 import { useAppearanceStore, type ThemeMode } from "@/shared/model/theme.store";
@@ -128,6 +128,7 @@ export function SystemSettingsPage() {
   const setSize = useTextSizeStore((state) => state.setSize);
   const push = usePushPermission();
   const reminder = useUpdateLessonReminderMutation();
+  const settings = useUpdateSettingsMutation();
   const [languageOpen, setLanguageOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [draftLanguage, setDraftLanguage] = useState<LanguageId>(language);
@@ -151,7 +152,10 @@ export function SystemSettingsPage() {
         <SegmentedRow icon="star" tone={SETTINGS_TONES.violet} title={t("page.theme")}>
           <Segmented<ThemeMode>
             value={mode}
-            onChange={setMode}
+            onChange={(next) => {
+              setMode(next);
+              settings.mutate({ theme: next });
+            }}
             options={[
               { id: "light", label: t("page.themeLight") },
               { id: "dark", label: t("page.themeDark") },
@@ -162,7 +166,10 @@ export function SystemSettingsPage() {
         <SegmentedRow icon="edit" tone={SETTINGS_TONES.warning} title={t("page.textSize")}>
           <Segmented<TextSize>
             value={size}
-            onChange={setSize}
+            onChange={(next) => {
+              setSize(next);
+              settings.mutate({ text_size: next });
+            }}
             options={[
               { id: SIZES[0]!, label: t("page.textSmall") },
               { id: SIZES[1]!, label: t("page.textMedium") },

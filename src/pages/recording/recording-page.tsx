@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useEvent, useEventListener } from "expo";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideoPlayer, VideoView, type VideoPlayer } from "expo-video";
 import { useKeepAwake } from "expo-keep-awake";
-import { Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react-native";
+import { Maximize2, Pause, Play, Volume1, Volume2, VolumeX } from "lucide-react-native";
 import { useAttendance } from "@/modules/attendance";
 import { useAuth, useRoleRoutes } from "@/modules/auth";
 import { boardApi } from "@/modules/board";
@@ -185,7 +185,7 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
     <MobileScreen title={t("recording.eyebrow")} closeLabel={t("recording.back")} closeIcon="chevron-left" onClose={onBack} action={menu}>
       <View style={styles.top}>
         {ready && recording?.streamUrl ? (
-          <RecordingVideo src={recording.streamUrl} />
+          <RecordingVideo src={recording.streamUrl} poster={recording.thumbnailUrl} />
         ) : (
           <View style={[styles.frame, styles.pending, { backgroundColor: ds.c.surface }]}>
             <Icon name={pendingIcon} size={32} color={ds.c["ink-secondary"]} />
@@ -368,12 +368,20 @@ function setMuted(player: VideoPlayer, muted: boolean) {
   player.muted = muted;
 }
 
+function setVolume(player: VideoPlayer, value: number) {
+  player.volume = value;
+  player.muted = value === 0;
+}
+
+const VOLUME_STEP = 0.05;
+
 /**
  * Pleer — veb `recording-video.tsx` (`variant="mobile"`): `aspect-[358/211]`
  * qora karta, o'rtada oq doira ichida "Play", boshlangach pastda vaqt,
- * chiziq va ovoz tugmasi. Vebdan farqi: oxirida to'liq ekran tugmasi bor.
+ * chiziq, ovoz tugmasi va balandligi surgichi (veb #161). Vebdan farqi:
+ * oxirida to'liq ekran tugmasi bor; surgich bosib yoki sudrab o'zgaradi.
  */
-function RecordingVideo({ src }: { src: string }) {
+function RecordingVideo({ src, poster }: { src: string; poster?: string | null }) {
   // Video ko'rayotganda ekran o'chib qolmasin.
   useKeepAwake();
 
@@ -385,6 +393,9 @@ function RecordingVideo({ src }: { src: string }) {
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [trackWidth, setTrackWidth] = useState(0);
+  const [volumeWidth, setVolumeWidth] = useState(0);
+  /** Oxirgi noldan katta balandlik — ovoz qaytarilganda shu tiklanadi. */
+  const [volume, setVolumeState] = useState(1);
   /*
    * Faqat audio yozuv (dars kamerasiz o'tgan). iOS AVPlayer video yo'lagi
    * bo'lmasa o'rniga QuickTime belgisini chizadi — native ko'rinish
@@ -400,6 +411,9 @@ function RecordingVideo({ src }: { src: string }) {
   const { status } = useEvent(player, "statusChange", { status: player.status });
   const { isPlaying } = useEvent(player, "playingChange", { isPlaying: player.playing });
   const { muted } = useEvent(player, "mutedChange", { muted: player.muted });
+  const { volume: liveVolume } = useEvent(player, "volumeChange", { volume: player.volume });
+  useEventListener(player, "volumeChange", (payload) => payload.volume > 0 && setVolumeState(payload.volume));
+  const silent = muted || liveVolume === 0;
   useEventListener(player, "timeUpdate", (payload) => setCurrent(payload.currentTime));
   useEventListener(player, "sourceLoad", (payload) => {
     setDuration(payload.duration);
@@ -437,6 +451,17 @@ function RecordingVideo({ src }: { src: string }) {
     );
 
   const progress = duration > 0 ? Math.min(current / duration, 1) : 0;
+
+  function toggleMute() {
+    if (silent) setVolume(player, volume > 0 ? volume : 0.5);
+    else setMuted(player, true);
+  }
+
+  function volumeAt(x: number) {
+    if (!volumeWidth) return;
+    const ratio = Math.max(0, Math.min(x / volumeWidth, 1));
+    setVolume(player, Math.round(ratio / VOLUME_STEP) * VOLUME_STEP);
+  }
   function toggle() {
     if (isPlaying) {
       player.pause();
@@ -458,6 +483,8 @@ function RecordingVideo({ src }: { src: string }) {
         allowsPictureInPicture
         contentFit="cover"
       />
+      {/* Veb `<video poster>`: ijro boshlanguncha muqova rasmi. */}
+      {poster && !started ? <Image source={{ uri: poster }} resizeMode="cover" style={StyleSheet.absoluteFill} /> : null}
 
       {isPlaying ? (
         <Pressable accessibilityRole="button" accessibilityLabel={t("recording.pause")} onPress={toggle} style={StyleSheet.absoluteFill} />
@@ -491,9 +518,37 @@ function RecordingVideo({ src }: { src: string }) {
           <DsText v="body-xs" c="ink-inverse" numeric>
             {clock(duration)}
           </DsText>
-          <Pressable accessibilityRole="button" accessibilityLabel={muted ? t("recording.unmute") : t("recording.mute")} onPress={() => setMuted(player, !muted)} hitSlop={8} style={styles.control}>
-            {muted ? <VolumeX size={16} color={ds.c["ink-inverse"]} /> : <Volume2 size={16} color={ds.c["ink-inverse"]} />}
+          <Pressable accessibilityRole="button" accessibilityLabel={silent ? t("recording.unmute") : t("recording.mute")} onPress={toggleMute} hitSlop={8} style={styles.control}>
+            {silent ? (
+              <VolumeX size={16} color={ds.c["ink-inverse"]} />
+            ) : volume < 0.5 ? (
+              <Volume1 size={16} color={ds.c["ink-inverse"]} />
+            ) : (
+              <Volume2 size={16} color={ds.c["ink-inverse"]} />
+            )}
           </Pressable>
+          {/* `type="range"` `w-14` — bosib yoki sudrab o'zgaradi */}
+          <View
+            accessible
+            accessibilityRole="adjustable"
+            accessibilityLabel={t("recording.volume")}
+            accessibilityValue={{ min: 0, max: 100, now: Math.round((silent ? 0 : volume) * 100) }}
+            accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
+            onAccessibilityAction={(event) =>
+              setVolume(player, Math.max(0, Math.min(1, (silent ? 0 : volume) + (event.nativeEvent.actionName === "increment" ? 0.1 : -0.1))))
+            }
+            onLayout={(event) => setVolumeWidth(event.nativeEvent.layout.width)}
+            onStartShouldSetResponder={() => true}
+            onMoveShouldSetResponder={() => true}
+            onResponderGrant={(event) => volumeAt(event.nativeEvent.locationX)}
+            onResponderMove={(event) => volumeAt(event.nativeEvent.locationX)}
+            hitSlop={8}
+            style={styles.volume}
+          >
+            <View pointerEvents="none" style={[styles.trackBar, { backgroundColor: dsAlpha(ds.c["ink-inverse"], 0.3) }]}>
+              <View style={[styles.trackFill, { width: `${(silent ? 0 : volume) * 100}%`, backgroundColor: ds.c["ink-inverse"] }]} />
+            </View>
+          </View>
           {audioOnly ? null : (
             <Pressable accessibilityRole="button" accessibilityLabel={tm("recording.toliq_ekran")} onPress={() => void viewRef.current?.enterFullscreen()} hitSlop={8} style={styles.control}>
               <Maximize2 size={15} color={ds.c["ink-inverse"]} />
@@ -556,6 +611,7 @@ const styles = StyleSheet.create({
   control: { width: 20, height: 20, alignItems: "center", justifyContent: "center" },
   track: { flex: 1, minWidth: 0, height: 16, justifyContent: "center" },
   trackBar: { height: 4, overflow: "hidden", borderRadius: 2 },
+  volume: { width: 56, flexShrink: 0, height: 16, justifyContent: "center" },
   trackFill: { position: "absolute", top: 0, bottom: 0, left: 0, borderRadius: 2 },
   skeleton: { gap: 20, paddingHorizontal: 16 },
   skeletonHeader: { flexDirection: "row", alignItems: "center", gap: 16 },

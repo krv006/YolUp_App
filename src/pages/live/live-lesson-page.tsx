@@ -40,7 +40,8 @@ export function LiveLessonPage() {
   const router = useRouter();
   const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
   const { user } = useAuth();
-  const lesson = useLesson(lessonId ?? null);
+  // Veb #161: yozuv holati (`recordingActive`) yangilanib turishi uchun.
+  const lesson = useLesson(lessonId ?? null, 30_000);
   const token = useLiveToken(lessonId, true);
   const joined = useRef(false);
   const isTeacher = useRef(false);

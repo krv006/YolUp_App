@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -96,6 +96,13 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
   const [finishOpen, setFinishOpen] = useState(false);
   const [shareRequest, setShareRequest] = useState<{ identity: string; name: string } | null>(null);
   const [joinedAt] = useState(() => new Date());
+  // Veb #161: taymer qo'shilgan paytdan emas, dars (yoki yozuv) boshlanganidan sanaydi.
+  const lessonStartedAt = useMemo(() => {
+    const recorded = lesson.recordingStartedAt ? new Date(lesson.recordingStartedAt) : null;
+    if (recorded && !Number.isNaN(recorded.getTime())) return recorded;
+    const scheduled = new Date(lesson.startsAt);
+    return !Number.isNaN(scheduled.getTime()) && scheduled.getTime() <= joinedAt.getTime() ? scheduled : joinedAt;
+  }, [lesson.recordingStartedAt, lesson.startsAt, joinedAt]);
   const participants = useParticipants();
   const room = useRoomContext();
   const attention = useAttentionCheck(lesson.id, !isTeacher);
@@ -154,7 +161,16 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
           <Icon name="chevron-left" size={22} color={ds.c["ink-inverse"]} />
         </Pressable>
         <View style={styles.headerCenter}>
-          <Elapsed startedAt={joinedAt} />
+          {/* 🟡 Vebdan farqi: o'qituvchida ham server yozuvi holati (mobilda brauzerdagi yozuv yo'q). `h-6 rounded-full bg-danger/70 px-2` */}
+          {lesson.recordingActive ? (
+            <View style={[styles.rec, { backgroundColor: dsAlpha(ds.c.danger, 0.7) }]}>
+              <View style={[styles.recDot, { backgroundColor: ds.c["on-action"] }]} />
+              <DsText v="caption-strong" c="on-action">
+                {t("room.rec")}
+              </DsText>
+            </View>
+          ) : null}
+          <Elapsed startedAt={lessonStartedAt} />
         </View>
         <Pressable
           accessibilityRole="button"
@@ -199,8 +215,22 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
 
       {/* `rounded-t-2xl bg-subtle/40 px-4 pt-0.5 pb-6.5 justify-between` */}
       <View style={[styles.toolbar, { backgroundColor: dsAlpha(ds.c.subtle, 0.4), paddingBottom: Math.max(26, insets.bottom + 8) }]}>
-        <MicButton isTeacher={isTeacher} requesting={mic.requesting} waiting={mic.waiting} onRequest={mic.requestMic} />
-        <CameraButton isTeacher={isTeacher} requesting={camera.requesting} waiting={camera.waiting} onRequest={camera.requestCamera} />
+        <MicButton
+          isTeacher={isTeacher}
+          requesting={mic.requesting}
+          cancelling={mic.cancelling}
+          waiting={mic.waiting}
+          onRequest={mic.requestMic}
+          onCancel={mic.cancelMic}
+        />
+        <CameraButton
+          isTeacher={isTeacher}
+          requesting={camera.requesting}
+          cancelling={camera.cancelling}
+          waiting={camera.waiting}
+          onRequest={camera.requestCamera}
+          onCancel={camera.cancelCamera}
+        />
         <ShareButton />
         <ToolbarButton icon={<Icon name="edit" size={22} color={boardOpen ? ds.c["on-action"] : ds.c.ink} />} label={t("room.board")} tone={boardOpen ? "active" : "default"} onPress={() => setBoardOpen(!boardOpen)} />
         <ToolbarButton
@@ -370,11 +400,14 @@ function ToolbarButton({
 interface RequestProps {
   isTeacher: boolean;
   requesting: boolean;
+  cancelling: boolean;
   waiting: boolean;
   onRequest: () => void;
+  onCancel: () => void;
 }
 
-function MicButton({ isTeacher, requesting, waiting, onRequest }: RequestProps) {
+/* Veb #161: kutilayotgan so'rovni bekor qilish — tugma "Bekor qilish" bo'ladi. */
+function MicButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCancel }: RequestProps) {
   const { t } = useTranslation("live");
   const ds = useDs();
   const permissions = useLocalParticipantPermissions();
@@ -394,15 +427,15 @@ function MicButton({ isTeacher, requesting, waiting, onRequest }: RequestProps) 
   return (
     <ToolbarButton
       icon={<Hand size={22} color={waiting ? ds.c["on-action"] : ds.c.ink} />}
-      label={t("mic.label")}
+      label={waiting ? t("room.cancelRequest") : t("mic.label")}
       tone={waiting ? "active" : "default"}
-      disabled={requesting || waiting}
-      onPress={onRequest}
+      disabled={requesting || cancelling}
+      onPress={waiting ? onCancel : onRequest}
     />
   );
 }
 
-function CameraButton({ isTeacher, requesting, waiting, onRequest }: RequestProps) {
+function CameraButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCancel }: RequestProps) {
   const { t } = useTranslation("live");
   const ds = useDs();
   const permissions = useLocalParticipantPermissions();
@@ -422,10 +455,10 @@ function CameraButton({ isTeacher, requesting, waiting, onRequest }: RequestProp
   return (
     <ToolbarButton
       icon={<Hand size={22} color={waiting ? ds.c["on-action"] : ds.c.ink} />}
-      label={t("camera.label")}
+      label={waiting ? t("room.cancelRequest") : t("camera.label")}
       tone={waiting ? "active" : "default"}
-      disabled={requesting || waiting}
-      onPress={onRequest}
+      disabled={requesting || cancelling}
+      onPress={waiting ? onCancel : onRequest}
     />
   );
 }
@@ -740,6 +773,8 @@ const styles = StyleSheet.create({
   header: { height: 44, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   headerCenter: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10 },
+  rec: { height: 24, flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, borderRadius: 12 },
+  recDot: { width: 6, height: 6, borderRadius: 3 },
   /* `h-9 w-13 rounded-full bg-subtle gap-1.5` */
   count: { width: 52, height: 36, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 18 },
   countDot: { position: "absolute", top: -2, right: -2, width: 10, height: 10, borderRadius: 5, borderWidth: 2 },

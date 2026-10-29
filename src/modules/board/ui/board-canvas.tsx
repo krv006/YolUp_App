@@ -42,6 +42,8 @@ export interface BoardCanvasProps {
 
 /** Nuqtalar orasidagi masofa va birinchi nuqta (`background-position: 6px` + katakning yarmi). */
 const DOT_STEP = 28;
+/** Veb #161 `use-board-drawing`: bundan yaqin nuqtalar tashlanadi — chizish tezroq, stroke ixchamroq. */
+const MIN_POINT_DISTANCE = 2;
 const DOT_START = 6 + DOT_STEP / 2;
 
 /**
@@ -196,13 +198,20 @@ export function BoardCanvas({
       ];
       draftEnd.set(point);
       if (drawKind === "pen" || drawKind === "marker") {
+        const points = draftPoints.get();
+        const last = points[points.length - 1];
         // Massiv QAYTA YARATILADI — shared value o'zgarishini sezishi uchun.
-        draftPoints.set([...draftPoints.get(), point]);
+        if (!last || Math.hypot(point[0] - last[0], point[1] - last[1]) >= MIN_POINT_DISTANCE) draftPoints.set([...points, point]);
       }
     })
     .onEnd(() => {
       "worklet";
-      runOnJS(commitDraft)(draftPoints.get(), draftStart.get(), draftEnd.get());
+      const points = draftPoints.get();
+      const end = draftEnd.get();
+      const last = points[points.length - 1];
+      // Tashlab ketilgan oxirgi nuqta — chiziq barmoq turgan joyda tugasin.
+      const finalPoints = last && (last[0] !== end[0] || last[1] !== end[1]) ? [...points, end] : points;
+      runOnJS(commitDraft)(finalPoints, draftStart.get(), end);
       draftPoints.set([]);
       draftStart.set([0, 0]);
       draftEnd.set([0, 0]);

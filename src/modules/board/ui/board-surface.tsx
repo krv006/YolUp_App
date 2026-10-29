@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Keyboard, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
@@ -11,7 +11,7 @@ import type { BoardSource, FormulaSolutionDto, Point, StrokeShapeDto, TextLineDt
 import { BOARD_TEXT_SIZE, MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
 import { FLOW_MARGIN, nextTextPoint, strokeSpan } from "../lib/board-flow";
 import { hasRichFormatting, linesToPlainText } from "../lib/rich-text";
-import { useAddSheet, useAddStroke, useBoard, useEraseStrokes, useRenameSheet, useSetBoardPermissions, useSolveFormula } from "../model/board.queries";
+import { useAddSheet, useAddStroke, useBoard, useEraseStrokes, useRenameSheet, useSetBoardPermissions, useSetCurrentSheet, useSolveFormula } from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
 import { BoardCanvas } from "./board-canvas";
 import { MobileBoardFooter, MobileBoardHeader, MobileBoardPill, MobileBoardToolbar, type BoardTool } from "./board-mobile";
@@ -75,6 +75,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const permissions = useSetBoardPermissions(lessonId);
   const renameSheet = useRenameSheet(lessonId);
   const solve = useSolveFormula(lessonId);
+  const currentSheet = useSetCurrentSheet(lessonId);
   const members = useCourseStudents(board.data?.isTeacher ? courseId : null, { page_size: 100 });
 
   const [localSheet, setLocalSheet] = useState(0);
@@ -96,6 +97,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const [draftText, setDraftText] = useState("");
   const [draftLines, setDraftLines] = useState<TextLineDto[]>([]);
   const [card, setCard] = useState({ width: 0, height: 0 });
+  const [viewRatio, setViewRatio] = useState(0);
   const [formHeight, setFormHeight] = useState(0);
 
   const rootRef = useRef<View>(null);
@@ -119,15 +121,32 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const state = source ? source.state : board.data;
   const active = state?.sheets.find((item) => item.index === sheet) ?? state?.sheets[0];
   const canDraw = Boolean(state?.canDraw);
+  // Veb #161: o'quvchi o'qituvchi ochgan varaqqa ergashadi; o'qituvchi varaq almashtirsa, server xabar topadi.
+  const followSheet = !source && board.data && !board.data.isTeacher ? board.data.currentSheet : null;
+  const lastFollowed = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (followSheet === null || followSheet === lastFollowed.current) return;
+    lastFollowed.current = followSheet;
+    setSheet(followSheet);
+  }, [followSheet, setSheet]);
+
+  const { mutate: announceSheet } = currentSheet;
+  function changeSheet(next: number) {
+    setSheet(next);
+    if (!source && board.data?.isTeacher) announceSheet(next);
+  }
 
   const boardHeight = state?.height ?? 900;
+  const boardWidth = state?.width ?? 1600;
+  // Kanvas ko'rinadigan joyni to'liq egallaydi (veb `ResizeObserver` bilan karta nisbati).
   const canvasHeight = useMemo(() => {
     const bottom = (active?.strokes ?? []).reduce((max, stroke) => {
       const span = strokeSpan(stroke);
       return span ? Math.max(max, span.bottom) : max;
     }, 0);
-    return Math.max(boardHeight, Math.ceil(bottom + FLOW_MARGIN));
-  }, [active?.strokes, boardHeight]);
+    return Math.max(boardHeight, Math.ceil(bottom + FLOW_MARGIN), Math.floor(boardWidth * viewRatio));
+  }, [active?.strokes, boardHeight, boardWidth, viewRatio]);
 
   function flowPointFor(lines: number): Point {
     return nextTextPoint(active?.strokes ?? [], { boardWidth: state?.width ?? 1200, boardHeight: canvasHeight, size: BOARD_TEXT_SIZE, lines });
@@ -145,7 +164,12 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   }
 
   const lastOwn = history.filter((entry) => entry.sheet === sheet).at(-1) ?? null;
-  const undoTarget = lastOwn ? ([...(active?.strokes ?? [])].reverse().find((stroke) => strokeKey(stroke) === strokeKey(lastOwn.shape)) ?? null) : null;
+  const activeStrokes = active?.strokes;
+  const undoTarget = useMemo(() => {
+    if (!lastOwn) return null;
+    const key = strokeKey(lastOwn.shape);
+    return [...(activeStrokes ?? [])].reverse().find((stroke) => strokeKey(stroke) === key) ?? null;
+  }, [activeStrokes, lastOwn]);
 
   function undo() {
     if (!lastOwn || !undoTarget) return;
@@ -172,11 +196,17 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const adding = !source && addStroke.isPending;
   const canPlaceBlock = Boolean(draftPlainText.trim()) && !adding;
 
-  function openPlacement() {
+  /** Veb #161: matn va formula bosilgan joyga yoziladi (avval keyingi bo'sh qatorga). */
+  function openPlacement(point: Point) {
     if (tool !== "text" && tool !== "math") return;
     setDraftText("");
     setDraftLines([]);
-    setPlacement({ tool, point: flowPointFor(1) });
+    setPlacement({ tool, point });
+  }
+
+  function anchorFor(point: Point): Point {
+    const width = state?.width ?? 1600;
+    return [Math.min(Math.max(point[0], 8), width - 40), point[1] + BOARD_TEXT_SIZE * 0.35];
   }
 
   function closePlacement() {
@@ -194,11 +224,10 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   function placeBlock() {
     if (!placement || !canPlaceBlock) return;
     let stroke: StrokeShapeDto;
+    const [x, y] = anchorFor(placement.point);
     if (placement.tool === "math") {
-      const [x, y] = flowPointFor(1);
       stroke = { type: "math", latex: draftText.trim(), x, y, size: BOARD_TEXT_SIZE, color };
     } else {
-      const [x, y] = flowPointFor(Math.max(1, draftLines.length));
       stroke = { type: "text", text: draftPlainText, x, y, size: BOARD_TEXT_SIZE, color, ...(hasRichFormatting(draftLines) ? { lines: draftLines } : {}) };
     }
     if (source) {
@@ -288,7 +317,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const scale = card.width ? card.width / state.width : 0;
   const formTop = placement ? Math.max(0, Math.min(placement.point[1] * scale - FORM_LIFT, card.height - formHeight)) : 0;
 
-  const pill = !canDraw ? (
+  const pill = source ? null : !canDraw ? (
     <MobileBoardPill icon={(fg) => <Eye size={14} color={fg} />} tone="neutral">
       {t("status.viewOnly")}
     </MobileBoardPill>
@@ -332,7 +361,12 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       <View style={styles.stage}>
         <View
           style={[styles.card, { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
-          onLayout={(event) => setCard({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })}
+          onLayout={(event) => {
+            const { width, height } = event.nativeEvent.layout;
+            setCard({ width, height });
+            // Klaviatura ochilib karta kichrayganda kanvas qisqarmasin.
+            if (!placing && width > 0) setViewRatio(height / width);
+          }}
         >
           <BoardCanvas
             strokes={active?.strokes ?? []}
@@ -442,8 +476,8 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
             canRedo={redoStack.length > 0}
             onUndo={undo}
             onRedo={redo}
-            onPrev={() => setSheet(Math.max(0, sheet - 1))}
-            onNext={() => setSheet(Math.min(total - 1, sheet + 1))}
+            onPrev={() => changeSheet(Math.max(0, sheet - 1))}
+            onNext={() => changeSheet(Math.min(total - 1, sheet + 1))}
             onPages={() => setPagesOpen(true)}
             onAdd={state.isTeacher || source ? () => (source ? source.addSheet() : addSheet.mutate()) : undefined}
           />
@@ -465,7 +499,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
           boardHeight={state.height}
           canAdd={state.isTeacher || Boolean(source)}
           onSelect={(index) => {
-            setSheet(index);
+            changeSheet(index);
             setSelected(null);
             setPagesOpen(false);
           }}

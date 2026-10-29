@@ -1,7 +1,8 @@
 import { apiClient, normalizePagination, type RequestOptions } from "@/shared/api";
 import { authEndpoints } from "./auth.endpoints";
-import { mapLoginRecords, mapTeacherRatings, mapTeacherStats } from "../lib/auth.mappers";
+import { mapAdminCertificate, mapLoginRecords, mapLoginRecordsPage, mapTeacherRatings, mapTeacherStats } from "../lib/auth.mappers";
 import type {
+  AdminCertificateDto,
   AuthUserDto,
   CertificateDto,
   ConsentRequestDto,
@@ -149,6 +150,29 @@ export const authApi = {
   updateLessonReminderMinutes(minutes: number) {
     return apiClient.patch<AuthUserDto>(authEndpoints.me, { lesson_reminder_minutes: minutes });
   },
+  removeAvatar() {
+    return apiClient.delete<AuthUserDto | null>(authEndpoints.meAvatar);
+  },
+  updateSettings(dto: { theme?: string; text_size?: string; target_band?: number | null; username?: string }) {
+    return apiClient.patch<AuthUserDto>(authEndpoints.me, dto);
+  },
+  async getLoginsPage(page: number, pageSize: number, options?: RequestOptions) {
+    return mapLoginRecordsPage(
+      await apiClient.get(authEndpoints.logins, { ...options, query: { page, page_size: pageSize } }),
+      { page, pageSize }
+    );
+  },
+  async getAdminCertificates(status: string, options?: RequestOptions) {
+    return normalizePagination<AdminCertificateDto>(
+      await apiClient.get(authEndpoints.adminCertificates, { ...options, query: { status, page_size: 100 } })
+    ).items.map(mapAdminCertificate);
+  },
+  verifyCertificate(id: string) {
+    return apiClient.post(authEndpoints.adminCertificateVerify(id), {});
+  },
+  rejectCertificate(id: string, reason: string) {
+    return apiClient.post(authEndpoints.adminCertificateReject(id), { reason });
+  },
   updateAvatar(avatar: File | null) {
     const body = new FormData();
     body.set("avatar", avatar ?? "");
@@ -211,10 +235,12 @@ export const authApi = {
   approveTeacher(id: string) {
     return apiClient.post<AuthUserDto>(authEndpoints.teacherApprove(id), {});
   },
-  uploadCertificate(file: File, title?: string) {
+  uploadCertificate(file: File, title?: string, issuer?: string, issuedYear?: number | null) {
     const body = new FormData();
     body.set("file", file);
     if (title) body.set("title", title);
+    if (issuer) body.set("issuer", issuer);
+    if (issuedYear) body.set("issued_year", String(issuedYear));
     return apiClient.post<CertificateDto>(authEndpoints.meCertificates, body);
   },
   async deleteCertificate(id: string) {

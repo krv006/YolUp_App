@@ -7,12 +7,15 @@
  */
 export { conversationApi } from "./api/conversation.api";
 export type { ChatRoomDto, DirectAction, DirectTeacher, DirectTeacherDto } from "./api/conversation.dto";
-export { DIRECT_STATUS, useDirectStatusLabel } from "./constants/direct-status";
+export { DIRECT_STATUS, isDirectLocked, useDirectStatusLabel } from "./constants/direct-status";
 export { mapConversationDto, mapConversationPage, mapTeacherDto } from "./lib/conversation.mappers";
+export { isOwnLastMessage, lastMessageBody } from "./lib/last-message";
+export type { LastMessageLabels } from "./lib/last-message";
 export { conversationKeys } from "./model/conversation.keys";
 export { useNewConversationStore } from "./model/new-conversation.store";
 export {
   matchesConversationFilter,
+  countUnreadChats,
   useConversationFilter,
   useConversationFilterStore,
 } from "./model/conversation-filter.store";
@@ -20,6 +23,7 @@ export type { ConversationFilter } from "./model/conversation-filter.store";
 export {
   readCachedConversation,
   useConversations,
+  useConversationSync,
   useGroupImages,
   useTeachersForDirect,
   useRequestDirect,

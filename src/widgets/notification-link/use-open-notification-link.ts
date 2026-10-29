@@ -73,7 +73,9 @@ export function useOpenNotificationLink() {
         const room = conversations.data?.find((item) => item.courseId === link.id);
         return go(room ? `${prefix}/chats/${room.id}` : `${prefix}/chats`);
       }
-      if (type === "conversation" || type === "room" || type === "chat" || type === "message") {
+      if (type === "certificate") return go(`${prefix}/profile/certificates`);
+      if (type === "support") return go(`${prefix}/profile/help?ticket=${encodeURIComponent(link.id)}`);
+      if (type === "conversation" || type === "room" || type === "chat" || type === "chat_room" || type === "message") {
         return go(`${prefix}/chats/${link.id}`);
       }
     },

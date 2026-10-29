@@ -43,6 +43,7 @@ export {
   useDeleteRecording,
   useFinishLesson,
   useRateLesson,
+  useLessonReminder,
   useUpdateLesson,
 } from "./model/lesson.queries";
 export { useLessonView, useLessonViewStore } from "./model/lesson-view.store";

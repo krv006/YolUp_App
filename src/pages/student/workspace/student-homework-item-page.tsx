@@ -102,7 +102,7 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   function send() {
     setError(null);
     submit
-      .mutateAsync({ assignmentId: assignment.id, file: file ? toUploadFile(file) : null, skillKey: assignment.skillKey, comment })
+      .mutateAsync({ assignmentId: assignment.id, files: file ? [toUploadFile(file)] : [], skillKey: assignment.skillKey, comment })
       .then(() => writeDraft(assignment.id, ""))
       .catch((reason: unknown) => setError(homeworkFieldError(reason, "file")));
   }

@@ -215,7 +215,8 @@
     "mobileReadyNote": "Tayyor bo‘lishi bilan chatga xabar yuboriladi.",
     "joinedYou": "Qatnashdingiz",
     "minutesShort": "{{count}} daq",
-    "download": "Yuklab olish"
+    "download": "Yuklab olish",
+    "volume": "Ovoz balandligi"
   },
   "schedule": {
     "now": "HOZIR",
@@ -332,7 +333,6 @@
     "attendanceStat": "Davomat",
     "emptyStudentHint": "O‘qituvchingiz dars qo‘shganda shu yerda ko‘rinadi.",
     "remind": "Eslatma qo‘yish",
-    "soon": "Tez orada",
     "recording": "Video yozuv",
     "rate": "Baholash",
     "myRating": "Bahoyingiz · {{value}}",
@@ -344,7 +344,10 @@
       "cancelled": "Bekor qilindi"
     },
     "dayToday": "Bugun",
-    "dayTomorrow": "Ertaga"
+    "dayTomorrow": "Ertaga",
+    "reminderOn": "Eslatma · {{count}} daq oldin",
+    "reminderSet": "Dars boshlanishidan {{count}} daqiqa oldin eslatamiz",
+    "reminderCleared": "Eslatma bekor qilindi"
   },
   "scheduleDialog": {
     "title": "Yangi dars",
@@ -357,8 +360,6 @@
     "date": "Sana",
     "start": "Boshlanish",
     "duration": "Davomiyligi (daqiqa)",
-    "quiz": "Test biriktirish",
-    "noQuiz": "Test biriktirilmagan",
     "submit": "Darsni saqlash",
     "mobileDescription": "Guruhni tanlang va vaqtni belgilang",
     "weeksValue": "{{count}} hafta",

@@ -1,20 +1,16 @@
 import { useMemo, useState } from "react";
-import { useIsStudent } from "@/modules/auth";
 import {
+  countUnreadChats,
   matchesConversationFilter,
   useConversationFilter,
   useConversations,
   type ConversationFilter,
 } from "@/modules/conversation";
+import { useIsStudent } from "@/modules/auth";
 import { useUserSearch } from "@/modules/notification";
 
-export const CONVERSATION_FILTERS: ConversationFilter[] = ["all", "group", "direct", "unread"];
+export const CONVERSATION_FILTERS: ConversationFilter[] = ["all", "group", "direct"];
 
-/**
- * Suhbatlar ro'yxati holati — veb `widgets/chat-shell/use-conversation-list.ts`
- * bilan bir xil: filtr, nom bo'yicha qidiruv, qadalganlar tepada, qidiruvda
- * "Odamlar" (ro'yxatda yo'q suhbatlar) va o'qilmagan suhbatlar soni.
- */
 export function useConversationList() {
   const { filter, setFilter } = useConversationFilter();
   const [search, setSearch] = useState("");
@@ -39,6 +35,28 @@ export function useConversationList() {
   }, [people.data, data]);
 
   const unreadTotal = data.reduce((sum, item) => sum + (item.unreadCount > 0 ? 1 : 0), 0);
+  const unreadByFilter = useMemo(
+    () =>
+      Object.fromEntries(CONVERSATION_FILTERS.map((id) => [id, countUnreadChats(data, id)])) as Record<
+        ConversationFilter,
+        number
+      >,
+    [data]
+  );
 
-  return { data, isLoading, isError, refetch, filter, setFilter, search, setSearch, query, visible, peopleRows, unreadTotal };
+  return {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    filter,
+    setFilter,
+    search,
+    setSearch,
+    query,
+    visible,
+    peopleRows,
+    unreadTotal,
+    unreadByFilter,
+  };
 }

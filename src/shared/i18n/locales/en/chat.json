@@ -87,7 +87,6 @@
     "tabMedia": "Media",
     "filesEmpty": "No files",
     "mediaEmpty": "No media",
-    "sectionPending": "Will appear once the backend is ready",
     "online": "online",
     "onlineCount": "{{count}} online",
     "teacherBadge": "Teacher",
@@ -95,12 +94,14 @@
     "filesEmptyHint": "Files shared in the group are collected here.",
     "mediaEmptyHint": "Photos and videos shared in the group are collected here.",
     "descriptionShort": "Description",
-    "memberYou": "{{name}} (you)"
+    "memberYou": "{{name}} (you)",
+    "messageTeacher": "Message"
   },
   "item": {
     "liveNow": "Lesson in progress",
     "typing": "typing...",
-    "mentionTitle": "You were mentioned"
+    "mentionTitle": "You were mentioned",
+    "recordingVoice": "recording a voice message..."
   },
   "newDialog": {
     "title": "New group",
@@ -148,6 +149,7 @@
     "emptyGroupHint": "Be the first to say hi or post an announcement — every member will get it.",
     "emptyTitle": "No messages yet",
     "emptyHint": "Be the first to say hi.",
+    "emptyLockedHint": "Messages will appear here once the conversation is open.",
     "today": "Today",
     "loadError": "Couldn't load messages",
     "loadErrorHint": "Please try again shortly.",
@@ -222,7 +224,8 @@
     "recordingHint": "Open the lesson recording"
   },
   "typing": {
-    "suffix": "typing"
+    "suffix": "typing",
+    "voiceSuffix": "is recording a voice message"
   },
   "attachment": {
     "openAria": "{{name}} — open",
@@ -250,8 +253,7 @@
     "filters": {
       "all": "All",
       "direct": "Direct",
-      "group": "Groups",
-      "unread": "Unread"
+      "group": "Groups"
     },
     "searchPlaceholder": "Search conversations...",
     "searchAria": "Search conversations",
@@ -296,7 +298,11 @@
     "peopleSection": "People",
     "startChat": "Start chat",
     "connectionLost": "No connection",
-    "freshStart": "Fresh start"
+    "freshStart": "Fresh start",
+    "voiceMessage": "Voice message",
+    "imageMessage": "Photo",
+    "videoMessage": "Video",
+    "recordingVoice": "{{name}} is recording a voice message..."
   },
   "pinned": {
     "label": "Pinned message",
@@ -344,7 +350,10 @@
   "system": {
     "recordingTitle": "The lesson recording is ready",
     "recordingHint": "The recording can only be watched on the platform",
-    "recordingAction": "Watch"
+    "recordingAction": "Watch",
+    "boardTitle": "Lesson board",
+    "boardAction": "Open",
+    "boardName": "“{{title}}” board"
   },
   "attach": {
     "title": "Attach",
@@ -376,5 +385,19 @@
       "Fr",
       "Sa"
     ]
+  },
+  "directGate": {
+    "studentPendingTitle": "Request sent",
+    "studentPendingHint": "You can write here once the teacher accepts.",
+    "studentBlockedTitle": "Conversation closed",
+    "studentBlockedHint": "The teacher closed this conversation. You can send a new request.",
+    "resend": "Send request again",
+    "teacherPendingTitle": "{{name}} wants to message you",
+    "teacherPendingHint": "Accept to let both of you write in this chat.",
+    "teacherBlockedTitle": "Conversation blocked",
+    "teacherBlockedHint": "The student can't message you.",
+    "accept": "Accept",
+    "block": "Block",
+    "unblock": "Unblock"
   }
 }

@@ -100,6 +100,7 @@ export interface ChatMemberDto {
   username?: string;
   role?: string;
   is_online?: boolean;
+  last_seen_at?: string | null;
   avatar_url?: string | null;
 }
 
@@ -112,6 +113,7 @@ export interface SocketTypingEventDto {
   type: "typing";
   user_id: string | number;
   name: string;
+  kind?: "text" | "voice";
 }
 
 export interface SocketErrorEventDto {
@@ -124,3 +126,18 @@ export type SocketEventDto =
   | SocketTypingEventDto
   | SocketErrorEventDto
   | { type: string; payload?: Record<string, unknown>; [key: string]: unknown };
+
+export interface RoomAttachmentDto {
+  id?: string | number;
+  message_id?: string | number;
+  name?: string;
+  file_name?: string;
+  size?: number | null;
+  mime?: string;
+  mime_type?: string;
+  url?: string | null;
+  file_url?: string | null;
+  thumbnail_url?: string | null;
+  sender?: { id?: string | number; name?: string } | null;
+  created_at?: string;
+}

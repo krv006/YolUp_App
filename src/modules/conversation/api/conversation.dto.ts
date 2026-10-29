@@ -6,7 +6,13 @@ export interface ChatRoomDto {
   course?: string | number | null;
   title: string;
   direct_status?: DirectStatus | null;
-  last_message?: { text?: string; sender?: string; created_at?: string } | null;
+  last_message?: {
+    text?: string;
+    sender?: string;
+    sender_id?: string | number | null;
+    message_type?: string | null;
+    created_at?: string;
+  } | null;
   other_user?: UserDto | null;
   unread?: number;
   unread_count?: number;
@@ -40,6 +46,7 @@ export interface DirectTeacher {
   username: string;
   name: string;
   phone: string | null;
+  avatarUrl: string | null;
   directStatus: DirectStatus | null;
   roomId: string | null;
 }

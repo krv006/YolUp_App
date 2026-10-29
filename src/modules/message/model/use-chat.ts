@@ -3,9 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 // 🟡 MOSLASH: veb `useNavigate` (react-router) -> Expo Router `useRouter`.
 import { useRouter } from "expo-router";
 import { toast } from "sonner";
+import type { Page } from "@/shared/api";
 import { i18n } from "@/shared/i18n";
-import { conversationApi, conversationKeys, readCachedConversation } from "@/modules/conversation";
-import type { ChatMessage, ConversationRole, SendMessagePayload } from "@/shared/types";
+import { conversationApi, conversationKeys, readCachedConversation, useConversations } from "@/modules/conversation";
+import type { ChatMessage, Conversation, ConversationRole, SendMessagePayload } from "@/shared/types";
 import { messageApi } from "../api/message.api";
 import { ChatSocketManager, type SocketState } from "../lib/chat-socket-manager";
 import { applyReactions, markMessageFailed, upsertMessage } from "../lib/message.mappers";
@@ -35,7 +36,7 @@ export function useChat(
     [conversationId, role]
   );
   const [socketState, setSocketState] = useState<SocketState>("idle");
-  const [typing, setTyping] = useState<string | null>(null);
+  const [typing, setTyping] = useState<{ name: string; kind: "text" | "voice" } | null>(null);
 
   const cachedConversation = readCachedConversation(queryClient, conversationId, role);
 
@@ -44,6 +45,7 @@ export function useChat(
     queryFn: ({ signal }) => conversationApi.getById(conversationId as string, { signal }),
     enabled: Boolean(conversationId),
     placeholderData: cachedConversation,
+    refetchInterval: (query) => (query.state.data?.directStatus === "pending" ? REST_FALLBACK_POLL_MS : false),
   });
 
   const messages = useQuery({
@@ -58,6 +60,16 @@ export function useChat(
     enabled: Boolean(conversationId),
     refetchInterval: socketState === "connected" ? false : REST_FALLBACK_POLL_MS,
   });
+
+  const rooms = useConversations(role);
+  const roomActivityAt = rooms.data?.find((item) => item.id === conversationId)?.updatedAt ?? null;
+  const latestMessageAt = messages.data?.at(-1)?.createdAt ?? null;
+  const refetchMessages = messages.refetch;
+
+  useEffect(() => {
+    if (!roomActivityAt || !latestMessageAt) return;
+    if (Date.parse(roomActivityAt) - Date.parse(latestMessageAt) > 1000) void refetchMessages();
+  }, [roomActivityAt, latestMessageAt, refetchMessages]);
 
   const socket = useMemo(
     () =>
@@ -100,8 +112,26 @@ export function useChat(
                 });
               }
               if (event.type === "typing" && event.userId !== String(senderId)) {
-                setTyping(event.name);
-                globalThis.setTimeout(() => setTyping(null), TYPING_RESET_MS);
+                const markRow = (value: { name: string; kind: "text" | "voice" } | null) =>
+                  queryClient.setQueryData<Page<Conversation>>(conversationKeys.list(role), (current) =>
+                    current
+                      ? {
+                          ...current,
+                          items: current.items.map((item) =>
+                            item.id === conversationId
+                              ? { ...item, typing: Boolean(value), typingName: value?.name ?? null, typingKind: value?.kind }
+                              : item
+                          ),
+                        }
+                      : current
+                  );
+                const value = { name: event.name, kind: event.kind };
+                setTyping(value);
+                markRow(value);
+                globalThis.setTimeout(() => {
+                  setTyping(null);
+                  markRow(null);
+                }, TYPING_RESET_MS);
               }
               if (event.type === "removed") {
                 toast.error(i18n.t("chat:removedFromGroup"));
@@ -126,11 +156,14 @@ export function useChat(
       const temporaryId = `temp-${crypto.randomUUID()}`;
       const optimistic: ChatMessage = {
         id: temporaryId,
+        clientMessageId: payload.clientMessageId ?? null,
         conversationId: conversationId ?? "",
         senderId: senderId ?? "",
         senderName: "",
         senderUsername: "",
         text: payload.text,
+        replyTo: payload.replyTo,
+        replyToId: payload.replyToId ?? null,
         type: "text",
         createdAt: new Date().toISOString(),
         status: "pending",
@@ -143,14 +176,14 @@ export function useChat(
       );
       return { temporaryId };
     },
-    onSuccess: (message, _payload, context) => {
+    onSuccess: (message, payload, context) => {
       queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
         upsertMessage(
           current.filter((item) => item.id !== context.temporaryId),
-          message
+          { ...message, clientMessageId: message.clientMessageId || payload.clientMessageId || null }
         )
       );
-      queryClient.invalidateQueries({ queryKey: conversationKeys.all });
+      queryClient.invalidateQueries({ queryKey: conversationKeys.list(role), exact: true });
     },
     onError: (_error, _payload, context) =>
       queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
@@ -216,9 +249,18 @@ export function useChat(
   });
 
   const markRead = useMutation({
-    mutationFn: (lastReadMessageId?: string | null) =>
-      messageApi.markRead(conversationId as string, lastReadMessageId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: conversationKeys.all }),
+    mutationFn: () => messageApi.markRead(conversationId as string),
+    onSuccess: () => {
+      const clear = (item: Conversation) =>
+        item.id === conversationId ? { ...item, unreadCount: 0, hasUnreadMention: false } : item;
+      queryClient.setQueryData<Page<Conversation>>(conversationKeys.list(role), (current) =>
+        current ? { ...current, items: current.items.map(clear) } : current
+      );
+      queryClient.setQueryData<Conversation>(conversationKeys.detail(conversationId ?? "", role), (current) =>
+        current ? { ...clear(current), firstUnreadMessageId: null } : current
+      );
+      queryClient.invalidateQueries({ queryKey: conversationKeys.list(role), exact: true });
+    },
   });
 
   function retryMessage(message: ChatMessage) {
@@ -232,7 +274,7 @@ export function useChat(
     conversation: {
       ...conversation,
       data: conversation.data
-        ? { ...conversation.data, typing: Boolean(typing), typingName: typing }
+        ? { ...conversation.data, typing: Boolean(typing), typingName: typing?.name ?? null, typingKind: typing?.kind }
         : conversation.data,
     },
     messages,
@@ -247,7 +289,7 @@ export function useChat(
     pinMessage,
     markRead,
     socketState,
-    sendTyping: () => socket?.sendTyping(),
+    sendTyping: (kind?: "text" | "voice") => socket?.sendTyping(kind),
   };
 }
 

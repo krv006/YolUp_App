@@ -58,6 +58,17 @@ export function dsAlpha(color: string, alpha: number): string {
 }
 
 /**
+ * Soyaning shaffof nusxasi — faol bo'lganda soya oladigan elementlar uchun.
+ *
+ * Android `boxShadow` ni mount'dan KEYIN qo'shilganda `borderRadius` siz
+ * chizadi (to'rtburchak soya). Shuning uchun soya doim turadi, faol emasida
+ * esa shu shaffof nusxa: `boxShadow: active ? ds.shadow.sm : dsShadowHidden(ds.shadow.sm)`.
+ */
+export function dsShadowHidden(shadow: string): string {
+  return shadow.replace(/rgba\(([^)]*),\s*[\d.]+\)/g, "rgba($1, 0)");
+}
+
+/**
  * Vebdagi rang klasslari satri (`"bg-accent-saffron-bg text-accent-saffron-fg"`)
  * -> `{ bg, fg }`. Domen qatlamidagi ohanglar (masalan `NOTIFICATION_TONES`)
  * vebda Tailwind klass sifatida yozilgan — ular o'zgartirilmasdan shu

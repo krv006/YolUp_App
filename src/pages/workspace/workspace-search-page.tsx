@@ -1,15 +1,15 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useIsStudent, useRoleRoutes } from "@/modules/auth";
 import { useConversations } from "@/modules/conversation";
-import { useCourses } from "@/modules/course";
-import { useLessons } from "@/modules/lesson";
-import { quizDisplayTitle, useQuizzes } from "@/modules/quiz";
+import { useQuizzes } from "@/modules/quiz";
+import { useGlobalSearch, type SearchHit, type SearchType } from "@/modules/search";
 import { ROUTES } from "@/shared/config";
 import {
+  Avatar,
   bodyFont,
   DsGradient,
   DsText,
@@ -25,15 +25,13 @@ import {
   type IconName,
 } from "@/shared/ui";
 
-type Filter = "all" | "groups" | "lessons" | "quizzes" | "messages";
+type Filter = "all" | SearchType;
 
 /**
  * Qidiruv (M5.9–5.10) — veb `pages/workspace/workspace-search-page.tsx`:
- * kamida 2 harf, natijalar guruhlar, darslar (guruh nomi bo'yicha ham),
- * testlar va xabarlar bo'limlarida; "Bugun / Ertaga" vaqt ko'rinishi.
- *
- * Farq: test va dars natijalari mobilning hozirgi sahifalarini ochadi
- * (Workspace marshrutlari 5-bosqichda vebdagidek bo'ladi).
+ * kamida 2 harf, backend qidiruvi (`useGlobalSearch`), natijalar guruhlar,
+ * darslar, testlar, xabarlar va odamlar bo'limlarida; "Bugun / Ertaga" vaqt
+ * ko'rinishi.
  */
 export function WorkspaceSearchPage() {
   const { t } = useTranslation("workspace");
@@ -47,33 +45,21 @@ export function WorkspaceSearchPage() {
   const [term, setTerm] = useState("");
   const [focused, setFocused] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
-  const query = term.trim().toLowerCase();
-  const enabled = query.length >= 2;
+  const search = useGlobalSearch(term, filter);
+  const enabled = search.active;
 
-  const courses = useCourses();
-  const lessons = useLessons({ page_size: 200 });
-  const quizzes = useQuizzes(null);
+  const quizzes = useQuizzes(null, !isStudent);
   const conversations = useConversations(isStudent ? "student" : "teacher");
   const months = tl("list.months", { returnObjects: true }) as string[];
 
-  const groups = useMemo(() => {
-    const matches = (value: string | null | undefined) => Boolean(value && value.toLowerCase().includes(query));
-    return enabled ? (courses.data ?? []).filter((item) => matches(item.title)) : [];
-  }, [courses.data, query, enabled]);
-  const lessonHits = useMemo(() => {
-    const matches = (value: string | null | undefined) => Boolean(value && value.toLowerCase().includes(query));
-    return enabled ? (lessons.data ?? []).filter((item) => matches(item.title) || matches(item.courseTitle)) : [];
-  }, [lessons.data, query, enabled]);
-  const quizHits = useMemo(() => {
-    const matches = (value: string | null | undefined) => Boolean(value && value.toLowerCase().includes(query));
-    return enabled ? (quizzes.data ?? []).filter((item) => matches(quizDisplayTitle(item))) : [];
-  }, [quizzes.data, query, enabled]);
-  const messageHits = useMemo(() => {
-    const matches = (value: string | null | undefined) => Boolean(value && value.toLowerCase().includes(query));
-    return enabled ? (conversations.data ?? []).filter((item) => matches(item.title) || matches(item.lastMessage)) : [];
-  }, [conversations.data, query, enabled]);
-
-  const total = groups.length + lessonHits.length + quizHits.length + messageHits.length;
+  const byType = (type: SearchType) => search.items.filter((item) => item.type === type);
+  const groups = byType("groups");
+  const lessonHits = byType("lessons");
+  const quizHits = byType("quizzes");
+  const messageHits = byType("messages");
+  const people = byType("people");
+  const countOf = (type: SearchType) => search.counts[type] ?? 0;
+  const total = (Object.values(search.counts) as number[]).reduce((sum, value) => sum + value, 0);
 
   const filters: Array<{ id: Filter; label: string }> = [
     { id: "all", label: t("filterAll", { count: total }) },
@@ -81,12 +67,19 @@ export function WorkspaceSearchPage() {
     { id: "lessons", label: t("filterLessons") },
     { id: "quizzes", label: t("filterQuizzes") },
     { id: "messages", label: t("filterMessages") },
+    { id: "people", label: t("filterPeople") },
   ];
 
   const show = (id: Filter) => filter === "all" || filter === id;
   const go = (href: string) => router.push(href as never);
 
-  function lessonMoment(value: string): string {
+  function openQuiz(hit: SearchHit) {
+    const quiz = quizzes.data?.find((entry) => entry.id === hit.id);
+    go(isStudent ? ROUTES.student.test(hit.id) : quiz && quiz.status !== "draft" ? ROUTES.teacher.testResults(hit.id) : ROUTES.teacher.test(hit.id));
+  }
+
+  function lessonMoment(value: string | null): string {
+    if (!value) return "";
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "";
     const time = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
@@ -131,7 +124,7 @@ export function WorkspaceSearchPage() {
           {term ? <SearchClear label={t("mobileSearch.clear")} onPress={() => setTerm("")} /> : null}
         </View>
 
-        {enabled && total > 0 ? (
+        {enabled && (total > 0 || filter !== "all") ? (
           <View style={styles.block}>
             <MobileSegment scroll items={filters} value={filter} onChange={setFilter} />
           </View>
@@ -141,24 +134,36 @@ export function WorkspaceSearchPage() {
           <DsText v="body-sm" c="ink-secondary" style={styles.hint}>
             {t("searchHint")}
           </DsText>
-        ) : total === 0 ? (
+        ) : search.loading && !search.items.length ? (
+          <View style={[styles.card, styles.block, { backgroundColor: ds.c.surface }]}>
+            {Array.from({ length: 4 }, (_, index) => (
+              <View key={index} style={[styles.row, index < 3 && { borderBottomWidth: 1, borderBottomColor: ds.c.line }]}>
+                <View style={[styles.icon, { backgroundColor: ds.c.skeleton }]} />
+                <View style={[styles.text, styles.skeletonText]}>
+                  <View style={[styles.skeletonLine, { width: 176, backgroundColor: ds.c.skeleton }]} />
+                  <View style={[styles.skeletonLine, styles.skeletonShort, { backgroundColor: ds.c.skeleton }]} />
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : !search.items.length ? (
           <View style={styles.block}>
             <MobileEmptyCard icon="search" title={t("mobileSearch.emptyTitle")} description={t("mobileSearch.emptyHint", { query: term.trim() })} />
           </View>
         ) : null}
 
         {show("groups") && groups.length ? (
-          <ResultSection title={t("mobileSearch.groups", { count: groups.length })}>
-            {groups.map((course, index) => (
+          <ResultSection title={t("mobileSearch.groups", { count: countOf("groups") })}>
+            {groups.map((hit, index) => (
               <ResultRow
-                key={course.id}
+                key={hit.id}
                 icon="person"
                 tone="bg-brand-subtle text-ink"
-                title={course.title}
-                hint={`${t("groupMeta", { count: course.studentCount ?? 0 })} · ${course.subjectLabel || course.subject}`}
+                title={hit.title}
+                hint={hit.subtitle}
                 last={index === groups.length - 1}
                 onPress={() => {
-                  const room = conversations.data?.find((item) => item.courseId === course.id);
+                  const room = conversations.data?.find((item) => item.courseId === hit.id);
                   go(room ? routes.chat(room.id) : routes.chats);
                 }}
               />
@@ -167,14 +172,14 @@ export function WorkspaceSearchPage() {
         ) : null}
 
         {show("lessons") && lessonHits.length ? (
-          <ResultSection title={t("mobileSearch.lessons", { count: lessonHits.length })}>
-            {lessonHits.map((item, index) => (
+          <ResultSection title={t("mobileSearch.lessons", { count: countOf("lessons") })}>
+            {lessonHits.map((hit, index) => (
               <ResultRow
-                key={item.id}
+                key={hit.id}
                 icon="clock"
                 tone="bg-accent-teal-bg text-accent-teal-fg"
-                title={item.title ? `${item.courseTitle} — ${item.title}` : item.courseTitle}
-                hint={lessonMoment(item.startsAt)}
+                title={hit.subtitle && hit.subtitle !== hit.title ? `${hit.subtitle} — ${hit.title}` : hit.title}
+                hint={lessonMoment(hit.startsAt)}
                 last={index === lessonHits.length - 1}
                 onPress={() => go(routes.schedule)}
               />
@@ -183,40 +188,47 @@ export function WorkspaceSearchPage() {
         ) : null}
 
         {show("quizzes") && quizHits.length ? (
-          <ResultSection title={t("mobileSearch.quizzes", { count: quizHits.length })}>
-            {quizHits.map((quiz, index) => (
+          <ResultSection title={t("mobileSearch.quizzes", { count: countOf("quizzes") })}>
+            {quizHits.map((hit, index) => (
               <ResultRow
-                key={quiz.id}
+                key={hit.id}
                 icon="quiz"
                 tone="bg-accent-violet-bg text-accent-violet-fg"
-                title={quizDisplayTitle(quiz)}
-                hint={`${quiz.status === "draft" ? t("draft") : t("published")} · ${t("quizQuestions", { count: quiz.questionCount })}`}
+                title={hit.title}
+                hint={hit.subtitle}
                 last={index === quizHits.length - 1}
-                onPress={() =>
-                  go(
-                    isStudent
-                      ? ROUTES.student.test(quiz.id)
-                      : quiz.status === "draft"
-                        ? ROUTES.teacher.test(quiz.id)
-                        : ROUTES.teacher.testResults(quiz.id)
-                  )
-                }
+                onPress={() => openQuiz(hit)}
               />
             ))}
           </ResultSection>
         ) : null}
 
         {show("messages") && messageHits.length ? (
-          <ResultSection title={t("mobileSearch.messages", { count: messageHits.length })}>
-            {messageHits.map((room, index) => (
+          <ResultSection title={t("mobileSearch.messages", { count: countOf("messages") })}>
+            {messageHits.map((hit, index) => (
               <ResultRow
-                key={room.id}
+                key={hit.id}
                 icon="chat"
                 tone="bg-success-bg text-success-fg"
-                title={room.title}
-                hint={room.lastMessage}
+                title={hit.title}
+                hint={[hit.subtitle, hit.sender].filter(Boolean).join(" · ")}
                 last={index === messageHits.length - 1}
-                onPress={() => go(routes.chat(room.id))}
+                onPress={() => go(hit.roomId ? routes.chat(hit.roomId) : routes.chats)}
+              />
+            ))}
+          </ResultSection>
+        ) : null}
+
+        {show("people") && people.length ? (
+          <ResultSection title={t("mobileSearch.people", { count: countOf("people") })}>
+            {people.map((hit, index) => (
+              <ResultRow
+                key={hit.id}
+                avatar={{ name: hit.title, src: hit.avatarUrl }}
+                title={hit.title}
+                hint={hit.subtitle}
+                last={index === people.length - 1}
+                onPress={() => go(hit.roomId ? routes.chat(hit.roomId) : routes.chats)}
               />
             ))}
           </ResultSection>
@@ -239,20 +251,22 @@ function ResultSection({ title, children }: { title: string; children: ReactNode
 function ResultRow({
   icon,
   tone,
+  avatar,
   title,
   hint,
   last,
   onPress,
 }: {
-  icon: IconName;
-  tone: string;
+  icon?: IconName;
+  tone?: string;
+  avatar?: { name: string; src: string | null };
   title: string;
   hint: string;
   last: boolean;
   onPress: () => void;
 }) {
   const ds = useDs();
-  const colors = toneColors(tone, ds);
+  const colors = toneColors(tone ?? "", ds);
   return (
     <Pressable
       accessibilityRole="button"
@@ -263,9 +277,13 @@ function ResultRow({
         pressed && { backgroundColor: ds.c.subtle },
       ]}
     >
-      <View style={[styles.icon, { backgroundColor: colors.bg }]}>
-        <Icon name={icon} size={20} color={colors.fg ?? ds.c.ink} />
-      </View>
+      {avatar ? (
+        <Avatar variant="legacy" name={avatar.name} src={avatar.src ?? undefined} size="sm" box={40} />
+      ) : (
+        <View style={[styles.icon, { backgroundColor: colors.bg }]}>
+          <Icon name={icon ?? "search"} size={20} color={colors.fg ?? ds.c.ink} />
+        </View>
+      )}
       <View style={styles.text}>
         <DsText v="title" numberOfLines={1}>
           {title}
@@ -293,4 +311,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 15 },
   icon: { width: 40, height: 40, borderRadius: dsRadius.lg, alignItems: "center", justifyContent: "center" },
   text: { flex: 1, minWidth: 0 },
+  skeletonText: { gap: 8 },
+  skeletonLine: { height: 14, maxWidth: "100%", borderRadius: dsRadius.full },
+  skeletonShort: { width: 112, height: 12 },
 });

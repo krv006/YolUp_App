@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   HomeworkResultDialog,
@@ -12,7 +13,7 @@ import {
   useSubmission,
 } from "@/modules/homework";
 import { ROUTES } from "@/shared/config";
-import { Avatar, DsGradient, DsText, dsRadius, Icon, MobileRoundButton, useDs } from "@/shared/ui";
+import { Avatar, DsGradient, DsText, dsRadius, Icon, MobileInput, MobileRoundButton, useDs } from "@/shared/ui";
 import { formatDue } from "./format-due";
 import { ResubmitDialog } from "./resubmit-dialog";
 import { SubmissionPreview } from "./submission-preview";
@@ -38,6 +39,7 @@ export function HomeworkReviewPage() {
   const download = useDownloadSubmissionFile();
 
   const [grade, setGrade] = useState<number | null>(null);
+  const [comment, setComment] = useState("");
   const [shareWithParent, setShareWithParent] = useState(true);
   const [resubmitOpen, setResubmitOpen] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
@@ -53,6 +55,7 @@ export function HomeworkReviewPage() {
   if (current && loadedId !== current.id) {
     setLoadedId(current.id);
     setGrade(current.gradeValue ?? null);
+    setComment(current.teacherComment ?? "");
     setShareWithParent(current.shareWithParent);
   }
 
@@ -77,14 +80,14 @@ export function HomeworkReviewPage() {
   function confirm() {
     if (!current) return;
     review.mutate(
-      { id: current.id, input: { gradeValue: grade, grade: grade === null ? "" : String(grade), shareWithParent } },
+      { id: current.id, input: { gradeValue: grade, grade: grade === null ? "" : String(grade), shareWithParent, teacherComment: comment.trim() } },
       { onSuccess: () => move(1) }
     );
   }
 
   return (
     <View style={[styles.fill, { backgroundColor: ds.c.canvas }]}>
-      <ScrollView contentContainerStyle={[styles.page, { paddingTop: insets.top + 20 }]}>
+      <KeyboardAwareScrollView contentContainerStyle={[styles.page, { paddingTop: insets.top + 20 }]} keyboardShouldPersistTaps="handled" bottomOffset={16}>
         <DsGradient name="auth" />
         <View style={styles.header}>
           <MobileRoundButton icon="chevron-left" label={index <= 0 ? t("review.back") : t("review.prev")} onPress={() => (index <= 0 ? back() : move(-1))} />
@@ -199,7 +202,45 @@ export function HomeworkReviewPage() {
             {grade === aiGrade ? t("mobileReview.matches", { value: aiGrade }) : t("review.aiSuggestion", { value: aiGrade })}
           </DsText>
         ) : null}
-      </ScrollView>
+
+        {/* Veb #162: o'qituvchi izohi, o'quvchi izohi va bir nechta fayl */}
+        <View style={styles.commentField}>
+          <DsText v="body-sm">{t("review.comment")}</DsText>
+          <MobileInput surface multiline multilineHeight={96} value={comment} maxLength={2000} placeholder={t("review.commentPlaceholder")} onChangeText={setComment} />
+        </View>
+        {current?.comment ? (
+          <View style={styles.note}>
+            <DsText v="body-xs" c="ink-secondary">
+              {t("review.studentComment")}
+            </DsText>
+            <View style={[styles.noteBox, { borderColor: ds.c.line }]}>
+              <DsText v="body-sm">{current.comment}</DsText>
+            </View>
+          </View>
+        ) : null}
+        {current && current.files.length > 1 ? (
+          <View style={styles.note}>
+            <DsText v="body-xs" c="ink-secondary">
+              {t("review.files", { count: current.files.length })}
+            </DsText>
+            {current.files.map((file) => (
+              <Pressable
+                key={file.index}
+                accessibilityRole="button"
+                disabled={download.isPending}
+                onPress={() => download.mutate({ id: current.id, fileName: file.name, index: file.index })}
+                style={({ pressed }) => [styles.fileRow, { backgroundColor: pressed ? ds.c.tint : ds.c.subtle }, download.isPending && styles.faded]}
+              >
+                <Icon name="description-fill" size={18} color={ds.c["error-text"]} />
+                <DsText v="body-sm" w="600" numberOfLines={1} style={styles.grow}>
+                  {file.name}
+                </DsText>
+                <Icon name="download" size={18} color={ds.c["icon-secondary"]} />
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
+      </KeyboardAwareScrollView>
 
       {/* `grid-cols-[1fr_1.4fr] gap-2 rounded-t-2xl bg-surface px-4 pt-3 pb-8` */}
       <View style={[styles.footer, { backgroundColor: ds.c.surface, paddingBottom: Math.max(32, insets.bottom + 12) }]}>
@@ -255,6 +296,13 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
   dim: { opacity: 0.4 },
+  faded: { opacity: 0.6 },
+  /* `mt-5 flex-col gap-2` */
+  commentField: { marginTop: 20, gap: 8 },
+  /* `mt-4 flex-col gap-2` */
+  note: { marginTop: 16, gap: 8 },
+  noteBox: { paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderRadius: dsRadius.md },
+  fileRow: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: dsRadius.md },
   page: { paddingHorizontal: 16, paddingBottom: 24 },
   header: { flexDirection: "row", alignItems: "center", gap: 12 },
   headerTitle: { flex: 1, minWidth: 0, textAlign: "center" },

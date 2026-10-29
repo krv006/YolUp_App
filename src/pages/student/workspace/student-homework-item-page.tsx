@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConversations } from "@/modules/conversation";
-import { homeworkFieldError, useAssignment, useDownloadAssignmentFile, useSubmission, useSubmitHomework } from "@/modules/homework";
+import {
+  homeworkFieldError,
+  homeworkKeys,
+  useAssignment,
+  useDownloadAssignmentFile,
+  useDownloadSubmissionFile,
+  useHomeworkDraft,
+  useSaveHomeworkDraft,
+  useSubmission,
+  useSubmitHomework,
+} from "@/modules/homework";
 import { ROUTES } from "@/shared/config";
-import { pickDocument, sanitizeHtml, storage, toUploadFile, type PickedFile } from "@/shared/lib";
+import { pickDocuments, sanitizeHtml, toUploadFile, type PickedFile } from "@/shared/lib";
 import type { Assignment, Submission } from "@/shared/types";
 import { bodyFont, dsAlpha, DsGradient, DsText, dsRadius, dsType, headingFont, HtmlView, Icon, MobileActionBar, MobileEmptyCard, MobilePageHeader, toast, useDs } from "@/shared/ui";
 import { SubmissionPreview } from "@/pages/workspace/homework/submission-preview";
@@ -18,12 +29,7 @@ const GRADES = [1, 2, 3, 4, 5];
 const ACCEPT = ["application/pdf", "image/png", "image/jpeg", "image/webp", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 const ACCEPT_SPEAKING = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp4", "audio/x-m4a", "audio/ogg"];
 
-const draftKey = (id: string) => `yolup.homework-draft.${id}`;
-
-function writeDraft(id: string, value: string) {
-  if (value.trim()) storage.set(draftKey(id), value);
-  else storage.remove(draftKey(id));
-}
+const MAX_FILES = 5;
 
 function fileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -79,8 +85,13 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   const insets = useSafeAreaInsets();
   const submit = useSubmitHomework();
   const downloadTask = useDownloadAssignmentFile();
-  const [file, setFile] = useState<PickedFile | null>(null);
-  const [comment, setComment] = useState(() => storage.get(draftKey(assignment.id)) ?? "");
+  // Veb #162: qoralama serverda (avval qurilma xotirasida edi), 5 tagacha fayl.
+  const draft = useHomeworkDraft(assignment.id);
+  const saveDraftMutation = useSaveHomeworkDraft(assignment.id);
+  const queryClient = useQueryClient();
+  const [files, setFiles] = useState<PickedFile[]>([]);
+  const [comment, setComment] = useState("");
+  const touched = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
   const [now] = useState(() => Date.now());
@@ -91,25 +102,46 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   const locked = overdue && !assignment.allowLate;
   const leftLabel = left === null ? "" : overdue ? t("workspace.hwItem.overdue") : left <= 0 ? t("workspace.hwItem.today") : t("workspace.hwItem.daysLeft", { count: left });
   const html = assignment.body ? sanitizeHtml(assignment.body) : "";
+  const serverDraft = draft.data?.comment ?? "";
+
+  useEffect(() => {
+    if (serverDraft && !touched.current) setComment(serverDraft);
+  }, [serverDraft]);
 
   async function pick() {
-    const next = await pickDocument(speaking ? ACCEPT_SPEAKING : ACCEPT);
-    if (!next) return;
-    setFile(next);
+    const incoming = await pickDocuments(speaking ? ACCEPT_SPEAKING : ACCEPT);
+    if (!incoming.length) return;
     setError(null);
+    setFiles((current) => {
+      const next = [...current, ...incoming];
+      if (next.length > MAX_FILES) toast.error(t("workspace.hwItem.tooManyFiles", { count: MAX_FILES }));
+      return next.slice(0, MAX_FILES);
+    });
   }
 
   function send() {
     setError(null);
     submit
-      .mutateAsync({ assignmentId: assignment.id, files: file ? [toUploadFile(file)] : [], skillKey: assignment.skillKey, comment })
-      .then(() => writeDraft(assignment.id, ""))
+      .mutateAsync({ assignmentId: assignment.id, files: files.map(toUploadFile), skillKey: assignment.skillKey, comment })
+      .then(() => {
+        if (serverDraft) saveDraftMutation.mutate("", { onSuccess: () => rememberDraft("") });
+      })
       .catch((reason: unknown) => setError(homeworkFieldError(reason, "file")));
   }
 
+  // 🟡 Vebdan farqi: qoralama so'rovi `staleTime: Infinity` — saqlangach kesh yangilanadi, aks holda shu seansda qayta kirilganda eski qiymat chiqardi.
+  function rememberDraft(value: string) {
+    queryClient.setQueryData(homeworkKeys.draft(assignment.id), { comment: value, updatedAt: new Date().toISOString() });
+  }
+
   function saveDraft() {
-    writeDraft(assignment.id, comment);
-    toast.success(t("workspace.hwItem.draftSaved"));
+    saveDraftMutation.mutate(comment, {
+      onSuccess: () => {
+        rememberDraft(comment.trim() ? comment : "");
+        toast.success(t("workspace.hwItem.draftSaved"));
+      },
+      onError: (reason: Error) => toast.error(reason.message),
+    });
   }
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace(ROUTES.student.homework as never));
@@ -131,11 +163,13 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
                 </DsText>
               </View>
             ) : null}
-            <View style={[styles.chip, { backgroundColor: ds.c["accent-violet-bg"] }]}>
-              <DsText v="caption-strong" c="accent-violet-fg">
-                {t("workspace.hwItem.aiCheck")}
-              </DsText>
-            </View>
+            {assignment.aiCheck ? (
+              <View style={[styles.chip, { backgroundColor: ds.c["accent-violet-bg"] }]}>
+                <DsText v="caption-strong" c="accent-violet-fg">
+                  {t("workspace.hwItem.aiCheck")}
+                </DsText>
+              </View>
+            ) : null}
           </View>
           {assignment.description ? <DsText style={styles.description}>{assignment.description}</DsText> : null}
           {html ? <HtmlView html={html} minHeight={20} /> : null}
@@ -149,9 +183,16 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
               <View style={[styles.fileIcon, { backgroundColor: ds.c.surface }]}>
                 <Icon name="description-fill" size={20} color={ds.c["error-text"]} />
               </View>
-              <DsText v="body-sm" w="600" numberOfLines={1} style={styles.grow}>
-                {assignment.attachmentName || th("detailDialog.defaultFile")}
-              </DsText>
+              <View style={styles.grow}>
+                <DsText v="body-sm" w="600" numberOfLines={1}>
+                  {assignment.attachmentName || th("detailDialog.defaultFile")}
+                </DsText>
+                {assignment.attachmentSize ? (
+                  <DsText v="caption" c="ink-secondary">
+                    {fileSize(assignment.attachmentSize)}
+                  </DsText>
+                ) : null}
+              </View>
               <Icon name="download" size={20} color={ds.c["icon-secondary"]} />
             </Pressable>
           ) : null}
@@ -183,12 +224,12 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
           </DsText>
           <Pressable
             accessibilityRole="button"
-            disabled={locked}
+            disabled={locked || files.length >= MAX_FILES}
             onPress={() => void pick()}
             style={({ pressed }) => [
               styles.drop,
               { borderColor: dsAlpha(ds.c.brand, 0.7), backgroundColor: pressed ? ds.c["brand-subtle"] : dsAlpha(ds.c["brand-subtle"], 0.4) },
-              locked && styles.faded,
+              (locked || files.length >= MAX_FILES) && styles.faded,
             ]}
           >
             <View style={[styles.dropIcon, { backgroundColor: ds.c.surface }]}>
@@ -202,22 +243,34 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
             </DsText>
           </Pressable>
 
-          {file ? (
-            <View style={[styles.attachment, styles.mt16, { backgroundColor: ds.c.subtle }]}>
-              <View style={[styles.fileIcon, { backgroundColor: ds.c.surface }]}>
-                <Icon name="description-fill" size={20} color={ds.c["error-text"]} />
-              </View>
-              <View style={styles.grow}>
-                <DsText v="body-sm" w="600" numberOfLines={1}>
-                  {file.name}
-                </DsText>
-                <DsText v="caption" w="400" c="ink-secondary">
-                  {t("workspace.hwItem.fileReady", { size: fileSize(file.size) })}
-                </DsText>
-              </View>
-              <Pressable accessibilityRole="button" accessibilityLabel={t("workspace.hwItem.remove")} onPress={() => setFile(null)} style={styles.remove}>
-                <Icon name="close" size={18} color={ds.c["icon-secondary"]} />
-              </Pressable>
+          {files.length ? (
+            <View style={[styles.fileList, styles.mt16]}>
+              {files.map((item, index) => (
+                <View key={`${item.name}-${index}`} style={[styles.attachment, { backgroundColor: ds.c.subtle }]}>
+                  <View style={[styles.fileIcon, { backgroundColor: ds.c.surface }]}>
+                    <Icon name="description-fill" size={20} color={ds.c["error-text"]} />
+                  </View>
+                  <View style={styles.grow}>
+                    <DsText v="body-sm" w="600" numberOfLines={1}>
+                      {item.name}
+                    </DsText>
+                    <DsText v="caption" w="400" c="ink-secondary">
+                      {t("workspace.hwItem.fileReady", { size: fileSize(item.size) })}
+                    </DsText>
+                  </View>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t("workspace.hwItem.remove")}
+                    onPress={() => setFiles((current) => current.filter((_, position) => position !== index))}
+                    style={styles.remove}
+                  >
+                    <Icon name="close" size={18} color={ds.c["icon-secondary"]} />
+                  </Pressable>
+                </View>
+              ))}
+              <DsText v="caption" c="ink-tertiary">
+                {t("workspace.hwItem.filesCount", { count: files.length, max: MAX_FILES })}
+              </DsText>
             </View>
           ) : null}
           {error ? (
@@ -234,10 +287,14 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
               multiline
               scrollEnabled={false}
               value={comment}
+              maxLength={2000}
               placeholder={t("workspace.hwItem.commentPlaceholder")}
               placeholderTextColor={ds.c["ink-tertiary"]}
               textAlignVertical="top"
-              onChangeText={setComment}
+              onChangeText={(value) => {
+                touched.current = true;
+                setComment(value);
+              }}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
               style={[styles.comment, { borderColor: focused ? ds.c.focus : ds.c["line-strong"], backgroundColor: ds.c.surface, color: ds.c.ink }]}
@@ -258,8 +315,13 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
       <MobileActionBar>
         <Pressable
           accessibilityRole="button"
+          disabled={saveDraftMutation.isPending}
           onPress={saveDraft}
-          style={({ pressed }) => [styles.footerButton, { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
+          style={({ pressed }) => [
+            styles.footerButton,
+            { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface },
+            saveDraftMutation.isPending && styles.faded,
+          ]}
         >
           <DsText v="body-sm" w="600" numberOfLines={1}>
             {t("workspace.hwItem.draft")}
@@ -267,9 +329,9 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          disabled={!file || locked || submit.isPending}
+          disabled={!files.length || locked || submit.isPending}
           onPress={send}
-          style={({ pressed }) => [styles.footerButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, (!file || locked || submit.isPending) && styles.faded]}
+          style={({ pressed }) => [styles.footerButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, (!files.length || locked || submit.isPending) && styles.faded]}
         >
           <Icon name="send" size={18} color={ds.c["on-action"]} />
           <DsText v="body-sm" w="600" c="on-action" numberOfLines={1}>
@@ -301,6 +363,7 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const submission = useSubmission(initial.id);
+  const download = useDownloadSubmissionFile();
   const room = useCourseRoom(assignment.courseId);
   const current = submission.data ?? initial;
 
@@ -332,7 +395,7 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
         ) : null}
 
         <View style={styles.panel}>
-          {checking ? (
+          {!assignment.aiCheck ? null : checking ? (
             <View style={[styles.box, { backgroundColor: ds.c["brand-subtle"] }]}>
               <View style={styles.boxHead}>
                 <View style={[styles.aiIcon, { backgroundColor: ds.c["accent-violet-fg"] }]}>
@@ -424,6 +487,17 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
             )}
           </View>
 
+          {current.teacherComment ? (
+            <View style={styles.gradeBlock}>
+              <DsText v="body-sm" w="500">
+                {t("workspace.hwItem.teacherComment")}
+              </DsText>
+              <DsText v="title" w="400" style={[styles.teacherComment, { backgroundColor: ds.c.subtle }]}>
+                {current.teacherComment}
+              </DsText>
+            </View>
+          ) : null}
+
           {current.resubmitComment ? (
             <View style={styles.gradeBlock}>
               <DsText v="body-sm" w="500">
@@ -432,6 +506,47 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
               <DsText v="title" w="400" style={[styles.teacherComment, { backgroundColor: ds.c.subtle }]}>
                 {current.resubmitComment}
               </DsText>
+            </View>
+          ) : null}
+
+          {current.comment ? (
+            <View style={styles.gradeBlock}>
+              <DsText v="body-sm" w="500">
+                {t("workspace.hwItem.myComment")}
+              </DsText>
+              <DsText v="body-sm" style={[styles.myComment, { borderColor: ds.c.line }]}>
+                {current.comment}
+              </DsText>
+            </View>
+          ) : null}
+
+          {current.files.length > 1 ? (
+            <View style={styles.gradeBlock}>
+              <DsText v="body-sm" w="500">
+                {t("workspace.hwItem.filesTitle", { count: current.files.length })}
+              </DsText>
+              {current.files.map((item) => (
+                <Pressable
+                  key={item.index}
+                  accessibilityRole="button"
+                  disabled={download.isPending}
+                  onPress={() => download.mutate({ id: current.id, fileName: item.name, index: item.index })}
+                  style={({ pressed }) => [styles.resultFile, { backgroundColor: pressed ? ds.c.tint : ds.c.subtle }, download.isPending && styles.dim]}
+                >
+                  <Icon name="description-fill" size={18} color={ds.c["error-text"]} />
+                  <View style={styles.grow}>
+                    <DsText v="body-sm" w="600" numberOfLines={1}>
+                      {item.name}
+                    </DsText>
+                    {item.size ? (
+                      <DsText v="caption" c="ink-secondary">
+                        {fileSize(item.size)}
+                      </DsText>
+                    ) : null}
+                  </View>
+                  <Icon name="download" size={18} color={ds.c["icon-secondary"]} />
+                </Pressable>
+              ))}
             </View>
           ) : null}
         </View>
@@ -464,6 +579,10 @@ const styles = StyleSheet.create({
   center: { textAlign: "center" },
   upper: { textTransform: "uppercase" },
   faded: { opacity: 0.5 },
+  dim: { opacity: 0.6 },
+  fileList: { gap: 8 },
+  myComment: { paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderRadius: dsRadius["2xl"] },
+  resultFile: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: dsRadius.xl },
   gap2: { gap: 2 },
   mt4: { marginTop: 4 },
   mt8: { marginTop: 8 },

@@ -3,7 +3,18 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { emptyAnswer, MathText, optionLetter, QuestionAnswerInput, quizDisplayTitle, QuizGroupPanel, useQuiz, useSubmitQuizAttempt } from "@/modules/quiz";
+import {
+  emptyAnswer,
+  MathText,
+  optionLetter,
+  QuestionAnswerInput,
+  quizApi,
+  quizDisplayTitle,
+  QuizGroupPanel,
+  useQuiz,
+  useQuizDraft,
+  useSubmitQuizAttempt,
+} from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import { storage } from "@/shared/lib";
 import type { QuizAnswerValue, QuizDetail, QuizQuestion } from "@/shared/types";
@@ -18,6 +29,24 @@ interface Draft {
 
 const draftKey = (quizId: string) => `yolup.quiz-draft.${quizId}`;
 const RAIL_STEP = 48;
+const SERVER_SAVE_DELAY = 4000;
+
+function toServerAnswers(answers: Record<string, QuizAnswerValue>) {
+  return Object.entries(answers).map(([questionId, answer]) => ({ question_id: questionId, answer }));
+}
+
+function fromServerAnswers(items: unknown[], questions: QuizQuestion[]): Record<string, QuizAnswerValue> {
+  const known = new Set(questions.map((question) => question.id));
+  const restored: Record<string, QuizAnswerValue> = {};
+  for (const item of items) {
+    if (!item || typeof item !== "object") continue;
+    const { question_id: questionId, answer } = item as { question_id?: unknown; answer?: unknown };
+    if (typeof questionId !== "string" || !known.has(questionId)) continue;
+    if (!answer || typeof answer !== "object" || !("type" in answer)) continue;
+    restored[questionId] = answer as QuizAnswerValue;
+  }
+  return restored;
+}
 
 function answered(value: QuizAnswerValue | undefined): boolean {
   if (!value) return false;
@@ -76,6 +105,15 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
   const submit = useSubmitQuizAttempt();
   const questions = quiz.questions;
   const [draft, setDraft] = useState<Draft>(() => storage.getJson<Draft>(draftKey(quiz.id)) ?? { answers: {}, index: 0, startedAt: Date.now() });
+  // Veb #162: javoblar serverga ham qoralama sifatida yoziladi — boshqa qurilmada davom ettirish uchun.
+  const serverDraft = useQuizDraft(quiz.id);
+  const [hydrated, setHydrated] = useState(false);
+  if (!hydrated && serverDraft.data) {
+    setHydrated(true);
+    const restored = fromServerAnswers(serverDraft.data.answers, questions);
+    if (Object.keys(restored).length && !Object.keys(draft.answers).length)
+      setDraft({ answers: restored, index: 0, startedAt: draft.startedAt - serverDraft.data.elapsedSeconds * 1000 });
+  }
   const [confirmOpen, setConfirmOpen] = useState(false);
   const railRef = useRef<ScrollView>(null);
   const index = Math.min(draft.index, Math.max(questions.length - 1, 0));
@@ -88,6 +126,14 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
   }, [quiz.id, draft]);
 
   useEffect(() => {
+    if (!hydrated || !Object.keys(draft.answers).length) return;
+    const id = globalThis.setTimeout(() => {
+      void quizApi.saveDraft(quiz.id, toServerAnswers(draft.answers), (Date.now() - draft.startedAt) / 1000).catch(() => undefined);
+    }, SERVER_SAVE_DELAY);
+    return () => globalThis.clearTimeout(id);
+  }, [hydrated, quiz.id, draft.answers, draft.startedAt]);
+
+  useEffect(() => {
     railRef.current?.scrollTo({ x: Math.max(0, index * RAIL_STEP - RAIL_STEP * 2), animated: true });
   }, [index]);
 
@@ -95,6 +141,8 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
   const setAnswer = (value: QuizAnswerValue) => setDraft((current) => (question ? { ...current, answers: { ...current.answers, [question.id]: value } } : current));
 
   function later() {
+    if (Object.keys(draft.answers).length)
+      void quizApi.saveDraft(quiz.id, toServerAnswers(draft.answers), (Date.now() - draft.startedAt) / 1000).catch(() => undefined);
     toast.success(t("workspace.player.savedLater"));
     if (router.canGoBack()) router.back();
     else router.replace(ROUTES.student.tests as never);
@@ -110,6 +158,7 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
       {
         onSuccess: (result) => {
           storage.remove(draftKey(quiz.id));
+          void quizApi.deleteDraft(quiz.id).catch(() => undefined);
           setConfirmOpen(false);
           toast.success(t("workspace.player.submitted"));
           rememberFreshResult(quiz.id, result);

@@ -64,11 +64,6 @@
         "soon": "Tez orada"
       }
     },
-    "student": {
-      "workspace": {
-        "soon": "Tez orada"
-      }
-    },
     "voice": {
       "room": {
         "soon": "Tez orada"
@@ -142,11 +137,6 @@
         "soon": "Скоро"
       }
     },
-    "student": {
-      "workspace": {
-        "soon": "Скоро"
-      }
-    },
     "voice": {
       "room": {
         "soon": "Скоро"
@@ -217,11 +207,6 @@
     },
     "live": {
       "room": {
-        "soon": "Coming soon"
-      }
-    },
-    "student": {
-      "workspace": {
         "soon": "Coming soon"
       }
     },

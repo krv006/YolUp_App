@@ -404,15 +404,15 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/student/dashboard/student-hero.tsx` | 🟡 MOSLASH | `3d2d055fff91` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
 | `src/pages/student/workspace/use-student-workspace.ts` | 🟢 NUSXA | `2e4c774c6c5e` | — |
 | `src/pages/student/workspace/filter-chips.tsx` | 🟡 MOSLASH | `9ce5a36a7e1b` | mobilda `MobileSegment scroll="auto"` (tor ekran varianti) |
-| `src/pages/student/workspace/student-workspace-page.tsx` | 🟡 MOSLASH | `6f00bccf1623` | faqat tor ekran shoxi |
+| `src/pages/student/workspace/student-workspace-page.tsx` | 🟡 MOSLASH | `81a7d286fbec` | faqat tor ekran shoxi |
 | `src/pages/student/workspace/student-tests-page.tsx` | 🟡 MOSLASH | `1b11c089099a` | faqat tor ekran shoxi; urinishlar ro'yxati `Sheet variant="app"` |
-| `src/pages/student/workspace/student-test-page.tsx` | 🟡 MOSLASH | `c19f95e8fe1a` | faqat tor ekran shoxi; qoralama `storage` da (`yolup.quiz-draft.<id>`, vebda `localStorage`); topshirilgan natija `fresh-results.ts` orqali uzatiladi (vebda `navigate` holati) |
-| `src/pages/student/workspace/student-test-results-page.tsx` | 🟡 MOSLASH | `f4ebbee9f7aa` | faqat tor ekran shoxi; yangi topshirilgan natija `takeFreshResult` dan, aks holda urinishlar ro'yxatidan |
-| `src/pages/student/workspace/student-analytics-page.tsx` | 🟡 MOSLASH | `eb41822dfbd3` | faqat tor ekran shoxi; ustunli diagramma oddiy `View` lar bilan |
-| `src/pages/student/workspace/student-mock-page.tsx` | 🟡 MOSLASH | `b3ad759af7ab` | faqat tor ekran shoxi |
-| `src/pages/student/workspace/student-mock-result-page.tsx` | 🟡 MOSLASH | `e295072ee733` | faqat tor ekran shoxi |
+| `src/pages/student/workspace/student-test-page.tsx` | 🟡 MOSLASH | `b46417846f8f` | faqat tor ekran shoxi; qoralama `storage` da (`yolup.quiz-draft.<id>`, vebda `localStorage`); topshirilgan natija `fresh-results.ts` orqali uzatiladi (vebda `navigate` holati) |
+| `src/pages/student/workspace/student-test-results-page.tsx` | 🟡 MOSLASH | `fc49635b853d` | faqat tor ekran shoxi; yangi topshirilgan natija `takeFreshResult` dan, aks holda urinishlar ro'yxatidan |
+| `src/pages/student/workspace/student-analytics-page.tsx` | 🟡 MOSLASH | `f081f56fa076` | faqat tor ekran shoxi; ustunli diagramma oddiy `View` lar bilan |
+| `src/pages/student/workspace/student-mock-page.tsx` | 🟡 MOSLASH | `efc615d60b4a` | faqat tor ekran shoxi |
+| `src/pages/student/workspace/student-mock-result-page.tsx` | 🟡 MOSLASH | `31bf71bb6a6c` | faqat tor ekran shoxi |
 | `src/pages/student/workspace/student-homework-page.tsx` | 🟡 MOSLASH | `5b4b398b9667` | faqat tor ekran shoxi |
-| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `a787df93264c` | faqat tor ekran shoxlari; fayl `pickDocument` bilan, qoralama `storage` da (`yolup.homework-draft.<id>`); topshiriq ko'rinishi `SubmissionPreview` |
+| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `a787df93264c` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi) |
 | `src/pages/student/workspace/fresh-results.ts` | 🆕 MOBIL | `—` | yangi topshirilgan test natijasini natija sahifasiga uzatadi — expo-router'da `navigate(..., { state })` yo'q |
 | `src/pages/student/exams/student-exam-page.tsx` | 🟡 MOSLASH | `1a00701cb78f` | mobilda `pages/exams/student-exam-page.tsx`; orqaga va chiqish mock ro'yxatiga, qidiruv `ROUTES.student.search` |
 | `src/pages/student/homework-board/student-homework-board-page.tsx` | 🟡 MOSLASH | `a8bc4e23ee83` | mobilda `pages/homework/student-homework-board-page.tsx`; vebdagidek eski sahifa; topshirgach `dismissTo` bilan stekdagi vazifa sahifasiga qaytadi |
@@ -509,11 +509,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/tutor/api/tutor.api.ts` | 🟢 NUSXA | `528d187d1499` | — |
 | `src/modules/tutor/api/tutor.dto.ts` | 🟢 NUSXA | `3e37a652c909` | — |
 | `src/modules/tutor/api/tutor.endpoints.ts` | 🟢 NUSXA | `684db9b4d7ab` | — |
-| `src/modules/tutor/index.ts` | 🟡 MOSLASH | `6e07e223d9e3` | veb barrel minus `ui/` eksportlari (`PracticeSession` mobilda alohida) |
+| `src/modules/tutor/index.ts` | 🟡 MOSLASH | `6e07e223d9e3` | veb barrel minus `ui/` eksportlari; mobil `PracticeSession` alohida bo'limda |
 | `src/modules/tutor/lib/tutor.mappers.ts` | 🟢 NUSXA | `5e472f3de6e5` | — |
 | `src/modules/tutor/model/tutor.queries.ts` | 🟢 NUSXA | `59bfd0df3bfc` | — |
 | `src/pages/workspace/materials-page.tsx` | 🟡 MOSLASH | `8ef427675303` | faqat tor ekran varianti; `SelectPicker` -> `MobilePickerField`, `FilterChips compact` -> `MobileSegment scroll="auto"`, yuklash `AppDialog` -> `Sheet`; fayl `pickDocument` (kengaytmalar o'rniga MIME ro'yxati); yuklab olish — OS ulashish oynasi (`downloadBlob`) |
 | `src/pages/teacher/workspace/share-results-dialog.tsx` | 🟡 MOSLASH | `6e3853cc00dd` | mobilda `pages/workspace/tests/share-results-dialog.tsx`; `AppDialog` -> `Sheet variant="app"` |
+| `src/pages/student/workspace/student-ai-page.tsx` | 🟡 MOSLASH | `3068926e14dc` | faqat tor ekran varianti; maydonlar klaviatura ustida (`KeyboardAwareScrollView`) |
+| `src/modules/tutor/ui/practice-session.tsx` | 🟡 MOSLASH | `fed1593cf756` | RN komponentlari; barrel'ning mobil UI bo'limidan eksport |
 
 ## Ataylab ko'chirilmagan
 

@@ -3,20 +3,21 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useMaterials } from "@/modules/material";
 import { ROUTES } from "@/shared/config";
-import { DsGradient, MobileListCard, MobileListRow, MobileSectionTitle, MobileStatsCard, MobileTitleHeader, PullRefresh, toast, useDs, type IconName } from "@/shared/ui";
+import { DsGradient, MobileListCard, MobileListRow, MobileSectionTitle, MobileStatsCard, MobileTitleHeader, PullRefresh, useDs, type IconName } from "@/shared/ui";
 import { shortDateTime } from "../lib/format";
 import { useStudentWorkspace } from "./use-student-workspace";
 
 type ModuleId = "tests" | "assignments" | "mock" | "ai" | "analytics" | "materials";
 
-const MODULES: ReadonlyArray<{ id: ModuleId; icon: IconName; tone: string; to: string | null }> = [
+const MODULES: ReadonlyArray<{ id: ModuleId; icon: IconName; tone: string; to: string }> = [
   { id: "tests", icon: "quiz", tone: "bg-accent-blue-bg text-accent-blue-fg", to: ROUTES.student.tests },
   { id: "assignments", icon: "assign", tone: "bg-accent-saffron-bg text-accent-saffron-fg", to: ROUTES.student.homework },
   { id: "mock", icon: "emoji-events", tone: "bg-accent-red-bg text-accent-red-fg", to: ROUTES.student.mockExams },
-  { id: "ai", icon: "auto-awesome", tone: "bg-accent-violet-bg text-accent-violet-fg", to: null },
+  { id: "ai", icon: "auto-awesome", tone: "bg-accent-violet-bg text-accent-violet-fg", to: ROUTES.student.ai },
   { id: "analytics", icon: "bar-chart", tone: "bg-accent-green-bg text-accent-green-fg", to: ROUTES.student.workspaceAnalytics },
-  { id: "materials", icon: "folder", tone: "bg-accent-blue-bg text-accent-blue-fg", to: null },
+  { id: "materials", icon: "folder", tone: "bg-accent-blue-bg text-accent-blue-fg", to: ROUTES.student.materials },
 ];
 
 /**
@@ -33,6 +34,7 @@ export function StudentWorkspacePage() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const data = useStudentWorkspace();
+  const materials = useMaterials({});
 
   const fresh = data.quizzes.filter((quiz) => !data.attemptByQuiz.has(quiz.id));
   const open = data.assignments.filter((item) => !item.mySubmission);
@@ -50,7 +52,7 @@ export function StudentWorkspacePage() {
     mock: examLabel,
     ai: t("workspace.counts.ai"),
     analytics: t("workspace.counts.analytics", { value: average }),
-    materials: t("workspace.counts.materials"),
+    materials: t("workspace.counts.materials", { count: materials.data?.length ?? 0 }),
   };
 
   return (
@@ -83,7 +85,7 @@ export function StudentWorkspacePage() {
                 title={t(`workspace.modules.${module.id}.title`)}
                 subtitle={counts[module.id]}
                 last={index === MODULES.length - 1}
-                onPress={() => (module.to ? router.push(module.to as never) : toast.info(t("workspace.soon")))}
+                onPress={() => router.push(module.to as never)}
               />
             ))}
           </MobileListCard>

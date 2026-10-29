@@ -23,6 +23,13 @@ export interface SupportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   ticketId?: string | null;
+  /**
+   * Xodim (admin) ko'rinishi — veb `SupportThread staffView`: faqat yozishma,
+   * "orqaga" oynani yopadi, xabarlar xodim tomonidan ko'rsatiladi.
+   */
+  staffView?: boolean;
+  /** Sarlavha (standart — `account:support.*`). */
+  title?: string;
 }
 
 type Screen = { kind: "list" } | { kind: "new" } | { kind: "thread"; id: string };
@@ -32,7 +39,7 @@ type Screen = { kind: "list" } | { kind: "new" } | { kind: "thread"; id: string 
  * variant="panel"`) ning pastki oyna varianti: ro'yxat, yangi murojaat va
  * yozishma. Vebdan farqi — tugmalar oynaning aylanmaydigan pastki qatorida.
  */
-export function SupportDialog({ open, onOpenChange, ticketId = null }: SupportDialogProps) {
+export function SupportDialog({ open, onOpenChange, ticketId = null, staffView = false, title: titleOverride }: SupportDialogProps) {
   const { t } = useTranslation("account");
   const [screen, setScreen] = useState<Screen>(ticketId ? { kind: "thread", id: ticketId } : { kind: "list" });
   const [syncedOpen, setSyncedOpen] = useState(open);
@@ -54,7 +61,7 @@ export function SupportDialog({ open, onOpenChange, ticketId = null }: SupportDi
     }
   }
 
-  const title = screen.kind === "new" ? t("support.newTitle") : screen.kind === "thread" ? t("support.threadTitle") : t("support.title");
+  const title = titleOverride ?? (screen.kind === "new" ? t("support.newTitle") : screen.kind === "thread" ? t("support.threadTitle") : t("support.title"));
   const canCreate = Boolean(subject.trim() && message.trim());
   const threadOpen = screen.kind === "thread" && ticket.data && ticket.data.status !== "closed";
 
@@ -117,7 +124,14 @@ export function SupportDialog({ open, onOpenChange, ticketId = null }: SupportDi
           </MobileFieldLabel>
         </View>
       ) : (
-        <SupportThread ticket={ticket.data} loading={ticket.isLoading} reply={reply} onReplyChange={setReply} onBack={() => setScreen({ kind: "list" })} />
+        <SupportThread
+          ticket={ticket.data}
+          loading={ticket.isLoading}
+          reply={reply}
+          staffView={staffView}
+          onReplyChange={setReply}
+          onBack={() => (staffView ? onOpenChange(false) : setScreen({ kind: "list" }))}
+        />
       )}
     </Sheet>
   );
@@ -181,17 +195,19 @@ function TicketRow({ ticket, onOpen }: { ticket: SupportTicket; onOpen: () => vo
   );
 }
 
-/** Yozishma — veb `SupportThread` (mobilda xodim ko'rinishi yo'q; javob maydoni shu yerda, tugmalar oyna pastida). */
+/** Yozishma — veb `SupportThread`: javob maydoni shu yerda, tugmalar oyna pastida. */
 function SupportThread({
   ticket,
   loading,
   reply,
+  staffView,
   onReplyChange,
   onBack,
 }: {
   ticket: SupportTicket | undefined;
   loading: boolean;
   reply: string;
+  staffView: boolean;
   onReplyChange: (value: string) => void;
   onBack: () => void;
 }) {
@@ -229,7 +245,7 @@ function SupportThread({
 
       <View style={styles.messages}>
         {ticket.messages.map((item) => {
-          const own = !item.fromStaff;
+          const own = item.fromStaff === staffView;
           return (
             // `max-w-[85%] rounded-2xl px-4 py-2.5`
             <View
@@ -237,7 +253,7 @@ function SupportThread({
               style={[styles.bubble, own ? styles.own : styles.other, { backgroundColor: own ? ds.c["brand-subtle"] : ds.c.subtle }]}
             >
               <DsText v="caption-strong" c="ink-secondary">
-                {own ? t("support.you") : t("support.staff")} · {stamp(item.createdAt)}
+                {own ? t("support.you") : staffView ? item.author || t("support.user") : t("support.staff")} · {stamp(item.createdAt)}
               </DsText>
               <DsText v="body-sm">{item.body}</DsText>
             </View>

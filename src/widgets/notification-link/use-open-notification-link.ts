@@ -29,6 +29,7 @@ export function useOpenNotificationLink() {
   const { user } = useAuth();
   const role = user?.role;
   const student = role === ROLES.STUDENT;
+  const admin = role === ROLES.ADMIN || role === ROLES.SUPER_ADMIN;
   const prefix = student ? "/student" : role === ROLES.PARENT ? "/parent" : "/teacher";
   const conversations = useConversations(student ? "student" : "teacher");
 
@@ -39,6 +40,9 @@ export function useOpenNotificationLink() {
       const type = link.type.toLowerCase();
 
       if (type === "teacher") return go(`/admin/teachers?teacher=${encodeURIComponent(link.id)}`);
+      // Veb `admin-dashboard-page` `openNotificationLink`: admin sertifikat va murojaat sahifalariga.
+      if (admin && type === "certificate") return go(`${ROUTES.admin.certificates}?certificate=${encodeURIComponent(link.id)}`);
+      if (admin && type === "support") return go(`${ROUTES.admin.support}?ticket=${encodeURIComponent(link.id)}`);
       if (type === "lesson") return go(kind?.includes("recording") ? `/recordings/${link.id}` : `/live/${link.id}`);
       if (type === "recording") return go(`/recordings/${link.id}`);
       if (prefix === "/teacher" && (type === "assignment" || type === "homework")) return go(ROUTES.teacher.homeworkItem(link.id));
@@ -79,6 +83,6 @@ export function useOpenNotificationLink() {
         return go(`${prefix}/chats/${link.id}`);
       }
     },
-    [router, prefix, student, conversations.data, queryClient]
+    [router, prefix, student, admin, conversations.data, queryClient]
   );
 }

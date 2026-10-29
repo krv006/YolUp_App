@@ -14,6 +14,7 @@ import {
   useTwoFactorStatus,
 } from "@/modules/auth";
 import { OtpInput } from "@/modules/auth/ui/otp-input";
+import { FEATURES } from "@/shared/config";
 import { DsText, dsRadius, Icon, MobileButton, MobileFieldLabel, MobileInput, Sheet, toast, useDs } from "@/shared/ui";
 import { DeleteAccountDialog } from "./profile-dialogs";
 import { ProfileSubPage, SettingsRow, SettingsSection } from "./profile-shell";
@@ -85,7 +86,8 @@ export function AccountSettingsPage() {
   const { user } = useAuth();
   const changePassword = useChangePasswordMutation();
   const deleteAccount = useDeleteAccountMutation();
-  const twoFactor = useTwoFactorStatus();
+  // SMS bilan tasdiqlash hozircha o'chirilgan (`FEATURES`) — holat so'ralmaydi, qator ko'rinmaydi.
+  const twoFactor = useTwoFactorStatus(FEATURES.smsVerification);
   const enableTwoFactor = useEnableTwoFactorMutation();
   const confirmTwoFactor = useConfirmTwoFactorMutation();
   const disableTwoFactor = useDisableTwoFactorMutation();
@@ -204,13 +206,15 @@ export function AccountSettingsPage() {
           hint={user?.passwordChangedAt ? `${t("page.changePasswordHint")}${user.passwordChangedAt}` : undefined}
           onPress={() => setDialog("password")}
         />
-        <SettingsRow
-          icon="shield"
-          tone={SETTINGS_TONES.violet}
-          title={t("page.twoFactor")}
-          value={twoFactorEnabled ? t("page.twoFactorOn") : t("page.twoFactorOff")}
-          onPress={() => setDialog(twoFactorEnabled ? "twoFactorDisable" : "twoFactorEnable")}
-        />
+        {FEATURES.smsVerification ? (
+          <SettingsRow
+            icon="shield"
+            tone={SETTINGS_TONES.violet}
+            title={t("page.twoFactor")}
+            value={twoFactorEnabled ? t("page.twoFactorOn") : t("page.twoFactorOff")}
+            onPress={() => setDialog(twoFactorEnabled ? "twoFactorDisable" : "twoFactorEnable")}
+          />
+        ) : null}
         <SettingsRow icon="clock" tone={SETTINGS_TONES.brand} title={t("page.loginsTitle")} hint={t("page.loginsRowHint")} onPress={() => router.push(`${routes.profile}/logins` as never)} />
       </SettingsSection>
 

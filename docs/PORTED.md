@@ -29,10 +29,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **152**
-- 🟡/🔴 moslashtirilgan: **272**
-- 🆕 mobilga xos: **12**
-- Jami: **436**
+- 🟢 NUSXA: **151**
+- 🟡/🔴 moslashtirilgan: **273**
+- 🆕 mobilga xos: **13**
+- Jami: **437**
 
 ## Olib tashlangan bo'limlar
 
@@ -340,14 +340,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/switch.tsx` | 🟡 MOSLASH | `edc97d390894` | radix o'rniga Pressable; `lg` o'lcham; radius aniq yarim balandlik (Android `boxShadow` 999 ni kesmaydi) |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `a30c57d10aa4` | faqat tor ekran varianti (`Sheet variant="app" compact`); tezkor tugmalar kursor joyiga (`onSelectionChange` + `setSelection`). Eski `formula-solver-sheet.tsx` `ui/legacy/` da |
 | `src/pages/teacher/exams/teacher-exams-page.tsx` | 🟡 MOSLASH | `aaec2fc43c46` | mobilda yo'q — vebda ham ulanmagan (`/teacher/exams` -> `/teacher/workspace/mock`) |
-| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali |
+| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): "Parolni unutdingizmi?" yashirin, 2FA talab qilinsa kod oynasi o'rniga izoh |
 | `src/modules/auth/ui/mobile-login-form.tsx` | 🟡 MOSLASH | `f2830b3adbe5` | mobilda `pages/auth/login-page.tsx` ichida |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `fd6ead08a2a2` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
 | `src/modules/auth/ui/mobile-register-form.tsx` | 🟡 MOSLASH | `eee88e0d2a0c` | mobilda `pages/auth/register-page.tsx` ichida |
 | `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `821d80dc5c6f` | `AuthScreen` (tor ekran varianti, M1–M4) + maydon/tugma komponentlari; `AuthShell` (keng ekran) yo'q; fon gradienti `DsGradient`, maydonlar klaviatura ustiga `KeyboardAwareScrollView` bilan suriladi; placeholder o'lchami RN'da alohida berilmagani uchun bo'sh maydonda shrift placeholder'nikiga o'tadi |
 | `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `56a812e2324e` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp`; fokus o'tishidan oldin kelgan raqam keyingi kataklarga tarqatiladi (vebda `maxLength=1`) |
 | `src/modules/auth/ui/two-factor-form.tsx` | 🟡 MOSLASH | `e6f1e33d6c41` | faqat `MobileTwoFactorForm` (veb tor ekranda shuni ko'rsatadi); `TwoFactorForm` (keng ekran) yo'q |
-| `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `142fd170b299` | faqat tor ekran varianti; `AppDialog` -> `Sheet`; 2FA yoqish/kod/o'chirish oynalari vebdagidek. Ota-ona hozircha `pages/profile/legacy/` dagi eski sahifada |
+| `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `142fd170b299` | faqat tor ekran varianti; `AppDialog` -> `Sheet`; 2FA yoqish/kod/o'chirish oynalari vebdagidek. Ota-ona hozircha `pages/profile/legacy/` dagi eski sahifada; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): 2FA qatori yashirin, holat so'ralmaydi |
 | `src/pages/profile/profile-page.tsx` | 🟡 MOSLASH | `a6e554a1a379` | faqat tor ekran varianti; avatar yuklash yo'q (veb tor ekranda ham yo'q); o'qituvchi va o'quvchi — ota-ona `pages/profile/legacy/` da |
 | `src/pages/profile/profile-layout.tsx` | 🟡 MOSLASH | `35ce0f6b738c` | tor ekranda faqat `Outlet` — mobilda `app/teacher/profile/_layout.tsx` (Stack, `anchor: "index"`); keng ekran yon menyusi yo'q |
 | `src/pages/profile/profile-shell.tsx` | 🟡 MOSLASH | `282318c579f7` | `ProfileSubPage` — maydonlar klaviatura ustida (`KeyboardAwareScrollView`); orqaga — stekdan, bo'lmasa profil bosh sahifasiga |
@@ -365,7 +365,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `c36d8a0a9983` | til menyusi oddiy ochiluvchi ro'yxat; Xush kelibsiz ochilishda `fade` bilan chiqadi |
 | `src/shared/ui/splash-screen.tsx` | 🟡 MOSLASH | `2a085985444d` | mobilda `shared/ui/boot-screen.tsx` (ilova ochilishi, sessiya tekshirilishi, `index` yo'naltirishi); nuqtalar Reanimated bilan |
 | `src/shared/ui/app-toast.tsx` | 🟡 MOSLASH | `dde01935d48d` | mobilda `shared/ui/toast.tsx` dagi `showErrorToast` (`appError` turi); tepada 16px |
-| `src/pages/auth/forgot-password-page.tsx` | 🟡 MOSLASH | `20a0829c7031` | mobilda `password-reset-pages.tsx` ichida; `location.state` o'rniga marshrut parametrlari |
+| `src/pages/auth/forgot-password-page.tsx` | 🟡 MOSLASH | `20a0829c7031` | mobilda `password-reset-pages.tsx` ichida; `location.state` o'rniga marshrut parametrlari; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): marshrutlar kirishga yo'naltiradi |
 | `src/pages/auth/verify-code-page.tsx` | 🟡 MOSLASH | `16651bf7c720` | mobilda `password-reset-pages.tsx` ichida |
 | `src/pages/auth/new-password-page.tsx` | 🟡 MOSLASH | `91726b8fbfb1` | mobilda `password-reset-pages.tsx` ichida |
 | `src/pages/parent/dashboard/parent-dashboard-page.tsx` | 🟡 MOSLASH | `aad62c96ad28` | mobilda `pages/parent/parent-dashboard-page.tsx`; sarlavha `ParentAppBar`, pastki tablar saqlangan |
@@ -427,7 +427,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/api/response-interceptor.ts` | 🟢 NUSXA | `283cbb28d435` | — |
 | `src/shared/api/token-storage.ts` | 🔴 QAYTA | `61b05f24a523` | SecureStore + xotira keshi; interfeys va sinxronligi bir xil. `readUser/writeUser` — profil tokenlar bilan Keychain'da (2 KB dan katta bo'lsa faqat xotirada); `setTokens` profil keshini O'CHIRMAYDI (vebda refresh har safar o'chiradi) |
 | `src/shared/config/env.ts` | 🔴 QAYTA | `5109da61b7b3` | import.meta.env -> expo-constants; o'sha zod sxemasi |
-| `src/shared/config/index.ts` | 🟢 NUSXA | `2a1ff6fd4d60` | — |
+| `src/shared/config/index.ts` | 🟡 MOSLASH | `2a1ff6fd4d60` | vebdagi ro'yxat + mobilga xos `FEATURES` |
+| `src/shared/config/features.ts` | 🆕 MOBIL | `—` | vaqtincha o'chirilgan imkoniyatlar: `smsVerification` (parol tiklash, 2FA) |
 | `src/shared/config/routes.ts` | 🟢 NUSXA | `998939695656` | — |
 | `src/shared/constants/index.ts` | 🟢 NUSXA | `c06257bbb1f3` | — |
 | `src/shared/constants/roles.ts` | 🟢 NUSXA | `2f90f03f91dc` | — |

@@ -17,7 +17,7 @@ import {
 } from "@/modules/auth";
 import { OtpInput } from "@/modules/auth/ui/otp-input";
 import { useQuizColors } from "@/modules/quiz";
-import { ROUTES } from "@/shared/config";
+import { FEATURES, ROUTES } from "@/shared/config";
 import {
   ConfirmSheet,
   Icon,
@@ -56,7 +56,8 @@ export function AccountSettingsPage() {
   const revokeSession = useRevokeSessionMutation();
   const logoutOthers = useLogoutOtherSessionsMutation();
   const deleteAccount = useDeleteAccountMutation();
-  const twoFactor = useTwoFactorStatus();
+  // SMS bilan tasdiqlash hozircha o'chirilgan (`FEATURES`) — holat so'ralmaydi, bo'lim ko'rinmaydi.
+  const twoFactor = useTwoFactorStatus(FEATURES.smsVerification);
   const enableTwoFactor = useEnableTwoFactorMutation();
   const confirmTwoFactor = useConfirmTwoFactorMutation();
   const disableTwoFactor = useDisableTwoFactorMutation();
@@ -175,26 +176,28 @@ export function AccountSettingsPage() {
         />
       </SettingsSection>
 
-      <SettingsSection label={t("page.securitySection")}>
-        <SettingsRow
-          icon="check-circle"
-          tone={legacy.success}
-          title={t("page.twoFactor")}
-          hint={
-            twoFactor.isLoading
-              ? t("page.twoFactorHint")
-              : `${twoFactorEnabled ? t("page.twoFactorOn") : t("page.twoFactorOff")} · ${t("page.twoFactorHint")}`
-          }
-          right={
-            <Switch
-              checked={twoFactorEnabled}
-              disabled={twoFactor.isLoading}
-              onCheckedChange={(next) => setDialog(next ? "twoFactorEnable" : "twoFactorDisable")}
-              accessibilityLabel={t("page.twoFactor")}
-            />
-          }
-        />
-      </SettingsSection>
+      {FEATURES.smsVerification ? (
+        <SettingsSection label={t("page.securitySection")}>
+          <SettingsRow
+            icon="check-circle"
+            tone={legacy.success}
+            title={t("page.twoFactor")}
+            hint={
+              twoFactor.isLoading
+                ? t("page.twoFactorHint")
+                : `${twoFactorEnabled ? t("page.twoFactorOn") : t("page.twoFactorOff")} · ${t("page.twoFactorHint")}`
+            }
+            right={
+              <Switch
+                checked={twoFactorEnabled}
+                disabled={twoFactor.isLoading}
+                onCheckedChange={(next) => setDialog(next ? "twoFactorEnable" : "twoFactorDisable")}
+                accessibilityLabel={t("page.twoFactor")}
+              />
+            }
+          />
+        </SettingsSection>
+      ) : null}
 
       <SettingsSection label={t("page.sessionsSection")}>
         {sessionList.isLoading ? (

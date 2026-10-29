@@ -210,24 +210,27 @@ function PreJoinBody({ lesson, userName, micAllowed = true, onJoin, onCancel }: 
         </Pressable>
       </View>
 
-      <ConfirmDialog
-        open={permissionDenied}
-        onOpenChange={(open) => {
-          if (!open) setFailure(null);
-        }}
-        tone="brand"
-        icon="videocam-fill"
-        confirmIcon="settings"
-        title={t("permissionDialog.title")}
-        description={tm("live.ruxsat_sozlamalarda")}
-        confirmLabel={tm("live.sozlamalarni_ochish")}
-        cancelLabel={t("permissionDialog.joinWithout")}
-        onConfirm={() => void Linking.openSettings()}
-        onCancel={() => {
-          videoTrack?.stop();
-          onJoin({ micOn: false, cameraOn: false });
-        }}
-      />
+      {/* Oyna ilova mavzusida (vebda portal orqali). */}
+      <ThemeScope scheme={null}>
+        <ConfirmDialog
+          open={permissionDenied}
+          onOpenChange={(open) => {
+            if (!open) setFailure(null);
+          }}
+          tone="brand"
+          icon="videocam-fill"
+          confirmIcon="settings"
+          title={t("permissionDialog.title")}
+          description={tm("live.ruxsat_sozlamalarda")}
+          confirmLabel={tm("live.sozlamalarni_ochish")}
+          cancelLabel={t("permissionDialog.joinWithout")}
+          onConfirm={() => void Linking.openSettings()}
+          onCancel={() => {
+            videoTrack?.stop();
+            onJoin({ micOn: false, cameraOn: false });
+          }}
+        />
+      </ThemeScope>
     </ScrollView>
   );
 }

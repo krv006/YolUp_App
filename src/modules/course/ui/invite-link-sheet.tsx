@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Share, StyleSheet, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { DsText, dsRadius, Icon, MobileButton, MobileFieldLabel, MobilePickerField, Sheet, Switch, toast, useDs } from "@/shared/ui";
+import { DsText, dsRadius, Icon, MobileButton, MobilePickerField, Sheet, Switch, toast, useDs } from "@/shared/ui";
 import { useCreateInviteLink, useDeleteInviteLink, useInviteLink } from "../model/course.queries";
 
 export interface InviteLinkSheetProps {
@@ -79,7 +79,11 @@ export function InviteLinkSheet({ courseId, open, onClose }: InviteLinkSheetProp
 
   const settings = (
     <>
-      <MobileFieldLabel label={t("invite.expiryLabel")}>
+      {/* `flex-col gap-2`, yorliq `text-body-xs text-ink-secondary` */}
+      <View style={styles.field}>
+        <DsText v="body-xs" c="ink-secondary">
+          {t("invite.expiryLabel")}
+        </DsText>
         <MobilePickerField
           type="select"
           value={expiresInDays}
@@ -88,7 +92,7 @@ export function InviteLinkSheet({ courseId, open, onClose }: InviteLinkSheetProp
           ariaLabel={t("invite.expiryLabel")}
           onChange={setExpiresInDays}
         />
-      </MobileFieldLabel>
+      </View>
 
       <View style={styles.approval}>
         {/* `size-9 rounded-md bg-accent-green-bg` */}
@@ -125,7 +129,10 @@ export function InviteLinkSheet({ courseId, open, onClose }: InviteLinkSheetProp
         <View style={[styles.skeleton, { backgroundColor: ds.c.muted }]} />
       ) : current ? (
         <>
-          <MobileFieldLabel label={t("invite.linkLabel")}>
+          <View style={styles.field}>
+            <DsText v="body-xs" c="ink-secondary">
+              {t("invite.linkLabel")}
+            </DsText>
             {/* `h-12.5 rounded-md bg-subtle pr-1.5 pl-4 gap-2` */}
             <View style={[styles.linkRow, { backgroundColor: ds.c.subtle }]}>
               <DsText numberOfLines={1} style={styles.grow}>
@@ -141,7 +148,7 @@ export function InviteLinkSheet({ courseId, open, onClose }: InviteLinkSheetProp
                 </DsText>
               </Pressable>
             </View>
-          </MobileFieldLabel>
+          </View>
 
           {settings}
 
@@ -191,6 +198,7 @@ function formatDate(value: string): string {
 
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
+  field: { gap: 8 },
   /* `h-25 rounded-md` */
   skeleton: { height: 100, borderRadius: dsRadius.md },
   linkRow: { height: 50, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 16, paddingRight: 6, borderRadius: dsRadius.md },

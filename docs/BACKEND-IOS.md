@@ -115,6 +115,34 @@ Shundan keyin ayting — iPhone'da sinab ko'ramiz.
 
 ---
 
+## Ovozli xabarlar (2026-10-29)
+
+Xuddi shu muammo chatdagi **ovozli xabarlarda** ham bor. Vebda (Chrome)
+yozilgan ovozli xabar `.webm` (Opus) bo'lib saqlanadi va iPhone'da
+ochilmaydi:
+
+```
+AVFoundation: "Cannot Open" (This media format is not supported)
+fayl: voice-1793135274333.webm
+```
+
+Ilova hozir "Ovozli xabar yuklanmadi" deb ko'rsatadi, lekin xabarni
+eshitib bo'lmaydi. Mobil ilova yozgan ovozli xabarlar `.m4a` (AAC) —
+ular hamma joyda ishlaydi.
+
+**Kerak:** yuklangan ovozli xabar AAC'ga o'girilsin (`.m4a`,
+`content-type: audio/mp4`), eski WebM xabarlar ham. `ffmpeg` bilan:
+
+```bash
+ffmpeg -i kirish.webm -c:a aac -b:a 64k -movflags +faststart chiqish.m4a
+```
+
+Muqobil: vebning o'zi yozishda `audio/mp4` ni tanlasin (Safari shunday
+yozadi), lekin Chrome'da bu hamma versiyada ishlamaydi — backend'da
+o'girish ishonchliroq.
+
+---
+
 ## Boshqa so'rovlar
 
 Bu fayl FAQAT iOS'ga tegishli. Umumiy backend so'rovlari

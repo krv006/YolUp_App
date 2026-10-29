@@ -1,13 +1,33 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCurrentUser } from "@/modules/auth";
+import { useCurrentUser, useUpdateSettingsMutation } from "@/modules/auth";
 import { useConversations } from "@/modules/conversation";
-import { useExam, useExamResults, useExamStudentResult } from "@/modules/exam";
+import { useExam, useExamMistakesPractice, useExamResultPdf, useExamResults, useExamStudentResult } from "@/modules/exam";
+import { PracticeSession } from "@/modules/tutor";
 import { ROUTES } from "@/shared/config";
-import type { ExamSectionResult, ExamWritingAiItem } from "@/shared/types";
-import { dsAlpha, DsGradient, DsText, dsRadius, headingFont, MobileActionBar, MobileEmptyCard, MobilePageHeader, toast, useDs, type DsColor } from "@/shared/ui";
+import { downloadBlob } from "@/shared/lib";
+import type { ExamSectionResult, ExamWritingAiItem, PracticeSet } from "@/shared/types";
+import {
+  dsAlpha,
+  DsGradient,
+  DsText,
+  dsRadius,
+  headingFont,
+  Icon,
+  MobileActionBar,
+  MobileButton,
+  MobileEmptyCard,
+  MobileInput,
+  MobilePageHeader,
+  MobileRoundButton,
+  Sheet,
+  toast,
+  useDs,
+  type DsColor,
+} from "@/shared/ui";
 
 function band(value: number | null | undefined): string {
   return value === null || value === undefined ? "—" : Number.isInteger(value) ? value.toFixed(1) : String(value);
@@ -35,7 +55,8 @@ function initials(title: string): string {
 /**
  * Mock natijasi — veb `student-mock-result-page.tsx` (tor ekran): umumiy,
  * guruh o'rtachasi va maqsad; bo'limlar bo'yicha ballar, tafsilot, insho va
- * AI baholash; pastda "O'qituvchidan so'rash" / "Mashq qilish".
+ * AI baholash; pastda "O'qituvchidan so'rash" / "Mashq qilish" (xatolar
+ * bo'yicha AI mashqi). Sarlavhada PDF; maqsad ballini bosib o'zgartirish mumkin.
  */
 export function StudentMockResultPage() {
   const { t } = useTranslation("student");
@@ -48,6 +69,12 @@ export function StudentMockResultPage() {
   const result = useExamStudentResult(examId || null, me?.id ?? null);
   const group = useExamResults(examId || null);
   const conversations = useConversations("student");
+  const pdf = useExamResultPdf();
+  const mistakes = useExamMistakesPractice(examId);
+  const settings = useUpdateSettingsMutation();
+  const [practiceSet, setPracticeSet] = useState<PracticeSet | null>(null);
+  const [targetOpen, setTargetOpen] = useState(false);
+  const [targetDraft, setTargetDraft] = useState("");
 
   const data = result.data;
   const ready = Boolean(data?.participated && (data.total || data.sections.length));
@@ -59,13 +86,33 @@ export function StudentMockResultPage() {
   const room = conversations.data?.find((item) => item.courseId === exam.data?.courseId);
 
   const askTeacher = () => router.push((room ? ROUTES.student.chat(room.id) : ROUTES.student.chats) as never);
-  const practice = () => toast.info(t("workspace.soon"));
+  const practice = () => mistakes.mutate(undefined, { onSuccess: (set) => setPracticeSet(set) });
+  const downloadPdf = () => {
+    if (!me) return;
+    pdf.mutate({ examId, studentId: me.id }, { onSuccess: (blob) => void downloadBlob(blob, `${exam.data?.title || "natija"}.pdf`) });
+  };
   const goBack = () => (router.canGoBack() ? router.back() : router.replace(ROUTES.student.mockExams as never));
+  const groupAverage = group.data?.groupAverage ?? null;
+  const target = me?.targetBand ?? null;
 
-  const stats: Array<{ id: string; value: string; tone: DsColor }> = [
+  function openTarget() {
+    setTargetDraft(target === null ? "" : String(target));
+    setTargetOpen(true);
+  }
+
+  function saveTarget() {
+    const value = targetDraft.trim() ? Number(targetDraft.replace(",", ".")) : null;
+    if (value !== null && (!Number.isFinite(value) || value < 0 || value > 1600)) {
+      toast.error(t("workspace.mockResult.targetInvalid"));
+      return;
+    }
+    settings.mutate({ target_band: value }, { onSuccess: () => setTargetOpen(false), onError: (error: Error) => toast.error(error.message) });
+  }
+
+  const stats: Array<{ id: string; value: string; tone: DsColor; onPress?: () => void }> = [
     { id: "overall", value: data?.total?.label || band(data?.total?.score), tone: "ink" },
-    { id: "group", value: band(groupAvg), tone: "brand" },
-    { id: "target", value: "—", tone: "success-fg" },
+    { id: "group", value: groupAverage !== null ? `${Math.round(groupAverage)}%` : band(groupAvg), tone: "brand" },
+    { id: "target", value: band(target), tone: "success-fg", onPress: openTarget },
   ];
   const pending = result.isLoading || exam.isLoading;
 
@@ -73,7 +120,12 @@ export function StudentMockResultPage() {
     <View style={[styles.fill, { backgroundColor: ds.c.canvas }]}>
       <ScrollView style={styles.fill} contentContainerStyle={[styles.page, { paddingTop: insets.top + 20 }]}>
         <DsGradient name="auth" />
-        <MobilePageHeader title={exam.data?.title ?? ""} backLabel={t("workspace.back")} onBack={goBack} />
+        <MobilePageHeader
+          title={exam.data?.title ?? ""}
+          backLabel={t("workspace.back")}
+          onBack={goBack}
+          action={ready ? <MobileRoundButton icon="download" label={t("workspace.mockResult.pdf")} disabled={pdf.isPending} onPress={downloadPdf} /> : undefined}
+        />
 
         {pending ? (
           <>
@@ -90,16 +142,35 @@ export function StudentMockResultPage() {
         ) : (
           <>
             <View style={styles.stats}>
-              {stats.map((stat) => (
-                <View key={stat.id} style={[styles.stat, { backgroundColor: ds.c.surface }]}>
-                  <DsText v="caption" w="400" c="ink-secondary" numberOfLines={1}>
-                    {t(`workspace.mockResult.stats.${stat.id}`)}
-                  </DsText>
-                  <DsText c={stat.tone} numberOfLines={1} style={styles.statValue}>
-                    {stat.value}
-                  </DsText>
-                </View>
-              ))}
+              {stats.map((stat) =>
+                stat.onPress ? (
+                  <Pressable
+                    key={stat.id}
+                    accessibilityRole="button"
+                    onPress={stat.onPress}
+                    style={({ pressed }) => [styles.stat, { backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
+                  >
+                    <View style={styles.statLabel}>
+                      <DsText v="caption" w="400" c="ink-secondary" numberOfLines={1} style={styles.shrink}>
+                        {t(`workspace.mockResult.stats.${stat.id}`)}
+                      </DsText>
+                      <Icon name="edit" size={14} color={ds.c["icon-secondary"]} />
+                    </View>
+                    <DsText c={stat.tone} numberOfLines={1} style={styles.statValue}>
+                      {stat.value}
+                    </DsText>
+                  </Pressable>
+                ) : (
+                  <View key={stat.id} style={[styles.stat, { backgroundColor: ds.c.surface }]}>
+                    <DsText v="caption" w="400" c="ink-secondary" numberOfLines={1}>
+                      {t(`workspace.mockResult.stats.${stat.id}`)}
+                    </DsText>
+                    <DsText c={stat.tone} numberOfLines={1} style={styles.statValue}>
+                      {stat.value}
+                    </DsText>
+                  </View>
+                )
+              )}
             </View>
 
             <View style={[styles.block, styles.sections, { backgroundColor: ds.c.surface }]}>
@@ -223,13 +294,49 @@ export function StudentMockResultPage() {
               {t("workspace.mockResult.askTeacher")}
             </DsText>
           </Pressable>
-          <Pressable accessibilityRole="button" onPress={practice} style={({ pressed }) => [styles.footerButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}>
+          <Pressable
+            accessibilityRole="button"
+            disabled={mistakes.isPending}
+            onPress={practice}
+            style={({ pressed }) => [styles.footerButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, mistakes.isPending && styles.faded]}
+          >
             <DsText v="body-sm" w="600" c="on-action" numberOfLines={1}>
               {t("workspace.mockResult.practice")}
             </DsText>
           </Pressable>
         </MobileActionBar>
       ) : null}
+
+      {/* Xatolar ustida ishlash — veb `AppDialog variant="panel"` */}
+      <Sheet variant="app" open={Boolean(practiceSet)} onClose={() => setPracticeSet(null)} title={t("workspace.mockResult.practiceTitle")} description={exam.data?.title ?? ""}>
+        {practiceSet ? (
+          <PracticeSession key={practiceSet.questions.map((question) => question.text).join("|")} set={practiceSet} restarting={mistakes.isPending} onRestart={practice} />
+        ) : null}
+      </Sheet>
+      <Sheet
+        variant="app"
+        open={targetOpen}
+        onClose={() => setTargetOpen(false)}
+        title={t("workspace.mockResult.targetTitle")}
+        description={t("workspace.mockResult.targetHint")}
+        footer={
+          <>
+            <MobileButton variant="secondary" label={t("workspace.mockResult.targetCancel")} onPress={() => setTargetOpen(false)} />
+            <MobileButton label={t("workspace.mockResult.targetSave")} disabled={settings.isPending} onPress={saveTarget} />
+          </>
+        }
+      >
+        <MobileInput
+          keyboardType="decimal-pad"
+          autoFocus
+          value={targetDraft}
+          placeholder={t("workspace.mockResult.targetPlaceholder")}
+          accessibilityLabel={t("workspace.mockResult.targetTitle")}
+          returnKeyType="done"
+          onSubmitEditing={saveTarget}
+          onChangeText={setTargetDraft}
+        />
+      </Sheet>
     </View>
   );
 }
@@ -237,6 +344,9 @@ export function StudentMockResultPage() {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
+  shrink: { flexShrink: 1, minWidth: 0 },
+  faded: { opacity: 0.6 },
+  statLabel: { flexDirection: "row", alignItems: "center", gap: 4 },
   /* `gap-5 px-4 pt-5 pb-6` */
   page: { gap: 20, paddingHorizontal: 16, paddingBottom: 24 },
   /* `grid-cols-3 gap-3`, karta `rounded-2xl p-4 gap-1` */

@@ -45,7 +45,7 @@ export function StudentTestResultsPage() {
   const stats: Array<{ id: string; value: string; tone: DsColor }> = [
     { id: "score", value: latest ? `${percentOf(latest)}%` : "—", tone: "ink" },
     { id: "correct", value: correct !== null && total ? `${correct} / ${total}` : "—", tone: "ink" },
-    { id: "group", value: "—", tone: "success-fg" },
+    { id: "group", value: quiz.data?.groupAvgPercentage != null ? `${Math.round(quiz.data.groupAvgPercentage)}%` : "—", tone: "success-fg" },
     { id: "time", value: latest?.durationSeconds ? t("workspace.results.minutes", { count: Math.max(1, Math.round(latest.durationSeconds / 60)) }) : "—", tone: "ink" },
   ];
 

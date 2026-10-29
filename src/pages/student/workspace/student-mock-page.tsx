@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { formatClock, secondsUntil, syncServerTime, useExamCurrent } from "@/modules/exam";
+import { formatClock, secondsUntil, syncServerTime, useExamCurrent, useExamReminder } from "@/modules/exam";
 import { ROUTES } from "@/shared/config";
 import type { ExamSummary } from "@/shared/types";
 import { DsGradient, DsText, dsRadius, headingFont, Icon, MobileEmptyCard, MobilePageHeader, MobileSegment, PullRefresh, toast, useDs, type DsColor } from "@/shared/ui";
@@ -26,6 +26,17 @@ export function StudentMockPage() {
   const queryClient = useQueryClient();
   const data = useStudentWorkspace();
   const [filter, setFilter] = useState("all");
+  const reminder = useExamReminder();
+
+  function toggleReminder(exam: ExamSummary) {
+    const enabled = !exam.hasReminder;
+    reminder.mutate(
+      { id: exam.id, enabled },
+      {
+        onSuccess: (minutes) => toast.success(enabled ? t("workspace.mock.reminderSet", { count: minutes ?? 15 }) : t("workspace.mock.reminderCleared")),
+      }
+    );
+  }
 
   const items = [...data.exams].sort((a, b) => {
     const rank = { running: 0, upcoming: 1, finished: 2 };
@@ -109,14 +120,41 @@ export function StudentMockPage() {
                       {t("workspace.mock.continue")}
                     </DsText>
                   </Pressable>
-                ) : (
+                ) : exam.state === "finished" ? (
                   <Pressable
                     accessibilityRole="button"
-                    onPress={() => (exam.state === "finished" ? router.push(ROUTES.student.mockResults(exam.id) as never) : toast.info(t("workspace.soon")))}
+                    onPress={() => router.push(ROUTES.student.mockResults(exam.id) as never)}
                     style={({ pressed }) => [styles.action, { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
                   >
                     <DsText v="body-sm" w="600">
-                      {exam.state === "finished" ? t("workspace.mock.result") : t("workspace.mock.remind")}
+                      {t("workspace.mock.result")}
+                    </DsText>
+                    {exam.myTotal?.label || exam.myTotal?.score != null ? (
+                      // `rounded-full bg-success-bg px-2 py-0.5 text-caption-strong text-success-fg`
+                      <View style={[styles.total, { backgroundColor: ds.c["success-bg"] }]}>
+                        <DsText v="caption-strong" c="success-fg">
+                          {exam.myTotal.label || exam.myTotal.score}
+                        </DsText>
+                      </View>
+                    ) : null}
+                  </Pressable>
+                ) : (
+                  // Veb #161: mock eslatmasi — yoqilgan bo'lsa `bg-brand-subtle text-brand` va daqiqasi
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: Boolean(exam.hasReminder) }}
+                    disabled={reminder.isPending && reminder.variables?.id === exam.id}
+                    onPress={() => toggleReminder(exam)}
+                    style={({ pressed }) => [
+                      styles.action,
+                      exam.hasReminder
+                        ? { backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] }
+                        : { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface },
+                    ]}
+                  >
+                    <Icon name={exam.hasReminder ? "notifications-off" : "notifications"} size={18} color={exam.hasReminder ? ds.c.brand : ds.c.ink} />
+                    <DsText v="body-sm" w="600" c={exam.hasReminder ? "brand" : "ink"}>
+                      {exam.hasReminder ? t("workspace.mock.reminderOn", { count: exam.reminderMinutes ?? 15 }) : t("workspace.mock.remind")}
                     </DsText>
                   </Pressable>
                 )}
@@ -200,7 +238,8 @@ const styles = StyleSheet.create({
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   state: { height: 20, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 6, borderRadius: 10 },
   stateDot: { width: 6, height: 6, borderRadius: 3 },
-  action: { height: 42, alignItems: "center", justifyContent: "center", paddingHorizontal: 14, borderRadius: 21 },
+  action: { height: 42, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 14, borderRadius: 21 },
+  total: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: dsRadius.full },
   /* `rounded-2xl bg-brand p-[18px]` */
   live: { padding: 18, borderRadius: dsRadius["2xl"] },
   liveHead: { flexDirection: "row", alignItems: "center", gap: 8 },

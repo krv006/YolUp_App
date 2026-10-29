@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useAttendance } from "@/modules/attendance";
 import { RateLessonSheet, useLessonReminder } from "@/modules/lesson";
 import { ROUTES } from "@/shared/config";
 import type { Lesson, LessonStatus } from "@/shared/types";
@@ -40,7 +39,6 @@ export function StudentLessons({ lessons = [], loading, teacher = "" }: StudentL
   const months = tl("list.months", { returnObjects: true }) as string[];
   const ds = useDs();
   const router = useRouter();
-  const attendance = useAttendance({ page_size: 200 });
   const [rateTarget, setRateTarget] = useState<Lesson | null>(null);
   const [now] = useState(() => Date.now());
   const reminder = useLessonReminder();
@@ -55,7 +53,6 @@ export function StudentLessons({ lessons = [], loading, teacher = "" }: StudentL
     );
   }
 
-  const joined = useMemo(() => new Set((attendance.data ?? []).filter((row) => row.joinedAt).map((row) => row.lessonId)), [attendance.data]);
   const visible = useMemo(
     () => lessons.filter((lesson) => lesson.status !== "cancelled" && new Date(lesson.startsAt).getTime() > now - HISTORY_DAYS * DAY_MS).sort((a, b) => a.startsAt.localeCompare(b.startsAt)),
     [lessons, now]
@@ -112,7 +109,7 @@ export function StudentLessons({ lessons = [], loading, teacher = "" }: StudentL
             const minutes = lesson.durationMinutes || 45;
             const end = new Date(start.getTime() + minutes * 60_000);
             const status = lesson.status;
-            const attended = lesson.attended ?? joined.has(lesson.id);
+            const attended = lesson.attended === true;
             const meta =
               status === "finished"
                 ? t(attended ? "groupWorkspace.lessonsTab.attended" : "groupWorkspace.lessonsTab.missed")

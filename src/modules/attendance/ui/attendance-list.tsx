@@ -212,7 +212,7 @@ function FocusDetail({ focus }: { focus: FocusJournal }) {
           <Text variant="caption">Chiqdi: {formatDateTime(exit.leftAt)}</Text>
           <Text variant="caption" tone="muted">
             {exit.returnedAt
-              ? `Qaytdi: ${formatDateTime(exit.returnedAt)} · ${formatDuration(exit.seconds)}`
+              ? `Qaytdi: ${formatDateTime(exit.returnedAt)} · ${exit.seconds === null ? "—" : formatDuration(exit.seconds)}`
               : "Qaytmagan"}
           </Text>
         </View>

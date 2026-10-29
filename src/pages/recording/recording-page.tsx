@@ -8,9 +8,8 @@ import { useVideoPlayer, VideoView, type VideoPlayer } from "expo-video";
 import { useKeepAwake } from "expo-keep-awake";
 import { Maximize2, Pause, Play, Volume1, Volume2, VolumeX } from "lucide-react-native";
 import { useAttendance } from "@/modules/attendance";
-import { useAuth, useRoleRoutes } from "@/modules/auth";
+import { useAuth } from "@/modules/auth";
 import { boardApi } from "@/modules/board";
-import { useConversations } from "@/modules/conversation";
 import { useCourse } from "@/modules/course";
 import { LessonRatingForm, useDeleteRecording, useLesson, useLessonRecording, useShareRecording } from "@/modules/lesson";
 import { ROUTES } from "@/shared/config";
@@ -34,6 +33,7 @@ import {
   usePopoverAnchor,
   type IconName,
 } from "@/shared/ui";
+import { LessonAttendanceDialog } from "@/widgets/lesson-attendance";
 
 /**
  * Dars yozuvi — veb `recording-page.tsx` + `recording-mobile.tsx` (tor
@@ -102,20 +102,19 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
   const ds = useDs();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const routes = useRoleRoutes();
   const months = t("list.months", { returnObjects: true }) as string[];
   const course = useCourse(canManage ? lesson.courseId : null);
   const attendance = useAttendance({ lesson: lesson.id }, canManage);
-  const conversations = useConversations(canManage ? "teacher" : "student");
   const removeRecording = useDeleteRecording();
   const share = useShareRecording(lesson.id);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [attendanceOpen, setAttendanceOpen] = useState(false);
   const { anchorRef, rect, open: openMenu, close: closeMenu } = usePopoverAnchor();
 
   const ready = Boolean(recording?.ready && recording.streamUrl);
   const rows = useMemo(() => attendance.data ?? [], [attendance.data]);
   const studentCount = course.data?.studentCount ?? rows.length;
-  const joined = recording?.participantsCount ?? rows.filter((row) => (row.minutes ?? 0) > 0).length;
+  const joined = recording?.participantsCount ?? rows.length;
   const boardPages = recording?.boardPreviews.length || recording?.boardPages || 0;
 
   const day = new Date(`${lesson.date}T00:00`);
@@ -154,11 +153,6 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
     }
   }
 
-  /* Vebda `/teacher/attendance` sahifasi; mobilda — guruh chatining "Davomat" bo'limi. */
-  function openAttendance() {
-    const room = (conversations.data ?? []).find((item) => item.courseId === lesson.courseId);
-    router.push((room ? `${routes.chat(room.id)}?tab=attendance` : routes.chats) as never);
-  }
 
   const menu =
     canManage && ready ? (
@@ -237,7 +231,7 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
                 title={t("recording.mobileAttendanceTitle")}
                 subtitle={t("recording.mobileJoined", { joined, total: studentCount })}
                 divider
-                onPress={openAttendance}
+                onPress={() => setAttendanceOpen(true)}
               />
             ) : null}
             {canManage ? (
@@ -274,6 +268,9 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
 
       {children}
       <View style={{ height: insets.bottom + 8 }} />
+
+      {/* Veb #164: dars davomati oynasi (avval alohida davomat sahifasi edi). */}
+      {canManage ? <LessonAttendanceDialog lesson={lesson} open={attendanceOpen} onOpenChange={setAttendanceOpen} /> : null}
 
       <ConfirmDialog
         open={confirmOpen}

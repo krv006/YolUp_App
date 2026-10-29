@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -6,7 +6,7 @@ import { LiveKitRoom, useConnectionState, useLocalParticipant, useParticipants }
 import { ConnectionState } from "livekit-client";
 import type { VoiceRoom, VoiceToken } from "@/shared/types";
 import { Avatar, dsAlpha, DsText, dsRadius, Icon, ThemeScope, toast, useDs } from "@/shared/ui";
-import { useAnswerVoiceJoinRequest, useVoiceJoinRequests } from "../model/voice.queries";
+import { useAnswerVoiceHand, useAnswerVoiceJoinRequest, useToggleVoiceHand, useVoiceHands, useVoiceJoinRequests } from "../model/voice.queries";
 
 export interface VoiceRoomPanelProps {
   room: VoiceRoom;
@@ -81,6 +81,19 @@ function VoiceRoomBody({
   const connection = useConnectionState();
   const { localParticipant, isMicrophoneEnabled } = useLocalParticipant();
   const hostIdentity = room.hostIdentity ?? `user-${room.createdById}`;
+  // Veb #161: qo'l ko'tarish — moderator ruxsat bersa gapirish mumkin.
+  const hand = useToggleVoiceHand(room.id);
+  const [handRaised, setHandRaised] = useState(false);
+
+  function toggleHand() {
+    const next = !handRaised;
+    hand.mutate(next, {
+      onSuccess: () => {
+        setHandRaised(next);
+        if (next) toast.success(t("room.handSent"));
+      },
+    });
+  }
 
   return (
     <VoiceRoomView
@@ -95,10 +108,20 @@ function VoiceRoomBody({
         owner: participant.identity === hostIdentity,
       }))}
       connecting={connection !== ConnectionState.Connected}
-      requests={isModerator ? <VoiceJoinRequests roomId={room.id} /> : null}
+      requests={
+        isModerator ? (
+          <>
+            <VoiceHands roomId={room.id} />
+            <VoiceJoinRequests roomId={room.id} />
+          </>
+        ) : null
+      }
       micOn={isMicrophoneEnabled}
       isModerator={isModerator}
       closing={closing}
+      handRaised={handRaised}
+      handPending={hand.isPending}
+      onToggleHand={toggleHand}
       onToggleMic={() =>
         void localParticipant
           .setMicrophoneEnabled(!isMicrophoneEnabled)
@@ -119,6 +142,9 @@ function VoiceRoomView({
   micOn,
   isModerator,
   closing,
+  handRaised = false,
+  handPending = false,
+  onToggleHand,
   onToggleMic,
   onLeave,
   onClose,
@@ -131,6 +157,9 @@ function VoiceRoomView({
   micOn: boolean;
   isModerator: boolean;
   closing?: boolean;
+  handRaised?: boolean;
+  handPending?: boolean;
+  onToggleHand?: () => void;
   onToggleMic: () => void;
   onLeave: () => void;
   onClose: () => void;
@@ -200,9 +229,20 @@ function VoiceRoomView({
                 {t("room.raiseHint")}
               </DsText>
             </View>
-            <Pressable accessibilityRole="button" onPress={() => toast.info(t("room.soon"))} style={[styles.raiseButton, { backgroundColor: ds.c.brand }]}>
-              <DsText v="button" c="on-action">
-                ✋ {t("room.raiseHand")}
+            {/* Ko'tarilgan qo'l — `bg-surface-inverse text-ink-inverse` */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: handRaised }}
+              disabled={handPending || !onToggleHand}
+              onPress={onToggleHand}
+              style={[
+                styles.raiseButton,
+                { backgroundColor: handRaised ? ds.c["surface-inverse"] : ds.c.brand },
+                (handPending || !onToggleHand) && styles.faded,
+              ]}
+            >
+              <DsText v="button" c={handRaised ? "ink-inverse" : "on-action"}>
+                ✋ {handRaised ? t("room.lowerHand") : t("room.raiseHand")}
               </DsText>
             </Pressable>
           </View>
@@ -244,6 +284,59 @@ function CloseButton({ label, disabled, onPress }: { label: string; disabled?: b
         {label}
       </DsText>
     </Pressable>
+  );
+}
+
+/** Ko'tarilgan qo'llar — veb `MobileVoiceHands`: ruxsat berish yoki rad etish. */
+function VoiceHands({ roomId }: { roomId: string }) {
+  const { t } = useTranslation("voice");
+  const ds = useDs();
+  const hands = useVoiceHands(roomId);
+  const answer = useAnswerVoiceHand(roomId);
+  const items = hands.data ?? [];
+
+  if (!items.length) return null;
+
+  return (
+    <View style={styles.requests}>
+      <DsText v="title-sm" w="600" style={styles.handsTitle}>
+        {t("room.handsTitle", { count: items.length })}
+      </DsText>
+      {items.map((item) => (
+        <View key={item.userId} style={[styles.request, { backgroundColor: dsAlpha(ds.c.subtle, 0.4) }]}>
+          <Avatar variant="legacy" name={item.name} size="sm" />
+          <View style={styles.grow}>
+            <DsText v="title-sm" w="600" numberOfLines={1}>
+              ✋ {item.name}
+            </DsText>
+            <DsText v="caption" c={item.status === "allowed" ? "success" : "ink-secondary"} numberOfLines={1}>
+              {item.status === "allowed" ? t("room.handAllowed") : t("room.handWaiting")}
+            </DsText>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("room.handDismiss")}
+            disabled={answer.isPending}
+            onPress={() => answer.mutate({ userId: item.userId, allow: false })}
+            style={[styles.deny, answer.isPending && styles.dim]}
+          >
+            <Icon name="close" size={18} color={ds.c["ink-secondary"]} />
+          </Pressable>
+          {item.status === "raised" ? (
+            <Pressable
+              accessibilityRole="button"
+              disabled={answer.isPending}
+              onPress={() => answer.mutate({ userId: item.userId, allow: true })}
+              style={[styles.approve, { backgroundColor: ds.c.brand }, answer.isPending && styles.dim]}
+            >
+              <DsText v="button" c="on-action">
+                {t("room.handAllow")}
+              </DsText>
+            </Pressable>
+          ) : null}
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -301,6 +394,8 @@ const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
   center: { textAlign: "center" },
   dim: { opacity: 0.5 },
+  faded: { opacity: 0.6 },
+  handsTitle: { paddingHorizontal: 4 },
   header: { marginTop: 20, height: 44, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
   round: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
   headerText: { flex: 1, minWidth: 0, alignItems: "center" },

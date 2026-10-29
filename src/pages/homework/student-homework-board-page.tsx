@@ -1,41 +1,23 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft, CheckCircle2, Cloud, CloudOff, Send } from "lucide-react-native";
-import { BoardSurface } from "@/modules/board/ui/legacy/board-surface";
-import {
-  useAssignment,
-  useHomeworkBoard,
-  useHomeworkBoardSource,
-  useSubmitHomeworkBoard,
-  type HomeworkBoardSaveState,
-} from "@/modules/homework";
-import { NotificationBell } from "@/modules/notification";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Send } from "lucide-react-native";
+import { BoardSurface } from "@/modules/board";
+import { useAssignment, useHomeworkBoard, useHomeworkBoardSource, useSubmitHomeworkBoard } from "@/modules/homework";
 import { ROUTES } from "@/shared/config";
-import { sanitizeHtml } from "@/shared/lib";
 import type { Assignment } from "@/shared/types";
-import {
-  AppBar,
-  AppBarAction,
-  HtmlView,
-  radius,
-  Screen,
-  ScreenError,
-  ScreenLoading,
-  Sheet,
-  SheetButton,
-  SheetFooter,
-  Text,
-  useTheme,
-} from "@/shared/ui";
+import { ConfirmDialog, DsText, Screen, ScreenError, ScreenLoading, ThemeScope, useDs } from "@/shared/ui";
 
 type BoardData = NonNullable<ReturnType<typeof useHomeworkBoard>["data"]>;
 
 /**
  * O'quvchi vazifani fayl yuklamasdan doskada yechadi — veb
- * `pages/student/homework-board/student-homework-board-page.tsx`.
- * "Topshirish" doskani PDF qilib yuboradi; o'zgarishlar avtomatik saqlanadi.
+ * `pages/student/homework-board/student-homework-board-page.tsx` ning tor
+ * ekran shoxi (veb #161): jonli dars doskasi bilan bir xil mobil doska,
+ * sarlavhada kurs va saqlash holati, o'ngda "Topshirish". "Topshirish"
+ * doskani PDF qilib yuboradi; o'zgarishlar avtomatik saqlanadi.
  */
 export function StudentHomeworkBoardPage() {
   const { t } = useTranslation("homework");
@@ -80,13 +62,11 @@ function HomeworkBoardScreen({
   onSubmitted: () => void;
 }) {
   const { t } = useTranslation("homework");
-  const { t: tw } = useTranslation("workspace");
-  const { palette } = useTheme();
-  const router = useRouter();
+  const ds = useDs();
+  const insets = useSafeAreaInsets();
   const { source, saveState, flush } = useHomeworkBoardSource(assignment.id, board);
   const submit = useSubmitHomeworkBoard();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const html = assignment.body ? sanitizeHtml(assignment.body) : "";
 
   async function send() {
     if (!(await flush())) return;
@@ -100,108 +80,55 @@ function HomeworkBoardScreen({
   }
 
   return (
-    <Screen padded={false}>
-      <AppBar title={tw("title")} back={{ label: t("board.back"), onPress: onBack }}>
-        <AppBarAction name="search" label={tw("searchAria")} onPress={() => router.push(ROUTES.student.search as never)} />
-        <NotificationBell />
-      </AppBar>
+    // `data-theme="light"` — doska doim yorug'
+    <ThemeScope scheme="light">
+      <View style={[styles.root, { backgroundColor: ds.c.subtle, paddingTop: insets.top + 20, paddingBottom: 26 + insets.bottom }]}>
+        <BoardSurface
+          lessonId=""
+          courseId={null}
+          source={source}
+          mobile={{
+            title: assignment.title,
+            subtitle: [assignment.courseTitle, t(`board.save.${saveState}`)].filter(Boolean).join(" · "),
+            backLabel: t("board.back"),
+            onBack,
+            action: (
+              // `h-10 rounded-full bg-brand px-4 text-button text-on-action`
+              <Pressable
+                accessibilityRole="button"
+                disabled={submit.isPending}
+                onPress={() => setConfirmOpen(true)}
+                style={({ pressed }) => [styles.submit, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, submit.isPending && styles.faded]}
+              >
+                <Send size={16} color={ds.c["on-action"]} />
+                <DsText v="button" c="on-action">
+                  {t("board.submit")}
+                </DsText>
+              </Pressable>
+            ),
+          }}
+        />
+      </View>
 
-      <ScrollView style={{ backgroundColor: palette.background }} contentContainerStyle={styles.page}>
-        <View style={styles.heading}>
-          <Text variant="caption" style={[styles.eyebrow, { color: palette.primary }]}>
-            {t("board.eyebrow")}
-          </Text>
-          <Text variant="title">{assignment.title}</Text>
-          <Text variant="body" style={{ color: palette["muted-foreground"] }}>
-            {assignment.courseTitle}
-          </Text>
-        </View>
-
-        <View style={styles.actions}>
-          <SaveBadge state={saveState} />
-          <Pressable
-            accessibilityRole="button"
-            onPress={onBack}
-            style={({ pressed }) => [
-              styles.button,
-              styles.grow,
-              { borderWidth: 1, borderColor: palette.border, backgroundColor: pressed ? palette["surface-subtle"] : palette.surface },
-            ]}
-          >
-            <ArrowLeft size={16} color={palette.foreground} />
-            <Text variant="label">{t("board.back")}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            disabled={submit.isPending}
-            onPress={() => setConfirmOpen(true)}
-            style={({ pressed }) => [
-              styles.button,
-              styles.grow,
-              { backgroundColor: pressed ? palette["primary-hover"] : palette.primary },
-              submit.isPending && styles.dim,
-            ]}
-          >
-            <Send size={16} color={palette["primary-foreground"]} />
-            <Text variant="label" style={{ color: palette["primary-foreground"] }}>
-              {t("board.submit")}
-            </Text>
-          </Pressable>
-        </View>
-
-        {assignment.description || html ? (
-          <View style={[styles.task, { borderColor: palette.border, backgroundColor: palette.surface }]}>
-            <Text variant="body">{t("board.task")}</Text>
-            {assignment.description ? <Text variant="body">{assignment.description}</Text> : null}
-            {html ? <HtmlView html={html} /> : null}
-          </View>
-        ) : null}
-
-        <View style={styles.board}>
-          <BoardSurface lessonId="" courseId={null} source={source} />
-        </View>
-      </ScrollView>
-
-      <Sheet open={confirmOpen} onClose={() => setConfirmOpen(false)} title={t("board.confirmTitle")} description={t("board.confirmDescription")}>
-        <SheetFooter>
-          <SheetButton title={t("board.cancel")} onPress={() => setConfirmOpen(false)} />
-          <SheetButton
-            variant="primary"
-            title={t("board.confirm")}
-            loading={submit.isPending}
-            icon={<CheckCircle2 size={16} color={palette["primary-foreground"]} />}
-            onPress={() => void send()}
-          />
-        </SheetFooter>
-      </Sheet>
-    </Screen>
-  );
-}
-
-/** `.homework-board-save` — saqlash holati. */
-function SaveBadge({ state }: { state: HomeworkBoardSaveState }) {
-  const { t } = useTranslation("homework");
-  const { palette } = useTheme();
-  const color = state === "error" ? palette["destructive-strong"] : state === "saving" ? palette["muted-foreground"] : palette["success-strong"];
-  return (
-    <View style={styles.save}>
-      {state === "error" ? <CloudOff size={15} color={color} /> : <Cloud size={15} color={color} />}
-      <Text variant="label" style={{ color }}>
-        {t(`board.save.${state}`)}
-      </Text>
-    </View>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        icon="check-circle"
+        tone="brand"
+        title={t("board.confirmTitle")}
+        description={t("board.confirmDescription")}
+        confirmLabel={t("board.confirm")}
+        cancelLabel={t("board.cancel")}
+        pending={submit.isPending}
+        onConfirm={() => void send()}
+      />
+    </ThemeScope>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { gap: 16, padding: 16 },
-  grow: { flex: 1 },
-  dim: { opacity: 0.6 },
-  heading: { gap: 8, paddingTop: 8 },
-  eyebrow: { fontWeight: "700", letterSpacing: 2.4, textTransform: "uppercase" },
-  actions: { flexDirection: "row", alignItems: "center", gap: 10 },
-  save: { flexDirection: "row", alignItems: "center", gap: 6 },
-  button: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingHorizontal: 14, borderRadius: 13 },
-  task: { gap: 8, padding: 16, borderWidth: 1, borderRadius: radius["2xl"] },
-  board: { height: 560 },
+  /* `flex-col bg-subtle px-3 pt-5 pb-[26px]` */
+  root: { flex: 1, paddingHorizontal: 12 },
+  faded: { opacity: 0.6 },
+  submit: { height: 40, flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, borderRadius: 20 },
 });

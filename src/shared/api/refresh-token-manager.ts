@@ -59,7 +59,7 @@ export class RefreshTokenManager {
     }
   }
 
-  private emitSessionExpired(): void {
+  emitSessionExpired(): void {
     for (const listener of this.listeners) {
       try {
         listener();
@@ -81,8 +81,7 @@ export class RefreshTokenManager {
         if (tokenStorage.getRefreshToken() !== startedWith && tokenStorage.hasSession()) {
           return true;
         }
-        tokenStorage.clearTokens();
-        this.emitSessionExpired();
+        expireSession();
         return false;
       })
       .finally(() => {
@@ -93,6 +92,12 @@ export class RefreshTokenManager {
 }
 
 export const refreshTokenManager = new RefreshTokenManager();
+
+/** Sessiya yaroqsiz: tokenlarni tozalaydi va obunachilarga xabar beradi (ilova login sahifasiga qaytaradi). */
+export function expireSession(): void {
+  tokenStorage.clearTokens();
+  refreshTokenManager.emitSessionExpired();
+}
 
 /**
  * Veb bu yerda `window` ga `CustomEvent` yuboradi. Mobilda global hodisa

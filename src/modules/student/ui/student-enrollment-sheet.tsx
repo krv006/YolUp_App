@@ -133,7 +133,7 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
       ) : null}
       {(teachers.data ?? []).map((teacher) => (
         <View key={teacher.id} style={styles.row}>
-          <Avatar name={teacher.name} tone="violet" size="md" />
+          <Avatar name={teacher.name} src={teacher.avatarUrl ?? undefined} tone="violet" size="md" />
           <View style={styles.body}>
             <Text variant="label" numberOfLines={1}>
               {teacher.name}

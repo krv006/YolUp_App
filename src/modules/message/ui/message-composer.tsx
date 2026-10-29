@@ -6,7 +6,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } fr
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useKeyboardState } from "react-native-keyboard-controller";
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder } from "expo-audio";
-import { formatFileSize, toUploadFile, type PickedFile } from "@/shared/lib";
+import { formatFileSize, formatRelativeShort, toUploadFile, type PickedFile } from "@/shared/lib";
 import { useOnlineStatus } from "@/shared/model";
 import type { ChatMessage, SendMessagePayload } from "@/shared/types";
 import { Avatar, bodyFont, DsText, dsRadius, dsType, Icon, toast, useDs } from "@/shared/ui";
@@ -22,7 +22,7 @@ export interface MessageComposerProps {
   editingMessage?: ChatMessage | null;
   onCancelContext: () => void;
   currentUserId?: string | null;
-  onTyping?: () => void;
+  onTyping?: (kind?: "text" | "voice") => void;
   allowAttachments?: boolean;
   roomId?: string | null;
   /** Biriktirish oynasidagi "Vazifa" (faqat o'qituvchi guruhida). */
@@ -256,7 +256,9 @@ export function MessageComposer({
                   <DsText v="body-sm" c={member.role === "teacher" ? "brand" : "ink-secondary"} numberOfLines={1}>
                     {member.role === "teacher"
                       ? t("mention.teacher")
-                      : `@${member.username}${member.isOnline ? ` · ${t("mention.online")}` : ""}`}
+                      : `@${member.username}${
+                          member.isOnline ? ` · ${t("mention.online")}` : member.lastSeenAt ? ` · ${formatRelativeShort(member.lastSeenAt)}` : ""
+                        }`}
                   </DsText>
                 </View>
               </Pressable>
@@ -358,7 +360,7 @@ export function MessageComposer({
         ) : null}
 
         {recording ? (
-          <RecordingPanel onDone={finishRecording} />
+          <RecordingPanel onDone={finishRecording} onTyping={onTyping} />
         ) : (
           <View style={styles.row}>
             <Pressable
@@ -508,7 +510,13 @@ export function MessageComposer({
  * ochilishi bilan yaratilsa, Android faoliyati almashgan paytda (masalan
  * rasm tanlagichdan qaytganda) nativ konstruktor rad etilib ekran yiqilardi.
  */
-function RecordingPanel({ onDone }: { onDone: (result: { uri: string; seconds: number } | null) => void }) {
+function RecordingPanel({
+  onDone,
+  onTyping,
+}: {
+  onDone: (result: { uri: string; seconds: number } | null) => void;
+  onTyping?: (kind?: "text" | "voice") => void;
+}) {
   const { t } = useTranslation("chat");
   const ds = useDs();
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
@@ -516,8 +524,10 @@ function RecordingPanel({ onDone }: { onDone: (result: { uri: string; seconds: n
   const secondsRef = useRef(0);
   const stoppedRef = useRef(false);
   const doneRef = useRef(onDone);
+  const typingRef = useRef(onTyping);
   useEffect(() => {
     doneRef.current = onDone;
+    typingRef.current = onTyping;
   });
 
   useEffect(() => {
@@ -534,7 +544,10 @@ function RecordingPanel({ onDone }: { onDone: (result: { uri: string; seconds: n
         doneRef.current(null);
       }
     })();
+    // Suhbatdoshda "ovozli xabar yozmoqda" ko'rinsin (veb #162).
+    typingRef.current?.("voice");
     const timer = setInterval(() => {
+      typingRef.current?.("voice");
       secondsRef.current += 1;
       setSeconds(secondsRef.current);
     }, 1000);

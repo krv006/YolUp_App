@@ -44,7 +44,7 @@ export function ChatsPage(_props: { role: ConversationRole }) {
   const insets = useSafeAreaInsets();
   const routes = useRoleRoutes();
   const openNewConversation = useNewConversationStore((state) => state.setOpen);
-  const { data, isLoading, isError, refetch, filter, setFilter, search, setSearch, query, visible, peopleRows, unreadTotal } =
+  const { data, isLoading, isError, refetch, filter, setFilter, search, setSearch, query, visible, peopleRows, unreadTotal, unreadByFilter } =
     useConversationList();
   const [actionsFor, setActionsFor] = useState<Conversation | null>(null);
   const [focus, setFocus] = useState<ConversationActionsFocus | null>(null);
@@ -112,7 +112,7 @@ export function ChatsPage(_props: { role: ConversationRole }) {
               <View style={styles.block}>
                 <MobileSegment
                   scroll
-                  items={CONVERSATION_FILTERS.map((id) => ({ id, label: t(`panel.filters.${id}`) }))}
+                  items={CONVERSATION_FILTERS.map((id) => ({ id, label: t(`panel.filters.${id}`), badge: unreadByFilter[id] }))}
                   value={filter}
                   onChange={setFilter}
                 />

@@ -1,14 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
+import { useCurrentUser } from "@/modules/auth";
+import { isDirectLocked, isOwnLastMessage, lastMessageBody, useDirectStatusLabel } from "@/modules/conversation";
 import { formatMessageTime } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
 import { Avatar, DsText, dsRadius, GroupTile, Icon, useDs } from "@/shared/ui";
 
-function preview(conversation: Conversation, youLabel: string): string {
+function preview(conversation: Conversation, mine: boolean, youLabel: string, body: string): string {
   if (!conversation.lastMessage) return "";
   const sender = conversation.lastSender;
-  if (!sender) return conversation.lastMessage;
-  return `${sender === "me" ? youLabel : sender}: ${conversation.lastMessage}`;
+  if (!sender) return body;
+  return `${mine ? youLabel : sender}: ${body}`;
 }
 
 /** Bugun — soat, kecha — "Kecha", hafta ichida — kun nomi, undan oldin — `kk.oo`. */
@@ -27,15 +29,24 @@ function listTime(value: string, yesterday: string, weekdays: string[]): string 
 /**
  * Suhbat qatorining tarkibi — veb `widgets/chat-shell/conversation-row.tsx`:
  * guruh belgisi yoki avatar (onlayn nuqta bilan), nom, oxirgi xabar (o'zimniki
- * bo'lsa ikki belgi), vaqt, qadalgan belgi va o'qilmaganlar soni yoki
+ * bo'lsa "Siz:" va ikki belgi; ovoz/rasm/video belgisi bilan), "yozmoqda"
+ * yoki shaxsiy chat holati (kutilmoqda/bloklangan), vaqt, qadalgan belgi va o'qilmaganlar soni yoki
  * ovozsiz belgisi. Qator va uzoq bosishdagi "ko'tarilgan" nusxa shu
  * komponentdan.
  */
 export function ConversationRowBody({ conversation }: { conversation: Conversation }) {
   const { t } = useTranslation("chat");
   const ds = useDs();
+  const user = useCurrentUser();
   const weekdays = t("listTime.weekdays", { returnObjects: true }) as string[];
   const unread = conversation.unreadCount > 0;
+  const directStatusLabel = useDirectStatusLabel();
+  const mine = isOwnLastMessage(conversation, user);
+  const body = lastMessageBody(conversation, {
+    voice: t("panel.voiceMessage"),
+    image: t("panel.imageMessage"),
+    video: t("panel.videoMessage"),
+  });
 
   return (
     <>
@@ -59,13 +70,19 @@ export function ConversationRowBody({ conversation }: { conversation: Conversati
         </DsText>
         {conversation.typing ? (
           <DsText v="body-sm" c="brand" numberOfLines={1}>
-            {t("panel.typing", { name: conversation.typingName ?? "" })}
+            {conversation.typingKind === "voice"
+              ? t("panel.recordingVoice", { name: conversation.typingName ?? "" })
+              : t("panel.typing", { name: conversation.typingName ?? "" })}
+          </DsText>
+        ) : isDirectLocked(conversation) ? (
+          <DsText v="body-sm" c={conversation.directStatus === "blocked" ? "error-text" : "saffron-strong"} numberOfLines={1}>
+            {directStatusLabel(conversation.directStatus)}
           </DsText>
         ) : (
           <View style={styles.preview}>
-            {conversation.lastSender === "me" ? <Icon name="done-all" size={16} color={ds.c.brand} /> : null}
+            {mine ? <Icon name="done-all" size={16} color={ds.c.brand} /> : null}
             <DsText v="body-sm" c={unread ? "ink" : "ink-secondary"} numberOfLines={1} style={styles.previewText}>
-              {preview(conversation, t("panel.you"))}
+              {preview(conversation, mine, t("panel.you"), body)}
             </DsText>
           </View>
         )}

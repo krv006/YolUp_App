@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -6,7 +6,8 @@ import { Play } from "lucide-react-native";
 import { ROLES } from "@/shared/constants";
 import { formatMessageTime } from "@/shared/lib";
 import type { ChatMessage } from "@/shared/types";
-import { Avatar, dsAlpha, DsText, dsRadius, Icon, useDs, type DsColor } from "@/shared/ui";
+import { Avatar, dsAlpha, DsText, dsRadius, FileViewer, Icon, useDs, type DsColor } from "@/shared/ui";
+import { messageApi } from "../api/message.api";
 import { useChatUiStore } from "../model/chat-ui.store";
 import { MessageAttachment } from "./message-attachment";
 import { MessageText } from "./message-text";
@@ -40,39 +41,104 @@ const RECORDING_PATH = /\/recordings\/([\w-]+)/;
 const QUOTED_TITLE = /[“"']([^“”"']+)[”"']/;
 
 /** Tizim xabari — kulrang pilyulka; dars yozuvi havolasi bo'lsa yozuv kartasi. */
-function SystemMessage({ text }: { text: string }) {
+/**
+ * Tizim kartasi — veb `SystemCard`: chap tomonda belgi, nom, izoh va vaqt,
+ * o'ngda harakat tugmasi (`max-w-[420px] rounded-2xl border p-3 shadow-sm`).
+ */
+function SystemCard({
+  icon,
+  iconBg,
+  title,
+  subtitle,
+  time,
+  action,
+  onAction,
+}: {
+  icon: ReactNode;
+  iconBg: string;
+  title: string;
+  subtitle: string;
+  time: string;
+  action: string;
+  onAction: () => void;
+}) {
+  const ds = useDs();
+  return (
+    <View style={styles.recordingRow}>
+      <View style={[styles.recording, { borderColor: ds.c.line, backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}>
+        <View style={[styles.recordingIcon, { backgroundColor: iconBg }]}>{icon}</View>
+        <View style={styles.grow}>
+          <DsText v="label-strong" numberOfLines={1}>
+            {title}
+          </DsText>
+          <DsText v="caption" c="ink-tertiary" numberOfLines={1}>
+            {[subtitle, time].filter(Boolean).join(" · ")}
+          </DsText>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAction}
+          style={({ pressed }) => [styles.recordingAction, { backgroundColor: pressed ? ds.c["action-hover"] : ds.c.action }]}
+        >
+          <DsText v="label-strong" c="on-action">
+            {action}
+          </DsText>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+/**
+ * Tizim xabari — veb `SystemMessage`: dars yozuvi tayyor bo'lsa yozuv kartasi,
+ * doska PDF'i biriktirilgan bo'lsa doska kartasi (ilova ichidagi fayl
+ * ko'ruvchida ochiladi), qolgan hollarda markazdagi kulrang yozuv.
+ */
+function SystemMessage({ message }: { message: ChatMessage }) {
   const { t } = useTranslation("chat");
   const ds = useDs();
   const router = useRouter();
+  const [boardOpen, setBoardOpen] = useState(false);
+  const text = message.text;
   const lessonId = text.match(RECORDING_PATH)?.[1] ?? null;
+  const title = text.match(QUOTED_TITLE)?.[1] ?? "";
+  const time = message.createdAt ? formatMessageTime(message.createdAt) : "";
 
-  if (lessonId) {
-    const title = text.match(QUOTED_TITLE)?.[1] ?? "";
+  if (lessonId)
     return (
-      <View style={styles.recordingRow}>
-        <View style={[styles.recording, { borderColor: ds.c.line, backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}>
-          <View style={[styles.recordingIcon, { backgroundColor: ds.c["action-subtle"] }]}>
-            <Play size={18} color={ds.c.action} />
-          </View>
-          <View style={styles.grow}>
-            <DsText v="label-strong" numberOfLines={1}>
-              {t("system.recordingTitle")}
-            </DsText>
-            <DsText v="caption" c="ink-tertiary" numberOfLines={1}>
-              {title || t("system.recordingHint")}
-            </DsText>
-          </View>
-          <Pressable
-            accessibilityRole="link"
-            onPress={() => router.push(`/recordings/${lessonId}` as never)}
-            style={({ pressed }) => [styles.recordingAction, { backgroundColor: pressed ? ds.c["action-hover"] : ds.c.action }]}
-          >
-            <DsText v="label-strong" c="on-action">
-              {t("system.recordingAction")}
-            </DsText>
-          </Pressable>
-        </View>
-      </View>
+      <SystemCard
+        icon={<Play size={18} color={ds.c.action} />}
+        iconBg={ds.c["action-subtle"]}
+        title={t("system.recordingTitle")}
+        subtitle={title || t("system.recordingHint")}
+        time={time}
+        action={t("system.recordingAction")}
+        onAction={() => router.push(`/recordings/${lessonId}` as never)}
+      />
+    );
+
+  if (message.attachment) {
+    const attachment = message.attachment;
+    return (
+      <>
+        <SystemCard
+          icon={<Icon name="board-marker" size={20} color={ds.c["accent-saffron-fg"]} />}
+          iconBg={ds.c["accent-saffron-bg"]}
+          title={t("system.boardTitle")}
+          subtitle={title || attachment.name}
+          time={time}
+          action={t("system.boardAction")}
+          onAction={() => setBoardOpen(true)}
+        />
+        <FileViewer
+          open={boardOpen}
+          onOpenChange={setBoardOpen}
+          name={title ? t("system.boardName", { title }) : attachment.name}
+          mimeType={attachment.mimeType}
+          meta={time}
+          load={(signal) => messageApi.downloadFile(message.id, { signal })}
+        />
+      </>
     );
   }
 
@@ -232,7 +298,7 @@ export function MessageBubble({
   const bubbleRef = useRef<View>(null);
   const outgoing = message.senderId === currentUserId;
 
-  if (message.type === "system") return <SystemMessage text={message.text} />;
+  if (message.type === "system") return <SystemMessage message={message} />;
 
   return (
     <Pressable
@@ -248,7 +314,7 @@ export function MessageBubble({
       ]}
     >
       {outgoing ? null : (
-        <View style={styles.avatarSlot}>{showAvatar ? <Avatar variant="legacy" name={message.senderName} size="sm" box={28} /> : null}</View>
+        <View style={styles.avatarSlot}>{showAvatar ? <Avatar variant="legacy" name={message.senderName} src={message.senderAvatarUrl ?? undefined} size="sm" box={28} /> : null}</View>
       )}
       <View ref={bubbleRef} collapsable={false} style={styles.bubbleBox}>
         <MessageBubbleCard message={message} outgoing={outgoing} showName={showName} highlighted={highlighted} onReact={onReact} fill />

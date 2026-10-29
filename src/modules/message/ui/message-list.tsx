@@ -298,7 +298,11 @@ export function MessageList({
               {conversation.kind === "course" ? t("list.emptyGroupTitle") : t("list.emptyTitle")}
             </DsText>
             <DsText v="body-sm" c="ink-secondary" style={[styles.center, styles.emptyHint]}>
-              {conversation.kind === "course" ? t("list.emptyGroupHint") : t("list.emptyHint")}
+              {conversation.kind === "course"
+                ? t("list.emptyGroupHint")
+                : conversation.directStatus && conversation.directStatus !== "active"
+                  ? t("list.emptyLockedHint")
+                  : t("list.emptyHint")}
             </DsText>
           </View>
         </View>
@@ -329,7 +333,7 @@ export function MessageList({
                 </View>
               ) : null
             }
-            ListFooterComponent={!search && conversation.typing ? <TypingIndicator name={conversation.typingName || conversation.title} /> : null}
+            ListFooterComponent={!search && conversation.typing ? <TypingIndicator name={conversation.typingName || conversation.title} kind={conversation.typingKind} /> : null}
             renderItem={renderRow}
           />
         </MessageTextScale>
@@ -433,18 +437,18 @@ function RowGap() {
 }
 
 /** "Yozmoqda" — `rounded-full bg-surface px-3 py-2 shadow-xs` ichida sakraydigan uch nuqta. */
-function TypingIndicator({ name }: { name: string }) {
+function TypingIndicator({ name, kind = "text" }: { name: string; kind?: "text" | "voice" }) {
   const { t } = useTranslation("chat");
   const ds = useDs();
   return (
-    <View style={styles.typing} accessibilityLabel={`${name} ${t("typing.suffix")}`}>
+    <View style={styles.typing} accessibilityLabel={`${name} ${t(kind === "voice" ? "typing.voiceSuffix" : "typing.suffix")}`}>
       <View style={[styles.typingDots, { backgroundColor: ds.c.surface, boxShadow: ds.shadow.xs }]}>
         {[0, 1, 2].map((dot) => (
           <TypingDot key={dot} delay={dot * 120} color={ds.c["ink-tertiary"]} />
         ))}
       </View>
       <DsText v="caption" c="ink-tertiary">
-        {name.split(" ")[0]} {t("typing.suffix")}
+        {name.split(" ")[0]} {t(kind === "voice" ? "typing.voiceSuffix" : "typing.suffix")}
       </DsText>
     </View>
   );

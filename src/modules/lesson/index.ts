@@ -81,8 +81,6 @@ export type { ConflictQuery, ScheduleInput, Weekday } from "./lib/lesson-schedul
 export type { LessonStatusMeta } from "./lib/lesson-status";
 
 // --- Mobil UI ---
-export { LessonCalendar } from "./ui/lesson-calendar";
-export type { LessonCalendarProps } from "./ui/lesson-calendar";
 export { LessonActions } from "./ui/lesson-actions";
 export type { LessonActionsProps } from "./ui/lesson-actions";
 export { LessonList } from "./ui/lesson-list";

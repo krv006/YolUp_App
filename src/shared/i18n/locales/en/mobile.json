@@ -255,7 +255,9 @@
     "darsga_kirish": "Join lesson",
     "bekor_qilish": "Cancel",
     "ha_shu_yerdaman": "Yes, I'm here",
-    "darsda_ekaningizni_tasdiqlang_javob_bermasan": "Confirm that you are in the lesson. If you do not answer, this goes into the attendance report."
+    "darsda_ekaningizni_tasdiqlang_javob_bermasan": "Confirm that you are in the lesson. If you do not answer, this goes into the attendance report.",
+    "ruxsat_sozlamalarda": "Allow YolUp to use the camera and microphone in your phone settings. Without it you join as a listener only.",
+    "sozlamalarni_ochish": "Open settings"
   },
   "quiz": {
     "fan": "Subject",

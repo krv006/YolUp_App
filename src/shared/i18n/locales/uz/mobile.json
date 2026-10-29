@@ -295,7 +295,9 @@
     "darsga_kirish": "Darsga kirish",
     "bekor_qilish": "Bekor qilish",
     "ha_shu_yerdaman": "Ha, shu yerdaman",
-    "darsda_ekaningizni_tasdiqlang_javob_bermasan": "Darsda ekaningizni tasdiqlang. Javob bermasangiz bu davomat hisobotiga tushadi."
+    "darsda_ekaningizni_tasdiqlang_javob_bermasan": "Darsda ekaningizni tasdiqlang. Javob bermasangiz bu davomat hisobotiga tushadi.",
+    "ruxsat_sozlamalarda": "Telefon sozlamalarida YolUp ilovasiga kamera va mikrofon ruxsatini bering. Ruxsatsiz faqat tinglovchi sifatida qo‘shilasiz.",
+    "sozlamalarni_ochish": "Sozlamalarni ochish"
   },
   "message": {
     "yopish": "Yopish",

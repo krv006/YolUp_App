@@ -39,6 +39,12 @@ export interface SheetProps {
   footer?: ReactNode;
   /** Faqat `app`: kichik sarlavha (`text-title-lg font-semibold`) va `pt-5` pastki qator — tanlagich oynalari. */
   compact?: boolean;
+  /** Faqat `app`: sarlavha chap tomonidagi belgi (veb `AppDialog icon`). */
+  icon?: ReactNode;
+  /** Faqat `app`: sarlavha brend shriftida (`font-heading text-h2 font-medium`). */
+  headingTitle?: boolean;
+  /** Faqat `app`: pastki qator bo'shliqlari (veb `footerClassName`, standart `pt-6 pb-4`). */
+  footerPadding?: { top: number; bottom: number };
 }
 
 /** Shu masofadan ko'p sudralsa yopiladi. */
@@ -87,7 +93,19 @@ const CLOSE_VELOCITY = 900;
  * │ dastlab qo'l bilan surilmagan edi.                                   │
  * └─────────────────────────────────────────────────────────────────────┘
  */
-export function Sheet({ open, onClose, title, description, children, variant = "classic", footer, compact = false }: SheetProps) {
+export function Sheet({
+  open,
+  onClose,
+  title,
+  description,
+  children,
+  variant = "classic",
+  footer,
+  compact = false,
+  icon,
+  headingTitle = false,
+  footerPadding,
+}: SheetProps) {
   const { t } = useTranslation("mobile");
   const { palette } = useTheme();
   const ds = useDs();
@@ -217,8 +235,9 @@ export function Sheet({ open, onClose, title, description, children, variant = "
 
             {app ? (
               <View style={styles.appHead}>
+                {icon}
                 <View style={styles.appTitle}>
-                  <DsText v={compact ? "title-lg" : "h2"} w="600" style={compact ? null : styles.appTitleText}>
+                  <DsText v={compact ? "title-lg" : "h2"} w={headingTitle ? "500" : "600"} heading={headingTitle} style={compact ? null : styles.appTitleText}>
                     {title}
                   </DsText>
                   {description ? (
@@ -265,7 +284,16 @@ export function Sheet({ open, onClose, title, description, children, variant = "
               </Animated.ScrollView>
             </GestureDetector>
             {app && footer ? (
-              <View style={[styles.appFooter, compact && styles.appFooterCompact, { paddingBottom: Math.max(compact ? 24 : 16, insets.bottom + 8) }]}>{footer}</View>
+              <View
+                style={[
+                  styles.appFooter,
+                  compact && styles.appFooterCompact,
+                  footerPadding ? { paddingTop: footerPadding.top } : null,
+                  { paddingBottom: Math.max(footerPadding?.bottom ?? (compact ? 24 : 16), insets.bottom + 8) },
+                ]}
+              >
+                {footer}
+              </View>
             ) : null}
           </Animated.View>
         </GestureDetector>

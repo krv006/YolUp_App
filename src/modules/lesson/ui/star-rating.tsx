@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Star } from "lucide-react-native";
 import { MIN_TOUCH_SIZE, Text, useTheme } from "@/shared/ui";
@@ -20,13 +21,14 @@ const STARS = [1, 2, 3, 4, 5] as const;
  * uchun.
  */
 export function StarRating({ value, onChange, size = 28, readOnly = false }: StarRatingProps) {
+  const { t } = useTranslation("lesson");
   const { palette } = useTheme();
 
   return (
     <View
       style={styles.row}
       accessibilityRole={readOnly ? "text" : "adjustable"}
-      accessibilityLabel={`Baho: ${value} yulduzdan 5`}
+      accessibilityLabel={readOnly || !onChange ? t("starRating.starAria", { count: value }) : t("starRating.aria")}
     >
       {STARS.map((star) => {
         const filled = star <= value;
@@ -44,7 +46,7 @@ export function StarRating({ value, onChange, size = 28, readOnly = false }: Sta
           <Pressable
             key={star}
             accessibilityRole="button"
-            accessibilityLabel={`${star} yulduz`}
+            accessibilityLabel={t("starRating.starAria", { count: star })}
             onPress={() => onChange(star)}
             style={styles.hit}
           >
@@ -58,11 +60,15 @@ export function StarRating({ value, onChange, size = 28, readOnly = false }: Sta
 
 /** O'rtacha baho + baholovchilar soni — kartochkalarda. */
 export function RatingSummary({ average, count }: { average: number | null; count: number }) {
+  const { t } = useTranslation("lesson");
   const { palette } = useTheme();
   if (average === null) return null;
 
   return (
-    <View style={styles.summary}>
+    <View
+      style={styles.summary}
+      accessibilityLabel={t("starRating.averageTitle", { value: average.toFixed(1), max: STARS.length })}
+    >
       <Star size={14} color={palette.warning} fill={palette.warning} />
       <Text variant="caption" tone="muted">
         {average.toFixed(1)} ({count})

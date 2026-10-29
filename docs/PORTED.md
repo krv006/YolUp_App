@@ -350,19 +350,19 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `821d80dc5c6f` | `AuthScreen` (tor ekran varianti, M1–M4) + maydon/tugma komponentlari; `AuthShell` (keng ekran) yo'q; fon gradienti `DsGradient`, maydonlar klaviatura ustiga `KeyboardAwareScrollView` bilan suriladi; placeholder o'lchami RN'da alohida berilmagani uchun bo'sh maydonda shrift placeholder'nikiga o'tadi |
 | `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `56a812e2324e` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp`; fokus o'tishidan oldin kelgan raqam keyingi kataklarga tarqatiladi (vebda `maxLength=1`) |
 | `src/modules/auth/ui/two-factor-form.tsx` | 🟡 MOSLASH | `e6f1e33d6c41` | faqat `MobileTwoFactorForm` (veb tor ekranda shuni ko'rsatadi); `TwoFactorForm` (keng ekran) yo'q |
-| `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `142fd170b299` | faqat tor ekran varianti; `AppDialog` -> `Sheet`; 2FA yoqish/kod/o'chirish oynalari vebdagidek. Ota-ona hozircha `pages/profile/legacy/` dagi eski sahifada; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): 2FA qatori yashirin, holat so'ralmaydi |
-| `src/pages/profile/profile-page.tsx` | 🟡 MOSLASH | `a6e554a1a379` | faqat tor ekran varianti; avatar yuklash yo'q (veb tor ekranda ham yo'q); o'qituvchi va o'quvchi — ota-ona `pages/profile/legacy/` da |
-| `src/pages/profile/profile-layout.tsx` | 🟡 MOSLASH | `35ce0f6b738c` | tor ekranda faqat `Outlet` — mobilda `app/teacher/profile/_layout.tsx` (Stack, `anchor: "index"`); keng ekran yon menyusi yo'q |
+| `src/pages/profile/account-settings-page.tsx` | 🟡 MOSLASH | `2f0e10040d95` | faqat tor ekran varianti; `AppDialog` -> `Sheet`; login o'zgartirish pastki oynada. Ota-ona hozircha `pages/profile/legacy/` dagi eski sahifada |
+| `src/pages/profile/profile-page.tsx` | 🟡 MOSLASH | `2c90aa54cf0c` | faqat tor ekran varianti; avatar yuklash yo'q (veb tor ekranda ham yo'q); o'qituvchi va o'quvchi — ota-ona `pages/profile/legacy/` da |
+| `src/pages/profile/profile-layout.tsx` | 🟡 MOSLASH | `3255068a24e6` | tor ekranda faqat `Outlet` — mobilda `app/teacher/profile/_layout.tsx` (Stack, `anchor: "index"`); keng ekran yon menyusi yo'q |
 | `src/pages/profile/profile-shell.tsx` | 🟡 MOSLASH | `282318c579f7` | `ProfileSubPage` — maydonlar klaviatura ustida (`KeyboardAwareScrollView`); orqaga — stekdan, bo'lmasa profil bosh sahifasiga |
 | `src/pages/profile/profile-dialogs.tsx` | 🟡 MOSLASH | `a2ea1873e2b1` | `AppDialog` -> `Sheet variant="app"` / `ConfirmDialog` |
 | `src/pages/profile/settings-tones.ts` | 🟢 NUSXA | `3d58b6ad30a4` | — |
-| `src/pages/profile/personal-info-page.tsx` | 🟡 MOSLASH | `c942534b1f5f` | faqat tor ekran varianti; fan va shahar `<select>` o'rniga `MobilePickerField`; xato `MobileActionBar` ustida |
-| `src/pages/profile/system-settings-page.tsx` | 🟡 MOSLASH | `e92e834bba3f` | faqat tor ekran varianti; push — veb Web Push o'rniga OS ruxsati (o'chirish tizim sozlamalarini ochadi, ilovaga qaytganda qayta o'qiladi); eski mobil sahifadagi kesh tozalash va bildirishnoma turlari olib tashlandi (vebda yo'q) |
-| `src/pages/profile/my-ratings-page.tsx` | 🟡 MOSLASH | `5842230d4b65` | faqat tor ekran shoxlari: o'qituvchida `TeacherRatings`, o'quvchida `student-ratings.tsx` |
-| `src/pages/profile/student-ratings.tsx` | 🟡 MOSLASH | `23c365c11544` | faqat tor ekran varianti |
-| `src/pages/profile/certificates-page.tsx` | 🟡 MOSLASH | `57c03981d30b` | faqat tor ekran varianti; fayl `pickDocument` bilan; faylni ochish `Linking.openURL`; qator menyusi `PopoverMenu` |
-| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `0d1bbdb3c27d` | faqat tor ekran varianti |
-| `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `29932f6eb4da` | tanishuvni qayta ko'rsatish — `storage` dagi kalit o'chiriladi (vebda `localStorage`) |
+| `src/pages/profile/personal-info-page.tsx` | 🟡 MOSLASH | `28200661b973` | faqat tor ekran varianti; fan va shahar `<select>` o'rniga `MobilePickerField`; xato `MobileActionBar` ustida |
+| `src/pages/profile/system-settings-page.tsx` | 🟡 MOSLASH | `f5135024240f` | faqat tor ekran varianti; push — veb Web Push o'rniga OS ruxsati (o'chirish tizim sozlamalarini ochadi, ilovaga qaytganda qayta o'qiladi); eski mobil sahifadagi kesh tozalash va bildirishnoma turlari olib tashlandi (vebda yo'q); mavzu va matn o'lchami vebdagidek serverga ham yoziladi |
+| `src/pages/profile/my-ratings-page.tsx` | 🟡 MOSLASH | `d8a2a399924a` | faqat tor ekran shoxlari: o'qituvchida `TeacherRatings`, o'quvchida `student-ratings.tsx` |
+| `src/pages/profile/student-ratings.tsx` | 🟡 MOSLASH | `681aec74e6b1` | faqat tor ekran varianti |
+| `src/pages/profile/certificates-page.tsx` | 🟡 MOSLASH | `25dea699b601` | faqat tor ekran varianti; fayl `pickDocument` bilan; faylni ochish `Linking.openURL`; qator menyusi `PopoverMenu` |
+| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `3844db93624c` | faqat tor ekran varianti |
+| `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `e2c0bd70c4b7` | tanishuvni qayta ko'rsatish — `storage` dagi kalit o'chiriladi (vebda `localStorage`); FAQ javobi `AppDialog` o'rniga `Sheet`; video `Linking.openURL`; `?ticket=` — `useLocalSearchParams`/`router.setParams` |
 | `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | mobilda `pages/profile/legacy/system-settings-page.tsx` ichida (ota-ona); Web Push qatori yo'q (qurilma tokeni kirishda o'zi yoziladi) |
 | `src/modules/auth/ui/login-history-dialog.tsx` | 🟡 MOSLASH | `8127cad1ced2` | mobilda `login-history-sheet.tsx` (Dialog o'rniga Sheet) |
 | `src/pages/auth/welcome-page.tsx` | 🟡 MOSLASH | `c36d8a0a9983` | til menyusi oddiy ochiluvchi ro'yxat; Xush kelibsiz ochilishda `fade` bilan chiqadi |
@@ -503,8 +503,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/support/api/support.api.ts` | 🟢 NUSXA | `6563a2ec4da0` | — |
 | `src/modules/support/api/support.dto.ts` | 🟢 NUSXA | `da35f39b892c` | — |
 | `src/modules/support/api/support.endpoints.ts` | 🟢 NUSXA | `4074a461df2f` | — |
-| `src/modules/support/index.ts` | 🟡 MOSLASH | `30f7a662d77d` | veb barrel minus `ui/` eksportlari (`SupportDialog` mobilda alohida) |
+| `src/modules/support/index.ts` | 🟡 MOSLASH | `30f7a662d77d` | veb barrel minus `ui/` eksportlari; mobil `SupportDialog` alohida bo'limda |
 | `src/modules/support/model/support.queries.ts` | 🟢 NUSXA | `dc55fa0171da` | — |
+| `src/modules/support/ui/support-dialog.tsx` | 🟡 MOSLASH | `8ac44facd076` | `AppDialog variant="panel"` -> `Sheet variant="app"`; yangi murojaat va javob tugmalari oyna pastki qatorida; xodim ko'rinishi (`staffView`) yo'q — mobilda faqat foydalanuvchi |
 | `src/modules/tutor/api/tutor.api.ts` | 🟢 NUSXA | `528d187d1499` | — |
 | `src/modules/tutor/api/tutor.dto.ts` | 🟢 NUSXA | `3e37a652c909` | — |
 | `src/modules/tutor/api/tutor.endpoints.ts` | 🟢 NUSXA | `684db9b4d7ab` | — |

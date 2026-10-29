@@ -3,17 +3,19 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useAuth, useIsStudent, useUpdateProfileMutation } from "@/modules/auth";
 import { useCourses, useSubjects } from "@/modules/course";
+import { AppError } from "@/shared/api";
 import { bodyFont, DsText, dsRadius, dsType, Icon, MobileButton, MobileFieldLabel, MobileInput, MobilePickerField, toast, useDs } from "@/shared/ui";
 import { ProfileSubPage } from "./profile-shell";
 
 const CITIES = ["Toshkent", "Samarqand", "Buxoro", "Andijon", "Farg'ona", "Namangan", "Qarshi", "Nukus", "Urganch", "Jizzax", "Guliston", "Navoiy", "Termiz"];
 
-type TextField = "firstName" | "lastName" | "phone" | "email";
+type TextField = "firstName" | "lastName" | "username" | "phone" | "email";
 
 /**
  * Shaxsiy ma'lumotlar — veb `personal-info-page.tsx` (tor ekran): ism va
- * familiya, telefon (izoh bilan), email, fan (o'quvchida o'qiyotgan fanlari)
- * va shahar; pastda "Saqlash", xato bo'lsa uning ustida izoh.
+ * familiya, login (izoh yoki server xatosi bilan), telefon, email, fan
+ * (o'quvchida o'qiyotgan fanlari) va shahar; pastda "Saqlash", boshqa xato
+ * bo'lsa uning ustida izoh.
  */
 export function PersonalInfoPage() {
   const { t } = useTranslation("account");
@@ -27,6 +29,7 @@ export function PersonalInfoPage() {
   const [form, setForm] = useState({
     firstName: user?.firstName ?? "",
     lastName: user?.lastName ?? "",
+    username: user?.username ?? "",
     phone: user?.phone ?? "",
     email: user?.email ?? "",
     subject: user?.subject ?? "",
@@ -35,6 +38,8 @@ export function PersonalInfoPage() {
 
   const subjectOptions = [{ value: "", label: t("page.subjectNone") }, ...(subjects.data ?? []).map((item) => ({ value: item.value, label: item.label }))];
   const subjectLabel = subjectOptions.find((item) => item.value === form.subject)?.label ?? "";
+  const usernameField = update.error instanceof AppError ? update.error.fields?.username : undefined;
+  const usernameError = Array.isArray(usernameField) ? usernameField[0] : usernameField;
 
   function save() {
     if (!form.firstName.trim() || !form.lastName.trim()) return;
@@ -49,7 +54,9 @@ export function PersonalInfoPage() {
       surface
       value={form[key]}
       keyboardType={keyboardType}
-      autoCapitalize={keyboardType ? "none" : "words"}
+      autoCapitalize={keyboardType || key === "username" ? "none" : "words"}
+      autoCorrect={key === "username" ? false : undefined}
+      invalid={key === "username" && Boolean(usernameError)}
       onChangeText={(value) => setForm((current) => ({ ...current, [key]: value }))}
     />
   );
@@ -58,7 +65,7 @@ export function PersonalInfoPage() {
     <ProfileSubPage
       title={t("page.personalTitle")}
       footerNote={
-        update.isError ? (
+        update.isError && !usernameError ? (
           <View style={[styles.error, { backgroundColor: ds.c["danger-bg"] }]}>
             <Icon name="warning-fill" size={20} color={ds.c.danger} />
             <DsText v="body-sm" w="500" c="error-text" style={styles.grow}>
@@ -82,14 +89,18 @@ export function PersonalInfoPage() {
             </MobileFieldLabel>
           </View>
         </View>
-        <View style={styles.phone}>
-          <MobileFieldLabel gap={7} label={t("page.phone")}>
-            {field("phone", "phone-pad")}
+        {/* `flex-col gap-1.5` */}
+        <View style={styles.username}>
+          <MobileFieldLabel gap={7} label={t("page.loginLabel")}>
+            {field("username")}
           </MobileFieldLabel>
-          <DsText v="caption" w="400" c="ink-secondary">
-            {t("page.phoneNote")}
+          <DsText v="caption" w="400" c={usernameError ? "error-text" : "ink-secondary"}>
+            {usernameError ?? t("page.usernameHint")}
           </DsText>
         </View>
+        <MobileFieldLabel gap={7} label={t("page.phone")}>
+          {field("phone", "phone-pad")}
+        </MobileFieldLabel>
         <MobileFieldLabel gap={7} label={t("page.email")}>
           {field("email", "email-address")}
         </MobileFieldLabel>
@@ -139,7 +150,7 @@ const styles = StyleSheet.create({
   /* `-mt-[6px] gap-[15px]` */
   form: { marginTop: -6, gap: 15 },
   pair: { flexDirection: "row", gap: 12 },
-  phone: { gap: 8 },
+  username: { gap: 6 },
   readonly: { height: 52, justifyContent: "center", paddingHorizontal: 16, borderRadius: dsRadius.lg },
   readonlyText: { fontSize: dsType.body.fontSize, fontFamily: bodyFont("400") },
   error: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.xl },

@@ -1,60 +1,15 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import {
-  useAuth,
-  useAuthStore,
-  useChangePasswordMutation,
-  useConfirmTwoFactorMutation,
-  useDeleteAccountMutation,
-  useDisableTwoFactorMutation,
-  useEnableTwoFactorMutation,
-  useRoleRoutes,
-  useTwoFactorStatus,
-} from "@/modules/auth";
-import { OtpInput } from "@/modules/auth/ui/otp-input";
-import { FEATURES } from "@/shared/config";
+import { useAuth, useAuthStore, useChangePasswordMutation, useDeleteAccountMutation, useRoleRoutes, useUpdateSettingsMutation } from "@/modules/auth";
+import { AppError } from "@/shared/api";
 import { DsText, dsRadius, Icon, MobileButton, MobileFieldLabel, MobileInput, Sheet, toast, useDs } from "@/shared/ui";
 import { DeleteAccountDialog } from "./profile-dialogs";
 import { ProfileSubPage, SettingsRow, SettingsSection } from "./profile-shell";
 import { SETTINGS_TONES } from "./settings-tones";
 
-type DialogId = "password" | "delete" | "twoFactorEnable" | "twoFactorCode" | "twoFactorDisable" | null;
-
-const TWO_FACTOR_CODE_LENGTH = 5;
-const RESEND_SECONDS = 60;
-
-function maskPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length < 9) return phone;
-  const local = digits.slice(-9);
-  return `+998 ${local.slice(0, 2)} *** ** ${local.slice(-2)}`;
-}
-
-function ResendTimer({ until, pending, onResend }: { until: number | null; pending: boolean; onResend: () => void }) {
-  const { t } = useTranslation("account");
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!until) return undefined;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [until]);
-
-  const left = until ? Math.max(0, Math.ceil((until - now) / 1000)) : 0;
-  if (left > 0)
-    return (
-      <DsText v="body-sm" c="ink-secondary" numberOfLines={1} style={styles.grow}>
-        {t("page.mobile.resendIn", { time: `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` })}
-      </DsText>
-    );
-  return (
-    <DsText v="body-sm" w="500" c="brand" numberOfLines={1} accessibilityRole="button" onPress={pending ? undefined : onResend} style={[styles.grow, pending && styles.dim]}>
-      {t("page.resendCode")}
-    </DsText>
-  );
-}
+type DialogId = "password" | "delete" | null;
 
 function PasswordField({ label, value, invalid = false, autoComplete, onChange, children }: { label: string; value: string; invalid?: boolean; autoComplete: "current-password" | "new-password"; onChange: (value: string) => void; children?: ReactNode }) {
   const ds = useDs();
@@ -75,8 +30,9 @@ function PasswordField({ label, value, invalid = false, autoComplete, onChange, 
 
 /**
  * Akkaunt va xavfsizlik — veb `account-settings-page.tsx` (tor ekran): login
- * va telefon; parolni almashtirish, ikki bosqichli tasdiqlash (yoqish — parol
- * va SMS kod, o'chirish — parol), kirishlar tarixi; akkauntni o'chirish.
+ * (bosilganda o'zgartirish oynasi) va telefon; parolni almashtirish,
+ * kirishlar tarixi; akkauntni o'chirish. Ikki bosqichli tasdiqlash vebda
+ * ham olib tashlangan (#160).
  */
 export function AccountSettingsPage() {
   const { t } = useTranslation("account");
@@ -86,28 +42,36 @@ export function AccountSettingsPage() {
   const { user } = useAuth();
   const changePassword = useChangePasswordMutation();
   const deleteAccount = useDeleteAccountMutation();
-  // SMS bilan tasdiqlash hozircha o'chirilgan (`FEATURES`) — holat so'ralmaydi, qator ko'rinmaydi.
-  const twoFactor = useTwoFactorStatus(FEATURES.smsVerification);
-  const enableTwoFactor = useEnableTwoFactorMutation();
-  const confirmTwoFactor = useConfirmTwoFactorMutation();
-  const disableTwoFactor = useDisableTwoFactorMutation();
+  const updateSettings = useUpdateSettingsMutation();
   const logout = useAuthStore((state) => state.logout);
   const [dialog, setDialog] = useState<DialogId>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [twoFactorPassword, setTwoFactorPassword] = useState("");
-  const [twoFactorCode, setTwoFactorCode] = useState("");
   const [mismatch, setMismatch] = useState(false);
-  const [resendAt, setResendAt] = useState<number | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
 
-  const twoFactorEnabled = twoFactor.data?.enabled === true;
-
-  function closeTwoFactor() {
-    setDialog(null);
-    setTwoFactorPassword("");
-    setTwoFactorCode("");
-    setResendAt(null);
+  function saveUsername() {
+    const value = username?.trim() ?? "";
+    if (!value || value === user?.username) {
+      setUsername(null);
+      return;
+    }
+    setUsernameError(null);
+    updateSettings.mutate(
+      { username: value },
+      {
+        onSuccess: () => {
+          toast.success(t("page.usernameSaved"));
+          setUsername(null);
+        },
+        onError: (error: Error) => {
+          const field = error instanceof AppError ? error.fields?.username : undefined;
+          setUsernameError((Array.isArray(field) ? field[0] : field) ?? error.message);
+        },
+      }
+    );
   }
 
   function closePassword() {
@@ -139,63 +103,20 @@ export function AccountSettingsPage() {
     );
   }
 
-  function sendCode(then?: () => void) {
-    enableTwoFactor.mutate(twoFactorPassword, {
-      onSuccess: () => {
-        setResendAt(Date.now() + RESEND_SECONDS * 1000);
-        then?.();
-      },
-      onError: (error: Error & { status?: number }) => toast.error(error.status === 503 ? t("page.twoFactorSmsUnavailable") : error.message),
-    });
-  }
-
-  function startTwoFactor() {
-    if (!twoFactorPassword) {
-      toast.error(t("page.passwordRule"));
-      return;
-    }
-    sendCode(() => setDialog("twoFactorCode"));
-  }
-
-  function finishTwoFactor() {
-    if (twoFactorCode.length < TWO_FACTOR_CODE_LENGTH) {
-      toast.error(t("page.twoFactorCodeRequired"));
-      return;
-    }
-    confirmTwoFactor.mutate(twoFactorCode, {
-      onSuccess: () => {
-        toast.success(t("page.twoFactorEnabled"));
-        closeTwoFactor();
-      },
-      onError: (error: Error) => toast.error(error.message),
-    });
-  }
-
-  function stopTwoFactor() {
-    if (!twoFactorPassword) {
-      toast.error(t("page.passwordRule"));
-      return;
-    }
-    disableTwoFactor.mutate(twoFactorPassword, {
-      onSuccess: () => {
-        toast.success(t("page.twoFactorDisabled"));
-        closeTwoFactor();
-      },
-      onError: (error: Error) => toast.error(error.message),
-    });
-  }
-
   return (
     <ProfileSubPage title={t("page.accountTitle")}>
       <SettingsSection label={t("page.loginSectionTitle")}>
-        <SettingsRow icon="person" tone={SETTINGS_TONES.brand} title={t("page.loginLabel")} value={user?.username ?? "—"} onPress={() => toast.info(t("page.notAvailable"))} />
         <SettingsRow
-          icon="check-circle"
-          tone={SETTINGS_TONES.success}
-          title={t("page.mobile.phone")}
-          value={user?.phone ? t("page.verified") : "—"}
-          onPress={() => toast.info(t("page.notAvailable"))}
+          icon="person"
+          tone={SETTINGS_TONES.brand}
+          title={t("page.loginLabel")}
+          value={user?.username ?? "—"}
+          onPress={() => {
+            setUsernameError(null);
+            setUsername(user?.username ?? "");
+          }}
         />
+        <SettingsRow icon="call" tone={SETTINGS_TONES.success} title={t("page.mobile.phone")} value={user?.phone || "—"} />
       </SettingsSection>
 
       <SettingsSection label={t("page.securitySectionTitle")}>
@@ -206,15 +127,6 @@ export function AccountSettingsPage() {
           hint={user?.passwordChangedAt ? `${t("page.changePasswordHint")}${user.passwordChangedAt}` : undefined}
           onPress={() => setDialog("password")}
         />
-        {FEATURES.smsVerification ? (
-          <SettingsRow
-            icon="shield"
-            tone={SETTINGS_TONES.violet}
-            title={t("page.twoFactor")}
-            value={twoFactorEnabled ? t("page.twoFactorOn") : t("page.twoFactorOff")}
-            onPress={() => setDialog(twoFactorEnabled ? "twoFactorDisable" : "twoFactorEnable")}
-          />
-        ) : null}
         <SettingsRow icon="clock" tone={SETTINGS_TONES.brand} title={t("page.loginsTitle")} hint={t("page.loginsRowHint")} onPress={() => router.push(`${routes.profile}/logins` as never)} />
       </SettingsSection>
 
@@ -265,66 +177,6 @@ export function AccountSettingsPage() {
         </View>
       </Sheet>
 
-      <Sheet
-        variant="app"
-        open={dialog === "twoFactorEnable"}
-        onClose={closeTwoFactor}
-        title={t("page.twoFactorEnableTitle")}
-        description={t("page.twoFactorEnableDescription")}
-        footer={
-          <>
-            <MobileButton variant="secondary" label={t("page.cancel")} onPress={closeTwoFactor} />
-            <MobileButton label={t("page.enable")} disabled={enableTwoFactor.isPending} onPress={startTwoFactor} />
-          </>
-        }
-      >
-        <PasswordField label={t("page.currentPassword")} autoComplete="current-password" value={twoFactorPassword} onChange={setTwoFactorPassword} />
-      </Sheet>
-
-      <Sheet
-        variant="app"
-        open={dialog === "twoFactorCode"}
-        onClose={closeTwoFactor}
-        title={t("page.twoFactorCodeTitle")}
-        description={user?.phone ? t("page.mobile.codeSentTo", { phone: maskPhone(user.phone) }) : t("page.twoFactorCodeDescription")}
-        footer={<MobileButton label={t("page.confirmCode")} disabled={confirmTwoFactor.isPending} onPress={finishTwoFactor} />}
-      >
-        <View style={styles.code}>
-          <OtpInput length={TWO_FACTOR_CODE_LENGTH} value={twoFactorCode} onChange={setTwoFactorCode} />
-          <View style={styles.codeRow}>
-            <ResendTimer until={resendAt} pending={enableTwoFactor.isPending} onResend={() => sendCode()} />
-            <DsText
-              v="body-sm"
-              w="500"
-              c="brand"
-              accessibilityRole="button"
-              onPress={() => {
-                closeTwoFactor();
-                router.push(`${routes.profile}/personal` as never);
-              }}
-            >
-              {t("page.changeNumber")}
-            </DsText>
-          </View>
-        </View>
-      </Sheet>
-
-      <Sheet
-        variant="app"
-        open={dialog === "twoFactorDisable"}
-        onClose={closeTwoFactor}
-        title={t("page.twoFactorDisableTitle")}
-        description={t("page.twoFactorDisableDescription")}
-        footer={
-          <>
-            <MobileButton variant="secondary" label={t("page.cancel")} onPress={closeTwoFactor} />
-            <MobileButton variant="danger" label={t("page.delete")} disabled={disableTwoFactor.isPending} onPress={stopTwoFactor} />
-          </>
-        }
-      >
-        <PasswordField label={t("page.currentPassword")} autoComplete="current-password" value={twoFactorPassword} onChange={setTwoFactorPassword} />
-      </Sheet>
-
       <DeleteAccountDialog
         open={dialog === "delete"}
         pending={deleteAccount.isPending}
@@ -339,13 +191,47 @@ export function AccountSettingsPage() {
           })
         }
       />
+
+      <Sheet
+        variant="app"
+        open={username !== null}
+        onClose={() => setUsername(null)}
+        title={t("page.usernameTitle")}
+        description={t("page.usernameHint")}
+        footer={
+          <>
+            <MobileButton variant="secondary" label={t("page.cancel")} onPress={() => setUsername(null)} />
+            <MobileButton label={t("page.save")} disabled={updateSettings.isPending || !username?.trim()} onPress={saveUsername} />
+          </>
+        }
+      >
+        <MobileFieldLabel label={t("page.loginLabel")}>
+          <MobileInput
+            value={username ?? ""}
+            autoFocus
+            autoCapitalize="none"
+            autoCorrect={false}
+            invalid={Boolean(usernameError)}
+            onChangeText={(value) => {
+              setUsernameError(null);
+              setUsername(value);
+            }}
+            onSubmitEditing={saveUsername}
+            returnKeyType="done"
+          />
+          {usernameError ? (
+            <DsText v="body-xs" c="error-text">
+              {usernameError}
+            </DsText>
+          ) : null}
+        </MobileFieldLabel>
+      </Sheet>
     </ProfileSubPage>
   );
 }
 
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
-  dim: { opacity: 0.5 },
   danger: { gap: 13 },
   dangerLabel: { lineHeight: 20 },
   deleteRow: { minHeight: 71, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 16, borderRadius: dsRadius.xl },
@@ -354,6 +240,4 @@ const styles = StyleSheet.create({
   fields: { marginTop: -2, gap: 15 },
   withIcon: { paddingRight: 48 },
   inputIcon: { position: "absolute", top: 0, bottom: 0, right: 16, justifyContent: "center" },
-  code: { gap: 16 },
-  codeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
 });

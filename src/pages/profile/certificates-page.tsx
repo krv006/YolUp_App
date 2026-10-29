@@ -35,12 +35,27 @@ function formatWhen(value: string, today: string): string {
 }
 
 /** Sertifikat yuklash — pastki oyna: fayl (tanlangani yoki tanlash maydoni) va nom. */
-function CertificateUploadSheet({ open, pending, onOpenChange, onUpload }: { open: boolean; pending: boolean; onOpenChange: (open: boolean) => void; onUpload: (file: PickedFile, title: string) => void }) {
+function CertificateUploadSheet({
+  open,
+  pending,
+  onOpenChange,
+  onUpload,
+}: {
+  open: boolean;
+  pending: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpload: (values: { file: PickedFile; title: string; issuer: string; issuedYear: number | null }) => void;
+}) {
   const { t } = useTranslation("account");
   const ds = useDs();
   const [file, setFile] = useState<PickedFile | null>(null);
   const [title, setTitle] = useState("");
+  const [issuer, setIssuer] = useState("");
+  const [year, setYear] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const thisYear = new Date().getFullYear();
+  const yearValue = Number(year);
+  const yearValid = !year || (Number.isInteger(yearValue) && yearValue >= 1950 && yearValue <= thisYear);
   const extension = file?.name.split(".").pop()?.toUpperCase() ?? "";
 
   async function pick() {
@@ -58,6 +73,8 @@ function CertificateUploadSheet({ open, pending, onOpenChange, onUpload }: { ope
   function close() {
     setFile(null);
     setTitle("");
+    setIssuer("");
+    setYear("");
     setError(null);
     onOpenChange(false);
   }
@@ -72,7 +89,12 @@ function CertificateUploadSheet({ open, pending, onOpenChange, onUpload }: { ope
       footer={
         <>
           <MobileButton variant="secondary" label={t("page.cancel")} onPress={close} />
-          <MobileButton icon="upload" label={t("page.mobile.upload")} disabled={pending || !file} onPress={() => file && onUpload(file, title.trim() || file.name)} />
+          <MobileButton
+            icon="upload"
+            label={t("page.mobile.upload")}
+            disabled={pending || !file || !yearValid}
+            onPress={() => file && onUpload({ file, title: title.trim() || file.name, issuer: issuer.trim(), issuedYear: year ? yearValue : null })}
+          />
         </>
       }
     >
@@ -122,6 +144,26 @@ function CertificateUploadSheet({ open, pending, onOpenChange, onUpload }: { ope
         <MobileFieldLabel gap={7} label={t("page.mobile.certificateName")}>
           <MobileInput value={title} placeholder={t("page.mobile.certificatePlaceholder")} onChangeText={setTitle} />
         </MobileFieldLabel>
+        {/* `grid-cols-[minmax(0,1fr)_120px] gap-3` */}
+        <View style={styles.pair}>
+          <View style={styles.grow}>
+            <MobileFieldLabel gap={7} label={t("page.certificateIssuer")}>
+              <MobileInput value={issuer} placeholder={t("page.certificateIssuerPlaceholder")} onChangeText={setIssuer} />
+            </MobileFieldLabel>
+          </View>
+          <View style={styles.year}>
+            <MobileFieldLabel gap={7} label={t("page.certificateYear")}>
+              <MobileInput
+                value={year}
+                keyboardType="number-pad"
+                maxLength={4}
+                placeholder={String(thisYear)}
+                invalid={!yearValid}
+                onChangeText={(value) => setYear(value.replace(/\D/g, ""))}
+              />
+            </MobileFieldLabel>
+          </View>
+        </View>
       </View>
     </Sheet>
   );
@@ -130,6 +172,15 @@ function CertificateUploadSheet({ open, pending, onOpenChange, onUpload }: { ope
 function StatusChip({ item }: { item: Certificate }) {
   const { t } = useTranslation("account");
   const ds = useDs();
+  if (item.status === "rejected")
+    return (
+      <View style={[styles.chip, { backgroundColor: ds.c["danger-bg"] }]}>
+        <Icon name="cancel" size={14} color={ds.c["error-text"]} />
+        <DsText v="caption-strong" c="error-text">
+          {t("page.certificateRejected")}
+        </DsText>
+      </View>
+    );
   return item.verified ? (
     <View style={[styles.chip, { backgroundColor: ds.c["success-bg"] }]}>
       <Icon name="check-circle" size={14} color={ds.c["success-fg"]} />
@@ -163,8 +214,13 @@ function CertificateRow({ item, divider, onRemove }: { item: Certificate; divide
             {item.title || "—"}
           </DsText>
           <DsText v="body-sm" c="ink-secondary" numberOfLines={1} style={styles.hint}>
-            {[item.issuer, formatWhen(item.createdAt, t("page.mobile.today"))].filter(Boolean).join(" · ")}
+            {[item.issuer, item.issuedYear ? String(item.issuedYear) : formatWhen(item.createdAt, t("page.mobile.today"))].filter(Boolean).join(" · ")}
           </DsText>
+          {item.status === "rejected" && item.rejectReason ? (
+            <DsText v="body-xs" c="error-text" numberOfLines={2} style={styles.reason}>
+              {t("page.certificateRejectReason", { reason: item.rejectReason })}
+            </DsText>
+          ) : null}
         </View>
         <StatusChip item={item} />
       </Pressable>
@@ -237,7 +293,7 @@ export function CertificatesPage() {
         open={sheetOpen}
         pending={upload.isPending}
         onOpenChange={setSheetOpen}
-        onUpload={(file, title) => upload.mutate({ file: toUploadFile(file), title }, { onSuccess: () => setSheetOpen(false) })}
+        onUpload={(values) => upload.mutate({ ...values, file: toUploadFile(values.file) }, { onSuccess: () => setSheetOpen(false) })}
       />
     </ProfileSubPage>
   );
@@ -245,6 +301,9 @@ export function CertificatesPage() {
 
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
+  pair: { flexDirection: "row", gap: 12 },
+  year: { width: 120 },
+  reason: { marginTop: 2 },
   mt4: { marginTop: 4 },
   mt8: { marginTop: 8 },
   /* `-mt-1 gap-[15px]` */

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
-import { useLoginHistory, useLogoutOtherSessionsMutation } from "@/modules/auth";
+import { useLoginHistoryPage, useLogoutOtherSessionsMutation } from "@/modules/auth";
 import { ConfirmDialog, DsText, dsRadius, Icon, toast, useDs } from "@/shared/ui";
 import { ProfileSubPage, SettingsRow, SettingsSection } from "./profile-shell";
 import { SETTINGS_TONES } from "./settings-tones";
@@ -80,15 +80,17 @@ function Pager({ page, pages, onChange }: { page: number; pages: number; onChang
 export function LoginHistoryPage() {
   const { t } = useTranslation("account");
   const ds = useDs();
-  const logins = useLoginHistory(null, true);
+  // Veb #157/#159: sahifalash serverda; joriy qurilma `isCurrent` bilan keladi.
+  const [page, setPage] = useState(1);
+  const logins = useLoginHistoryPage(page, PAGE_SIZE);
   const logoutOthers = useLogoutOtherSessionsMutation();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [page, setPage] = useState(1);
 
-  const all = logins.data ?? [];
-  const pages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+  const items = logins.data?.items ?? [];
+  const pages = Math.max(1, logins.data?.totalPages ?? 1);
   const current = Math.min(page, pages);
-  const rows = all.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const rows = items.length > PAGE_SIZE ? items.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE) : items;
+  const anyCurrent = items.some((row) => row.isCurrent);
 
   function closeOthers() {
     logoutOthers.mutate(undefined, {
@@ -116,7 +118,7 @@ export function LoginHistoryPage() {
         return (
           <SettingsSection key={group} label={t(`page.${group}`)}>
             {items.map((row, index) => {
-              const thisDevice = current === 1 && group === "todayGroup" && index === 0;
+              const thisDevice = anyCurrent ? row.isCurrent : current === 1 && group === "todayGroup" && index === 0;
               const phone = isPhone(row.device);
               return (
                 <SettingsRow
@@ -124,7 +126,7 @@ export function LoginHistoryPage() {
                   icon={phone ? "person" : "settings"}
                   tone={thisDevice ? "bg-success-bg text-ink" : phone ? "bg-brand-subtle text-ink" : SETTINGS_TONES.brand}
                   title={row.device || "—"}
-                  hint={row.ip}
+                  hint={[row.location, row.ip].filter(Boolean).join(" · ")}
                   right={
                     <DsText v="caption-strong" c={thisDevice ? "success-fg" : "ink"}>
                       {thisDevice ? t("page.thisDevice") : clock(row.at)}

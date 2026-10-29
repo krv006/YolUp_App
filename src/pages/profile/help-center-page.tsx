@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Linking, StyleSheet, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth, useIsStudent } from "@/modules/auth";
+import { SupportDialog, useHelpFaq, useHelpVideos, type FaqItem } from "@/modules/support";
 import { ROUTES } from "@/shared/config";
 import { storage } from "@/shared/lib";
-import { DsText, dsRadius, MobileListCard, MobileListRow, MobileSearchField, MobileSectionTitle, toast, useDs, type IconName } from "@/shared/ui";
+import { DsText, dsRadius, MobileListCard, MobileListRow, MobileSearchField, MobileSectionTitle, Sheet, useDs, type IconName } from "@/shared/ui";
 import { ProfileSubPage } from "./profile-shell";
 import { SETTINGS_TONES } from "./settings-tones";
 
@@ -15,13 +16,22 @@ interface HelpItem {
   id: string;
   icon: IconName;
   tone: string;
+  title: string;
+  hint: string;
   action: () => void;
+}
+
+function duration(seconds: number | null): string {
+  if (!seconds) return "";
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
 /**
  * Yordam markazi — veb `help-center-page.tsx`: qidiruv, ko'p so'raladigan
- * savollar (tegishli bo'limni ochadi), video qo'llanmalar, aloqa va
- * o'qituvchida tanishuvni qayta ko'rsatish.
+ * savollar (backenddagilari javob oynasini, qo'llanmalar tegishli bo'limni
+ * ochadi), video qo'llanmalar, qo'llab-quvvatlashga murojaat (`?ticket=`
+ * bilan bildirishnomadan to'g'ridan-to'g'ri yozishma) va o'qituvchida
+ * tanishuvni qayta ko'rsatish.
  */
 export function HelpCenterPage() {
   const { t } = useTranslation("account");
@@ -29,43 +39,68 @@ export function HelpCenterPage() {
   const router = useRouter();
   const { user } = useAuth();
   const student = useIsStudent();
+  const params = useLocalSearchParams<{ ticket?: string }>();
   const [query, setQuery] = useState("");
-  const soon = () => toast.info(t("help.soon"));
+  const [faq, setFaq] = useState<FaqItem | null>(null);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const faqItems = useHelpFaq();
+  const videos = useHelpVideos();
+  const ticketId = params.ticket ?? null;
   const go = (href: string) => router.navigate(href as never);
+  const item = (id: string, icon: IconName, tone: string, action: () => void): HelpItem => ({
+    id,
+    icon,
+    tone,
+    title: t(`help.items.${id}.title`),
+    hint: t(`help.items.${id}.hint`),
+    action,
+  });
+
+  const guides: HelpItem[] = student
+    ? [
+        item("joinLesson", "help", FAQ_TONE, () => go(ROUTES.student.schedule)),
+        item("joinGroup", "person-add", FAQ_TONE, () => go(ROUTES.student.chats)),
+        item("submitHomework", "task-alt", FAQ_TONE, () => go(ROUTES.student.homework)),
+        item("takeTest", "quiz", FAQ_TONE, () => go(ROUTES.student.tests)),
+      ]
+    : [
+        item("startLesson", "help", FAQ_TONE, () => go(ROUTES.teacher.dashboard)),
+        item("addStudent", "person-add", FAQ_TONE, () => go(ROUTES.teacher.chats)),
+        item("checkHomework", "task-alt", FAQ_TONE, () => router.push(ROUTES.teacher.homework as never, { withAnchor: true })),
+      ];
+
+  const remoteFaq: HelpItem[] = (faqItems.data ?? []).map((entry) => ({
+    id: `faq-${entry.id}`,
+    icon: "help",
+    tone: FAQ_TONE,
+    title: entry.question,
+    hint: entry.answer.replace(/\s+/g, " ").slice(0, 90),
+    action: () => setFaq(entry),
+  }));
+
+  const videoItems: HelpItem[] = (videos.data ?? []).map((entry) => ({
+    id: `video-${entry.id}`,
+    icon: "play-circle-fill",
+    tone: SETTINGS_TONES.violet,
+    title: entry.title,
+    hint: duration(entry.durationSeconds) || t("help.videoHint"),
+    action: () => void Linking.openURL(entry.url),
+  }));
 
   const sections: Array<{ id: string; items: HelpItem[] }> = [
-    {
-      id: "faq",
-      items: student
-        ? [
-            { id: "joinLesson", icon: "help", tone: FAQ_TONE, action: () => go(ROUTES.student.schedule) },
-            { id: "joinGroup", icon: "person-add", tone: FAQ_TONE, action: () => go(ROUTES.student.chats) },
-            { id: "submitHomework", icon: "task-alt", tone: FAQ_TONE, action: () => go(ROUTES.student.homework) },
-            { id: "takeTest", icon: "quiz", tone: FAQ_TONE, action: () => go(ROUTES.student.tests) },
-          ]
-        : [
-            { id: "startLesson", icon: "help", tone: FAQ_TONE, action: () => go(ROUTES.teacher.dashboard) },
-            { id: "addStudent", icon: "person-add", tone: FAQ_TONE, action: () => go(ROUTES.teacher.chats) },
-            { id: "checkHomework", icon: "task-alt", tone: FAQ_TONE, action: () => router.push(ROUTES.teacher.homework as never, { withAnchor: true }) },
-          ],
-    },
-    { id: "videos", items: [{ id: "intro", icon: "play-circle-fill", tone: SETTINGS_TONES.violet, action: soon }] },
+    { id: "faq", items: [...remoteFaq, ...guides] },
+    { id: "videos", items: videoItems },
     {
       id: "contact",
       items: [
-        { id: "support", icon: "forum", tone: SETTINGS_TONES.success, action: soon },
+        item("support", "forum", SETTINGS_TONES.success, () => setSupportOpen(true)),
         ...(student
           ? []
           : [
-              {
-                id: "tour",
-                icon: "school" as IconName,
-                tone: SETTINGS_TONES.success,
-                action: () => {
-                  storage.remove(`yolup:onboarding:${user?.id ?? ""}`);
-                  go(ROUTES.teacher.dashboard);
-                },
-              },
+              item("tour", "school", SETTINGS_TONES.success, () => {
+                storage.remove(`yolup:onboarding:${user?.id ?? ""}`);
+                go(ROUTES.teacher.dashboard);
+              }),
             ]),
       ],
     },
@@ -75,9 +110,15 @@ export function HelpCenterPage() {
   const visible = sections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) => !term || `${t(`help.items.${item.id}.title`)} ${t(`help.items.${item.id}.hint`)}`.toLowerCase().includes(term)),
+      items: section.items.filter((entry) => !term || `${entry.title} ${entry.hint}`.toLowerCase().includes(term)),
     }))
     .filter((section) => section.items.length);
+
+  function closeSupport(open: boolean) {
+    if (open) return;
+    setSupportOpen(false);
+    if (ticketId) router.setParams({ ticket: undefined });
+  }
 
   return (
     <ProfileSubPage title={t("page.helpTitle")}>
@@ -88,15 +129,15 @@ export function HelpCenterPage() {
           <View key={section.id} style={styles.section}>
             <MobileSectionTitle>{t(`help.sections.${section.id}`)}</MobileSectionTitle>
             <MobileListCard>
-              {section.items.map((item, index) => (
+              {section.items.map((entry, index) => (
                 <MobileListRow
-                  key={item.id}
-                  icon={item.icon}
-                  tone={item.tone}
-                  title={t(`help.items.${item.id}.title`)}
-                  subtitle={t(`help.items.${item.id}.hint`)}
+                  key={entry.id}
+                  icon={entry.icon}
+                  tone={entry.tone}
+                  title={entry.title}
+                  subtitle={entry.hint}
                   last={index === section.items.length - 1}
-                  onPress={item.action}
+                  onPress={entry.action}
                 />
               ))}
             </MobileListCard>
@@ -111,6 +152,12 @@ export function HelpCenterPage() {
           </View>
         )}
       </View>
+
+      <Sheet variant="app" open={Boolean(faq)} onClose={() => setFaq(null)} title={faq?.question ?? ""}>
+        <DsText v="body-sm">{faq?.answer}</DsText>
+      </Sheet>
+
+      <SupportDialog open={supportOpen || Boolean(ticketId)} onOpenChange={closeSupport} ticketId={ticketId} />
     </ProfileSubPage>
   );
 }

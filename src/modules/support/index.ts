@@ -10,3 +10,7 @@ export {
   useSupportTicket,
   useSupportTickets,
 } from "./model/support.queries";
+
+// --- Mobil UI (veb `ui/support-dialog.tsx` ning pastki oyna varianti) ---
+export { SupportDialog } from "./ui/support-dialog";
+export type { SupportDialogProps } from "./ui/support-dialog";

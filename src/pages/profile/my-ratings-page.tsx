@@ -100,13 +100,15 @@ function TeacherRatings() {
                 {rows.map((row, index) => (
                   <View key={row.id} style={[styles.comment, index > 0 && { borderTopWidth: 1, borderTopColor: ds.c.line }]}>
                     <View style={styles.commentHead}>
-                      <Avatar variant="legacy" name={row.studentName} size="sm" box={32} />
+                      <Avatar variant="legacy" name={row.studentName} src={row.studentAvatar ?? undefined} size="sm" box={32} />
                       <View style={styles.grow}>
                         <DsText v="title-sm" numberOfLines={1}>
                           {row.studentName}
                         </DsText>
                         <DsText v="caption" w="400" c="ink-secondary" numberOfLines={1}>
-                          {row.createdAt ? relativeDay(row.createdAt, { today: t("page.mobile.today"), yesterday: t("page.mobile.yesterday") }) : ""}
+                          {[row.courseTitle, row.createdAt ? relativeDay(row.createdAt, { today: t("page.mobile.today"), yesterday: t("page.mobile.yesterday") }) : ""]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </DsText>
                       </View>
                       <Stars value={row.stars} size={14} />

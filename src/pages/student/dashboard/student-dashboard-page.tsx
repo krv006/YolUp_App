@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLessonPresence } from "@/modules/live";
-import { notificationLines } from "@/modules/notification";
+import { notificationContent } from "@/modules/notification";
 import { ROUTES } from "@/shared/config";
 import { useOnlineStatus } from "@/shared/model";
 import type { Lesson } from "@/shared/types";
@@ -165,7 +165,7 @@ export function StudentDashboardPage() {
                   </DsText>
                   <MobileListCard>
                     {home.recentGrades.slice(0, 3).map((item, index, list) => {
-                      const { title, body } = notificationLines(item.html);
+                      const { title, body } = notificationContent(item);
                       return (
                         <MobileListRow
                           key={item.id}

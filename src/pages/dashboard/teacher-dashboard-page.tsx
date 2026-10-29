@@ -110,6 +110,8 @@ export function TeacherDashboardPage() {
     [assignments]
   );
   const pendingWorks = dashboard.data?.submissionsPending ?? toReview.reduce((sum, row) => sum + row.pending, 0);
+  // 🟡 Vebdan farqi: ro'yxat API'si `submissions` ni qaytarmaydi, shuning uchun `toReview` doim bo'sh — "0 ta vazifa" chiqardi.
+  const pendingTasks = dashboard.data?.assignmentsPending ?? toReview.length;
 
   const studentsByCourse = new Map(groups.map((course) => [course.id, course.studentCount ?? 0]));
   const toneByCourse = new Map(groups.map((course) => [course.id, course.color]));
@@ -130,7 +132,12 @@ export function TeacherDashboardPage() {
   const approved = user?.isApproved !== false;
   const hasGroups = groups.length > 0;
 
-  const openLesson = (lesson: Lesson) => router.push(ROUTES.live(lesson.id) as never);
+  // Veb #161: tugagan dars yozuvini, bekor qilingani jadvalni ochadi.
+  const openLesson = (lesson: Lesson) => {
+    if (lesson.status === "finished") router.push(ROUTES.recording(lesson.id) as never);
+    else if (lesson.status === "cancelled") router.navigate(ROUTES.teacher.schedule as never);
+    else router.push(ROUTES.live(lesson.id) as never);
+  };
   const openSchedule = () => router.navigate(ROUTES.teacher.schedule as never);
   const openReview = () => router.push(ROUTES.teacher.homework as never, { withAnchor: true });
   const openChat = (lesson: Lesson) => {
@@ -199,7 +206,7 @@ export function TeacherDashboardPage() {
                       {t("mobile.reviewTitle")}
                     </DsText>
                     <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
-                      {t("mobile.reviewHint", { works: pendingWorks, tasks: toReview.length })}
+                      {t("mobile.reviewHint", { works: pendingWorks, tasks: pendingTasks })}
                     </DsText>
                   </View>
                   <View style={[styles.reviewCount, { backgroundColor: ds.c.brand }]}>

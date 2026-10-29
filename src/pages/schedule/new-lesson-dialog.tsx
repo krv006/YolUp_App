@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
-import { useQuizzes } from "@/modules/quiz";
 import {
   DsText,
   dsRadius,
@@ -23,7 +22,6 @@ export interface NewLessonValues {
   date: string;
   time: string;
   duration: string;
-  quizId: string;
   repeatWeeks: number;
 }
 
@@ -58,9 +56,7 @@ export function NewLessonDialog({ open, onOpenChange, courses, pending = false, 
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("18:00");
   const [duration, setDuration] = useState(90);
-  const [quizId, setQuizId] = useState("");
   const [weeks, setWeeks] = useState(8);
-  const quizzes = useQuizzes(courseId || null, Boolean(courseId) && open);
   const weekdays = t("list.weekdaysShort", { returnObjects: true }) as string[];
   const months = t("list.months", { returnObjects: true }) as string[];
   const canSubmit = !pending && Boolean(courseId) && Boolean(topic.trim());
@@ -71,7 +67,7 @@ export function NewLessonDialog({ open, onOpenChange, courses, pending = false, 
     : `${weekdays[(picked.getDay() + 6) % 7] ?? ""}, ${picked.getDate()}-${(months[picked.getMonth()] ?? "").toLowerCase()}`;
 
   function submit() {
-    onSubmit({ courseId, topic: topic.trim(), date, time, duration: String(duration), quizId, repeatWeeks: repeat ? weeks : 0 });
+    onSubmit({ courseId, topic: topic.trim(), date, time, duration: String(duration), repeatWeeks: repeat ? weeks : 0 });
   }
 
   return (
@@ -99,10 +95,7 @@ export function NewLessonDialog({ open, onOpenChange, courses, pending = false, 
                   key={course.id}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
-                  onPress={() => {
-                    setCourseId(course.id);
-                    setQuizId("");
-                  }}
+                  onPress={() => setCourseId(course.id)}
                   style={[styles.course, active ? { borderColor: ds.c.brand, backgroundColor: ds.c["brand-subtle"] } : { borderColor: "transparent", backgroundColor: ds.c.subtle }]}
                 >
                   <GroupTile name={course.title} tone={course.tone} src={course.image} box={32} radius={dsRadius.xl} />
@@ -174,17 +167,6 @@ export function NewLessonDialog({ open, onOpenChange, courses, pending = false, 
 
         <MobileFieldLabel label={t("scheduleDialog.duration")}>
           <MobileChoiceChips items={DURATIONS} value={duration} onChange={setDuration} />
-        </MobileFieldLabel>
-
-        <MobileFieldLabel label={t("scheduleDialog.quiz")}>
-          <MobilePickerField
-            type="select"
-            value={quizId}
-            display={(quizzes.data ?? []).find((quiz) => quiz.id === quizId)?.title ?? t("scheduleDialog.noQuiz")}
-            ariaLabel={t("scheduleDialog.quiz")}
-            options={[{ value: "", label: t("scheduleDialog.noQuiz") }, ...(quizzes.data ?? []).map((quiz) => ({ value: quiz.id, label: quiz.title }))]}
-            onChange={setQuizId}
-          />
         </MobileFieldLabel>
       </View>
     </Sheet>

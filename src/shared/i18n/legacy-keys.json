@@ -65,32 +65,12 @@
         "confirmCode": "Tasdiqlash"
       }
     },
-    "group": {
-      "dialogs": {
-        "lesson": {
-          "quizLabel": "Test biriktirish",
-          "quizNone": "Test biriktirilmagan"
-        }
-      }
-    },
-    "lesson": {
-      "schedule": {
-        "soon": "Tez orada"
-      },
-      "scheduleDialog": {
-        "quiz": "Test biriktirish",
-        "noQuiz": "Test biriktirilmagan"
-      }
-    },
     "live": {
       "room": {
         "soon": "Tez orada"
       }
     },
     "student": {
-      "groupWorkspace": {
-        "soon": "Tez orada"
-      },
       "workspace": {
         "soon": "Tez orada"
       }
@@ -169,32 +149,12 @@
         "confirmCode": "Подтвердить"
       }
     },
-    "group": {
-      "dialogs": {
-        "lesson": {
-          "quizLabel": "Прикрепить тест",
-          "quizNone": "Тест не прикреплён"
-        }
-      }
-    },
-    "lesson": {
-      "schedule": {
-        "soon": "Скоро"
-      },
-      "scheduleDialog": {
-        "quiz": "Прикрепить тест",
-        "noQuiz": "Тест не прикреплён"
-      }
-    },
     "live": {
       "room": {
         "soon": "Скоро"
       }
     },
     "student": {
-      "groupWorkspace": {
-        "soon": "Скоро"
-      },
       "workspace": {
         "soon": "Скоро"
       }
@@ -273,32 +233,12 @@
         "confirmCode": "Verify"
       }
     },
-    "group": {
-      "dialogs": {
-        "lesson": {
-          "quizLabel": "Attach a quiz",
-          "quizNone": "No quiz attached"
-        }
-      }
-    },
-    "lesson": {
-      "schedule": {
-        "soon": "Coming soon"
-      },
-      "scheduleDialog": {
-        "quiz": "Attach a quiz",
-        "noQuiz": "No quiz attached"
-      }
-    },
     "live": {
       "room": {
         "soon": "Coming soon"
       }
     },
     "student": {
-      "groupWorkspace": {
-        "soon": "Coming soon"
-      },
       "workspace": {
         "soon": "Coming soon"
       }

@@ -14,7 +14,6 @@ import {
   useUpdateLesson,
   WEEKDAYS,
 } from "@/modules/lesson";
-import { quizDisplayTitle, useQuizzes } from "@/modules/quiz";
 import type { Lesson } from "@/shared/types";
 import {
   DsText,
@@ -90,14 +89,6 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
 
   // To'qnashuv barcha darslar bo'yicha (boshqa guruhdagi ham) — veb `allLessons`.
   const allLessons = useLessons({ page_size: 200 }, open);
-  const courseQuizzes = useQuizzes(courseId, open);
-  const quizOptions = useMemo(
-    () =>
-      (courseQuizzes.data ?? [])
-        .filter((quiz) => !quiz.lessonId || quiz.lessonId === editing?.id)
-        .map((quiz) => ({ value: quiz.id, label: quizDisplayTitle(quiz) })),
-    [courseQuizzes.data, editing]
-  );
 
   const months = tl("list.months", { returnObjects: true }) as string[];
   const formatDate = (date: Date) => `${date.getDate()}-${(months[date.getMonth()] ?? "").toLowerCase()}`;
@@ -194,8 +185,6 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
     if (value === today) return t("dialogs.lesson.todayDate", { date: label });
     return `${shortOf(parsed.getDay() || 7)}, ${label}`;
   };
-  const quizSelectOptions = [{ value: "", label: t("dialogs.lesson.quizNone") }, ...quizOptions];
-  const quizLabel = quizSelectOptions.find((option) => option.value === quizId)?.label;
 
   return (
     <Sheet
@@ -405,21 +394,9 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
           </View>
 
           {timeBusy ? null : (
-            <>
-              <MobileFieldLabel label={t("dialogs.lesson.durationMinutes")}>
-                <MobileChoiceChips items={MOBILE_DURATIONS} value={durationMinutes as (typeof MOBILE_DURATIONS)[number]} onChange={(value) => setDuration(String(value))} />
-              </MobileFieldLabel>
-              <MobileFieldLabel label={t("dialogs.lesson.quizLabel")}>
-                <MobilePickerField
-                  type="select"
-                  value={quizId}
-                  display={quizLabel}
-                  options={quizSelectOptions}
-                  ariaLabel={t("dialogs.lesson.quizLabel")}
-                  onChange={setQuizId}
-                />
-              </MobileFieldLabel>
-            </>
+            <MobileFieldLabel label={t("dialogs.lesson.durationMinutes")}>
+              <MobileChoiceChips items={MOBILE_DURATIONS} value={durationMinutes as (typeof MOBILE_DURATIONS)[number]} onChange={(value) => setDuration(String(value))} />
+            </MobileFieldLabel>
           )}
         </>
       )}

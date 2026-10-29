@@ -5,7 +5,15 @@ import { addDays } from "date-fns";
 import { useIsStudent, useRoleRoutes } from "@/modules/auth";
 import { useConversations, useGroupImages } from "@/modules/conversation";
 import { useCourses } from "@/modules/course";
-import { buildScheduleDates, RateLessonSheet, useCancelLesson, useCreateLesson, useCreateLessonSchedule, useLessons } from "@/modules/lesson";
+import {
+  buildScheduleDates,
+  RateLessonSheet,
+  useCancelLesson,
+  useCreateLesson,
+  useCreateLessonSchedule,
+  useLessonReminder,
+  useLessons,
+} from "@/modules/lesson";
 import { ROUTES } from "@/shared/config";
 import { useOnlineStatus } from "@/shared/model";
 import type { Lesson } from "@/shared/types";
@@ -35,6 +43,7 @@ export function SchedulePage() {
   const createLesson = useCreateLesson();
   const createSchedule = useCreateLessonSchedule();
   const cancelLesson = useCancelLesson();
+  const reminder = useLessonReminder();
 
   const [anchor, setAnchor] = useState(() => new Date());
   const [now] = useState(() => new Date());
@@ -45,6 +54,17 @@ export function SchedulePage() {
   const [view, setView] = useState<MobileScheduleView>("day");
 
   const items = useMemo(() => lessons.data ?? [], [lessons.data]);
+  const detailLesson = detail ? (items.find((item) => item.id === detail.id) ?? detail) : null;
+
+  function toggleReminder(lesson: Lesson) {
+    const enabled = !lesson.hasReminder;
+    reminder.mutate(
+      { id: lesson.id, enabled },
+      {
+        onSuccess: (minutes) => toast.success(enabled ? t("schedule.reminderSet", { count: minutes ?? 15 }) : t("schedule.reminderCleared")),
+      }
+    );
+  }
 
   const courseLook = useMemo(() => {
     const byId = new Map((courses.data ?? []).map((course) => [course.id, course]));
@@ -120,7 +140,7 @@ export function SchedulePage() {
       />
 
       <LessonDetailDrawer
-        lesson={detail}
+        lesson={detailLesson}
         studentCount={detail ? courseLook(detail.courseId).students : 0}
         now={now}
         onOpenChange={(open) => !open && setDetail(null)}
@@ -135,7 +155,7 @@ export function SchedulePage() {
         }}
         student={student}
         teacherName={detail ? courseLook(detail.courseId).teacher : ""}
-        onRemind={() => toast.info(t("schedule.soon"))}
+        onRemind={toggleReminder}
         onRecording={(lesson) => {
           setDetail(null);
           router.push(ROUTES.recording(lesson.id) as never);

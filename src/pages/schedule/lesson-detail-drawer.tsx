@@ -132,7 +132,15 @@ export function LessonDetailDrawer({
             </View>
           ) : lesson.status === "cancelled" ? null : (
             <View style={styles.actionsTop}>
-              <ActionButton icon="notifications" label={t("schedule.remind")} outline onPress={() => onRemind?.(lesson)} height={42} />
+              {/* Veb #161: eslatma yoqilgan bo'lsa `bg-brand-subtle text-brand` va daqiqasi */}
+              <ActionButton
+                icon={lesson.hasReminder ? "notifications-off" : "notifications"}
+                label={lesson.hasReminder ? t("schedule.reminderOn", { count: lesson.reminderMinutes ?? 15 }) : t("schedule.remind")}
+                outline={!lesson.hasReminder}
+                tone={lesson.hasReminder ? "brand" : undefined}
+                onPress={() => onRemind?.(lesson)}
+                height={42}
+              />
             </View>
           )
         ) : (

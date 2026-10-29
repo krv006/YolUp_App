@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useAttendance } from "@/modules/attendance";
-import { RateLessonSheet } from "@/modules/lesson";
+import { RateLessonSheet, useLessonReminder } from "@/modules/lesson";
 import { ROUTES } from "@/shared/config";
 import type { Lesson, LessonStatus } from "@/shared/types";
 import { DsText, dsRadius, Icon, MobileEmptyCard, toast, useDs, type DsColor, type IconName } from "@/shared/ui";
@@ -43,6 +43,17 @@ export function StudentLessons({ lessons = [], loading, teacher = "" }: StudentL
   const attendance = useAttendance({ page_size: 200 });
   const [rateTarget, setRateTarget] = useState<Lesson | null>(null);
   const [now] = useState(() => Date.now());
+  const reminder = useLessonReminder();
+
+  function toggleReminder(lesson: Lesson) {
+    const enabled = !lesson.hasReminder;
+    reminder.mutate(
+      { id: lesson.id, enabled },
+      {
+        onSuccess: (minutes) => toast.success(enabled ? tl("schedule.reminderSet", { count: minutes ?? 15 }) : tl("schedule.reminderCleared")),
+      }
+    );
+  }
 
   const joined = useMemo(() => new Set((attendance.data ?? []).filter((row) => row.joinedAt).map((row) => row.lessonId)), [attendance.data]);
   const visible = useMemo(
@@ -169,13 +180,23 @@ export function StudentLessons({ lessons = [], loading, teacher = "" }: StudentL
                     </Pressable>
                   </View>
                 ) : (
+                  // Veb #161: eslatma yoqilgan bo'lsa `bg-brand-subtle text-brand` va daqiqasi
                   <Pressable
                     accessibilityRole="button"
-                    onPress={() => toast.info(t("groupWorkspace.soon"))}
-                    style={({ pressed }) => [styles.button, { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
+                    accessibilityState={{ selected: Boolean(lesson.hasReminder) }}
+                    disabled={reminder.isPending && reminder.variables?.id === lesson.id}
+                    onPress={() => toggleReminder(lesson)}
+                    style={({ pressed }) => [
+                      styles.button,
+                      lesson.hasReminder
+                        ? { backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] }
+                        : { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface },
+                    ]}
                   >
-                    <Icon name="edit" size={18} color={ds.c.ink} />
-                    <DsText v="button">{t("groupWorkspace.lessonsTab.remind")}</DsText>
+                    <Icon name={lesson.hasReminder ? "notifications-off" : "notifications"} size={18} color={lesson.hasReminder ? ds.c.brand : ds.c.ink} />
+                    <DsText v="button" c={lesson.hasReminder ? "brand" : "ink"}>
+                      {lesson.hasReminder ? tl("schedule.reminderOn", { count: lesson.reminderMinutes ?? 15 }) : t("groupWorkspace.lessonsTab.remind")}
+                    </DsText>
                   </Pressable>
                 )}
               </View>

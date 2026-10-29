@@ -4,7 +4,6 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { startOfWeek } from "date-fns";
-import { useAttendance } from "@/modules/attendance";
 import { useLessons } from "@/modules/lesson";
 import { ROUTES } from "@/shared/config";
 import { DsGradient, DsText, dsRadius, GroupTile, headingFont, Icon, MobilePageHeader, useDs, type DsColor } from "@/shared/ui";
@@ -32,15 +31,13 @@ export function StudentAnalyticsPage() {
   const data = useStudentWorkspace();
   const { now } = data;
   const lessons = useLessons({ page_size: 200 });
-  const attendance = useAttendance({ page_size: 200 });
 
   const grades = data.assignments.map((item) => item.mySubmission?.gradeValue ?? null).filter((value): value is number => value !== null);
   const avgGrade = grades.length ? grades.reduce((sum, value) => sum + value, 0) / grades.length : null;
 
-  const joined = new Set((attendance.data ?? []).filter((row) => row.joinedAt).map((row) => row.lessonId));
   const finished = (lessons.data ?? []).filter((lesson) => lesson.status === "finished");
-  const attended = finished.filter((lesson) => lesson.attended ?? joined.has(lesson.id)).length;
-  const rate = monthAttendanceRate(lessons.data ?? [], attendance.data ?? [], now);
+  const attended = finished.filter((lesson) => lesson.attended === true).length;
+  const rate = monthAttendanceRate(lessons.data ?? [], now);
 
   const due = data.assignments.filter((item) => item.mySubmission || (item.dueAt && new Date(item.dueAt).getTime() < now.getTime()));
   const onTime = due.filter((item) => item.mySubmission && (!item.dueAt || new Date(item.mySubmission.createdAt).getTime() <= new Date(item.dueAt).getTime())).length;

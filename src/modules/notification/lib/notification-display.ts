@@ -1,4 +1,5 @@
 import type { InboxNotification, NotificationLink } from "../api/notification.dto";
+import { htmlToPlainText } from "@/shared/lib/sanitize-html";
 
 const LESSON_REMINDER_KIND = "lesson_reminder";
 
@@ -43,11 +44,10 @@ export function notificationGroupKey(value: string): NotificationGroupKey {
 }
 
 export function notificationLines(html: string): { title: string; body: string } {
-  const text = html.replace(/<br\s*\/?>|<\/(p|div|li|h\d)>/gi, "\n");
-  const doc = new DOMParser().parseFromString(text, "text/html");
-  const lines = (doc.body.textContent ?? "")
-    .split("\n")
-    .map((line) => line.trim())
+  // Mobil: `DOMParser` RN'da yo'q — har qator `htmlToPlainText` bilan matnga aylanadi.
+  const lines = html
+    .split(/<br\s*\/?>|<\/(?:p|div|li|h\d)>/gi)
+    .map((line) => htmlToPlainText(line, Number.MAX_SAFE_INTEGER))
     .filter(Boolean);
   return { title: lines[0] ?? "", body: lines.slice(1).join(" · ") };
 }

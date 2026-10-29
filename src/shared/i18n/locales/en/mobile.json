@@ -47,7 +47,8 @@
     "tagline": "Online learning platform",
     "telefon": "Phone",
     "telefon_ixtiyoriy": "Phone (optional)",
-    "yangi_hisob_ochish_u_joriy_hisobingizga_bogl": "Create a new account — it links to your current one"
+    "yangi_hisob_ochish_u_joriy_hisobingizga_bogl": "Create a new account — it links to your current one",
+    "ikki_bosqichli_mavjud_emas": "Two-step verification is turned on for this account and isn't available in the mobile app yet. Turn it off on the website and sign in again."
   },
   "profile": {
     "edit": "Edit",

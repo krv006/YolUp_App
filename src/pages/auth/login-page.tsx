@@ -10,7 +10,7 @@ import { createLoginSchema, resolveHomeRoute, useAuth, type TwoFactorChallenge }
 import { AuthButton, AuthField, AuthFieldError, AuthPasswordField, AuthScreen } from "@/modules/auth/ui/auth-screen";
 import { MobileTwoFactorForm } from "@/modules/auth/ui/two-factor-form";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
-import { ROUTES } from "@/shared/config";
+import { FEATURES, ROUTES } from "@/shared/config";
 import type { LoginCredentials } from "@/shared/types";
 import { DsText, dsRadius, showErrorToast, useDs } from "@/shared/ui";
 
@@ -32,6 +32,7 @@ interface PendingChallenge {
  */
 export function LoginPage() {
   const { t } = useTranslation("auth");
+  const { t: tm } = useTranslation("mobile");
   const ds = useDs();
   const router = useRouter();
   const { login, completeTwoFactorLogin } = useAuth();
@@ -56,7 +57,9 @@ export function LoginPage() {
     try {
       const result = await login(values);
       if (result.status === "twoFactor") {
-        setPending({ credentials: values, challenge: result.challenge });
+        // SMS bilan tasdiqlash hozircha o'chirilgan (`FEATURES`) — kod oynasi o'rniga izoh.
+        if (FEATURES.smsVerification) setPending({ credentials: values, challenge: result.challenge });
+        else setError("root", { type: "server", message: tm("auth.ikki_bosqichli_mavjud_emas") });
         return;
       }
       router.replace(resolveHomeRoute(result.user));
@@ -183,11 +186,13 @@ export function LoginPage() {
           {failed ? <AuthFieldError>{errors.root?.message}</AuthFieldError> : null}
         </View>
 
-        <Pressable accessibilityRole="link" onPress={() => router.push(ROUTES.auth.forgotPassword)} style={styles.forgot}>
-          <DsText v="body-sm" c="brand-strong">
-            {t("mobile.login.forgotPassword")}
-          </DsText>
-        </Pressable>
+        {FEATURES.smsVerification ? (
+          <Pressable accessibilityRole="link" onPress={() => router.push(ROUTES.auth.forgotPassword)} style={styles.forgot}>
+            <DsText v="body-sm" c="brand-strong">
+              {t("mobile.login.forgotPassword")}
+            </DsText>
+          </Pressable>
+        ) : null}
       </View>
     </AuthScreen>
   );

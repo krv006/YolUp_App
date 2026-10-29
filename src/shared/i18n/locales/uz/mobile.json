@@ -47,7 +47,8 @@
     "tagline": "Onlayn ta'lim platformasi",
     "telefon": "Telefon",
     "telefon_ixtiyoriy": "Telefon (ixtiyoriy)",
-    "yangi_hisob_ochish_u_joriy_hisobingizga_bogl": "Yangi hisob ochish — u joriy hisobingizga bog'lanadi"
+    "yangi_hisob_ochish_u_joriy_hisobingizga_bogl": "Yangi hisob ochish — u joriy hisobingizga bog'lanadi",
+    "ikki_bosqichli_mavjud_emas": "Bu hisobda ikki bosqichli tasdiqlash yoqilgan — mobil ilovada u hozircha yo‘q. Uni veb-saytda o‘chirib, qayta kiring."
   },
   "profile": {
     "edit": "Tahrirlash",

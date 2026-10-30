@@ -93,7 +93,8 @@
     "retrying": "Video queued",
     "stopped": "Video saved",
     "unsupported": "Video recording unavailable",
-    "error": "Video recording error"
+    "error": "Video recording error",
+    "interrupted": "Screen recording stopped. Share your screen again to continue recording."
   },
   "room": {
     "cameraOffAria": "{{name}}'s camera is off",
@@ -228,6 +229,7 @@
     "joinFailedDescription": "The connection dropped — we could not join the lesson. The lesson is still running.",
     "mobileJoinFailedTitle": "Couldn't connect to the lesson",
     "mobileJoinFailedDescription": "Check your internet connection. The lesson is still going — try again.",
-    "mobileBackToChat": "Back to chat"
+    "mobileBackToChat": "Back to chat",
+    "joiningRoom": "Joining the lesson room"
   }
 }

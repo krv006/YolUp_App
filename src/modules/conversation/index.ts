@@ -31,6 +31,10 @@ export {
   useSetRoomImage,
 } from "./model/use-conversations";
 
+export { applyChatActivity, applyChatTyping, CHAT_TYPING_TTL_MS, setActiveConversation } from "./model/chat-realtime";
+export { clearRoomTyping, markRoomTyping, useRoomTyping } from "./model/typing.store";
+export type { RoomTyping } from "./model/typing.store";
+
 // --- Mobil UI ---
 export { ChatHeader } from "./ui/chat-header";
 export { DirectRequestBar } from "./ui/direct-request-bar";

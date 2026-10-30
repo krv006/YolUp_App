@@ -1,5 +1,5 @@
 import Constants from "expo-constants";
-import { z } from "zod";
+import { z } from "@/shared/lib/zod";
 
 /**
  * Veb `src/shared/config/env.ts` ning mobil varianti.

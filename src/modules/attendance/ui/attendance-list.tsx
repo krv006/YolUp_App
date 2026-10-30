@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
-import { ChevronDown, ChevronRight, Clock3, ShieldAlert, UsersRound } from "lucide-react-native";
+import { ChevronDown, ChevronRight, Clock3, LogIn, LogOut, ShieldAlert, UsersRound } from "lucide-react-native";
 import { formatDateTime, formatDuration } from "@/shared/lib";
 import type { AttendanceRow, FocusJournal } from "@/shared/types";
 import {
@@ -127,6 +127,8 @@ export function AttendanceList({ rows, emptyLabel }: AttendanceListProps) {
 
 function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () => void }) {
   const { t } = useTranslation("mobile");
+  // Veb `attendance-accordion`/`focus-journal-cell` matnlari (veb 30-okt, `parent` lug'ati).
+  const { t: tp } = useTranslation("parent");
   const { palette } = useTheme();
   const rate = attentionRate(row.attentionAnswered, row.attentionTotal);
 
@@ -141,7 +143,7 @@ function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () 
         <View style={styles.studentMeta}>
           <Clock3 size={12} color={palette["muted-foreground"]} />
           <Text variant="caption" tone="muted">
-            {row.entered} – {row.exited} · {row.duration}
+            {row.entered} – {row.exited} · {row.minutes === null ? tp("attendanceTable.inLesson") : tp("attendanceTable.minutes", { count: row.minutes })}
           </Text>
         </View>
 
@@ -173,8 +175,8 @@ function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () 
             }}
           >
             {row.focus.exits === 0
-              ? "Chiqmagan"
-              : `${row.focus.exits} chiqish · ${formatDuration(row.focus.awaySeconds)}`}
+              ? tp("focusJournal.noExits")
+              : `${tp("focusJournal.exits", { count: row.focus.exits })} · ${formatDuration(row.focus.awaySeconds)}`}
           </Text>
         </Pressable>
       </View>
@@ -186,7 +188,7 @@ function StudentRow({ row, onOpenFocus }: { row: AttendanceRow; onOpenFocus: () 
 
 /** Fokus tafsiloti — ota-ona ekranidagi bilan bir xil ko'rinish. */
 function FocusDetail({ focus }: { focus: FocusJournal }) {
-  const { t } = useTranslation("mobile");
+  const { t } = useTranslation("parent");
   const { palette } = useTheme();
 
   return (
@@ -195,28 +197,41 @@ function FocusDetail({ focus }: { focus: FocusJournal }) {
         <View style={[styles.alert, { backgroundColor: palette["destructive-soft"] }]}>
           <ShieldAlert size={16} color={palette["destructive-strong"]} />
           <Text variant="caption" style={{ flex: 1, color: palette["destructive-strong"] }}>
-            {t("attendance.chiqishlar_soni_chegaradan_oshgan_ota_onaga_")}
+            {t("focusJournal.alert")}
           </Text>
         </View>
       ) : null}
 
       <View style={styles.focusStats}>
-        <Metric label={t("attendance.chiqishlar")} value={String(focus.exits)} />
-        <Metric label={t("attendance.jami_yoqlik")} value={formatDuration(focus.awaySeconds)} />
-        <Metric label={t("attendance.eng_uzun")} value={formatDuration(focus.longestSeconds)} />
+        <Metric label={t("focusJournal.exitsLabel")} value={String(focus.exits)} />
+        <Metric label={t("focusJournal.awayLabel")} value={formatDuration(focus.awaySeconds)} />
+        <Metric label={t("focusJournal.longestLabel")} value={formatDuration(focus.longestSeconds)} />
       </View>
 
-      <Text variant="label">Tafsilot</Text>
-      {focus.timeline.map((exit, index) => (
-        <View key={`${exit.leftAt}-${index}`} style={styles.timelineRow}>
-          <Text variant="caption">Chiqdi: {formatDateTime(exit.leftAt)}</Text>
-          <Text variant="caption" tone="muted">
-            {exit.returnedAt
-              ? `Qaytdi: ${formatDateTime(exit.returnedAt)} · ${exit.seconds === null ? "—" : formatDuration(exit.seconds)}`
-              : "Qaytmagan"}
-          </Text>
-        </View>
-      ))}
+      {/* Veb `focus-timeline`: chiqdi → qaytdi va davomiylik */}
+      {focus.timeline.length ? (
+        focus.timeline.map((exit, index) => (
+          <View key={`${exit.leftAt}-${index}`} style={styles.timelineRow}>
+            <View style={styles.timelineBody}>
+              <View style={styles.timelineLine}>
+                <LogOut size={13} color={palette["muted-foreground"]} />
+                <Text variant="caption">{formatDateTime(exit.leftAt)}</Text>
+              </View>
+              <View style={styles.timelineLine}>
+                <LogIn size={13} color={palette["muted-foreground"]} />
+                <Text variant="caption" tone="muted">
+                  {exit.returnedAt ? formatDateTime(exit.returnedAt) : t("focusJournal.notReturned")}
+                </Text>
+              </View>
+            </View>
+            <Text variant="label">{exit.seconds === null ? "—" : formatDuration(exit.seconds)}</Text>
+          </View>
+        ))
+      ) : (
+        <Text variant="caption" tone="muted">
+          {t("focusJournal.noTimeline")}
+        </Text>
+      )}
     </View>
   );
 }
@@ -250,5 +265,7 @@ const styles = StyleSheet.create({
   alert: { flexDirection: "row", alignItems: "center", gap: 8, padding: 12, borderRadius: radius.sm },
   focusStats: { flexDirection: "row", gap: 24, flexWrap: "wrap" },
   metric: { gap: 2 },
-  timelineRow: { gap: 2, paddingVertical: 4 },
+  timelineRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 },
+  timelineBody: { flex: 1, minWidth: 0, gap: 2 },
+  timelineLine: { flexDirection: "row", alignItems: "center", gap: 6 },
 });

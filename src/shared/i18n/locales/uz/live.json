@@ -93,7 +93,8 @@
     "retrying": "Video navbatda",
     "stopped": "Video saqlandi",
     "unsupported": "Video yozuv mavjud emas",
-    "error": "Video yozuvda xato"
+    "error": "Video yozuvda xato",
+    "interrupted": "Ekran yozuvi to‘xtadi. Yozuv davom etishi uchun ekranni qayta ulashing."
   },
   "room": {
     "cameraOffAria": "{{name}} kamerasi o'chiq",
@@ -228,6 +229,7 @@
     "joinFailedDescription": "Internet uzildi — darsga ulanib bo'lmadi. Dars davom etmoqda.",
     "mobileJoinFailedTitle": "Darsga ulanib bo‘lmadi",
     "mobileJoinFailedDescription": "Internet aloqasini tekshiring. Dars hali davom etmoqda — qayta urinib ko‘ring.",
-    "mobileBackToChat": "Chatga qaytish"
+    "mobileBackToChat": "Chatga qaytish",
+    "joiningRoom": "Dars xonasiga ulanmoqda"
   }
 }

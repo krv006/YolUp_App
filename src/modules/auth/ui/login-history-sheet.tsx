@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import { Globe, MonitorSmartphone, ShieldAlert } from "lucide-react-native";
 import { formatDateTime } from "@/shared/lib";
@@ -14,41 +15,41 @@ export interface LoginHistorySheetProps {
 
 /**
  * Kirishlar tarixi — veb `login-history-dialog.tsx`: qurilma, IP va vaqt,
- * yangi qurilma/IP belgilari. Matnlar vebdagidek shu faylda (vebda ham
- * lug'atga chiqarilmagan).
+ * yangi qurilma/IP belgilari. Matnlar `account:loginHistory.*` (veb 30-okt).
  */
 export function LoginHistorySheet({
   open,
   onClose,
   studentId = null,
-  title = "Kirishlar tarixi",
-  description = "Hisobingizga qaysi qurilma va IP’dan kirilgani.",
+  title,
+  description,
 }: LoginHistorySheetProps) {
+  const { t } = useTranslation("account");
   const { palette } = useTheme();
   const query = useLoginHistory(studentId, open);
   const records = query.data ?? [];
 
   return (
-    <Sheet open={open} onClose={onClose} title={title} description={description}>
+    <Sheet open={open} onClose={onClose} title={title ?? t("loginHistory.title")} description={description ?? t("loginHistory.description")}>
       {query.isLoading ? (
         <View style={styles.state}>
           <ActivityIndicator color={palette.primary} />
           <Text variant="label" tone="muted">
-            Tarix yuklanmoqda
+            {t("loginHistory.loading")}
           </Text>
         </View>
       ) : null}
 
       {query.isError ? (
         <View style={styles.state}>
-          <Text variant="label">Tarixni yuklab bo‘lmadi</Text>
-          <Button title="Qayta urinish" variant="secondary" fullWidth={false} onPress={() => void query.refetch()} />
+          <Text variant="label">{t("loginHistory.loadError")}</Text>
+          <Button title={t("loginHistory.retry")} variant="secondary" fullWidth={false} onPress={() => void query.refetch()} />
         </View>
       ) : null}
 
       {query.isSuccess && !records.length ? (
         <Text variant="body" tone="muted">
-          Kirishlar hali qayd etilmagan.
+          {t("loginHistory.empty")}
         </Text>
       ) : null}
 
@@ -86,8 +87,8 @@ export function LoginHistorySheet({
                 </View>
                 {record.isNewDevice || record.isNewIp ? (
                   <View style={styles.flags}>
-                    {record.isNewDevice ? <Flag label="Yangi qurilma" /> : null}
-                    {record.isNewIp ? <Flag label="Yangi IP" /> : null}
+                    {record.isNewDevice ? <Flag label={t("loginHistory.newDevice")} /> : null}
+                    {record.isNewIp ? <Flag label={t("loginHistory.newIp")} /> : null}
                   </View>
                 ) : null}
               </View>

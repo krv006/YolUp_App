@@ -84,12 +84,13 @@ export function Screen({
 }
 
 /** Ma'lumot yuklanayotgan holat — har ekranning uch holatidan biri (§18.12). */
-export function ScreenLoading({ label = "Yuklanmoqda…" }: { label?: string }) {
+export function ScreenLoading({ label }: { label?: string }) {
+  const { t } = useTranslation("common");
   const { palette } = useTheme();
   return (
     <View style={styles.center}>
       <ActivityIndicator color={palette.primary} />
-      <Text tone="muted">{label}</Text>
+      <Text tone="muted">{label ?? t("a11y.loading")}</Text>
     </View>
   );
 }

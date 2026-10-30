@@ -70,9 +70,9 @@ export function RecordingPage() {
           <MobileEmptyCard
             icon="error"
             iconColor="error-text"
-            title="Darsni topib bo‘lmadi"
+            title={t("recording.notFoundTitle")}
             description={lesson.error?.message}
-            action={{ label: "Qayta urinish", icon: "refresh", onPress: () => void lesson.refetch() }}
+            action={{ label: t("recording.retry"), icon: "refresh", onPress: () => void lesson.refetch() }}
           />
         </View>
       </MobileScreen>

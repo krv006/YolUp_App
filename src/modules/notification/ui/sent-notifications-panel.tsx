@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { Check, Clock3, Megaphone, Plus, UserRound } from "lucide-react-native";
 import { formatDateTime, htmlToPlainText } from "@/shared/lib";
@@ -15,6 +16,7 @@ import { SendNotificationSheet } from "./send-notification-sheet";
  * yo'q) chiqadi — bu yerda boshqa panellar kabi kartada.
  */
 export function SentNotificationsPanel() {
+  const { t } = useTranslation("notification");
   const { palette } = useTheme();
   const colors = useLegacyColors();
   const [composeOpen, setComposeOpen] = useState(false);
@@ -32,16 +34,16 @@ export function SentNotificationsPanel() {
       <View style={styles.head}>
         <View>
           <Text variant="caption" style={[styles.eyebrow, { color: palette["primary-text"] }]}>
-            BILDIRISHNOMALAR
+            {t("sentPanel.eyebrow")}
           </Text>
           <Text variant="body" style={styles.title}>
-            Yuborilgan xabarlar
+            {t("sentPanel.title")}
           </Text>
         </View>
         <PortalButton
           variant="primary"
           icon={Plus}
-          label="Yangi xabar"
+          label={t("sentPanel.compose")}
           onPress={() => setComposeOpen(true)}
           style={styles.compose}
         />
@@ -51,14 +53,14 @@ export function SentNotificationsPanel() {
         <View style={styles.loading}>
           <ActivityIndicator color={palette.primary} />
           <Text variant="label" style={{ color: colors.muted }}>
-            Xabarlar yuklanmoqda
+            {t("sentPanel.loading")}
           </Text>
         </View>
       ) : null}
 
       {sent.isSuccess && !items.length ? (
         <Text variant="body" style={{ color: colors.muted }}>
-          Hali xabar yuborilmagan.
+          {t("sentPanel.empty")}
         </Text>
       ) : null}
 
@@ -97,7 +99,7 @@ export function SentNotificationsPanel() {
                     {item.readCount}/{item.totalCount}
                   </Text>
                   <Text variant="caption" style={[styles.small, { color: colors.muted }]}>
-                    {rate}% o‘qigan
+                    {t("sentPanel.readRate", { rate })}
                   </Text>
                 </View>
               </Pressable>
@@ -111,14 +113,14 @@ export function SentNotificationsPanel() {
       <Sheet
         open={Boolean(detailId)}
         onClose={() => setDetailId(null)}
-        title="Kim o‘qidi"
-        description="Xabar yuborilgan foydalanuvchilar ro‘yxati."
+        title={t("sentPanel.readersTitle")}
+        description={t("sentPanel.readersDescription")}
       >
         {recipients.isLoading ? (
           <View style={styles.loading}>
             <ActivityIndicator color={palette.primary} />
             <Text variant="label" style={{ color: colors.muted }}>
-              Yuklanmoqda
+              {t("sentPanel.readersLoading")}
             </Text>
           </View>
         ) : null}
@@ -152,7 +154,7 @@ export function SentNotificationsPanel() {
                   </View>
                 ) : (
                   <Text variant="caption" style={[styles.flag, { color: colors.muted }]}>
-                    O‘qimagan
+                    {t("sentPanel.unread")}
                   </Text>
                 )}
               </View>
@@ -161,7 +163,7 @@ export function SentNotificationsPanel() {
         ) : null}
         {recipients.isSuccess && !recipients.data.length ? (
           <Text variant="body" style={{ color: colors.muted }}>
-            Qabul qiluvchi topilmadi.
+            {t("sentPanel.noRecipients")}
           </Text>
         ) : null}
       </Sheet>

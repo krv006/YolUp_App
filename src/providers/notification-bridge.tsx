@@ -1,15 +1,19 @@
 import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
-import { useIsAuthenticated } from "@/modules/auth";
-import { useNotificationFeed, type NotificationLink } from "@/modules/notification";
+import { useCurrentUser, useIsAuthenticated } from "@/modules/auth";
+import { useNotificationFeed, type NotificationLink, type OpenNotificationLink } from "@/modules/notification";
+import { ROLES } from "@/shared/constants";
 import { useOpenNotificationLink } from "@/widgets/notification-link";
+import { RealtimeSync } from "./realtime-sync";
 import { usePushRegistration } from "./use-push-registration";
 
 /**
  * Bildirishnomalar ko'prigi — veb'da bu `NotificationBell` ichida turardi.
  *
  * Uchta ish qiladi:
- *   1. Ilova OCHIQ turganda WebSocket kanali (toast bilan).
+ *   1. Ilova OCHIQ turganda WebSocket kanali (toast bilan). O'qituvchi va
+ *      o'quvchida u chat ro'yxatini ham real vaqtda yangilaydi
+ *      (`RealtimeSync`, veb #165); ota-ona va adminda faqat bildirishnomalar.
  *   2. Qurilmani push uchun ro'yxatga olish.
  *   3. Push BOSILGANDA tegishli ekranga o'tish.
  *
@@ -30,8 +34,15 @@ export function NotificationBridge() {
  */
 function NotificationLinks() {
   const openLink = useOpenNotificationLink();
-  useNotificationFeed(true, openLink);
+  const role = useCurrentUser()?.role;
+  const chatRole = role === ROLES.TEACHER ? "teacher" : role === ROLES.STUDENT ? "student" : null;
   usePushResponse(true, openLink);
+  return chatRole ? <RealtimeSync role={chatRole} openLink={openLink} /> : <NotificationFeed openLink={openLink} />;
+}
+
+/** Ota-ona va admin — veb `NotificationBell` dagi kabi faqat bildirishnomalar kanali. */
+function NotificationFeed({ openLink }: { openLink: OpenNotificationLink }) {
+  useNotificationFeed(true, openLink);
   return null;
 }
 

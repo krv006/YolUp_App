@@ -5,7 +5,16 @@ import { useRouter } from "expo-router";
 import { toast } from "sonner";
 import type { Page } from "@/shared/api";
 import { i18n } from "@/shared/i18n";
-import { conversationApi, conversationKeys, readCachedConversation, useConversations } from "@/modules/conversation";
+import {
+  clearRoomTyping,
+  conversationApi,
+  conversationKeys,
+  markRoomTyping,
+  readCachedConversation,
+  setActiveConversation,
+  useConversations,
+  useRoomTyping,
+} from "@/modules/conversation";
 import type { ChatMessage, Conversation, ConversationRole, SendMessagePayload } from "@/shared/types";
 import { messageApi } from "../api/message.api";
 import { ChatSocketManager, type SocketState } from "../lib/chat-socket-manager";
@@ -36,7 +45,13 @@ export function useChat(
     [conversationId, role]
   );
   const [socketState, setSocketState] = useState<SocketState>("idle");
-  const [typing, setTyping] = useState<{ name: string; kind: "text" | "voice" } | null>(null);
+  const typing = useRoomTyping(conversationId);
+
+  useEffect(() => {
+    if (!conversationId) return undefined;
+    setActiveConversation(conversationId);
+    return () => setActiveConversation(null);
+  }, [conversationId]);
 
   const cachedConversation = readCachedConversation(queryClient, conversationId, role);
 
@@ -80,6 +95,7 @@ export function useChat(
             onState: setSocketState,
             onEvent: (event) => {
               if (event.type === "message") {
+                if (conversationId && event.message.senderId !== String(senderId)) clearRoomTyping(conversationId);
                 queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
                   upsertMessage(current, event.message)
                 );
@@ -111,27 +127,8 @@ export function useChat(
                   queryKey: conversationKeys.detail(conversationId ?? "", role),
                 });
               }
-              if (event.type === "typing" && event.userId !== String(senderId)) {
-                const markRow = (value: { name: string; kind: "text" | "voice" } | null) =>
-                  queryClient.setQueryData<Page<Conversation>>(conversationKeys.list(role), (current) =>
-                    current
-                      ? {
-                          ...current,
-                          items: current.items.map((item) =>
-                            item.id === conversationId
-                              ? { ...item, typing: Boolean(value), typingName: value?.name ?? null, typingKind: value?.kind }
-                              : item
-                          ),
-                        }
-                      : current
-                  );
-                const value = { name: event.name, kind: event.kind };
-                setTyping(value);
-                markRow(value);
-                globalThis.setTimeout(() => {
-                  setTyping(null);
-                  markRow(null);
-                }, TYPING_RESET_MS);
+              if (event.type === "typing" && conversationId && event.userId !== String(senderId)) {
+                markRoomTyping(conversationId, { name: event.name, kind: event.kind }, TYPING_RESET_MS);
               }
               if (event.type === "removed") {
                 toast.error(i18n.t("chat:removedFromGroup"));

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useCurrentUser } from "@/modules/auth";
-import { isDirectLocked, isOwnLastMessage, lastMessageBody, useDirectStatusLabel } from "@/modules/conversation";
+import { isDirectLocked, isOwnLastMessage, lastMessageBody, useDirectStatusLabel, useRoomTyping } from "@/modules/conversation";
 import { formatMessageTime } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
 import { Avatar, DsText, dsRadius, GroupTile, Icon, useDs } from "@/shared/ui";
@@ -41,6 +41,8 @@ export function ConversationRowBody({ conversation }: { conversation: Conversati
   const weekdays = t("listTime.weekdays", { returnObjects: true }) as string[];
   const unread = conversation.unreadCount > 0;
   const directStatusLabel = useDirectStatusLabel();
+  // Veb #165: "yozmoqda" `ws/notifications` dagi `chat_typing` dan (ro'yxat keshida emas).
+  const typing = useRoomTyping(conversation.id);
   const mine = isOwnLastMessage(conversation, user);
   const body = lastMessageBody(conversation, {
     voice: t("panel.voiceMessage"),
@@ -68,11 +70,9 @@ export function ConversationRowBody({ conversation }: { conversation: Conversati
         <DsText v="title" numberOfLines={1}>
           {conversation.title}
         </DsText>
-        {conversation.typing ? (
+        {typing ? (
           <DsText v="body-sm" c="brand" numberOfLines={1}>
-            {conversation.typingKind === "voice"
-              ? t("panel.recordingVoice", { name: conversation.typingName ?? "" })
-              : t("panel.typing", { name: conversation.typingName ?? "" })}
+            {typing.kind === "voice" ? t("panel.recordingVoice", { name: typing.name }) : t("panel.typing", { name: typing.name })}
           </DsText>
         ) : isDirectLocked(conversation) ? (
           <DsText v="body-sm" c={conversation.directStatus === "blocked" ? "error-text" : "saffron-strong"} numberOfLines={1}>

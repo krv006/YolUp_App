@@ -10,3 +10,4 @@ export { OpenHomeworkBadge } from "./parent-tab-badge";
 export { useParentNotificationLink } from "./use-parent-notification-link";
 export { ParentScreen, useParentTabInset } from "./parent-screen";
 export type { ParentScreenProps } from "./parent-screen";
+export { useParentBack } from "./use-parent-back";

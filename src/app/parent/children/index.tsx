@@ -1,4 +1,4 @@
-import { ParentChildrenPage } from "@/pages/parent/parent-children-page";
+import { ParentChildrenPage } from "@/pages/parent/children/parent-children-page";
 
 export default function ParentChildrenRoute() {
   return <ParentChildrenPage />;

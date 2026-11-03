@@ -1,4 +1,4 @@
-import { ParentExamsPage } from "@/pages/parent/parent-exams-page";
+import { ParentExamsPage } from "@/pages/parent/exams/parent-exams-page";
 
 export default function ParentExamsRoute() {
   return <ParentExamsPage />;

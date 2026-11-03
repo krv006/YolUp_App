@@ -67,7 +67,6 @@ export { printTable } from "./lib/print-table";
 export type { PrintableTable } from "./lib/print-table";
 
 // --- Mobil UI ---
-export { ParentAppBar } from "./ui/parent-app-bar";
 export { AddChildDialog } from "./ui/add-child-dialog";
 export type { AddChildDialogProps } from "./ui/add-child-dialog";
 export { LinkChildDialog } from "./ui/link-child-dialog";

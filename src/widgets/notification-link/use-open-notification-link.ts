@@ -19,9 +19,10 @@ function isResult(kind?: string | null): boolean {
  * tur (dars, yozuv, vazifa, topshiriq, test, imtihon, guruh, suhbat) o'z
  * sahifasiga.
  *
- * Ota-onada test va imtihon havolalari mobilning hozirgi sahifalariga
- * (ota-ona ekranlari yangilanmagan). Admin uchun o'qituvchi havolasi
- * o'qituvchilar ro'yxatini ochadi.
+ * Ota-ona o'z havola ochuvchisidan foydalanadi
+ * (`widgets/parent-shell/use-parent-notification-link.ts` — farzandni tanlab
+ * bo'limni ochadi). Admin uchun o'qituvchi havolasi o'qituvchilar ro'yxatini
+ * ochadi.
  */
 export function useOpenNotificationLink() {
   const router = useRouter();

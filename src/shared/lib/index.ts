@@ -2,6 +2,8 @@ export { storage, mmkvInstance } from "./storage";
 export { htmlToPlainText, sanitizeHtml } from "./sanitize-html";
 export { cn, initials } from "./utils";
 export { blobToBase64, downloadBlob, writeBlobToCache } from "./download";
+export { shareHtmlAsPdf, shareTextFile } from "./share-file";
+export type { PdfPage } from "./share-file";
 export { isOnline, onOnline, refreshNetworkState } from "./network";
 export { currentAppState, isAppActive, onAppFocusChange, onAppStateChange } from "./app-state";
 export type { AppFocusState } from "./app-state";
@@ -12,6 +14,7 @@ export {
   formatDateTime,
   formatDayTime,
   formatDuration,
+  formatLocalized,
   formatMessageTime,
   formatRelativeShort,
 } from "./date";

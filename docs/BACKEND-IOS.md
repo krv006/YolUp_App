@@ -24,7 +24,7 @@ Dars yozuvi ochilganda iPhone'da ekran bo'sh qoladi, jurnalda:
 
 ```
 Failed to load available audio tracks for
-https://edu.thesofmebel.uz/api/v1/lessons/<id>/recording/stream/?t=<token>
+https://backend.yolup.uz/api/v1/lessons/<id>/recording/stream/?t=<token>
 
 Error Domain=AVFoundationErrorDomain Code=-11828 "Cannot Open"
 NSLocalizedFailureReason=This media format is not supported.

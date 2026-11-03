@@ -49,9 +49,12 @@ const VARIANTS: Record<Variant, { name: string; idSuffix: string }> = {
 
 const BASE_ID = "uz.yolup.edu";
 
-/** Prod backend — mobil veb proxy'siz to'g'ridan-to'g'ri uradi (MOBILE_PLAN §11 #4). */
-const DEFAULT_API_URL = "https://edu.thesofmebel.uz";
-const DEFAULT_WS_URL = "wss://edu.thesofmebel.uz";
+/**
+ * Prod backend — mobil veb proxy'siz to'g'ridan-to'g'ri uradi (MOBILE_PLAN §11 #4).
+ * 2026-11-02 dan `backend.yolup.uz` (veb `e5b1d8e`); eski `edu.thesofmebel.uz` 502 qaytaradi.
+ */
+const DEFAULT_API_URL = "https://backend.yolup.uz";
+const DEFAULT_WS_URL = "wss://backend.yolup.uz";
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   const variant = VARIANTS[VARIANT];

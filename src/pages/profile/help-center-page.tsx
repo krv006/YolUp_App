@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth, useIsStudent } from "@/modules/auth";
 import { SupportDialog, useHelpFaq, useHelpVideos, type FaqItem } from "@/modules/support";
 import { ROUTES } from "@/shared/config";
+import { ROLES } from "@/shared/constants";
 import { storage } from "@/shared/lib";
 import { DsText, dsRadius, MobileListCard, MobileListRow, MobileSearchField, MobileSectionTitle, Sheet, useDs, type IconName } from "@/shared/ui";
 import { ProfileSubPage } from "./profile-shell";
@@ -56,7 +57,10 @@ export function HelpCenterPage() {
     action,
   });
 
-  const guides: HelpItem[] = student
+  const parent = user?.role === ROLES.PARENT;
+  const guides: HelpItem[] = parent
+    ? []
+    : student
     ? [
         item("joinLesson", "help", FAQ_TONE, () => go(ROUTES.student.schedule)),
         item("joinGroup", "person-add", FAQ_TONE, () => go(ROUTES.student.chats)),
@@ -94,7 +98,7 @@ export function HelpCenterPage() {
       id: "contact",
       items: [
         item("support", "forum", SETTINGS_TONES.success, () => setSupportOpen(true)),
-        ...(student
+        ...(student || parent
           ? []
           : [
               item("tour", "school", SETTINGS_TONES.success, () => {

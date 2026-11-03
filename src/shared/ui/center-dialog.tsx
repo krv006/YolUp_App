@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
 import { DsText, dsRadius, useDs } from "./ds";
 import { Icon, type IconName } from "./icon";
 
-interface CenterDialogShellProps {
+export interface CenterDialogProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -21,22 +22,29 @@ interface CenterDialogShellProps {
  * `rounded-2xl bg-surface shadow-2xl`, ochilishda `fade-in zoom-in-95`).
  * Vebda karta markazdan 22px yuqorida (`top-[calc(50%-22px)]`).
  */
-function CenterDialogShell({ open, onClose, children, maxWidth, inset = 16, shift = -22 }: CenterDialogShellProps) {
+/**
+ * Markazdagi karta qobig'i — veb `AppDialog variant="confirm"`. Ichida maydon
+ * bo'lsa klaviatura ochilganda fon qisqaradi va karta ko'rinadigan qismda
+ * qoladi (`KeyboardAvoidingView`), karta ichi esa aylantiriladi.
+ */
+export function CenterDialog({ open, onClose, children, maxWidth, inset = 16, shift = -22 }: CenterDialogProps) {
   const ds = useDs();
   return (
     <Modal visible={open} transparent animationType="none" statusBarTranslucent navigationBarTranslucent onRequestClose={onClose}>
       {open ? (
+        <KeyboardAvoidingView behavior="padding" style={styles.fill}>
         <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)} style={[styles.scrim, { paddingHorizontal: inset, paddingTop: Math.max(0, shift * 2), paddingBottom: Math.max(0, -shift * 2), backgroundColor: ds.c.scrim }]}>
           <Pressable accessibilityRole="button" style={StyleSheet.absoluteFill} onPress={onClose} />
           <Animated.View
             entering={ZoomIn.duration(160).withInitialValues({ transform: [{ scale: 0.95 }] })}
             style={[styles.card, { maxWidth, backgroundColor: ds.c.surface, boxShadow: ds.shadow["2xl"] }]}
           >
-            <ScrollView bounces={false} contentContainerStyle={styles.cardScroll}>
+            <ScrollView bounces={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.cardScroll}>
               {children}
             </ScrollView>
           </Animated.View>
         </Animated.View>
+        </KeyboardAvoidingView>
       ) : null}
     </Modal>
   );
@@ -89,7 +97,7 @@ export function ConfirmDialog({
   // Fon yoki "orqaga" — faqat yopish (vebdagi `onOpenChange(false)`); `onCancel`
   // faqat pastdagi tugmada (masalan "Faqat chiqish" darsdan chiqaradi).
   return (
-    <CenterDialogShell open={open} onClose={() => onOpenChange(false)} maxWidth={330}>
+    <CenterDialog open={open} onClose={() => onOpenChange(false)} maxWidth={330}>
       <View style={styles.confirm}>
         <View style={[styles.confirmIcon, { backgroundColor: danger ? ds.c["danger-bg"] : ds.c["brand-subtle"] }]}>
           <Icon name={icon} size={24} color={danger ? ds.c["error-text"] : ds.c.brand} />
@@ -123,7 +131,7 @@ export function ConfirmDialog({
           </DsText>
         </Pressable>
       </View>
-    </CenterDialogShell>
+    </CenterDialog>
   );
 }
 
@@ -172,7 +180,7 @@ export function MobileAlertDialog({
   const ds = useDs();
   const cancel = () => (onCancel ? onCancel() : onOpenChange(false));
   return (
-    <CenterDialogShell open={open} onClose={cancel} inset={24} shift={shift}>
+    <CenterDialog open={open} onClose={cancel} inset={24} shift={shift}>
       <View style={styles.alert}>
         <View style={[styles.alertIcon, { backgroundColor: tone === "danger" ? ds.c["danger-bg"] : ds.c["brand-subtle"] }]}>
           <Icon name={icon} size={26} color={tone === "danger" ? ds.c["error-text"] : ds.c.brand} />
@@ -213,11 +221,12 @@ export function MobileAlertDialog({
           </Pressable>
         </View>
       </View>
-    </CenterDialogShell>
+    </CenterDialog>
   );
 }
 
 const styles = StyleSheet.create({
+  fill: { flex: 1 },
   /* `fixed inset-0 bg-scrim`, karta `top-[calc(50%-22px)]` */
   scrim: { flex: 1, justifyContent: "center", alignItems: "center" },
   card: { width: "100%", maxHeight: "86%", borderRadius: dsRadius["2xl"], overflow: "hidden", alignSelf: "center" },

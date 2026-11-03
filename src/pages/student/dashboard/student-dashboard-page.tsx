@@ -8,7 +8,7 @@ import { notificationContent } from "@/modules/notification";
 import { ROUTES } from "@/shared/config";
 import { useOnlineStatus } from "@/shared/model";
 import type { Lesson } from "@/shared/types";
-import { DsGradient, DsText, dsRadius, GroupTile, Icon, MobileListCard, MobileListRow, PullRefresh, useDs } from "@/shared/ui";
+import { DsGradient, DsText, dsRadius, GroupTile, Icon, MobileListCard, MobileListRow, MobileServerError, PullRefresh, useDs } from "@/shared/ui";
 import { MobileUserHeader } from "@/widgets/mobile-user-header";
 import { lessonClock } from "../lib/clock";
 import { useStudentHome } from "./use-student-home";
@@ -29,7 +29,7 @@ function endOf(lesson: Lesson): Date {
  */
 export function StudentDashboardPage() {
   const { t } = useTranslation("student");
-  const { t: td } = useTranslation("dashboard");
+  const { t: td } = useTranslation(["dashboard", "common"]);
   const months = td("months", { returnObjects: true }) as string[];
   const ds = useDs();
   const router = useRouter();
@@ -43,11 +43,14 @@ export function StudentDashboardPage() {
 
   const dayLabel = (date: Date) => `${date.getDate()}-${(months[date.getMonth()] ?? "").toLowerCase()}`;
   const upcoming = heroLesson && heroLesson.status === "scheduled" && !todayLessons.length ? heroLesson : null;
-  const emptyHint = upcoming
-    ? new Date(upcoming.startsAt).toDateString() === new Date(now.getTime() + DAY_MS).toDateString()
-      ? t("home.today.emptyNext", { time: lessonClock(new Date(upcoming.startsAt)), title: upcoming.courseTitle })
-      : t("home.today.emptyLater", { date: dayLabel(new Date(upcoming.startsAt)), title: upcoming.courseTitle })
-    : t("home.today.emptyNone");
+  const emptyTitle = home.lessonsFailed ? td("today.loadError") : t("home.today.emptyTitle");
+  const emptyHint = home.lessonsFailed
+    ? td("banner.serverError")
+    : upcoming
+      ? new Date(upcoming.startsAt).toDateString() === new Date(now.getTime() + DAY_MS).toDateString()
+        ? t("home.today.emptyNext", { time: lessonClock(new Date(upcoming.startsAt)), title: upcoming.courseTitle })
+        : t("home.today.emptyLater", { date: dayLabel(new Date(upcoming.startsAt)), title: upcoming.courseTitle })
+      : t("home.today.emptyNone");
 
   const openChat = (courseId: string) => {
     const room = home.roomByCourse.get(courseId);
@@ -78,6 +81,8 @@ export function StudentDashboardPage() {
                 {t("home.offline")}
               </DsText>
             </View>
+          ) : home.failed ? (
+            <MobileServerError label={td("mobile.serverError")} retryLabel={td("common:actions.retry")} onRetry={home.retry} />
           ) : null}
 
           {home.loading ? (
@@ -138,7 +143,7 @@ export function StudentDashboardPage() {
                     </View>
                     <View style={styles.grow}>
                       <DsText v="title" numberOfLines={1}>
-                        {t("home.today.emptyTitle")}
+                        {emptyTitle}
                       </DsText>
                       <DsText v="body-sm" c="ink-secondary" numberOfLines={2}>
                         {emptyHint}

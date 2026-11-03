@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as Notifications from "expo-notifications";
 import { useCurrentUser, useIsAuthenticated } from "@/modules/auth";
-import { useNotificationFeed, type NotificationLink, type OpenNotificationLink } from "@/modules/notification";
+import { useNotificationFeed, type OpenNotificationLink } from "@/modules/notification";
 import { ROLES } from "@/shared/constants";
 import { useOpenNotificationLink } from "@/widgets/notification-link";
+import { useParentNotificationLink } from "@/widgets/parent-shell";
 import { RealtimeSync } from "./realtime-sync";
 import { usePushRegistration } from "./use-push-registration";
 
@@ -33,11 +34,27 @@ export function NotificationBridge() {
  * so'raydi, tokensiz u 401 olardi.
  */
 function NotificationLinks() {
+  const role = useCurrentUser()?.role;
+  return role === ROLES.PARENT ? <ParentNotificationLinks /> : <RoleNotificationLinks />;
+}
+
+function RoleNotificationLinks() {
   const openLink = useOpenNotificationLink();
   const role = useCurrentUser()?.role;
   const chatRole = role === ROLES.TEACHER ? "teacher" : role === ROLES.STUDENT ? "student" : null;
   usePushResponse(true, openLink);
   return chatRole ? <RealtimeSync role={chatRole} openLink={openLink} /> : <NotificationFeed openLink={openLink} />;
+}
+
+/**
+ * Ota-ona — veb `ParentBell` (`useParentNotificationLink`): xabardagi
+ * `student_id` bo'yicha farzand tanlanib, bo'limi ochiladi. Suhbat ro'yxati
+ * so'ralmaydi (ota-onada chat yo'q).
+ */
+function ParentNotificationLinks() {
+  const openLink = useParentNotificationLink();
+  usePushResponse(true, openLink);
+  return <NotificationFeed openLink={openLink} />;
 }
 
 /** Ota-ona va admin — veb `NotificationBell` dagi kabi faqat bildirishnomalar kanali. */
@@ -61,7 +78,7 @@ function NotificationFeed({ openLink }: { openLink: OpenNotificationLink }) {
  * qolinadi: ilova ochilganda `getLastNotificationResponseAsync` o'sha
  * javobni qaytarishi, keyin listener ham chaqirilishi mumkin.
  */
-function usePushResponse(enabled: boolean, openLink: (link: NotificationLink) => void): void {
+function usePushResponse(enabled: boolean, openLink: OpenNotificationLink): void {
   const handled = useRef<string | null>(null);
 
   useEffect(() => {
@@ -83,7 +100,7 @@ function usePushResponse(enabled: boolean, openLink: (link: NotificationLink) =>
         | undefined;
       const type = typeof data?.link_type === "string" ? data.link_type : "";
       const id_ = typeof data?.link_id === "string" ? data.link_id : "";
-      if (type && id_) openLink({ type, id: id_ });
+      if (type && id_) openLink({ type, id: id_ }, null, data);
     }
 
     void Notifications.getLastNotificationResponseAsync().then(handle);

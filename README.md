@@ -51,8 +51,8 @@ APP_VARIANT=production  npm start   # uz.yolup.edu
 API manzilini almashtirish:
 
 ```bash
-EXPO_PUBLIC_API_URL=https://edu.thesofmebel.uz \
-EXPO_PUBLIC_WS_URL=wss://edu.thesofmebel.uz \
+EXPO_PUBLIC_API_URL=https://backend.yolup.uz \
+EXPO_PUBLIC_WS_URL=wss://backend.yolup.uz \
 npm start
 ```
 

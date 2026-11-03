@@ -61,6 +61,11 @@ export { passwordStrength } from "./lib/password-strength";
 export { isConsentRequired, retryMinutes } from "./lib/parent-errors";
 export type { ChildRankDto, ChildSessionDto, ChildSummaryDto, ChildrenSummaryDto, UsernameAvailability } from "./api/parent.dto";
 
+// --- Mobil fayl yordamchilari (veb `download-file` / `print-table` — DOM o'rnida fayl va ulashish) ---
+export { downloadFile } from "./lib/download-file";
+export { printTable } from "./lib/print-table";
+export type { PrintableTable } from "./lib/print-table";
+
 // --- Mobil UI ---
 export { ParentAppBar } from "./ui/parent-app-bar";
 export { AddChildDialog } from "./ui/add-child-dialog";

@@ -23,8 +23,8 @@ const TABS: readonly TabDefinition[] = [
   { name: "grades", labelKey: "mobile.tabs.results", iconName: "bar-chart", siblings: ["exams"] },
 ];
 
-/* `(account)` — profil, sozlamalar va yordam (o'z stack'i, URL'da guruh nomi yo'q). */
-const HIDDEN = ["exams", "notifications", "(account)", "[...missing]"];
+/* `(account)` — profil, sozlamalar, yordam va bildirishnomalar (o'z stack'i, URL'da guruh nomi yo'q). */
+const HIDDEN = ["exams", "(account)", "[...missing]"];
 
 export default function ParentLayout() {
   return (

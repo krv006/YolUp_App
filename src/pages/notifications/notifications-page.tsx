@@ -37,7 +37,7 @@ const GROUP_ORDER: NotificationGroupKey[] = ["today", "yesterday", "earlier"];
  * Vebdagi `NotificationHtml` da birinchi `<b>`/`<strong>` alohida qator
  * (`text-title text-ink`), qolgani izoh (`text-body-sm text-ink-secondary`).
  */
-function splitHtml(html: string): { title: string; body: string } {
+export function splitHtml(html: string): { title: string; body: string } {
   const match = /<(b|strong)>([\s\S]*?)<\/\1>/i.exec(html);
   if (!match) return { title: "", body: htmlToPlainText(html, 240) };
   return {

@@ -23,10 +23,11 @@ const STYLE = `
 `;
 
 /*
- * A4 albom — nuqtalarda. Chetlar `@page` da (Android `margins` parametrini
- * e'tiborsiz qoldiradi), shuning uchun bu yerda 0.
+ * A4 albom — nuqtalarda. Chetlar ikki joyda: Android `margins` parametrini
+ * e'tiborsiz qoldiradi va `@page` ni oladi, iOS esa aksincha — har biri
+ * faqat bittasini qo'llaydi, ikki barobar bo'lmaydi.
  */
-const A4_LANDSCAPE = { width: 842, height: 595, margin: 0 };
+const A4_LANDSCAPE = { width: 842, height: 595, margin: 45 };
 
 function escape(value: string): string {
   return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] ?? char);

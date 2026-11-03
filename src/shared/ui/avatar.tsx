@@ -98,6 +98,8 @@ export function Avatar({ name, tone, size = "md", status, src, style, variant = 
           <Text
             style={[
               styles.initials,
+              // Qator balandligi shriftga mos: `Text` dagi standart 24 yirik harfni (28+) iOS'da tepadan kesardi.
+              { lineHeight: Math.round(metrics.font * 1.3) },
               legacy
                 ? { fontSize: metrics.font, color: "#ffffff", fontWeight: "700" }
                 : { fontSize: metrics.font, color: palette[`tone-${resolved}-fg`] },

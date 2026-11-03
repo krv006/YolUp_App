@@ -41,8 +41,11 @@ export interface SheetProps {
   compact?: boolean;
   /** Faqat `app`: sarlavha chap tomonidagi belgi (veb `AppDialog icon`). */
   icon?: ReactNode;
-  /** Faqat `app`: sarlavha brend shriftida (`font-heading text-h2 font-medium`). */
-  headingTitle?: boolean;
+  /**
+   * Faqat `app`: sarlavha brend shriftida (`font-heading text-h2 font-medium`);
+   * `"semibold"` — ota-ona oynalaridagi `font-heading text-[20px]/7 font-semibold`.
+   */
+  headingTitle?: boolean | "semibold";
   /** Faqat `app`: pastki qator bo'shliqlari (veb `footerClassName`, standart `pt-6 pb-4`). */
   footerPadding?: { top: number; bottom: number };
 }
@@ -237,7 +240,12 @@ export function Sheet({
               <View style={styles.appHead}>
                 {icon}
                 <View style={styles.appTitle}>
-                  <DsText v={compact ? "title-lg" : "h2"} w={headingTitle ? "500" : "600"} heading={headingTitle} style={compact ? null : styles.appTitleText}>
+                  <DsText
+                    v={compact ? "title-lg" : "h2"}
+                    w={headingTitle === true ? "500" : "600"}
+                    heading={Boolean(headingTitle)}
+                    style={compact ? null : headingTitle === "semibold" ? styles.appTitleSemibold : styles.appTitleText}
+                  >
                     {title}
                   </DsText>
                   {description ? (
@@ -327,6 +335,7 @@ const styles = StyleSheet.create({
   appHead: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 16 },
   appTitle: { flex: 1, minWidth: 0, gap: 2 },
   appTitleText: { lineHeight: 24 },
+  appTitleSemibold: { lineHeight: 28 },
   appClose: { width: 44, height: 44, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
   /* `-mx-1 gap-4 px-5 pt-4.5 pb-1` */
   appBody: { gap: 16, paddingHorizontal: 16, paddingTop: 18, paddingBottom: 4 },

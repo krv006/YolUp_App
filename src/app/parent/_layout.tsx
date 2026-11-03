@@ -1,55 +1,59 @@
+import { StyleSheet, View } from "react-native";
+import { useSelectedChild } from "@/modules/parent";
 import { ProtectedRoute, RoleRoute } from "@/providers/route-guards";
-import { RoleTabs } from "@/providers/role-tabs";
+import { RoleTabs, type TabDefinition } from "@/providers/role-tabs";
 import { ROLES } from "@/shared/constants";
+import { useOnlineStatus } from "@/shared/model";
+import { OpenHomeworkBadge, ParentOffline, ParentUnlinked } from "@/widgets/parent-shell";
 
 /*
- * Veb `parent-layout.tsx` dagi navigatsiya + PROFIL.
+ * Veb `widgets/parent-shell/parent-tab-bar.tsx` — telefondagi suzuvchi panel:
+ * Farzandlar, Davomat, markazda Asosiy, Vazifalar (ochiq vazifalar soni) va
+ * Natijalar (Imtihonlar ham shu tabda). Yorliqlar `parent:mobile.tabs.*`.
  *
- * Nega veb'da profil yo'q: u yerda hisob menyusi navigatsiyadan TASHQARIDA,
- * alohida widget (`widgets/account-menu`) sifatida qobiqda turadi va har
- * rolda ko'rinadi. Mobilda esa u profil TABIGA joylashtirilgan.
- *
- * Navigatsiya veb'dan 1:1 ko'chirilgani uchun ota-ona profilsiz qolgan edi:
- * chiqish, hisob almashtirish va ko'rinish sozlamalari unga umuman yetib
- * bormasdi. O'qituvchi va o'quvchida profil tabi bor edi, shuning uchun
- * kamchilik ko'zga tashlanmagan.
- *
- * DAVOMAT, VAZIFALAR, MOCK TESTLAR va REYTING tab EMAS — ular Ish maydonida.
- *
- * Veb navigatsiyasi oltita bo'limdan iborat, mobilda ularning ustiga
- * Profil qo'shilib YETTITA tab chiqardi. Telefonning tor qatorida yorliqlar
- * kesilardi ("Davoma…", "Vazifa…", "Farzan…") va bo'limlar bir-biridan
- * ajralmay qolardi. Endi kundalik ikkitasi tabda, qolgan to'rttasi Ish
- * maydonida — o'qituvchi va o'quvchidagi bilan bir xil naqsh.
- *
- * Marshrutlar o'zgarmadi, faqat panelda ko'rinmaydi.
- *
- * Har sahifaning tepasida vebdagi portal sarlavhasi turadi: logotip,
- * farzand tanlagichi va qo'ng'iroq (`modules/parent/ui/parent-app-bar.tsx`).
+ * Profil tab emas: vebdagidek bosh sahifa sarlavhasidagi avatar uni ochadi.
+ * Bildirishnomalar, profil va topilmagan sahifa marshrutlari panelda
+ * ko'rinmaydi va ularda panel yashirinadi.
  */
-const TABS = [
-  { name: "dashboard", labelKey: "tabs.overview", iconName: "school" },
-  { name: "children", labelKey: "tabs.children", iconName: "groups" },
-  {
-    name: "workspace",
-    labelKey: "tabs.workspace",
-    iconName: "nav-workspace",
-    owns: ["attendance", "homework", "exams", "grades", "notifications"],
-  },
-  {
-    name: "profile",
-    labelKey: "tabs.profile",
-    iconName: "nav-profile",
-    owns: ["profile-personal", "profile-account", "profile-system"],
-  },
-] as const;
+const TABS: readonly TabDefinition[] = [
+  { name: "children", labelKey: "mobile.tabs.children", iconName: "group" },
+  { name: "attendance", labelKey: "mobile.tabs.attendance", iconName: "event" },
+  { name: "dashboard", labelKey: "mobile.tabs.home", iconName: "home", center: true },
+  { name: "homework", labelKey: "mobile.tabs.homework", iconName: "assignment", badge: OpenHomeworkBadge },
+  { name: "grades", labelKey: "mobile.tabs.results", iconName: "bar-chart", siblings: ["exams"] },
+];
+
+const HIDDEN = ["exams", "notifications", "profile", "profile-personal", "profile-account", "profile-system", "[...missing]"];
 
 export default function ParentLayout() {
   return (
     <ProtectedRoute>
       <RoleRoute allowedRoles={[ROLES.PARENT]}>
-        <RoleTabs tabs={TABS} hidden={["attendance", "homework", "exams", "grades", "profile-personal", "profile-account", "profile-system", "notifications"]} />
+        <ParentShell />
       </RoleRoute>
     </ProtectedRoute>
   );
 }
+
+/**
+ * Veb `parent-mobile-shell.tsx`: internet yo'q va farzandlar hali kelmagan
+ * bo'lsa "Internet yo'q" ekrani, farzand ulanishni uzgan bo'lsa bir martalik
+ * xabar. Ikkalasi ham navigator ustidan qoplanadi — ostidagi bo'limlar holati
+ * saqlanib qoladi.
+ */
+function ParentShell() {
+  const online = useOnlineStatus();
+  const { childrenQuery } = useSelectedChild();
+  return (
+    <View style={styles.fill}>
+      <ParentUnlinked>
+        <RoleTabs variant="floating" namespace="parent" floatingBottom={24} tabs={TABS} hidden={HIDDEN} />
+      </ParentUnlinked>
+      {!online && !childrenQuery.data ? <ParentOffline onRetry={() => void childrenQuery.refetch()} /> : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+});

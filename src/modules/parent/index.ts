@@ -63,3 +63,11 @@ export type { ChildRankDto, ChildSessionDto, ChildSummaryDto, ChildrenSummaryDto
 
 // --- Mobil UI ---
 export { ParentAppBar } from "./ui/parent-app-bar";
+export { AddChildDialog } from "./ui/add-child-dialog";
+export type { AddChildDialogProps } from "./ui/add-child-dialog";
+export { LinkChildDialog } from "./ui/link-child-dialog";
+export type { LinkChildDialogProps } from "./ui/link-child-dialog";
+export { CreateChildDialog } from "./ui/create-child-dialog";
+export type { CreateChildDialogProps } from "./ui/create-child-dialog";
+export { Celebration } from "./ui/child-dialog-parts";
+export type { CelebrationTone } from "./ui/child-dialog-parts";

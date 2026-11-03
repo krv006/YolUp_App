@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ComponentType } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -45,12 +45,25 @@ export interface TabDefinition {
   inset?: boolean;
   /** O'qilmagan suhbatlar soni belgisi (`chat` tabi). */
   unreadChats?: boolean;
+  /**
+   * Belgi ustidagi qizil son — o'z so'rovini o'zi qiladigan komponent
+   * (ota-onada ochiq vazifalar). Faqat shu tabda chiziladi, boshqa rolda
+   * keraksiz so'rov ketmaydi.
+   */
+  badge?: ComponentType;
+  /**
+   * Panelda tabi yo'q, lekin panel KO'RINADIGAN va shu tab faol bo'ladigan
+   * bo'limlar (ota-onada "Natijalar" — Imtihonlar ham). `owns` dan farqi:
+   * u yerdagi ichki sahifalarda panel yashirinadi.
+   */
+  siblings?: readonly string[];
 }
 
 export type RoleTabsVariant = "classic" | "floating";
 
 /** Suzuvchi panel: ekran pastidan `max(30px, safe-area)`, balandligi `h-17`. */
 const FLOATING_HEIGHT = 68;
+const FLOATING_BOTTOM = 30;
 
 /*
  * Panel proplarining tipi `Tabs` ning O'ZIDAN chiqariladi.
@@ -77,9 +90,9 @@ type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>
  * Suzuvchi panel egallaydigan pastki joy. Ichki stack'li bo'lim (Workspace)
  * uni faqat o'z bosh sahifasiga beradi — ichki sahifada panel yashiringan.
  */
-export function useFloatingTabInset(): number {
+export function useFloatingTabInset(bottom = FLOATING_BOTTOM): number {
   const insets = useSafeAreaInsets();
-  return Math.max(30, insets.bottom) + FLOATING_HEIGHT + 14;
+  return Math.max(bottom, insets.bottom) + FLOATING_HEIGHT + 14;
 }
 
 export function RoleTabs({
@@ -87,24 +100,30 @@ export function RoleTabs({
   hidden = [],
   variant = "classic",
   conversationRole = "teacher",
+  floatingBottom = FLOATING_BOTTOM,
+  namespace,
 }: {
   tabs: readonly TabDefinition[];
   hidden?: readonly string[];
-  /** `floating` — yangi dizayndagi suzuvchi panel (o'qituvchi, o'quvchi). */
+  /** `floating` — yangi dizayndagi suzuvchi panel (o'qituvchi, o'quvchi, ota-ona). */
   variant?: RoleTabsVariant;
   conversationRole?: "teacher" | "student";
+  /** Suzuvchi panelning ekran pastidan eng kam masofasi (ota-onada `max(24px, safe-area)`). */
+  floatingBottom?: number;
+  /** Yorliqlar lug'ati (standart: suzuvchida `nav`, klassikda `mobile`). */
+  namespace?: string;
 }) {
   const { palette } = useTheme();
-  const { t } = useTranslation(variant === "floating" ? "nav" : "mobile");
+  const { t } = useTranslation(namespace ?? (variant === "floating" ? "nav" : "mobile"));
   const iconByRoute = new Map(tabs.map((tab) => [tab.name, tab.iconName]));
   const ownsByRoute = new Map(tabs.map((tab) => [tab.name, tab.owns ?? []]));
-  const floatingInset = useFloatingTabInset();
+  const floatingInset = useFloatingTabInset(floatingBottom);
 
   return (
     <Tabs
       tabBar={(props) =>
         variant === "floating" ? (
-          <FloatingTabBar {...props} tabs={tabs} conversationRole={conversationRole} />
+          <FloatingTabBar {...props} tabs={tabs} conversationRole={conversationRole} bottom={floatingBottom} />
         ) : (
           <RoleTabBar {...props} iconByRoute={iconByRoute} ownsByRoute={ownsByRoute} />
         )
@@ -296,29 +315,29 @@ function FloatingTabBar({
   navigation,
   tabs,
   conversationRole,
-}: TabBarProps & { tabs: readonly TabDefinition[]; conversationRole: "teacher" | "student" }) {
+  bottom,
+}: TabBarProps & { tabs: readonly TabDefinition[]; conversationRole: "teacher" | "student"; bottom: number }) {
   const ds = useDs();
   const insets = useSafeAreaInsets();
-  const conversations = useConversations(conversationRole);
-  const unread = (conversations.data ?? []).filter((item) => item.unreadCount > 0).length;
 
   const activeRoute = state.routes[state.index];
   const nestedIndex = activeRoute?.state?.index ?? 0;
-  const isTabRoot = tabs.some((tab) => tab.name === activeRoute?.name);
+  const isTabRoot = tabs.some((tab) => tab.name === activeRoute?.name || (tab.siblings ?? []).includes(activeRoute?.name ?? ""));
   if (!isTabRoot || nestedIndex > 0) return null;
 
   return (
     <View
       style={[
         floating.bar,
-        { bottom: Math.max(30, insets.bottom), backgroundColor: ds.c.surface, boxShadow: ds.shadow.lg },
+        { bottom: Math.max(bottom, insets.bottom), backgroundColor: ds.c.surface, boxShadow: ds.shadow.lg },
       ]}
     >
       {tabs.map((tab) => {
         const index = state.routes.findIndex((route) => route.name === tab.name);
         const route = state.routes[index];
         if (!route) return null;
-        const active = state.index === index;
+        const active = state.index === index || (tab.siblings ?? []).includes(activeRoute?.name ?? "");
+        const Badge = tab.badge;
         const label = descriptors[route.key]?.options.title ?? route.name;
 
         function onPress() {
@@ -363,11 +382,8 @@ function FloatingTabBar({
               ]}
             >
               <Icon name={tab.iconName} size={27} color={active ? ds.c.brand : ds.c.ink} />
-              {tab.unreadChats && unread ? (
-                <View style={[floating.badge, { backgroundColor: ds.c.danger }]}>
-                  <Text style={[floating.badgeText, { color: ds.c["on-action"] }]}>{unread}</Text>
-                </View>
-              ) : null}
+              {tab.unreadChats ? <UnreadChatsBadge role={conversationRole} /> : null}
+              {Badge ? <Badge /> : null}
             </View>
             <DsText v="micro" w="500" c={active ? "brand" : "ink"} style={floating.label}>
               {label}
@@ -375,6 +391,23 @@ function FloatingTabBar({
           </Pressable>
         );
       })}
+    </View>
+  );
+}
+
+/** O'qilmagan suhbatlar soni — so'rov faqat chat tabi bor rolda ketadi. */
+function UnreadChatsBadge({ role }: { role: "teacher" | "student" }) {
+  const conversations = useConversations(role);
+  const unread = (conversations.data ?? []).filter((item) => item.unreadCount > 0).length;
+  return unread ? <TabBadge count={unread} /> : null;
+}
+
+/** Tab belgisidagi qizil son — `absolute -top-1 right-1.5 h-4 min-w-4 rounded-full bg-danger text-[10px]`. */
+export function TabBadge({ count }: { count: number }) {
+  const ds = useDs();
+  return (
+    <View style={[floating.badge, { backgroundColor: ds.c.danger }]}>
+      <Text style={[floating.badgeText, { color: ds.c["on-action"] }]}>{count}</Text>
     </View>
   );
 }

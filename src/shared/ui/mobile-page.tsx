@@ -174,6 +174,30 @@ export function MobileWarningNote({ children, style }: { children: ReactNode; st
   );
 }
 
+/**
+ * Server xatosi lentasi — veb `student-mobile-home.tsx` / `mobile-dashboard.tsx`
+ * (`h-11 rounded-xl bg-surface-inverse pr-1.5 pl-4`), o'ngda `h-8` "Qayta urinish".
+ * Oflayn lentasi bilan bir xil o'lcham: ikkisi bir joyda, navbat bilan chiqadi.
+ */
+export function MobileServerError({ label, retryLabel, onRetry }: { label: ReactNode; retryLabel: ReactNode; onRetry: () => void }) {
+  const ds = useDs();
+  return (
+    <View style={[styles.serverError, { backgroundColor: ds.c["surface-inverse"] }]}>
+      <Icon name="warning" size={20} color={ds.c["ink-inverse"]} />
+      <DsText v="body-sm" c="ink-inverse" numberOfLines={1} style={styles.serverErrorText}>
+        {label}
+      </DsText>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onRetry}
+        style={({ pressed }) => [styles.serverErrorButton, { backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
+      >
+        <DsText v="button">{retryLabel}</DsText>
+      </Pressable>
+    </View>
+  );
+}
+
 export interface MobileTitleHeaderProps {
   eyebrow: ReactNode;
   title: ReactNode;
@@ -574,4 +598,7 @@ const styles = StyleSheet.create({
    * ham to'liq ko'rinadi ("Hammasi · 14"), RN esa uni qisqartiradi.
    */
   segmentScroll: { minWidth: 114, paddingHorizontal: 12 },
+  serverError: { height: 44, flexDirection: "row", alignItems: "center", gap: 12, paddingLeft: 16, paddingRight: 6, borderRadius: dsRadius.xl },
+  serverErrorText: { flex: 1, minWidth: 0 },
+  serverErrorButton: { height: 32, justifyContent: "center", paddingHorizontal: 12, borderRadius: dsRadius.full },
 });

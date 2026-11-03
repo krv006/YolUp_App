@@ -23,6 +23,7 @@ import {
   MobileListCard,
   MobileListRow,
   MobileSectionTitle,
+  MobileServerError,
   MobileWarningNote,
   PullRefresh,
   useDs,
@@ -63,7 +64,7 @@ function upcoming(items: Lesson[] | undefined): Lesson | undefined {
  * bugun dars yo'q holatlari, birinchi kirishda tanishuv.
  */
 export function TeacherDashboardPage() {
-  const { t } = useTranslation("dashboard");
+  const { t } = useTranslation(["dashboard", "common"]);
   const ds = useDs();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -109,7 +110,12 @@ export function TeacherDashboardPage() {
         .filter((row) => row.pending > 0),
     [assignments]
   );
-  const pendingWorks = dashboard.data?.submissionsPending ?? toReview.reduce((sum, row) => sum + row.pending, 0);
+  // Veb (2-noyabr): server yiqilsa sahifa bo'sh qolmaydi — lenta va "Qayta urinish".
+  const coursesFailed = courses.isError && !courses.data;
+  const failed = courses.isError || lessons.isError;
+  const retry = () => Promise.all([courses.refetch(), lessons.refetch(), dashboard.refetch()]);
+
+  const pendingWorks = dashboard.data?.submissionsPending ?? (coursesFailed ? 0 : toReview.reduce((sum, row) => sum + row.pending, 0));
   // 🟡 Vebdan farqi: ro'yxat API'si `submissions` ni qaytarmaydi, shuning uchun `toReview` doim bo'sh — "0 ta vazifa" chiqardi.
   const pendingTasks = dashboard.data?.assignmentsPending ?? toReview.length;
 
@@ -130,7 +136,7 @@ export function TeacherDashboardPage() {
 
   const loading = courses.isLoading || lessons.isLoading;
   const approved = user?.isApproved !== false;
-  const hasGroups = groups.length > 0;
+  const hasGroups = !courses.isSuccess || groups.length > 0;
 
   // Veb #161: tugagan dars yozuvini, bekor qilingani jadvalni ochadi.
   const openLesson = (lesson: Lesson) => {
@@ -154,7 +160,7 @@ export function TeacherDashboardPage() {
         contentContainerStyle={[styles.page, { paddingTop: insets.top + 20 }]}
         refreshControl={
           <PullRefresh
-            onRefresh={() => Promise.all([courses.refetch(), lessons.refetch(), dashboard.refetch(), conversations.refetch()])}
+            onRefresh={() => Promise.all([retry(), conversations.refetch()])}
           />
         }
       >
@@ -169,6 +175,8 @@ export function TeacherDashboardPage() {
                 {t("mobile.offline")}
               </DsText>
             </View>
+          ) : failed ? (
+            <MobileServerError label={t("mobile.serverError")} retryLabel={t("common:actions.retry")} onRetry={() => void retry()} />
           ) : null}
 
           {!approved ? <MobileWarningNote>{t("banner.notApproved")}</MobileWarningNote> : null}
@@ -188,7 +196,7 @@ export function TeacherDashboardPage() {
                   onOpen={openLesson}
                   onChat={openChat}
                 />
-              ) : !todayLessons.length ? (
+              ) : !todayLessons.length && !failed ? (
                 <NoLessons next={upcoming(lessons.data) ?? null} onAdd={openSchedule} />
               ) : null}
 

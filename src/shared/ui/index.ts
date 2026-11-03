@@ -71,6 +71,7 @@ export {
   MobileSegment,
   MobileStatsCard,
   MobileTitleHeader,
+  MobileServerError,
   MobileWarningNote,
   SearchClear,
 } from "./mobile-page";

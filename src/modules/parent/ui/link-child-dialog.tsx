@@ -7,6 +7,9 @@ import type { ParentLink } from "../api/parent.dto";
 import { useRequestChildLink } from "../model/parent.queries";
 import { Celebration, ChildButton, ChildInput, ChildLabel, ChildNote, ChildSuccessScreen } from "./child-dialog-parts";
 
+/** Pastki oyna yopilib bo'lgach natija ekrani ochiladi (iOS ikki `Modal` ni bir vaqtda almashtirmaydi). */
+const SWAP_DELAY_MS = 350;
+
 export interface LinkChildDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,11 +28,19 @@ export function LinkChildDialog({ open, onOpenChange }: LinkChildDialogProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<{ message: string; notFound: boolean } | null>(null);
   const [sent, setSent] = useState<ParentLink | null>(null);
+  const [revealed, setRevealed] = useState(false);
 
   function reset() {
     setValue("");
     setError(null);
     setSent(null);
+    setRevealed(false);
+  }
+
+  /** "Yana qo'shish" — avval natija ekrani yopiladi, keyin forma qaytadi. */
+  function again() {
+    setRevealed(false);
+    setTimeout(reset, SWAP_DELAY_MS);
   }
 
   function close(next: boolean) {
@@ -42,7 +53,10 @@ export function LinkChildDialog({ open, onOpenChange }: LinkChildDialogProps) {
     if (!login || request.isPending) return;
     setError(null);
     request.mutate(login, {
-      onSuccess: (link) => setSent(link),
+      onSuccess: (link) => {
+        setSent(link);
+        setTimeout(() => setRevealed(true), SWAP_DELAY_MS);
+      },
       onError: (cause: Error) =>
         setError(
           cause instanceof AppError && cause.status === 404
@@ -56,12 +70,12 @@ export function LinkChildDialog({ open, onOpenChange }: LinkChildDialogProps) {
     const linked = sent.status === "approved";
     return (
       <ChildSuccessScreen
-        open={open}
+        open={open && revealed}
         onClose={() => close(false)}
         footer={
           <>
             {/* `h-11 text-title-sm font-semibold text-brand` */}
-            <ChildButton variant="link" label={t("linkChild.more")} onPress={reset} />
+            <ChildButton variant="link" label={t("linkChild.more")} onPress={again} />
             <ChildButton label={t("linkChild.done")} wide onPress={() => close(false)} style={styles.fullButton} />
           </>
         }

@@ -49,18 +49,31 @@ export interface PdfPage {
 /**
  * HTML'dan PDF — vebdagi chop etish oynasi (`window.print`) o'rni:
  * `expo-print` sahifani PDF'ga aylantiradi, fayl `<name>` bilan keshga
- * qo'yiladi va ulashish oynasi ochiladi.
+ * qo'yiladi va ulashish oynasi ochiladi. `margin` faqat iOS'da qo'llanadi
+ * (Android chetlarni HTML'dagi `@page` dan oladi).
  */
 export async function shareHtmlAsPdf(name: string, html: string, page: PdfPage): Promise<boolean> {
   try {
-    const { uri } = await Print.printToFileAsync({
+    const { uri, base64 } = await Print.printToFileAsync({
       html,
+      base64: true,
       width: page.width,
       height: page.height,
       margins: { top: page.margin, bottom: page.margin, left: page.margin, right: page.margin },
     });
+    /*
+     * Fayl `move` bilan emas, qayta yozib ko'chiriladi: iOS'da `reports/`
+     * papkasi endigina yaratilgan birinchi chaqiruvda ko'chirilgan faylni
+     * `expo-sharing` "ruxsat yo'q" deb rad etardi (CSV — yozilgan fayl — ishlaydi).
+     */
     const target = freshFile(name.endsWith(".pdf") ? name : `${name}.pdf`);
-    new File(uri).move(target);
+    target.create();
+    target.write(base64 ?? "", { encoding: "base64" });
+    try {
+      new File(uri).delete();
+    } catch {
+      // vaqtinchalik fayl — OS keshni o'zi tozalaydi
+    }
     return await share(target, "application/pdf", name);
   } catch (error) {
     console.warn("[share] PDF yaratib bo'lmadi", error);

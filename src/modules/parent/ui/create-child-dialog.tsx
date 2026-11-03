@@ -21,6 +21,8 @@ interface Credentials {
 
 const EMPTY = { firstName: "", lastName: "", username: "", grade: "" };
 const CHECK_DELAY_MS = 400;
+/** Pastki oyna yopilib bo'lgach natija ekrani ochiladi (iOS ikki `Modal` ni bir vaqtda almashtirmaydi). */
+const SWAP_DELAY_MS = 350;
 
 function randomPool(): number[] {
   return Array.from({ length: 8 }, () => Math.random());
@@ -54,6 +56,7 @@ export function CreateChildDialog({ open, onOpenChange }: CreateChildDialogProps
   const [suggestions, setSuggestions] = useState<string[] | null>(null);
   const [error, setError] = useState<{ field: "username" | "password" | "form"; message: string } | null>(null);
   const [ready, setReady] = useState<Credentials | null>(null);
+  const [revealed, setRevealed] = useState(false);
 
   const username = usernameEdited ? form.username : suggestUsername(form.firstName, form.lastName);
   const password = customPassword ?? tempPassword(form.firstName, fromPool(pool));
@@ -94,6 +97,7 @@ export function CreateChildDialog({ open, onOpenChange }: CreateChildDialogProps
     setSuggestions(null);
     setError(null);
     setReady(null);
+    setRevealed(false);
     setChecked("");
   }
 
@@ -143,7 +147,10 @@ export function CreateChildDialog({ open, onOpenChange }: CreateChildDialogProps
         ...(form.grade.trim() ? { grade: form.grade.trim() } : {}),
       },
       {
-        onSuccess: () => setReady({ name, username: username.trim(), password }),
+        onSuccess: () => {
+          setReady({ name, username: username.trim(), password });
+          setTimeout(() => setRevealed(true), SWAP_DELAY_MS);
+        },
         onError: (cause: Error) => {
           const fields = cause instanceof AppError ? cause.fields : null;
           const loginError = firstError(fields, "username");
@@ -169,7 +176,7 @@ export function CreateChildDialog({ open, onOpenChange }: CreateChildDialogProps
     ];
     return (
       <ChildSuccessScreen
-        open={open}
+        open={open && revealed}
         onClose={() => close(false)}
         footer={
           <>

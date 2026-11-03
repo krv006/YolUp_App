@@ -38,6 +38,8 @@ export { RealtimeHubContext } from "./model/realtime-hub-context";
 export {
   notificationKeys,
   useMarkAllNotificationsRead,
+  useDeleteNotification,
+  useMarkNotificationsUnread,
   useMarkNotificationRead,
   useNotificationInbox,
   useNotificationRecipients,
@@ -53,7 +55,8 @@ export {
   notificationContent,
   notificationLines,
 } from "./lib/notification-display";
-export type { NotificationGroupKey } from "./lib/notification-display";
+export type { NotificationCategory, NotificationGroupKey } from "./lib/notification-display";
+export { NOTIFICATION_CATEGORIES, notificationCategory } from "./lib/notification-display";
 export { useNotificationFeed } from "./model/use-notification-feed";
 
 // --- Mobil UI ---

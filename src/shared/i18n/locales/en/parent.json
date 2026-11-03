@@ -144,5 +144,1002 @@
     "longestLabel": "longest",
     "notReturned": "Did not return",
     "noTimeline": "Exits were counted, but no detailed time log is available."
+  },
+  "shell": {
+    "nav": {
+      "dashboard": "Home",
+      "children": "Children",
+      "attendance": "Attendance",
+      "homework": "Homework",
+      "results": "Results"
+    },
+    "role": "Parent",
+    "openAccount": "Profile and settings",
+    "navLabel": "Parent sections"
+  },
+  "switcher": {
+    "eyebrow": "CHILD",
+    "groups": "{{count}} groups",
+    "others": "+{{count}} children",
+    "menuTitle": "CHOOSE A CHILD",
+    "pending": "Pending",
+    "requestSent": "request sent",
+    "add": "Add a child",
+    "manage": "Manage children",
+    "open": "Choose a child"
+  },
+  "home": {
+    "datePattern": "EEEE, MMMM d",
+    "monthPattern": "LLLL",
+    "dayPattern": "EEE",
+    "todayLessons": "{{name}} has {{count}} lessons today",
+    "noLessonsToday": "{{name}} has no lessons today",
+    "greeting": {
+      "morning": "Good morning, {{name}}!",
+      "day": "Good afternoon, {{name}}!",
+      "evening": "Good evening, {{name}}!",
+      "night": "Good night, {{name}}!"
+    },
+    "welcome": "Welcome, {{name}}!",
+    "connectSubtitle": "Connect your child to get started",
+    "hero": {
+      "todayChip": "Today · {{time}}",
+      "todayTitle": "{{name}} has {{count}} lessons today",
+      "liveChip": "Live lesson · {{count}} min",
+      "liveTitle": "{{name}} is in a lesson now",
+      "liveNotJoined": "{{name}} has not joined yet",
+      "joinedAt": "joined at {{time}}",
+      "freeChip": "No lessons today",
+      "freeTitle": "{{name}} has no lessons today",
+      "nextLesson": "Next lesson: {{day}}, {{time}} · {{course}}",
+      "noUpcoming": "No lessons planned for the coming days",
+      "viewAttendance": "View attendance",
+      "lessonDetails": "Lesson details",
+      "focusTitle": "Focus level",
+      "focusMeta": "Joined {{time}} · attention checks {{answered}}/{{total}}",
+      "focusMetaNoChecks": "Joined {{time}}",
+      "focusPending": "Focus is calculated after a minute",
+      "weekSummary": "This week: {{attended}} / {{total}} lessons",
+      "weekLate": " · {{count}} late",
+      "weekdays": [
+        "Mo",
+        "Tu",
+        "We",
+        "Th",
+        "Fr",
+        "Sa",
+        "Su"
+      ],
+      "dayState": {
+        "attended": "attended",
+        "late": "late",
+        "missed": "absent",
+        "today": "today",
+        "none": "no lesson"
+      }
+    },
+    "stats": {
+      "attendance": "Attendance",
+      "attendanceSub": "{{month}} · {{attended}}/{{total}} lessons",
+      "attendanceEmpty": "No finished lessons this month",
+      "score": "Average score",
+      "scoreSub": "Last 30 days",
+      "scoreEmpty": "No graded homework",
+      "homework": "Homework",
+      "homeworkLeft": "{{count}} left",
+      "homeworkDue": "{{count}} due soon",
+      "homeworkNoDue": "Nothing due soon",
+      "homeworkEmpty": "No homework yet",
+      "time": "In lessons",
+      "timeSub": "This week"
+    },
+    "duration": {
+      "hours": "{{h}}h {{m}}m",
+      "minutes": "{{m}}m"
+    },
+    "recent": {
+      "title": "Recent attendance",
+      "all": "View all",
+      "today": "Today · {{from}} – {{to}}",
+      "liveSince": "since {{time}} · {{minutes}} min",
+      "liveNotJoined": "Lesson in progress · not joined",
+      "stay": "{{from}} → {{to}} · {{duration}}",
+      "missed": "{{from}} – {{to}} · absent",
+      "chipLive": "Live",
+      "chipAttended": "Attended",
+      "chipLate": "+{{count}} min",
+      "chipMissed": "Absent",
+      "empty": "No lessons yet",
+      "durationHours": "{{h}}h {{m}}m",
+      "durationMinutes": "{{m}} min"
+    },
+    "attention": {
+      "title": "Needs attention",
+      "homeworkToday": "Homework due today",
+      "homeworkTomorrow": "Homework due tomorrow",
+      "homeworkSoon": "Homework due soon",
+      "login": "Sign-in from a new device",
+      "exam": "Mock test results are out",
+      "examMeta": "{{title}} · see the result",
+      "empty": "Nothing needs your attention right now"
+    },
+    "score": {
+      "title": "Score trend",
+      "week": "W{{n}}",
+      "empty": "No graded homework yet"
+    },
+    "offline": "No internet. Last data: {{time}} — not updating",
+    "serverError": "Can’t reach the server — data didn’t load.",
+    "connect": {
+      "title": "Connect your child",
+      "description": "Connect your child’s account or create a new one to follow attendance, homework, mock results and safety in one place.",
+      "link": "Connect a student",
+      "create": "New child account",
+      "step": "Step {{n}}",
+      "steps": [
+        {
+          "title": "Send a request",
+          "description": "Enter your child’s login or FK code"
+        },
+        {
+          "title": "Your child approves",
+          "description": "The request appears in their app"
+        },
+        {
+          "title": "Start following",
+          "description": "Attendance and results show up here"
+        }
+      ]
+    },
+    "pending": {
+      "chip": "Pending · {{time}}",
+      "title": "Request sent to {{name}}",
+      "description": "As soon as @{{username}} approves the request in the app, attendance and results will appear here.",
+      "howTitle": "How does my child approve?",
+      "how": [
+        "Signs in to YolUp with their own login",
+        "Chats → “+” → Parent requests",
+        "Taps “Approve”"
+      ],
+      "addAnother": "Add another child",
+      "addAnotherHint": "Connect another child account"
+    }
+  },
+  "family": {
+    "eyebrow": "Family · {{linked}} linked",
+    "eyebrowPending": "Family · {{linked}} linked, {{pending}} pending",
+    "title": "My children",
+    "link": "Link a student",
+    "create": "Child account",
+    "selected": "Selected",
+    "groups": "{{count}} groups",
+    "stats": {
+      "attendance": "Attendance",
+      "lessons": "Lessons",
+      "score": "Score"
+    },
+    "today": "today",
+    "yesterday": "yesterday",
+    "activity": "{{course}} · {{when}}",
+    "noActivity": "Hasn’t joined a lesson yet",
+    "profile": "Profile",
+    "attendance": "Attendance",
+    "choose": "Select",
+    "pending": "Waiting for @{{username}} to approve",
+    "addMore": {
+      "title": "Add another child",
+      "description": "Link an existing student by login or FK code, or create a new child account",
+      "action": "Add"
+    },
+    "table": {
+      "titleWeek": "This week — by child",
+      "titleMonth": "This month — by child",
+      "week": "Week",
+      "month": "Month",
+      "child": "Child",
+      "attendance": "Attendance",
+      "homework": "Homework",
+      "score": "Average score",
+      "lastLesson": "Last lesson",
+      "lastLessonValue": "{{when}} · {{course}}"
+    },
+    "datePattern": "MMMM d",
+    "eyebrowBase": "Family"
+  },
+  "profile": {
+    "breadcrumb": "My children",
+    "title": "Child profile",
+    "role": "Student",
+    "groupsChip": "{{count}} groups",
+    "attendanceChip": "{{percent}}% attendance",
+    "attendance": "Attendance",
+    "groups": "Groups",
+    "groupMeta": "{{teacher}} · {{count}} students",
+    "noGroups": "No groups yet",
+    "permissions": "Permissions",
+    "security": "Security",
+    "logins": "Sign-in history",
+    "newDevices": "{{count}} new devices",
+    "noNewDevices": "No new devices in the last 30 days",
+    "consentOn": "{{label}} permission turned on",
+    "consentOff": "{{label}} permission turned off",
+    "consentOffDialog": {
+      "recording": {
+        "title": "Turn off lesson recording?",
+        "description": "Permission to record lessons with {{name}} will be revoked."
+      },
+      "camera": {
+        "title": "Turn off the camera?",
+        "description": "{{name}} won’t be able to turn on the camera in live lessons."
+      },
+      "analytics": {
+        "title": "Turn off activity analysis?",
+        "description": "{{name}}’s attendance, attention and focus analysis will be hidden from you."
+      },
+      "confirm": "Turn off",
+      "cancel": "Cancel"
+    },
+    "online": "Online",
+    "unlink": {
+      "action": "Unlink child",
+      "text": "The account stays, it is only disconnected from you",
+      "title": "Unlink {{name}}?",
+      "description": "You will no longer see {{name}}’s attendance, results or notifications. Your permissions will be removed too. To reconnect, you will need to send a new request.",
+      "confirm": "Unlink",
+      "cancel": "Cancel",
+      "done": "{{name}} was unlinked",
+      "failed": "Couldn’t unlink. Please try again"
+    }
+  },
+  "addChild": {
+    "title": "Add a child",
+    "description": "Choose how",
+    "linkTitle": "Link an existing student",
+    "linkText": "If your child already has a YolUp account — by login or FK code",
+    "createTitle": "New child account",
+    "createText": "We’ll create a login and a temporary password linked to you",
+    "cancel": "Cancel",
+    "next": "Continue"
+  },
+  "linkChild": {
+    "title": "Link a student",
+    "description": "Enter your child’s login (username) or FK-… invite code",
+    "label": "Login or invite code",
+    "placeholder": "For example: ali_valiyev or FK-8K2Q",
+    "hint": "Use the login your child signs in to YolUp with",
+    "notFound": "No such login or code. Check the spelling",
+    "notFoundNote": "Ask your child for the login — it’s shown with @ in the account settings",
+    "cancel": "Cancel",
+    "submit": "Send request",
+    "retry": "Try again",
+    "sentTitle": "Request sent!",
+    "sentText": "Once your child approves the request in the app, their data will appear here.",
+    "linkedTitle": "Already linked",
+    "linkedText": "You can already see this child’s data.",
+    "chipPending": "Pending",
+    "chipLinked": "Linked",
+    "more": "Add another",
+    "done": "Got it"
+  },
+  "createChild": {
+    "title": "Create a child account",
+    "description": "The new student will be linked to you automatically",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "username": "Login",
+    "usernameHint": "Latin letters, digits and _ .",
+    "taken": "This login is taken. Pick one of these",
+    "password": "Temporary password",
+    "regenerate": "New password",
+    "copy": "Copy",
+    "copied": "Copied",
+    "info": "Your child will change the password on first sign-in",
+    "cancel": "Cancel",
+    "submit": "Create account",
+    "readyTitle": "Account ready!",
+    "readyText": "{{name}} will sign in with these details and set a new password on first sign-in.",
+    "warning": "You’ll only see the password now — save or print it",
+    "pdf": "Download PDF",
+    "done": "Done",
+    "printTitle": "YolUp — {{username}}",
+    "printHeading": "YolUp account: {{name}}",
+    "printSubtitle": "Your child signs in with this login and password.",
+    "share": "Share the details",
+    "free": "Login is available",
+    "invalid": "Only Latin letters, digits and _ . are allowed",
+    "grade": "Grade",
+    "optional": "(optional)",
+    "gradePlaceholder": "e.g. 7-B"
+  },
+  "attendanceView": {
+    "eyebrow": "Tracking",
+    "title": "Attendance",
+    "reportButton": "Report",
+    "search": "Search a lesson or group",
+    "clearSearch": "Clear search",
+    "periods": {
+      "week": "Week",
+      "month": "Month",
+      "all": "All"
+    },
+    "columns": {
+      "lesson": "Lesson",
+      "in": "Joined",
+      "out": "Left",
+      "duration": "Duration",
+      "focus": "Focus",
+      "status": "Status"
+    },
+    "status": {
+      "live": "Live",
+      "attended": "Attended",
+      "late": "+{{minutes}} min",
+      "missed": "Missed",
+      "upcoming": "Scheduled"
+    },
+    "legend": {
+      "attended": "Attended",
+      "late": "Late",
+      "missed": "Missed",
+      "upcoming": "Scheduled"
+    },
+    "summary": {
+      "label": "attendance",
+      "insight": "Average focus {{focus}}% — best day: {{day}}",
+      "insightNoDay": "Average focus {{focus}}%",
+      "empty": "No statistics yet"
+    },
+    "calendar": {
+      "prev": "Previous month",
+      "next": "Next month",
+      "weekdays": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "list": "Table",
+      "calendar": "Calendar",
+      "summary": "{{month}} summary",
+      "lessons": "Lessons",
+      "attended": "Attended",
+      "late": "Late",
+      "missed": "Missed",
+      "noLessons": "No lessons on this day"
+    },
+    "detail": {
+      "datePattern": "EEEE, MMMM d",
+      "in": "Joined",
+      "out": "Left",
+      "duration": "Duration",
+      "focused": "Focused",
+      "away": "Left the app",
+      "focus": "Focus",
+      "attention": "Attention",
+      "exits": "Distractions",
+      "close": "Close",
+      "notJoined": "Your child didn’t join this lesson.",
+      "upcoming": "The lesson starts at {{time}}.",
+      "lateReason": "Reason for being late",
+      "missedReason": "Reason for absence",
+      "teacherNote": "Teacher’s note",
+      "teacherNoteBy": "Teacher’s note · {{teacher}}"
+    },
+    "filter": {
+      "title": "Filter",
+      "period": "Period",
+      "periods": {
+        "week": "This week",
+        "month": "This month",
+        "quarter": "3 months"
+      },
+      "group": "Group",
+      "allGroups": "All groups",
+      "status": "Status",
+      "clear": "Reset",
+      "apply": "Apply"
+    },
+    "empty": {
+      "title": "No lessons yet",
+      "text": "Once your child attends a first lesson, join and leave times and focus will appear here."
+    },
+    "notFound": {
+      "title": "Nothing found",
+      "text": "No lesson or group matches “{{query}}”. Try another name."
+    },
+    "filtered": {
+      "title": "No lessons",
+      "text": "There are no lessons for the selected period and filter."
+    },
+    "report": {
+      "title": "Attendance report",
+      "subtitle": "{{name}} · all groups",
+      "period": "Period",
+      "periodOption": "{{month}} · {{count}} lessons",
+      "pdf": "PDF",
+      "pdfText": "For printing and sharing",
+      "excel": "Excel",
+      "excelText": "Analyse as a spreadsheet",
+      "focus": "Include focus analysis",
+      "focusText": "Focus percentage per lesson",
+      "cancel": "Cancel",
+      "download": "Download report",
+      "done": "Report downloaded — {{file}}",
+      "heading": "Attendance report — {{name}}",
+      "filePrefix": "attendance",
+      "datePattern": "EEE, MMMM d",
+      "columns": {
+        "date": "Date",
+        "teacher": "Teacher"
+      }
+    }
+  },
+  "logins": {
+    "title": "Sign-in history",
+    "tabs": {
+      "all": "All",
+      "phone": "Phone",
+      "computer": "Computer",
+      "suspicious": "Suspicious"
+    },
+    "periods": {
+      "today": "Today",
+      "week": "Last 7 days",
+      "month": "Last 30 days"
+    },
+    "filter": {
+      "title": "Filter",
+      "period": "Period",
+      "periodShort": {
+        "today": "Today",
+        "week": "7 days",
+        "month": "30 days"
+      },
+      "kinds": "Device type",
+      "kind": {
+        "phone": "Phone",
+        "computer": "Computer",
+        "tablet": "Tablet"
+      },
+      "clear": "Reset",
+      "apply": "Apply"
+    },
+    "columns": {
+      "device": "Device",
+      "ip": "IP address",
+      "location": "Location",
+      "time": "Time",
+      "status": "Status"
+    },
+    "status": {
+      "newDevice": "New device",
+      "newIp": "New IP",
+      "known": "Known"
+    },
+    "summary": {
+      "suspicious": "{{count}} suspicious sign-ins",
+      "ok": "All good",
+      "stats": "{{period}}: {{count}} sign-ins, {{devices}} devices",
+      "show": "Show suspicious"
+    },
+    "tip": {
+      "title": "Security tip",
+      "text": "If you see an unfamiliar device, talk to your child and change their password."
+    },
+    "detail": {
+      "newTitle": "Sign-in from a new device",
+      "title": "Sign-in details",
+      "subtitle": "{{name}}’s account · {{when}}",
+      "device": "Device",
+      "browser": "Browser",
+      "ip": "IP address",
+      "location": "Location",
+      "time": "Time",
+      "unknownLocation": "Location unknown",
+      "warning": "If this wasn’t {{name}}, talk to your child and change the password",
+      "close": "Close",
+      "duration": "Duration",
+      "session": "Session",
+      "sessionActive": "Active",
+      "sessionEnded": "Ended",
+      "recognize": "This is {{name}}",
+      "recognized": "Device marked as known",
+      "endSession": "End session",
+      "ended": "Session ended",
+      "failed": "Something went wrong. Please try again"
+    },
+    "empty": {
+      "title": "No sign-ins yet",
+      "text": "When your child signs in, the device, IP and time will appear here."
+    },
+    "filtered": {
+      "title": "No sign-ins found",
+      "text": "There are no sign-ins for the selected period and filter."
+    },
+    "mobile": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "filterHint": "Narrow down the sign-in history"
+    },
+    "sessions": {
+      "title": "Active sessions · {{count}}",
+      "text": "Devices where {{name}}’s account is open right now",
+      "end": "End session",
+      "endAll": "Sign out of all devices",
+      "confirmTitle": "Sign out of all devices?",
+      "confirmText": "{{name}} will be signed out on every device and will need to sign in again.",
+      "confirm": "Sign out",
+      "cancel": "Cancel",
+      "endedAll": "Sessions ended: {{count}}"
+    }
+  },
+  "homeworkView": {
+    "eyebrow": "Assignments",
+    "title": "Homework",
+    "stats": {
+      "waiting": "Waiting",
+      "checking": "Being checked",
+      "average": "Average"
+    },
+    "filters": {
+      "all": "All",
+      "waiting": "Waiting",
+      "submitted": "Submitted",
+      "graded": "Graded"
+    },
+    "sections": {
+      "waiting": "Due soon",
+      "submitted": "Submitted"
+    },
+    "state": {
+      "pending": "Waiting",
+      "overdue": "Overdue",
+      "resubmit": "Resubmit",
+      "checking": "Being checked",
+      "error": "Error",
+      "graded": "Graded",
+      "done": "Submitted"
+    },
+    "daysLeft": "{{count}} days left",
+    "hoursLeft": "{{count}} hours left",
+    "noDue": "No deadline",
+    "shortPattern": "MMM d",
+    "fullPattern": "MMMM d, HH:mm",
+    "gradedOn": "graded {{date}}",
+    "submittedOn": "submitted {{date}}",
+    "dueWas": "was due {{date}}",
+    "givenOn": "assigned {{date}}",
+    "filteredEmpty": "No homework for this filter",
+    "empty": {
+      "title": "No homework yet",
+      "text": "When the teacher assigns homework, its deadline, status and result will appear here."
+    },
+    "downloadError": "Couldn’t download the file",
+    "view": "View",
+    "download": "Download",
+    "attachment": "Assignment file",
+    "fromTeacher": "attached by the teacher",
+    "uploadedBy": "uploaded by {{name}}",
+    "steps": {
+      "given": "Assigned",
+      "submitted": "Submitted",
+      "early": "{{count}} days before the deadline",
+      "late": "submitted late",
+      "checking": "Being checked",
+      "checkingMeta": "The teacher is reviewing the answer",
+      "graded": "Grading",
+      "aiFailed": "Automatic check",
+      "aiFailedMeta": "The file couldn’t be checked automatically",
+      "teacherCheck": "Teacher review",
+      "teacherCheckMeta": "In the queue",
+      "notSubmitted": "Not submitted",
+      "dueEnded": "The deadline passed on {{date}}",
+      "lateAllowed": "Late submission",
+      "lateAllowedMeta": "The teacher accepts late answers",
+      "resubmit": "Resubmission requested",
+      "accepted": "Accepted"
+    },
+    "errorBanner": "The automatic check failed. The teacher will check it manually — no need to resubmit.",
+    "overdueBanner": "The deadline passed {{count}} days ago.",
+    "lateAccepted": "Late submissions are accepted.",
+    "lateRejected": "Late submissions are not accepted.",
+    "timeLeft": "Time left to submit",
+    "dueOn": "Deadline: {{date}}",
+    "units": {
+      "days": "days",
+      "hours": "hours",
+      "minutes": "min"
+    },
+    "result": {
+      "excellent": "Excellent result!",
+      "good": "Good result",
+      "fair": "Fair result",
+      "low": "Needs work"
+    },
+    "delta": "vs previous {{value}}",
+    "task": "Task",
+    "remind": {
+      "action": "Remind {{name}}",
+      "sent": "Reminder sent",
+      "done": "Reminder sent to {{name}}",
+      "limit": "You can remind again in {{count}} min",
+      "failed": "Couldn’t send the reminder. Please try again"
+    },
+    "group": {
+      "average": "Group average {{value}}",
+      "rank": "{{name}} is #{{rank}} of {{total}}"
+    }
+  },
+  "results": {
+    "eyebrow": "Rating",
+    "title": "Results",
+    "tabs": {
+      "rating": "Rating",
+      "mock": "Mock tests"
+    },
+    "month": "Month",
+    "stats": {
+      "given": "Homework given",
+      "submitted": "Submitted",
+      "average": "Average score",
+      "subjects": "Subjects",
+      "scale": "out of 10"
+    },
+    "chart": "Score trend · by week",
+    "thisMonth": "this month",
+    "recent": "Latest grades",
+    "all": "All",
+    "subjects": "By subject",
+    "average": "average",
+    "noSubjects": "No subjects yet",
+    "empty": {
+      "title": "No statistics yet",
+      "text": "Once your child starts submitting homework, the score trend and results by subject will appear here."
+    },
+    "panel": {
+      "close": "Close",
+      "attendance": "View attendance",
+      "average": "Average score",
+      "counts": "{{submitted}}/{{total}} submitted · {{graded}} graded",
+      "grades": "Grades",
+      "noGrades": "No grades yet"
+    },
+    "rank": {
+      "place": "#{{rank}} in group",
+      "top": "Top {{value}}%"
+    }
+  },
+  "mock": {
+    "eyebrow": "Mock tests",
+    "next": "Next: {{title}} — {{date}}",
+    "nextPattern": "MMMM d, HH:mm",
+    "minutes": "{{count}} minutes",
+    "minutesShort": "{{count}} min",
+    "resultAfter": "results open after the exam",
+    "remind": "Remind me",
+    "reminderSet": "Reminder set",
+    "columns": {
+      "exam": "Exam",
+      "date": "Date",
+      "duration": "Duration",
+      "sections": "Sections",
+      "overall": "Overall"
+    },
+    "state": {
+      "upcoming": "Scheduled",
+      "running": "In progress",
+      "pending": "Pending",
+      "absent": "Didn’t take it"
+    },
+    "open": "Result",
+    "empty": {
+      "title": "No mock tests",
+      "text": "When the teacher schedules an exam, its date, sections and results will appear here."
+    },
+    "locked": {
+      "title": "Result not available yet",
+      "text": "The result of {{exam}} will appear here after it ends ({{date}}).",
+      "ok": "Got it",
+      "close": "Close"
+    },
+    "result": {
+      "title": "{{name}} — {{exam}} result",
+      "datePattern": "MMMM d",
+      "close": "Close",
+      "pdf": "Download PDF",
+      "overall": "Overall band",
+      "level": "Close to {{level}}",
+      "delta": "vs previous mock {{value}}",
+      "groupAverage": "group average {{value}}",
+      "notReady": "Overall band not calculated yet",
+      "waitingTeacher": "Waiting for the teacher’s grade",
+      "sectionWaiting": "pending",
+      "pendingNote": "Some sections are graded manually — the result will appear here once it’s ready.",
+      "teacherComment": "Teacher’s note"
+    }
+  },
+  "settings": {
+    "eyebrow": "Account",
+    "title": "Settings",
+    "nav": {
+      "profile": "Profile",
+      "notifications": "Notifications",
+      "interface": "Interface",
+      "security": "Security",
+      "children": "Children"
+    },
+    "profile": {
+      "children": "{{count}} children",
+      "edit": "Edit",
+      "photo": "Change photo",
+      "photoMenu": {
+        "upload": "Upload a new photo",
+        "camera": "Take a photo",
+        "remove": "Remove photo"
+      },
+      "photoSaved": "Photo updated",
+      "photoRemoved": "Photo removed",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "username": "Login",
+      "phone": "Phone",
+      "usernameHint": "If you change it, sign in with the new login next time",
+      "required": "Fill in this field",
+      "phoneInvalid": "Incomplete number: +998 XX XXX XX XX",
+      "errors": "{{count}} fields have errors — fix them and save again",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saved": "Profile saved"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Choose where and when we notify you",
+      "channels": "Channels",
+      "push": "Browser notifications",
+      "pushText": "Push on this device",
+      "pushBlocked": "Blocked in browser settings",
+      "pushUnsupported": "Not supported by this browser",
+      "email": "Email notifications",
+      "emailText": "A copy of every notification by email",
+      "reminder": "Lesson reminder",
+      "reminderText": "We’ll notify you before your child’s lesson",
+      "when": "When",
+      "minutes": "{{count}} min before",
+      "hours": "{{count}} h before",
+      "never": "Don’t remind",
+      "reminderSaved": "Reminder time saved",
+      "askTitle": "Turn on notifications",
+      "askText": "Lesson reminders, homework deadlines and teacher messages will arrive right away.",
+      "allow": "Allow",
+      "later": "Later"
+    },
+    "interface": {
+      "title": "Interface",
+      "language": "Language",
+      "theme": "Theme",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "security": {
+      "title": "Security",
+      "password": "Change password",
+      "current": "Current",
+      "next": "New password",
+      "repeat": "Repeat the new password",
+      "rule": "At least 8 characters, 1 digit",
+      "weak": "Use at least 8 characters and 1 digit",
+      "mismatch": "Passwords don’t match",
+      "update": "Update password",
+      "changed": "Password updated",
+      "sessions": "Active sessions",
+      "unknownDevice": "Unknown device",
+      "now": "now",
+      "end": "End session",
+      "ended": "Session ended",
+      "endOthers": "Sign out of other sessions",
+      "othersEnded": "Other sessions ended"
+    },
+    "alerts": {
+      "title": "Alerts about your child",
+      "notifyChildAbsent": {
+        "title": "Missed or late for a lesson",
+        "text": "10 minutes after the lesson starts"
+      },
+      "notifyChildNewDevice": {
+        "title": "Sign-in from a new device",
+        "text": "Security alert"
+      },
+      "notifyHomeworkDue": {
+        "title": "Homework due soon",
+        "text": "24 hours before the deadline"
+      },
+      "muted": {
+        "title": "Turned-off kinds",
+        "text": "Kinds turned off: {{count}}",
+        "reset": "Turn all on",
+        "done": "All notification kinds are on"
+      }
+    }
+  },
+  "account": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logins": "Sign-in history",
+    "help": "Help",
+    "logout": "Sign out",
+    "logoutTitle": "Sign out?",
+    "logoutText": "You’ll need your login and password to sign in again.",
+    "logoutConfirm": "Sign out",
+    "cancel": "Cancel"
+  },
+  "states": {
+    "home": "Back to home",
+    "notFound": {
+      "title": "Page not found",
+      "text": "The address is wrong or the page has moved. Go back to the home page."
+    },
+    "offline": {
+      "title": "No internet",
+      "text": "Check your connection. The data will refresh once you’re back online.",
+      "retry": "Reconnect"
+    },
+    "unlinked": {
+      "title": "{{name}} unlinked you",
+      "text": "{{name}} removed you as a parent. Send a new request to link again.",
+      "ok": "Got it",
+      "again": "Send a new request"
+    }
+  },
+  "mobile": {
+    "tabs": {
+      "children": "Children",
+      "attendance": "Attendance",
+      "home": "Home",
+      "homework": "Homework",
+      "results": "Results"
+    },
+    "greeting": {
+      "morning": "Good morning 👋",
+      "day": "Good afternoon 👋",
+      "evening": "Good evening 👋",
+      "night": "Good night 👋"
+    },
+    "switcher": {
+      "title": "Choose a child",
+      "subtitle": "Figures are shown for this child",
+      "selected": "{{name}} selected — all sections updated",
+      "requested": "@{{username}} · request sent"
+    },
+    "hero": {
+      "joined": "Joined {{time}} · still in class",
+      "watch": "Watch",
+      "details": "Details"
+    },
+    "stats": {
+      "lessons": "{{attended}} / {{total}} lessons"
+    },
+    "connect": {
+      "link": "By login or FK-… invite code",
+      "create": "Create a login for your child",
+      "how": "How it works"
+    },
+    "pending": {
+      "title": "Request sent",
+      "text": "@{{username}} ({{name}}) needs to approve your request. Their data will appear here afterwards."
+    },
+    "offline": "No internet. Last data: {{time}}",
+    "notifications": {
+      "empty": "Messages about attendance, homework and security will appear here.",
+      "settings": "Open settings",
+      "actions": {
+        "title": "Notification actions",
+        "open": "Open",
+        "read": "Mark as read",
+        "unread": "Mark as unread",
+        "mute": "Turn off this kind",
+        "muted": "You won’t get this kind of notification any more",
+        "delete": "Delete",
+        "deleted": "Notification deleted",
+        "failed": "Something went wrong",
+        "undo": "Undo",
+        "allRead": "Marked {{count}} as read"
+      }
+    },
+    "profile": {
+      "privacy": "Privacy and security",
+      "permissionsText": "Lesson recording, camera, activity analysis",
+      "attendanceText": "Join/leave times and focus",
+      "permissionsFor": "Permissions for {{name}}",
+      "permissionsHint": "Lesson recording, camera and activity analysis"
+    },
+    "attendance": {
+      "since": "since {{time}} · {{duration}}",
+      "absent": "no reason",
+      "failedTitle": "Attendance didn’t load",
+      "failedText": "The server isn’t responding right now. It’s not your internet — try again in a moment.",
+      "reload": "Reload",
+      "filterHint": "Narrow down attendance",
+      "searchTitle": "Search"
+    },
+    "homework": {
+      "title": "Assignment"
+    },
+    "results": {
+      "submitted": "{{submitted}} / {{total}} submitted"
+    },
+    "mock": {
+      "finished": "Finished exams",
+      "dayPattern": "MMMM d",
+      "resultTitle": "Mock result"
+    },
+    "settings": {
+      "role": "Parent · {{count}} children",
+      "securityTitle": "Security — protected",
+      "securityText": "Password, active sessions · {{count}} devices",
+      "info": "Profile details",
+      "infoText": "View personal details",
+      "children": "{{count}} linked",
+      "childrenPending": "{{linked}} linked, {{pending}} pending",
+      "loginsText": "Log by device and IP",
+      "notificationsText": "Messages and reminders",
+      "settingsText": "Language, theme, reminders",
+      "username": "Username",
+      "roleLabel": "Role",
+      "edit": "Edit profile",
+      "photoTitle": "Profile photo",
+      "photoHint": "JPG or PNG",
+      "gallery": "Choose from gallery",
+      "editTitle": "Edit",
+      "protected": "Your account is protected · {{count}} active devices",
+      "password": "Password",
+      "changedAt": "Last changed {{when}}",
+      "sessions": "Active sessions · {{count}}",
+      "signOut": "Sign out",
+      "endOthersTitle": "Sign out of other sessions?",
+      "endOthersText": "{{count}} other sessions will be closed. This device stays signed in.",
+      "endOthersConfirm": "Yes, sign out",
+      "fixFields": "Fix {{count}} fields",
+      "currentPassword": "Current password",
+      "secret": "Never share your password",
+      "strength": "Password strength",
+      "levels": {
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong"
+      },
+      "rules": {
+        "length": "At least 8 characters",
+        "digit": "At least 1 digit",
+        "cases": "Upper and lower case (recommended)"
+      },
+      "update": "Update"
+    }
+  },
+  "locked": {
+    "title": "This data is hidden",
+    "text": "“Activity analysis” is turned off for {{name}}. Turn it on to see attendance, attention and focus.",
+    "action": "Open permissions"
+  },
+  "pendingActions": {
+    "remind": "Remind",
+    "reminded": "Reminder sent",
+    "remindDone": "Reminder sent to {{name}}",
+    "remindLimit": "You can remind again in {{time}}",
+    "retryHours": "{{count}} h",
+    "retryMinutes": "{{count}} min",
+    "cancel": "Cancel",
+    "cancelTitle": "Cancel the request?",
+    "cancelText": "The request sent to {{name}} will be deleted. You can send a new one later.",
+    "cancelConfirm": "Cancel request",
+    "cancelKeep": "Keep",
+    "cancelDone": "Request cancelled",
+    "failed": "Something went wrong. Please try again",
+    "expires": "The request is valid until {{date}} — it expires if not approved"
   }
 }

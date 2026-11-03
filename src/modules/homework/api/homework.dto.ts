@@ -87,6 +87,7 @@ export interface AssignmentStatsDto {
 }
 
 export interface AssignmentDto {
+  group_stats?: { average?: number | null; rank?: number | null; total?: number | null } | null;
   id: string | number;
   course_id: string | number;
   course_title: string;
@@ -133,9 +134,11 @@ export interface HomeworkCourseReportDto {
   course_name?: string;
   assigned_count?: number | null;
   assignments_count?: number | null;
+  assignments_total?: number | null;
   total_assignments?: number | null;
   submitted_count?: number | null;
   submissions_count?: number | null;
+  assignments_submitted?: number | null;
   avg_score?: number | null;
   average_score?: number | null;
 }
@@ -144,6 +147,7 @@ export type HomeworkReportDto =
   | HomeworkCourseReportDto[]
   | {
       courses?: HomeworkCourseReportDto[];
+      subjects?: HomeworkCourseReportDto[];
       results?: HomeworkCourseReportDto[];
       overall?: HomeworkCourseReportDto;
       summary?: HomeworkCourseReportDto;

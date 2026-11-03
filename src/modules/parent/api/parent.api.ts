@@ -1,15 +1,21 @@
 import { apiClient, normalizePagination, type RequestOptions } from "@/shared/api";
 import { attendanceApi } from "@/modules/attendance";
-import { courseApi } from "@/modules/course";
 import { homeworkApi } from "@/modules/homework";
 import { authEndpoints, type CreateChildRequestDto, type LinkAction } from "@/modules/auth";
 import type { Assignment } from "@/shared/types";
 import type {
+  ChildRankDto,
+  ChildSessionDto,
+  ChildSummaryDto,
+  ChildrenSummaryDto,
   Consent,
   ConsentDto,
   ParentLinkDto,
   SetConsentInput,
+  UsernameAvailability,
 } from "./parent.dto";
+import { isInviteCode } from "../lib/parent-home";
+import { parentEndpoints } from "./parent.endpoints";
 import { createParentDashboard, mapChildFromLink, mapParentLinkDto } from "../lib/parent.mappers";
 
 export interface ParentDashboardOptions extends RequestOptions {
@@ -37,9 +43,7 @@ export const parentApi = {
   async getChildren(options?: RequestOptions) {
     const links = await this.getLinks(options);
     const approved = links.filter((item) => item.status === "approved");
-    if (!approved.length) return [];
-    const attendancePage = await attendanceApi.getAll({ ...options, query: { page_size: 100 } });
-    return approved.map((link) => mapChildFromLink(link, attendancePage.items));
+    return approved.map((link) => mapChildFromLink(link));
   },
 
   async getDashboard(options: ParentDashboardOptions = {}) {
@@ -59,22 +63,14 @@ export const parentApi = {
     return apiClient.post(authEndpoints.children, dto);
   },
 
-  /*
-   * O'quvchi LOGINI yoki `FK-...` TAKLIF KODI bilan ulanadi.
-   *
-   * Backend ikkala shaklni ham qabul qiladi (`username` va `invite_code`),
-   * ikkalasi kelsa `username` ustun turadi. Veb hamma qiymatni
-   * `invite_code` sifatida yuboradi; mobil esa `FK-` bilan boshlanganini
-   * kod, qolganini login deb yuboradi — shuning uchun bu fayl veb bilan
-   * bir xil emas (🟡).
-   *
-   * Login O'ZGARTIRILMASDAN yuboriladi (faqat `trim`): backend
-   * katta-kichik harfdan qat'i nazar topadi, lekin avval AYNAN mos
-   * keladiganini qidiradi. `.toUpperCase()` faqat taklif kodiga to'g'ri.
-   */
-  async requestLink(value: string) {
-    const body = /^FK-/i.test(value) ? { invite_code: value.toUpperCase() } : { username: value };
-    return mapParentLinkDto(await apiClient.post<ParentLinkDto>(authEndpoints.requestLink, body));
+  async requestLink(loginOrCode: string) {
+    const value = loginOrCode.trim();
+    return mapParentLinkDto(
+      await apiClient.post<ParentLinkDto>(
+        authEndpoints.requestLink,
+        isInviteCode(value) ? { invite_code: value.toUpperCase() } : { username: value.replace(/^@/, "") }
+      )
+    );
   },
 
   async respondLink(id: string, action: LinkAction) {
@@ -100,21 +96,50 @@ export const parentApi = {
   },
 
   async getHomework(selectedChildId: string, options: RequestOptions = {}): Promise<Assignment[]> {
-    const coursePage = await courseApi.getAll({ ...options, query: { page_size: 100 } });
-    const assignments = (
-      await Promise.all(
-        coursePage.items.map((course) =>
-          homeworkApi.getAssignments(course.id, options).catch((): Assignment[] => [])
-        )
-      )
-    ).flat();
-    const details = await Promise.all(
-      assignments.map((item) => homeworkApi.getAssignment(item.id, options).catch(() => item))
-    );
-    return details.map((item) => ({
-      ...item,
-      mySubmission:
-        item.submissions?.find((submission) => submission.studentId === selectedChildId) ?? null,
-    }));
+    return homeworkApi.getChildAssignments(selectedChildId, options);
+  },
+
+  cancelLink(id: string) {
+    return apiClient.post(authEndpoints.cancelLink(id), {});
+  },
+
+  async remindLink(id: string) {
+    return mapParentLinkDto(await apiClient.post<ParentLinkDto>(authEndpoints.remindLink(id), {}));
+  },
+
+  unlink(id: string) {
+    return apiClient.post(authEndpoints.unlink(id), {});
+  },
+
+  usernameAvailable(username: string, options?: RequestOptions) {
+    return apiClient.get<UsernameAvailability>(authEndpoints.usernameAvailable, { ...options, query: { username } });
+  },
+
+  getChildSummary(studentId: string, options?: RequestOptions) {
+    return apiClient.get<ChildSummaryDto>(parentEndpoints.childSummary(studentId), options);
+  },
+
+  getChildRank(studentId: string, courseId: string, month: string, options?: RequestOptions) {
+    return apiClient.get<ChildRankDto>(parentEndpoints.childRank(studentId), { ...options, query: { course: courseId, month } });
+  },
+
+  async getChildrenSummary(period: "week" | "month", options?: RequestOptions) {
+    return (await apiClient.get<ChildrenSummaryDto[]>(parentEndpoints.childrenSummary, { ...options, query: { period } })) ?? [];
+  },
+
+  async getChildSessions(studentId: string, options?: RequestOptions) {
+    return (await apiClient.get<ChildSessionDto[]>(authEndpoints.childSessions(studentId), options)) ?? [];
+  },
+
+  endChildSession(studentId: string, sessionId: string) {
+    return apiClient.delete(authEndpoints.childSession(studentId, sessionId));
+  },
+
+  endAllChildSessions(studentId: string) {
+    return apiClient.post<{ ended?: number }>(authEndpoints.childSessionsLogoutAll(studentId), {});
+  },
+
+  recognizeLogin(loginId: string) {
+    return apiClient.post<{ id: string; recognized: boolean }>(authEndpoints.recognizeLogin(loginId), {});
   },
 };

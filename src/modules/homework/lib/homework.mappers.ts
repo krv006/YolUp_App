@@ -119,6 +119,9 @@ export function mapAssignmentDto(dto: AssignmentDto): Assignment {
     lessonStartsAt: dto.lesson_starts_at ?? null,
     grading: dto.grading ?? "five",
     maxScore: dto.max_score ?? defaultMaxScore(dto.grading ?? "five"),
+    groupStats: dto.group_stats
+      ? { average: dto.group_stats.average ?? null, rank: dto.group_stats.rank ?? null, total: dto.group_stats.total ?? null }
+      : null,
     aiGroupSummary: dto.ai_group_summary
       ? {
           text: dto.ai_group_summary.text ?? "",
@@ -160,15 +163,15 @@ function mapCourseReportDto(dto: HomeworkCourseReportDto): CourseHomeworkReport 
     courseId: String(dto.course_id ?? dto.id ?? ""),
     courseTitle: dto.course_title ?? dto.title ?? dto.course_name ?? "",
     ...summarize(
-      pickCount(dto.assigned_count, dto.assignments_count, dto.total_assignments),
-      pickCount(dto.submitted_count, dto.submissions_count),
+      pickCount(dto.assigned_count, dto.assignments_count, dto.assignments_total, dto.total_assignments),
+      pickCount(dto.submitted_count, dto.submissions_count, dto.assignments_submitted),
       pickScore(dto.avg_score, dto.average_score)
     ),
   };
 }
 
 export function mapHomeworkReportDto(dto: HomeworkReportDto | null | undefined): HomeworkReport {
-  const rows: HomeworkCourseReportDto[] = Array.isArray(dto) ? dto : (dto?.courses ?? dto?.results ?? []);
+  const rows: HomeworkCourseReportDto[] = Array.isArray(dto) ? dto : (dto?.courses ?? dto?.subjects ?? dto?.results ?? []);
   const courses = rows.map(mapCourseReportDto);
 
   const overallDto = !Array.isArray(dto) ? (dto?.overall ?? dto?.summary ?? dto?.total) : undefined;

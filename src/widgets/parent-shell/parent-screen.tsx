@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DsGradient, PullRefresh, useDs } from "@/shared/ui";
 
@@ -23,6 +24,8 @@ export interface ParentScreenProps {
   onRefresh?: () => Promise<unknown>;
   /** Kontent bo'shliqlari; standart `flex flex-col gap-4 px-4 pt-5`. */
   style?: StyleProp<ViewStyle>;
+  /** Formali sahifa — fokusdagi maydon klaviatura ostida qolmasin. */
+  keyboard?: boolean;
 }
 
 /**
@@ -30,21 +33,23 @@ export interface ParentScreenProps {
  * `main.overflow-y-auto.bg-auth-gradient` (+ tab sahifalarida `pb-32`) va
  * sahifalarning `px-4 pt-5` o'rami.
  */
-export function ParentScreen({ children, tabs = false, onRefresh, style }: ParentScreenProps) {
+export function ParentScreen({ children, tabs = false, onRefresh, style, keyboard = false }: ParentScreenProps) {
   const ds = useDs();
   const insets = useSafeAreaInsets();
   const tabInset = useParentTabInset();
+  const Scroll = keyboard ? KeyboardAwareScrollView : ScrollView;
   return (
     <View style={[styles.fill, { backgroundColor: ds.c.canvas }]}>
-      <ScrollView
+      <Scroll
         style={styles.fill}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={[styles.page, { paddingTop: insets.top + 20, paddingBottom: tabs ? tabInset : insets.bottom + 24 }, style]}
         refreshControl={onRefresh ? <PullRefresh onRefresh={onRefresh} /> : undefined}
+        {...(keyboard ? { bottomOffset: 24 } : null)}
       >
         <DsGradient name="auth" />
         {children}
-      </ScrollView>
+      </Scroll>
     </View>
   );
 }

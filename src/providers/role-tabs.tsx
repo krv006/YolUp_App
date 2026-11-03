@@ -102,6 +102,7 @@ export function RoleTabs({
   conversationRole = "teacher",
   floatingBottom = FLOATING_BOTTOM,
   namespace,
+  backBehavior,
 }: {
   tabs: readonly TabDefinition[];
   hidden?: readonly string[];
@@ -112,6 +113,11 @@ export function RoleTabs({
   floatingBottom?: number;
   /** Yorliqlar lug'ati (standart: suzuvchida `nav`, klassikda `mobile`). */
   namespace?: string;
+  /**
+   * "Orqaga" — standart `firstRoute` (birinchi tabga). Ota-onada `history`:
+   * vebdagidek kelingan bo'limga qaytadi (masalan profildan Asosiyga).
+   */
+  backBehavior?: "firstRoute" | "history";
 }) {
   const { palette } = useTheme();
   const { t } = useTranslation(namespace ?? (variant === "floating" ? "nav" : "mobile"));
@@ -121,6 +127,7 @@ export function RoleTabs({
 
   return (
     <Tabs
+      backBehavior={backBehavior}
       tabBar={(props) =>
         variant === "floating" ? (
           <FloatingTabBar {...props} tabs={tabs} conversationRole={conversationRole} bottom={floatingBottom} />

@@ -13,7 +13,7 @@ import { OpenHomeworkBadge, ParentOffline, ParentUnlinked } from "@/widgets/pare
  *
  * Profil tab emas: vebdagidek bosh sahifa sarlavhasidagi avatar uni ochadi.
  * Bildirishnomalar, profil va topilmagan sahifa marshrutlari panelda
- * ko'rinmaydi va ularda panel yashirinadi.
+ * ko'rinmaydi va ularda panel yashirinadi. "Orqaga" tarix bo'yicha.
  */
 const TABS: readonly TabDefinition[] = [
   { name: "children", labelKey: "mobile.tabs.children", iconName: "group" },
@@ -23,7 +23,8 @@ const TABS: readonly TabDefinition[] = [
   { name: "grades", labelKey: "mobile.tabs.results", iconName: "bar-chart", siblings: ["exams"] },
 ];
 
-const HIDDEN = ["exams", "notifications", "profile", "profile-personal", "profile-account", "profile-system", "[...missing]"];
+/* `(account)` — profil, sozlamalar va yordam (o'z stack'i, URL'da guruh nomi yo'q). */
+const HIDDEN = ["exams", "notifications", "(account)", "[...missing]"];
 
 export default function ParentLayout() {
   return (
@@ -47,7 +48,7 @@ function ParentShell() {
   return (
     <View style={styles.fill}>
       <ParentUnlinked>
-        <RoleTabs variant="floating" namespace="parent" floatingBottom={24} tabs={TABS} hidden={HIDDEN} />
+        <RoleTabs variant="floating" namespace="parent" floatingBottom={24} backBehavior="history" tabs={TABS} hidden={HIDDEN} />
       </ParentUnlinked>
       {!online && !childrenQuery.data ? <ParentOffline onRetry={() => void childrenQuery.refetch()} /> : null}
     </View>

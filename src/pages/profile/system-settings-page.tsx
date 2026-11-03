@@ -26,7 +26,7 @@ const MINUTE_OPTIONS = [5, 10, 15, 30, 60];
  * Ilova ruxsatni o'zi bekor qila olmaydi, shuning uchun o'chirishda tizim
  * sozlamalari ochiladi; ilovaga qaytilganda holat qayta o'qiladi.
  */
-function usePushPermission() {
+export function usePushPermission() {
   const [granted, setGranted] = useState(false);
 
   const refresh = useCallback(() => {

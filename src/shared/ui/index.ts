@@ -54,8 +54,8 @@ export { PopoverMenu, PopoverMenuItem, usePopoverAnchor } from "./popover-menu";
 export type { PopoverMenuProps, PopoverRect } from "./popover-menu";
 export type { MobileDateSheetProps, MobileTimeSheetProps } from "./mobile-pickers";
 export type { GroupTileProps } from "./group-tile";
-export { ConfirmDialog, MobileAlertDialog } from "./center-dialog";
-export type { ConfirmDialogProps, MobileAlertDialogProps } from "./center-dialog";
+export { CenterDialog, ConfirmDialog, MobileAlertDialog } from "./center-dialog";
+export type { CenterDialogProps, ConfirmDialogProps, MobileAlertDialogProps } from "./center-dialog";
 export {
   MobileActionBar,
   MobileButton,

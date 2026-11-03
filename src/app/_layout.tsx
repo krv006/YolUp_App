@@ -2,6 +2,7 @@
 import "@/shared/lib/bootstrap";
 import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { ForcePasswordDialog } from "@/modules/auth/ui/force-password-dialog";
 import { AppProviders } from "@/providers/app-providers";
 import { NotificationBridge } from "@/providers/notification-bridge";
 import { RouteErrorPage } from "@/pages/status/route-status-pages";
@@ -24,6 +25,8 @@ export default function RootLayout() {
     <AppProviders>
       <ThemedStack />
       <NotificationBridge />
+      {/* Veb `role-route.tsx` — vaqtinchalik parol bilan kirgan hisob yangi parol o'rnatmaguncha. */}
+      <ForcePasswordDialog />
     </AppProviders>
   );
 }

@@ -130,6 +130,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         // Ekran ulashish (Android; iOS'da Broadcast Extension kerak — v1.1).
         "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
       ],
+      /*
+       * Play Market siyosatiga ko'ra keraksiz ruxsatlar:
+       * - `READ_MEDIA_IMAGES` — `expo-screen-capture` skrinshot kuzatuvchisi
+       *   uchun qo'shadi, ilova esa faqat skrinshotni taqiqlaydi
+       *   (`preventScreenCaptureAsync`). Rasm tanlash tizim Photo Picker'i
+       *   orqali ruxsatsiz ishlaydi (`shared/lib/file-picker.ts`). Bu ruxsat
+       *   qolsa Play "Photo and video permissions" e'lonini talab qiladi.
+       * - `SYSTEM_ALERT_WINDOW` — Expo shabloni dev menyusi uchun qo'shadi;
+       *   ilovaning o'zi boshqa ilovalar ustida oyna ochmaydi. Dev-build'da
+       *   qoldiriladi.
+       */
+      blockedPermissions: [
+        "android.permission.READ_MEDIA_IMAGES",
+        ...(VARIANT === "production" ? ["android.permission.SYSTEM_ALERT_WINDOW"] : []),
+      ],
     },
     plugins: [
       "expo-router",

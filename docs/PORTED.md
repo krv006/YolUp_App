@@ -607,7 +607,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/settings/parent-help-page.tsx` | 🟡 MOSLASH | `e76812a19546` | telefon shoxi — umumiy `HelpCenterPage` |
 | `src/pages/parent/settings/parent-not-found-page.tsx` | 🟡 MOSLASH | `fec50f1a61c2` | mobilda `app/parent/[...missing].tsx` to'g'ridan-to'g'ri `ParentNotFound` |
 | `src/pages/parent/settings/settings-mobile-profile.tsx` | 🟡 MOSLASH | `7c76bec863cf` | avatar — `pickImage` (kamera / galereya); nusxa `expo-clipboard`; qatorlar `settings-parts.tsx` |
-| `src/pages/parent/settings/settings-mobile-system.tsx` | 🟡 MOSLASH | `c5d9acc70f7d` | push — OS ruxsati (`usePushPermission`), sarlavha `account:page.pushTitle` (vebda "Brauzer bildirishnomalari") |
+| `src/pages/parent/settings/settings-mobile-system.tsx` | 🟡 MOSLASH | `c5d9acc70f7d` | push — OS ruxsati (`usePushPermission`), sarlavha `account:page.pushTitle` (vebda "Brauzer bildirishnomalari"); Xavfsizlik sahifasida "Akkauntni o'chirish" — mobilga xos (vebda ota-onada yo'q, Play Market ilova ichida o'chirishni talab qiladi) |
 | `src/pages/parent/notifications/parent-notifications-page.tsx` | 🟡 MOSLASH | `eafd45978230` | `NotificationHtml` o'rnida `splitHtml` (sarlavha / matn) |
 | `src/pages/parent/notifications/notification-actions.tsx` | 🟡 MOSLASH | `b2d39cb08e58` | `AppDialog sheet` -> `Sheet`; havola oyna yopilgach ochiladi |
 | `src/widgets/parent-shell/parent-screen.tsx` | 🆕 MOBIL | `—` | ota-ona sahifa qobig'i: `bg-auth-gradient`, xavfsiz hudud, tab sahifalarida `pb-32`, pastga tortib yangilash, formalarda `KeyboardAwareScrollView` |

@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import {
   useAuth,
   useChangePasswordMutation,
+  useDeleteAccountMutation,
   useLogoutOtherSessionsMutation,
   useRevokeSessionMutation,
   useSessions,
@@ -13,6 +14,7 @@ import {
   useUpdateSettingsMutation,
 } from "@/modules/auth";
 import { parentLogins, passwordStrength } from "@/modules/parent";
+import { DeleteAccountDialog } from "@/pages/profile/profile-dialogs";
 import { usePushPermission } from "@/pages/profile/system-settings-page";
 import { AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
@@ -248,13 +250,16 @@ export function SettingsMobile() {
 /** Xavfsizlik — veb `SecurityMobile`: parol, sessiyalar (alohida chiqarish), boshqalarini yopish. */
 export function SecurityMobile() {
   const { t } = useTranslation("parent");
+  const { t: ta } = useTranslation("account");
   const ds = useDs();
   const back = useParentBack(ROUTES.parent.profile);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const sessions = useSessions();
   const revoke = useRevokeSessionMutation();
   const logoutOthers = useLogoutOtherSessionsMutation();
+  const deleteAccount = useDeleteAccountMutation();
   const [confirm, setConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const list = sessions.data ?? [];
   const others = list.filter((item) => !item.isCurrent);
   const router = useRouter();
@@ -320,6 +325,29 @@ export function SecurityMobile() {
       <DsText v="body-xs" c="ink-secondary" style={styles.tip}>
         {t("logins.tip.text")}
       </DsText>
+      {/*
+       * Mobilga xos: vebda ota-onada hisobni o'chirish yo'q, Play Market esa
+       * ilova ichida ro'yxatdan o'tiladigan hisoblar uchun uni talab qiladi.
+       * O'qituvchi/o'quvchidagi bilan bir xil oqim (`DeleteAccountDialog`).
+       */}
+      <SettingsLabel>{ta("page.dangerSectionTitle")}</SettingsLabel>
+      <SettingsCard>
+        <SettingsItem icon="logout" tone={{ bg: "danger-bg", fg: "error-text" }} title={ta("page.deleteAccount")} danger last onPress={() => setDeleting(true)} />
+      </SettingsCard>
+      <DeleteAccountDialog
+        open={deleting}
+        pending={deleteAccount.isPending}
+        onOpenChange={setDeleting}
+        onConfirm={() =>
+          deleteAccount.mutate(undefined, {
+            onSuccess: () => {
+              setDeleting(false);
+              void logout();
+            },
+            onError: (error: Error) => toast.error(error.message),
+          })
+        }
+      />
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}

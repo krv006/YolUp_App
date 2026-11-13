@@ -50,7 +50,7 @@ export function AudiencePicker({ value, onChange, excludeCourseIds = [] }: Audie
                 onPress={() => onChange({ ...value, courseIds: toggle(value.courseIds, course.id) })}
                 style={[styles.row, index < courseItems.length - 1 && divider, checked && { backgroundColor: ds.c["brand-subtle"] }]}
               >
-                <Icon name={checked ? "check-box-fill" : "check-box"} size={20} color={checked ? ds.c.brand : ds.c["icon-secondary"]} />
+                <CheckMark checked={checked} />
                 <DsText v="body" numberOfLines={1} style={styles.grow}>
                   {course.title}
                 </DsText>
@@ -122,7 +122,7 @@ export function AudiencePicker({ value, onChange, excludeCourseIds = [] }: Audie
                       @{person.username}
                     </DsText>
                   </View>
-                  <Icon name={picked ? "check-box-fill" : "check-box"} size={20} color={picked ? ds.c.brand : ds.c["icon-secondary"]} />
+                  <CheckMark checked={picked} />
                 </Pressable>
               );
             })}
@@ -138,7 +138,15 @@ export function AudiencePicker({ value, onChange, excludeCourseIds = [] }: Audie
   );
 }
 
+/** Belgilash katakchasi: tanlanganda `check-box-fill`, aks holda bo'sh kvadrat (vebda native checkbox). */
+function CheckMark({ checked }: { checked: boolean }) {
+  const ds = useDs();
+  if (checked) return <Icon name="check-box-fill" size={20} color={ds.c.brand} />;
+  return <View style={[styles.box, { borderColor: ds.c["icon-secondary"] }]} />;
+}
+
 const styles = StyleSheet.create({
+  box: { width: 16, height: 16, margin: 2, borderWidth: 2, borderRadius: 3 },
   root: { gap: 16 },
   section: { gap: 8 },
   list: { maxHeight: 208, borderWidth: 1, borderRadius: dsRadius.xl },

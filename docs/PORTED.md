@@ -670,7 +670,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/progress/index.ts` | 🟢 NUSXA | `0a95e89e2c74` | — |
 | `src/modules/progress/lib/progress.mappers.ts` | 🟢 NUSXA | `a5723f6ba7ff` | — |
 | `src/modules/progress/model/progress.queries.ts` | 🟢 NUSXA | `e4f2d34c2968` | — |
-| `src/widgets/audience-picker/audience-picker.tsx` | 🟡 MOSLASH | `d61c1ba9ed6b` | checkbox o'rniga `check-box(-fill)` belgili `Pressable`; ro'yxatlar `ScrollView` (`max-h-52`) |
+| `src/widgets/audience-picker/audience-picker.tsx` | 🟡 MOSLASH | `d61c1ba9ed6b` | checkbox o'rniga `Pressable`: tanlangani `check-box-fill`, tanlanmagani bo'sh kvadrat (vebdagi `check-box` ikonkasi ichida belgi bor); ro'yxatlar `ScrollView` (`max-h-52`) |
 | `src/widgets/audience-picker/index.ts` | 🟢 NUSXA | `d394414f6c9e` | — |
 | `src/widgets/new-chat-menu/new-chat-menu.tsx` | 🟡 MOSLASH | `be764d02ad98` | `Dropdown` -> `PopoverMenu`; trigger tugmasi komponent ichida (`children` o'rniga) |
 | `src/widgets/new-chat-menu/create-audience-dialog.tsx` | 🟡 MOSLASH | `da4a61b61f45` | pastki `Sheet` + `MobileInput` |

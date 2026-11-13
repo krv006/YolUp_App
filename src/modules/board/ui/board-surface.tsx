@@ -9,7 +9,7 @@ import { useCourseStudents } from "@/modules/course";
 import { DsText, dsRadius, dsShadowHidden, Icon, ThemeScope, toast, useDs } from "@/shared/ui";
 import type { BoardSource, FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
 import { BOARD_TEXT_SIZE, MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
-import { FLOW_MARGIN, nextTextPoint, strokeSpan } from "../lib/board-flow";
+import { nextTextPoint } from "../lib/board-flow";
 import { hasRichFormatting, linesToPlainText } from "../lib/rich-text";
 import { useAddSheet, useAddStroke, useBoard, useEraseStrokes, useRenameSheet, useSetBoardPermissions, useSetCurrentSheet, useSolveFormula } from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
@@ -97,7 +97,6 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const [draftText, setDraftText] = useState("");
   const [draftLines, setDraftLines] = useState<TextLineDto[]>([]);
   const [card, setCard] = useState({ width: 0, height: 0 });
-  const [viewRatio, setViewRatio] = useState(0);
   const [formHeight, setFormHeight] = useState(0);
 
   const rootRef = useRef<View>(null);
@@ -139,14 +138,16 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
   const boardHeight = state?.height ?? 900;
   const boardWidth = state?.width ?? 1600;
-  // Kanvas ko'rinadigan joyni to'liq egallaydi (veb `ResizeObserver` bilan karta nisbati).
-  const canvasHeight = useMemo(() => {
-    const bottom = (active?.strokes ?? []).reduce((max, stroke) => {
-      const span = strokeSpan(stroke);
-      return span ? Math.max(max, span.bottom) : max;
-    }, 0);
-    return Math.max(boardHeight, Math.ceil(bottom + FLOW_MARGIN), Math.floor(boardWidth * viewRatio));
-  }, [active?.strokes, boardHeight, boardWidth, viewRatio]);
+  /*
+   * Kanvas = serverdagi doska (`state.width × state.height`, odatda 16:9).
+   *
+   * Avval kanvas vebdagidek karta nisbatiga cho'zilardi (telefonda
+   * 1600×2254). Server esa nuqtalarni `state.height` bilan cheklaydi, shuning
+   * uchun pastki qismda chizilgan chiziq 900-chiziqqa siqilib qolardi
+   * ("ma'lum qismdan keyin chizib bo'lmayapti"). Endi karta doska nisbatida,
+   * mayda yozish uchun ikki barmoq bilan kattalashtiriladi.
+   */
+  const canvasHeight = boardHeight;
 
   function flowPointFor(lines: number): Point {
     return nextTextPoint(active?.strokes ?? [], { boardWidth: state?.width ?? 1200, boardHeight: canvasHeight, size: BOARD_TEXT_SIZE, lines });
@@ -360,12 +361,10 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
       <View style={styles.stage}>
         <View
-          style={[styles.card, { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
+          style={[styles.card, { aspectRatio: boardWidth / boardHeight, backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
           onLayout={(event) => {
             const { width, height } = event.nativeEvent.layout;
             setCard({ width, height });
-            // Klaviatura ochilib karta kichrayganda kanvas qisqarmasin.
-            if (!placing && width > 0) setViewRatio(height / width);
           }}
         >
           <BoardCanvas
@@ -575,7 +574,7 @@ const styles = StyleSheet.create({
   /* `relative mt-1 flex-1`, karta `rounded-2xl bg-surface shadow-sm` */
   /* `zIndex` — ochiq matn kartasi pastdagi asboblar ustida tursin */
   stage: { flex: 1, minHeight: 0, marginTop: 4, zIndex: 1 },
-  card: { flex: 1, overflow: "hidden", borderRadius: dsRadius["2xl"] },
+  card: { width: "100%", overflow: "hidden", borderRadius: dsRadius["2xl"] },
   /* `absolute inset-x-6 rounded-lg border p-3 shadow-lg` */
   form: { position: "absolute", left: 24, right: 24, padding: 12, borderWidth: 1, borderRadius: dsRadius.lg },
   tabs: { height: 38, flexDirection: "row", padding: 3, borderRadius: 19 },

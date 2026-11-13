@@ -166,7 +166,8 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 
   return (
     <View style={[styles.root, { backgroundColor: ds.c.canvas }]}>
-      {group ? <DsGradient name="auth" /> : null}
+      {/* Shaxsiy chat ham guruhdagidek gradient fonda (veb #180). */}
+      <DsGradient name="auth" />
       <ChatHeader
         conversation={conversation}
         topInset={insets.top}

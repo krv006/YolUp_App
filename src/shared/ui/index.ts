@@ -79,6 +79,7 @@ export type { MobileButtonVariant, MobileEmptyCardProps, MobileListRowProps, Mob
 export { MobileScreenDialog } from "./mobile-screen-dialog";
 export { FileViewer } from "./file-viewer";
 export { FloatingWatermark } from "./floating-watermark";
+export { RoleTag } from "./role-tag";
 export type { FileViewerProps } from "./file-viewer";
 export { RouteStatus } from "./route-status";
 export type { RouteStatusProps, RouteStatusTone } from "./route-status";

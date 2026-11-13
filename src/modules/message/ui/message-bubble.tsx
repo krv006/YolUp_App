@@ -3,10 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Play } from "lucide-react-native";
-import { ROLES } from "@/shared/constants";
 import { formatMessageTime } from "@/shared/lib";
 import type { ChatMessage } from "@/shared/types";
-import { Avatar, dsAlpha, DsText, dsRadius, FileViewer, Icon, useDs, type DsColor } from "@/shared/ui";
+import { Avatar, dsAlpha, DsText, dsRadius, FileViewer, Icon, RoleTag, useDs, type DsColor } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
 import { useChatUiStore } from "../model/chat-ui.store";
 import { MessageAttachment } from "./message-attachment";
@@ -173,7 +172,6 @@ export function MessageBubbleCard({ message, outgoing, showName = true, highligh
   const { t } = useTranslation("chat");
   const ds = useDs();
   const searchTerm = useChatUiStore((state) => state.search);
-  const isTeacherSender = message.senderRole === ROLES.TEACHER;
   const onAction = ds.c["on-action"];
   const meta = outgoing ? dsAlpha(onAction, 0.75) : ds.c["ink-tertiary"];
 
@@ -190,10 +188,10 @@ export function MessageBubbleCard({ message, outgoing, showName = true, highligh
     >
       {message.senderName && !outgoing && showName ? (
         <View style={styles.sender}>
-          {isTeacherSender ? <Icon name="school" size={13} color={ds.c[senderColor(message.senderId || message.senderName)]} /> : null}
-          <DsText v="caption-strong" c={senderColor(message.senderId || message.senderName)} numberOfLines={1}>
+          <DsText v="caption-strong" c={senderColor(message.senderId || message.senderName)} numberOfLines={1} style={styles.senderName}>
             {message.senderName}
           </DsText>
+          {message.senderRole === "teacher" || message.senderRole === "parent" ? <RoleTag role={message.senderRole} /> : null}
         </View>
       ) : null}
 
@@ -337,6 +335,7 @@ const styles = StyleSheet.create({
   bubble: { width: 264, maxWidth: "85%", gap: 4, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8, borderRadius: dsRadius.lg },
   fill: { width: "100%", maxWidth: "100%" },
   sender: { flexDirection: "row", alignItems: "center", gap: 4 },
+  senderName: { flexShrink: 1 },
   /* `gap-0.5 rounded-lg border-l-2 py-1 pl-2.5` */
   reply: { gap: 2, paddingVertical: 4, paddingLeft: 10, paddingRight: 8, borderLeftWidth: 2, borderRadius: dsRadius.lg },
   meta: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4 },

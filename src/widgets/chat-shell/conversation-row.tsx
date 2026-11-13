@@ -4,7 +4,10 @@ import { useCurrentUser } from "@/modules/auth";
 import { isDirectLocked, isOwnLastMessage, lastMessageBody, useDirectStatusLabel, useRoomTyping } from "@/modules/conversation";
 import { formatMessageTime } from "@/shared/lib";
 import type { Conversation } from "@/shared/types";
-import { Avatar, DsText, dsRadius, GroupTile, Icon, useDs } from "@/shared/ui";
+import { Avatar, DsText, dsRadius, GroupTile, Icon, RoleTag, useDs } from "@/shared/ui";
+
+/** Guruhda oxirgi xabar shu rollardan bo'lsa, ro'yxatda yorliq chiqadi (veb #182). */
+const TAGGED_SENDERS = new Set(["teacher", "parent"]);
 
 function preview(conversation: Conversation, mine: boolean, youLabel: string, body: string): string {
   if (!conversation.lastMessage) return "";
@@ -67,9 +70,12 @@ export function ConversationRowBody({ conversation }: { conversation: Conversati
       )}
 
       <View style={styles.body}>
-        <DsText v="title" numberOfLines={1}>
-          {conversation.title}
-        </DsText>
+        <View style={styles.titleRow}>
+          <DsText v="title" numberOfLines={1} style={styles.shrink}>
+            {conversation.title}
+          </DsText>
+          {conversation.type === "direct" ? <RoleTag role={conversation.participant?.role} /> : null}
+        </View>
         {typing ? (
           <DsText v="body-sm" c="brand" numberOfLines={1}>
             {typing.kind === "voice" ? t("panel.recordingVoice", { name: typing.name }) : t("panel.typing", { name: typing.name })}
@@ -81,6 +87,9 @@ export function ConversationRowBody({ conversation }: { conversation: Conversati
         ) : (
           <View style={styles.preview}>
             {mine ? <Icon name="done-all" size={16} color={ds.c.brand} /> : null}
+            {!mine && conversation.type === "group" && conversation.lastSender && TAGGED_SENDERS.has(conversation.lastSenderRole ?? "") ? (
+              <RoleTag role={conversation.lastSenderRole} />
+            ) : null}
             <DsText v="body-sm" c={unread ? "ink" : "ink-secondary"} numberOfLines={1} style={styles.previewText}>
               {preview(conversation, mine, t("panel.you"), body)}
             </DsText>
@@ -112,6 +121,8 @@ export function ConversationRowBody({ conversation }: { conversation: Conversati
 const styles = StyleSheet.create({
   /* `flex-1 flex-col gap-0.5` */
   body: { flex: 1, minWidth: 0, gap: 2 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8, minWidth: 0 },
+  shrink: { flexShrink: 1 },
   preview: { flexDirection: "row", alignItems: "center", gap: 4 },
   previewText: { flexShrink: 1 },
   /* `items-end gap-1` */

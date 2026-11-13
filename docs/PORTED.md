@@ -31,9 +31,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **239**
-- 🟡/🔴 moslashtirilgan: **359**
+- 🟡/🔴 moslashtirilgan: **360**
 - 🆕 mobilga xos: **17**
-- Jami: **615**
+- Jami: **616**
 
 ## Olib tashlangan bo'limlar
 
@@ -547,6 +547,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/app/router/realtime-sync.tsx` | 🟡 MOSLASH | `8a90d910424f` | mobilda `providers/realtime-sync.tsx` — marshrutda emas, `NotificationBridge` ichida (soket ilova bo'ylab bitta); ota-ona va adminda faqat `useNotificationFeed` |
 | `src/shared/ui/mobile-action-bar.tsx` | 🟡 MOSLASH | `92b6c28ae6ee` | mobilda `mobile-page.tsx` ichida |
 | `src/shared/ui/floating-watermark.tsx` | 🟡 MOSLASH | `74bf70261276` | RN `View` + reanimated (opacity 1 s); `translate(-x%, -y%)` o'rniga `onLayout` o'lchami; logo — `Logo` komponenti; mobilda `recording-page.tsx` dagi `RecordingVideo` ustida |
+| `src/shared/ui/role-tag.tsx` | 🟡 MOSLASH | `050848b538b6` | RN `View` + `DsText`; `className` o'rniga `style` |
 | `src/modules/auth/ui/force-password-dialog.tsx` | 🟡 MOSLASH | `14e2219182ac` | markaziy oyna `CenterDialog` (yopilmaydi, klaviaturadan qochadi); vebda har rol marshrutida (`role-route.tsx`), mobilda ildiz layout'da bitta nusxa |
 | `src/modules/auth/lib/account-link.ts` | 🟢 NUSXA | `7d11d910393c` | — |
 | `src/modules/auth/lib/account-switch.ts` | 🟢 NUSXA | `c3456f35da4c` | — |

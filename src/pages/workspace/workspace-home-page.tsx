@@ -9,7 +9,7 @@ import { useCourses } from "@/modules/course";
 import { useExams } from "@/modules/exam";
 import { homeworkApi, homeworkKeys } from "@/modules/homework";
 import { useQuizzes } from "@/modules/quiz";
-import { ROUTES } from "@/shared/config";
+import { FEATURES, ROUTES } from "@/shared/config";
 import {
   DsGradient,
   MobileListCard,
@@ -27,7 +27,7 @@ import {
 } from "@/shared/ui";
 
 
-const MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: string }> = [
+const ALL_MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: string }> = [
   { id: "tests", icon: "quiz", tone: "bg-accent-blue-bg text-accent-blue-fg", to: ROUTES.teacher.tests },
   { id: "analytics", icon: "bar-chart", tone: "bg-accent-green-bg text-accent-green-fg", to: ROUTES.teacher.workspaceAnalytics },
   { id: "ai", icon: "sparkles-fill", tone: "bg-accent-saffron-bg text-accent-saffron-fg", to: ROUTES.teacher.workspaceAi },
@@ -36,12 +36,16 @@ const MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to: str
   { id: "materials", icon: "folder", tone: "bg-accent-violet-bg text-accent-red-fg", to: ROUTES.teacher.materials },
 ];
 
-const CREATE: ReadonlyArray<{ id: string; icon: IconName; to: string }> = [
+const ALL_CREATE: ReadonlyArray<{ id: string; icon: IconName; to: string }> = [
   { id: "test", icon: "quiz", to: `${ROUTES.teacher.tests}?new=1` },
   { id: "homework", icon: "assign", to: `${ROUTES.teacher.homework}?new=1` },
   { id: "mock", icon: "assignment-check-fill", to: `${ROUTES.teacher.mockExams}?new=1` },
   { id: "ai", icon: "sparkles-fill", to: ROUTES.teacher.workspaceAi },
 ];
+
+// "AI yordamchi" vaqtincha yashirin (veb `FEATURES.aiAssistant`).
+const MODULES = ALL_MODULES.filter((module) => module.id !== "ai" || FEATURES.aiAssistant);
+const CREATE = ALL_CREATE.filter((item) => item.id !== "ai" || FEATURES.aiAssistant);
 
 /**
  * O'qituvchining Workspace bosh sahifasi — veb `workspace-home-page.tsx` +

@@ -14,7 +14,7 @@ import {
   type NotificationGroupKey,
 } from "@/modules/notification";
 import { ROLES } from "@/shared/constants";
-import { formatMessageTime, htmlToPlainText } from "@/shared/lib";
+import { formatNotificationTime, htmlToPlainText } from "@/shared/lib";
 import {
   DsGradient,
   DsText,
@@ -219,7 +219,7 @@ export function NotificationsPage() {
                     </View>
                     <View style={styles.meta}>
                       <DsText v="caption" c="ink-secondary">
-                        {item.createdAt ? formatMessageTime(item.createdAt) : ""}
+                        {item.createdAt ? formatNotificationTime(item.createdAt) : ""}
                       </DsText>
                       {item.isRead ? null : <View style={[styles.dot, { backgroundColor: ds.c.brand }]} />}
                     </View>

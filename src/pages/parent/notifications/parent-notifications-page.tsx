@@ -17,7 +17,7 @@ import {
 } from "@/modules/notification";
 import { splitHtml } from "@/pages/notifications/notifications-page";
 import { ROUTES } from "@/shared/config";
-import { formatMessageTime } from "@/shared/lib";
+import { formatNotificationTime } from "@/shared/lib";
 import { DsText, dsRadius, Icon, MobilePageHeader, MobileRoundButton, toast, toneColors, useDs, type IconName } from "@/shared/ui";
 import { ParentScreen, useParentBack, useParentNotificationLink } from "@/widgets/parent-shell";
 import { NotificationActions } from "./notification-actions";
@@ -157,7 +157,7 @@ export function ParentNotificationsPage() {
                     </View>
                     <View style={styles.itemMeta}>
                       <DsText v="caption" c="ink-secondary">
-                        {item.createdAt ? formatMessageTime(item.createdAt) : ""}
+                        {item.createdAt ? formatNotificationTime(item.createdAt) : ""}
                       </DsText>
                       {item.isRead ? null : <View style={[styles.dot, { backgroundColor: ds.c.brand }]} />}
                     </View>

@@ -6,7 +6,7 @@
     "rating": "Reyting",
     "profile": "Profil",
     "overview": "Asosiy",
-    "children": "Farzand",
+    "children": "O'quvchi",
     "attendance": "Davomat",
     "homework": "Vazifa",
     "workspace": "Workspace"
@@ -56,7 +56,7 @@
     "notifications": "Xabarlar",
     "phone": "Telefon",
     "username": "Foydalanuvchi nomi",
-    "inviteCode": "Taklif kodi — ota-ona shu kod bilan ulanadi",
+    "inviteCode": "Taklif kodi — kuzatuvchi shu kod bilan ulanadi",
     "switchAccount": "Hisobni almashtirish",
     "linkedAccounts": "{{count}} ta bog'langan hisob",
     "newRole": "Yangi rol ochish",
@@ -100,7 +100,7 @@
   "roles": {
     "student": "O'quvchi",
     "teacher": "O'qituvchi",
-    "parent": "Ota-ona"
+    "parent": "Kuzatuvchi"
   },
   "analytics": {
     "urinishlar": "Urinishlar",
@@ -133,7 +133,7 @@
     "chiqishlar": "Chiqishlar",
     "jami_yoqlik": "Jami yo'qlik",
     "eng_uzun": "Eng uzun",
-    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Chiqishlar soni chegaradan oshgan — ota-onaga xabar yuborilgan.",
+    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Chiqishlar soni chegaradan oshgan — kuzatuvchiga xabar yuborilgan.",
     "davomat_yozuvi_topilmadi": "Davomat yozuvi topilmadi"
   },
   "board": {
@@ -466,21 +466,21 @@
     "yangi_xabarlar_shu_yerda_korinadi": "Yangi xabarlar shu yerda ko'rinadi."
   },
   "parent": {
-    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "Avval 'Farzandlar' bo'limida o'quvchi hisobini ulang.",
+    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "Avval 'O'quvchilar' bo'limida o'quvchi hisobini ulang.",
     "barchasi": "Barchasi",
     "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Biriktirilgan o'quvchi hisoblari va maxfiylik ruxsatlari.",
-    "bola_hisobi": "Bola hisobi",
-    "bola_hisobini_yaratish": "Bola hisobini yaratish",
+    "bola_hisobi": "O'quvchi hisobi",
+    "bola_hisobini_yaratish": "O'quvchi hisobini yaratish",
     "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "Bu ruxsatlarni istalgan payt qaytarib olishingiz mumkin.",
     "davomat_yuklanmoqda": "Davomat yuklanmoqda…",
     "davomatni_yuklab_bolmadi": "Davomatni yuklab bo'lmadi",
     "familiya": "Familiya",
-    "farzand_biriktirilmagan": "Farzand biriktirilmagan",
-    "farzand_bolimiga_oting_va_oquvchining_taklif": "'Farzand' bo'limiga o'ting va o'quvchining taklif kodi bilan uning hisobini ulang.",
-    "farzand_hali_ulanmagan": "Farzand hali ulanmagan",
-    "farzand_tanlanmagan": "Farzand tanlanmagan",
-    "farzandlar_royxatini_yuklab_bolmadi": "Farzandlar ro'yxatini yuklab bo'lmadi",
-    "farzandlar_yuklanmoqda": "Farzandlar yuklanmoqda…",
+    "farzand_biriktirilmagan": "O'quvchi biriktirilmagan",
+    "farzand_bolimiga_oting_va_oquvchining_taklif": "'O'quvchilar' bo'limiga o'ting va o'quvchining taklif kodi bilan uning hisobini ulang.",
+    "farzand_hali_ulanmagan": "O'quvchi hali ulanmagan",
+    "farzand_tanlanmagan": "O'quvchi tanlanmagan",
+    "farzandlar_royxatini_yuklab_bolmadi": "O'quvchilar ro'yxatini yuklab bo'lmadi",
+    "farzandlar_yuklanmoqda": "O'quvchilar yuklanmoqda…",
     "fk_xxxx": "FK-XXXX",
     "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Har bir darsdagi ishtirok, diqqat va fokus ko'rsatkichlari.",
     "hisob_yaratildi": "Hisob yaratildi",
@@ -498,10 +498,10 @@
     "panel_yuklanmoqda": "Panel yuklanmoqda…",
     "ruxsatlarni_yuklab_bolmadi": "Ruxsatlarni yuklab bo'lmadi.",
     "songgi_davomat": "So'nggi davomat",
-    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "So'rov yuborildi — farzandingiz tasdiqlashi kerak",
+    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "So'rov yuborildi — o'quvchingiz tasdiqlashi kerak",
     "sorov_yuborish": "So'rov yuborish",
     "taklif_kodi": "Taklif kodi",
-    "tanlangan_farzand_uchun_davomat_topilmadi": "Tanlangan farzand uchun davomat topilmadi.",
+    "tanlangan_farzand_uchun_davomat_topilmadi": "Tanlangan o'quvchi uchun davomat topilmadi.",
     "tekshirilmoqda": "Tekshirilmoqda",
     "tekshiruv_xatosi": "Tekshiruv xatosi",
     "topshirilmagan": "Topshirilmagan",
@@ -525,7 +525,7 @@
     "songgi_faollik": "So'nggi faollik: {{value}}",
     "uchun_ruxsatlar": "{{name}} uchun ruxsatlar",
     "parol_kamida_8_ta_belgidan_iborat_bolsin": "Parol kamida 8 ta belgidan iborat bo'lsin",
-    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Farzandingiz darsga kirgach ma'lumot shu yerda paydo bo'ladi"
+    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "O'quvchingiz darsga kirgach ma'lumot shu yerda paydo bo'ladi"
   },
   "quizzes": {
     "test_yuklanmoqda": "Test yuklanmoqda…",
@@ -556,7 +556,7 @@
     "toliq_ekran": "To‘liq ekran"
   },
   "report": {
-    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Har bir fan bo'yicha farzandingizning vazifalari va baholari.",
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Har bir fan bo'yicha o'quvchingizning vazifalari va baholari.",
     "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Har bir fan bo'yicha vazifalar va baholaringiz.",
     "reyting_yuklanmoqda": "Reyting yuklanmoqda…"
   },
@@ -710,17 +710,17 @@
     },
     "student": {
       "group": "Guruhga qo'shilish uchun o'qituvchingizga yozing.",
-      "parent": "Ota-onangiz profilingizdagi kod orqali hisobingizga ulanishi mumkin."
+      "parent": "Kuzatuvchingiz profilingizdagi kod orqali hisobingizga ulanishi mumkin."
     },
     "parent": {
-      "link": "\"Farzandlar\" bo'limida farzandingizning kodi bilan hisobini ulang.",
+      "link": "\"O'quvchilar\" bo'limida o'quvchingizning kodi bilan hisobini ulang.",
       "follow": "Keyin uning davomati, vazifalari va reytingini kuzatib borasiz."
     }
   },
   "workspace": {
     "attendance": {
       "title": "Davomat",
-      "description": "Farzandingizning har bir darsdagi ishtiroki."
+      "description": "O'quvchingizning har bir darsdagi ishtiroki."
     },
     "homework": {
       "title": "Vazifalar",
@@ -728,11 +728,11 @@
     },
     "examsChild": {
       "title": "Mock testlar",
-      "description": "Farzandingiz guruhlaridagi imtihonlar va natijalar."
+      "description": "O'quvchingiz guruhlaridagi imtihonlar va natijalar."
     },
     "ratingChild": {
       "title": "Reyting",
-      "description": "Farzandingizning vazifalar bo'yicha natijalari."
+      "description": "O'quvchingizning vazifalar bo'yicha natijalari."
     },
     "modullar": "Modullar"
   }

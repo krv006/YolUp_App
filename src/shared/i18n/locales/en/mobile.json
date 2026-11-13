@@ -6,7 +6,7 @@
     "rating": "Rating",
     "profile": "Profile",
     "overview": "Overview",
-    "children": "Children",
+    "children": "Students",
     "attendance": "Attendance",
     "homework": "Homework",
     "workspace": "Workspace"
@@ -56,7 +56,7 @@
     "notifications": "Notifications",
     "phone": "Phone",
     "username": "Username",
-    "inviteCode": "Invite code — a parent connects with it",
+    "inviteCode": "Invite code — an observer connects with it",
     "switchAccount": "Switch account",
     "linkedAccounts": "{{count}} linked accounts",
     "newRole": "Create a new role",
@@ -100,7 +100,7 @@
   "roles": {
     "student": "Student",
     "teacher": "Teacher",
-    "parent": "Parent"
+    "parent": "Observer"
   },
   "message": {
     "yozmoqda": "{{name}} is typing…",
@@ -201,7 +201,7 @@
     "chiqishlar": "Exits",
     "jami_yoqlik": "Total away",
     "eng_uzun": "Longest",
-    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Exit count passed the limit — the parent was notified.",
+    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Exit count passed the limit — the observer was notified.",
     "davomat_yozuvi_topilmadi": "No attendance records found"
   },
   "recording": {
@@ -237,7 +237,7 @@
     "soat_15_00_da_boshlaymiz": "We start at 15:00."
   },
   "report": {
-    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Your child's homework and grades for each subject.",
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Your student's homework and grades for each subject.",
     "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Your assignments and grades for each subject.",
     "reyting_yuklanmoqda": "Loading rating…"
   },
@@ -470,21 +470,21 @@
     "dars_ketmoqda": "Lesson in progress"
   },
   "parent": {
-    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "First link a student account in the 'Children' section.",
+    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "First link a student account in the 'Students' section.",
     "barchasi": "All",
     "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Linked student accounts and privacy permissions.",
-    "bola_hisobi": "Child account",
-    "bola_hisobini_yaratish": "Create a child account",
+    "bola_hisobi": "Student account",
+    "bola_hisobini_yaratish": "Create a student account",
     "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "You can revoke these permissions at any time.",
     "davomat_yuklanmoqda": "Loading attendance…",
     "davomatni_yuklab_bolmadi": "Could not load attendance",
     "familiya": "Last name",
-    "farzand_biriktirilmagan": "No child linked",
-    "farzand_bolimiga_oting_va_oquvchining_taklif": "Go to the 'Children' section and link the student's account with their invite code.",
-    "farzand_hali_ulanmagan": "No child linked yet",
-    "farzand_tanlanmagan": "No child selected",
-    "farzandlar_royxatini_yuklab_bolmadi": "Could not load the list of children",
-    "farzandlar_yuklanmoqda": "Loading children…",
+    "farzand_biriktirilmagan": "No student linked",
+    "farzand_bolimiga_oting_va_oquvchining_taklif": "Go to the 'Students' section and link the student's account with their invite code.",
+    "farzand_hali_ulanmagan": "No student linked yet",
+    "farzand_tanlanmagan": "No student selected",
+    "farzandlar_royxatini_yuklab_bolmadi": "Could not load the list of students",
+    "farzandlar_yuklanmoqda": "Loading students…",
     "fk_xxxx": "FK-XXXX",
     "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Participation, attention and focus for each lesson.",
     "hisob_yaratildi": "Account created",
@@ -502,10 +502,10 @@
     "panel_yuklanmoqda": "Loading dashboard…",
     "ruxsatlarni_yuklab_bolmadi": "Could not load permissions.",
     "songgi_davomat": "Recent attendance",
-    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Request sent — your child needs to confirm it",
+    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Request sent — your student needs to confirm it",
     "sorov_yuborish": "Send request",
     "taklif_kodi": "Invite code",
-    "tanlangan_farzand_uchun_davomat_topilmadi": "No attendance found for the selected child.",
+    "tanlangan_farzand_uchun_davomat_topilmadi": "No attendance found for the selected student.",
     "tekshirilmoqda": "Reviewing",
     "tekshiruv_xatosi": "Review error",
     "topshirilmagan": "Not submitted",
@@ -529,7 +529,7 @@
     "songgi_faollik": "Last activity: {{value}}",
     "uchun_ruxsatlar": "Permissions for {{name}}",
     "parol_kamida_8_ta_belgidan_iborat_bolsin": "The password must be at least 8 characters",
-    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Information appears here once your child joins a lesson"
+    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Information appears here once your student joins a lesson"
   },
   "conversation": {
     "bekor_qilish": "Cancel",
@@ -710,17 +710,17 @@
     },
     "student": {
       "group": "Ask your teacher to add you to a group.",
-      "parent": "A parent can link to your account with the code in your profile."
+      "parent": "An observer can link to your account with the code in your profile."
     },
     "parent": {
-      "link": "In 'Children', link your child's account with their code.",
+      "link": "In 'Students', link your student's account with their code.",
       "follow": "After that you can follow their attendance, homework and rating."
     }
   },
   "workspace": {
     "attendance": {
       "title": "Attendance",
-      "description": "Your child's presence in each lesson."
+      "description": "Your student's presence in each lesson."
     },
     "homework": {
       "title": "Homework",
@@ -728,11 +728,11 @@
     },
     "examsChild": {
       "title": "Mock tests",
-      "description": "Exams in your child's groups and their results."
+      "description": "Exams in your student's groups and their results."
     },
     "ratingChild": {
       "title": "Rating",
-      "description": "Your child's homework results."
+      "description": "Your student's homework results."
     },
     "modullar": "Modules"
   }

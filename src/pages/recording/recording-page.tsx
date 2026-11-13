@@ -22,6 +22,7 @@ import {
   DsGradient,
   DsText,
   dsRadius,
+  FloatingWatermark,
   Icon,
   MobileEmptyCard,
   MobileRoundButton,
@@ -385,6 +386,8 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
   const { t } = useTranslation("lesson");
   const { t: tm } = useTranslation("mobile");
   const ds = useDs();
+  const { user } = useAuth();
+  const watermark = `@${user?.username || user?.name || "YolUp"} · YolUp`;
   const viewRef = useRef<VideoView>(null);
   const [started, setStarted] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -482,6 +485,7 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
       />
       {/* Veb `<video poster>`: ijro boshlanguncha muqova rasmi. */}
       {poster && !started ? <Image source={{ uri: poster }} resizeMode="cover" style={StyleSheet.absoluteFill} /> : null}
+      <FloatingWatermark label={watermark} />
 
       {isPlaying ? (
         <Pressable accessibilityRole="button" accessibilityLabel={t("recording.pause")} onPress={toggle} style={StyleSheet.absoluteFill} />

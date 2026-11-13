@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Clipboard from "expo-clipboard";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { HomeworkMessageCard } from "@/modules/homework";
+import { formatDayLabel } from "@/shared/lib";
 import type { ChatMessage, Conversation, MessageCapabilities } from "@/shared/types";
 import { ConfirmDialog, DsText, dsRadius, Icon, MessageTextScale, toast, useDs } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
@@ -68,8 +69,6 @@ export function MessageList({
   assignmentSubmitted,
 }: MessageListProps) {
   const { t } = useTranslation("chat");
-  const { t: tn } = useTranslation("notification");
-  const { t: tl } = useTranslation("lesson");
   const ds = useDs();
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlashListRef<MessageRow>>(null);
@@ -106,11 +105,8 @@ export function MessageList({
   const [unread, setUnread] = useState(conversation.unreadCount ?? 0);
   const [dividerId, setDividerId] = useState<string | null>(conversation.firstUnreadMessageId ?? null);
 
-  const rows = useMemo(
-    () => buildMessageRows(messages ?? [], { days: !announcement, dividerId }),
-    [messages, announcement, dividerId]
-  );
-  const months = tl("list.months", { returnObjects: true }) as string[];
+  // Kun ajratgichlari e'lonlar kanalida ham (veb 2026-11-10 dan).
+  const rows = useMemo(() => buildMessageRows(messages ?? [], { dividerId }), [messages, dividerId]);
 
   useEffect(() => {
     if (search) setSearchCount(Math.max(matches.length, serverTotal));
@@ -146,17 +142,6 @@ export function MessageList({
     atBottomRef.current = bottom;
     setAtBottom(bottom);
     if (bottom) setUnread(0);
-  }
-
-  function dayLabel(value: string): string {
-    const date = new Date(value);
-    const today = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(today.getDate() - 1);
-    if (date.toDateString() === today.toDateString()) return t("list.today");
-    if (date.toDateString() === yesterday.toDateString()) return tn("groups.yesterday");
-    const label = `${date.getDate()}-${(months[date.getMonth()] ?? "").toLowerCase()}`;
-    return date.getFullYear() === today.getFullYear() ? label : `${label} ${date.getFullYear()}`;
   }
 
   function openActions(message: ChatMessage, bubble: View | null) {
@@ -227,7 +212,7 @@ export function MessageList({
         <View style={styles.separatorRow}>
           <View style={[styles.separator, { backgroundColor: ds.c.surface }]}>
             <DsText v="caption" c="ink-secondary">
-              {dayLabel(item.date)}
+              {formatDayLabel(item.date)}
             </DsText>
           </View>
         </View>

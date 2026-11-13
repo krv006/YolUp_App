@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { ROUTES } from "@/shared/config";
+import { FEATURES, ROUTES } from "@/shared/config";
 import type { ExamTemplate, QuizSummary } from "@/shared/types";
 import {
   DsText,
@@ -295,18 +295,20 @@ export function ExamCreateDialog({ open, pending = false, courses, templates, qu
           <DsText v="body-sm" w="500">
             {t("createDialog.noQuizzesShort")}
           </DsText>
-          <DsText
-            v="body-sm"
-            w="600"
-            c="brand"
-            accessibilityRole="link"
-            onPress={() => {
-              close();
-              router.push(ROUTES.teacher.workspaceAi as never);
-            }}
-          >
-            {t("createDialog.createWithAiShort")}
-          </DsText>
+          {FEATURES.aiAssistant ? (
+            <DsText
+              v="body-sm"
+              w="600"
+              c="brand"
+              accessibilityRole="link"
+              onPress={() => {
+                close();
+                router.push(ROUTES.teacher.workspaceAi as never);
+              }}
+            >
+              {t("createDialog.createWithAiShort")}
+            </DsText>
+          ) : null}
         </View>
       ) : null}
 

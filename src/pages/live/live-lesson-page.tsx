@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
 import * as ScreenCapture from "expo-screen-capture";
 import { LiveKitRoom, registerGlobals } from "@livekit/react-native";
+import { DisconnectReason, VideoPresets, type RoomOptions } from "livekit-client";
+import { Info } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { RateLessonSheet, useLesson } from "@/modules/lesson";
 import {
@@ -15,7 +19,8 @@ import {
   type LessonPreJoinChoices,
 } from "@/modules/live";
 import { ROUTES } from "@/shared/config";
-import { Screen, ScreenLoading, ThemeScope, toast } from "@/shared/ui";
+import { isOnline } from "@/shared/lib";
+import { DsText, dsRadius, Screen, ScreenLoading, ThemeScope, toast, useDs } from "@/shared/ui";
 import { LiveRoom } from "@/widgets/live-room/live-room";
 import { LiveRoomState } from "@/widgets/live-room/live-room-state";
 
@@ -27,6 +32,38 @@ import { LiveRoomState } from "@/widgets/live-room/live-room-state";
  * Render ichida chaqirilsa birinchi ulanish yiqiladi.
  */
 registerGlobals();
+
+/**
+ * Veb a4a6a70: adaptiveStream — tomoshabin faqat ko'rinib turgan o'lchamga mos
+ * qatlamni oladi; dynacast — hech kim ko'rmayotgan qatlam yuborilmaydi; kamera
+ * 540p@24 + 180p (2 qatlam). Modul darajasida — Room qayta yaratilmasin.
+ */
+const ROOM_OPTIONS: RoomOptions = {
+  adaptiveStream: true,
+  dynacast: true,
+  videoCaptureDefaults: { resolution: { ...VideoPresets.h540.resolution, frameRate: 24 } },
+  publishDefaults: { videoSimulcastLayers: [VideoPresets.h180] },
+};
+
+/*
+ * Veb bd11d31 — avtomatik qayta kirish: LiveKit o'zi qayta ulana olmay uzilsa
+ * ham foydalanuvchi darsdan chiqarilmaydi, yangi token bilan xona qayta
+ * yaratiladi. Kutish oraliqlari kengayib boradi (jami ~1,5 daqiqa).
+ * CLIENT_INITIATED yakuniy sabab EMAS: kutubxona qayta ulanish bekor
+ * bo'lganda ham shuni beradi; foydalanuvchining o'z chiqishi `leaving` bilan ajratiladi.
+ */
+const REJOIN_DELAYS_MS = [1_500, 3_000, 5_000, 8_000, 10_000, 15_000, 15_000, 20_000];
+const REJOIN_CONNECT_TIMEOUT_MS = 20_000;
+const FINAL_DISCONNECT_REASONS = new Set<DisconnectReason | undefined>([
+  DisconnectReason.DUPLICATE_IDENTITY,
+  DisconnectReason.PARTICIPANT_REMOVED,
+  DisconnectReason.ROOM_DELETED,
+  DisconnectReason.ROOM_CLOSED,
+  DisconnectReason.USER_REJECTED,
+  DisconnectReason.USER_UNAVAILABLE,
+]);
+
+type LiveToken = Awaited<ReturnType<typeof liveApi.getToken>>;
 
 /**
  * Jonli dars — veb `pages/live/live-lesson-page.tsx` porti.
@@ -48,6 +85,22 @@ export function LiveLessonPage() {
   const [ratePrompt, setRatePrompt] = useState(false);
   const [choices, setChoices] = useState<LessonPreJoinChoices | null>(null);
   const [delayElapsed, setDelayElapsed] = useState(false);
+  // Avtomatik qayta kirish: `session` o'zgarsa LiveKitRoom yangidan yaratiladi, `rejoinAttempt` > 0 bo'lsa banner ko'rinadi.
+  const [session, setSession] = useState(0);
+  const [freshToken, setFreshToken] = useState<LiveToken | null>(null);
+  const [rejoinAttempt, setRejoinAttempt] = useState(0);
+  const rejoining = useRef(false);
+  const rejoinAttempts = useRef(0);
+  const rejoinTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const rejoinStep = useRef<() => void>(() => undefined);
+  // Foydalanuvchi chiqayotgan (yoki ekran yopilayotgan) paytda CLIENT_INITIATED uzilishi qayta kirishni boshlamasin.
+  const leaving = useRef(false);
+  useLayoutEffect(() => {
+    leaving.current = false;
+    return () => {
+      leaving.current = true;
+    };
+  }, []);
 
   // Dars davomida ekran o'chmasin.
   useKeepAwake();
@@ -102,6 +155,7 @@ export function LiveLessonPage() {
 
   const refetchLesson = lesson.refetch;
   const handleLeave = useCallback(() => {
+    leaving.current = true;
     if (isTeacher.current) {
       goBack();
       return;
@@ -114,6 +168,78 @@ export function LiveLessonPage() {
       .catch(() => goBack());
   }, [goBack, refetchLesson]);
 
+  const stopRejoin = useCallback(() => {
+    clearTimeout(rejoinTimer.current);
+    rejoining.current = false;
+    rejoinAttempts.current = 0;
+    setRejoinAttempt(0);
+  }, []);
+
+  // Har chaqiruvda keyingi urinish: kutadi -> dars tugamaganini tekshiradi -> yangi token -> xonani qayta yaratadi.
+  // Ulanmasa (yoki yana uzilsa) qayta chaqiriladi; urinishlar tugasa avvalgidek darsdan chiqiladi.
+  useEffect(() => {
+    rejoinStep.current = () => {
+      clearTimeout(rejoinTimer.current);
+      const attempt = rejoinAttempts.current;
+      if (attempt >= REJOIN_DELAYS_MS.length) {
+        stopRejoin();
+        toast.error("Aloqa tiklanmadi — darsga qaytadan kiring");
+        handleLeave();
+        return;
+      }
+      rejoinAttempts.current = attempt + 1;
+      setRejoinAttempt(attempt + 1);
+      rejoinTimer.current = setTimeout(() => {
+        void (async () => {
+          try {
+            // Veb `navigator.onLine` o'rni — NetInfo'ning oxirgi ma'lum holati.
+            if (!isOnline()) throw new Error("offline");
+            const latest = await refetchLesson();
+            if (latest.data?.status === "finished") {
+              stopRejoin();
+              handleLeave();
+              return;
+            }
+            const next = await liveApi.getToken(lessonId as string);
+            setFreshToken(next);
+            setSession((current) => current + 1);
+            // Yangi xona shu vaqt ichida ulanmasa — yana urinamiz (`handleConnected` taymerni to'xtatadi).
+            rejoinTimer.current = setTimeout(() => rejoinStep.current(), REJOIN_CONNECT_TIMEOUT_MS);
+          } catch {
+            rejoinStep.current();
+          }
+        })();
+      }, REJOIN_DELAYS_MS[attempt]);
+    };
+  }, [handleLeave, lessonId, refetchLesson, stopRejoin]);
+
+  useEffect(() => () => clearTimeout(rejoinTimer.current), []);
+
+  const handleDisconnected = useCallback(
+    (reason?: DisconnectReason) => {
+      if (reason === DisconnectReason.PARTICIPANT_REMOVED) {
+        toast.error("Siz darsdan chetlashtirildingiz");
+        stopRejoin();
+        handleLeave();
+        return;
+      }
+      // Foydalanuvchi o'zi chiqyapti yoki qayta kirishda eski xona yangisi bilan almashyapti.
+      if (reason === DisconnectReason.CLIENT_INITIATED && (leaving.current || rejoining.current)) return;
+      if (FINAL_DISCONNECT_REASONS.has(reason)) {
+        stopRejoin();
+        handleLeave();
+        return;
+      }
+      rejoining.current = true;
+      rejoinStep.current();
+    },
+    [handleLeave, stopRejoin]
+  );
+
+  const handleConnected = useCallback(() => {
+    if (rejoining.current) stopRejoin();
+  }, [stopRejoin]);
+
   if (lesson.isLoading || token.isLoading)
     return (
       <ThemeScope scheme="dark">
@@ -123,7 +249,9 @@ export function LiveLessonPage() {
       </ThemeScope>
     );
 
-  if (lesson.isError || !lesson.data)
+  // 🟡 Vebda `lesson.isError || !lesson.data`. RN'da TanStack onlineManager tarmoqni bilmaydi: aloqa
+  // uzilganda 30 s'lik fon so'rovi xato bersa ham xonadan chiqarib yubormaslik uchun faqat ma'lumot yo'qligiga qaraladi.
+  if (!lesson.data)
     return (
       <LiveRoomState
         title={t("state.notFoundTitle")}
@@ -186,17 +314,57 @@ export function LiveLessonPage() {
       </ThemeScope>
     );
 
+  const liveToken = freshToken ?? token.data;
   return (
-    <LiveKitRoom
-      serverUrl={token.data.serverUrl}
-      token={token.data.token}
-      connect
-      audio={choices.micOn}
-      video={choices.cameraOn}
-      onDisconnected={handleLeave}
-      onError={(error) => toast.error(error.message)}
-    >
-      <LiveRoom lesson={lesson.data} isTeacher={token.data.isTeacher} onLeave={handleLeave} />
-    </LiveKitRoom>
+    <View style={styles.fill}>
+      <LiveKitRoom
+        key={session}
+        serverUrl={liveToken.serverUrl}
+        token={liveToken.token}
+        options={ROOM_OPTIONS}
+        connect
+        audio={choices.micOn}
+        video={choices.cameraOn}
+        onConnected={handleConnected}
+        onDisconnected={handleDisconnected}
+        // Qayta kirish paytidagi ulanish xatolari ko'rsatilmaydi — keyingi urinish o'zi boshlanadi.
+        onError={(error) => !rejoining.current && toast.error(error.message)}
+      >
+        <LiveRoom lesson={lesson.data} isTeacher={token.data.isTeacher} onLeave={handleLeave} />
+      </LiveKitRoom>
+      {rejoinAttempt > 0 ? <RejoinBanner /> : null}
+    </View>
   );
 }
+
+/** Qayta kirish banneri — veb `room.reconnectingMobile` (`role="status"`). */
+function RejoinBanner() {
+  const { t } = useTranslation("live");
+  const insets = useSafeAreaInsets();
+  return (
+    <ThemeScope scheme="dark">
+      <RejoinBannerBody label={t("room.reconnectingMobile")} top={insets.top + 72} />
+    </ThemeScope>
+  );
+}
+
+function RejoinBannerBody({ label, top }: { label: string; top: number }) {
+  const ds = useDs();
+  return (
+    <View accessibilityRole="alert" pointerEvents="none" style={[styles.rejoin, { top }]}>
+      <View style={[styles.rejoinBody, { backgroundColor: ds.c["warning-bg"] }]}>
+        <Info size={17} color={ds.c["warning-fg"]} />
+        <DsText v="body-sm" c="warning-fg" style={styles.shrink}>
+          {label}
+        </DsText>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  shrink: { flexShrink: 1 },
+  rejoin: { position: "absolute", left: 16, right: 16, zIndex: 30, alignItems: "center" },
+  rejoinBody: { flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: dsRadius.xl },
+});

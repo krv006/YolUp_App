@@ -78,6 +78,9 @@ export {
 export type { MobileButtonVariant, MobileEmptyCardProps, MobileListRowProps, MobileSegmentProps } from "./mobile-page";
 export { MobileScreenDialog } from "./mobile-screen-dialog";
 export { FileViewer } from "./file-viewer";
+export { FloatingWatermark } from "./floating-watermark";
+export { RoleTag } from "./role-tag";
+export { CheckboxMark } from "./checkbox-mark";
 export type { FileViewerProps } from "./file-viewer";
 export { RouteStatus } from "./route-status";
 export type { RouteStatusProps, RouteStatusTone } from "./route-status";

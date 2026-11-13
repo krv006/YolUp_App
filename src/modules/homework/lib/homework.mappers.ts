@@ -1,10 +1,25 @@
-import type { AiResult, Assignment, CourseHomeworkReport, GradingScale, HomeworkReport, HomeworkReportSummary, Submission } from "@/shared/types";
+import type {
+  AiResult,
+  Assignment,
+  CourseHomeworkReport,
+  GradingScale,
+  HomeworkAnswer,
+  HomeworkQuestion,
+  HomeworkReport,
+  HomeworkReportSummary,
+  Submission,
+} from "@/shared/types";
 import type {
   AiResultDto,
+  AssignFromBankInput,
+  AssignmentAudience,
+  AssignmentAudienceDto,
   AssignmentDto,
   AssignmentFormInput,
   HomeworkBoardDto,
+  HomeworkAnswerDto,
   HomeworkCourseReportDto,
+  HomeworkQuestionDto,
   HomeworkReportDto,
   SubmissionDto,
 } from "../api/homework.dto";
@@ -60,12 +75,42 @@ export function mapSubmissionDto(dto: SubmissionDto | null | undefined): Submiss
     resubmitComment: dto.resubmit_comment || "",
     comment: dto.comment || "",
     teacherComment: dto.teacher_comment || "",
-    files: (dto.files?.length ? dto.files : [{ name: dto.file_name, index: 0 }]).map((file, position) => ({
+    files: (dto.files ?? (dto.file_name ? [{ name: dto.file_name, index: 0 }] : [])).map((file, position) => ({
       name: file.name || dto.file_name || "",
       size: file.size ?? null,
       mimeType: file.mime || "",
       index: file.index ?? position,
     })),
+    answers: (dto.answers ?? []).map(mapHomeworkAnswerDto),
+    aiState: dto.ai_state ?? null,
+    aiSummary: dto.ai_summary?.trim() || null,
+    aiCheckingSince: dto.ai_checking_since ?? null,
+  };
+}
+
+export function mapHomeworkQuestionDto(dto: HomeworkQuestionDto): HomeworkQuestion {
+  return {
+    id: String(dto.id),
+    type: dto.type,
+    text: dto.text ?? "",
+    options: dto.options ?? [],
+    correct: dto.correct ?? null,
+    points: Number(dto.points ?? 1),
+  };
+}
+
+export function mapHomeworkAnswerDto(dto: HomeworkAnswerDto): HomeworkAnswer {
+  return {
+    questionId: String(dto.question_id),
+    type: dto.type,
+    text: dto.text ?? "",
+    options: dto.options ?? [],
+    points: Number(dto.points ?? 0),
+    answer: dto.answer ?? null,
+    score: dto.score ?? null,
+    correct: dto.correct ?? null,
+    isCorrect: typeof dto.is_correct === "boolean" ? dto.is_correct : null,
+    aiScore: dto.ai_score ?? null,
   };
 }
 
@@ -86,14 +131,29 @@ export function defaultMaxScore(grading: GradingScale): number {
 export function mapAssignmentDto(dto: AssignmentDto): Assignment {
   return {
     id: String(dto.id),
-    courseId: String(dto.course_id),
-    courseTitle: dto.course_title,
+    courseId: dto.course_id == null ? "" : String(dto.course_id),
+    courseTitle: dto.course_title ?? "",
     subject: dto.subject_label || dto.subject,
     title: dto.title,
     description: dto.description || "",
     body: dto.body || "",
     attachmentName: dto.attachment_name || "",
     hasAttachment: Boolean(dto.has_attachment),
+    googleFormUrl: dto.google_form_url || null,
+    isBank: dto.is_bank === true || dto.status === "bank",
+    sourceId: dto.source_id == null ? null : String(dto.source_id),
+    copiesCount: dto.copies_count ?? dto.copies?.length ?? null,
+    copies: (dto.copies ?? []).map((copy) => ({
+      id: String(copy.id),
+      courseId: copy.course_id == null ? "" : String(copy.course_id),
+      courseTitle: copy.course_title ?? "",
+      dueAt: copy.due_at ?? null,
+      submissionsCount: copy.submissions_count ?? 0,
+      studentIds: copy.student_ids?.length ? copy.student_ids.map(String) : null,
+      createdAt: copy.created_at ?? "",
+    })),
+    questionsCount: dto.questions_count ?? (dto.questions ? dto.questions.length : null),
+    studentIds: dto.student_ids?.length ? dto.student_ids.map(String) : null,
     dueAt: dto.due_at,
     skillKey: dto.skill_key || "",
     lessonId: dto.lesson_id == null ? null : String(dto.lesson_id),
@@ -104,14 +164,17 @@ export function mapAssignmentDto(dto: AssignmentDto): Assignment {
     submissions: (dto.submissions ?? [])
       .map(mapSubmissionDto)
       .filter((item): item is Submission => item !== null),
-    stats: dto.stats
-      ? {
-          studentsCount: dto.stats.students_count ?? null,
-          submittedCount: dto.stats.submitted_count ?? null,
-          averageScore: dto.stats.avg_score ?? null,
-        }
-      : null,
-    status: dto.status === "draft" ? "draft" : "active",
+    stats:
+      dto.stats || dto.students_count != null || dto.submitted_count != null
+        ? {
+            studentsCount: dto.students_count ?? dto.stats?.students_count ?? null,
+            submittedCount: dto.submitted_count ?? dto.stats?.submitted_count ?? null,
+            pendingReviewCount: dto.pending_review_count ?? null,
+            gradedCount: dto.graded_count ?? null,
+            averageScore: dto.stats?.avg_score ?? null,
+          }
+        : null,
+    status: dto.status === "draft" ? "draft" : dto.status === "bank" || dto.is_bank ? "bank" : "active",
     announceInChat: dto.announce_in_chat !== false,
     allowLate: dto.allow_late !== false,
     aiCheck: dto.ai_check !== false,
@@ -119,6 +182,9 @@ export function mapAssignmentDto(dto: AssignmentDto): Assignment {
     lessonStartsAt: dto.lesson_starts_at ?? null,
     grading: dto.grading ?? "five",
     maxScore: dto.max_score ?? defaultMaxScore(dto.grading ?? "five"),
+    questions: (dto.questions ?? []).map(mapHomeworkQuestionDto),
+    hasQuestions: Boolean(dto.has_questions ?? dto.questions?.length),
+    questionsPoints: Number(dto.questions_points ?? 0),
     groupStats: dto.group_stats
       ? { average: dto.group_stats.average ?? null, rank: dto.group_stats.rank ?? null, total: dto.group_stats.total ?? null }
       : null,
@@ -206,5 +272,35 @@ export function mapAssignmentRequest(form: AssignmentFormInput): FormData {
   if (form.grading) data.set("grading", form.grading);
   if (form.grading === "hundred" && form.maxScore) data.set("max_score", String(form.maxScore));
   if (form.file) data.set("attachment", form.file);
+  if (form.questions) data.set("questions", JSON.stringify(form.questions));
+  if (form.googleFormUrl !== undefined) data.set("google_form_url", form.googleFormUrl.trim());
   return data;
+}
+
+export function mapAssignmentAudienceDto(dto: AssignmentAudienceDto | null | undefined): AssignmentAudience {
+  const students = (dto?.students ?? []).map((student) => ({
+    id: String(student.id),
+    name: student.name || student.username || "",
+    username: student.username ?? "",
+    assigned: student.assigned !== false,
+    submitted: Boolean(student.submitted),
+  }));
+  return {
+    restricted: Boolean(dto?.restricted),
+    total: Number(dto?.total ?? students.length),
+    assignedCount: Number(dto?.assigned_count ?? students.filter((student) => student.assigned).length),
+    students,
+  };
+}
+
+export function assignFromBankBody(input: AssignFromBankInput): Record<string, unknown> {
+  return {
+    targets: input.targets.map(({ courseId, studentIds }) => ({
+      course_id: courseId,
+      ...(studentIds?.length ? { student_ids: studentIds } : {}),
+    })),
+    ...(input.dueAt ? { due_at: input.dueAt } : {}),
+    allow_late: input.allowLate,
+    announce_in_chat: input.announceInChat,
+  };
 }

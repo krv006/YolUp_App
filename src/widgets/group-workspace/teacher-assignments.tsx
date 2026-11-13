@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useCourse } from "@/modules/course";
 import { useAssignments, useDeleteAssignment } from "@/modules/homework";
 import { AssignmentDetailSheet } from "@/modules/homework/ui/assignment-detail-sheet";
@@ -8,11 +8,13 @@ import { useLessons } from "@/modules/lesson";
 import {
   AddQuizDialog,
   AssignQuizDialog,
+  PaidTestDialog,
   QuizAttemptsSheet,
   quizDisplayTitle,
   quizErrorMessage,
   useAssignQuizToCourse,
   useCreateQuiz,
+  usePaidTestGate,
   usePublishQuiz,
   useQuiz,
   useQuizAttempts,
@@ -22,15 +24,17 @@ import {
   useUploadGroupAudio,
 } from "@/modules/quiz";
 import type { Assignment, QuizImportWarning, QuizSummary } from "@/shared/types";
-import { ConfirmDialog, DsText, dsRadius, Icon, MobileEmptyCard, useDs } from "@/shared/ui";
+import { ConfirmDialog, dsRadius, MobileEmptyCard, useDs } from "@/shared/ui";
+import { AssignHomeworkDialog } from "@/widgets/homework-assign";
+import { AddAssignmentMenu } from "./add-assignment-menu";
 import { AddAssignmentSheet } from "./add-assignment-sheet";
 import { PanelHeading } from "./panel-heading";
 import { AddQuizMenu, MobileAssignmentList } from "./task-cards";
 
 /**
  * O'qituvchining guruh vazifalari — veb `group-workspace.tsx` dagi
- * `AssignmentsPanel` ning tor ekran varianti: "Vazifa berish" va "Test
- * qo'shish" menyusi, vazifa va test kartalari (`MobileAssignmentList`),
+ * `AssignmentsPanel` ning tor ekran varianti: "Vazifa berish" (yangi yoki
+ * bazadan) va "Test qo'shish" menyusi, vazifa va test kartalari (`MobileAssignmentList`),
  * bo'sh holat. Test oynalari va yangi vazifa formasi hozircha mobilning
  * mavjud oynalari (4b va 5-bosqichda yangilanadi).
  */
@@ -55,7 +59,9 @@ export function TeacherAssignments({
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [quizDialog, setQuizDialog] = useState(false);
+  const quizGate = usePaidTestGate();
   const [bankDialog, setBankDialog] = useState(false);
+  const [giveFromBank, setGiveFromBank] = useState(false);
   const [attemptsOf, setAttemptsOf] = useState<QuizSummary | null>(null);
   const [editQuizTarget, setEditQuizTarget] = useState<QuizSummary | null>(null);
   const [importedWarnings, setImportedWarnings] = useState<QuizImportWarning[]>([]);
@@ -108,20 +114,8 @@ export function TeacherAssignments({
         <PanelHeading eyebrow={t("assignments.eyebrow")} title={t("assignments.title")} subtitle={t("assignments.subtitleShort")} style={styles.heading} />
         {hasItems || loading ? (
           <View style={styles.buttons}>
-            {/* Ichki chet flex asosiga qo'shiladi (Yoga) — teng ustun uchun tugma o'ramda. */}
-            <View style={styles.half}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setDialog(true)}
-                style={({ pressed }) => [styles.primary, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}
-              >
-                <Icon name="add" size={16} color={ds.c["on-action"]} />
-                <DsText v="button" c="on-action" numberOfLines={1}>
-                  {t("assignments.addAssignment")}
-                </DsText>
-              </Pressable>
-            </View>
-            <AddQuizMenu onFromBank={() => setBankDialog(true)} onCreate={() => setQuizDialog(true)} />
+            <AddAssignmentMenu label={t("assignments.addAssignment")} onCreate={() => setDialog(true)} onFromBank={() => setGiveFromBank(true)} />
+            <AddQuizMenu onFromBank={() => setBankDialog(true)} onCreate={quizGate.guard(() => setQuizDialog(true))} createLocked={!quizGate.allowed} />
           </View>
         ) : null}
       </View>
@@ -221,6 +215,10 @@ export function TeacherAssignments({
         onSubmit={(value) => void assignQuiz.mutateAsync(value).then(() => setBankDialog(false))}
       />
 
+      <PaidTestDialog open={quizGate.open} onOpenChange={quizGate.setOpen} />
+
+      <AssignHomeworkDialog open={giveFromBank} onOpenChange={setGiveFromBank} courseId={courseId} />
+
       {quizDialog ? (
         <AddQuizDialog
           open
@@ -277,8 +275,6 @@ const styles = StyleSheet.create({
   heading: { flex: 0 },
   /* `grid grid-cols-2 gap-2.5` */
   buttons: { flexDirection: "row", gap: 10 },
-  half: { flexGrow: 1, flexShrink: 1, flexBasis: 0, minWidth: 0 },
-  primary: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingHorizontal: 16, borderRadius: 22 },
   skeletons: { gap: 12 },
   skeletonCard: { gap: 12, padding: 16, borderRadius: dsRadius.xl },
   skeletonHead: { flexDirection: "row", alignItems: "center", gap: 12 },

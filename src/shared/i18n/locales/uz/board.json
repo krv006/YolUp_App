@@ -42,7 +42,11 @@
     "toolbarAria": "Doska asboblari",
     "colorLabel": "Rang {{value}}",
     "widthLabel": "Qalinlik {{value}}",
-    "styleAria": "Rang va qalinlik"
+    "styleAria": "Rang va qalinlik",
+    "code": "Kod",
+    "select": "Tanlash",
+    "textSizeLabel": "Matn o'lchami: {{value}}",
+    "eraserSizeLabel": "O'chirg'ich o'lchami: {{value}}"
   },
   "inline": {
     "cancel": "Bekor qilish",
@@ -58,7 +62,14 @@
     "underline": "Tagiga chizish",
     "bulletList": "Belgili ro'yxat",
     "numberedList": "Raqamli ro'yxat",
-    "formatAria": "Matnni formatlash"
+    "formatAria": "Matnni formatlash",
+    "code": "Kod",
+    "save": "Saqlash",
+    "edit": {
+      "text": "Matnni tahrirlash",
+      "math": "Formulani tahrirlash",
+      "code": "Kodni tahrirlash"
+    }
   },
   "eraseDialog": {
     "title": "Elementni o‘chirish",
@@ -73,7 +84,8 @@
       "cleanup": "Doskani tozalash",
       "other": "Boshqa"
     },
-    "reasonPlaceholder": "Sababni yozing"
+    "reasonPlaceholder": "Sababni yozing",
+    "deletedCount": "{{count}} ta element o'chirildi"
   },
   "grantDialog": {
     "title": "Doskada chizish ruxsati",
@@ -213,5 +225,27 @@
     },
     "liveLesson": "Jonli dars",
     "menu": "Amallar"
+  },
+  "code": {
+    "language": "Dasturlash tili",
+    "detected": "Avto · {{language}}",
+    "counter": "{{count}}/{{max}}",
+    "aria": "Doskaga kod yozish",
+    "placeholder": "Kodni yozing…",
+    "hint": "Tab — 4 probel · Shift+Tab — chekinishni olish · Ctrl+Enter — tasdiqlash"
+  },
+  "edit": {
+    "notOwner": "Faqat o'zingiz yozgan elementni o'zgartira olasiz",
+    "editedBy": "{{name}} tahrirladi",
+    "toolbar": "Element amallari",
+    "edit": "Tahrirlash",
+    "delete": "O'chirish",
+    "sizeDown": "Kichiklashtirish",
+    "sizeUp": "Kattalashtirish"
+  },
+  "zoom": {
+    "in": "Kattalashtirish",
+    "out": "Kichiklashtirish",
+    "reset": "Asl o'lchamga qaytarish ({{value}}%)"
   }
 }

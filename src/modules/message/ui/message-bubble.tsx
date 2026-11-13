@@ -3,10 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Play } from "lucide-react-native";
-import { ROLES } from "@/shared/constants";
 import { formatMessageTime } from "@/shared/lib";
 import type { ChatMessage } from "@/shared/types";
-import { Avatar, dsAlpha, DsText, dsRadius, FileViewer, Icon, useDs, type DsColor } from "@/shared/ui";
+import { Avatar, dsAlpha, DsText, dsRadius, FileViewer, Icon, RoleTag, useDs, type DsColor } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
 import { useChatUiStore } from "../model/chat-ui.store";
 import { MessageAttachment } from "./message-attachment";
@@ -27,6 +26,8 @@ export interface MessageBubbleProps {
   /** Ketma-ket xabarlarda avatar faqat oxirgisida, ism faqat birinchisida. */
   showAvatar?: boolean;
   showName?: boolean;
+  /** Kanal posti: "N izoh" / "Izoh yozish" tugmasi (veb #182). */
+  onOpenThread?: (message: ChatMessage) => void;
 }
 
 const SENDER_COLORS: DsColor[] = ["action", "success-text", "saffron-strong", "link"];
@@ -173,7 +174,6 @@ export function MessageBubbleCard({ message, outgoing, showName = true, highligh
   const { t } = useTranslation("chat");
   const ds = useDs();
   const searchTerm = useChatUiStore((state) => state.search);
-  const isTeacherSender = message.senderRole === ROLES.TEACHER;
   const onAction = ds.c["on-action"];
   const meta = outgoing ? dsAlpha(onAction, 0.75) : ds.c["ink-tertiary"];
 
@@ -190,10 +190,10 @@ export function MessageBubbleCard({ message, outgoing, showName = true, highligh
     >
       {message.senderName && !outgoing && showName ? (
         <View style={styles.sender}>
-          {isTeacherSender ? <Icon name="school" size={13} color={ds.c[senderColor(message.senderId || message.senderName)]} /> : null}
-          <DsText v="caption-strong" c={senderColor(message.senderId || message.senderName)} numberOfLines={1}>
+          <DsText v="caption-strong" c={senderColor(message.senderId || message.senderName)} numberOfLines={1} style={styles.senderName}>
             {message.senderName}
           </DsText>
+          {message.senderRole === "teacher" || message.senderRole === "parent" ? <RoleTag role={message.senderRole} /> : null}
         </View>
       ) : null}
 
@@ -293,7 +293,9 @@ export function MessageBubble({
   highlighted = false,
   showAvatar = true,
   showName = true,
+  onOpenThread,
 }: MessageBubbleProps) {
+  const { t } = useTranslation("chat");
   const ds = useDs();
   const bubbleRef = useRef<View>(null);
   const outgoing = message.senderId === currentUserId;
@@ -318,6 +320,23 @@ export function MessageBubble({
       )}
       <View ref={bubbleRef} collapsable={false} style={styles.bubbleBox}>
         <MessageBubbleCard message={message} outgoing={outgoing} showName={showName} highlighted={highlighted} onReact={onReact} fill />
+        {onOpenThread && typeof message.commentCount === "number" && !selectionMode ? (
+          // `h-8 w-fit gap-1.5 rounded-full border border-line bg-surface px-3 text-caption-strong text-brand`
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onOpenThread(message)}
+            style={({ pressed }) => [
+              styles.thread,
+              outgoing ? styles.threadOutgoing : null,
+              { borderColor: ds.c.line, backgroundColor: pressed ? ds.c["brand-subtle"] : ds.c.surface },
+            ]}
+          >
+            <Icon name="chat-outline" size={14} color={ds.c.brand} />
+            <DsText v="caption-strong" c="brand">
+              {message.commentCount ? t("channel.comments", { count: message.commentCount }) : t("channel.writeComment")}
+            </DsText>
+          </Pressable>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -334,9 +353,12 @@ const styles = StyleSheet.create({
   avatarSlot: { width: 28, marginBottom: 4 },
   /* pufak o'lchami: `w-66 max-w-[85%]` (qator kengligidan) */
   bubbleBox: { width: 264, maxWidth: "85%" },
+  thread: { marginTop: 6, height: 32, alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderWidth: 1, borderRadius: 16 },
+  threadOutgoing: { alignSelf: "flex-end" },
   bubble: { width: 264, maxWidth: "85%", gap: 4, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8, borderRadius: dsRadius.lg },
   fill: { width: "100%", maxWidth: "100%" },
   sender: { flexDirection: "row", alignItems: "center", gap: 4 },
+  senderName: { flexShrink: 1 },
   /* `gap-0.5 rounded-lg border-l-2 py-1 pl-2.5` */
   reply: { gap: 2, paddingVertical: 4, paddingLeft: 10, paddingRight: 8, borderLeftWidth: 2, borderRadius: dsRadius.lg },
   meta: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 4 },

@@ -11,6 +11,7 @@ import {
   useCancelLesson,
   useCreateLesson,
   useCreateLessonSchedule,
+  useCreateLessonsBulk,
   useLessonReminder,
   useLessons,
 } from "@/modules/lesson";
@@ -42,6 +43,7 @@ export function SchedulePage() {
   const groupImages = useGroupImages(student ? "student" : "teacher");
   const createLesson = useCreateLesson();
   const createSchedule = useCreateLessonSchedule();
+  const createBulk = useCreateLessonsBulk();
   const cancelLesson = useCancelLesson();
   const reminder = useLessonReminder();
 
@@ -189,8 +191,9 @@ export function SchedulePage() {
             tone: course.color,
             image: course.avatarUrl ?? groupImages.get(course.id) ?? null,
           }))}
-          pending={createLesson.isPending || createSchedule.isPending}
+          pending={createLesson.isPending || createSchedule.isPending || createBulk.isPending}
           onSubmit={createFromDialog}
+          onSubmitBulk={(courseId, rows) => createBulk.mutateAsync({ courseId, rows }).then(() => setCreateOpen(false))}
         />
       )}
     </>

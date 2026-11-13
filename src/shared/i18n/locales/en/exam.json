@@ -28,12 +28,12 @@
     "openResult": "Result"
   },
   "parentList": {
-    "subtitle": "Exams in your child's groups. Results open once the exam is over.",
+    "subtitle": "Exams in your student's groups. Results open once the exam is over.",
     "resultTitle": "{{name}} — result",
     "hidden": "The result opens once the exam is over.",
-    "notInExam": "This exam doesn't belong to your child's group.",
-    "noChildTitle": "No child selected",
-    "noChildDescription": "Add a child first to see their exams."
+    "notInExam": "This exam doesn't belong to your student's group.",
+    "noChildTitle": "No student selected",
+    "noChildDescription": "Add a student first to see their exams."
   },
   "runner": {
     "loading": "Loading the exam",
@@ -316,7 +316,11 @@
       "shared": "Results were sent to the group chat ({{count}} students)",
       "averageLabel": "Average",
       "bySection": "Section averages"
-    }
+    },
+    "comment": "Teacher's note (optional)",
+    "commentPlaceholder": "e.g. Develop your ideas more in Writing Task 2",
+    "commentHint": "The student and observer will see it with the result",
+    "commentNeedsScore": "Enter a band for at least one section to save the note"
   },
   "results": {
     "eyebrow": "Mock exams / Results · {{title}} · {{label}}",
@@ -334,6 +338,7 @@
     "aiTitle": "AI review · by criteria",
     "aiHint": "Criterion scores come from the AI review — re-run it or grade manually.",
     "aiRetry": "Ask AI again",
-    "grade": "Grade"
+    "grade": "Grade",
+    "teacherComment": "Teacher's note"
   }
 }

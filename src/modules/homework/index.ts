@@ -15,11 +15,28 @@ export type {
   SubmissionDto,
   SubmissionReviewInput,
   ResubmitRequestInput,
+  HomeworkAnswerInput,
+  HomeworkQuestionInput,
 } from "./api/homework.dto";
 export { HOMEWORK_EXTENSIONS, HOMEWORK_MAX_FILE_SIZE, HOMEWORK_SKILLS } from "./constants/homework.constants";
 export { defaultMaxScore, mapAiResultDto, mapAssignmentDto, mapAssignmentRequest, mapHomeworkReportDto, mapSubmissionDto } from "./lib/homework.mappers";
 export { validateHomeworkFile } from "./lib/homework-validation";
-export { getHomeworkPollingInterval, homeworkKeys, useAssignmentAiSummary, useHomeworkAiStats, useRemindAssignment, useRequestResubmit, useAssignment, useAssignments, useSubmission, useCreateAssignment, useDeleteAssignment, useDownloadAssignmentFile, useHomeworkBoard, useHomeworkDraft, useSaveHomeworkDraft, useSaveHomeworkBoard, useSubmitHomeworkBoard, useDownloadSubmissionFile, useHomeworkReport, useRecheckSubmission, useReviewSubmission, useSubmitHomework, useUpdateAssignment } from "./model/homework.queries";
+export { getHomeworkPollingInterval, homeworkKeys, useAssignmentAiSummary, useHomeworkAiStats, useRemindAssignment, useRequestResubmit, useAssignment, useAssignments, useSubmission, useCreateAssignment, useDeleteAssignment, useDownloadAssignmentFile, useHomeworkBoard, useHomeworkDraft, useSaveHomeworkDraft, useSaveHomeworkBoard, useSubmitHomeworkBoard, useDownloadSubmissionFile, useHomeworkReport, useRecheckSubmission, useReviewSubmission, useSubmitHomework, useUpdateAssignment, useHomeworkBank, useAssignFromBank, useAssignmentAudience, useSetAssignmentAudience } from "./model/homework.queries";
+export { submissionAiState } from "./lib/submission-ai-state";
+export { googleFormUrlInvalid, isGoogleFormUrl } from "./lib/google-form";
+export {
+  draftsFromQuestions,
+  isTestQuestion,
+  questionIssue,
+  toQuestionInputs,
+  totalPoints,
+} from "./lib/homework-questions";
+export type { DraftQuestion } from "./lib/homework-questions";
+export { useQuestionDrafts } from "./model/use-question-drafts";
+export { answerInputs, isAnswered } from "./lib/homework-answers";
+export type { AnswerDraft } from "./lib/homework-answers";
+export { formatGradeValue, gradePercent } from "./lib/grade-display";
+export type { AssignFromBankInput, AssignmentAudience, AssignTarget } from "./api/homework.dto";
 export { useHomeworkBoardSource } from "./model/use-homework-board";
 export type { HomeworkBoardSaveState } from "./model/use-homework-board";
 

@@ -17,6 +17,9 @@ export type {
   QuizOptionDto,
   QuizQuestionDto,
   QuizSummaryDto,
+  QuizAssignInput,
+  QuizAudience,
+  QuizAudienceStudent,
 } from "./api/quiz.dto";
 export type { AiQuizJob, AiQuizRequest, AiQuizStandard } from "./api/quiz.dto";
 export {
@@ -33,6 +36,7 @@ export {
   mapQuizQuestionDto,
   mapQuizRequest,
   mapQuizSummaryDto,
+  mapQuizAudienceDto,
 } from "./lib/quiz.mappers";
 export {
   quizKeys,
@@ -59,7 +63,15 @@ export {
   useSubmitQuizAttempt,
   useUploadGroupAudio,
   useUpdateQuiz,
+  useStartQuiz,
+  useQuizAudience,
+  useSetQuizAudience,
 } from "./model/quiz.queries";
+export { useQuizLimitsText } from "./model/use-quiz-limits-text";
+export { useQuizCountdown } from "./model/use-quiz-countdown";
+export { useQuizSessionsLeft } from "./model/use-quiz-sessions";
+export { formatCountdown } from "./lib/countdown";
+export { usePaidTestGate } from "./model/use-paid-test-gate";
 export { blankTextForDisplay, emptyAnswer, stableShuffle } from "./lib/answer-value";
 export { groupQuestions } from "./lib/group-questions";
 export {
@@ -101,6 +113,11 @@ export { QuizExportDialog } from "./ui/quiz-export-dialog";
 export type { QuizExportDialogProps } from "./ui/quiz-export-dialog";
 export { QuizImportDialog } from "./ui/quiz-import-dialog";
 export type { QuizImportDialogProps } from "./ui/quiz-import-dialog";
+export type { QuizImportSource } from "./ui/quiz-import-dialog";
+export { QuizAudienceCard } from "./ui/quiz-audience-card";
+export type { QuizAudienceCardProps } from "./ui/quiz-audience-card";
+export { PaidTestDialog } from "./ui/paid-test-dialog";
+export type { PaidTestDialogProps } from "./ui/paid-test-dialog";
 export { AddQuizDialog } from "./ui/quiz-create-dialog";
 export type { AddQuizDialogProps } from "./ui/quiz-create-dialog";
 export { QuizPreview } from "./ui/quiz-preview";

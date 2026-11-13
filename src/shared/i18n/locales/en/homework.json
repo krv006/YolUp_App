@@ -15,7 +15,8 @@
     "unsupportedType": "This file type isn't supported",
     "allowedTypes": "Allowed: {{types}}",
     "audioOnlySpeaking": "Audio is only for Speaking assignments",
-    "fileTooLarge": "File is larger than 25 MB"
+    "fileTooLarge": "File is larger than 25 MB",
+    "fileOrComment": "Upload a file or write your answer in the comment"
   },
   "status": {
     "checking": "Checking",
@@ -41,7 +42,8 @@
     "scorePoints": "{{score}} pts",
     "downloadSubmissionAria": "Download the submitted file",
     "recheckAria": "Recheck",
-    "result": "Result"
+    "result": "Result",
+    "textAnswer": "Written answer"
   },
   "resultDialog": {
     "defaultTitle": "AI review result",
@@ -73,7 +75,12 @@
     "mistakes": "Mistakes",
     "suggestions": "Suggestions",
     "defaultFileName": "Submission",
-    "scoreRange": "The overall score must be between 0 and 100"
+    "scoreRange": "The overall score must be between 0 and 100",
+    "aiFailedTitle": "AI couldn’t grade this — grade it yourself",
+    "aiNone": "This submission wasn’t checked by AI. You set the grade.",
+    "checkingSince": "Checking since {{time}}",
+    "aiUnscoredTitle": "AI didn't give a score — grade it yourself",
+    "aiSummary": "AI summary"
   },
   "report": {
     "noGrade": "No grade",
@@ -142,7 +149,10 @@
     "announce": "Announce in the group chat",
     "announceHint": "The assignment card goes to the chat",
     "draft": "Draft",
-    "submit": "Send"
+    "submit": "Send",
+    "googleForm": "Google Form link (optional)",
+    "googleFormHint": "Students fill in the form, then submit here with a note",
+    "googleFormInvalid": "Use a Google Form link: forms.gle/…, forms.google.com/… or docs.google.com/forms/…"
   },
   "review": {
     "back": "Back",
@@ -167,12 +177,16 @@
     "matchesAi": "Matches AI",
     "comment": "Comment to the student",
     "commentPlaceholder": "Nice! Next time reduce the fraction fully.",
-    "shareParent": "Show the parent",
-    "shareParentHint": "The grade and comment appear in the parent app",
+    "shareParent": "Show the observer",
+    "shareParentHint": "The grade and comment appear in the observer app",
     "resubmit": "Return",
     "confirm": "Confirm",
     "studentComment": "Student's note",
-    "files": "Files · {{count}}"
+    "files": "Files · {{count}}",
+    "textAnswer": "Student’s written answer",
+    "aiFailed": "AI couldn’t grade this — grade it yourself",
+    "aiFailedHint": "Review the work and set the grade yourself",
+    "aiUnscored": "AI didn't give a score — grade it yourself"
   },
   "workspace": {
     "emptyTitle": "No homework yet",
@@ -229,8 +243,8 @@
     "draftBadge": "Draft",
     "filterDraftCount": "Drafts ({{count}})",
     "aiLoading": "Preparing...",
-    "remindParents": "Send to parents too",
-    "remindParentsHint": "Goes to the confirmed parents of students who have not submitted",
+    "remindParents": "Send to observers too",
+    "remindParentsHint": "Goes to the confirmed observers of students who have not submitted",
     "remindThrottleNote": "A reminder can be sent once every 10 minutes per assignment."
   },
   "messageCard": {
@@ -333,8 +347,8 @@
     "description": "{{count}} students get a notification in the app",
     "message": "Message",
     "defaultMessage": "“{{title}}” is due {{due}}. Please send your work.",
-    "parents": "Send to parents too",
-    "parentsHint": "Parents of students who haven't submitted get it as well",
+    "parents": "Send to observers too",
+    "parentsHint": "Observers of students who haven't submitted get it as well",
     "rate": "One reminder per assignment every 10 minutes.",
     "cancel": "Cancel",
     "submit": "Send"
@@ -383,5 +397,119 @@
     "close": "Close",
     "groupPlaceholder": "Choose a group",
     "dateValue": "{{weekday}}, {{month}} {{day}}"
+  },
+  "questions": {
+    "title": "Questions (optional)",
+    "summary": "{{count}} questions, {{points}} points in total",
+    "locked": "Students have already submitted — the questions can't be changed.",
+    "number": "Question {{n}}",
+    "typeLabel": "Question type",
+    "types": {
+      "single": "Test: one answer",
+      "multiple": "Test: several answers",
+      "short": "Short answer",
+      "long": "Long answer"
+    },
+    "points": "Points",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "remove": "Delete question {{n}}",
+    "textPlaceholder": "Question text",
+    "markOne": "Mark the correct answer",
+    "markMany": "Mark all correct answers",
+    "markCorrect": "Mark option {{n}} as correct",
+    "optionPlaceholder": "Option {{n}}",
+    "removeOption": "Delete option {{n}}",
+    "addOption": "Add option",
+    "shortHint": "The student answers with a short text. AI grades it if AI checking is on, otherwise you do.",
+    "longHint": "The student writes a detailed answer. AI grades it if AI checking is on, otherwise you do.",
+    "issues": {
+      "text": "Write the question text",
+      "options": "At least 2 filled options are needed",
+      "correct": "Mark the correct answer",
+      "points": "Points must be 1 to 1000"
+    },
+    "add": "Add question",
+    "fixIssues": "Fix the problems in the questions",
+    "answerTitle": "Questions",
+    "answered": "{{count}} of {{total}} answered",
+    "pointsValue_one": "{{count}} point",
+    "pointsValue_other": "{{count}} points",
+    "pickMany": "You can pick several answers",
+    "shortPlaceholder": "Your answer",
+    "longPlaceholder": "Write a detailed answer",
+    "filesOptional": "Attaching a file is optional",
+    "resultTitle": "Question results",
+    "resultTotal": "{{earned}} / {{total}} points",
+    "scoreAria": "Points for question {{n}}",
+    "yourChoice": "(your choice)",
+    "noAnswer": "No answer",
+    "aiScore": "AI score: {{score}}"
+  },
+  "googleForm": {
+    "open": "Open Google Form",
+    "hint": "Fill in the form, then submit here with a note"
+  },
+  "bank": {
+    "option": "No group — save to the bank",
+    "badge": "Bank assignment",
+    "save": "Save to the bank",
+    "saveHint": "Give it to groups later, with a deadline",
+    "formHint": "The assignment goes to the bank. Later you give it to groups or single students with a deadline.",
+    "saved": "Saved to the bank",
+    "assigned_one": "Given to {{count}} group",
+    "assigned_other": "Given to {{count}} groups",
+    "tab": "Bank",
+    "empty": "The bank is empty. When creating an assignment, pick «No group — save to the bank».",
+    "copies_one": "Given to {{count}} group",
+    "copies_other": "Given to {{count}} groups",
+    "notGiven": "Not given yet",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "give": "Give",
+    "assignTitle": "Give from the bank",
+    "assignDescription": "Pick a bank assignment and choose who gets it",
+    "assignAction": "Give",
+    "pickLabel": "Bank assignment",
+    "pick": "Choose",
+    "allowLate": "Allow late submissions",
+    "announceHint": "A chat card is posted only when the whole group gets it",
+    "cancel": "Cancel",
+    "fromBank": "Give from the bank",
+    "fromBankHint": "Give a ready assignment to this group with a deadline",
+    "newAssignment": "New assignment",
+    "newAssignmentHint": "Create an assignment for this group",
+    "formTitle": "Add to the bank",
+    "detailTitle": "This assignment is in the bank",
+    "detailHint": "Give it to one or more groups or single students with a deadline — each group gets its own copy, and submissions show up there.",
+    "groupsLabel": "Groups",
+    "groupsHint": "Tick a group to see its students, then untick anyone who shouldn't get it",
+    "studentsCount_one": "{{count}} student",
+    "studentsCount_other": "{{count}} students",
+    "loading": "Loading...",
+    "noGroups": "No groups",
+    "copiesTitle": "Given to groups · {{count}}",
+    "copyDue": "Due {{date}}",
+    "copyNoDue": "No deadline",
+    "copySubmitted": "{{count}} submitted",
+    "copyStudents_one": "{{count}} student",
+    "copyStudents_other": "{{count}} students",
+    "copyWholeGroup": "Whole group",
+    "copyNoGroup": "No group"
+  },
+  "audience": {
+    "title": "Given to",
+    "everyone_one": "All {{count}} student in the group",
+    "everyone_other": "All {{count}} students in the group",
+    "restricted": "{{count}} of {{total}} students",
+    "edit": "Change",
+    "editTitle": "Given to",
+    "editHint": "Unchecked students don't see the assignment and can't submit it",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "List saved",
+    "submitted": "Submitted",
+    "notSubmitted": "Not submitted",
+    "loading": "Loading…"
   }
 }

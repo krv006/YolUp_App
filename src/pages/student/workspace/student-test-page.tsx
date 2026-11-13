@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Animated, { cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCourse } from "@/modules/course";
 import {
   emptyAnswer,
+  formatCountdown,
   MathText,
   optionLetter,
   QuestionAnswerInput,
@@ -12,19 +15,23 @@ import {
   quizDisplayTitle,
   QuizGroupPanel,
   useQuiz,
+  useQuizCountdown,
   useQuizDraft,
   useSubmitQuizAttempt,
 } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import { storage } from "@/shared/lib";
 import type { QuizAnswerValue, QuizDetail, QuizQuestion } from "@/shared/types";
-import { ConfirmDialog, DsGradient, DsText, dsRadius, MobileActionBar, MobileButton, MobileEmptyCard, MobileRoundButton, toast, useDs } from "@/shared/ui";
+import { ConfirmDialog, DsGradient, DsText, dsRadius, Icon, MobileActionBar, MobileButton, MobileEmptyCard, MobileRoundButton, toast, useDs } from "@/shared/ui";
 import { rememberFreshResult } from "./fresh-results";
+import { TestAttemptsOver, TestStartScreen } from "./student-test-gate";
 
 interface Draft {
   answers: Record<string, QuizAnswerValue>;
   index: number;
   startedAt: number;
+  /** Vaqtli testda seans boshlangan payt (`started_at`) — qoralama shu seansga tegishli. */
+  session?: string;
 }
 
 const draftKey = (quizId: string) => `yolup.quiz-draft.${quizId}`;
@@ -72,11 +79,15 @@ function answered(value: QuizAnswerValue | undefined): boolean {
  * Test yechish — veb `student-test-page.tsx` (tor ekran): sarlavha
  * ("keyinroq" va "Tugatish"), savol raqamlari qatori, savol kartasi; pastda
  * "Oldingi" / "Keyingi". Javoblar qoralama sifatida saqlanadi (vebda
- * `localStorage`, mobilda `storage`).
+ * `localStorage`, mobilda `storage`). Vaqtli testda avval boshlash ekrani,
+ * urinishlar tugaganda alohida ekran (`student-test-gate.tsx`); boshlangan
+ * seansda sarlavha o'rnida server vaqti bo'yicha taymer, vaqt tugasa test
+ * o'zi topshiriladi.
  */
 export function StudentTestPage() {
   const { quizId = "" } = useLocalSearchParams<{ quizId: string }>();
   const quiz = useQuiz(quizId || null);
+  const course = useCourse(quiz.data?.courseId || null);
   const { t } = useTranslation("student");
   const ds = useDs();
   const insets = useSafeAreaInsets();
@@ -94,7 +105,40 @@ export function StudentTestPage() {
         <View style={[styles.loadingCard, { backgroundColor: ds.c.surface }]} />
       </View>
     );
-  return <TestPlayer key={quiz.data.id} quiz={quiz.data} />;
+  if (quiz.data.attemptsLeft === 0 && !quiz.data.questions.length) return <TestAttemptsOver quiz={quiz.data} />;
+  if (quiz.data.needsStart)
+    return <TestStartScreen quiz={quiz.data} meta={[quiz.data.subjectLabel, course.data?.title, course.data?.teacher].filter(Boolean).join(" · ")} />;
+  return <TestPlayer key={`${quiz.data.id}:${quiz.data.startedAt ?? ""}`} quiz={quiz.data} />;
+}
+
+/** Qolgan vaqt — `h-9 rounded-full px-3`; oxirgi daqiqada qizil va `animate-pulse`. */
+function TimerPill({ seconds }: { seconds: number }) {
+  const { t } = useTranslation("student");
+  const ds = useDs();
+  const urgent = seconds <= 60;
+  const opacity = useSharedValue(1);
+  useEffect(() => {
+    if (urgent) opacity.set(withRepeat(withTiming(0.5, { duration: 1000 }), -1, true));
+    else {
+      cancelAnimation(opacity);
+      opacity.set(1);
+    }
+  }, [urgent, opacity]);
+  const pulse = useAnimatedStyle(() => ({ opacity: opacity.get() }));
+  const color = urgent ? ds.c["error-text"] : ds.c.brand;
+  return (
+    <Animated.View
+      accessible
+      accessibilityRole="timer"
+      accessibilityLabel={t("workspace.player.timeLeft", { time: formatCountdown(seconds) })}
+      style={[styles.timer, { backgroundColor: urgent ? ds.c["danger-bg"] : ds.c["brand-subtle"] }, pulse]}
+    >
+      <Icon name="timer" size={16} color={color} />
+      <DsText v="body-sm" w="600" c={urgent ? "error-text" : "brand"} style={styles.tabular}>
+        {formatCountdown(seconds)}
+      </DsText>
+    </Animated.View>
+  );
 }
 
 function TestPlayer({ quiz }: { quiz: QuizDetail }) {
@@ -104,7 +148,15 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
   const insets = useSafeAreaInsets();
   const submit = useSubmitQuizAttempt();
   const questions = quiz.questions;
-  const [draft, setDraft] = useState<Draft>(() => storage.getJson<Draft>(draftKey(quiz.id)) ?? { answers: {}, index: 0, startedAt: Date.now() });
+  const session = quiz.startedAt ?? "";
+  const [draft, setDraft] = useState<Draft>(() => {
+    const stored = storage.getJson<Draft>(draftKey(quiz.id));
+    return stored && (stored.session ?? "") === session
+      ? stored
+      : { answers: {}, index: 0, startedAt: quiz.startedAt ? Date.parse(quiz.startedAt) : Date.now(), session };
+  });
+  const remaining = useQuizCountdown(quiz.endsAt);
+  const timeUpHandled = useRef(false);
   // Veb #162: javoblar serverga ham qoralama sifatida yoziladi — boshqa qurilmada davom ettirish uchun.
   const serverDraft = useQuizDraft(quiz.id);
   const [hydrated, setHydrated] = useState(false);
@@ -153,7 +205,7 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
       {
         quizId: quiz.id,
         answers: questions.map((item) => ({ questionId: item.id, answer: draft.answers[item.id] ?? emptyAnswer(item) })),
-        durationSeconds: Math.round((Date.now() - draft.startedAt) / 1000),
+        durationSeconds: Math.round((Date.now() - (quiz.startedAt ? Date.parse(quiz.startedAt) : draft.startedAt)) / 1000),
       },
       {
         onSuccess: (result) => {
@@ -169,6 +221,18 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
   }
 
   const requestFinish = () => (missing ? setConfirmOpen(true) : finish());
+
+  const onTimeUp = useEffectEvent(() => {
+    setConfirmOpen(false);
+    toast.info(t("workspace.player.timeUp"));
+    if (!submit.isPending) finish();
+  });
+
+  useEffect(() => {
+    if (remaining !== 0 || timeUpHandled.current) return;
+    timeUpHandled.current = true;
+    onTimeUp();
+  }, [remaining]);
   const last = index === questions.length - 1;
 
   return (
@@ -177,9 +241,15 @@ function TestPlayer({ quiz }: { quiz: QuizDetail }) {
         <DsGradient name="auth" />
         <View style={styles.header}>
           <MobileRoundButton icon="chevron-left" label={t("workspace.player.later")} onPress={later} />
-          <DsText v="title-lg" w="600" numberOfLines={1} style={styles.title}>
-            {quizDisplayTitle(quiz)}
-          </DsText>
+          {remaining === null ? (
+            <DsText v="title-lg" w="600" numberOfLines={1} style={styles.title}>
+              {quizDisplayTitle(quiz)}
+            </DsText>
+          ) : (
+            <View style={styles.timerSlot}>
+              <TimerPill seconds={remaining} />
+            </View>
+          )}
           <Pressable
             accessibilityRole="button"
             disabled={submit.isPending}
@@ -362,6 +432,10 @@ const styles = StyleSheet.create({
   page: { gap: 16, paddingHorizontal: 16, paddingBottom: 24 },
   header: { height: 44, flexDirection: "row", alignItems: "center", gap: 12 },
   title: { flex: 1, minWidth: 0, textAlign: "center" },
+  timerSlot: { flex: 1, minWidth: 0, alignItems: "center" },
+  /* `h-9 gap-1.5 rounded-full px-3` */
+  timer: { height: 36, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: dsRadius.full },
+  tabular: { fontVariant: ["tabular-nums"] },
   finish: { height: 44, justifyContent: "center", paddingHorizontal: 16, borderRadius: 22 },
   railScroller: { marginHorizontal: -16, flexGrow: 0 },
   rail: { gap: 8, paddingHorizontal: 16 },

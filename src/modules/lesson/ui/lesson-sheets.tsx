@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import type { Lesson } from "@/shared/types";
 import { formatDayTime } from "@/shared/lib";
 import {
   Avatar,
   Button,
+  CheckboxMark,
   ConfirmDialog,
+  DsText,
+  dsRadius,
   Input,
   ScreenEmpty,
   ScreenLoading,
@@ -14,8 +17,9 @@ import {
   Separator,
   Sheet,
   Text,
+  useDs,
 } from "@/shared/ui";
-import { useFinishLesson, useLessonRatings, useRateLesson } from "../model/lesson.queries";
+import { useFinishLesson, useLessonRatings, useRateLesson, useRecordingChoice } from "../model/lesson.queries";
 import { StarRating } from "./star-rating";
 
 /**
@@ -99,7 +103,13 @@ export function FinishLessonSheet({
   onLeaveOnly?: () => void;
 }) {
   const { t } = useTranslation("lesson");
+  const ds = useDs();
   const finish = useFinishLesson();
+  // Veb f6185c9 + e6503c8: "Video yozuvni guruhga yuborish"; darsga kirganda tanlangan bo'lsa qayta so'ralmaydi.
+  const choice = useRecordingChoice(lesson?.id ?? null).data;
+  const [postRecording, setPostRecording] = useState(true);
+  const decided = choice?.decided ? choice.postRecording : null;
+  const finalPost = decided ?? postRecording;
 
   /* Veb `finish-lesson-dialog.tsx` ning tor ekran varianti — markazdagi `ConfirmDialog` (brand). */
   return (
@@ -117,7 +127,7 @@ export function FinishLessonSheet({
       onConfirm={() => {
         if (!lesson) return;
         finish.mutate(
-          { id: lesson.id },
+          { id: lesson.id, postRecording: finalPost },
           {
             onSuccess: () => {
               onClose();
@@ -126,7 +136,33 @@ export function FinishLessonSheet({
           }
         );
       }}
-    />
+    >
+      {/* `rounded-md bg-subtle px-4 py-3 text-left` */}
+      {decided !== null ? (
+        <View style={[styles.post, { backgroundColor: ds.c.subtle }]}>
+          <DsText v="body-sm" c="ink-secondary">
+            {decided ? t("finishDialog.postRecordingDecided") : t("finishDialog.keepRecordingDecided")}
+          </DsText>
+        </View>
+      ) : (
+        <Pressable
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: postRecording }}
+          onPress={() => setPostRecording((value) => !value)}
+          style={[styles.post, { backgroundColor: ds.c.subtle }]}
+        >
+          <CheckboxMark checked={postRecording} size={20} />
+          <View style={styles.postText}>
+            <DsText v="body-sm" w="500">
+              {t("finishDialog.postRecording")}
+            </DsText>
+            <DsText v="caption" c="ink-secondary">
+              {postRecording ? t("finishDialog.postRecordingHint") : t("finishDialog.keepRecordingHint")}
+            </DsText>
+          </View>
+        </Pressable>
+      )}
+    </ConfirmDialog>
   );
 }
 
@@ -184,4 +220,6 @@ const styles = StyleSheet.create({
   rating: { flexDirection: "row", gap: 12, paddingVertical: 12 },
   ratingBody: { flex: 1, gap: 4 },
   finishIcon: { width: 44, height: 44, borderRadius: radius["2xl"], alignItems: "center", justifyContent: "center" },
+  post: { flexDirection: "row", alignItems: "flex-start", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.md },
+  postText: { flex: 1, minWidth: 0 },
 });

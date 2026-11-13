@@ -3,7 +3,9 @@
     "chat": "Чат",
     "lessons": "Уроки",
     "assignments": "Задания",
-    "attendance": "Посещаемость"
+    "attendance": "Посещаемость",
+    "progress": "Прогресс",
+    "members": "Участники"
   },
   "sendFailed": "Не удалось отправить сообщение",
   "replyFallback": "Ответ",
@@ -90,7 +92,9 @@
     "removeDialogDescription": "Ученик потеряет доступ к чату, занятиям и заданиям. Оценки и посещаемость сохранятся.",
     "cancel": "Отмена",
     "remove": "Удалить",
-    "removeConfirmTitle": "Удалить {{name}} из группы?"
+    "removeConfirmTitle": "Удалить {{name}} из группы?",
+    "message": "Написать",
+    "messageAria": "Написать {{name}}"
   },
   "attendance": {
     "eyebrow": "ОТЧЁТ ПО КУРСУ",
@@ -117,7 +121,12 @@
     "lessonsMeta": "Кто пришёл, кто нет",
     "untitledLesson": "Урок без темы",
     "lessonJoined": "{{joined}} / {{total}} присутствовали",
-    "lessonOpen": "Посмотреть посещаемость"
+    "lessonOpen": "Посмотреть посещаемость",
+    "exits_one": "{{count}} выход",
+    "exits_few": "{{count}} выхода",
+    "exits_many": "{{count}} выходов",
+    "exits_other": "{{count}} выхода",
+    "exitsHint": "Сколько раз уходили из окна урока"
   },
   "dialogs": {
     "lesson": {
@@ -176,7 +185,14 @@
       "timeShort": "Время",
       "startShort": "Начало",
       "durationMinutes": "Длительность (мин)",
-      "minutesValue": "{{count}} минут"
+      "minutesValue": "{{count}} минут",
+      "bulk": "Несколько уроков",
+      "bulkSubtitle": "Укажите тему и время каждого урока",
+      "short": {
+        "single": "Один раз",
+        "repeat": "Еженедельно",
+        "bulk": "Несколько"
+      }
     },
     "conflict": {
       "singleTitle": "У вас уже есть урок в это время",
@@ -218,7 +234,8 @@
         "reading": "Reading",
         "listening": "Listening",
         "speaking": "Speaking"
-      }
+      },
+      "descriptionLabel": "Описание задания"
     }
   },
   "addStudent": {
@@ -242,7 +259,7 @@
     "password": "Временный пароль",
     "copyPassword": "Скопировать пароль",
     "passwordCopied": "Пароль скопирован",
-    "parentPhone": "Телефон родителя · необязательно",
+    "parentPhone": "Телефон наблюдателя · необязательно",
     "createNote": "Отправьте логин и пароль ученику. При первом входе он сменит пароль.",
     "createSubmit": "Создать аккаунт",
     "requestsTitle": "Заявки на вступление · {{count}}",
@@ -252,7 +269,7 @@
     "decline": "Отклонить",
     "acceptAll": "Принять ({{count}})",
     "close": "Закрыть",
-    "parentFor": "Родитель · для {{name}}",
+    "parentFor": "Наблюдатель · для {{name}}",
     "createAccountShort": "Новый аккаунт ученика",
     "inviteShort": "Ссылка-приглашение",
     "copy": "Копировать"
@@ -328,5 +345,152 @@
     "delete": "Удалить",
     "results": "Результаты",
     "menu": "Действия"
+  },
+  "progress": {
+    "eyebrow": "ОТЧЁТ ПО УЧЕНИКАМ",
+    "title": "Прогресс учеников",
+    "fee": "Цена в месяц: {{amount}} сум",
+    "prevMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "statPaid": "Оплатили",
+    "statAttendance": "Посещаемость",
+    "statHomework": "Задания",
+    "filterAll": "Все",
+    "filterUnpaid": "Не оплатили",
+    "filterPaid": "Оплатили",
+    "filterEmpty": "Нет учеников по этому фильтру.",
+    "joined": "Присоединился: {{date}}",
+    "missed_one": "Не выполнено заданий: {{count}}",
+    "missed_few": "Не выполнено заданий: {{count}}",
+    "missed_many": "Не выполнено заданий: {{count}}",
+    "missed_other": "Не выполнено заданий: {{count}}",
+    "unpaidMonths_one": "Не оплачено месяцев: {{count}}",
+    "unpaidMonths_few": "Не оплачено месяцев: {{count}}",
+    "unpaidMonths_many": "Не оплачено месяцев: {{count}}",
+    "unpaidMonths_other": "Не оплачено месяцев: {{count}}",
+    "paid": "Оплачено",
+    "unpaid": "Не оплачено",
+    "markPaid": "Отметить как оплачено",
+    "undoPaid": "Снять отметку об оплате",
+    "markedPaid": "{{name}} — оплата отмечена",
+    "unmarked": "{{name}} — отметка об оплате снята",
+    "unmarkTitle": "Снять отметку об оплате?",
+    "unmarkDescription": "{{name}} — отметка «оплачено» за {{month}} будет удалена.",
+    "unmarkConfirm": "Снять",
+    "cancel": "Отмена",
+    "errorTitle": "Данные не загружены",
+    "errorDescription": "Не удалось загрузить прогресс. Попробуйте ещё раз.",
+    "retry": "Повторить",
+    "emptyTitle": "Учеников пока нет",
+    "emptyDescription": "Когда в группу добавятся ученики, здесь появятся их оплата, посещаемость и результаты заданий.",
+    "detail": {
+      "lessons": "Уроки",
+      "assignments": "Задания",
+      "payments": "Оплата",
+      "attended": "Был",
+      "absent": "Не был",
+      "minutes": "{{count}} мин",
+      "noLessons": "Завершённых уроков пока нет.",
+      "noAssignments": "Заданий пока нет.",
+      "due": "Срок: {{date}}",
+      "noDeadline": "Без срока",
+      "score": "{{value}} / 10",
+      "paidOn": "Оплачено: {{date}}",
+      "state": {
+        "done": "Проверено",
+        "awaiting_review": "На проверке",
+        "resubmit": "Сдать повторно",
+        "missed": "Не выполнено",
+        "not_submitted": "Не сдано"
+      },
+      "lateReason": "Причина опоздания: {{reason}}",
+      "absentReason": "Причина пропуска: {{reason}}",
+      "teacherNote": "Комментарий: {{note}}"
+    },
+    "gradeLabel": "Ср. балл",
+    "rangeLabel": "Период посещаемости",
+    "payment": {
+      "title": "Отметить оплату",
+      "editTitle": "Изменить оплату",
+      "amount": "Сумма",
+      "currency": "сум",
+      "note": "Комментарий (необязательно)",
+      "notePlaceholder": "Например: наличными, номер чека",
+      "notes": {
+        "cash": "Наличные",
+        "card": "Карта",
+        "transfer": "Перевод"
+      },
+      "save": "Сохранить",
+      "updated": "{{name}} — оплата обновлена",
+      "edit": "Изменить",
+      "sum": "{{amount}} сум",
+      "markShort": "Оплачено"
+    },
+    "noFee": "Цена курса не указана — оплаты не учитываются",
+    "currentMonth": "Вернуться к текущему месяцу",
+    "notJoinedYet": "Ещё не в группе",
+    "search": "Поиск ученика",
+    "sort": {
+      "label": "Сортировка",
+      "name": "Имя (А–Я)",
+      "attendance": "Мало посещений",
+      "homework": "Мало заданий",
+      "debt": "Больше долг"
+    },
+    "searchShort": "Поиск",
+    "resubmit_one": "На пересдачу: {{count}}",
+    "resubmit_few": "На пересдачу: {{count}}",
+    "resubmit_many": "На пересдачу: {{count}}",
+    "resubmit_other": "На пересдачу: {{count}}",
+    "neverVisited": "Ещё не был на занятии",
+    "inactive_one": "Не был на занятиях {{count}} день",
+    "inactive_few": "Не был на занятиях {{count}} дня",
+    "inactive_many": "Не был на занятиях {{count}} дней",
+    "inactive_other": "Не был на занятиях {{count}} дня",
+    "focusHint": "Фокус {{value}}%",
+    "awaitingHint_one": "На проверке: {{count}}",
+    "awaitingHint_few": "На проверке: {{count}}",
+    "awaitingHint_many": "На проверке: {{count}}",
+    "awaitingHint_other": "На проверке: {{count}}",
+    "statFocus": "Фокус",
+    "statAttendanceLessons": "Посещаемость · занятий: {{count}}",
+    "lastVisit": "Последнее посещение: {{date}}",
+    "noVisit": "Ещё не был на занятии",
+    "overdue": "Просрочено",
+    "unpaidBadge_one": "Не оплатил {{count}} ученик",
+    "unpaidBadge_few": "Не оплатили {{count}} ученика",
+    "unpaidBadge_many": "Не оплатили {{count}} учеников",
+    "unpaidBadge_other": "Не оплатили {{count}} ученика"
+  },
+  "club": {
+    "eyebrow": "Speaking club",
+    "membersTitle": "Участники · {{count}}",
+    "add": "Добавить участников",
+    "addHint": "Выберите группы или отдельных учеников — они будут добавлены сразу.",
+    "added": "Добавлено учеников: {{count}}",
+    "empty": "Участников пока нет"
+  },
+  "paymentSettings": {
+    "button": "Настройки оплаты",
+    "title": "Настройки оплаты",
+    "description": "Ежемесячная оплата, день оплаты и напоминания. Напоминание получают ученик и его наблюдатель.",
+    "fee": "Ежемесячная оплата (сум)",
+    "feePlaceholder": "Например, 450000",
+    "day": "День оплаты каждый месяц",
+    "noDay": "Не задан",
+    "dayOption": "{{day}}-е число",
+    "dayHint": "Если не оплачено до этого дня, ученик отмечается как «Просрочено».",
+    "reminders": "Отправлять напоминание",
+    "reminderOption_one": "за {{count}} день",
+    "reminderOption_few": "за {{count}} дня",
+    "reminderOption_many": "за {{count}} дней",
+    "reminderOption_other": "за {{count}} дня",
+    "remindersHint": "Можно выбрать несколько. Приходит только тем, кто не оплатил в этом месяце.",
+    "remindersNeedDay": "Сначала выберите день оплаты.",
+    "dueDay": "день оплаты: {{day}}-е",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "saved": "Настройки оплаты сохранены"
   }
 }

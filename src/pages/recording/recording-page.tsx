@@ -22,6 +22,7 @@ import {
   DsGradient,
   DsText,
   dsRadius,
+  FloatingWatermark,
   Icon,
   MobileEmptyCard,
   MobileRoundButton,
@@ -129,18 +130,22 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
       ? t("recording.recordingTitle")
       : recording?.status === "failed"
         ? t("recording.failedTitle")
-        : recording
-          ? t("recording.mergingTitle")
-          : t("recording.noneTitle");
+        : recording?.status === "converting"
+          ? t("recording.convertingTitle")
+          : recording
+            ? t("recording.mergingTitle")
+            : t("recording.noneTitle");
   const pendingNote =
     recording?.error ??
     (recording?.status === "recording"
       ? t("recording.recording")
       : recording?.status === "failed"
         ? t("recording.failed")
-        : recording
-          ? t("recording.mobileMerging")
-          : t("recording.none"));
+        : recording?.status === "converting"
+          ? t("recording.converting")
+          : recording
+            ? t("recording.mobileMerging")
+            : t("recording.none"));
   const pendingIcon: IconName = recording?.status === "failed" ? "error" : recording ? "hourglass-empty" : "videocam";
 
   async function downloadPdf() {
@@ -258,7 +263,7 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
               {pendingNote}
             </DsText>
           </View>
-          {recording && recording.status !== "failed" ? (
+          {recording && recording.status !== "failed" && recording.postToChat ? (
             <DsText v="caption" c="ink-secondary" style={styles.readyNote}>
               {t("recording.mobileReadyNote")}
             </DsText>
@@ -385,6 +390,8 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
   const { t } = useTranslation("lesson");
   const { t: tm } = useTranslation("mobile");
   const ds = useDs();
+  const { user } = useAuth();
+  const watermark = `@${user?.username || user?.name || "YolUp"} · YolUp`;
   const viewRef = useRef<VideoView>(null);
   const [started, setStarted] = useState(false);
   const [current, setCurrent] = useState(0);
@@ -482,6 +489,7 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
       />
       {/* Veb `<video poster>`: ijro boshlanguncha muqova rasmi. */}
       {poster && !started ? <Image source={{ uri: poster }} resizeMode="cover" style={StyleSheet.absoluteFill} /> : null}
+      <FloatingWatermark label={watermark} />
 
       {isPlaying ? (
         <Pressable accessibilityRole="button" accessibilityLabel={t("recording.pause")} onPress={toggle} style={StyleSheet.absoluteFill} />

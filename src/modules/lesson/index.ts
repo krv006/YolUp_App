@@ -45,7 +45,20 @@ export {
   useRateLesson,
   useLessonReminder,
   useUpdateLesson,
+  useCreateLessonsBulk,
+  useRecordingChoice,
+  useSetRecordingChoice,
 } from "./model/lesson.queries";
+export {
+  bulkRowErrors,
+  bulkRowsReady,
+  createBulkRow,
+  findBulkOverlaps,
+  isBulkRowInPast,
+  MAX_BULK_LESSONS,
+  nextBulkRow,
+} from "./lib/bulk-lessons";
+export type { BulkLessonRow } from "./lib/bulk-lessons";
 export { useLessonView, useLessonViewStore } from "./model/lesson-view.store";
 export type { LessonView } from "./model/lesson-view.store";
 export {
@@ -90,6 +103,8 @@ export type { LessonListProps } from "./ui/lesson-list";
 export { FinishLessonSheet, LessonRatingsSheet, RateLessonSheet } from "./ui/lesson-sheets";
 export { RatingSummary, StarRating } from "./ui/star-rating";
 export { LessonRatingForm } from "./ui/lesson-rating-form";
+export { BulkLessonRows } from "./ui/bulk-lesson-rows";
+export type { BulkLessonRowsProps } from "./ui/bulk-lesson-rows";
 export type { StarRatingProps } from "./ui/star-rating";
 
 export { useScheduleStore } from "./model/schedule.store";

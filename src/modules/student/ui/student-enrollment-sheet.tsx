@@ -93,7 +93,7 @@ export function StudentEnrollmentSheet({ open, onClose }: StudentEnrollmentSheet
 
       {pendingLinks.length > 0 ? (
         <>
-          <SectionLabel>Ota-ona so'rovlari</SectionLabel>
+          <SectionLabel>Kuzatuvchi so'rovlari</SectionLabel>
           {pendingLinks.map((link) => (
             <View key={link.id} style={styles.row}>
               <Avatar name={link.parent.name} tone="amber" size="md" />

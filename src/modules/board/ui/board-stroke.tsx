@@ -1,17 +1,11 @@
-import { memo, useMemo } from "react";
-import {
-  Circle,
-  Group,
-  Path,
-  Rect,
-  matchFont,
-  Skia,
-  Text as SkiaText,
-  type SkFont,
-} from "@shopify/react-native-skia";
-import type { Point, StrokeDto, StrokeShapeDto } from "../api/board.dto";
+import { memo } from "react";
+import { Circle, Group, Path, Rect, Skia, Text as SkiaText } from "@shopify/react-native-skia";
+import type { Point, StrokeShapeDto } from "../api/board.dto";
+import { BOARD_TEXT_SIZE } from "../constants/board.constants";
+import { TEXT_LINE_HEIGHT } from "../lib/board-flow";
 import { arrowHeadPoints, strokeKindOf } from "../lib/board.geometry";
-import { BOARD_FONT_FAMILY } from "./board-font";
+import { boardFont } from "./board-font";
+import { CodeBlock } from "./code-block";
 import { RichTextStroke } from "./rich-text-stroke";
 
 /**
@@ -78,15 +72,12 @@ function linePath(x1: number, y1: number, x2: number, y2: number, arrow?: boolea
 
 export interface BoardStrokeProps {
   stroke: StrokeShapeDto;
-  /** Matn uchun shrift — `useFont` bilan bir marta yuklanadi va uzatiladi. */
-  font: SkFont | null;
-  /** Tanlangan stroke ajratib ko'rsatiladi (o'chirish uchun). */
+  /** O'chirish kutilayotgan stroke ajratib ko'rsatiladi (sabab oynasi ochiq). */
   selected?: boolean;
 }
 
 export const BoardStroke = memo(function BoardStroke({
   stroke,
-  font,
   selected = false,
 }: BoardStrokeProps) {
   const color = stroke.color ?? DEFAULT_COLOR;
@@ -133,8 +124,8 @@ export const BoardStroke = memo(function BoardStroke({
     );
   }
 
-  if (stroke.type === "text" && font) {
-    const size = stroke.size ?? 20;
+  if (stroke.type === "text") {
+    const size = stroke.size ?? BOARD_TEXT_SIZE;
 
     /*
      * Formatlangan matn (qalin, kursiv, ro'yxat) alohida chiziladi —
@@ -154,7 +145,13 @@ export const BoardStroke = memo(function BoardStroke({
       );
     }
 
-    // Ko'p qatorli matn: Skia `\n` ni o'zi ajratmaydi.
+    /*
+     * Ko'p qatorli matn: Skia `\n` ni o'zi ajratmaydi. Shrift stroke
+     * o'lchamida va `600` qalinlikda, qator oralig'i `size × 1.35` — veb
+     * va PDF bilan bir xil (avval hamma matn 20px va 1.25 oraliqda edi,
+     * S/M/L/XL o'lchamlari telefonda ko'rinmasdi).
+     */
+    const font = boardFont(size);
     const lines = String(stroke.text ?? "").split("\n");
     return (
       <Group opacity={selected ? 0.45 : 1}>
@@ -162,7 +159,7 @@ export const BoardStroke = memo(function BoardStroke({
           <SkiaText
             key={index}
             x={stroke.x}
-            y={stroke.y + index * size * 1.25}
+            y={stroke.y + index * size * TEXT_LINE_HEIGHT}
             text={line}
             font={font}
             color={color}
@@ -172,6 +169,10 @@ export const BoardStroke = memo(function BoardStroke({
     );
   }
 
+  if (stroke.type === "code") {
+    return <CodeBlock stroke={stroke} color={color} opacity={selected ? 0.45 : 1} />;
+  }
+
   /*
    * Formula (`type: "math"`) Skia'da chizilmaydi — LaTeX render qilish uchun
    * matn dvigateli kerak. U `BoardMathLayer` da WebView orqali ustiga
@@ -179,65 +180,3 @@ export const BoardStroke = memo(function BoardStroke({
    */
   return null;
 });
-
-/** Matn strokelari uchun tizim shrifti — bir marta yuklanadi. */
-export function useBoardFont(size = 20) {
-  /*
-   * `matchFont`, `useFont(null, …)` EMAS.
-   *
-   * `useFont(null, size)` hujjatga ko'ra tizim shriftini beradi, lekin
-   * Androidda u `null` qaytaradi. Natijada `stroke.type === "text" && font`
-   * sharti hech qachon bajarilmasdi va DOSKADA MATN UMUMAN CHIZILMASDI —
-   * na oddiy, na formatlangan. Stroke serverda saqlanardi, ekranda esa
-   * ko'rinmasdi, ya'ni xato jim edi.
-   *
-   * `matchFont` tizim shriftini sinxron beradi va hech qachon `null`
-   * qaytarmaydi (`rich-text-stroke.tsx` allaqachon shundan foydalanadi).
-   */
-  return useMemo(() => matchFont({ fontFamily: BOARD_FONT_FAMILY, fontSize: size }), [size]);
-}
-
-/** Tanlash uchun: bosilgan nuqta shu stroke ustidami? */
-export function hitTestStroke(stroke: StrokeDto, [px, py]: Point, tolerance = 12): boolean {
-  const kind = strokeKindOf(stroke);
-
-  if (kind === "pen" || kind === "marker") {
-    const points = "points" in stroke ? (stroke.points ?? []) : [];
-    return points.some(([x, y]) => Math.hypot(x - px, y - py) <= tolerance);
-  }
-
-  if (stroke.type === "line") {
-    return distanceToSegment([px, py], [stroke.x1, stroke.y1], [stroke.x2, stroke.y2]) <= tolerance;
-  }
-
-  if (stroke.type === "rect" || stroke.type === "ellipse") {
-    return (
-      px >= stroke.x - tolerance &&
-      px <= stroke.x + stroke.w + tolerance &&
-      py >= stroke.y - tolerance &&
-      py <= stroke.y + stroke.h + tolerance
-    );
-  }
-
-  if (stroke.type === "text" || stroke.type === "math") {
-    const size = stroke.size ?? 20;
-    return (
-      px >= stroke.x - tolerance &&
-      px <= stroke.x + size * 12 &&
-      py >= stroke.y - size &&
-      py <= stroke.y + size
-    );
-  }
-
-  return false;
-}
-
-function distanceToSegment([px, py]: Point, [x1, y1]: Point, [x2, y2]: Point): number {
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const lengthSquared = dx * dx + dy * dy;
-  if (lengthSquared === 0) return Math.hypot(px - x1, py - y1);
-
-  const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / lengthSquared));
-  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
-}

@@ -38,3 +38,5 @@ export { TrendLineChart } from "./ui/trend-line-chart";
 export type { TrendLineChartProps, TrendLineSeries } from "./ui/trend-line-chart";
 export { TrendStackedBarChart } from "./ui/trend-stacked-bar-chart";
 export type { TrendBarSeries, TrendStackedBarChartProps } from "./ui/trend-stacked-bar-chart";
+export { ChartTooltip } from "./ui/chart-tooltip";
+export type { ChartTooltipProps, ChartTooltipRow } from "./ui/chart-tooltip";

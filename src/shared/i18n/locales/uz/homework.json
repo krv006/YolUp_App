@@ -15,7 +15,8 @@
     "unsupportedType": "Fayl turi qo'llab-quvvatlanmaydi",
     "allowedTypes": "Mumkin: {{types}}",
     "audioOnlySpeaking": "Audio faqat Speaking vazifasi uchun",
-    "fileTooLarge": "Fayl 25 MB dan katta"
+    "fileTooLarge": "Fayl 25 MB dan katta",
+    "fileOrComment": "Fayl yuklang yoki javobingizni izohga yozing"
   },
   "status": {
     "checking": "Tekshirilmoqda",
@@ -41,7 +42,8 @@
     "scorePoints": "{{score}} ball",
     "downloadSubmissionAria": "Topshirilgan faylni yuklab olish",
     "recheckAria": "Qayta tekshirish",
-    "result": "Natija"
+    "result": "Natija",
+    "textAnswer": "Matnli javob"
   },
   "resultDialog": {
     "defaultTitle": "AI tekshiruv natijasi",
@@ -73,7 +75,12 @@
     "mistakes": "Xatolar",
     "suggestions": "Tavsiyalar",
     "defaultFileName": "Topshiriq",
-    "scoreRange": "Umumiy ball 0 dan 100 gacha bo'lishi kerak"
+    "scoreRange": "Umumiy ball 0 dan 100 gacha bo'lishi kerak",
+    "aiFailedTitle": "AI baholay olmadi — o‘zingiz baholang",
+    "aiNone": "Bu topshiriq AI’da tekshirilmagan. Bahoni o‘zingiz qo‘yasiz.",
+    "checkingSince": "{{time}} dan beri tekshirilmoqda",
+    "aiUnscoredTitle": "AI ball qo‘ymadi — o‘zingiz baholang",
+    "aiSummary": "AI xulosasi"
   },
   "report": {
     "noGrade": "Baho yo'q",
@@ -142,7 +149,10 @@
     "announce": "Guruh chatida e’lon qilish",
     "announceHint": "Vazifa kartasi chatga yuboriladi",
     "draft": "Qoralama",
-    "submit": "Yuborish"
+    "submit": "Yuborish",
+    "googleForm": "Google Form havolasi (ixtiyoriy)",
+    "googleFormHint": "O‘quvchi formani ochib to‘ldiradi, so‘ng shu yerda izoh bilan topshiradi",
+    "googleFormInvalid": "Google Form havolasi kerak: forms.gle/…, forms.google.com/… yoki docs.google.com/forms/…"
   },
   "review": {
     "back": "Orqaga",
@@ -167,12 +177,16 @@
     "matchesAi": "AI bilan mos",
     "comment": "O‘quvchiga izoh",
     "commentPlaceholder": "Yaxshi! Keyingi safar kasrni oxirigacha qisqartiring.",
-    "shareParent": "Ota-onaga ham ko‘rsatish",
-    "shareParentHint": "Baho va izoh ota-ona ilovasida chiqadi",
+    "shareParent": "Kuzatuvchiga ham ko‘rsatish",
+    "shareParentHint": "Baho va izoh kuzatuvchi ilovasida chiqadi",
     "resubmit": "Qayta topshirish",
     "confirm": "Tasdiqlash",
     "studentComment": "O‘quvchi izohi",
-    "files": "Fayllar · {{count}}"
+    "files": "Fayllar · {{count}}",
+    "textAnswer": "O‘quvchining matnli javobi",
+    "aiFailed": "AI baholay olmadi — o‘zingiz baholang",
+    "aiFailedHint": "Topshiriqni ko‘rib chiqing va bahoni o‘zingiz qo‘ying",
+    "aiUnscored": "AI ball qo‘ymadi — o‘zingiz baholang"
   },
   "workspace": {
     "emptyTitle": "Hali vazifa berilmagan",
@@ -229,8 +243,8 @@
     "draftBadge": "Qoralama",
     "filterDraftCount": "Qoralama ({{count}})",
     "aiLoading": "Tayyorlanmoqda...",
-    "remindParents": "Ota-onalarga ham yuborish",
-    "remindParentsHint": "Topshirmagan o‘quvchilarning tasdiqlangan ota-onalariga boradi",
+    "remindParents": "Kuzatuvchilarga ham yuborish",
+    "remindParentsHint": "Topshirmagan o‘quvchilarning tasdiqlangan kuzatuvchilariga boradi",
     "remindThrottleNote": "Bir vazifaga 10 daqiqada bir marta eslatma yuborish mumkin."
   },
   "messageCard": {
@@ -333,8 +347,8 @@
     "description": "{{count}} ta o‘quvchiga ilovada bildirishnoma yuboriladi",
     "message": "Xabar",
     "defaultMessage": "“{{title}}” muddati {{due}} da tugaydi. Iltimos, javobingizni yuboring.",
-    "parents": "Ota-onalarga ham yuborish",
-    "parentsHint": "Topshirmaganlarning ota-onalariga ham boradi",
+    "parents": "Kuzatuvchilarga ham yuborish",
+    "parentsHint": "Topshirmaganlarning kuzatuvchilariga ham boradi",
     "rate": "Bir vazifaga 10 daqiqada bir marta eslatma yuborish mumkin.",
     "cancel": "Bekor qilish",
     "submit": "Yuborish"
@@ -383,5 +397,112 @@
     "close": "Yopish",
     "groupPlaceholder": "Guruhni tanlang",
     "dateValue": "{{weekday}}, {{day}}-{{month}}"
+  },
+  "questions": {
+    "title": "Savollar (ixtiyoriy)",
+    "summary": "{{count}} ta savol, jami {{points}} ball",
+    "locked": "Vazifa topshirilgan — savollarni o'zgartirib bo'lmaydi.",
+    "number": "{{n}}-savol",
+    "typeLabel": "Savol turi",
+    "types": {
+      "single": "Test: bitta javob",
+      "multiple": "Test: bir nechta javob",
+      "short": "Qisqa javob",
+      "long": "Uzun javob"
+    },
+    "points": "Ball",
+    "moveUp": "Yuqoriga",
+    "moveDown": "Pastga",
+    "remove": "{{n}}-savolni o'chirish",
+    "textPlaceholder": "Savol matnini yozing",
+    "markOne": "To'g'ri javobni belgilang",
+    "markMany": "Barcha to'g'ri javoblarni belgilang",
+    "markCorrect": "{{n}}-variantni to'g'ri deb belgilash",
+    "optionPlaceholder": "{{n}}-variant",
+    "removeOption": "{{n}}-variantni o'chirish",
+    "addOption": "Variant qo'shish",
+    "shortHint": "O'quvchi qisqa matn bilan javob beradi. AI tekshiruvi yoqilgan bo'lsa AI baholaydi, aks holda siz.",
+    "longHint": "O'quvchi batafsil javob yozadi. AI tekshiruvi yoqilgan bo'lsa AI baholaydi, aks holda siz.",
+    "issues": {
+      "text": "Savol matnini yozing",
+      "options": "Kamida 2 ta to'ldirilgan variant kerak",
+      "correct": "To'g'ri javobni belgilang",
+      "points": "Ball 1 dan 1000 gacha bo'lishi kerak"
+    },
+    "add": "Savol qo'shish",
+    "fixIssues": "Savollardagi kamchiliklarni to'g'rilang",
+    "answerTitle": "Savollar",
+    "answered": "{{count}} / {{total}} javob berildi",
+    "pointsValue": "{{count}} ball",
+    "pickMany": "Bir nechta javobni tanlash mumkin",
+    "shortPlaceholder": "Javobingiz",
+    "longPlaceholder": "Javobingizni batafsil yozing",
+    "filesOptional": "Fayl biriktirish ixtiyoriy",
+    "resultTitle": "Savollar natijasi",
+    "resultTotal": "{{earned}} / {{total}} ball",
+    "scoreAria": "{{n}}-savol uchun ball",
+    "yourChoice": "(tanlov)",
+    "noAnswer": "Javob berilmagan",
+    "aiScore": "AI bahosi: {{score}}"
+  },
+  "googleForm": {
+    "open": "Google Form’ni ochish",
+    "hint": "Formani to‘ldirgach, shu yerda izoh bilan topshiring"
+  },
+  "bank": {
+    "option": "Guruhsiz — bazaga saqlash",
+    "badge": "Bazadagi vazifa",
+    "save": "Bazaga saqlash",
+    "saveHint": "Guruhlarga keyin, muddat bilan beriladi",
+    "formHint": "Vazifa bazaga tushadi. Guruh(lar)ga yoki alohida o'quvchilarga keyin muddat bilan berasiz.",
+    "saved": "Vazifa bazaga saqlandi",
+    "assigned": "Vazifa {{count}} ta guruhga berildi",
+    "tab": "Baza",
+    "empty": "Bazada vazifa yo'q. Yangi vazifa yaratishda guruh o'rniga «Guruhsiz — bazaga saqlash»ni tanlang.",
+    "copies": "{{count}} ta guruhga berilgan",
+    "notGiven": "Hali berilmagan",
+    "questions": "{{count}} ta savol",
+    "give": "Berish",
+    "assignTitle": "Bazadan berish",
+    "assignDescription": "Bazadagi vazifani tanlang va kimlarga berishni belgilang",
+    "assignAction": "Berish",
+    "pickLabel": "Bazadagi vazifa",
+    "pick": "Tanlang",
+    "allowLate": "Muddatdan keyin ham topshirsa bo'ladi",
+    "announceHint": "Faqat butun guruhga berilganda chatga karta tushadi",
+    "cancel": "Bekor qilish",
+    "fromBank": "Bazadan berish",
+    "fromBankHint": "Tayyor vazifani shu guruhga muddat bilan berish",
+    "newAssignment": "Yangi vazifa",
+    "newAssignmentHint": "Yangi vazifa yaratib shu guruhga berish",
+    "formTitle": "Bazaga vazifa qo'shish",
+    "detailTitle": "Bu vazifa bazada",
+    "detailHint": "Uni bir yoki bir nechta guruhga yoki alohida o'quvchilarga muddat bilan bering — har guruh uchun alohida nusxa yaratiladi, topshiriqlar o'sha nusxada ko'rinadi.",
+    "groupsLabel": "Guruhlar",
+    "groupsHint": "Guruhni belgilang — o'quvchilar ro'yxati ochiladi, kerak bo'lmaganini olib tashlang",
+    "studentsCount": "{{count}} o'quvchi",
+    "loading": "Yuklanmoqda...",
+    "noGroups": "Guruhlar yo'q",
+    "copiesTitle": "Berilgan guruhlar · {{count}}",
+    "copyDue": "Muddat: {{date}}",
+    "copyNoDue": "Muddatsiz",
+    "copySubmitted": "{{count}} ta topshirdi",
+    "copyStudents": "{{count}} ta o'quvchiga",
+    "copyWholeGroup": "Butun guruhga",
+    "copyNoGroup": "Guruhsiz"
+  },
+  "audience": {
+    "title": "Kimlarga berilgan",
+    "everyone": "Guruhdagi hamma {{count}} o'quvchiga",
+    "restricted": "{{total}} tadan {{count}} ta o'quvchiga",
+    "edit": "O'zgartirish",
+    "editTitle": "Kimlarga berilgan",
+    "editHint": "Belgilanmagan o'quvchilar vazifani ko'rmaydi va topshira olmaydi",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "saved": "Ro'yxat saqlandi",
+    "submitted": "Topshirgan",
+    "notSubmitted": "Topshirmagan",
+    "loading": "Yuklanmoqda…"
   }
 }

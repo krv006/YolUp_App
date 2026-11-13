@@ -1,5 +1,6 @@
 export const liveEndpoints = Object.freeze({
   token: "/api/v1/live/token/",
+  clientHealth: (lessonId: string) => `/api/v1/live/lesson/${lessonId}/client-health/`,
   leave: "/api/v1/live/leave/",
   attention: "/api/v1/live/attention/",
   focus: "/api/v1/live/focus/",
@@ -14,6 +15,9 @@ export const liveEndpoints = Object.freeze({
   ban: "/api/v1/live/ban/",
   unban: "/api/v1/live/unban/",
   muteAll: "/api/v1/live/mute-all/",
+  cameraOffAll: "/api/v1/live/camera-off-all/",
+  releaseMedia: "/api/v1/live/release-media/",
+  mediaMode: (lessonId: string) => `/api/v1/live/lesson/${lessonId}/media-mode/`,
   presence: (lessonId: string) => `/api/v1/live/lesson/${lessonId}/presence/`,
   micRequest: (lessonId: string) => `/api/v1/live/lesson/${lessonId}/mic-request/`,
   cameraRequest: (lessonId: string) => `/api/v1/live/lesson/${lessonId}/camera-request/`,

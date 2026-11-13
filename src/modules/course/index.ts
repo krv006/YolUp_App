@@ -18,8 +18,10 @@ export type {
   EnrollmentDto,
   EnrollPayload,
   SubjectOptionDto,
+  ClubDto,
+  CoursePaymentSettings,
 } from "./api/course.dto";
-export { mapCourseDto, mapCoursePage, mapCourseRequest, mapCourseUserDto, mapEnrollmentDto } from "./lib/course.mappers";
+export { mapClubDto, mapCourseDto, mapCoursePage, mapCourseRequest, mapCourseUserDto, mapEnrollmentDto } from "./lib/course.mappers";
 export {
   courseKeys,
   useCourse,
@@ -44,4 +46,15 @@ export {
   useUnenrollStudent,
   useUpdateCourse,
   useUpdateCourseAvatar,
+  useUpdateCoursePayments,
 } from "./model/course.queries";
+export { clubApi } from "./api/club.api";
+export type { ClubAudience, ClubInput } from "./api/club.api";
+export {
+  clubKeys,
+  useAddClubMembers,
+  useClubMembers,
+  useClubs,
+  useCreateClub,
+  useRemoveClubMember,
+} from "./model/club.queries";

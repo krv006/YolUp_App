@@ -21,6 +21,8 @@ import {
   mapLessonRecordingDto,
   mapLessonRequest,
 } from "../lib/lesson.mappers";
+import { bulkLessonsRequest, type BulkLessonRow } from "../lib/bulk-lessons";
+import { mapRecordingChoice, type RecordingChoice } from "../lib/recording-choice";
 
 function isMissingRatingApi(error: unknown): boolean {
   return (
@@ -82,6 +84,11 @@ export const lessonApi = {
       throw error;
     }
   },
+  async createBulk(courseId: string, rows: readonly BulkLessonRow[]) {
+    const dto = await apiClient.post<LessonScheduleResponseDto>(lessonEndpoints.bulk, bulkLessonsRequest(courseId, rows));
+    const lessons = (dto?.lessons ?? []).map(mapLessonDto);
+    return { count: Number(dto?.count ?? lessons.length), lessons };
+  },
   async createMany(dates: readonly string[], form: LessonFormInput) {
     const created: Lesson[] = [];
     const failed: Array<{ date: string; message: string }> = [];
@@ -112,13 +119,21 @@ export const lessonApi = {
     await apiClient.delete(lessonEndpoints.detail(id));
     return id;
   },
-  async finish(id: string, recordingTitle?: string) {
-    const title = recordingTitle?.trim();
+  async finish(id: string, options: { recordingTitle?: string; postRecording?: boolean } = {}) {
+    const title = options.recordingTitle?.trim();
     return mapLessonDto(
-      await apiClient.post<LessonDto>(
-        lessonEndpoints.finish(id),
-        title ? { recording_title: title } : {}
-      )
+      await apiClient.post<LessonDto>(lessonEndpoints.finish(id), {
+        ...(title ? { recording_title: title } : {}),
+        ...(options.postRecording === undefined ? {} : { post_recording: options.postRecording }),
+      })
+    );
+  },
+  async getRecordingChoice(id: string, options?: RequestOptions): Promise<RecordingChoice> {
+    return mapRecordingChoice(await apiClient.get<unknown>(lessonEndpoints.recordingChoice(id), options));
+  },
+  async setRecordingChoice(id: string, postRecording: boolean): Promise<RecordingChoice> {
+    return mapRecordingChoice(
+      await apiClient.patch<unknown>(lessonEndpoints.recordingChoice(id), { post_recording: postRecording })
     );
   },
   async getRecording(id: string, options?: RequestOptions) {

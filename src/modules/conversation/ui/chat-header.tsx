@@ -6,7 +6,7 @@ import { useChatUiStore } from "@/modules/message/model/chat-ui.store";
 import { PinnedMessageBar } from "@/modules/message/ui/pinned-message-bar";
 import { useOnlineStatus } from "@/shared/model";
 import type { Conversation } from "@/shared/types";
-import { Avatar, bodyFont, DsText, dsRadius, dsType, GroupTile, Icon, MobileRoundButton, useDs } from "@/shared/ui";
+import { Avatar, bodyFont, DsText, dsRadius, dsType, GroupTile, Icon, MobileRoundButton, RoleTag, useDs } from "@/shared/ui";
 
 export interface ChatHeaderProps {
   conversation: Conversation;
@@ -138,9 +138,12 @@ export function ChatHeader({ conversation, onBack, onOpenInfo, onVoice, workspac
               <Avatar variant="legacy" name={conversation.title} tone={conversation.avatarTone} src={conversation.imageUrl} size="md" status={conversation.status} />
             )}
             <View style={styles.grow}>
-              <DsText v="title" numberOfLines={1}>
-                {conversation.title}
-              </DsText>
+              <View style={styles.titleRow}>
+                <DsText v="title" numberOfLines={1} style={styles.titleText}>
+                  {conversation.title}
+                </DsText>
+                {conversation.type === "direct" ? <RoleTag role={conversation.participant?.role} /> : null}
+              </View>
               <DsText v="body-xs" c="ink-secondary" numberOfLines={1}>
                 {subtitle}
               </DsText>
@@ -172,6 +175,8 @@ export function ChatHeader({ conversation, onBack, onOpenInfo, onVoice, workspac
 
 const styles = StyleSheet.create({
   grow: { flex: 1, minWidth: 0 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8, minWidth: 0 },
+  titleText: { flexShrink: 1 },
   pressed: { opacity: 0.8 },
   /* `items-center gap-3 bg-surface px-4 pt-5 pb-3` */
   selection: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 20, paddingBottom: 12 },

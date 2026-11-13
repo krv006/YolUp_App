@@ -3,8 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { AssignmentFormInput } from "@/modules/homework";
-import type { GradingScale } from "@/shared/types";
+import { googleFormUrlInvalid, useQuestionDrafts, type AssignmentFormInput } from "@/modules/homework";
+import { GoogleFormField } from "@/modules/homework/ui/google-form-field";
+import { QuestionsEditor } from "@/modules/homework/ui/questions-editor";
+import type { GradingScale, HomeworkQuestion } from "@/shared/types";
 import {
   bodyFont,
   DsGradient,
@@ -18,6 +20,7 @@ import {
   MobilePickerField,
   MobileRoundButton,
   Switch,
+  toast,
   toneColors,
   useDs,
   type IconName,
@@ -28,6 +31,8 @@ export interface AssignmentFormDialogProps {
   onOpenChange: (open: boolean) => void;
   courses: ReadonlyArray<{ id: string; title: string; studentCount: number }>;
   pending?: boolean;
+  /** Yangi vazifa guruhsiz (bazaga) yaratiladi — "Baza" bo'limidan ochilganda. */
+  bank?: boolean;
   initial?: {
     courseId: string;
     title: string;
@@ -36,12 +41,17 @@ export interface AssignmentFormDialogProps {
     grading: GradingScale;
     announceInChat: boolean;
     aiCheck?: boolean;
+    googleFormUrl?: string | null;
+    questions?: HomeworkQuestion[];
+    questionsLocked?: boolean;
   } | null;
   onSubmit: (values: AssignmentFormInput) => void;
 }
 
 const GRADINGS: GradingScale[] = ["five", "hundred", "none"];
 const FORMAT_BUTTONS: IconName[] = ["format-bold", "format-italic", "format-underlined", "format-list-bulleted", "link", "functions"];
+/** Guruh tanlovidagi "Guruhsiz — bazaga saqlash" qiymati. */
+const BANK_VALUE = "__bank__";
 
 function today(): string {
   const date = new Date();
@@ -51,10 +61,21 @@ function today(): string {
 /**
  * Yangi vazifa / tahrirlash — veb `assignment-form-dialog.tsx` ning tor
  * ekran varianti (to'liq ekran): guruh, nom, matn (formatlash panelli),
- * muddat sanasi va vaqti, baholash, AI tekshiruv va chatga e'lon; pastda
- * "Qoralama" va "Yuborish". To'ldirilmagan majburiy maydonlar qizil.
+ * muddat sanasi va vaqti, baholash, Google Form havolasi, savollar, AI
+ * tekshiruv va chatga e'lon; pastda "Qoralama" va "Yuborish". To'ldirilmagan
+ * majburiy maydonlar qizil. Guruh o'rniga "Guruhsiz — bazaga saqlash"
+ * tanlansa muddat, e'lon va qoralama yo'q, tugma "Bazaga saqlash";
+ * bazadagi vazifani tahrirlashda guruh o'rnida "Bazadagi vazifa" belgisi.
  */
-export function AssignmentFormDialog({ open, onOpenChange, courses, pending = false, initial = null, onSubmit }: AssignmentFormDialogProps) {
+export function AssignmentFormDialog({
+  open,
+  onOpenChange,
+  courses,
+  pending = false,
+  bank = false,
+  initial = null,
+  onSubmit,
+}: AssignmentFormDialogProps) {
   const { t } = useTranslation("homework");
   const common = useTranslation("common").t;
   const ds = useDs();
@@ -62,6 +83,8 @@ export function AssignmentFormDialog({ open, onOpenChange, courses, pending = fa
   const weekdays = common("formPickers.weekdays", { returnObjects: true }) as string[];
   const months = common("formPickers.months", { returnObjects: true }) as string[];
   const [courseId, setCourseId] = useState(initial?.courseId ?? "");
+  const [inBank, setInBank] = useState(initial ? !initial.courseId : bank);
+  const lockedBank = Boolean(initial) && inBank;
   const [title, setTitle] = useState(initial?.title ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
   const [date, setDate] = useState(() => initial?.dueAt?.slice(0, 10) ?? today());
@@ -69,29 +92,53 @@ export function AssignmentFormDialog({ open, onOpenChange, courses, pending = fa
   const [grading, setGrading] = useState<GradingScale>(initial?.grading ?? "five");
   const [aiCheck, setAiCheck] = useState(initial?.aiCheck ?? true);
   const [announce, setAnnounce] = useState(initial?.announceInChat ?? true);
+  const [googleFormUrl, setGoogleFormUrl] = useState(initial?.googleFormUrl ?? "");
   const [touched, setTouched] = useState(false);
+  const questions = useQuestionDrafts(initial?.questions ?? [], {
+    editing: Boolean(initial),
+    locked: Boolean(initial?.questionsLocked),
+  });
 
   const course = courses.find((item) => item.id === courseId) ?? null;
-  const missing = [!courseId, !title.trim()].filter(Boolean).length;
+  const missing = [!courseId && !inBank, !title.trim()].filter(Boolean).length;
   const invalid = touched && missing > 0;
   const titleMissing = invalid && !title.trim();
+  const groupValue = inBank ? BANK_VALUE : courseId;
+  const groupOptions = [
+    { value: BANK_VALUE, label: t("bank.option") },
+    ...courses.map((item) => ({ value: item.id, label: `${item.title} · ${t("form.students", { count: item.studentCount })}` })),
+  ];
+
+  function pickGroup(value: string) {
+    setInBank(value === BANK_VALUE);
+    setCourseId(value === BANK_VALUE ? "" : value);
+    setTouched(false);
+  }
 
   function save(status: "draft" | "active") {
     if (missing) {
       setTouched(true);
       return;
     }
+    if (googleFormUrlInvalid(googleFormUrl)) {
+      toast.error(t("form.googleFormInvalid"));
+      return;
+    }
+    if (!questions.validate()) {
+      toast.error(t("questions.fixIssues"));
+      return;
+    }
     onSubmit({
-      courseId,
+      questions: questions.payload(),
+      courseId: inBank ? "" : courseId,
       title: title.trim(),
       description: "",
       body,
-      dueAt: `${date}T${time || "23:59"}`,
-      status,
-      announceInChat: announce,
+      ...(inBank ? {} : { dueAt: `${date}T${time || "23:59"}`, status, announceInChat: announce }),
       allowLate: true,
       aiCheck,
       grading,
+      googleFormUrl: googleFormUrl.trim(),
     });
   }
 
@@ -112,7 +159,7 @@ export function AssignmentFormDialog({ open, onOpenChange, courses, pending = fa
           <View style={styles.header}>
             <MobileRoundButton icon="close" label={t("mobileForm.close")} onPress={() => onOpenChange(false)} />
             <DsText v="title-lg" w="600" numberOfLines={1} style={styles.headerTitle}>
-              {initial ? t("mobileForm.editTitle") : t("mobileForm.title")}
+              {initial ? t("mobileForm.editTitle") : inBank ? t("bank.formTitle") : t("mobileForm.title")}
             </DsText>
             <View style={styles.spacer} />
           </View>
@@ -126,25 +173,35 @@ export function AssignmentFormDialog({ open, onOpenChange, courses, pending = fa
             </View>
           ) : null}
 
-          <MobileFieldLabel label={<RequiredLabel>{t("form.group")}</RequiredLabel>}>
-            <MobilePickerField
-              type="select"
-              surface
-              value={courseId}
-              invalid={invalid && !courseId}
-              placeholder={!course}
-              display={course ? `${course.title} · ${t("form.students", { count: course.studentCount })}` : t("mobileForm.groupPlaceholder")}
-              ariaLabel={t("form.group")}
-              options={[
-                { value: "", label: t("mobileForm.groupPlaceholder") },
-                ...courses.map((item) => ({ value: item.id, label: `${item.title} · ${t("form.students", { count: item.studentCount })}` })),
-              ]}
-              onChange={(value) => {
-                setCourseId(value);
-                setTouched(false);
-              }}
-            />
-          </MobileFieldLabel>
+          {lockedBank ? (
+            // `h-11 self-start rounded-full bg-brand-subtle px-4 text-body-sm font-medium text-brand`
+            <View style={[styles.bankBadge, { backgroundColor: ds.c["brand-subtle"] }]}>
+              <Icon name="menu-book" size={18} color={ds.c.brand} />
+              <DsText v="body-sm" w="500" c="brand">
+                {t("bank.badge")}
+              </DsText>
+            </View>
+          ) : (
+            <MobileFieldLabel label={<RequiredLabel>{t("form.group")}</RequiredLabel>}>
+              <MobilePickerField
+                type="select"
+                surface
+                value={groupValue}
+                invalid={invalid && !courseId && !inBank}
+                placeholder={!inBank && !course}
+                display={
+                  inBank
+                    ? t("bank.option")
+                    : course
+                      ? `${course.title} · ${t("form.students", { count: course.studentCount })}`
+                      : t("mobileForm.groupPlaceholder")
+                }
+                ariaLabel={t("form.group")}
+                options={[{ value: "", label: t("mobileForm.groupPlaceholder") }, ...groupOptions]}
+                onChange={pickGroup}
+              />
+            </MobileFieldLabel>
+          )}
 
           <MobileFieldLabel label={<RequiredLabel>{t("form.titleLabel")}</RequiredLabel>}>
             <View>
@@ -192,22 +249,31 @@ export function AssignmentFormDialog({ open, onOpenChange, courses, pending = fa
             </View>
           </MobileFieldLabel>
 
-          <View style={styles.pair}>
-            <View style={styles.grow}>
-              <MobileFieldLabel label={<RequiredLabel>{t("form.due")}</RequiredLabel>}>
-                <MobilePickerField type="date" surface value={date} min={today()} display={dateLabel} ariaLabel={t("form.due")} onChange={setDate} />
-              </MobileFieldLabel>
+          {inBank ? null : (
+            <View style={styles.pair}>
+              <View style={styles.grow}>
+                <MobileFieldLabel label={<RequiredLabel>{t("form.due")}</RequiredLabel>}>
+                  <MobilePickerField type="date" surface value={date} min={today()} display={dateLabel} ariaLabel={t("form.due")} onChange={setDate} />
+                </MobileFieldLabel>
+              </View>
+              <View style={styles.grow}>
+                <MobileFieldLabel label={t("form.time")}>
+                  <MobilePickerField type="time" surface value={time} display={time} ariaLabel={t("form.time")} onChange={setTime} />
+                </MobileFieldLabel>
+              </View>
             </View>
-            <View style={styles.grow}>
-              <MobileFieldLabel label={t("form.time")}>
-                <MobilePickerField type="time" surface value={time} display={time} ariaLabel={t("form.time")} onChange={setTime} />
-              </MobileFieldLabel>
-            </View>
-          </View>
+          )}
 
           <MobileFieldLabel label={t("form.grading")}>
             <MobileChoiceChips items={GRADINGS} value={grading} onChange={setGrading} render={(item) => t(`form.gradings.${item}`)} />
           </MobileFieldLabel>
+
+          <GoogleFormField compact value={googleFormUrl} onChange={setGoogleFormUrl} />
+
+          {/* `mt-0.5 rounded-lg bg-surface p-4` */}
+          <View style={[styles.questions, { backgroundColor: ds.c.surface }]}>
+            <QuestionsEditor value={questions.drafts} onChange={questions.setDrafts} locked={questions.locked} showIssues={questions.showIssues} />
+          </View>
 
           <View style={[styles.toggles, { backgroundColor: ds.c.surface }]}>
             <ToggleRow
@@ -218,31 +284,35 @@ export function AssignmentFormDialog({ open, onOpenChange, courses, pending = fa
               checked={aiCheck}
               onChange={setAiCheck}
             />
-            <ToggleRow icon="chat" tone="bg-brand-subtle text-brand" title={t("form.announce")} hint={t("form.announceHint")} checked={announce} onChange={setAnnounce} />
+            {inBank ? null : (
+              <ToggleRow icon="chat" tone="bg-brand-subtle text-brand" title={t("form.announce")} hint={t("form.announceHint")} checked={announce} onChange={setAnnounce} />
+            )}
           </View>
         </ScrollView>
 
         {/* `rounded-t-2xl bg-surface px-4 pt-3 pb-8.5 shadow-nav-top` */}
         <View style={[styles.footer, { backgroundColor: ds.c.surface, boxShadow: ds.shadow["nav-top"], paddingBottom: Math.max(34, insets.bottom + 12) }]}>
-          <Pressable
-            accessibilityRole="button"
-            disabled={pending}
-            onPress={() => save("draft")}
-            style={({ pressed }) => [styles.draft, { borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }, pending && styles.dim]}
-          >
-            <DsText v="title" w="500">
-              {t("form.draft")}
-            </DsText>
-          </Pressable>
+          {inBank ? null : (
+            <Pressable
+              accessibilityRole="button"
+              disabled={pending}
+              onPress={() => save("draft")}
+              style={({ pressed }) => [styles.draft, { borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }, pending && styles.dim]}
+            >
+              <DsText v="title" w="500">
+                {t("form.draft")}
+              </DsText>
+            </Pressable>
+          )}
           <Pressable
             accessibilityRole="button"
             disabled={pending}
             onPress={() => save("active")}
             style={({ pressed }) => [styles.submit, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, pending && styles.dim]}
           >
-            <Icon name="send" size={20} color={ds.c["on-action"]} />
+            <Icon name={inBank ? "menu-book" : "send"} size={20} color={ds.c["on-action"]} />
             <DsText v="title" w="500" c="on-action">
-              {t("form.submit")}
+              {inBank ? t("bank.save") : t("form.submit")}
             </DsText>
           </Pressable>
         </View>
@@ -312,6 +382,8 @@ const styles = StyleSheet.create({
   tool: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   body: { height: 96, paddingHorizontal: 16, paddingVertical: 12, fontSize: dsType.body.fontSize, fontFamily: bodyFont("400") },
   pair: { flexDirection: "row", gap: 12 },
+  bankBadge: { alignSelf: "flex-start", height: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, borderRadius: 22 },
+  questions: { marginTop: 2, padding: 16, borderRadius: dsRadius.lg },
   toggles: { marginTop: 2, gap: 16, padding: 16, borderRadius: dsRadius.lg },
   toggle: { flexDirection: "row", alignItems: "center", gap: 12 },
   toggleIcon: { width: 40, height: 40, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },

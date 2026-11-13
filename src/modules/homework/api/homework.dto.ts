@@ -1,4 +1,4 @@
-import type { AssignmentStatus, GradingScale, SubmissionStatus } from "@/shared/types";
+import type { AssignmentStatus, GradingScale, HomeworkQuestionType, SubmissionStatus } from "@/shared/types";
 
 import type { StrokeDto } from "@/modules/board";
 
@@ -57,6 +57,42 @@ export interface SubmissionDto {
   comment?: string | null;
   teacher_comment?: string | null;
   files?: Array<{ name?: string | null; size?: number | null; mime?: string | null; index?: number | null }> | null;
+  answers?: HomeworkAnswerDto[] | null;
+  ai_state?: "checking" | "ready" | "unscored" | "failed" | "none" | null;
+  ai_summary?: string | null;
+  ai_checking_since?: string | null;
+}
+
+export interface HomeworkQuestionDto {
+  id: string | number;
+  order?: number;
+  type: HomeworkQuestionType;
+  text: string;
+  options?: string[] | null;
+  correct?: number[] | null;
+  points?: number | null;
+}
+
+export interface HomeworkAnswerDto {
+  question_id: string | number;
+  order?: number;
+  type: HomeworkQuestionType;
+  text: string;
+  options?: string[] | null;
+  points?: number | null;
+  answer?: number[] | string | null;
+  score?: number | null;
+  correct?: number[] | null;
+  is_correct?: boolean | null;
+  ai_score?: number | null;
+}
+
+export interface HomeworkQuestionInput {
+  type: HomeworkQuestionType;
+  text: string;
+  options: string[];
+  correct: number[];
+  points: number;
 }
 
 export interface SubmissionReviewInput {
@@ -66,6 +102,12 @@ export interface SubmissionReviewInput {
   shareWithParent?: boolean;
   result?: Record<string, unknown> | null;
   teacherComment?: string;
+  answerScores?: Record<string, number>;
+}
+
+export interface HomeworkAnswerInput {
+  questionId: string;
+  answer: number[] | string;
 }
 
 export interface ResubmitRequestInput {
@@ -89,8 +131,8 @@ export interface AssignmentStatsDto {
 export interface AssignmentDto {
   group_stats?: { average?: number | null; rank?: number | null; total?: number | null } | null;
   id: string | number;
-  course_id: string | number;
-  course_title: string;
+  course_id: string | number | null;
+  course_title: string | null;
   subject: string;
   subject_label?: string;
   title: string;
@@ -98,12 +140,23 @@ export interface AssignmentDto {
   body?: string;
   attachment_name?: string;
   has_attachment?: boolean;
+  google_form_url?: string | null;
+  is_bank?: boolean;
+  source_id?: string | number | null;
+  copies_count?: number | null;
+  copies?: AssignmentCopyDto[] | null;
+  questions_count?: number | null;
+  student_ids?: Array<string | number> | null;
   due_at: string | null;
   skill_key?: string;
   lesson_id?: string | number | null;
   lesson_title?: string | null;
   created_at: string;
   submissions_count?: number | null;
+  students_count?: number | null;
+  submitted_count?: number | null;
+  pending_review_count?: number | null;
+  graded_count?: number | null;
   my_submission?: SubmissionDto | null;
   submissions?: SubmissionDto[];
   stats?: AssignmentStatsDto | null;
@@ -124,6 +177,9 @@ export interface AssignmentDto {
   lesson_starts_at?: string | null;
   grading?: GradingScale;
   max_score?: number | null;
+  questions?: HomeworkQuestionDto[] | null;
+  has_questions?: boolean;
+  questions_points?: number | null;
 }
 
 export interface HomeworkCourseReportDto {
@@ -170,4 +226,55 @@ export interface AssignmentFormInput {
   aiCheck?: boolean;
   grading?: GradingScale;
   maxScore?: number;
+  questions?: HomeworkQuestionInput[];
+  googleFormUrl?: string;
+}
+
+export interface AssignmentCopyDto {
+  id: string | number;
+  course_id?: string | number | null;
+  course_title?: string | null;
+  due_at?: string | null;
+  status?: string;
+  submissions_count?: number | null;
+  student_ids?: Array<string | number> | null;
+  created_at?: string;
+}
+
+export interface AssignFromBankDto {
+  count?: number;
+  assignments?: AssignmentDto[];
+}
+
+export interface AssignTarget {
+  courseId: string;
+  studentIds: string[] | null;
+}
+
+export interface AssignFromBankInput {
+  targets: AssignTarget[];
+  dueAt: string | null;
+  allowLate: boolean;
+  announceInChat: boolean;
+}
+
+export interface AssignmentAudienceDto {
+  restricted?: boolean;
+  total?: number;
+  assigned_count?: number;
+  students?: Array<{
+    id: string | number;
+    name?: string;
+    username?: string;
+    assigned?: boolean;
+    can_submit?: boolean;
+    submitted?: boolean;
+  }>;
+}
+
+export interface AssignmentAudience {
+  restricted: boolean;
+  total: number;
+  assignedCount: number;
+  students: Array<{ id: string; name: string; username: string; assigned: boolean; submitted: boolean }>;
 }

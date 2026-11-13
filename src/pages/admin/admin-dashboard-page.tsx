@@ -7,6 +7,7 @@ import {
   BookOpen,
   CalendarCheck,
   CheckCircle2,
+  Flag,
   GraduationCap,
   LifeBuoy,
   LogOut,
@@ -124,6 +125,8 @@ export function AdminDashboardPage() {
               {/* Veb #159: sertifikatlar va murojaatlar */}
               <PortalButton variant="primary" size="link" icon={Award} label={t("dashboard.certificatesLink")} onPress={() => router.push(ROUTES.admin.certificates)} />
               <PortalButton variant="primary" size="link" icon={LifeBuoy} label={t("dashboard.supportLink")} onPress={() => router.push(ROUTES.admin.support)} />
+              {/* Veb #182: chat shikoyatlari */}
+              <PortalButton variant="primary" size="link" icon={Flag} label={t("dashboard.reportsLink")} onPress={() => router.push(ROUTES.admin.reports)} />
               <NotificationBell />
               <PortalButton size="dense" icon={LogOut} label={t("dashboard.logout")} onPress={() => void signOut()} style={styles.grow} />
             </View>

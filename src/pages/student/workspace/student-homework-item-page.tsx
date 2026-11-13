@@ -2,10 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConversations } from "@/modules/conversation";
 import {
+  answerInputs,
+  formatGradeValue,
+  gradePercent,
   homeworkFieldError,
   homeworkKeys,
   useAssignment,
@@ -15,7 +19,11 @@ import {
   useSaveHomeworkDraft,
   useSubmission,
   useSubmitHomework,
+  type AnswerDraft,
 } from "@/modules/homework";
+import { GoogleFormLink } from "@/modules/homework/ui/google-form-link";
+import { QuestionsAnswerForm } from "@/modules/homework/ui/questions-answer-form";
+import { QuestionsResult } from "@/modules/homework/ui/questions-result";
 import { ROUTES } from "@/shared/config";
 import { pickDocuments, sanitizeHtml, toUploadFile, type PickedFile } from "@/shared/lib";
 import type { Assignment, Submission } from "@/shared/types";
@@ -91,6 +99,7 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [comment, setComment] = useState("");
+  const [answers, setAnswers] = useState<AnswerDraft>({});
   const touched = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [focused, setFocused] = useState(false);
@@ -103,6 +112,9 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   const leftLabel = left === null ? "" : overdue ? t("workspace.hwItem.overdue") : left <= 0 ? t("workspace.hwItem.today") : t("workspace.hwItem.daysLeft", { count: left });
   const html = assignment.body ? sanitizeHtml(assignment.body) : "";
   const serverDraft = draft.data?.comment ?? "";
+  // Veb #183: fayl, savol javoblari yoki izohdan bittasi yetarli (faylsiz topshirish).
+  const answerList = answerInputs(assignment.questions, answers);
+  const ready = files.length > 0 || answerList.length > 0 || Boolean(comment.trim());
 
   useEffect(() => {
     if (serverDraft && !touched.current) setComment(serverDraft);
@@ -122,7 +134,7 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   function send() {
     setError(null);
     submit
-      .mutateAsync({ assignmentId: assignment.id, files: files.map(toUploadFile), skillKey: assignment.skillKey, comment })
+      .mutateAsync({ assignmentId: assignment.id, files: files.map(toUploadFile), skillKey: assignment.skillKey, comment, answers: answerList })
       .then(() => {
         if (serverDraft) saveDraftMutation.mutate("", { onSuccess: () => rememberDraft("") });
       })
@@ -149,7 +161,8 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
 
   return (
     <View style={[styles.fill, { backgroundColor: ds.c.canvas }]}>
-      <ScrollView style={styles.fill} contentContainerStyle={[styles.page, { paddingTop: insets.top + 20 }]} keyboardShouldPersistTaps="handled">
+      {/* Savol javoblari va izoh klaviatura ustida qolsin — `KeyboardAwareScrollView`. */}
+      <KeyboardAwareScrollView style={styles.fill} contentContainerStyle={[styles.page, { paddingTop: insets.top + 20 }]} keyboardShouldPersistTaps="handled" bottomOffset={16}>
         <DsGradient name="auth" />
         <MobilePageHeader title={assignment.title} backLabel={t("workspace.back")} onBack={goBack} />
 
@@ -196,6 +209,7 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
               <Icon name="download" size={20} color={ds.c["icon-secondary"]} />
             </Pressable>
           ) : null}
+          {assignment.googleFormUrl ? <GoogleFormLink url={assignment.googleFormUrl} /> : null}
           <View style={styles.facts}>
             <Fact label={th("detail.grading")} value={th(`form.gradings.${assignment.grading}`)} />
             <Fact label={th("detail.allowLate")} value={assignment.allowLate ? th("detail.allowed") : th("detail.notAllowed")} />
@@ -216,11 +230,16 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
         </Pressable>
 
         <View style={[styles.form, { backgroundColor: ds.c.surface }]}>
+          {assignment.questions.length ? (
+            <View style={styles.questions}>
+              <QuestionsAnswerForm questions={assignment.questions} value={answers} onChange={setAnswers} disabled={locked} />
+            </View>
+          ) : null}
           <DsText v="title-lg" w="600">
             {t("workspace.hwItem.answer")}
           </DsText>
           <DsText v="body-xs" c="ink-secondary" style={styles.mt4}>
-            {t("workspace.hwItem.answerHint")}
+            {assignment.questions.length ? th("questions.filesOptional") : t("workspace.hwItem.answerHint")}
           </DsText>
           <Pressable
             accessibilityRole="button"
@@ -310,7 +329,7 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
             </DsText>
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <MobileActionBar>
         <Pressable
@@ -329,9 +348,9 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          disabled={!files.length || locked || submit.isPending}
+          disabled={!ready || locked || submit.isPending}
           onPress={send}
-          style={({ pressed }) => [styles.footerButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, (!files.length || locked || submit.isPending) && styles.faded]}
+          style={({ pressed }) => [styles.footerButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, (!ready || locked || submit.isPending) && styles.faded]}
         >
           <Icon name="send" size={18} color={ds.c["on-action"]} />
           <DsText v="body-sm" w="600" c="on-action" numberOfLines={1}>
@@ -433,7 +452,9 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
                   <View style={styles.aiTitle}>
                     <Icon name="auto-awesome" size={16} color={ds.c.brand} />
                     <DsText v="body-sm" w="600">
-                      {t("workspace.hwItem.aiScore", { value: aiGrade ?? "—" })}
+                      {t("workspace.hwItem.aiScore", {
+                        value: assignment.grading === "hundred" && aiScore !== null ? formatGradeValue((aiScore * assignment.maxScore) / 100) : (aiGrade ?? "—"),
+                      })}
                     </DsText>
                   </View>
                   <DsText v="caption" w="400" c="ink-secondary">
@@ -460,22 +481,41 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
             <DsText v="overline" c="ink-secondary" style={styles.upper}>
               {t("workspace.hwItem.teacherGrade")}
             </DsText>
-            {teacherGrade === null ? (
+            {assignment.grading === "none" ? (
+              <DsText v="body-sm" c="ink-secondary">
+                {t("workspace.hwItem.notGraded")}
+              </DsText>
+            ) : teacherGrade === null ? (
               <DsText v="body-sm" c="ink-secondary">
                 {t("workspace.hwItem.waitingGrade")}
               </DsText>
+            ) : assignment.grading === "hundred" ? (
+              // 100 ballik: katta ball va chiziq (`gap-2.5 rounded-xl bg-brand-subtle px-4 py-3`).
+              <View style={[styles.hundred, { backgroundColor: ds.c["brand-subtle"] }]}>
+                <View style={styles.hundredValue}>
+                  <DsText heading w="700" c="brand" style={styles.hundredScore}>
+                    {formatGradeValue(teacherGrade)}
+                  </DsText>
+                  <DsText v="body-sm" c="ink-secondary">
+                    {t("workspace.hwItem.outOf", { max: assignment.maxScore })}
+                  </DsText>
+                </View>
+                <View style={[styles.hundredTrack, { backgroundColor: ds.c.surface }]}>
+                  <View style={[styles.hundredFill, { width: `${gradePercent(teacherGrade, assignment.maxScore)}%`, backgroundColor: ds.c.brand }]} />
+                </View>
+              </View>
             ) : (
               <>
                 <View style={styles.grades}>
                   {GRADES.map((value) => (
-                    <View key={value} style={[styles.grade, { backgroundColor: teacherGrade === value ? ds.c.brand : ds.c.subtle }]}>
-                      <DsText v="title" w="600" c={teacherGrade === value ? "ink-inverse" : "ink"}>
+                    <View key={value} style={[styles.grade, { backgroundColor: Math.round(teacherGrade) === value ? ds.c.brand : ds.c.subtle }]}>
+                      <DsText v="title" w="600" c={Math.round(teacherGrade) === value ? "ink-inverse" : "ink"}>
                         {value}
                       </DsText>
                     </View>
                   ))}
                 </View>
-                {aiGrade !== null && aiGrade === teacherGrade ? (
+                {aiGrade !== null && aiGrade === Math.round(teacherGrade) ? (
                   <View style={styles.aiTitle}>
                     <Icon name="check" size={14} color={ds.c["success-fg"]} />
                     <DsText v="caption-strong" c="success-fg">
@@ -486,6 +526,8 @@ function HomeworkResult({ assignment, initial, onResubmit }: { assignment: Assig
               </>
             )}
           </View>
+
+          {current.answers.length ? <QuestionsResult answers={current.answers} /> : null}
 
           {current.teacherComment ? (
             <View style={styles.gradeBlock}>
@@ -587,6 +629,8 @@ const styles = StyleSheet.create({
   mt4: { marginTop: 4 },
   mt8: { marginTop: 8 },
   mt16: { marginTop: 16 },
+  /* `mb-6` */
+  questions: { marginBottom: 24 },
   state: { flex: 1, justifyContent: "center", padding: 24 },
   loading: { flex: 1, gap: 20, paddingHorizontal: 16 },
   loadingLine: { width: 320, maxWidth: "100%", height: 36, borderRadius: 18 },
@@ -634,5 +678,11 @@ const styles = StyleSheet.create({
   gradeBlock: { gap: 8 },
   grades: { flexDirection: "row", gap: 8 },
   grade: { flex: 1, height: 44, borderRadius: dsRadius.xl, alignItems: "center", justifyContent: "center" },
+  hundred: { gap: 10, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.xl },
+  hundredValue: { flexDirection: "row", alignItems: "baseline", gap: 6 },
+  /* `font-heading text-[32px]/[38px]` */
+  hundredScore: { fontSize: 32, lineHeight: 38 },
+  hundredTrack: { height: 6, overflow: "hidden", borderRadius: 3 },
+  hundredFill: { height: "100%", borderRadius: 3 },
   teacherComment: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: dsRadius["2xl"], overflow: "hidden" },
 });

@@ -2,7 +2,14 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { CalendarDays, FileUp, GraduationCap, Paperclip } from "lucide-react-native";
-import { useCreateAssignment, useUpdateAssignment } from "@/modules/homework";
+import {
+  googleFormUrlInvalid,
+  useAssignment,
+  useCreateAssignment,
+  useQuestionDrafts,
+  useUpdateAssignment,
+} from "@/modules/homework";
+import { QuestionsEditor } from "@/modules/homework/ui/questions-editor";
 import type { Assignment, Lesson } from "@/shared/types";
 import { pickDocument, toUploadFile, type PickedFile } from "@/shared/lib";
 import {
@@ -12,6 +19,7 @@ import {
   Sheet,
   SheetButton,
   Text,
+  toast,
   useTheme,
   type SelectOption,
 } from "@/shared/ui";
@@ -38,9 +46,11 @@ const SKILLS = ["", "writing", "reading", "listening", "speaking"] as const;
 
 /**
  * Vazifa yaratish — veb `group-action-dialogs.tsx` dagi `AddAssignmentDialog`:
- * nom, matn, fayl, topshirish muddati (sana va vaqt), qaysi dars uchun,
- * til fanida tekshiruv turi, baholash izohi; pastda "Bekor qilish" va
- * "Vazifani yuborish".
+ * nom, "Vazifa tavsifi" sarlavhali matn, fayl, topshirish muddati (sana va
+ * vaqt), qaysi dars uchun, til fanida tekshiruv turi, baholash izohi, Google
+ * Form havolasi va savollar; oyna pastiga yopishgan "Bekor qilish" va
+ * "Vazifani yuborish". Tahrirlashda savollar vazifa tafsilotidan olinadi va
+ * topshiriq tushgan bo'lsa qulflanadi.
  *
  * Veb'da matn maydoni ustida rich-text asboblar qatori bor edi (qalin, qiya,
  * ro'yxat). Mobilda u ATAYLAB olib tashlandi: veb'da ham u faqat ko'rinish
@@ -57,6 +67,7 @@ export function AddAssignmentSheet({
   assignment = null,
 }: AddAssignmentSheetProps) {
   const { t } = useTranslation("group");
+  const { t: tHomework } = useTranslation("homework");
 
   const skillOptions: readonly SelectOption[] = useMemo(
     () => SKILLS.map((skill) => ({ value: skill, label: t(`dialogs.assignment.skillOptions.${skill || "general"}`) })),
@@ -79,6 +90,21 @@ export function AddAssignmentSheet({
   const [skillKey, setSkillKey] = useState(assignment?.skillKey ?? "");
   const [lessonId, setLessonId] = useState(assignment?.lessonId ?? "");
   const [file, setFile] = useState<PickedFile | null>(null);
+  const [googleFormUrl, setGoogleFormUrl] = useState(assignment?.googleFormUrl ?? "");
+  const googleFormInvalid = googleFormUrlInvalid(googleFormUrl);
+  // Ro'yxatdagi vazifada savollar yo'q — tahrirlashda tafsilot so'raladi.
+  const detail = useAssignment(open && assignment ? assignment.id : null);
+  const questions = useQuestionDrafts([], {
+    editing,
+    locked: editing && ((detail.data?.submissions.length ?? 0) > 0 || (assignment?.submissionsCount ?? 0) > 0),
+  });
+  const questionsKey = open ? (assignment ? (detail.data ? `edit:${detail.data.id}` : "") : "new") : "";
+  const [syncedQuestions, setSyncedQuestions] = useState("");
+  if (questionsKey && questionsKey !== syncedQuestions) {
+    setSyncedQuestions(questionsKey);
+    questions.reset(assignment ? (detail.data?.questions ?? []) : []);
+  }
+  if (!questionsKey && syncedQuestions) setSyncedQuestions("");
 
   /** Backend faqat TUGAGAN darsni qabul qiladi — eng yangisi tepada. */
   const lessonOptions = useMemo<SelectOption[]>(() => {
@@ -97,6 +123,7 @@ export function AddAssignmentSheet({
     setSkillKey("");
     setLessonId("");
     setFile(null);
+    setGoogleFormUrl("");
   }
 
   function close() {
@@ -110,7 +137,11 @@ export function AddAssignmentSheet({
   }
 
   async function submit() {
-    if (!title.trim() || !description.trim()) return;
+    if (!title.trim() || !description.trim() || googleFormInvalid) return;
+    if (!questions.validate()) {
+      toast.error(tHomework("questions.fixIssues"));
+      return;
+    }
 
     const values = {
       courseId,
@@ -124,6 +155,8 @@ export function AddAssignmentSheet({
       lessonId: lessonId || null,
       extraInstructions: grading.trim(),
       file: file ? toUploadFile(file) : null,
+      questions: questions.payload(),
+      googleFormUrl: googleFormUrl.trim(),
     };
 
     try {
@@ -148,6 +181,20 @@ export function AddAssignmentSheet({
       onClose={close}
       title={editing ? t("dialogs.assignment.editTitle") : t("dialogs.assignment.newTitle")}
       description={t("dialogs.assignment.description")}
+      footer={
+        /* `.dialog-actions.is-sticky` — oyna pastiga yopishgan, "Bekor qilish" shaffof. */
+        <>
+          <SheetButton fill={false} variant="ghost" title={t("dialogs.assignment.cancel")} onPress={close} />
+          <SheetButton
+            fill={false}
+            variant="primary"
+            title={editing ? t("dialogs.assignment.saveChanges") : t("dialogs.assignment.submit")}
+            loading={create.isPending || update.isPending}
+            disabled={!title.trim() || !description.trim() || googleFormInvalid}
+            onPress={() => void submit()}
+          />
+        </>
+      }
     >
       <View style={styles.form}>
         <Input
@@ -160,7 +207,7 @@ export function AddAssignmentSheet({
 
         {/* Vebdagi formatlash qatori yo'q — sababi yuqoridagi izohda. */}
         <Input
-          accessibilityLabel={t("dialogs.assignment.descriptionPlaceholder")}
+          label={t("dialogs.assignment.descriptionLabel")}
           placeholder={t("dialogs.assignment.descriptionPlaceholder")}
           value={description}
           onChangeText={setDescription}
@@ -229,18 +276,29 @@ export function AddAssignmentSheet({
           onChangeText={setGrading}
         />
 
-        {/* `.dialog-actions` — o'ngda, "Bekor qilish" shaffof. */}
-        <View style={styles.actions}>
-          <SheetButton fill={false} variant="ghost" title={t("dialogs.assignment.cancel")} onPress={close} />
-          <SheetButton
-            fill={false}
-            variant="primary"
-            title={editing ? t("dialogs.assignment.saveChanges") : t("dialogs.assignment.submit")}
-            loading={create.isPending || update.isPending}
-            disabled={!title.trim() || !description.trim()}
-            onPress={() => void submit()}
+        <View>
+          <Input
+            label={tHomework("form.googleForm")}
+            placeholder="https://forms.gle/…"
+            value={googleFormUrl}
+            onChangeText={setGoogleFormUrl}
+            keyboardType="url"
+            inputMode="url"
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={googleFormInvalid ? tHomework("form.googleFormInvalid") : undefined}
           />
+          {googleFormInvalid ? null : (
+            <Text variant="caption" tone="muted" style={styles.hint}>
+              {tHomework("form.googleFormHint")}
+            </Text>
+          )}
         </View>
+      </View>
+
+      {/* `mt-4` */}
+      <View style={styles.questions}>
+        <QuestionsEditor value={questions.drafts} onChange={questions.setDrafts} locked={questions.locked} showIssues={questions.showIssues} />
       </View>
     </Sheet>
   );
@@ -256,5 +314,6 @@ const styles = StyleSheet.create({
   uploadButton: { minHeight: 35, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 11, borderWidth: 1, borderRadius: 10 },
   uploadText: { fontSize: 11, lineHeight: 16.5, fontWeight: "700" },
   fileName: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 6 },
-  actions: { flexDirection: "row", justifyContent: "flex-end", gap: 12, marginTop: 4 },
+  hint: { marginTop: 4 },
+  questions: { marginTop: 2 },
 });

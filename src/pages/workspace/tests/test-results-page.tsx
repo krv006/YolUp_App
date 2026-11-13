@@ -4,7 +4,15 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCourses, useCourseStudents } from "@/modules/course";
-import { QuizAttemptsDrawer, quizDisplayTitle, useQuiz, useQuizAttempts } from "@/modules/quiz";
+import {
+  QuizAttemptsDrawer,
+  QuizAudienceCard,
+  quizDisplayTitle,
+  useQuiz,
+  useQuizAttempts,
+  useQuizAudience,
+  useQuizLimitsText,
+} from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import {
   Avatar,
@@ -39,8 +47,9 @@ function percentTone(value: number): DsColor {
 /**
  * Test natijalari — veb `test-results-page.tsx` + `mobile-test-results.tsx`
  * (tor ekran): orqaga va urinishlar tugmasi, guruh va savollar soni,
- * uchta katak (yechganlar, o'rtacha, eng yaxshi) va o'quvchilar ro'yxati
- * (eng yaxshi foiz, urinishlar, vaqt).
+ * uchta katak (yechganlar, o'rtacha, eng yaxshi), o'quvchilar ro'yxati
+ * (eng yaxshi foiz, urinishlar, vaqt; test tanlangan o'quvchilarga berilgan
+ * bo'lsa faqat ular) va "Kimlar ochishi mumkin" bo'limi.
  */
 export function TestResultsPage() {
   const { t } = useTranslation("quiz");
@@ -51,13 +60,23 @@ export function TestResultsPage() {
   const [attemptsOpen, setAttemptsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const quiz = useQuiz(quizId);
+  const limitsText = useQuizLimitsText()(quiz.data);
   const courses = useCourses();
   const attempts = useQuizAttempts(quizId, Boolean(quizId));
   const students = useCourseStudents(quiz.data?.courseId ?? null, { page_size: 100 });
+  const audience = useQuizAudience(quizId, Boolean(quiz.data?.courseId));
+  const assignedIds = useMemo(
+    () =>
+      audience.data?.restricted
+        ? new Set(audience.data.students.filter((student) => student.assigned).map((student) => student.id))
+        : null,
+    [audience.data]
+  );
 
   const rows = useMemo<Row[]>(() => {
     const byStudent = new Map<string, Row>();
     for (const item of students.data?.items ?? []) {
+      if (assignedIds && !assignedIds.has(item.student.id)) continue;
       byStudent.set(item.student.id, { id: item.student.id, name: item.student.name, attempts: 0, percent: null, durationSeconds: null });
     }
     for (const attempt of attempts.data ?? []) {
@@ -72,7 +91,7 @@ export function TestResultsPage() {
       });
     }
     return [...byStudent.values()].sort((a, b) => (b.percent ?? -1) - (a.percent ?? -1));
-  }, [attempts.data, students.data]);
+  }, [attempts.data, students.data, assignedIds]);
 
   const solved = rows.filter((row) => row.attempts > 0);
   const average = solved.length ? Math.round(solved.reduce((sum, row) => sum + (row.percent ?? 0), 0) / solved.length) : null;
@@ -96,7 +115,7 @@ export function TestResultsPage() {
       <ScrollView
         style={styles.fill}
         contentContainerStyle={[styles.page, { paddingTop: insets.top + 22, paddingBottom: insets.bottom + 32 }]}
-        refreshControl={<PullRefresh onRefresh={() => Promise.all([quiz.refetch(), attempts.refetch(), students.refetch()])} />}
+        refreshControl={<PullRefresh onRefresh={() => Promise.all([quiz.refetch(), attempts.refetch(), students.refetch(), quiz.data?.courseId ? audience.refetch() : null])} />}
       >
         <DsGradient name="auth" />
         <View style={styles.header}>
@@ -109,7 +128,7 @@ export function TestResultsPage() {
 
         <View style={styles.title}>
           <MobileTitleHeader
-            eyebrow={[courseTitle, t("tests.questionCount", { count: quiz.data?.questionCount ?? 0 })].filter(Boolean).join(" · ")}
+            eyebrow={[courseTitle, t("tests.questionCount", { count: quiz.data?.questionCount ?? 0 }), limitsText].filter(Boolean).join(" · ")}
             title={quiz.data ? quizDisplayTitle(quiz.data) : ""}
           />
         </View>
@@ -170,6 +189,8 @@ export function TestResultsPage() {
             </DsText>
           </View>
         )}
+
+        <QuizAudienceCard quizId={quizId} hasCourse={Boolean(quiz.data?.courseId)} style={styles.audience} />
       </ScrollView>
 
       {quizId ? <ShareResultsDialog quizId={quizId} open={shareOpen} onOpenChange={setShareOpen} /> : null}
@@ -177,7 +198,7 @@ export function TestResultsPage() {
         open={attemptsOpen}
         onOpenChange={setAttemptsOpen}
         title={quiz.data ? quizDisplayTitle(quiz.data) : ""}
-        subtitle={t("attemptsDrawer.unlimited")}
+        subtitle={quiz.data?.maxAttempts ? t("attemptsDrawer.limited", { count: quiz.data.maxAttempts }) : t("attemptsDrawer.unlimited")}
         attempts={attempts.data ?? []}
         students={rows.map((row) => ({ id: row.id, name: row.name }))}
         loading={attempts.isLoading}
@@ -200,4 +221,5 @@ const styles = StyleSheet.create({
   list: { marginTop: 20 },
   empty: { paddingHorizontal: 20, paddingVertical: 40, borderRadius: dsRadius.xl },
   dash: { width: 16, height: 2, borderRadius: 1 },
+  audience: { marginTop: 20 },
 });

@@ -9,7 +9,7 @@ import { useRequestDirect, useRespondDirect } from "../model/use-conversations";
 
 export interface DirectRequestBarProps {
   conversation: Conversation;
-  role: "teacher" | "student";
+  role: "teacher" | "student" | "parent";
 }
 
 /**
@@ -24,8 +24,9 @@ export function DirectRequestBar({ conversation, role }: DirectRequestBarProps) 
   const insets = useSafeAreaInsets();
   const respond = useRespondDirect();
   const request = useRequestDirect();
-  const blocked = conversation.directStatus === DIRECT_STATUS.BLOCKED;
-  const teacher = role === "teacher";
+  const spam = conversation.directStatus === DIRECT_STATUS.SPAM;
+  const blocked = spam || conversation.directStatus === DIRECT_STATUS.BLOCKED;
+  const teacher = role === "teacher" && !spam;
 
   function answer(action: DirectAction) {
     respond.mutate(
@@ -45,14 +46,18 @@ export function DirectRequestBar({ conversation, role }: DirectRequestBarProps) 
     });
   }
 
-  const title = teacher
+  const title = spam
+    ? t("directGate.spamTitle")
+    : teacher
     ? blocked
       ? t("directGate.teacherBlockedTitle")
       : t("directGate.teacherPendingTitle", { name: conversation.title })
     : blocked
       ? t("directGate.studentBlockedTitle")
       : t("directGate.studentPendingTitle");
-  const hint = teacher
+  const hint = spam
+    ? t("directGate.spamHint")
+    : teacher
     ? blocked
       ? t("directGate.teacherBlockedHint")
       : t("directGate.teacherPendingHint")
@@ -82,7 +87,7 @@ export function DirectRequestBar({ conversation, role }: DirectRequestBarProps) 
             {blocked ? null : <MobileButton variant="danger" label={t("directGate.block")} disabled={respond.isPending} onPress={() => answer("block")} />}
             <MobileButton label={blocked ? t("directGate.unblock") : t("directGate.accept")} disabled={respond.isPending} onPress={() => answer("accept")} />
           </View>
-        ) : blocked && conversation.participantId ? (
+        ) : blocked && !spam && conversation.participantId ? (
           <View style={styles.actions}>
             <MobileButton label={t("directGate.resend")} disabled={request.isPending} onPress={resend} />
           </View>

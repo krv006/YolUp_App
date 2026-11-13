@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCourses } from "@/modules/course";
-import { homeworkApi, homeworkKeys, useCreateAssignment, useDeleteAssignment } from "@/modules/homework";
+import { homeworkApi, homeworkKeys, useCreateAssignment, useDeleteAssignment, useHomeworkBank } from "@/modules/homework";
 import { ROUTES } from "@/shared/config";
 import type { Assignment, Course } from "@/shared/types";
 import {
@@ -24,13 +24,15 @@ import {
   useDs,
   usePopoverAnchor,
 } from "@/shared/ui";
+import { AssignHomeworkDialog } from "@/widgets/homework-assign";
 import { AssignmentFormDialog } from "@/widgets/homework-workspace/assignment-form-dialog";
+import { BankAssignmentCard } from "./bank-assignment-card";
 import { DeleteAssignmentDialog } from "./delete-assignment-dialog";
 import { formatDue } from "./format-due";
 
-type HomeworkFilter = "active" | "review" | "draft";
+type HomeworkFilter = "active" | "review" | "draft" | "bank";
 
-const FILTERS: HomeworkFilter[] = ["active", "review", "draft"];
+const FILTERS: HomeworkFilter[] = ["active", "review", "draft", "bank"];
 
 function dueInDays(value: string | null, now: number): number | null {
   if (!value) return null;
@@ -39,18 +41,26 @@ function dueInDays(value: string | null, now: number): number | null {
   return Math.ceil((due - now) / 86_400_000);
 }
 
-function needsReview(item: Assignment): boolean {
+/** Tekshirilmagan topshiriqlar — backend `pending_review_count`, bo'lmasa ro'yxatdan. */
+function awaitingReview(item: Assignment): number {
+  if (item.stats?.pendingReviewCount != null) return item.stats.pendingReviewCount;
   const submitted = item.stats?.submittedCount ?? 0;
   const checked = item.submissions?.filter((row) => row.status === "done").length ?? 0;
-  return submitted > checked;
+  return Math.max(submitted - checked, 0);
+}
+
+function needsReview(item: Assignment): boolean {
+  return awaitingReview(item) > 0;
 }
 
 /**
  * Vazifalar ro'yxati — veb `homework-list-page.tsx` + `mobile-homework-list.tsx`
- * (tor ekran): sarlavha va "+", "Faol / Tekshirish / Qoralama" (soni bilan),
- * "Shu hafta" va "Avvalroq" bo'limlarida vazifa kartalari (guruh, muddat,
- * tekshirish/qolgan kun belgisi, topshirganlar va chiziq); kartadagi menyu —
- * ochish, tekshirish, o'chirish. `?new=1` bilan ochilsa yaratish oynasi ochiq.
+ * (tor ekran): sarlavha va "+", "Faol / Tekshirish / Qoralama / Baza" (soni
+ * bilan, aylanadigan), "Shu hafta" va "Avvalroq" bo'limlarida vazifa kartalari
+ * (guruh, muddat, tekshirish/qolgan kun belgisi, topshirganlar va chiziq);
+ * kartadagi menyu — ochish, tekshirish, o'chirish. "Baza" da guruhsiz
+ * vazifalar ("Berish" — bazadan berish oynasi), "+" esa bazaga saqlaydi.
+ * `?new=1` bilan ochilsa yaratish oynasi ochiq.
  */
 export function HomeworkListPage() {
   const { t } = useTranslation("homework");
@@ -64,7 +74,11 @@ export function HomeworkListPage() {
   const [filter, setFilter] = useState<HomeworkFilter>("active");
   const [createOpen, setCreateOpen] = useState(() => params.new === "1");
   const [deleting, setDeleting] = useState<Assignment | null>(null);
+  const [giving, setGiving] = useState<Assignment | null>(null);
   const [now] = useState(() => Date.now());
+  const bank = useHomeworkBank();
+  const bankRows = bank.data ?? [];
+  const bankMode = filter === "bank";
 
   const groups = useMemo(() => courses.data ?? [], [courses.data]);
   const queries = useQueries({
@@ -79,8 +93,14 @@ export function HomeworkListPage() {
 
   const active = items.filter((item) => item.status === "active");
   const drafts = items.filter((item) => item.status === "draft");
-  const counts: Record<HomeworkFilter, number> = { active: active.length, review: active.filter(needsReview).length, draft: drafts.length };
-  const visible = filter === "draft" ? drafts : filter === "review" ? active.filter(needsReview) : active;
+  const counts: Record<HomeworkFilter, number> = {
+    active: active.length,
+    review: active.filter(needsReview).length,
+    draft: drafts.length,
+    bank: bankRows.length,
+  };
+  const visible = bankMode ? [] : filter === "draft" ? drafts : filter === "review" ? active.filter(needsReview) : active;
+  const filterLabel = (id: HomeworkFilter) => (id === "bank" ? t("bank.tab") : t(`list.filters.${id}`));
 
   const week: Assignment[] = [];
   const earlier: Assignment[] = [];
@@ -93,7 +113,8 @@ export function HomeworkListPage() {
     { id: "week" as const, rows: week },
     { id: "earlier" as const, rows: earlier },
   ];
-  const empty = !loading && !visible.length;
+  const listLoading = bankMode ? bank.isLoading : loading;
+  const empty = !listLoading && (bankMode ? !bankRows.length : !visible.length);
 
   function changeCreateOpen(open: boolean) {
     setCreateOpen(open);
@@ -110,7 +131,9 @@ export function HomeworkListPage() {
       <ScrollView
         style={styles.fill}
         contentContainerStyle={[styles.page, { paddingTop: insets.top + 22, paddingBottom: insets.bottom + 32 }]}
-        refreshControl={<PullRefresh onRefresh={() => Promise.all([courses.refetch(), ...queries.map((query) => query.refetch())])} />}
+        refreshControl={
+          <PullRefresh onRefresh={() => Promise.all([courses.refetch(), bank.refetch(), ...queries.map((query) => query.refetch())])} />
+        }
       >
         <DsGradient name="auth" />
         <MobilePageHeader
@@ -122,14 +145,26 @@ export function HomeworkListPage() {
 
         <View style={styles.filters}>
           <MobileSegment
-            items={FILTERS.map((id) => ({ id, label: counts[id] ? `${t(`list.filters.${id}`)} · ${counts[id]}` : t(`list.filters.${id}`) }))}
+            scroll
+            items={FILTERS.map((id) => ({ id, label: counts[id] ? `${filterLabel(id)} · ${counts[id]}` : filterLabel(id) }))}
             value={filter}
             onChange={setFilter}
           />
         </View>
 
         <View style={styles.list}>
-          {loading ? Array.from({ length: 3 }, (_, index) => <View key={index} style={[styles.skeleton, { backgroundColor: ds.c.surface }]} />) : null}
+          {listLoading ? Array.from({ length: 3 }, (_, index) => <View key={index} style={[styles.skeleton, { backgroundColor: ds.c.surface }]} />) : null}
+
+          {bankMode
+            ? bankRows.map((item) => (
+                <BankAssignmentCard
+                  key={item.id}
+                  item={item}
+                  onOpen={() => router.push(ROUTES.teacher.homeworkItem(item.id) as never)}
+                  onGive={() => setGiving(item)}
+                />
+              ))
+            : null}
 
           {sections.map((section) =>
             section.rows.length ? (
@@ -152,17 +187,26 @@ export function HomeworkListPage() {
             ) : null
           )}
 
-          {empty ? <MobileEmptyCard icon="assign" title={t("list.empty")} /> : null}
+          {empty ? (
+            bankMode ? (
+              <MobileEmptyCard icon="menu-book" title={t("bank.tab")} description={t("bank.empty")} />
+            ) : (
+              <MobileEmptyCard icon="assign" title={t("list.empty")} />
+            )
+          ) : null}
         </View>
       </ScrollView>
 
       <AssignmentFormDialog
+        key={bankMode ? "bank" : "group"}
         open={createOpen}
         onOpenChange={changeCreateOpen}
         courses={groups.map((course) => ({ id: course.id, title: course.title, studentCount: course.studentCount ?? 0 }))}
         pending={create.isPending}
+        bank={bankMode}
         onSubmit={(values) => create.mutate(values, { onSuccess: () => changeCreateOpen(false) })}
       />
+      <AssignHomeworkDialog open={Boolean(giving)} onOpenChange={(open) => !open && setGiving(null)} assignment={giving} />
       <DeleteAssignmentDialog
         open={Boolean(deleting)}
         count={deleting?.stats?.submittedCount ?? deleting?.submissions.length ?? 0}
@@ -199,7 +243,7 @@ function AssignmentCard({
   const due = item.dueAt ? formatDue(item.dueAt, months).replace(", 23:59", "") : "";
   const submitted = item.stats?.submittedCount ?? 0;
   const total = item.stats?.studentsCount ?? 0;
-  const pending = item.submissions.filter((row) => row.status !== "done").length;
+  const pending = item.stats?.pendingReviewCount ?? item.submissions.filter((row) => row.status !== "done").length;
   const percent = total ? Math.min(100, Math.round((submitted / total) * 100)) : 0;
 
   function pick(action: () => void) {

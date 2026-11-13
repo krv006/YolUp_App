@@ -9,7 +9,7 @@ import { AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import { pickImage, toUploadFile } from "@/shared/lib";
 import { Avatar, ConfirmDialog, DsText, dsRadius, Icon, MobileButton, MobilePageHeader, MobileRoundButton, Sheet, toast, useDs, type IconName } from "@/shared/ui";
-import { ParentScreen, useParentBack } from "@/widgets/parent-shell";
+import { ParentAccountSwitchDialog, ParentScreen, useParentBack } from "@/widgets/parent-shell";
 import { ErrorsNote, SettingsCard, SettingsField, SettingsItem } from "./settings-parts";
 
 const PHONE = /^\+998\s?\d{2}\s?\d{3}\s?\d{2}\s?\d{2}$/;
@@ -40,6 +40,7 @@ export function ProfileHubMobile() {
   const links = useParentLinks();
   const sessions = useSessions();
   const [confirm, setConfirm] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
   const pending = (links.data ?? []).filter((link) => link.status === "pending").length;
   const go = (href: string) => router.push(href as never);
 
@@ -103,13 +104,23 @@ export function ProfileHubMobile() {
         <Icon name="chevron-right" size={20} color={ds.c["success-text"]} />
       </Pressable>
       <SettingsCard>
-        {rows.map((row, index) => (
-          <SettingsItem key={row.to} icon={row.icon} tone={row.tone} title={row.title} text={row.text} last={index === rows.length - 1} onPress={() => go(row.to)} />
+        {rows.map((row) => (
+          <SettingsItem key={row.to} icon={row.icon} tone={row.tone} title={row.title} text={row.text} last={false} onPress={() => go(row.to)} />
         ))}
+        {/* Akkaunt almashtirish — bog'langan akkauntlar va yangi rol (veb #183). */}
+        <SettingsItem
+          icon="swap-horiz"
+          tone={{ bg: "brand-subtle", fg: "brand" }}
+          title={t("account.switchAccount")}
+          text={t("account.switchAccountText")}
+          last
+          onPress={() => setSwitchOpen(true)}
+        />
       </SettingsCard>
       <SettingsCard>
         <SettingsItem icon="logout" tone={{ bg: "danger-bg", fg: "error-text" }} title={t("account.logout")} danger last onPress={() => setConfirm(true)} />
       </SettingsCard>
+      <ParentAccountSwitchDialog open={switchOpen} onOpenChange={setSwitchOpen} />
       <ConfirmDialog
         open={confirm}
         onOpenChange={setConfirm}

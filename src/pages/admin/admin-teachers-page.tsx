@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft, BarChart3, ShieldCheck, Star, Users } from "lucide-react-native";
-import { useApproveTeacher, usePendingTeachers, useTeachers } from "@/modules/auth";
+import { useApproveTeacher, usePendingTeachers, useSetTeacherTestAccess, useTeachers } from "@/modules/auth";
 import { ROUTES } from "@/shared/config";
 import type { AuthUser } from "@/shared/types";
 import {
@@ -16,7 +16,9 @@ import {
   PullRefresh,
   Screen,
   SelectField,
+  Switch,
   Text,
+  toast,
   useLegacyColors,
   useTheme,
 } from "@/shared/ui";
@@ -26,7 +28,8 @@ type TeacherView = "pending" | "all";
 
 /**
  * O'qituvchilar — veb `admin-teachers-page.tsx`: tasdiqlanishi kerak
- * bo'lganlar yoki barcha o'qituvchilar, reyting, statistika va tasdiqlash.
+ * bo'lganlar yoki barcha o'qituvchilar, reyting, statistika va tasdiqlash;
+ * barcha o'qituvchilarda "Test yaratish" (pullik xizmat) kaliti.
  * `?teacher=<id>` bilan kelinsa (bildirishnomadan) o'sha qatorga aylanadi.
  *
  * Vebda tor ekranda bo'lim sarlavhasi tanlagich yonida 110px ga siqiladi —
@@ -41,6 +44,7 @@ export function AdminTeachersPage() {
   const pending = usePendingTeachers();
   const teachers = useTeachers();
   const approve = useApproveTeacher();
+  const testAccess = useSetTeacherTestAccess();
   const [statsTarget, setStatsTarget] = useState<AuthUser | null>(null);
   const [view, setView] = useState<TeacherView>("pending");
   const query = view === "pending" ? pending : teachers;
@@ -118,6 +122,15 @@ export function AdminTeachersPage() {
                 highlighted={teacher.id === highlightId}
                 onLayoutY={teacher.id === highlightId ? setRowY : undefined}
                 onStats={setStatsTarget}
+                onTestAccess={
+                  view === "all"
+                    ? (row, enabled) =>
+                        testAccess.mutate(
+                          { id: row.id, enabled },
+                          { onSuccess: () => toast.success(t(enabled ? "teachers.testAccessOn" : "teachers.testAccessOff", { name: row.name })) }
+                        )
+                    : undefined
+                }
                 action={
                   view === "pending" ? (
                     <PortalButton
@@ -152,6 +165,7 @@ function TeacherRow({
   highlighted,
   onLayoutY,
   onStats,
+  onTestAccess,
   action,
 }: {
   teacher: AuthUser;
@@ -159,6 +173,7 @@ function TeacherRow({
   highlighted: boolean;
   onLayoutY?: (y: number) => void;
   onStats: (teacher: AuthUser) => void;
+  onTestAccess?: (teacher: AuthUser, enabled: boolean) => void;
   action?: ReactNode;
 }) {
   const { t } = useTranslation("admin");
@@ -191,6 +206,14 @@ function TeacherRow({
             {teacher.avgRating.toFixed(1)}
           </Text>
         </View>
+      ) : null}
+      {/* Vebda tor ekranda "Test yaratish" yozuvi yashirin (`max-sm:sr-only`) — faqat kalit. */}
+      {onTestAccess ? (
+        <Switch
+          checked={teacher.canCreateTests !== false}
+          onCheckedChange={(enabled) => onTestAccess(teacher, enabled)}
+          accessibilityLabel={t("teachers.testAccessAria", { name: teacher.name })}
+        />
       ) : null}
       <Pressable
         accessibilityRole="button"

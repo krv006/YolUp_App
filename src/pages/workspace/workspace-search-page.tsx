@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useIsStudent, useRoleRoutes } from "@/modules/auth";
-import { useConversations } from "@/modules/conversation";
+import { directChatAction, PersonChatHint, useConversations, useStartDirectChat } from "@/modules/conversation";
 import { useQuizzes } from "@/modules/quiz";
 import { useGlobalSearch, type SearchHit, type SearchType } from "@/modules/search";
 import { ROUTES } from "@/shared/config";
@@ -19,6 +19,7 @@ import {
   MobileEmptyCard,
   MobilePageHeader,
   MobileSegment,
+  RoleTag,
   SearchClear,
   toneColors,
   useDs,
@@ -41,6 +42,7 @@ export function WorkspaceSearchPage() {
   const insets = useSafeAreaInsets();
   const isStudent = useIsStudent();
   const routes = useRoleRoutes();
+  const startChat = useStartDirectChat(routes.chat);
 
   const [term, setTerm] = useState("");
   const [focused, setFocused] = useState(false);
@@ -226,9 +228,12 @@ export function WorkspaceSearchPage() {
                 key={hit.id}
                 avatar={{ name: hit.title, src: hit.avatarUrl }}
                 title={hit.title}
+                tag={<RoleTag role={hit.role} />}
                 hint={hit.subtitle}
                 last={index === people.length - 1}
-                onPress={() => go(hit.roomId ? routes.chat(hit.roomId) : routes.chats)}
+                trailing={<PersonChatHint action={directChatAction(hit)} />}
+                disabled={directChatAction(hit) === "none" || startChat.pending}
+                onPress={() => startChat.start(hit)}
               />
             ))}
           </ResultSection>
@@ -253,16 +258,22 @@ function ResultRow({
   tone,
   avatar,
   title,
+  tag,
   hint,
   last,
+  trailing,
+  disabled = false,
   onPress,
 }: {
   icon?: IconName;
   tone?: string;
   avatar?: { name: string; src: string | null };
   title: string;
+  tag?: ReactNode;
   hint: string;
   last: boolean;
+  trailing?: ReactNode;
+  disabled?: boolean;
   onPress: () => void;
 }) {
   const ds = useDs();
@@ -270,6 +281,7 @@ function ResultRow({
   return (
     <Pressable
       accessibilityRole="button"
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
@@ -285,19 +297,24 @@ function ResultRow({
         </View>
       )}
       <View style={styles.text}>
-        <DsText v="title" numberOfLines={1}>
-          {title}
-        </DsText>
+        <View style={styles.titleRow}>
+          <DsText v="title" numberOfLines={1} style={styles.shrink}>
+            {title}
+          </DsText>
+          {tag}
+        </View>
         <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
           {hint}
         </DsText>
       </View>
-      <Icon name="chevron-right" size={20} color={ds.c["icon-secondary"]} />
+      {trailing ?? <Icon name="chevron-right" size={20} color={ds.c["icon-secondary"]} />}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8, minWidth: 0 },
+  shrink: { flexShrink: 1 },
   fill: { flex: 1 },
   page: { paddingHorizontal: 16 },
   search: { marginTop: 20, height: 48, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 18, borderWidth: 1.5, borderRadius: dsRadius.full },

@@ -10,14 +10,15 @@ import { DsText, dsRadius, Icon, MobileEmptyCard, MobileRoundButton, MobileSelec
 import { ParentErrorBanner, ParentScreen } from "@/widgets/parent-shell";
 import { subjectLook } from "../attendance/attendance-styles";
 import { MobileConnect } from "../dashboard/parent-home-mobile";
-import { ScoreCard } from "../dashboard/home-side";
+import { ChildScoreChart } from "@/widgets/child-score-chart";
 import { useHomeworkView } from "../homework/use-homework-view";
 import { ResultsTabs } from "./results-parts";
 
 /**
  * Natijalar (reyting) — veb `results-mobile.tsx`: oy tanlash, to'rtta
  * ko'rsatkich (berilgan, topshirilgan, o'rtacha, fanlar), ball dinamikasi
- * va fanlar ro'yxati (bosilsa kurs sahifasi).
+ * (`ChildScoreChart` — vazifa, test va mock ballari) va fanlar ro'yxati
+ * (bosilsa kurs sahifasi).
  */
 export function ResultsMobile() {
   const { t } = useTranslation("parent");
@@ -31,8 +32,6 @@ export function ResultsMobile() {
   const assignments = view.assignments;
   const months = parentResults.activeMonths(assignments, view.now);
   const current = parentResults.monthHomework(assignments, period.year, period.month);
-  const previousDate = new Date(period.year, period.month - 1, 1);
-  const previous = parentResults.monthHomework(assignments, previousDate.getFullYear(), previousDate.getMonth());
   const points = parentHome.gradedScores(assignments);
   const titles = new Map(
     [...view.courseById.values()].filter((course) => assignments.some((item) => item.courseId === course.id)).map((course) => [course.id, course.title])
@@ -82,14 +81,9 @@ export function ResultsMobile() {
               </View>
             ))}
           </View>
+          <ChildScoreChart childId={view.child?.id ?? null} variant="compact" />
           {points.length ? (
             <>
-              <ScoreCard
-                trend={parentHome.scoreTrend(points, view.now, 6)}
-                delta={parentResults.delta(current.average, previous.average)}
-                deltaLabel={t("results.thisMonth")}
-                gradientId="results-mobile-fill"
-              />
               <DsText v="title-lg" heading style={styles.heading}>
                 {t("results.subjects")}
               </DsText>

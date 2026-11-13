@@ -16,6 +16,7 @@ import { isDirectLocked } from "@/modules/conversation";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { DirectRequestBar } from "@/modules/conversation/ui/direct-request-bar";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
+import { ChannelView } from "@/widgets/channel-view";
 import { GroupInfoScreen } from "@/modules/conversation/ui/group-info-screen";
 import { PinnedMessageBar, useChat, useChatUiStore } from "@/modules/message";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
@@ -54,7 +55,12 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const [forwardTarget, setForwardTarget] = useState<ChatMessage[]>([]);
   const [infoOpen, setInfoOpen] = useState(false);
   const [tab, setTab] = useState<GroupTab>(
-    initialTab === "lessons" || initialTab === "assignments" || initialTab === "attendance" ? initialTab : "chat"
+    initialTab === "lessons" ||
+      initialTab === "assignments" ||
+      initialTab === "attendance" ||
+      (initialTab === "progress" && role === "teacher")
+      ? initialTab
+      : "chat"
   );
 
   const chat = useChat(conversationId, { role, senderId: currentUserId });
@@ -95,7 +101,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
     markRead.mutate();
   }, [readKey, markRead]);
 
-  const backPath = role === "teacher" ? "/teacher/chats" : "/student/chats";
+  const backPath = role === "teacher" ? "/teacher/chats" : role === "parent" ? "/parent/chats" : "/student/chats";
   function goBack() {
     if (router.canGoBack()) router.back();
     else router.replace(backPath);
@@ -116,6 +122,10 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
       </Screen>
     );
   }
+
+  // Kanal: postlar va har post ostida izohlar (veb #182) — o'z ko'rinishi.
+  if (conversation.type === "channel")
+    return <ChannelView chat={chat} conversation={conversation} role={role} backTo={backPath} currentUserId={currentUserId} />;
 
   const group = conversation.type === "group" && Boolean(courseId);
 
@@ -166,7 +176,8 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 
   return (
     <View style={[styles.root, { backgroundColor: ds.c.canvas }]}>
-      {group ? <DsGradient name="auth" /> : null}
+      {/* Shaxsiy chat ham guruhdagidek gradient fonda (veb #180). */}
+      <DsGradient name="auth" />
       <ChatHeader
         conversation={conversation}
         topInset={insets.top}
@@ -178,7 +189,16 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
       />
 
       {group ? <VoiceRoomBar courseId={courseId} courseTitle={conversation.title} hideIdle /> : null}
-      {group ? <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} compact={selectionMode} /> : null}
+      {group ? (
+        <GroupTabsRow
+          active={tab}
+          onChange={setTab}
+          isTeacher={role === "teacher"}
+          isClub={course.data?.kind === "club"}
+          compact={selectionMode}
+          unpaidCount={course.data?.unpaidCount}
+        />
+      ) : null}
 
       {group && tab === "chat" && !selectionMode ? (
         conversation.announcementOnly ? (

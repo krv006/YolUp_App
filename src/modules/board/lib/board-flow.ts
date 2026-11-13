@@ -27,6 +27,11 @@ export function strokeSpan(stroke: StrokeDto): VerticalSpan | null {
       return textSpan(stroke.y, stroke.size ?? 22, String(stroke.text ?? "").split("\n").length);
     case "math":
       return textSpan(stroke.y, stroke.size ?? 22, 1);
+    case "code": {
+      const size = stroke.size ?? 20;
+      const lines = String(stroke.text ?? "").split("\n").length;
+      return { top: stroke.y - size * 1.05, bottom: stroke.y + (lines - 1) * size * 1.35 + size * 0.45 };
+    }
     default: {
       const points: Point[] = stroke.points ?? [];
       if (!points.length) return null;
@@ -87,4 +92,51 @@ export function nextTextPoint(
   const blockHeight = textBlockHeight(size, lines);
   const [x, y] = nextFlowPoint(strokes, { boardWidth, boardHeight, blockHeight });
   return [x, y + size];
+}
+
+export interface BoardObstacle {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+}
+
+export const TEXT_LINE_HEIGHT = 1.35;
+const OVERLAP_TOLERANCE = 2;
+
+export function textRow(size: number): number {
+  return size * TEXT_LINE_HEIGHT;
+}
+
+export function estimateTextWidth(text: string, size: number): number {
+  return Math.max(1, ...text.split("\n").map((line) => line.length)) * size * 0.56;
+}
+
+export interface FreeTextInit {
+  x: number;
+  y: number;
+  size: number;
+  lines: number;
+  width: number;
+  obstacles: BoardObstacle[];
+  maxBaseline: number;
+}
+
+export function freeTextBaseline({ x, y, size, lines, width, obstacles, maxBaseline }: FreeTextInit): number {
+  const row = textRow(size);
+  const height = Math.max(1, lines) * row;
+  const relevant = obstacles.filter(
+    (item) => item.right - OVERLAP_TOLERANCE > x && item.left + OVERLAP_TOLERANCE < x + width
+  );
+  const isFree = (top: number) =>
+    relevant.every((item) => item.bottom - OVERLAP_TOLERANCE <= top || item.top + OVERLAP_TOLERANCE >= top + height);
+  const start = Math.max(0, Math.floor(y / row));
+  const last = Math.max(start, Math.floor((maxBaseline - size) / row));
+  for (let index = start; index <= last; index += 1) {
+    if (isFree(index * row)) return index * row + size;
+  }
+  for (let index = start - 1; index >= 0; index -= 1) {
+    if (isFree(index * row)) return index * row + size;
+  }
+  return start * row + size;
 }

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { toIntlLocale } from "@/shared/i18n";
 import type { Submission } from "@/shared/types";
 import { DsGradient, DsText, dsRadius, Icon, MobileRoundButton, useDs, type DsColor, type IconName } from "@/shared/ui";
+import { submissionAiState } from "../lib/submission-ai-state";
 import { useRecheckSubmission, useReviewSubmission, useSubmission } from "../model/homework.queries";
 
 export interface HomeworkResultDialogProps {
@@ -28,18 +30,27 @@ const SECTIONS: Array<{ key: "strengths" | "topicsToReview" | "recommendations";
 
 /**
  * AI natijasi — veb `homework-result-dialog.tsx` ning tor ekran varianti
- * (to'liq ekran): tekshirilayotgan holat, ko'k ball kartasi (bahoni
- * tahrirlash va qayta tekshirish), kuchli tomonlar, takrorlash kerak
+ * (to'liq ekran): faylsiz topshiriqda matnli javob, `ai_state` bo'yicha
+ * holat (tekshirilmoqda — qachondan beri; baholay olmadi; ball qo'ymadi —
+ * AI xulosasi; AI ishlatilmagan), ko'k ball kartasi (bahoni tahrirlash va
+ * qayta tekshirish — faqat fayl bo'lsa), kuchli tomonlar, takrorlash kerak
  * mavzular va tavsiyalar.
  */
 export function HomeworkResultDialog({ submissionId, initial = null, open, onOpenChange, canRecheck = false, canReview = false }: HomeworkResultDialogProps) {
-  const { t } = useTranslation("homework");
+  const { t, i18n } = useTranslation("homework");
   const ds = useDs();
   const insets = useSafeAreaInsets();
   const query = useSubmission(open ? submissionId : null, { poll: initial?.status !== "done" });
   const recheck = useRecheckSubmission();
   const review = useReviewSubmission();
   const submission = query.data ?? initial;
+  const aiState = submission ? submissionAiState(submission) : "checking";
+  const hasFiles = Boolean(submission?.files.length);
+  const showScore = aiState === "ready" || submission?.status === "done";
+  const textAnswer = submission && !hasFiles && submission.comment ? submission.comment : "";
+  const checkingSince = submission?.aiCheckingSince
+    ? new Intl.DateTimeFormat(toIntlLocale(i18n.language), { hour: "2-digit", minute: "2-digit" }).format(new Date(submission.aiCheckingSince))
+    : "";
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [draft, setDraft] = useState<{ score: string; grade: string; questions: Record<string, string> } | null>(null);
 
@@ -94,8 +105,8 @@ export function HomeworkResultDialog({ submissionId, initial = null, open, onOpe
     );
   }
 
-  const pendingState = !submission || submission.status === "checking" || submission.status === "error";
   const onAction = ds.c["on-action"];
+  const stateTone = aiState === "failed" ? ds.c.danger : aiState === "unscored" ? ds.c["accent-violet-fg"] : ds.c["ink-secondary"];
 
   return (
     <Modal visible={open} animationType="slide" statusBarTranslucent navigationBarTranslucent onRequestClose={() => onOpenChange(false)}>
@@ -110,35 +121,61 @@ export function HomeworkResultDialog({ submissionId, initial = null, open, onOpe
             <View style={styles.spacer} />
           </View>
 
-          {pendingState ? (
-            <>
-              <View style={[styles.card, { backgroundColor: ds.c.surface }]}>
-                <View style={styles.row}>
-                  <View style={[styles.icon, { backgroundColor: ds.c["brand-subtle"] }]}>
-                    <Icon name="hourglass-empty" size={20} color={ds.c.brand} />
-                  </View>
-                  <View style={styles.grow}>
-                    <DsText v="title" style={styles.lh24}>
-                      {t("mobileResult.checking")}
-                    </DsText>
-                    <DsText v="body-sm" c="ink-secondary">
-                      {t("mobileResult.checkingHint")}
-                    </DsText>
-                  </View>
+          {textAnswer ? (
+            // `mt-4 gap-2 rounded-lg bg-surface p-4`
+            <View style={[styles.section, { backgroundColor: ds.c.surface }]}>
+              <DsText v="caption" c="ink-secondary">
+                {t("detailDialog.textAnswer")}
+              </DsText>
+              <DsText v="body-sm">{textAnswer}</DsText>
+            </View>
+          ) : null}
+
+          {!submission || aiState === "checking" ? (
+            <View style={[styles.card, { backgroundColor: ds.c.surface }]}>
+              <View style={styles.row}>
+                <View style={[styles.icon, { backgroundColor: ds.c["brand-subtle"] }]}>
+                  <Icon name="hourglass-empty" size={20} color={ds.c.brand} />
                 </View>
-                <View style={[styles.track, { backgroundColor: ds.c.subtle }]}>
-                  <View style={[styles.bar, { backgroundColor: ds.c.brand }]} />
-                </View>
-              </View>
-              {submission?.status === "error" ? (
-                <View style={[styles.error, { backgroundColor: ds.c["danger-bg"] }]}>
-                  <Icon name="warning-fill" size={18} color={ds.c.danger} />
-                  <DsText v="body-sm" c="error-text" style={styles.grow}>
-                    {t("mobileResult.error")}
+                <View style={styles.grow}>
+                  <DsText v="title" style={styles.lh24}>
+                    {t("mobileResult.checking")}
+                  </DsText>
+                  <DsText v="body-sm" c="ink-secondary">
+                    {checkingSince ? t("resultDialog.checkingSince", { time: checkingSince }) : t("mobileResult.checkingHint")}
                   </DsText>
                 </View>
-              ) : null}
-            </>
+              </View>
+              <View style={[styles.track, { backgroundColor: ds.c.subtle }]}>
+                <View style={[styles.bar, { backgroundColor: ds.c.brand }]} />
+              </View>
+            </View>
+          ) : !showScore ? (
+            // `mt-4 items-start gap-3 rounded-lg p-4` — AI baholay olmadi / ball qo'ymadi / ishlatilmagan
+            <View style={[styles.state, { backgroundColor: aiState === "failed" ? ds.c["danger-bg"] : ds.c.surface }]}>
+              <View style={styles.stateIcon}>
+                <Icon name={aiState === "failed" ? "warning-fill" : aiState === "unscored" ? "auto-awesome" : "info"} size={20} color={stateTone} />
+              </View>
+              <View style={[styles.grow, styles.stateBody]}>
+                <DsText v="title-sm" c={aiState === "failed" ? "error-text" : "ink"}>
+                  {aiState === "failed"
+                    ? t("resultDialog.aiFailedTitle")
+                    : aiState === "unscored"
+                      ? t("resultDialog.aiUnscoredTitle")
+                      : t("resultDialog.aiNone")}
+                </DsText>
+                {aiState === "failed" && submission.error ? (
+                  <DsText v="body-xs" c="ink-secondary">
+                    {submission.error}
+                  </DsText>
+                ) : null}
+                {aiState === "unscored" && submission.aiSummary ? (
+                  <DsText v="body-sm" c="ink-secondary" style={styles.summary}>
+                    {submission.aiSummary}
+                  </DsText>
+                ) : null}
+              </View>
+            </View>
           ) : (
             <>
               {/* `rounded-lg bg-brand p-4 gap-3 text-on-action` */}
@@ -192,7 +229,7 @@ export function HomeworkResultDialog({ submissionId, initial = null, open, onOpe
                       <ScoreButton
                         icon="refresh"
                         label={t("mobileResult.recheck")}
-                        disabled={!canRecheck || recheck.isPending}
+                        disabled={!canRecheck || !hasFiles || recheck.isPending}
                         onPress={() => recheck.mutate(submission.id)}
                       />
                     </>
@@ -265,7 +302,10 @@ const styles = StyleSheet.create({
   icon: { width: 40, height: 40, borderRadius: dsRadius.lg, alignItems: "center", justifyContent: "center" },
   track: { height: 6, overflow: "hidden", borderRadius: 3 },
   bar: { height: "100%", width: "30%", borderRadius: 3 },
-  error: { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 10, borderRadius: dsRadius.lg },
+  state: { marginTop: 16, flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 16, borderRadius: dsRadius.lg },
+  stateIcon: { marginTop: 2 },
+  stateBody: { gap: 2 },
+  summary: { marginTop: 4 },
   scoreRow: { flexDirection: "row", alignItems: "center" },
   score: { fontSize: 32, lineHeight: 38 },
   scoreInput: { width: 80, height: 38, paddingHorizontal: 8, paddingVertical: 0, borderRadius: dsRadius.lg, fontSize: 32, fontWeight: "700" },

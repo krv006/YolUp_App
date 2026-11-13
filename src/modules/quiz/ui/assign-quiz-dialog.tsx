@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
-import { MobileButton, MobileFieldLabel, MobilePickerField, Sheet } from "@/shared/ui";
+import { useCourseStudents } from "@/modules/course";
+import { dsRadius, MobileButton, MobileFieldLabel, MobilePickerField, Sheet, useDs } from "@/shared/ui";
+import type { QuizAssignInput } from "../api/quiz.dto";
+import { parseQuizLimits, quizLimitsDraft, type QuizLimitsDraft } from "../lib/quiz-limits";
+import { useQuiz } from "../model/quiz.queries";
+import { QuizLimitsFields } from "./quiz-limits-fields";
+import { StudentChecklist } from "./student-checklist";
 
 export interface AssignQuizDialogProps {
   open: boolean;
@@ -14,7 +20,7 @@ export interface AssignQuizDialogProps {
   quizLabel?: string;
   courseId?: string | null;
   pending?: boolean;
-  onSubmit: (value: { quizId: string; courseId: string; dueAt: string | null }) => void;
+  onSubmit: (value: QuizAssignInput) => void;
 }
 
 function today(): string {
@@ -26,8 +32,10 @@ function today(): string {
 
 /**
  * Testni guruhga berish — veb `assign-quiz-dialog.tsx` ning tor ekran
- * varianti (pastki oyna): test, guruh (oldindan aniq bo'lmasa), muddat
- * sanasi va vaqti; "Bekor qilish" va "Berish".
+ * varianti (pastki oyna): test, guruh (oldindan aniq bo'lmasa), guruh
+ * o'quvchilari (hammasi belgilangan; kimdir olib tashlansa `student_ids`),
+ * muddat sanasi va vaqti, topshirish sozlamalari (testning joriy qiymatlari
+ * bilan); "Bekor qilish" va "Berish".
  */
 export function AssignQuizDialog({
   open,
@@ -42,6 +50,7 @@ export function AssignQuizDialog({
 }: AssignQuizDialogProps) {
   const { t } = useTranslation("quiz");
   const { t: tl } = useTranslation("lesson");
+  const ds = useDs();
   const months = tl("list.months", { returnObjects: true }) as string[];
   const [pickedQuiz, setPickedQuiz] = useState<string | null>(null);
   const [pickedCourse, setPickedCourse] = useState("");
@@ -50,6 +59,25 @@ export function AssignQuizDialog({
 
   const finalQuiz = pickedQuiz ?? quizId ?? "";
   const finalCourse = courseId ?? pickedCourse;
+  const enrollments = useCourseStudents(finalCourse || null, { page_size: 100 }, open);
+  const students = useMemo(
+    () =>
+      (enrollments.data?.items ?? [])
+        .filter((item) => item.status === "approved")
+        .map((item) => ({ id: item.student.id, name: item.student.name, avatarUrl: item.student.avatarUrl })),
+    [enrollments.data]
+  );
+  const detail = useQuiz(open && finalQuiz ? finalQuiz : null);
+  const questionCount = detail.data?.questionCount ?? 0;
+  const hasGroups = (detail.data?.groups.length ?? 0) > 0;
+  const [limitsDraft, setLimitsDraft] = useState<{ quiz: string; value: QuizLimitsDraft } | null>(null);
+  const limitsValue = limitsDraft?.quiz === finalQuiz ? limitsDraft.value : quizLimitsDraft(detail.data);
+  const limits = parseQuizLimits(limitsValue, { questionCount, hasGroups });
+  const [excluded, setExcluded] = useState<{ course: string; ids: Set<string> }>({ course: "", ids: new Set() });
+  const excludedIds = excluded.course === finalCourse ? excluded.ids : new Set<string>();
+  const chosen = students.filter((student) => !excludedIds.has(student.id)).map((student) => student.id);
+  const nobody = students.length > 0 && chosen.length === 0;
+  const blocked = pending || !finalQuiz || !finalCourse || nobody || limits.invalid.length > 0 || !detail.data;
   const quizOptions = quizId && !quizzes.some((item) => item.id === quizId) ? [{ id: quizId, label: quizLabel }, ...quizzes] : quizzes;
   const quiz = quizOptions.find((item) => item.id === finalQuiz) ?? null;
   const course = courses.find((item) => item.id === finalCourse) ?? null;
@@ -59,12 +87,22 @@ export function AssignQuizDialog({
   const dateLabel = Number.isNaN(day.getTime()) ? date : `${day.getDate()}-${(months[day.getMonth()] ?? "").slice(0, 3).toLowerCase()}`;
 
   function changeOpen(next: boolean) {
-    if (!next) setPickedQuiz(null);
+    if (!next) {
+      setPickedQuiz(null);
+      setExcluded({ course: "", ids: new Set() });
+      setLimitsDraft(null);
+    }
     onOpenChange(next);
   }
 
   function submit() {
-    onSubmit({ quizId: finalQuiz, courseId: finalCourse, dueAt: date ? `${date}T${time || "23:59"}` : null });
+    onSubmit({
+      quizId: finalQuiz,
+      courseId: finalCourse,
+      dueAt: date ? `${date}T${time || "23:59"}` : null,
+      studentIds: excludedIds.size ? chosen : null,
+      ...limits.limits,
+    });
   }
 
   return (
@@ -77,7 +115,7 @@ export function AssignQuizDialog({
       footer={
         <>
           <MobileButton variant="secondary" label={t("assignDialog.cancel")} onPress={() => changeOpen(false)} />
-          <MobileButton label={t("assignDialog.submit")} disabled={pending || !finalQuiz || !finalCourse} onPress={submit} />
+          <MobileButton label={t("assignDialog.submit")} disabled={blocked} onPress={submit} />
         </>
       }
     >
@@ -108,6 +146,15 @@ export function AssignQuizDialog({
           </MobileFieldLabel>
         )}
 
+        {finalCourse ? (
+          <StudentChecklist
+            students={students}
+            excluded={excludedIds}
+            loading={enrollments.isLoading}
+            onChange={(ids) => setExcluded({ course: finalCourse, ids })}
+          />
+        ) : null}
+
         <View style={styles.pair}>
           <View style={styles.grow}>
             <MobileFieldLabel label={t("assignDialog.dueLabel")}>
@@ -120,6 +167,18 @@ export function AssignQuizDialog({
             </MobileFieldLabel>
           </View>
         </View>
+
+        {detail.data ? (
+          <QuizLimitsFields
+            value={limitsValue}
+            invalid={limits.invalid}
+            questionCount={questionCount}
+            hasGroups={hasGroups}
+            onChange={(value) => setLimitsDraft({ quiz: finalQuiz, value })}
+          />
+        ) : finalQuiz ? (
+          <View style={[styles.limitsSkeleton, { backgroundColor: ds.c.skeleton }]} />
+        ) : null}
       </View>
     </Sheet>
   );
@@ -130,4 +189,6 @@ const styles = StyleSheet.create({
   /* `-mt-1 gap-3.5` */
   body: { marginTop: -4, gap: 14 },
   pair: { flexDirection: "row", gap: 12 },
+  /* `h-20 rounded-lg bg-skeleton` */
+  limitsSkeleton: { height: 80, borderRadius: dsRadius.lg },
 });

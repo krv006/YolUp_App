@@ -6,7 +6,7 @@
     "rating": "Рейтинг",
     "profile": "Профиль",
     "overview": "Главная",
-    "children": "Дети",
+    "children": "Ученики",
     "attendance": "Посещаемость",
     "homework": "Задания",
     "workspace": "Workspace"
@@ -56,7 +56,7 @@
     "notifications": "Уведомления",
     "phone": "Телефон",
     "username": "Имя пользователя",
-    "inviteCode": "Код приглашения — по нему подключается родитель",
+    "inviteCode": "Код приглашения — по нему подключается наблюдатель",
     "switchAccount": "Сменить аккаунт",
     "linkedAccounts": "Связанных аккаунтов: {{count}}",
     "newRole": "Создать новую роль",
@@ -100,7 +100,7 @@
   "roles": {
     "student": "Ученик",
     "teacher": "Учитель",
-    "parent": "Родитель"
+    "parent": "Наблюдатель"
   },
   "message": {
     "yozmoqda": "{{name}} печатает…",
@@ -201,7 +201,7 @@
     "chiqishlar": "Выходы",
     "jami_yoqlik": "Всего отсутствовал",
     "eng_uzun": "Самый долгий",
-    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Число выходов превысило предел — родителю отправлено уведомление.",
+    "chiqishlar_soni_chegaradan_oshgan_ota_onaga_": "Число выходов превысило предел — наблюдателю отправлено уведомление.",
     "davomat_yozuvi_topilmadi": "Записи о посещаемости не найдены"
   },
   "recording": {
@@ -237,7 +237,7 @@
     "soat_15_00_da_boshlaymiz": "Начинаем в 15:00."
   },
   "report": {
-    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Задания и оценки вашего ребёнка по каждому предмету.",
+    "har_bir_fan_boyicha_farzandingiz_vazifalari": "Задания и оценки вашего ученика по каждому предмету.",
     "har_bir_fan_boyicha_vazifalar_va_baholaringi": "Ваши задания и оценки по каждому предмету.",
     "reyting_yuklanmoqda": "Загрузка рейтинга…"
   },
@@ -470,21 +470,21 @@
     "dars_ketmoqda": "Урок идёт"
   },
   "parent": {
-    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "Сначала привяжите аккаунт ученика в разделе «Дети».",
+    "avval_farzandlar_bolimida_oquvchi_hisobini_u": "Сначала привяжите аккаунт ученика в разделе «Ученики».",
     "barchasi": "Все",
     "biriktirilgan_oquvchi_hisoblari_va_maxfiylik": "Привязанные аккаунты учеников и разрешения приватности.",
-    "bola_hisobi": "Аккаунт ребёнка",
-    "bola_hisobini_yaratish": "Создать аккаунт ребёнка",
+    "bola_hisobi": "Аккаунт ученика",
+    "bola_hisobini_yaratish": "Создать аккаунт ученика",
     "bu_ruxsatlarni_istalgan_payt_qaytarib_olishi": "Вы можете отозвать эти разрешения в любой момент.",
     "davomat_yuklanmoqda": "Загрузка посещаемости…",
     "davomatni_yuklab_bolmadi": "Не удалось загрузить посещаемость",
     "familiya": "Фамилия",
-    "farzand_biriktirilmagan": "Ребёнок не привязан",
-    "farzand_bolimiga_oting_va_oquvchining_taklif": "Перейдите в раздел «Дети» и привяжите аккаунт ученика по коду приглашения.",
-    "farzand_hali_ulanmagan": "Ребёнок ещё не привязан",
-    "farzand_tanlanmagan": "Ребёнок не выбран",
-    "farzandlar_royxatini_yuklab_bolmadi": "Не удалось загрузить список детей",
-    "farzandlar_yuklanmoqda": "Загрузка детей…",
+    "farzand_biriktirilmagan": "Ученик не привязан",
+    "farzand_bolimiga_oting_va_oquvchining_taklif": "Перейдите в раздел «Ученики» и привяжите аккаунт ученика по коду приглашения.",
+    "farzand_hali_ulanmagan": "Ученик ещё не привязан",
+    "farzand_tanlanmagan": "Ученик не выбран",
+    "farzandlar_royxatini_yuklab_bolmadi": "Не удалось загрузить список учеников",
+    "farzandlar_yuklanmoqda": "Загрузка учеников…",
     "fk_xxxx": "FK-XXXX",
     "har_bir_darsdagi_ishtirok_diqqat_va_fokus_ko": "Участие, внимание и фокус на каждом уроке.",
     "hisob_yaratildi": "Аккаунт создан",
@@ -502,10 +502,10 @@
     "panel_yuklanmoqda": "Загрузка панели…",
     "ruxsatlarni_yuklab_bolmadi": "Не удалось загрузить разрешения.",
     "songgi_davomat": "Последняя посещаемость",
-    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Запрос отправлен — ваш ребёнок должен подтвердить его",
+    "sorov_yuborildi_farzandingiz_tasdiqlashi_ker": "Запрос отправлен — ваш ученик должен подтвердить его",
     "sorov_yuborish": "Отправить запрос",
     "taklif_kodi": "Код приглашения",
-    "tanlangan_farzand_uchun_davomat_topilmadi": "Для выбранного ребёнка посещаемость не найдена.",
+    "tanlangan_farzand_uchun_davomat_topilmadi": "Для выбранного ученика посещаемость не найдена.",
     "tekshirilmoqda": "Проверяется",
     "tekshiruv_xatosi": "Ошибка проверки",
     "topshirilmagan": "Не сдано",
@@ -529,7 +529,7 @@
     "songgi_faollik": "Последняя активность: {{value}}",
     "uchun_ruxsatlar": "Разрешения для {{name}}",
     "parol_kamida_8_ta_belgidan_iborat_bolsin": "Пароль должен содержать не менее 8 символов",
-    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Информация появится здесь после того, как ваш ребёнок зайдёт на урок"
+    "farzandingiz_darsga_kirgach_malumot_shu_yerd": "Информация появится здесь после того, как ваш ученик зайдёт на урок"
   },
   "conversation": {
     "bekor_qilish": "Отмена",
@@ -710,17 +710,17 @@
     },
     "student": {
       "group": "Чтобы присоединиться к группе, напишите преподавателю.",
-      "parent": "Родитель может подключиться к вашему аккаунту по коду из профиля."
+      "parent": "Наблюдатель может подключиться к вашему аккаунту по коду из профиля."
     },
     "parent": {
-      "link": "В разделе «Дети» подключите аккаунт ребёнка по его коду.",
+      "link": "В разделе «Ученики» подключите аккаунт ученика по его коду.",
       "follow": "После этого вы будете видеть посещаемость, задания и рейтинг."
     }
   },
   "workspace": {
     "attendance": {
       "title": "Посещаемость",
-      "description": "Участие ребёнка на каждом уроке."
+      "description": "Участие ученика на каждом уроке."
     },
     "homework": {
       "title": "Задания",
@@ -728,11 +728,11 @@
     },
     "examsChild": {
       "title": "Мок-тесты",
-      "description": "Экзамены в группах ребёнка и их результаты."
+      "description": "Экзамены в группах ученика и их результаты."
     },
     "ratingChild": {
       "title": "Рейтинг",
-      "description": "Результаты ребёнка по заданиям."
+      "description": "Результаты ученика по заданиям."
     },
     "modullar": "Модули"
   }

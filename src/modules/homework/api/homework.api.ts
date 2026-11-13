@@ -4,21 +4,27 @@ import type { Submission } from "@/shared/types";
 import { homeworkEndpoints } from "./homework.endpoints";
 import type {
   HomeworkBoardDto,
+  AssignFromBankDto,
+  AssignFromBankInput,
+  AssignmentAudienceDto,
   AssignmentDto,
   AssignmentFormInput,
   HomeworkAiSummaryDto,
+  HomeworkAnswerInput,
   HomeworkReportDto,
   SubmissionDto,
   SubmissionReviewInput,
 } from "./homework.dto";
 import {
+  assignFromBankBody,
+  mapAssignmentAudienceDto,
   mapBoardDto,
   mapAssignmentDto,
   mapAssignmentRequest,
   mapHomeworkReportDto,
   mapSubmissionDto,
 } from "../lib/homework.mappers";
-import { validateHomeworkFile } from "../lib/homework-validation";
+import { validateHomeworkAnswer, validateHomeworkFile } from "../lib/homework-validation";
 
 export const homeworkApi = {
   async getAssignments(courseId: string | null, options: RequestOptions = {}) {
@@ -39,6 +45,25 @@ export const homeworkApi = {
     return apiClient.post<{ last_reminded_at: string | null; sent: boolean }>(homeworkEndpoints.remindChild(assignmentId), {
       student: studentId,
     });
+  },
+  async getBank(options: RequestOptions = {}) {
+    const items = await apiClient.get<AssignmentDto[]>(homeworkEndpoints.assignments, {
+      ...options,
+      query: { bank: 1 },
+    });
+    return items.map(mapAssignmentDto);
+  },
+  async assignFromBank(id: string, input: AssignFromBankInput) {
+    const dto = await apiClient.post<AssignFromBankDto>(homeworkEndpoints.assignFromBank(id), assignFromBankBody(input));
+    return (dto?.assignments ?? []).map(mapAssignmentDto);
+  },
+  async getAudience(id: string, options?: RequestOptions) {
+    return mapAssignmentAudienceDto(await apiClient.get<AssignmentAudienceDto>(homeworkEndpoints.audience(id), options));
+  },
+  async setAudience(id: string, studentIds: string[]) {
+    return mapAssignmentAudienceDto(
+      await apiClient.put<AssignmentAudienceDto>(homeworkEndpoints.audience(id), { student_ids: studentIds })
+    );
   },
   async getAssignment(id: string, options?: RequestOptions) {
     return mapAssignmentDto(await apiClient.get<AssignmentDto>(homeworkEndpoints.assignment(id), options));
@@ -62,12 +87,20 @@ export const homeworkApi = {
   async downloadAssignment(id: string, options?: RequestOptions) {
     return apiClient.get<Blob>(homeworkEndpoints.assignmentFile(id), { ...options, responseType: "blob" });
   },
-  async submit(assignmentId: string, files: File[], skillKey?: string, comment?: string): Promise<Submission | null> {
-    if (!files.length) validateHomeworkFile(null, { speaking: skillKey === "speaking" });
+  async submit(
+    assignmentId: string,
+    files: File[],
+    skillKey?: string,
+    comment?: string,
+    answers?: HomeworkAnswerInput[]
+  ): Promise<Submission | null> {
+    validateHomeworkAnswer({ files, comment, answers });
     files.forEach((file) => validateHomeworkFile(file, { speaking: skillKey === "speaking" }));
     const body = new FormData();
     files.forEach((file, index) => body.append(index ? "files" : "file", file));
     if (comment?.trim()) body.set("comment", comment.trim());
+    if (answers?.length)
+      body.set("answers", JSON.stringify(answers.map((item) => ({ question_id: item.questionId, answer: item.answer }))));
     return mapSubmissionDto(
       await apiClient.post<SubmissionDto>(homeworkEndpoints.submit(assignmentId), body)
     );
@@ -119,6 +152,7 @@ export const homeworkApi = {
     if (input.shareWithParent !== undefined) body.share_with_parent = input.shareWithParent;
     if (input.result !== undefined) body.result = input.result;
     if (input.teacherComment !== undefined) body.teacher_comment = input.teacherComment;
+    if (input.answerScores && Object.keys(input.answerScores).length) body.answer_scores = input.answerScores;
     return mapSubmissionDto(await apiClient.post<SubmissionDto>(homeworkEndpoints.review(id), body));
   },
   async requestResubmit(id: string, comment: string) {

@@ -145,7 +145,7 @@ function SubmissionRow({ submission, onOpenResult }: { submission: Submission; o
         <View style={styles.file}>
           <FileText size={12} color={palette["muted-foreground"]} />
           <Text variant="caption" numberOfLines={1} style={[styles.shrink, { color: palette["muted-foreground"] }]}>
-            {submission.fileName || t("detailDialog.defaultFile")}
+            {submission.fileName || (submission.comment ? t("detailDialog.textAnswer") : t("detailDialog.defaultFile"))}
             {submission.isLate ? (
               <Text variant="caption" style={[styles.late, { color: palette["destructive-strong"] }]}>
                 {` · ${t("detailDialog.lateSuffix")}`}
@@ -161,24 +161,29 @@ function SubmissionRow({ submission, onOpenResult }: { submission: Submission; o
         </Text>
       </View>
       <View style={styles.actions}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("detailDialog.downloadSubmissionAria")}
-          disabled={download.isPending}
-          onPress={() => download.mutate({ id: submission.id, fileName: submission.fileName })}
-          style={styles.iconButton}
-        >
-          <Download size={16} color={palette["muted-foreground"]} />
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("detailDialog.recheckAria")}
-          disabled={recheck.isPending || submission.status === "checking"}
-          onPress={() => recheck.mutate(submission.id)}
-          style={styles.iconButton}
-        >
-          <RefreshCw size={16} color={palette["muted-foreground"]} />
-        </Pressable>
+        {/* Faylsiz (izoh bilan) topshiriqda yuklab olish va qayta tekshirish yo'q. */}
+        {submission.files.length ? (
+          <>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("detailDialog.downloadSubmissionAria")}
+              disabled={download.isPending}
+              onPress={() => download.mutate({ id: submission.id, fileName: submission.fileName })}
+              style={styles.iconButton}
+            >
+              <Download size={16} color={palette["muted-foreground"]} />
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("detailDialog.recheckAria")}
+              disabled={recheck.isPending || submission.status === "checking"}
+              onPress={() => recheck.mutate(submission.id)}
+              style={styles.iconButton}
+            >
+              <RefreshCw size={16} color={palette["muted-foreground"]} />
+            </Pressable>
+          </>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           onPress={() => onOpenResult(submission)}

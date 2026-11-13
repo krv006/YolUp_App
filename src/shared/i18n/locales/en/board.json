@@ -42,7 +42,11 @@
     "toolbarAria": "Board tools",
     "colorLabel": "Color {{value}}",
     "widthLabel": "Thickness {{value}}",
-    "styleAria": "Colour and width"
+    "styleAria": "Colour and width",
+    "code": "Code",
+    "select": "Select",
+    "textSizeLabel": "Text size: {{value}}",
+    "eraserSizeLabel": "Eraser size: {{value}}"
   },
   "inline": {
     "cancel": "Cancel",
@@ -58,7 +62,14 @@
     "underline": "Underline",
     "bulletList": "Bulleted list",
     "numberedList": "Numbered list",
-    "formatAria": "Text formatting"
+    "formatAria": "Text formatting",
+    "code": "Code",
+    "save": "Save",
+    "edit": {
+      "text": "Edit text",
+      "math": "Edit formula",
+      "code": "Edit code"
+    }
   },
   "eraseDialog": {
     "title": "Delete element",
@@ -73,7 +84,9 @@
       "cleanup": "Clearing the board",
       "other": "Other"
     },
-    "reasonPlaceholder": "Describe the reason"
+    "reasonPlaceholder": "Describe the reason",
+    "deletedCount_one": "{{count}} element deleted",
+    "deletedCount_other": "{{count}} elements deleted"
   },
   "grantDialog": {
     "title": "Board drawing permission",
@@ -213,5 +226,27 @@
     },
     "liveLesson": "Live lesson",
     "menu": "Actions"
+  },
+  "code": {
+    "language": "Programming language",
+    "detected": "Auto · {{language}}",
+    "counter": "{{count}}/{{max}}",
+    "aria": "Write code on the board",
+    "placeholder": "Type code…",
+    "hint": "Tab — 4 spaces · Shift+Tab — outdent · Ctrl+Enter — confirm"
+  },
+  "edit": {
+    "notOwner": "You can only change elements you created",
+    "editedBy": "edited by {{name}}",
+    "toolbar": "Element actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "sizeDown": "Smaller",
+    "sizeUp": "Larger"
+  },
+  "zoom": {
+    "in": "Zoom in",
+    "out": "Zoom out",
+    "reset": "Reset zoom ({{value}}%)"
   }
 }

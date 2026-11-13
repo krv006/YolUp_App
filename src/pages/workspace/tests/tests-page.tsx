@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCourses, useSubjects } from "@/modules/course";
 import {
   AssignQuizDialog,
+  PaidTestDialog,
   QuizAttemptsDrawer,
   QuizExportDialog,
   QuizImportDialog,
@@ -14,10 +15,12 @@ import {
   useCreateQuiz,
   useDeleteQuiz,
   useExportQuiz,
+  usePaidTestGate,
   usePublishQuiz,
   useQuizAttempts,
+  useQuizLimitsText,
   useQuizzes,
-  useUpdateQuiz,
+  type QuizImportSource,
 } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import type { QuizSummary } from "@/shared/types";
@@ -51,6 +54,8 @@ const DRAFT = "draft";
  * ochadi (tahrirlash, natijalar, urinishlar, yuklab olish, o'chirish);
  * pastda qoralamada "Tahrirlash / E'lon qilish", aks holda "Natijalar /
  * Guruhga berish". `?new=1` bilan ochilsa yangi test oynasi ochiq.
+ * Test yaratish xizmati yoqilmagan o'qituvchida "+" qulf belgili va
+ * "pullik xizmat" oynasini ochadi.
  */
 export function TestsPage() {
   const { t } = useTranslation("quiz");
@@ -63,7 +68,6 @@ export function TestsPage() {
   const subjectOptions = useSubjects();
   const publish = usePublishQuiz();
   const create = useCreateQuiz();
-  const update = useUpdateQuiz();
   const assign = useAssignQuizToCourse();
   const remove = useDeleteQuiz();
   const exportQuiz = useExportQuiz();
@@ -73,6 +77,8 @@ export function TestsPage() {
   const [exportOf, setExportOf] = useState<QuizSummary | null>(null);
   const [deleting, setDeleting] = useState<QuizSummary | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const gate = usePaidTestGate();
+  const [importSource, setImportSource] = useState<QuizImportSource | null>(null);
   const [assignTarget, setAssignTarget] = useState<QuizSummary | null>(null);
   const [attemptsOf, setAttemptsOf] = useState<QuizSummary | null>(null);
   const attempts = useQuizAttempts(attemptsOf?.id ?? null, Boolean(attemptsOf));
@@ -168,7 +174,14 @@ export function TestsPage() {
           title={t("tests.title")}
           backLabel={t("tests.mobile.back")}
           onBack={goBack}
-          action={<MobileRoundButton icon="add" iconSize={24} label={t("tests.create")} onPress={() => changeCreateOpen(true)} />}
+          action={
+            <MobileRoundButton
+              icon={gate.allowed ? "add" : "lock"}
+              iconSize={gate.allowed ? 24 : 20}
+              label={t("tests.create")}
+              onPress={gate.guard(() => changeCreateOpen(true))}
+            />
+          }
         />
 
         <MobileSearchField style={styles.search} value={query} onChange={setQuery} placeholder={t("tests.mobile.searchPlaceholder")} clearLabel={t("tests.mobile.clearSearch")} />
@@ -210,7 +223,7 @@ export function TestsPage() {
                   icon="quiz"
                   title={t("tests.emptyTitle")}
                   description={t("tests.emptyHint")}
-                  action={{ label: t("tests.create"), icon: "add", onPress: () => changeCreateOpen(true) }}
+                  action={{ label: t("tests.create"), icon: gate.allowed ? "add" : "lock", onPress: gate.guard(() => changeCreateOpen(true)) }}
                 />
               )
             ) : null}
@@ -225,18 +238,24 @@ export function TestsPage() {
         subjects={(subjectOptions.data ?? []).map((item) => ({ value: item.value, label: item.label }))}
         pending={create.isPending}
         onContinue={startTest}
-        onImport={() => setImportOpen(true)}
-      />
-
-      <QuizImportDialog
-        open={importOpen}
-        onOpenChange={setImportOpen}
-        request={{ topic: t("tests.importedTopic") }}
-        onImported={(quiz) => {
-          changeCreateOpen(false);
-          router.push(ROUTES.teacher.test(quiz.id) as never);
+        onImport={(source) => {
+          setImportSource(source);
+          setImportOpen(true);
         }}
-      />
+      >
+        <QuizImportDialog
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          source={importSource}
+          request={{ topic: t("tests.importedTopic") }}
+          onImported={(quiz) => {
+            changeCreateOpen(false);
+            router.push(ROUTES.teacher.test(quiz.id) as never);
+          }}
+        />
+      </NewTestDialog>
+
+      <PaidTestDialog open={gate.open} onOpenChange={gate.setOpen} />
 
       <AssignQuizDialog
         open={Boolean(assignTarget)}
@@ -246,20 +265,14 @@ export function TestsPage() {
         quizzes={items.filter((quiz) => quiz.status !== DRAFT).map((quiz) => ({ id: quiz.id, label: quizDisplayTitle(quiz) }))}
         courses={courseOptions.map((course) => ({ id: course.id, label: course.label, studentCount: course.studentCount }))}
         pending={assign.isPending}
-        onSubmit={({ quizId, courseId, dueAt }) => {
-          const target = items.find((quiz) => quiz.id === quizId) ?? assignTarget;
-          void assign.mutateAsync({ quizId, courseId }).then(() => {
-            if (dueAt && target) update.mutate({ id: target.id, values: { dueAt } });
-            setAssignTarget(null);
-          });
-        }}
+        onSubmit={(value) => void assign.mutateAsync(value).then(() => setAssignTarget(null))}
       />
 
       <QuizAttemptsDrawer
         open={Boolean(attemptsOf)}
         onOpenChange={(open) => !open && setAttemptsOf(null)}
         title={attemptsOf ? quizDisplayTitle(attemptsOf) : ""}
-        subtitle={t("attemptsDrawer.unlimited")}
+        subtitle={attemptsOf?.maxAttempts ? t("attemptsDrawer.limited", { count: attemptsOf.maxAttempts }) : t("attemptsDrawer.unlimited")}
         attempts={attempts.data ?? []}
         loading={attempts.isLoading}
       />
@@ -306,6 +319,7 @@ interface TestCardProps {
 function TestCard({ quiz, ...props }: TestCardProps) {
   const { t } = useTranslation("quiz");
   const ds = useDs();
+  const limitsText = useQuizLimitsText();
   const { anchorRef, rect, open, close } = usePopoverAnchor();
   const draft = quiz.status === DRAFT;
   const menuItems = 2 + (draft ? 1 : 3);
@@ -328,7 +342,7 @@ function TestCard({ quiz, ...props }: TestCardProps) {
                 {quizDisplayTitle(quiz)}
               </DsText>
               <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
-                {[quiz.subjectLabel, t("tests.questionCount", { count: quiz.questionCount })].filter(Boolean).join(" · ")}
+                {[quiz.subjectLabel, t("tests.questionCount", { count: quiz.questionCount }), limitsText(quiz)].filter(Boolean).join(" · ")}
               </DsText>
             </View>
           </Pressable>

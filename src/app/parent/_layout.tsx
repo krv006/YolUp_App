@@ -24,7 +24,7 @@ const TABS: readonly TabDefinition[] = [
 ];
 
 /* `(account)` — profil, sozlamalar, yordam va bildirishnomalar (o'z stack'i, URL'da guruh nomi yo'q). */
-const HIDDEN = ["exams", "(account)", "[...missing]"];
+const HIDDEN = ["exams", "chats", "(account)", "[...missing]"];
 
 export default function ParentLayout() {
   return (

@@ -5,6 +5,7 @@ export type { SocketState };
 
 export type BoardSocketEvent =
   | { type: "stroke"; sheet: number; stroke: StrokeDto }
+  | { type: "stroke_updated"; sheet: number; stroke: StrokeDto }
   | { type: "erase"; sheet: number; strokeIds: string[]; by: string; reason: string }
   | { type: "sheet"; index: number; title?: string }
   | { type: "sheet_renamed"; index: number; title: string }
@@ -19,6 +20,10 @@ export type BoardSocketEvent =
   | { type: "camera_denied"; studentId: string }
   | { type: "board_granted"; studentId: string }
   | { type: "board_revoked"; studentId: string }
+  | { type: "mic_revoked"; studentId: string }
+  | { type: "camera_revoked"; studentId: string }
+  | { type: "media_mode"; openMic: boolean; openCamera: boolean }
+  | { type: "attention"; checkId: string; dueAt: string }
   | { type: "error"; detail: string };
 
 interface RawBoardEvent {
@@ -33,6 +38,9 @@ interface RawBoardEvent {
   student_id?: string | number;
   name?: string;
   detail?: string;
+  open_mic?: boolean;
+  open_camera?: boolean;
+  check?: { id?: string | number; due_at?: string } | null;
 }
 
 export function parseBoardEvent(raw: unknown): BoardSocketEvent | null {
@@ -43,6 +51,10 @@ export function parseBoardEvent(raw: unknown): BoardSocketEvent | null {
     case "stroke":
       return event.stroke
         ? { type: "stroke", sheet: Number(event.sheet ?? 0), stroke: event.stroke }
+        : null;
+    case "stroke_updated":
+      return event.stroke?.id
+        ? { type: "stroke_updated", sheet: Number(event.sheet ?? 0), stroke: event.stroke }
         : null;
     case "erase":
       return {
@@ -82,6 +94,16 @@ export function parseBoardEvent(raw: unknown): BoardSocketEvent | null {
       return event.student_id ? { type: "board_granted", studentId: String(event.student_id) } : null;
     case "board_revoked":
       return event.student_id ? { type: "board_revoked", studentId: String(event.student_id) } : null;
+    case "mic_revoked":
+      return event.student_id ? { type: "mic_revoked", studentId: String(event.student_id) } : null;
+    case "camera_revoked":
+      return event.student_id ? { type: "camera_revoked", studentId: String(event.student_id) } : null;
+    case "media_mode":
+      return { type: "media_mode", openMic: Boolean(event.open_mic), openCamera: Boolean(event.open_camera) };
+    case "attention":
+      return event.check?.id
+        ? { type: "attention", checkId: String(event.check.id), dueAt: event.check.due_at ?? "" }
+        : null;
     case "error":
       return { type: "error", detail: event.detail || "Doska ulanishida xatolik" };
     default:

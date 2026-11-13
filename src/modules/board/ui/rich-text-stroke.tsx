@@ -1,14 +1,7 @@
 import { useMemo } from "react";
-import {
-  Group,
-  matchFont,
-  Rect,
-  Text as SkiaText,
-  type SkFont,
-} from "@shopify/react-native-skia";
+import { Group, Rect, Text as SkiaText } from "@shopify/react-native-skia";
 import type { TextLineDto } from "../api/board.dto";
-import { listMarkers } from "../lib/rich-text";
-import { BOARD_FONT_FAMILY } from "./board-font";
+import { richTextRows } from "../lib/board-measure";
 
 /**
  * Formatlangan matn strokesi — veb `board-stroke.tsx:23-46` ning mobil
@@ -18,25 +11,17 @@ import { BOARD_FONT_FAMILY } from "./board-font";
  * kenglik o'lchanadi. Vebda buning hammasini SVG `<tspan>` o'zi qiladi —
  * bir necha qator kod. Skia'da esa qo'lda joylashtirish kerak, shuning
  * uchun mantiq `board-stroke.tsx` ni ikki barobar uzaytirib yubormasligi
- * uchun bu yerga ajratildi.
+ * uchun bu yerga ajratildi. Joylashuvning o'zi `richTextRows` da — tanlash
+ * ramkasi ham aynan shu o'lchov bilan chiziladi.
  *
  * Bungacha mobil `stroke.lines` ni UMUMAN o'qimasdi va faqat `stroke.text`
  * ni chizardi — ya'ni vebda qalin harf yoki ro'yxat bilan yozilgan matn
  * telefonda formatsiz va belgisiz ko'rinardi.
  */
 
-/** Qator balandligi — veb `lineHeight = size * 1.35` bilan bir xil. */
-const LINE_HEIGHT = 1.35;
 /** Tagiga chizish qalinligi va matndan pastdagi masofa (shrift ulushida). */
 const UNDERLINE_WIDTH = 0.06;
 const UNDERLINE_OFFSET = 0.16;
-
-interface Piece {
-  text: string;
-  font: SkFont;
-  x: number;
-  underline: boolean;
-}
 
 export interface RichTextStrokeProps {
   lines: readonly TextLineDto[];
@@ -48,45 +33,8 @@ export interface RichTextStrokeProps {
 }
 
 export function RichTextStroke({ lines, x, y, size, color, opacity }: RichTextStrokeProps) {
-  /*
-   * Shriftlar va joylashuv BIR MARTA hisoblanadi: `matchFont` har
-   * chaqirilganda tizim shrift menejeriga boradi, doskada esa yuzlab
-   * stroke bo'lishi mumkin.
-   */
-  const rows = useMemo(() => {
-    const markers = listMarkers(lines);
-
-    // Veb qalinligi: oddiy matn 600, qalin 800, belgi 700.
-    const fontFor = (bold?: boolean, italic?: boolean) =>
-      matchFont({
-        fontFamily: BOARD_FONT_FAMILY,
-        fontSize: size,
-        fontWeight: bold ? "800" : "600",
-        fontStyle: italic ? "italic" : "normal",
-      });
-
-    const markerFont = matchFont({ fontFamily: BOARD_FONT_FAMILY, fontSize: size, fontWeight: "700" });
-
-    return lines.map((line, index) => {
-      const pieces: Piece[] = [];
-      let cursor = x;
-
-      const marker = markers[index];
-      if (marker) {
-        pieces.push({ text: marker, font: markerFont, x: cursor, underline: false });
-        cursor += markerFont.getTextWidth(marker);
-      }
-
-      for (const run of line.runs) {
-        if (!run.text) continue;
-        const font = fontFor(run.bold, run.italic);
-        pieces.push({ text: run.text, font, x: cursor, underline: Boolean(run.underline) });
-        cursor += font.getTextWidth(run.text);
-      }
-
-      return { pieces, y: y + index * size * LINE_HEIGHT };
-    });
-  }, [lines, size, x, y]);
+  // Shriftlar keshlangan (`boardFont`), joylashuv esa bir marta hisoblanadi.
+  const rows = useMemo(() => richTextRows(lines, x, y, size), [lines, size, x, y]);
 
   return (
     <Group opacity={opacity}>

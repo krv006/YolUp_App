@@ -21,7 +21,8 @@ function dayMonth(value: string): string {
  * ekran varianti (veb #164): davr filtrlari, ko'k xulosa kartasi (davomat,
  * fokus, darslar), o'quvchilar ro'yxati (N/M dars, davomat chizig'i, fokus) —
  * hammasi backend xulosasidan; pastda tugagan darslar, bosilsa dars davomati
- * oynasi (`LessonAttendanceDialog`).
+ * oynasi (`LessonAttendanceDialog`). O'quvchi va dars qatorlarida oynadan
+ * chiqishlar soni — backenddagi `focus_exits` (xulosa va `/lessons/`).
  */
 export function AttendanceSection({ courseId }: { courseId: string }) {
   const { t } = useTranslation("group");
@@ -136,9 +137,12 @@ export function AttendanceSection({ courseId }: { courseId: string }) {
               <View key={student.id} style={[styles.row, index < students.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line }]}>
                 <Avatar variant="legacy" name={student.name} size="sm" box={44} />
                 <View style={styles.rowBody}>
-                  <DsText v="title" numberOfLines={1}>
-                    {student.name}
-                  </DsText>
+                  <View style={styles.nameRow}>
+                    <DsText v="title" numberOfLines={1} style={styles.shrink}>
+                      {student.name}
+                    </DsText>
+                    {student.focusExits ? <ExitsBadge count={student.focusExits} /> : null}
+                  </View>
                   <View style={styles.barRow}>
                     <View style={[styles.track, { backgroundColor: ds.c.subtle }]}>
                       <View style={[styles.bar, { width: `${student.attendancePercent}%`, backgroundColor: student.attendancePercent >= 50 ? ds.c.brand : ds.c.danger }]} />
@@ -201,6 +205,7 @@ export function AttendanceSection({ courseId }: { courseId: string }) {
                           : t("attendance.lessonOpen")}
                       </DsText>
                     </View>
+                    {lesson.focusExits ? <ExitsBadge count={lesson.focusExits} /> : null}
                     {lesson.attendanceRate !== null ? (
                       <DsText v="title-sm" numeric c={lesson.attendanceRate >= 50 ? "success" : "danger"}>
                         {Math.round(lesson.attendanceRate)}%
@@ -222,9 +227,31 @@ export function AttendanceSection({ courseId }: { courseId: string }) {
   );
 }
 
+/**
+ * Oynadan chiqishlar — veb `ExitsBadge` ning tor ekran ko'rinishi
+ * (`h-6 rounded-full bg-danger-bg px-2`, chiqish belgisi va son).
+ */
+function ExitsBadge({ count }: { count: number }) {
+  const { t } = useTranslation("group");
+  const ds = useDs();
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${t("attendance.exits", { count })} · ${t("attendance.exitsHint")}`}
+      style={[styles.exits, { backgroundColor: ds.c["danger-bg"] }]}
+    >
+      <Icon name="logout" size={12} color={ds.c.danger} />
+      <DsText v="caption-strong" c="danger" numeric>
+        {count}
+      </DsText>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
+  shrink: { flexShrink: 1, minWidth: 0 },
   /* `gap-5 px-4 pt-5 pb-8` */
   page: { gap: 20, paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32 },
   heading: { flex: 0, marginBottom: 4 },
@@ -241,6 +268,8 @@ const styles = StyleSheet.create({
   /* `gap-3 border-b px-4 py-3.5` */
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
   rowBody: { flex: 1, minWidth: 0, gap: 6 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  exits: { height: 24, flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, borderRadius: 12 },
   barRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   track: { flex: 1, minWidth: 0, height: 6, overflow: "hidden", borderRadius: 3 },
   bar: { height: "100%", borderRadius: 3 },

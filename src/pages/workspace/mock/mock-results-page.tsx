@@ -118,7 +118,7 @@ export function MockResultsPage() {
       prefill={scoring?.prefill}
       suggested={scoringResult.data?.writingAi?.suggestedBand != null ? { [writingKey]: scoringResult.data.writingAi.suggestedBand } : {}}
       pending={saveScores.isPending}
-      onSave={(scores) => scoringRow && saveScores.mutate({ studentId: scoringRow.studentId, scores }, { onSuccess: () => setScoring(null) })}
+      onSave={(scores, comment) => scoringRow && saveScores.mutate({ studentId: scoringRow.studentId, scores, comment }, { onSuccess: () => setScoring(null) })}
     />
   );
 
@@ -129,6 +129,7 @@ export function MockResultsPage() {
         <WritingAi
           title={t("mock.mobile.aiTitle", { name: row?.studentName ?? "", section: row?.sections.find((section) => section.key === writingKey)?.title ?? "Writing" })}
           detail={essayDetail.data}
+          comment={row?.teacherComment ?? ""}
           requesting={requestAi.isPending}
           onBack={goBack}
           onRequest={() => requestAi.mutate(essayStudent)}
@@ -566,9 +567,14 @@ function WritingList({ eyebrow, entries, loading, onBack, onOpen }: { eyebrow: s
   );
 }
 
+/**
+ * O'quvchi esse tahlili — vebda keng ekrandagi tanlangan o'quvchi kartasiga
+ * mos; o'qituvchi izohi bo'lsa pastda ko'rinadi.
+ */
 function WritingAi({
   title,
   detail,
+  comment,
   requesting,
   onBack,
   onRequest,
@@ -576,6 +582,7 @@ function WritingAi({
 }: {
   title: string;
   detail: ExamStudentResultDetail | undefined;
+  comment: string;
   requesting: boolean;
   onBack: () => void;
   onRequest: () => void;
@@ -679,6 +686,16 @@ function WritingAi({
           ) : null}
         </View>
       ))}
+
+      {comment ? (
+        // `flex flex-col gap-0.5 rounded-md bg-surface px-3.5 py-2.5`
+        <View style={[styles.teacherComment, { backgroundColor: ds.c.surface }]}>
+          <DsText v="caption-strong" c="ink-secondary">
+            {t("results.teacherComment")}
+          </DsText>
+          <DsText v="body-sm">{comment}</DsText>
+        </View>
+      ) : null}
     </Page>
   );
 }
@@ -757,6 +774,7 @@ const styles = StyleSheet.create({
   aiTitle: { flexDirection: "row", alignItems: "center", gap: 6 },
   criteria: { marginTop: 10, gap: 10 },
   criterion: { gap: 4 },
+  teacherComment: { marginTop: 16, gap: 2, paddingHorizontal: 14, paddingVertical: 10, borderRadius: dsRadius.md },
   aiSection: { gap: 8, paddingHorizontal: 16, paddingTop: 14, paddingBottom: 12, borderRadius: dsRadius.xl },
   askAgain: { flex: 0.8, paddingHorizontal: 12 },
   apply: { flex: 1.2, paddingHorizontal: 12 },

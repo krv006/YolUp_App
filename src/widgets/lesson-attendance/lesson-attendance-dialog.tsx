@@ -1,11 +1,21 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
-import { averageFocus, buildLessonRoster, LATE_AFTER_MINUTES, useAttendance, type RosterEntry, type RosterStatus } from "@/modules/attendance";
+import {
+  averageFocus,
+  buildLessonRoster,
+  LATE_AFTER_MINUTES,
+  useAttendance,
+  useUpdateAttendanceNote,
+  type RosterEntry,
+  type RosterStatus,
+} from "@/modules/attendance";
+import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
+import { ROLES } from "@/shared/constants";
 import { formatDayTime, formatDuration, formatMessageTime } from "@/shared/lib";
-import type { Lesson } from "@/shared/types";
-import { Avatar, DsText, dsRadius, Icon, Sheet, useDs, type DsColor } from "@/shared/ui";
+import type { AttendanceRow, Lesson } from "@/shared/types";
+import { Avatar, DsText, dsRadius, dsType, Icon, MobileInput, Sheet, toast, useDs, type DsColor } from "@/shared/ui";
 
 export interface LessonAttendanceDialogProps {
   lesson: Lesson | null;
@@ -25,7 +35,8 @@ const STATUS_TONE: Record<RosterStatus, { bg: DsColor; fg: DsColor }> = {
  * (`AppDialog variant="panel"`) ning pastki oyna varianti: qo'shilgan,
  * kechikkan, kelmagan va o'rtacha fokus; guruhning har bir o'quvchisi holati
  * bilan. Darsdan chiqishlari bo'lsa qator ochilib, chiqish-qaytish vaqtlari
- * ko'rinadi.
+ * ko'rinadi. O'qituvchi darsga kirgan o'quvchi qatoriga kechikish sababi va
+ * izoh yozadi (qator ostida ochiladigan forma).
  */
 export function LessonAttendanceDialog({ lesson, open, onOpenChange }: LessonAttendanceDialogProps) {
   const { t } = useTranslation("lesson");
@@ -34,6 +45,9 @@ export function LessonAttendanceDialog({ lesson, open, onOpenChange }: LessonAtt
   const attendance = useAttendance({ lesson: lesson?.id ?? "", page_size: 100 }, enabled);
   const students = useCourseStudents(lesson?.courseId ?? null, { page_size: 100 }, enabled);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const { user } = useAuth();
+  const canEdit = user?.role === ROLES.TEACHER;
 
   const roster = useMemo(
     () =>
@@ -65,7 +79,10 @@ export function LessonAttendanceDialog({ lesson, open, onOpenChange }: LessonAtt
     <Sheet
       variant="app"
       open={open}
-      onClose={() => onOpenChange(false)}
+      onClose={() => {
+        setEditing(null);
+        onOpenChange(false);
+      }}
       title={t("attendanceDetail.title")}
       description={lesson ? `${lesson.courseTitle} · ${formatDayTime(lesson.startsAt)}` : undefined}
     >
@@ -108,6 +125,9 @@ export function LessonAttendanceDialog({ lesson, open, onOpenChange }: LessonAtt
                 last={index === roster.length - 1}
                 expanded={expanded === entry.student.id}
                 onToggle={() => setExpanded((current) => (current === entry.student.id ? null : entry.student.id))}
+                editing={editing === entry.student.id}
+                onEdit={canEdit && entry.row ? () => setEditing(entry.student.id) : undefined}
+                onEditDone={() => setEditing(null)}
               />
             ))}
           </View>
@@ -123,7 +143,114 @@ export function LessonAttendanceDialog({ lesson, open, onOpenChange }: LessonAtt
   );
 }
 
-function RosterRow({ entry, last, expanded, onToggle }: { entry: RosterEntry; last: boolean; expanded: boolean; onToggle: () => void }) {
+/**
+ * Kechikish sababi va o'qituvchi izohi — veb `NoteEditor`. Faqat o'zgargan
+ * maydon `PATCH /attendance/<id>/` ga yuboriladi; hech narsa o'zgarmagan
+ * bo'lsa so'rovsiz yopiladi.
+ */
+function NoteEditor({ row, onDone }: { row: AttendanceRow; onDone: () => void }) {
+  const { t } = useTranslation("lesson");
+  const ds = useDs();
+  const save = useUpdateAttendanceNote();
+  const [lateReason, setLateReason] = useState(row.lateReason ?? "");
+  const [teacherNote, setTeacherNote] = useState(row.teacherNote ?? "");
+
+  function submit() {
+    const nextReason = lateReason.trim();
+    const nextNote = teacherNote.trim();
+    const reasonChanged = nextReason !== (row.lateReason ?? "");
+    const noteChanged = nextNote !== (row.teacherNote ?? "");
+    if (!reasonChanged && !noteChanged) {
+      onDone();
+      return;
+    }
+    save.mutate(
+      { id: row.id, lateReason: reasonChanged ? nextReason : undefined, teacherNote: noteChanged ? nextNote : undefined },
+      {
+        onSuccess: () => {
+          toast.success(t("attendanceDetail.noteSaved"));
+          onDone();
+        },
+        onError: (error) => toast.error(error.message || t("attendanceDetail.noteFailed")),
+      }
+    );
+  }
+
+  return (
+    // `flex flex-col gap-2.5 bg-subtle px-3.5 py-3`
+    <View style={[styles.editor, { backgroundColor: ds.c.subtle }]}>
+      <View style={styles.field}>
+        <DsText v="caption-strong" c="ink-secondary">
+          {t("attendanceDetail.reasonLabel")}
+        </DsText>
+        <MobileInput
+          surface
+          autoFocus
+          maxLength={200}
+          value={lateReason}
+          placeholder={t("attendanceDetail.reasonPlaceholder")}
+          onChangeText={setLateReason}
+          style={styles.input}
+        />
+      </View>
+      <View style={styles.field}>
+        <DsText v="caption-strong" c="ink-secondary">
+          {t("attendanceDetail.noteLabel")}
+        </DsText>
+        <MobileInput
+          surface
+          multiline
+          maxLength={2000}
+          value={teacherNote}
+          placeholder={t("attendanceDetail.notePlaceholder")}
+          onChangeText={setTeacherNote}
+          style={[styles.input, styles.textarea]}
+        />
+      </View>
+      <DsText v="caption" c="ink-tertiary">
+        {t("attendanceDetail.noteHint")}
+      </DsText>
+      <View style={styles.editorActions}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onDone}
+          style={({ pressed }) => [styles.pill, pressed && { backgroundColor: ds.c.surface }]}
+        >
+          <DsText v="button">{t("attendanceDetail.noteCancel")}</DsText>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: save.isPending }}
+          disabled={save.isPending}
+          onPress={submit}
+          style={({ pressed }) => [
+            styles.pill,
+            styles.pillPrimary,
+            { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand },
+            save.isPending && styles.dim,
+          ]}
+        >
+          <DsText v="button" c="on-action">
+            {t("attendanceDetail.noteSave")}
+          </DsText>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+interface RosterRowProps {
+  entry: RosterEntry;
+  last: boolean;
+  expanded: boolean;
+  onToggle: () => void;
+  editing: boolean;
+  /** Faqat o'qituvchida va o'quvchi darsga kirgan bo'lsa. */
+  onEdit?: () => void;
+  onEditDone: () => void;
+}
+
+function RosterRow({ entry, last, expanded, onToggle, editing, onEdit, onEditDone }: RosterRowProps) {
   const { t } = useTranslation("lesson");
   const ds = useDs();
   const { row, status } = entry;
@@ -176,6 +303,16 @@ function RosterRow({ entry, last, expanded, onToggle }: { entry: RosterEntry; la
             </DsText>
           </View>
         ) : null}
+        {row?.lateReason ? (
+          <DsText v="caption" c="warning-text">
+            {t("attendanceDetail.reasonLine", { text: row.lateReason })}
+          </DsText>
+        ) : null}
+        {row?.teacherNote ? (
+          <DsText v="caption" c="ink-secondary">
+            {t("attendanceDetail.noteLine", { text: row.teacherNote })}
+          </DsText>
+        ) : null}
       </View>
       {exits ? (
         <View style={styles.chevron}>
@@ -187,18 +324,32 @@ function RosterRow({ entry, last, expanded, onToggle }: { entry: RosterEntry; la
 
   return (
     <View style={!last && { borderBottomWidth: 1, borderBottomColor: ds.c.line }}>
-      {exits ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded }}
-          onPress={onToggle}
-          style={({ pressed }) => [styles.row, pressed && { backgroundColor: ds.c.subtle }]}
-        >
-          {content}
-        </Pressable>
-      ) : (
-        <View style={styles.row}>{content}</View>
-      )}
+      <View style={styles.rowWrap}>
+        {exits ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded }}
+            onPress={onToggle}
+            style={({ pressed }) => [styles.row, styles.grow, pressed && { backgroundColor: ds.c.subtle }]}
+          >
+            {content}
+          </Pressable>
+        ) : (
+          <View style={[styles.row, styles.grow]}>{content}</View>
+        )}
+        {onEdit && !editing ? (
+          // `mt-2 mr-2 size-9 rounded-full text-icon-secondary`
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={row?.teacherNote || row?.lateReason ? t("attendanceDetail.noteEdit") : t("attendanceDetail.noteAdd")}
+            onPress={onEdit}
+            style={({ pressed }) => [styles.noteButton, pressed && { backgroundColor: ds.c.subtle }]}
+          >
+            {({ pressed }) => <Icon name="edit-note" size={20} color={pressed ? ds.c.brand : ds.c["icon-secondary"]} />}
+          </Pressable>
+        ) : null}
+      </View>
+      {editing && row ? <NoteEditor row={row} onDone={onEditDone} /> : null}
 
       {expanded && row ? (
         <View style={[styles.details, { backgroundColor: ds.c.subtle }]}>
@@ -239,12 +390,25 @@ const styles = StyleSheet.create({
   tiles: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tile: { width: "48.5%", flexGrow: 1, minWidth: 0, gap: 2, paddingHorizontal: 12, paddingVertical: 10, borderRadius: dsRadius.xl },
   list: { overflow: "hidden", borderWidth: 1, borderRadius: dsRadius.xl },
+  rowWrap: { flexDirection: "row", alignItems: "flex-start" },
   /* `flex items-start gap-3 px-3.5 py-3` */
   row: { flexDirection: "row", alignItems: "flex-start", gap: 12, paddingHorizontal: 14, paddingVertical: 12 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   chip: { flexShrink: 0, paddingHorizontal: 8, paddingVertical: 2, borderRadius: dsRadius.full },
   alert: { flexDirection: "row", alignItems: "center", gap: 4 },
   chevron: { marginTop: 10 },
+  noteButton: { width: 36, height: 36, marginTop: 8, marginRight: 8, alignItems: "center", justifyContent: "center", borderRadius: 18 },
+  editor: { gap: 10, paddingHorizontal: 14, paddingVertical: 12 },
+  field: { gap: 4 },
+  /* `h-10 rounded-md px-3 text-body-sm` */
+  input: { height: 40, paddingHorizontal: 12, borderRadius: dsRadius.md, fontSize: dsType["body-sm"].fontSize },
+  /* `rows={2} py-2` — `input` balandligini bosib o'tadi. */
+  textarea: { height: 64, paddingTop: 8, paddingBottom: 8 },
+  editorActions: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 8 },
+  /* `h-9 rounded-full px-3.5` */
+  pill: { height: 36, justifyContent: "center", paddingHorizontal: 14, borderRadius: dsRadius.full },
+  pillPrimary: { paddingHorizontal: 16 },
+  dim: { opacity: 0.6 },
   details: { gap: 8, paddingHorizontal: 14, paddingVertical: 12 },
   totals: { flexDirection: "row", flexWrap: "wrap", columnGap: 16, rowGap: 4 },
   exit: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 12, paddingVertical: 8, borderRadius: dsRadius.lg },

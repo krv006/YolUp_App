@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, TextInput, View } from "react-native";
 import type { ExamStudentResult } from "@/shared/types";
-import { dsAlpha, DsText, dsRadius, dsType, headingFont, Icon, MobileButton, Sheet, useDs } from "@/shared/ui";
+import { dsAlpha, DsText, dsRadius, dsType, headingFont, Icon, MobileButton, MobileFieldLabel, MobileInput, Sheet, useDs } from "@/shared/ui";
 
 export interface ExamScoreDialogProps {
   open: boolean;
@@ -17,18 +17,22 @@ export interface ExamScoreDialogProps {
 /**
  * Qo'lda baholash — veb `exam-score-dialog.tsx` ning tor ekran varianti
  * (pastki oyna): har bo'lim qatori (avtomatik baholangani qulflangan,
- * qo'ldagisida band kiritiladi, AI taklifi izohda) va umumiy band.
+ * qo'ldagisida band kiritiladi, AI taklifi izohda), umumiy band va ixtiyoriy
+ * o'qituvchi izohi. Server izohni faqat ball bilan qabul qiladi — kamida
+ * bitta bo'limga band kiritilmaguncha "Saqlash" o'chiq.
  */
 export function ExamScoreDialog({ open, onOpenChange, result, suggested = {}, prefill, pending = false, onSave }: ExamScoreDialogProps) {
   const { t } = useTranslation("exam");
   const ds = useDs();
   const [scores, setScores] = useState<Record<string, string>>({});
+  const [comment, setComment] = useState("");
   const [focused, setFocused] = useState<string | null>(null);
   const [syncedId, setSyncedId] = useState<string | null>(null);
   const syncKey = result ? `${result.studentId}:${JSON.stringify(prefill ?? {})}:${open}` : null;
 
   if (result && syncedId !== syncKey) {
     setSyncedId(syncKey);
+    setComment(result.teacherComment ?? "");
     setScores(
       Object.fromEntries(
         result.sections
@@ -48,13 +52,15 @@ export function ExamScoreDialog({ open, onOpenChange, result, suggested = {}, pr
     .filter((value) => Number.isFinite(value));
   const overall = values.length ? (Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 2) / 2).toFixed(1) : "—";
 
+  const payload: Record<string, number> = {};
+  for (const [key, value] of Object.entries(scores)) {
+    const score = Number(value.replace(",", "."));
+    if (value.trim() && Number.isFinite(score)) payload[key] = score;
+  }
+  const canSave = Object.keys(payload).length > 0;
+
   function save() {
-    const payload: Record<string, number> = {};
-    for (const [key, value] of Object.entries(scores)) {
-      const score = Number(value.replace(",", "."));
-      if (value.trim() && Number.isFinite(score)) payload[key] = score;
-    }
-    onSave(payload, "");
+    if (canSave) onSave(payload, comment.trim());
   }
 
   return (
@@ -67,7 +73,7 @@ export function ExamScoreDialog({ open, onOpenChange, result, suggested = {}, pr
       footer={
         <>
           <MobileButton variant="secondary" label={t("mock.scoreCancel")} onPress={() => onOpenChange(false)} />
-          <MobileButton label={t("mock.scoreSave")} disabled={pending} onPress={save} />
+          <MobileButton label={t("mock.scoreSave")} disabled={pending || !canSave} onPress={save} />
         </>
       }
     >
@@ -124,6 +130,22 @@ export function ExamScoreDialog({ open, onOpenChange, result, suggested = {}, pr
             {overall}
           </DsText>
         </View>
+        {/* `flex flex-col gap-1.5 pt-1`, `textarea rows={3} min-h-24` */}
+        <View style={styles.comment}>
+          <MobileFieldLabel label={t("mock.comment")} gap={6}>
+            <MobileInput
+              multiline
+              multilineHeight={96}
+              maxLength={2000}
+              value={comment}
+              placeholder={t("mock.commentPlaceholder")}
+              onChangeText={setComment}
+            />
+          </MobileFieldLabel>
+          <DsText v="caption" c="ink-tertiary">
+            {canSave ? t("mock.commentHint") : t("mock.commentNeedsScore")}
+          </DsText>
+        </View>
       </View>
     </Sheet>
   );
@@ -136,4 +158,5 @@ const styles = StyleSheet.create({
   input: { width: 64, padding: 0, textAlign: "right", fontSize: dsType["title-lg"].fontSize, fontFamily: headingFont("500") },
   locked: { flexDirection: "row", alignItems: "center", gap: 12 },
   overall: { paddingTop: 6, flexDirection: "row", alignItems: "center", gap: 12 },
+  comment: { paddingTop: 4, gap: 6 },
 });

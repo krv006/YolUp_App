@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **241**
-- 🟡/🔴 moslashtirilgan: **374**
-- 🆕 mobilga xos: **17**
-- Jami: **632**
+- 🟢 NUSXA: **243**
+- 🟡/🔴 moslashtirilgan: **380**
+- 🆕 mobilga xos: **18**
+- Jami: **641**
 
 ## Olib tashlangan bo'limlar
 
@@ -140,7 +140,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/teacher/dashboard/teacher-dashboard-page.tsx` | 🟡 MOSLASH | `1fe27bcd6604` | faqat tor ekran shoxi; mobilda `pages/dashboard/teacher-dashboard-page.tsx` (`mobile-dashboard.tsx` bilan birga); Jadval va Vazifalar havolalari mobilning hozirgi marshrutlariga; "Tekshirish kerak" dagi vazifalar soni `assignmentsPending` dan (vebda `toReview.length` — ro'yxat API'si `submissions` bermagani uchun doim 0) |
 | `src/pages/teacher/dashboard/mobile-dashboard.tsx` | 🟡 MOSLASH | `1abc9723488c` | mobilda `pages/dashboard/teacher-dashboard-page.tsx` ichida |
 | `src/pages/teacher/dashboard/mobile-onboarding.tsx` | 🟡 MOSLASH | `62a51e7e3e44` | mobilda `pages/dashboard/mobile-onboarding.tsx`; xira fon panel ostida (sahifa ichida), karta va ramka ustida |
-| `src/pages/notifications/notifications-page.tsx` | 🟡 MOSLASH | `f349ef9397e9` | `NotificationHtml` o'rniga birinchi `<b>` sarlavha qatori + matn; ota-ona va admin ham shu sahifani ishlatadi (vebda faqat o'qituvchi/o'quvchi) |
+| `src/pages/notifications/notifications-page.tsx` | 🟡 MOSLASH | `9fe61068f9f4` | `NotificationHtml` o'rniga birinchi `<b>` sarlavha qatori + matn; ota-ona va admin ham shu sahifani ishlatadi (vebda faqat o'qituvchi/o'quvchi) |
 | `src/pages/workspace/workspace-search-page.tsx` | 🟡 MOSLASH | `cedaa3fcba18` | o'qituvchida test qoralamasi muharrirni, e'lon qilingani natijalarni ochadi; o'quvchida test sahifasini (vebdagidek) |
 | `src/modules/course/api/course.api.ts` | 🟢 NUSXA | `be53118d3dac` | — |
 | `src/modules/course/api/course.dto.ts` | 🟢 NUSXA | `75ffaf92bbaa` | — |
@@ -489,6 +489,12 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/group-workspace/add-quiz-menu.tsx` | 🟡 MOSLASH | `2c72f4ae7e85` | mobilda `task-cards.tsx` ichida (`AddQuizMenu`, `PopoverMenu`) |
 | `src/widgets/group-workspace/panel-heading.tsx` | 🟡 MOSLASH | `48e4699dd96e` | — |
 | `src/widgets/group-workspace/club-members-panel.tsx` | 🟡 MOSLASH | `942d208fd475` | qo'shish oynasi pastki `Sheet`; tab `group-workspace.tsx` dagi `CLUB_TABS` da |
+| `src/widgets/group-workspace/progress-format.ts` | 🟢 NUSXA | `5ed72434c686` | — |
+| `src/widgets/group-workspace/progress-panel.tsx` | 🟡 MOSLASH | `38673afe881a` | tor ekran; sarlavha tugmalari sarlavha ostida (telefonda so'z bo'linmasin); saralash `<select>` -> `MobileSelectSheet`; nested oynalar ichma-ich (iOS) |
+| `src/widgets/group-workspace/progress-student-card.tsx` | 🟡 MOSLASH | `9bab686d5a5a` | RN `View`/`Pressable` |
+| `src/widgets/group-workspace/student-progress-dialog.tsx` | 🟡 MOSLASH | `c7256b9d58b1` | pastki `Sheet` (vebda panel dialog); topshiriq bosilsa oyna yopilib `homeworkReview(id)?s=` ochiladi; to'lov va bekor qilish oynalari ichma-ich |
+| `src/widgets/group-workspace/payment-dialog.tsx` | 🟡 MOSLASH | `c2f04579040b` | pastki `Sheet`; summa bo'shliqlar bilan formatlanadi |
+| `src/widgets/group-workspace/payment-settings-dialog.tsx` | 🟡 MOSLASH | `07b1436de9bb` | pastki `Sheet`; to'lov kuni `<select>` -> `MobilePickerField` |
 | `src/widgets/student-group-workspace/student-group-workspace.tsx` | 🟡 MOSLASH | `6e635a063f9c` | faqat tor ekran shoxi (`StudentGroupSection`) — guruh chatidagi "Darslar" va "Vazifalar" tablari |
 | `src/widgets/student-group-workspace/student-lessons.tsx` | 🟡 MOSLASH | `a8a5b9c66857` | faqat tor ekran varianti; baholash `RateLessonSheet` |
 | `src/widgets/student-group-workspace/student-tasks.tsx` | 🟡 MOSLASH | `ad5dcf56cfb0` | faqat tor ekran varianti |
@@ -552,6 +558,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/mobile-action-bar.tsx` | 🟡 MOSLASH | `92b6c28ae6ee` | mobilda `mobile-page.tsx` ichida |
 | `src/shared/ui/floating-watermark.tsx` | 🟡 MOSLASH | `74bf70261276` | RN `View` + reanimated (opacity 1 s); `translate(-x%, -y%)` o'rniga `onLayout` o'lchami; logo — `Logo` komponenti; mobilda `recording-page.tsx` dagi `RecordingVideo` ustida |
 | `src/shared/ui/role-tag.tsx` | 🟡 MOSLASH | `050848b538b6` | RN `View` + `DsText`; `className` o'rniga `style` |
+| `src/shared/ui/checkbox-mark.tsx` | 🆕 MOBIL | `—` | belgilash katakchasi: tanlanganda `check-box-fill`, aks holda bo'sh kvadrat (vebda native checkbox) |
 | `src/modules/auth/ui/force-password-dialog.tsx` | 🟡 MOSLASH | `14e2219182ac` | markaziy oyna `CenterDialog` (yopilmaydi, klaviaturadan qochadi); vebda har rol marshrutida (`role-route.tsx`), mobilda ildiz layout'da bitta nusxa |
 | `src/modules/auth/lib/account-link.ts` | 🟢 NUSXA | `7d11d910393c` | — |
 | `src/modules/auth/lib/account-switch.ts` | 🟢 NUSXA | `c3456f35da4c` | — |
@@ -670,7 +677,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/progress/index.ts` | 🟢 NUSXA | `0a95e89e2c74` | — |
 | `src/modules/progress/lib/progress.mappers.ts` | 🟢 NUSXA | `a5723f6ba7ff` | — |
 | `src/modules/progress/model/progress.queries.ts` | 🟢 NUSXA | `e4f2d34c2968` | — |
-| `src/widgets/audience-picker/audience-picker.tsx` | 🟡 MOSLASH | `d61c1ba9ed6b` | checkbox o'rniga `Pressable`: tanlangani `check-box-fill`, tanlanmagani bo'sh kvadrat (vebdagi `check-box` ikonkasi ichida belgi bor); ro'yxatlar `ScrollView` (`max-h-52`) |
+| `src/widgets/audience-picker/audience-picker.tsx` | 🟡 MOSLASH | `d61c1ba9ed6b` | checkbox o'rniga `Pressable` + `CheckboxMark`; ro'yxatlar `ScrollView` (`max-h-52`) |
 | `src/widgets/audience-picker/index.ts` | 🟢 NUSXA | `d394414f6c9e` | — |
 | `src/widgets/new-chat-menu/new-chat-menu.tsx` | 🟡 MOSLASH | `be764d02ad98` | `Dropdown` -> `PopoverMenu`; trigger tugmasi komponent ichida (`children` o'rniga) |
 | `src/widgets/new-chat-menu/create-audience-dialog.tsx` | 🟡 MOSLASH | `da4a61b61f45` | pastki `Sheet` + `MobileInput` |
@@ -678,6 +685,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/channel-view/channel-thread.tsx` | 🟡 MOSLASH | `1b1f66ef493d` | to'liq ekran `Modal` (vebda tor ekranda `fixed inset-0`); `textarea` -> ko'p qatorli `TextInput` |
 | `src/widgets/channel-view/channel-info-dialog.tsx` | 🟡 MOSLASH | `38e8017ad9ad` | pastki `Sheet`; rasm `pickImage`; a'zo qo'shish va o'chirish oynalari shu oynaning ichida (iOS) |
 | `src/widgets/channel-view/index.ts` | 🟢 NUSXA | `7d9248d9b9ef` | — |
+| `src/widgets/teacher-notify-dialog/teacher-notify-dialog.tsx` | 🟡 MOSLASH | `05d0a486b817` | pastki `Sheet`; guruh `<select>` -> picker; katakchalar `CheckboxMark` |
+| `src/widgets/teacher-notify-dialog/index.ts` | 🟢 NUSXA | `39f4fb954a01` | — |
 
 ## Ataylab ko'chirilmagan
 

@@ -30,6 +30,7 @@ import {
   type IconName,
 } from "@/shared/ui";
 import { useOpenNotificationLink } from "@/widgets/notification-link";
+import { TeacherNotifyDialog } from "@/widgets/teacher-notify-dialog";
 
 const GROUP_ORDER: NotificationGroupKey[] = ["today", "yesterday", "earlier"];
 
@@ -50,7 +51,8 @@ export function splitHtml(html: string): { title: string; body: string } {
  * Bildirishnomalar (M5.7–5.8) — veb `pages/notifications/notifications-page.tsx`:
  * sarlavha va "hammasini o'qildi", "Hammasi / O'qilmagan" segmenti, kun
  * bo'yicha guruhlar, rangli belgilar, amal havolasi va o'qilmagan nuqta.
- * Bosilganda o'qilgan deb belgilanadi va havola ochiladi.
+ * Bosilganda o'qilgan deb belgilanadi va havola ochiladi. O'qituvchida
+ * sarlavha yonida "Xabar yuborish" (`TeacherNotifyDialog`) — veb 6d592ba.
  *
  * Vebda bu sahifa faqat o'qituvchi va o'quvchida; mobilda ota-ona va admin
  * ham shu sahifadan foydalanadi.
@@ -66,6 +68,8 @@ export function NotificationsPage() {
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const openLink = useOpenNotificationLink();
+  const isTeacher = user?.role === ROLES.TEACHER;
+  const [composeOpen, setComposeOpen] = useState(false);
 
   const all = inbox.data?.items ?? [];
   const unreadCount = all.filter((item) => !item.isRead).length;
@@ -113,13 +117,28 @@ export function NotificationsPage() {
           backLabel={t("back")}
           onBack={goBack}
           action={
-            unreadCount ? (
-              <MobileRoundButton
-                icon="done-all"
-                label={t("markAllRead")}
-                disabled={markAllRead.isPending}
-                onPress={() => markAllRead.mutate()}
-              />
+            isTeacher || unreadCount ? (
+              <View style={styles.actions}>
+                {isTeacher ? (
+                  // `size-11 rounded-full bg-brand text-on-action`
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t("teacherSend.button")}
+                    onPress={() => setComposeOpen(true)}
+                    style={({ pressed }) => [styles.compose, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}
+                  >
+                    <Icon name="campaign" size={22} color={ds.c["on-action"]} />
+                  </Pressable>
+                ) : null}
+                {unreadCount ? (
+                  <MobileRoundButton
+                    icon="done-all"
+                    label={t("markAllRead")}
+                    disabled={markAllRead.isPending}
+                    onPress={() => markAllRead.mutate()}
+                  />
+                ) : null}
+              </View>
             ) : undefined
           }
         />
@@ -230,6 +249,7 @@ export function NotificationsPage() {
           </View>
         ))}
       </ScrollView>
+      {isTeacher ? <TeacherNotifyDialog open={composeOpen} onOpenChange={setComposeOpen} /> : null}
     </View>
   );
 }
@@ -238,6 +258,9 @@ const styles = StyleSheet.create({
   fill: { flex: 1 },
   /* `px-4 pt-5 pb-8` */
   page: { paddingHorizontal: 16 },
+  /* `flex items-center gap-2` */
+  actions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  compose: { width: 44, height: 44, borderRadius: dsRadius.full, alignItems: "center", justifyContent: "center" },
   segment: { marginTop: 20 },
   loading: { marginTop: 24 },
   /* `mt-5 gap-3` */

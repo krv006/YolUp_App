@@ -55,7 +55,12 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
   const [forwardTarget, setForwardTarget] = useState<ChatMessage[]>([]);
   const [infoOpen, setInfoOpen] = useState(false);
   const [tab, setTab] = useState<GroupTab>(
-    initialTab === "lessons" || initialTab === "assignments" || initialTab === "attendance" ? initialTab : "chat"
+    initialTab === "lessons" ||
+      initialTab === "assignments" ||
+      initialTab === "attendance" ||
+      (initialTab === "progress" && role === "teacher")
+      ? initialTab
+      : "chat"
   );
 
   const chat = useChat(conversationId, { role, senderId: currentUserId });
@@ -185,7 +190,14 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
 
       {group ? <VoiceRoomBar courseId={courseId} courseTitle={conversation.title} hideIdle /> : null}
       {group ? (
-        <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} isClub={course.data?.kind === "club"} compact={selectionMode} />
+        <GroupTabsRow
+          active={tab}
+          onChange={setTab}
+          isTeacher={role === "teacher"}
+          isClub={course.data?.kind === "club"}
+          compact={selectionMode}
+          unpaidCount={course.data?.unpaidCount}
+        />
       ) : null}
 
       {group && tab === "chat" && !selectionMode ? (

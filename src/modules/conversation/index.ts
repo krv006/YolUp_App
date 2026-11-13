@@ -59,4 +59,5 @@ export type { DirectRequestBarProps } from "./ui/direct-request-bar";
 export { ConversationInfoSheet } from "./ui/conversation-info-sheet";
 export { NewGroupSheet } from "./ui/new-group-sheet";
 export { PersonChatHint } from "./ui/person-chat-hint";
+export { ChannelAvatar } from "./ui/channel-avatar";
 export { InviteStudentsSheet } from "./ui/invite-students-sheet";

@@ -35,6 +35,8 @@ export interface MessageListProps {
   onForward?: (messages: ChatMessage[]) => void;
   onBulkDelete?: (messageIds: string[], scope: "me" | "everyone") => void;
   onOpenAssignment?: (assignmentId: string) => void;
+  /** Kanal posti ostidagi izohlarni ochish (veb #182). */
+  onOpenThread?: (message: ChatMessage) => void;
   assignmentSubmitted?: (assignmentId: string) => boolean | null;
 }
 
@@ -67,6 +69,7 @@ export function MessageList({
   onBulkDelete,
   onOpenAssignment,
   assignmentSubmitted,
+  onOpenThread,
 }: MessageListProps) {
   const { t } = useTranslation("chat");
   const ds = useDs();
@@ -255,6 +258,7 @@ export function MessageList({
           onReact={onReact}
           onOpenActions={openActions}
           highlighted={message.id === activeMatchId}
+          onOpenThread={onOpenThread}
         />
         {message.failed ? (
           <View style={styles.failed}>

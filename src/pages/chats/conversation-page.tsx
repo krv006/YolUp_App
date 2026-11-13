@@ -16,6 +16,7 @@ import { isDirectLocked } from "@/modules/conversation";
 import { ChatHeader } from "@/modules/conversation/ui/chat-header";
 import { DirectRequestBar } from "@/modules/conversation/ui/direct-request-bar";
 import { ConversationInfoSheet } from "@/modules/conversation/ui/conversation-info-sheet";
+import { ChannelView } from "@/widgets/channel-view";
 import { GroupInfoScreen } from "@/modules/conversation/ui/group-info-screen";
 import { PinnedMessageBar, useChat, useChatUiStore } from "@/modules/message";
 import { MessageComposer } from "@/modules/message/ui/message-composer";
@@ -117,6 +118,10 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
     );
   }
 
+  // Kanal: postlar va har post ostida izohlar (veb #182) — o'z ko'rinishi.
+  if (conversation.type === "channel")
+    return <ChannelView chat={chat} conversation={conversation} role={role} backTo={backPath} currentUserId={currentUserId} />;
+
   const group = conversation.type === "group" && Boolean(courseId);
 
   async function send(payload: SendMessagePayload) {
@@ -179,7 +184,9 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
       />
 
       {group ? <VoiceRoomBar courseId={courseId} courseTitle={conversation.title} hideIdle /> : null}
-      {group ? <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} compact={selectionMode} /> : null}
+      {group ? (
+        <GroupTabsRow active={tab} onChange={setTab} isTeacher={role === "teacher"} isClub={course.data?.kind === "club"} compact={selectionMode} />
+      ) : null}
 
       {group && tab === "chat" && !selectionMode ? (
         conversation.announcementOnly ? (

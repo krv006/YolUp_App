@@ -25,6 +25,7 @@ import {
   useDs,
 } from "@/shared/ui";
 import { ConversationRowBody } from "@/widgets/chat-shell/conversation-row";
+import { NewChatMenu } from "@/widgets/new-chat-menu";
 import { CONVERSATION_FILTERS, useConversationList } from "@/widgets/chat-shell/use-conversation-list";
 
 /** Uzoq bosish — vebdagi `LONG_PRESS_MS`. */
@@ -37,7 +38,7 @@ const LONG_PRESS_MS = 450;
  * xato holatlari. Uzoq bosilganda qator joyida ko'tariladi va amallar
  * menyusi ochiladi.
  */
-export function ChatsPage(_props: { role: ConversationRole }) {
+export function ChatsPage({ role }: { role: ConversationRole }) {
   const { t } = useTranslation("chat");
   const ds = useDs();
   const router = useRouter();
@@ -84,7 +85,14 @@ export function ChatsPage(_props: { role: ConversationRole }) {
         <MobileTitleHeader
           eyebrow={subtitle}
           title={t("panel.title")}
-          action={<MobileRoundButton icon="add" iconSize={24} label={t("panel.newGroup")} onPress={() => openNewConversation(true)} />}
+          action={
+            // O'qituvchida "+" menyu: guruh, kanal, speaking club (veb #182).
+            role === "teacher" ? (
+              <NewChatMenu />
+            ) : (
+              <MobileRoundButton icon="add" iconSize={24} label={t("panel.newGroup")} onPress={() => openNewConversation(true)} />
+            )
+          }
         />
 
         {fresh ? (

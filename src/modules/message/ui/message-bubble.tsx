@@ -26,6 +26,8 @@ export interface MessageBubbleProps {
   /** Ketma-ket xabarlarda avatar faqat oxirgisida, ism faqat birinchisida. */
   showAvatar?: boolean;
   showName?: boolean;
+  /** Kanal posti: "N izoh" / "Izoh yozish" tugmasi (veb #182). */
+  onOpenThread?: (message: ChatMessage) => void;
 }
 
 const SENDER_COLORS: DsColor[] = ["action", "success-text", "saffron-strong", "link"];
@@ -291,7 +293,9 @@ export function MessageBubble({
   highlighted = false,
   showAvatar = true,
   showName = true,
+  onOpenThread,
 }: MessageBubbleProps) {
+  const { t } = useTranslation("chat");
   const ds = useDs();
   const bubbleRef = useRef<View>(null);
   const outgoing = message.senderId === currentUserId;
@@ -316,6 +320,23 @@ export function MessageBubble({
       )}
       <View ref={bubbleRef} collapsable={false} style={styles.bubbleBox}>
         <MessageBubbleCard message={message} outgoing={outgoing} showName={showName} highlighted={highlighted} onReact={onReact} fill />
+        {onOpenThread && typeof message.commentCount === "number" && !selectionMode ? (
+          // `h-8 w-fit gap-1.5 rounded-full border border-line bg-surface px-3 text-caption-strong text-brand`
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onOpenThread(message)}
+            style={({ pressed }) => [
+              styles.thread,
+              outgoing ? styles.threadOutgoing : null,
+              { borderColor: ds.c.line, backgroundColor: pressed ? ds.c["brand-subtle"] : ds.c.surface },
+            ]}
+          >
+            <Icon name="chat-outline" size={14} color={ds.c.brand} />
+            <DsText v="caption-strong" c="brand">
+              {message.commentCount ? t("channel.comments", { count: message.commentCount }) : t("channel.writeComment")}
+            </DsText>
+          </Pressable>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -332,6 +353,8 @@ const styles = StyleSheet.create({
   avatarSlot: { width: 28, marginBottom: 4 },
   /* pufak o'lchami: `w-66 max-w-[85%]` (qator kengligidan) */
   bubbleBox: { width: 264, maxWidth: "85%" },
+  thread: { marginTop: 6, height: 32, alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderWidth: 1, borderRadius: 16 },
+  threadOutgoing: { alignSelf: "flex-end" },
   bubble: { width: 264, maxWidth: "85%", gap: 4, paddingHorizontal: 14, paddingTop: 10, paddingBottom: 8, borderRadius: dsRadius.lg },
   fill: { width: "100%", maxWidth: "100%" },
   sender: { flexDirection: "row", alignItems: "center", gap: 4 },

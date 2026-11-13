@@ -5,15 +5,17 @@ import {
   CalendarDays,
   CheckCircle2,
   ListChecks,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react-native";
 import { DsText, useDs } from "@/shared/ui";
 import { AttendanceSection } from "./attendance-section";
+import { ClubMembersPanel } from "./club-members-panel";
 import { LessonsPanel } from "./lessons-panel";
 import { StudentGroupSection } from "@/widgets/student-group-workspace/student-group-workspace";
 import { TeacherAssignments } from "./teacher-assignments";
 
-export type GroupTab = "chat" | "lessons" | "assignments" | "attendance";
+export type GroupTab = "chat" | "lessons" | "assignments" | "attendance" | "members";
 
 interface TabDefinition {
   id: GroupTab;
@@ -48,6 +50,14 @@ const TABS: readonly TabDefinition[] = [
   },
 ];
 
+/** Speaking club: Chat, Darslar, A'zolar (o'qituvchi), Davomat (o'qituvchi) — veb #182. */
+const CLUB_TABS: readonly TabDefinition[] = [
+  { id: "chat", labelKey: "tabs.chat", icon: BookOpen },
+  { id: "lessons", labelKey: "tabs.lessons", icon: CalendarDays },
+  { id: "members", labelKey: "tabs.members", icon: UsersRound, teacherOnly: true },
+  { id: "attendance", labelKey: "tabs.attendance", icon: CheckCircle2, teacherOnly: true },
+];
+
 /**
  * Guruh bo'limlari — veb `group-workspace.tsx` tablari: teng ustunli
  * `h-11 rounded-full` tugmalar, faoli `bg-brand text-ink-inverse`,
@@ -57,16 +67,18 @@ export function GroupTabsRow({
   active,
   onChange,
   isTeacher,
+  isClub = false,
   compact = false,
 }: {
   active: GroupTab;
   onChange: (tab: GroupTab) => void;
   isTeacher: boolean;
+  isClub?: boolean;
   compact?: boolean;
 }) {
   const { t } = useTranslation("group");
   const ds = useDs();
-  const visible = TABS.filter((tab) => !tab.teacherOnly || isTeacher);
+  const visible = (isClub ? CLUB_TABS : TABS).filter((tab) => !tab.teacherOnly || isTeacher);
 
   return (
     <View accessibilityRole="tablist" style={[styles.tabRow, { paddingTop: compact ? 4 : 16 }]}>
@@ -128,6 +140,7 @@ export function GroupWorkspaceSection({
         )
       ) : null}
       {tab === "attendance" ? <AttendanceSection courseId={courseId} /> : null}
+      {tab === "members" ? <ClubMembersPanel clubId={courseId} /> : null}
     </View>
   );
 }

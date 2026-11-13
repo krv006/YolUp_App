@@ -31,9 +31,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **239**
-- 🟡/🔴 moslashtirilgan: **357**
+- 🟡/🔴 moslashtirilgan: **359**
 - 🆕 mobilga xos: **17**
-- Jami: **613**
+- Jami: **615**
 
 ## Olib tashlangan bo'limlar
 
@@ -368,7 +368,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/profile/profile-page.tsx` | 🟡 MOSLASH | `2c90aa54cf0c` | faqat tor ekran varianti; avatar yuklash yo'q (veb tor ekranda ham yo'q); o'qituvchi va o'quvchi — ota-ona `pages/parent/settings/settings-mobile-profile.tsx` da |
 | `src/pages/profile/profile-layout.tsx` | 🟡 MOSLASH | `3255068a24e6` | tor ekranda faqat `Outlet` — mobilda `app/teacher/profile/_layout.tsx` (Stack, `anchor: "index"`); keng ekran yon menyusi yo'q |
 | `src/pages/profile/profile-shell.tsx` | 🟡 MOSLASH | `282318c579f7` | `ProfileSubPage` — maydonlar klaviatura ustida (`KeyboardAwareScrollView`); orqaga — stekdan, bo'lmasa profil bosh sahifasiga |
-| `src/pages/profile/profile-dialogs.tsx` | 🟡 MOSLASH | `a2ea1873e2b1` | `AppDialog` -> `Sheet variant="app"` / `ConfirmDialog` |
+| `src/pages/profile/profile-dialogs.tsx` | 🟡 MOSLASH | `b40b451d2915` | `AppDialog` -> `Sheet variant="app"` / `ConfirmDialog`; faqat tor ekran shoxi; `LinkAccountDialog` almashtirish oynasi ichida (iOS) |
 | `src/pages/profile/settings-tones.ts` | 🟢 NUSXA | `3d58b6ad30a4` | — |
 | `src/pages/profile/personal-info-page.tsx` | 🟡 MOSLASH | `28200661b973` | faqat tor ekran varianti; fan va shahar `<select>` o'rniga `MobilePickerField`; xato `MobileActionBar` ustida |
 | `src/pages/profile/system-settings-page.tsx` | 🟡 MOSLASH | `f5135024240f` | faqat tor ekran varianti; push — veb Web Push o'rniga OS ruxsati (o'chirish tizim sozlamalarini ochadi, ilovaga qaytganda qayta o'qiladi); eski mobil sahifadagi kesh tozalash va bildirishnoma turlari olib tashlandi (vebda yo'q); mavzu va matn o'lchami vebdagidek serverga ham yoziladi |
@@ -551,6 +551,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/lib/account-link.ts` | 🟢 NUSXA | `7d11d910393c` | — |
 | `src/modules/auth/lib/account-switch.ts` | 🟢 NUSXA | `c3456f35da4c` | — |
 | `src/modules/auth/model/use-account-switch.ts` | 🟡 MOSLASH | `0378ebd833ab` | react-router `useNavigate` -> expo-router `useRouter` (`replace`/`push`) |
+| `src/modules/auth/ui/link-account-dialog.tsx` | 🟡 MOSLASH | `b37bb4522e4e` | pastki `Sheet` + `MobileInput`; mantiq (`seed`, xato turlari, qulflangan login) bir xil; `SwitchAccountDialog` ichida ichma-ich ochiladi (iOS ikkita yonma-yon Modal'ni ko'rsatmaydi) |
 | `src/modules/parent/api/parent.endpoints.ts` | 🟢 NUSXA | `85b3cf9db4d0` | — |
 | `src/modules/parent/lib/parent-attendance.ts` | 🟢 NUSXA | `b3352ac652af` | — |
 | `src/modules/parent/lib/parent-errors.ts` | 🟢 NUSXA | `ce4e5985c831` | — |
@@ -578,7 +579,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/parent-shell/parent-locked-card.tsx` | 🟡 MOSLASH | `f087b471afc8` | telefonda ruxsatlar sahifasiga (`withAnchor`) |
 | `src/widgets/parent-shell/parent-error-banner.tsx` | 🟡 MOSLASH | `f557d547d20e` | ko'rinish bir xil |
 | `src/widgets/parent-shell/use-parent-notification-link.ts` | 🟡 MOSLASH | `dbbec7df12dc` | `navigate` -> `router.push(..., { withAnchor })`; push bosilganda ham ishlaydi (`providers/notification-bridge.tsx`, `data.student_id`) |
-| `src/widgets/parent-shell/index.ts` | 🟡 MOSLASH | `fd91bc9d9f8f` | keng ekran eksportlari yo'q; `ParentScreen`, `useParentBack`, `OpenHomeworkBadge`, holat ekranlari qo'shilgan |
+| `src/widgets/parent-shell/index.ts` | 🟡 MOSLASH | `ed29f02cba0c` | keng ekran eksportlari yo'q; `ParentScreen`, `useParentBack`, `OpenHomeworkBadge`, holat ekranlari qo'shilgan |
 | `src/pages/parent/dashboard/use-parent-home.ts` | 🟢 NUSXA | `2b13b3ec170e` | — |
 | `src/pages/parent/dashboard/home-format.ts` | 🟢 NUSXA | `4eb42b803570` | — |
 | `src/pages/parent/dashboard/parent-home-mobile.tsx` | 🟡 MOSLASH | `df5954fed832` | `ParentScreen` ichida (pastga tortib yangilash); halqa va uzuq chiziq `react-native-svg`; `MobileConnect` boshqa bo'limlarda ham |
@@ -630,13 +631,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/settings/parent-settings-page.tsx` | 🟡 MOSLASH | `eb3c8a32a1a7` | `section` marshrut parametri (`app/parent/(account)/settings/[section].tsx`) |
 | `src/pages/parent/settings/parent-help-page.tsx` | 🟡 MOSLASH | `e76812a19546` | telefon shoxi — umumiy `HelpCenterPage` |
 | `src/pages/parent/settings/parent-not-found-page.tsx` | 🟡 MOSLASH | `fec50f1a61c2` | mobilda `app/parent/[...missing].tsx` to'g'ridan-to'g'ri `ParentNotFound` |
-| `src/pages/parent/settings/settings-mobile-profile.tsx` | 🟡 MOSLASH | `7c76bec863cf` | avatar — `pickImage` (kamera / galereya); nusxa `expo-clipboard`; qatorlar `settings-parts.tsx` |
+| `src/pages/parent/settings/settings-mobile-profile.tsx` | 🟡 MOSLASH | `73b8dab8ec0b` | avatar — `pickImage` (kamera / galereya); nusxa `expo-clipboard`; qatorlar `settings-parts.tsx` |
 | `src/pages/parent/settings/settings-mobile-system.tsx` | 🟡 MOSLASH | `c5d9acc70f7d` | push — OS ruxsati (`usePushPermission`), sarlavha `account:page.pushTitle` (vebda "Brauzer bildirishnomalari"); Xavfsizlik sahifasida "Akkauntni o'chirish" — mobilga xos (vebda ota-onada yo'q, Play Market ilova ichida o'chirishni talab qiladi) |
 | `src/pages/parent/notifications/parent-notifications-page.tsx` | 🟡 MOSLASH | `5e596c1faa3f` | `NotificationHtml` o'rnida `splitHtml` (sarlavha / matn) |
 | `src/pages/parent/notifications/notification-actions.tsx` | 🟡 MOSLASH | `b2d39cb08e58` | `AppDialog sheet` -> `Sheet`; havola oyna yopilgach ochiladi |
 | `src/widgets/parent-shell/parent-screen.tsx` | 🆕 MOBIL | `—` | ota-ona sahifa qobig'i: `bg-auth-gradient`, xavfsiz hudud, tab sahifalarida `pb-32`, pastga tortib yangilash, formalarda `KeyboardAwareScrollView` |
 | `src/widgets/parent-shell/use-parent-back.ts` | 🆕 MOBIL | `—` | ichki sahifadan orqaga: stek bo'lsa `back`, havola orqali kirilgan bo'lsa bo'lim manziliga |
 | `src/widgets/parent-shell/parent-tab-badge.tsx` | 🆕 MOBIL | `—` | veb `parent-tab-bar.tsx` dagi ochiq vazifalar soni — panel belgisi o'z so'rovini o'zi qiladi |
+| `src/widgets/parent-shell/parent-account-switch-dialog.tsx` | 🟡 MOSLASH | `c2f495ee24fc` | tor ekran varianti — pastki `Sheet`; bog'lash oynasi ichma-ich (iOS) |
 | `src/pages/parent/settings/settings-parts.tsx` | 🆕 MOBIL | `—` | veb `settings-mobile-*` dagi `MenuRow`/`Row`, maydon va xato lentasi |
 | `src/shared/lib/share-file.ts` | 🆕 MOBIL | `—` | matnli fayl va HTML -> PDF (`expo-print`) ni keshga yozib ulashish oynasini ochish (veb yuklab olish / chop etish o'rni) |
 | `src/shared/lib/zoom.ts` | 🟢 NUSXA | `621584f47f73` | — |

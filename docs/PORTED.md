@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **245**
-- 🟡/🔴 moslashtirilgan: **394**
+- 🟢 NUSXA: **246**
+- 🟡/🔴 moslashtirilgan: **396**
 - 🆕 mobilga xos: **18**
-- Jami: **657**
+- Jami: **660**
 
 ## Olib tashlangan bo'limlar
 
@@ -136,7 +136,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/chat-shell/use-conversation-list.ts` | 🟢 NUSXA | `581727dc7f31` | mantiq bir xil, faqat mobil import yo'llari |
 | `src/widgets/mobile-tab-bar/mobile-tab-bar.tsx` | 🟡 MOSLASH | `da37f448a0b4` | mobilda `providers/role-tabs.tsx` dagi `FloatingTabBar` (`variant="floating"`); faqat bo'limlarning o'zida ko'rinadi; eski bo'limlarga `inset`, Workspace'da bo'shliq stack bosh sahifasida (`useFloatingTabInset`); faol tab soyasi doim turadi, faol emasida shaffof (`dsShadowHidden`) — Android keyin qo'shilgan `boxShadow` ga radius qo'llamaydi |
 | `src/widgets/mobile-user-header/mobile-user-header.tsx` | 🟡 MOSLASH | `458790186999` | qo'ng'iroq — `MobileRoundButton` + `lucide` Bell, o'qilmagan bo'lsa qizil nuqta |
-| `src/widgets/notification-link/use-open-notification-link.ts` | 🟡 MOSLASH | `9d79dd0e5c78` | o'qituvchi va o'quvchi havolalari vebdagidek (vazifa, test va uning natijalari, mock natijalari yoki ro'yxati); admin uchun `teacher` havolasi; sertifikat va murojaat havolalari profilga (`/profile/certificates`, `/profile/help?ticket=`); admin sertifikat va murojaat havolalari veb `admin-dashboard-page` `openNotificationLink` dagidek; ota-onada `widgets/parent-shell/use-parent-notification-link.ts` |
+| `src/widgets/notification-link/use-open-notification-link.ts` | 🟡 MOSLASH | `61495ad9a95c` | o'qituvchi va o'quvchi havolalari vebdagidek (vazifa, test va uning natijalari, mock natijalari yoki ro'yxati); admin uchun `teacher` havolasi; sertifikat va murojaat havolalari profilga (`/profile/certificates`, `/profile/help?ticket=`); admin sertifikat va murojaat havolalari veb `admin-dashboard-page` `openNotificationLink` dagidek; ota-onada `widgets/parent-shell/use-parent-notification-link.ts` |
 | `src/pages/teacher/dashboard/teacher-dashboard-page.tsx` | 🟡 MOSLASH | `1fe27bcd6604` | faqat tor ekran shoxi; mobilda `pages/dashboard/teacher-dashboard-page.tsx` (`mobile-dashboard.tsx` bilan birga); Jadval va Vazifalar havolalari mobilning hozirgi marshrutlariga; "Tekshirish kerak" dagi vazifalar soni `assignmentsPending` dan (vebda `toReview.length` — ro'yxat API'si `submissions` bermagani uchun doim 0) |
 | `src/pages/teacher/dashboard/mobile-dashboard.tsx` | 🟡 MOSLASH | `1abc9723488c` | mobilda `pages/dashboard/teacher-dashboard-page.tsx` ichida |
 | `src/pages/teacher/dashboard/mobile-onboarding.tsx` | 🟡 MOSLASH | `62a51e7e3e44` | mobilda `pages/dashboard/mobile-onboarding.tsx`; xira fon panel ostida (sahifa ichida), karta va ramka ustida |
@@ -342,7 +342,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/voice/ui/voice-room-bar.tsx` | 🟡 MOSLASH | `f18a7c85c56e` | `hideIdle`; ochish oynasi `useVoiceUiStore` orqali (sarlavhadagi tugma ham shuni ochadi) |
 | `src/modules/voice/ui/voice-room-create-dialog.tsx` | 🟡 MOSLASH | `3bec99f4bb11` | faqat tor ekran varianti (`Sheet variant="app"`) |
 | `src/modules/voice/ui/voice-room-panel.tsx` | 🟡 MOSLASH | `1b71d881514a` | faqat tor ekran varianti — to'liq ekranli `Modal`; `RoomAudioRenderer` kerak emas (RN ovozni o'zi chiqaradi) |
-| `src/pages/admin/admin-dashboard-page.tsx` | 🟡 MOSLASH | `bd9ba5a14a76` | jadvallar ustunlab chiziladi va gorizontal aylanadi (`admin-table.tsx`); havolalar qatori o'raladi (sertifikatlar va murojaatlar qo'shilgach) |
+| `src/pages/admin/admin-dashboard-page.tsx` | 🟡 MOSLASH | `5c65d8e6aae3` | jadvallar ustunlab chiziladi va gorizontal aylanadi (`admin-table.tsx`); havolalar qatori o'raladi (sertifikatlar va murojaatlar qo'shilgach) |
 | `src/pages/admin/system-panels.tsx` | 🟡 MOSLASH | `1f10ae6fae56` | server holatida davr tugmalari sarlavha ostida (vebda tor ekranda ustun bo'lib izohni siqadi) |
 | `src/pages/admin/teachers/admin-teachers-page.tsx` | 🟡 MOSLASH | `73fbd40d4d08` | mobilda `pages/admin/admin-teachers-page.tsx`; ko'rinish tanlagichi sarlavha ostida; `?teacher=` qatorga aylantiradi va belgilaydi |
 | `src/pages/admin/teachers/teacher-stats-dialog.tsx` | 🟡 MOSLASH | `b15753cd64fc` | mobilda `pages/admin/teacher-stats-sheet.tsx` (Dialog o'rniga Sheet) |
@@ -549,6 +549,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/tutor/ui/practice-session.tsx` | 🟡 MOSLASH | `fed1593cf756` | RN komponentlari; barrel'ning mobil UI bo'limidan eksport |
 | `src/pages/admin/certificates/admin-certificates-page.tsx` | 🟡 MOSLASH | `85eebc2f140b` | mobilda `pages/admin/admin-certificates-page.tsx`; portal uslubi (`admin-teachers-page` kabi); tugmalar qator ostida; fayl `Linking.openURL`; rad etish `Sheet` |
 | `src/pages/admin/support/admin-support-page.tsx` | 🟡 MOSLASH | `21a5e503ddbb` | mobilda `pages/admin/admin-support-page.tsx`; portal uslubi; yozishma `SupportDialog staffView`; `?ticket=` — `router.setParams` |
+| `src/pages/admin/reports/admin-reports-page.tsx` | 🟡 MOSLASH | `3046d75083be` | marshrut `app/admin/reports.tsx`; portal uslubi; `AppDialog` -> `Sheet variant="app"`; `?report=` — `router.setParams`; xabarlar ro'yxati ichki aylanishsiz |
 | `src/modules/attendance/lib/lesson-roster.ts` | 🟢 NUSXA | `6e6fd57cfd83` | — |
 | `src/widgets/lesson-attendance/index.ts` | 🟢 NUSXA | `3e5a33642bc9` | — |
 | `src/widgets/lesson-attendance/lesson-attendance-dialog.tsx` | 🟡 MOSLASH | `e3a4e31ae05d` | `AppDialog variant="panel"` -> `Sheet variant="app"`; statistika kartalari 2 ustunda; chiqishlar qatori bosilganda ochiladi |
@@ -601,7 +602,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/parent-shell/parent-state-styles.ts` | 🟡 MOSLASH | `27ff538fb319` | mobilda `parent-state-screen.tsx` ichida |
 | `src/widgets/parent-shell/parent-locked-card.tsx` | 🟡 MOSLASH | `f087b471afc8` | telefonda ruxsatlar sahifasiga (`withAnchor`) |
 | `src/widgets/parent-shell/parent-error-banner.tsx` | 🟡 MOSLASH | `f557d547d20e` | ko'rinish bir xil |
-| `src/widgets/parent-shell/use-parent-notification-link.ts` | 🟡 MOSLASH | `dbbec7df12dc` | `navigate` -> `router.push(..., { withAnchor })`; push bosilganda ham ishlaydi (`providers/notification-bridge.tsx`, `data.student_id`) |
+| `src/widgets/parent-shell/use-parent-notification-link.ts` | 🟡 MOSLASH | `f472f2a9f69e` | `navigate` -> `router.push(..., { withAnchor })`; push bosilganda ham ishlaydi (`providers/notification-bridge.tsx`, `data.student_id`) |
 | `src/widgets/parent-shell/index.ts` | 🟡 MOSLASH | `ed29f02cba0c` | keng ekran eksportlari yo'q; `ParentScreen`, `useParentBack`, `OpenHomeworkBadge`, holat ekranlari qo'shilgan |
 | `src/pages/parent/dashboard/use-parent-home.ts` | 🟢 NUSXA | `2b13b3ec170e` | — |
 | `src/pages/parent/dashboard/home-format.ts` | 🟢 NUSXA | `4eb42b803570` | — |
@@ -642,7 +643,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/homework/homework-detail.tsx` | 🟡 MOSLASH | `138c6623185e` | yuklab olish `shared/lib` `downloadBlob` (ulashish oynasi) |
 | `src/pages/parent/homework/homework-styles.ts` | 🟡 MOSLASH | `d8968c2f66b1` | Tailwind sinflari o'rnida `ds` tokenlari |
 | `src/pages/parent/homework/parent-homework-item-page.tsx` | 🟡 MOSLASH | `3a3679a2de5f` | mobilda `app/parent/homework/[assignmentId].tsx` |
-| `src/pages/parent/report/results-mobile.tsx` | 🟡 MOSLASH | `cdbc0f3f8eaa` | oy tanlash `<select>` -> `MobileSelectSheet` |
+| `src/pages/parent/report/results-mobile.tsx` | 🟡 MOSLASH | `13d15afa4040` | oy tanlash `<select>` -> `MobileSelectSheet` |
 | `src/pages/parent/report/results-parts.tsx` | 🟡 MOSLASH | `aa04d1bfed54` | `ResultsTabs` faqat `wide`; `MonthPicker` keng ekranda |
 | `src/pages/parent/report/parent-course-page.tsx` | 🟡 MOSLASH | `0e9312907473` | mobilda `app/parent/grades/[courseId].tsx` |
 | `src/pages/parent/exams/use-mock-view.ts` | 🟢 NUSXA | `8f6d03e0c371` | — |
@@ -703,6 +704,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/homework-assign/group-targets-picker.tsx` | 🟡 MOSLASH | `6be1f79082f0` | `CheckboxMark`; guruh ochilsa o'quvchilar ro'yxati |
 | `src/widgets/homework-assign/group-targets.ts` | 🟢 NUSXA | `bb45eb71e00d` | — |
 | `src/widgets/homework-assign/index.ts` | 🟢 NUSXA | `c1b6f1744554` | — |
+| `src/widgets/child-score-chart/child-score-chart.tsx` | 🟡 MOSLASH | `19ba4755e1c6` | react-native-svg; viewBox karta eniga cho'ziladi; nuqta qiymati `<title>` o'rniga bosilganda `ChartTooltip` (`modules/analytics`); davr yozuvlari absolute View |
+| `src/widgets/child-score-chart/index.ts` | 🟢 NUSXA | `29e9a0bc773c` | — |
 
 ## Ataylab ko'chirilmagan
 

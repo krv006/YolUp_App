@@ -16,13 +16,13 @@ function isResult(kind?: string | null): boolean {
 
 /**
  * Bildirishnoma havolasini ochish — veb `widgets/notification-link`: har
- * tur (dars, yozuv, vazifa, topshiriq, test, imtihon, guruh, suhbat) o'z
- * sahifasiga.
+ * tur (dars, yozuv, vazifa, topshiriq, test, imtihon, guruh yoki club,
+ * suhbat) o'z sahifasiga.
  *
  * Ota-ona o'z havola ochuvchisidan foydalanadi
  * (`widgets/parent-shell/use-parent-notification-link.ts` — farzandni tanlab
- * bo'limni ochadi). Admin uchun o'qituvchi havolasi o'qituvchilar ro'yxatini
- * ochadi.
+ * bo'limni ochadi). Admin uchun o'qituvchi havolasi o'qituvchilar ro'yxatini,
+ * shikoyat (`spam_report`) esa Shikoyatlar sahifasida o'sha shikoyatni ochadi.
  */
 export function useOpenNotificationLink() {
   const router = useRouter();
@@ -41,9 +41,10 @@ export function useOpenNotificationLink() {
       const type = link.type.toLowerCase();
 
       if (type === "teacher") return go(`/admin/teachers?teacher=${encodeURIComponent(link.id)}`);
-      // Veb `admin-dashboard-page` `openNotificationLink`: admin sertifikat va murojaat sahifalariga.
+      // Veb `admin-dashboard-page` `openNotificationLink`: admin sertifikat, murojaat va shikoyat sahifalariga.
       if (admin && type === "certificate") return go(`${ROUTES.admin.certificates}?certificate=${encodeURIComponent(link.id)}`);
       if (admin && type === "support") return go(`${ROUTES.admin.support}?ticket=${encodeURIComponent(link.id)}`);
+      if (admin && type === "spam_report") return go(`${ROUTES.admin.reports}?report=${encodeURIComponent(link.id)}`);
       if (type === "lesson") return go(kind?.includes("recording") ? `/recordings/${link.id}` : `/live/${link.id}`);
       if (type === "recording") return go(`/recordings/${link.id}`);
       if (prefix === "/teacher" && (type === "assignment" || type === "homework")) return go(ROUTES.teacher.homeworkItem(link.id));
@@ -74,7 +75,8 @@ export function useOpenNotificationLink() {
         if (student) return go(isResult(kind) ? ROUTES.student.mockResults(link.id) : ROUTES.student.mockExams);
         return go(`${prefix}/exams`);
       }
-      if (type === "course") {
+      // Club (speaking club) bildirishnomasi ham guruh chatini ochadi.
+      if (type === "course" || type === "club") {
         const room = conversations.data?.find((item) => item.courseId === link.id);
         return go(room ? `${prefix}/chats/${room.id}` : `${prefix}/chats`);
       }

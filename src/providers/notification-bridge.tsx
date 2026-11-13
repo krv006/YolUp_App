@@ -49,7 +49,8 @@ function RoleNotificationLinks() {
 /**
  * Ota-ona — veb `ParentBell` (`useParentNotificationLink`): xabardagi
  * `student_id` bo'yicha farzand tanlanib, bo'limi ochiladi. Suhbat ro'yxati
- * so'ralmaydi (ota-onada chat yo'q).
+ * so'ralmaydi — chat havolasi to'g'ridan-to'g'ri `/parent/chats/<id>` ni
+ * ochadi.
  */
 function ParentNotificationLinks() {
   const openLink = useParentNotificationLink();

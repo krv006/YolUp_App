@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **246**
-- 🟡/🔴 moslashtirilgan: **396**
+- 🟢 NUSXA: **249**
+- 🟡/🔴 moslashtirilgan: **400**
 - 🆕 mobilga xos: **18**
-- Jami: **660**
+- Jami: **667**
 
 ## Olib tashlangan bo'limlar
 
@@ -239,7 +239,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/ui/schedule-sidebar.tsx` | 🟡 MOSLASH | `a33c07fd337b` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
 | `src/modules/lesson/ui/lesson-detail-dialog.tsx` | 🟡 MOSLASH | `fe03b39eee02` | mobilda ishlatilmaydi — jadvalda `pages/schedule/lesson-detail-drawer.tsx` |
 | `src/modules/lesson/ui/lesson-create-dialog.tsx` | 🟡 MOSLASH | `e1ad0ea3713b` | mobilda ishlatilmaydi — jadvalda `pages/schedule/new-lesson-dialog.tsx`, guruhda `add-lesson-dialog.tsx` |
-| `src/modules/lesson/ui/finish-lesson-dialog.tsx` | 🟡 MOSLASH | `9523cd3f01c7` | mobilda `lesson-sheets.tsx` dagi `FinishLessonSheet` (`ConfirmDialog`, tor ekran matni) |
+| `src/modules/lesson/ui/finish-lesson-dialog.tsx` | 🟡 MOSLASH | `75e6028dd651` | mobilda `lesson-sheets.tsx` dagi `FinishLessonSheet`; "yozuv guruhga yuborilsin" — `CheckboxMark` yoki saqlangan tanlov matni |
 | `src/modules/lesson/ui/star-rating.tsx` | 🟡 MOSLASH | `c837cb4c5fb6` | yorliqlar `accessibilityLabel`; teginish maydoni 44pt; `RatingSummary` "N ta baho" o'rniga `(N)` (faqat admin ro'yxatida) |
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `6bcde4cb0067` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `ebd0415d0318` | — |
@@ -399,14 +399,14 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/exams/parent-exams-page.tsx` | 🟡 MOSLASH | `33a9f589e315` | faqat telefon shoxi (`MockMobile`) |
 | `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `976d5b111c4a` | faqat telefon shoxi (`ResultsMobile`) |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `5c58f38cd773` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
-| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `41c62b179e63` | faqat tor ekran shoxlari; Androidda FLAG_SECURE (skrinshot himoyasi), iOS'da ism-watermark |
-| `src/modules/live/ui/lesson-pre-join.tsx` | 🟡 MOSLASH | `ee92bbd8bbb0` | faqat tor ekran varianti; o'qituvchining kompyuterdagi ekran ulashish shoxi yo'q; ruxsat rad etilsa `media-permission-dialog.tsx` ga qarang |
+| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `f4237a24a07c` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
+| `src/modules/live/ui/lesson-pre-join.tsx` | 🟡 MOSLASH | `658cda176ab8` | faqat tor ekran varianti; o'qituvchining kompyuterdagi ekran ulashish shoxi yo'q; ruxsat rad etilsa `media-permission-dialog.tsx` ga qarang |
 | `src/modules/live/ui/media-permission-dialog.tsx` | 🟡 MOSLASH | `425eb1d4a350` | mobilda `lesson-pre-join.tsx` ichida (`ConfirmDialog`); "Qayta tekshirish" o'rniga tizim sozlamalari (`Linking.openSettings`), ilovaga qaytganda kamera qayta so'raladi; brauzerga xos izoh o'rniga `mobile.live.ruxsat_sozlamalarda` |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `befefce3e95e` | faqat tor ekran shoxi; xato holati `MobileEmptyCard` |
-| `src/pages/recording/recording-mobile.tsx` | 🟡 MOSLASH | `d6481405f820` | mobilda `recording-page.tsx` ichida; davomat qatori `LessonAttendanceDialog` ni ochadi (vebdagidek); PDF `downloadBlob` orqali |
+| `src/pages/recording/recording-mobile.tsx` | 🟡 MOSLASH | `362f3c7891e4` | mobilda `recording-page.tsx` ichida; davomat qatori `LessonAttendanceDialog` ni ochadi (vebdagidek); PDF `downloadBlob` orqali |
 | `src/pages/recording/recording-video.tsx` | 🟡 MOSLASH | `81d25e23dd52` | mobilda `recording-page.tsx` ichida, `expo-video`; vebdan farqi — oxirida to'liq ekran tugmasi; oxiriga yetgan video boshidan qo'yiladi (ExoPlayer o'zi qaytarmaydi); pleer QO'LDA to'xtatilmaydi; video yo'lagi yo'q (faqat audio) yozuvda native ko'rinish yashiriladi — iOS QuickTime belgisini chizardi |
-| `src/pages/recording/recording-desktop.tsx` | 🟡 MOSLASH | `8e22240fb02b` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
-| `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `42684a8f0678` | mobilda ishlatilmaydi (vebda ham hech qayerda chaqirilmaydi) — pleer `recording-video.tsx` asosida `recording-page.tsx` ichida |
+| `src/pages/recording/recording-desktop.tsx` | 🟡 MOSLASH | `a8c8e7cc62fb` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
+| `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `5acbd8ce03f4` | mobilda ishlatilmaydi (vebda ham hech qayerda chaqirilmaydi) — pleer `recording-video.tsx` asosida `recording-page.tsx` ichida |
 | `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `ad93934ff3d1` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
 | `src/pages/schedule/mobile-schedule.tsx` | 🟡 MOSLASH | `108bc38855cf` | — |
 | `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `fac2f1b7392d` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
@@ -509,10 +509,16 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/student-group-workspace/use-assignment-rows.ts` | 🟡 MOSLASH | `734e4c2eff10` | `navigate` o'rniga `router.push(..., { withAnchor: true })` |
 | `src/widgets/forward-dialog/forward-dialog.tsx` | 🟡 MOSLASH | `c22c79a14efe` | pastki oyna (`Sheet variant="app"`) |
 | `src/pages/teacher/conversation-page.tsx` | 🟡 MOSLASH | `7ae453d9b1fb` | mobilda `pages/chats/conversation-page.tsx` (guruh qismi `group-workspace.tsx` dagi chat bilan birga). Tor ekrandagidek jonli dars chizig'i yo'q. O'quvchida vazifa kartasi vazifa sahifasini ochadi va topshirilganini ko'rsatadi; e'lonlar kanalida yozish maydoni o'rniga ogohlantirish. Qadalgan xabarni olib tashlash `pinned: true` bilan (vebda `false` ketadi — xabar qayta qadaladi, `useChat.pinMessage` ma'nosiga zid); o'qilganlik faqat kelgan xabarga (`readKey`); kutilayotgan/bloklangan shaxsiy chatda `DirectRequestBar` (oldingi qattiq yozilgan o'zbekcha izoh olib tashlandi) |
-| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `b51311f38c8f` | tor ekran shoxi (`mobile-live-room.tsx` bilan bitta faylda): sahna, 3 ustunli plitkalar, pastki panel; brauzerdagi yozuv yo'q (yozuv server tomonda) — REC belgisi o'qituvchida ham server `recordingActive` dan (vebda o'qituvchida brauzer yozuvi); `MediaPermissionDialog` yo'q — ruxsatni Android so'raydi; doska to'liq ekranda hozircha `BoardSurface` (5-bosqichda `BoardPanel` mobil ko'rinishi) |
-| `src/widgets/live-room/mobile-live-room.tsx` | 🟡 MOSLASH | `4d274234abf8` | mobilda `live-room.tsx` ichida (`RoomBody`, `ToolbarButton`, `CameraTile`) |
+| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `cf0a8da9cf76` | mobilda `mobile-live-room` ham shu faylda; o'qituvchi panelida "hammaga ochiq" almashtirgichlari, hammani o'chirish; yozuv tanlovi `recording-start-sheet.tsx`; Document PiP va SharePreview yo'q |
+| `src/widgets/live-room/mobile-live-room.tsx` | 🟡 MOSLASH | `7d9e2c02059b` | mobilda `live-room.tsx` ichida: o'qituvchida 7 tugma, `toggleWithRelease`, sahnada "Ulashilmoqda" (RN'da trek nomi yo'q — "Ekran"), ekran ulashish publish sozlamasi (o'lchamsiz) |
 | `src/widgets/live-room/live-room-state.tsx` | 🟡 MOSLASH | `83ff7305c2e7` | faqat tor ekran varianti (doim qorong'i) |
 | `src/widgets/live-room/use-elapsed-seconds.ts` | 🟢 NUSXA | `6a64d9089071` | — |
+| `src/widgets/live-room/use-silence-all.ts` | 🟢 NUSXA | `0ab3a87aac28` | — |
+| `src/widgets/live-room/use-screen-share-release.ts` | 🟢 NUSXA | `e42f27b21f34` | — |
+| `src/widgets/live-room/use-share-source-text.ts` | 🟢 NUSXA | `f8983bef2b62` | — |
+| `src/widgets/live-room/use-live-health.ts` | 🟡 MOSLASH | `70d47887447e` | CPU himoyasi yo'q (`LocalTrackCpuConstrained` faqat brauzerda); ko'rinish `AppState` dan; yadro va xotira ma'lumoti yo'q |
+| `src/widgets/live-room/recording-start-dialog.tsx` | 🟡 MOSLASH | `9233bafa96ac` | mobilda `recording-start-sheet.tsx`, faqat telefon shoxi (`withScreen=false`): faqat "yozuv guruhga yuborilsin" tanlovi |
+| `src/widgets/live-room/silence-all-control.tsx` | 🟡 MOSLASH | `688a265a4850` | mobilda ishlatilmaydi (desktop panel); mobil tugma `live-room.tsx` dagi `SilenceAllButton` |
 | `src/modules/conversation/lib/last-message.ts` | 🟢 NUSXA | `9a3b37afbe12` | — |
 | `src/modules/exam/api/exam.api.ts` | 🟢 NUSXA | `392f41feb6f3` | — |
 | `src/modules/exam/api/exam.endpoints.ts` | 🟢 NUSXA | `4fed44d6b712` | — |
@@ -683,6 +689,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/live/lib/share-source.ts` | 🟢 NUSXA | `c1da876a4f6e` | — |
 | `src/modules/live/lib/client-health.ts` | 🟢 NUSXA | `ba90ea5fcb94` | — |
 | `src/modules/live/model/use-media-mode-channel.ts` | 🟢 NUSXA | `8e33aed6b85f` | — |
+| `src/modules/live/ui/attention-check-dialog.tsx` | 🟡 MOSLASH | `95718a707918` | mobilda `AttentionCheckSheet` (`live-room.tsx` ichida); vaqt tugasa yopiladi |
 | `src/modules/parent/lib/child-scores.ts` | 🟢 NUSXA | `41e236fb0b87` | — |
 | `src/modules/progress/api/progress.api.ts` | 🟢 NUSXA | `9a77a51535f4` | — |
 | `src/modules/progress/api/progress.dto.ts` | 🟢 NUSXA | `9e67b4007e81` | — |
@@ -720,6 +727,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/lib/mathlive-loader.ts` | Web Component loader — Faza 5 da WebView bilan |
 | `src/modules/board/model/use-board-drawing.ts` | DOM pointer events — Faza 5 da Skia + gesture-handler |
 | `src/modules/live/lib/screen-capture.ts` | brauzer `getDisplayMedia` — mobilda ekran ulashish LiveKit orqali, iOS'da v1.1 |
+| `src/widgets/live-room/{share-control-window,share-preview}.tsx`, `use-document-pip.ts` | Document PiP — faqat brauzer (Chrome); loyiha egasi qarori bilan ko'chirilmadi (2026-11-13) |
 | `src/shared/ui/** (80+ fayl)` | shadcn/Radix — mobil dizayn tizimi alohida (§8.2) |
 | `src/modules/*/ui/**` | UI ko'chirilmaydi (§5) |
 | `src/pages/**, src/widgets/**, src/app/**` | UI qatlami — mobil uchun qayta yoziladi |

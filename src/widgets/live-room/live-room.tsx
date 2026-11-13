@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useConnectionState,
@@ -12,15 +12,16 @@ import {
   VideoTrack,
   type TrackReferenceOrPlaceholder,
 } from "@livekit/react-native";
-import { ConnectionState, DisconnectReason, RoomEvent, Track, type Participant } from "livekit-client";
+import { ConnectionState, RoomEvent, Track, type Participant, type TrackPublishOptions } from "livekit-client";
 import { Hand, Info, MicOff, MonitorUp, UserRoundX, VideoOff, X } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { AwayStudentsNotice, BoardPreview, BoardSurface } from "@/modules/board";
-import { FinishLessonSheet } from "@/modules/lesson";
+import { FinishLessonSheet, useRecordingChoice } from "@/modules/lesson";
 import {
   CAMERA_SOURCE,
   canPublishSource,
   decodeScreenShareRequest,
+  describeShareTrack,
   encodeScreenShareRequest,
   LessonInviteSheet,
   MICROPHONE_SOURCE,
@@ -29,12 +30,17 @@ import {
   useAnswerAttention,
   useAttentionCheck,
   useBanFromLesson,
+  useCameraOffAll,
   useCameraSignals,
   useFocusTracker,
+  useMediaMode,
+  useMediaModeChannel,
   useMicSignals,
   useMuteAll,
+  useSetMediaMode,
   type AttentionCheck,
   type CameraRequest,
+  type MediaMode,
   type MicRequest,
 } from "@/modules/live";
 import type { Lesson } from "@/shared/types";
@@ -47,15 +53,34 @@ import {
   Icon,
   MobileButton,
   Sheet,
+  Switch,
   ThemeScope,
   toast,
   useDs,
 } from "@/shared/ui";
 import { LiveWatermark } from "./live-watermark";
+import { RecordingStartSheet } from "./recording-start-sheet";
 import { formatElapsed, useElapsedSeconds } from "./use-elapsed-seconds";
+import { useLiveHealth } from "./use-live-health";
+import { useScreenShareRelease } from "./use-screen-share-release";
+import { useShareSourceText } from "./use-share-source-text";
+import { useSilenceAll } from "./use-silence-all";
 
 const MAX_RECONNECT_ATTEMPTS = 5;
 const MAX_TILES = 6;
+
+/**
+ * Ekran ulashish — veb `screen-capture.ts` dagi `SCREEN_SHARE_PUBLISH`: bitta
+ * qatlam, 15 kadr/s, ~1.5 Mbit/s gacha. Ushlash o'lchami (720p) RN'da
+ * berilmaydi — `getDisplayMedia` cheklovlarni qabul qilmaydi.
+ */
+const SCREEN_SHARE_PUBLISH: TrackPublishOptions = {
+  simulcast: false,
+  screenShareEncoding: { maxBitrate: 1_500_000, maxFramerate: 15 },
+};
+
+/** O'qituvchida panel 7 tugma — zichroq (veb `denseToolbar`: `w-12`, doira `size-12`). */
+const DenseToolbar = createContext(false);
 
 function firstName(value: string): string {
   return value.trim().split(/\s+/)[0] ?? value;
@@ -71,8 +96,8 @@ export interface LiveRoomProps {
  * Jonli dars xonasi — veb `live-room.tsx` + `mobile-live-room.tsx` (tor
  * ekran, qorong'i): sarlavhada orqaga, o'tgan vaqt va ishtirokchilar soni;
  * yorug' sahna kartasi (ekran ulashish yoki doska ko'rinishi), 3 ustunli
- * kamera plitkalari, pastda mikrofon, kamera, ulashish, doska, ishtirokchilar
- * va yakunlash/chiqish tugmalari.
+ * kamera plitkalari, pastda mikrofon, kamera, (o'qituvchida "Cheklash"),
+ * ulashish, doska, ishtirokchilar va yakunlash/chiqish tugmalari.
  *
  * Vebdan farqi: o'qituvchining brauzerdagi audio/video yozuvi mobilda yo'q
  * (yozuv server tomonda), shuning uchun "REC" belgisi ko'rsatilmaydi.
@@ -80,7 +105,9 @@ export interface LiveRoomProps {
 export function LiveRoom(props: LiveRoomProps) {
   return (
     <ThemeScope scheme="dark">
-      <RoomBody {...props} />
+      <DenseToolbar.Provider value={props.isTeacher}>
+        <RoomBody {...props} />
+      </DenseToolbar.Provider>
     </ThemeScope>
   );
 }
@@ -89,6 +116,7 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
   const { t } = useTranslation("live");
   const ds = useDs();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const { user } = useAuth();
   const [boardOpen, setBoardOpen] = useState(false);
   const [peopleOpen, setPeopleOpen] = useState(false);
@@ -105,10 +133,18 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
   }, [lesson.recordingStartedAt, lesson.startsAt, joinedAt]);
   const participants = useParticipants();
   const room = useRoomContext();
+  const connectionState = useConnectionState();
   const attention = useAttentionCheck(lesson.id, !isTeacher);
   const mic = useMicSignals(lesson.id, isTeacher);
   const camera = useCameraSignals(lesson.id, isTeacher);
   const allowShare = useAllowShare(lesson.id);
+  // Veb e6503c8: yozuv tanlovi darsga kirgandan keyin so'raladi (tanlanmagan bo'lsa).
+  const recordingChoice = useRecordingChoice(lesson.id, isTeacher);
+  const [recordingDismissed, setRecordingDismissed] = useState(false);
+  const shareSourceText = useShareSourceText();
+  useMediaModeChannel(lesson.id, isTeacher);
+  useScreenShareRelease(lesson.id, !isTeacher);
+  useLiveHealth(lesson.id);
   useFocusTracker(lesson.id, !isTeacher);
 
   const tracks = useTracks(
@@ -125,17 +161,20 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
   const ordered = [...cameraTracks.filter((track) => track.participant.isLocal), ...cameraTracks.filter((track) => !track.participant.isLocal)];
   const visible = ordered.length > MAX_TILES ? ordered.slice(0, MAX_TILES - 1) : ordered;
   const overflow = ordered.length - visible.length;
-
-  /* O'qituvchi chetlashtirganda sababi aytiladi (veb `onDisconnected`). */
-  useEffect(() => {
-    function onDisconnected(reason?: DisconnectReason) {
-      if (reason === DisconnectReason.PARTICIPANT_REMOVED) toast.error("Siz darsdan chetlashtirildingiz");
-    }
-    room.on(RoomEvent.Disconnected, onDisconnected);
-    return () => {
-      room.off(RoomEvent.Disconnected, onDisconnected);
-    };
-  }, [room]);
+  // Veb b72d9b2: o'qituvchi o'z ulashayotgan ekranini sahnada ko'rsa — nima ulashilayotgani yoziladi.
+  const localShareTrack = isTeacher && activeShare?.participant.isLocal && "publication" in activeShare ? activeShare.publication?.track : undefined;
+  const sharedWhat = localShareTrack ? shareSourceText(describeShareTrack(localShareTrack.mediaStreamTrack)) : null;
+  // 🟡 iOS ikki qo'shni Modal'ni birga ko'rsatmaydi — boshqa oyna ochiq bo'lsa yozuv oynasi kutib turadi.
+  const recordingPromptOpen =
+    isTeacher &&
+    connectionState === ConnectionState.Connected &&
+    !recordingDismissed &&
+    recordingChoice.isFetched &&
+    !recordingChoice.data?.decided &&
+    !peopleOpen &&
+    !inviteOpen &&
+    !finishOpen &&
+    !shareRequest;
 
   /* O'quvchining ekran ulashish so'rovi — tor ekranda tasdiqlash oynasi (veb `ShareRequestListener`). */
   useEffect(() => {
@@ -191,7 +230,10 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
         <ThemeScope scheme="light">
           <StageCard>
             {activeShare && "publication" in activeShare ? (
-              <VideoTrack trackRef={activeShare as never} style={styles.fill} objectFit="contain" />
+              <>
+                <VideoTrack trackRef={activeShare as never} style={styles.fill} objectFit="contain" />
+                {sharedWhat ? <SharingBadge label={t("share.sharingWhat", { what: sharedWhat })} /> : null}
+              </>
             ) : (
               <BoardPreview lessonId={lesson.id} currentUserId={room.localParticipant.identity} />
             )}
@@ -214,7 +256,8 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
       </ScrollView>
 
       {/* `rounded-t-2xl bg-subtle/40 px-4 pt-0.5 pb-6.5 justify-between` */}
-      <View style={[styles.toolbar, { backgroundColor: dsAlpha(ds.c.subtle, 0.4), paddingBottom: Math.max(26, insets.bottom + 8) }]}>
+      {/* `px-3 min-[380px]:px-4` — o'qituvchining 7 tugmasi 360dp ekranga sig'ishi uchun. */}
+      <View style={[styles.toolbar, { backgroundColor: dsAlpha(ds.c.subtle, 0.4), paddingHorizontal: width < 380 ? 12 : 16, paddingBottom: Math.max(26, insets.bottom + 8) }]}>
         <MicButton
           isTeacher={isTeacher}
           requesting={mic.requesting}
@@ -222,6 +265,7 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
           waiting={mic.waiting}
           onRequest={mic.requestMic}
           onCancel={mic.cancelMic}
+          onRelease={mic.release}
         />
         <CameraButton
           isTeacher={isTeacher}
@@ -230,7 +274,9 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
           waiting={camera.waiting}
           onRequest={camera.requestCamera}
           onCancel={camera.cancelCamera}
+          onRelease={camera.release}
         />
+        {isTeacher ? <SilenceAllButton lessonId={lesson.id} /> : null}
         <ShareButton />
         <ToolbarButton icon={<Icon name="edit" size={22} color={boardOpen ? ds.c["on-action"] : ds.c.ink} />} label={t("room.board")} tone={boardOpen ? "active" : "default"} onPress={() => setBoardOpen(!boardOpen)} />
         <ToolbarButton
@@ -243,7 +289,7 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
           icon={<Icon name="logout" size={22} color={ds.c["on-action"]} />}
           label={isTeacher ? t("room.finish") : t("room.leave")}
           tone="danger"
-          onPress={() => (isTeacher ? setFinishOpen(true) : void room.disconnect())}
+          onPress={() => (isTeacher ? setFinishOpen(true) : onLeave())}
         />
       </View>
 
@@ -264,6 +310,8 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
         {isTeacher ? (
           <FinishLessonSheet lesson={finishOpen ? lesson : null} onClose={() => setFinishOpen(false)} onFinished={onLeave} onLeaveOnly={onLeave} />
         ) : null}
+
+        {isTeacher ? <RecordingStartSheet lessonId={lesson.id} open={recordingPromptOpen} onClose={() => setRecordingDismissed(true)} /> : null}
 
         <Sheet variant="app" open={peopleOpen} onClose={() => setPeopleOpen(false)} title={t("room.mobileParticipantsCount", { count: participants.length })}>
           <ParticipantsPanel
@@ -317,6 +365,19 @@ function StageCard({ children }: { children: ReactNode }) {
   return <View style={[styles.stage, { backgroundColor: ds.c.surface }]}>{children}</View>;
 }
 
+/** Sahnadagi "Ulashilmoqda: ..." — `absolute top-2.5 left-2.5 h-7 rounded-full bg-canvas/85 px-3 text-caption-strong`. */
+function SharingBadge({ label }: { label: string }) {
+  const ds = useDs();
+  return (
+    <View accessibilityRole="text" style={[styles.sharing, { backgroundColor: dsAlpha(ds.c.canvas, 0.85) }]}>
+      <Icon name="send" size={14} color={ds.c.brand} />
+      <DsText v="caption-strong" numberOfLines={1} style={styles.shrink}>
+        {label}
+      </DsText>
+    </View>
+  );
+}
+
 /** Kamera plitkasi — `aspect-[114/86] rounded-xl bg-subtle`, gapirganda yashil hoshiya, pastda ism va mikrofon. */
 function CameraTile({ track }: { track: TrackReferenceOrPlaceholder }) {
   const { t } = useTranslation("live");
@@ -365,6 +426,7 @@ function ToolbarButton({
   onPress?: () => void;
 }) {
   const ds = useDs();
+  const dense = useContext(DenseToolbar);
   const background: Record<ToolbarTone, string> = {
     default: ds.c.subtle,
     off: ds.c["danger-bg"],
@@ -378,9 +440,9 @@ function ToolbarButton({
       accessibilityState={{ disabled, selected: tone === "active" }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.toolbarItem, disabled && styles.dim]}
+      style={[styles.toolbarItem, dense && styles.toolbarItemDense, disabled && styles.dim]}
     >
-      <View style={[styles.toolbarCircle, { backgroundColor: background[tone] }]}>
+      <View style={[styles.toolbarCircle, dense && styles.toolbarCircleDense, { backgroundColor: background[tone] }]}>
         {icon}
         {badge ? (
           <View style={[styles.toolbarBadge, { backgroundColor: ds.c.danger }]}>
@@ -404,10 +466,21 @@ interface RequestProps {
   waiting: boolean;
   onRequest: () => void;
   onCancel: () => void;
+  /** Veb 7ea8ccb: o'quvchi ruxsat berilgan qurilmani o'zi o'chirsa ruxsat qaytariladi (bir martalik). */
+  onRelease?: () => void;
+}
+
+/** Yoqish/o'chirish; o'quvchi o'chirgach `release-media` (veb `toggleWithRelease`). */
+function toggleWithRelease(enabled: boolean, toggle: () => Promise<unknown>, release: (() => void) | undefined) {
+  void toggle()
+    .then(() => {
+      if (enabled) release?.();
+    })
+    .catch(() => undefined);
 }
 
 /* Veb #161: kutilayotgan so'rovni bekor qilish — tugma "Bekor qilish" bo'ladi. */
-function MicButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCancel }: RequestProps) {
+function MicButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCancel, onRelease }: RequestProps) {
   const { t } = useTranslation("live");
   const ds = useDs();
   const permissions = useLocalParticipantPermissions();
@@ -421,7 +494,11 @@ function MicButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCa
         icon={on ? <Icon name="mic" size={22} color={ds.c.ink} /> : <MicOff size={22} color={ds.c["error-text"]} />}
         label={t("mic.label")}
         tone={on ? "default" : "off"}
-        onPress={() => (allowed ? void localParticipant.setMicrophoneEnabled(!on).catch(() => undefined) : toast.error(t("mic.disabledTitle")))}
+        onPress={() =>
+          allowed
+            ? toggleWithRelease(on, () => localParticipant.setMicrophoneEnabled(!on), isTeacher ? undefined : onRelease)
+            : toast.error(t("mic.disabledTitle"))
+        }
       />
     );
   return (
@@ -435,7 +512,7 @@ function MicButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCa
   );
 }
 
-function CameraButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCancel }: RequestProps) {
+function CameraButton({ isTeacher, requesting, cancelling, waiting, onRequest, onCancel, onRelease }: RequestProps) {
   const { t } = useTranslation("live");
   const ds = useDs();
   const permissions = useLocalParticipantPermissions();
@@ -449,7 +526,11 @@ function CameraButton({ isTeacher, requesting, cancelling, waiting, onRequest, o
         icon={on ? <Icon name="videocam-fill" size={22} color={ds.c.ink} /> : <VideoOff size={22} color={ds.c["error-text"]} />}
         label={t("camera.label")}
         tone={on ? "default" : "off"}
-        onPress={() => (allowed ? void localParticipant.setCameraEnabled(!on).catch(() => undefined) : toast.error(t("camera.disabledTitle")))}
+        onPress={() =>
+          allowed
+            ? toggleWithRelease(on, () => localParticipant.setCameraEnabled(!on), isTeacher ? undefined : onRelease)
+            : toast.error(t("camera.disabledTitle"))
+        }
       />
     );
   return (
@@ -461,6 +542,14 @@ function CameraButton({ isTeacher, requesting, cancelling, waiting, onRequest, o
       onPress={waiting ? onCancel : onRequest}
     />
   );
+}
+
+/** Veb 26cbc18: bitta bosishda hammaning mikrofoni va kamerasi o'chadi (faqat o'qituvchi). */
+function SilenceAllButton({ lessonId }: { lessonId: string }) {
+  const { t } = useTranslation("live");
+  const ds = useDs();
+  const silence = useSilenceAll(lessonId);
+  return <ToolbarButton icon={<MicOff size={22} color={ds.c.ink} />} label={t("silenceAll.mobileLabel")} disabled={silence.pending} onPress={silence.run} />;
 }
 
 /** Ekran ulashish: ruxsat bo'lsa yoqadi/o'chiradi (Android MediaProjection), bo'lmasa o'qituvchidan so'raydi. */
@@ -478,7 +567,9 @@ function ShareButton() {
         icon={<Icon name="send" size={22} color={sharing ? ds.c["on-action"] : ds.c.ink} />}
         label={t("room.mobileShare")}
         tone={sharing ? "active" : "default"}
-        onPress={() => void localParticipant.setScreenShareEnabled(!sharing).catch(() => toast.error(t("share.failedToast")))}
+        onPress={() =>
+          void localParticipant.setScreenShareEnabled(!sharing, undefined, SCREEN_SHARE_PUBLISH).catch(() => toast.error(t("share.failedToast")))
+        }
       />
     );
 
@@ -572,7 +663,8 @@ function AttentionCheckSheet({ lessonId, check }: { lessonId: string; check: Att
   return (
     <Sheet
       variant="app"
-      open={Boolean(check)}
+      // Veb c6e3834: vaqt tugagach oyna yopiladi.
+      open={Boolean(check) && seconds > 0}
       onClose={() => undefined}
       title={t("attentionCheck.title")}
       description={t("attentionCheck.description", { time: clock })}
@@ -655,7 +747,6 @@ function ParticipantsPanel({
   const participants = useParticipants();
   const allowShare = useAllowShare(lessonId);
   const ban = useBanFromLesson(lessonId);
-  const muteAll = useMuteAll(lessonId);
   const raisedHands = new Set([...micRequests.map((request) => request.name), ...cameraRequests.map((request) => request.name)]);
 
   return (
@@ -740,27 +831,92 @@ function ParticipantsPanel({
         ) : null}
       </View>
 
-      {isTeacher ? (
-        <View style={styles.panelFooter}>
+      {isTeacher ? <TeacherMediaControls lessonId={lessonId} onInvite={onInvite} /> : null}
+    </View>
+  );
+}
+
+/**
+ * Veb 7ea8ccb `TeacherMediaControls` (tor ekran): "Hammaga mikrofon/kamera
+ * ochiq" kalitlari (`media-mode`), hammaning mikrofoni va kamerasini o'chirish,
+ * pastda "Taklif qilish".
+ */
+function TeacherMediaControls({ lessonId, onInvite }: { lessonId: string; onInvite: () => void }) {
+  const { t } = useTranslation("live");
+  const ds = useDs();
+  const muteAll = useMuteAll(lessonId);
+  const cameraOffAll = useCameraOffAll(lessonId);
+  const mode = useMediaMode(lessonId);
+  const setMode = useSetMediaMode(lessonId);
+  const toggleDisabled = setMode.isPending || mode.isLoading;
+  /* `max-lg:border max-lg:border-line-strong max-lg:bg-surface rounded-xl` */
+  const card = { borderColor: ds.c["line-strong"], backgroundColor: ds.c.surface };
+  const divider = { borderBottomWidth: 1, borderBottomColor: ds.c.line };
+
+  const toggles: { id: string; label: string; checked: boolean; patch: (value: boolean) => Partial<MediaMode> }[] = [
+    { id: "mic", label: t("mediaMode.openMic"), checked: Boolean(mode.data?.openMic), patch: (value) => ({ openMic: value }) },
+    { id: "camera", label: t("mediaMode.openCamera"), checked: Boolean(mode.data?.openCamera), patch: (value) => ({ openCamera: value }) },
+  ];
+
+  function change(patch: Partial<MediaMode>, value: boolean) {
+    setMode.mutate(patch, { onSuccess: () => toast.success(t(value ? "mediaMode.enabledToast" : "mediaMode.disabledToast")) });
+  }
+
+  return (
+    <View style={styles.mediaControls}>
+      <View style={[styles.mediaCard, styles.mediaToggles, card]}>
+        {toggles.map((item, index) => (
           <Pressable
-            accessibilityRole="button"
-            disabled={muteAll.isPending}
-            onPress={() => muteAll.mutate([], { onSuccess: (count) => toast.success(t("participantsPanel.muteAllDone", { count })) })}
-            style={({ pressed }) => [styles.panelButton, { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }, muteAll.isPending && styles.dim]}
+            key={item.id}
+            accessible={false}
+            disabled={toggleDisabled}
+            onPress={() => change(item.patch(!item.checked), !item.checked)}
+            style={[styles.mediaToggle, index < toggles.length - 1 && divider]}
           >
-            <Icon name="notifications-off" size={18} color={ds.c.ink} />
-            <DsText v="button" numberOfLines={1}>
-              {t("participantsPanel.muteAll")}
-            </DsText>
+            <View style={styles.fill}>
+              <DsText v="title-sm" numberOfLines={1}>
+                {item.label}
+              </DsText>
+              <DsText v="body-xs" c="ink-secondary" numberOfLines={1}>
+                {item.checked ? t("mediaMode.openHint") : t("mediaMode.closedHint")}
+              </DsText>
+            </View>
+            <Switch checked={item.checked} disabled={toggleDisabled} accessibilityLabel={item.label} onCheckedChange={(value) => change(item.patch(value), value)} />
           </Pressable>
-          <Pressable accessibilityRole="button" onPress={onInvite} style={({ pressed }) => [styles.panelButton, { backgroundColor: ds.c["brand-subtle"], opacity: pressed ? 0.85 : 1 }]}>
-            <Icon name="person" size={18} color={ds.c.brand} />
-            <DsText v="button" c="brand" numberOfLines={1}>
-              {t("participantsPanel.invite")}
-            </DsText>
-          </Pressable>
-        </View>
-      ) : null}
+        ))}
+      </View>
+
+      <View style={[styles.mediaCard, card]}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={muteAll.isPending}
+          onPress={() => muteAll.mutate([], { onSuccess: (count) => toast.success(t("participantsPanel.muteAllDone", { count })) })}
+          style={({ pressed }) => [styles.mediaAction, divider, pressed && { backgroundColor: ds.c.muted }, muteAll.isPending && styles.dim]}
+        >
+          <MicOff size={17} color={ds.c["ink-secondary"]} />
+          <DsText v="title-sm" numberOfLines={1} style={styles.shrink}>
+            {t("participantsPanel.muteAll")}
+          </DsText>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          disabled={cameraOffAll.isPending}
+          onPress={() => cameraOffAll.mutate([], { onSuccess: (count) => toast.success(t("participantsPanel.cameraOffAllDone", { count })) })}
+          style={({ pressed }) => [styles.mediaAction, pressed && { backgroundColor: ds.c.muted }, cameraOffAll.isPending && styles.dim]}
+        >
+          <VideoOff size={17} color={ds.c["ink-secondary"]} />
+          <DsText v="title-sm" numberOfLines={1} style={styles.shrink}>
+            {t("participantsPanel.cameraOffAll")}
+          </DsText>
+        </Pressable>
+      </View>
+
+      <Pressable accessibilityRole="button" onPress={onInvite} style={({ pressed }) => [styles.panelButton, { backgroundColor: ds.c["brand-subtle"], opacity: pressed ? 0.85 : 1 }]}>
+        <Icon name="person" size={18} color={ds.c.brand} />
+        <DsText v="button" c="brand" numberOfLines={1}>
+          {t("participantsPanel.invite")}
+        </DsText>
+      </Pressable>
     </View>
   );
 }
@@ -790,6 +946,9 @@ const styles = StyleSheet.create({
   toolbar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingTop: 2, borderTopLeftRadius: dsRadius["2xl"], borderTopRightRadius: dsRadius["2xl"] },
   toolbarItem: { width: 52, alignItems: "center", gap: 4 },
   toolbarCircle: { width: 52, height: 52, borderRadius: 26, alignItems: "center", justifyContent: "center" },
+  toolbarItemDense: { width: 48 },
+  toolbarCircleDense: { width: 48, height: 48, borderRadius: 24 },
+  sharing: { position: "absolute", top: 10, left: 10, maxWidth: "92%", height: 28, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: 14 },
   toolbarBadge: { position: "absolute", top: -2, right: -2, minWidth: 20, height: 20, paddingHorizontal: 4, borderRadius: 10, alignItems: "center", justifyContent: "center" },
   toolbarLabel: { marginHorizontal: -8, fontSize: 11, lineHeight: 16 },
   board: { paddingHorizontal: 12 },
@@ -803,6 +962,13 @@ const styles = StyleSheet.create({
   person: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 7 },
   personAction: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },
   emptyPeople: { paddingVertical: 12 },
-  panelFooter: { flexDirection: "row", gap: 10, paddingTop: 8 },
-  panelButton: { flex: 1, minWidth: 0, height: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 24 },
+  panelButton: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 24 },
+  /* `flex flex-col gap-2.5 pt-2` */
+  mediaControls: { gap: 10, paddingTop: 8 },
+  mediaCard: { overflow: "hidden", borderWidth: 1, borderRadius: dsRadius.xl },
+  mediaToggles: { paddingHorizontal: 14 },
+  /* `min-h-12 gap-3 border-b border-line py-2` */
+  mediaToggle: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+  /* `min-h-12 gap-3 border-b border-line px-3.5 text-title-sm` */
+  mediaAction: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14 },
 });

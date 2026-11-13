@@ -130,18 +130,22 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
       ? t("recording.recordingTitle")
       : recording?.status === "failed"
         ? t("recording.failedTitle")
-        : recording
-          ? t("recording.mergingTitle")
-          : t("recording.noneTitle");
+        : recording?.status === "converting"
+          ? t("recording.convertingTitle")
+          : recording
+            ? t("recording.mergingTitle")
+            : t("recording.noneTitle");
   const pendingNote =
     recording?.error ??
     (recording?.status === "recording"
       ? t("recording.recording")
       : recording?.status === "failed"
         ? t("recording.failed")
-        : recording
-          ? t("recording.mobileMerging")
-          : t("recording.none"));
+        : recording?.status === "converting"
+          ? t("recording.converting")
+          : recording
+            ? t("recording.mobileMerging")
+            : t("recording.none"));
   const pendingIcon: IconName = recording?.status === "failed" ? "error" : recording ? "hourglass-empty" : "videocam";
 
   async function downloadPdf() {
@@ -259,7 +263,7 @@ function RecordingMobile({ lesson, recording, canManage, onBack, children }: Rec
               {pendingNote}
             </DsText>
           </View>
-          {recording && recording.status !== "failed" ? (
+          {recording && recording.status !== "failed" && recording.postToChat ? (
             <DsText v="caption" c="ink-secondary" style={styles.readyNote}>
               {t("recording.mobileReadyNote")}
             </DsText>

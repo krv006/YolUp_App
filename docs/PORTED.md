@@ -31,9 +31,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **245**
-- 🟡/🔴 moslashtirilgan: **393**
+- 🟡/🔴 moslashtirilgan: **394**
 - 🆕 mobilga xos: **18**
-- Jami: **656**
+- Jami: **657**
 
 ## Olib tashlangan bo'limlar
 
@@ -346,7 +346,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/admin/system-panels.tsx` | 🟡 MOSLASH | `1f10ae6fae56` | server holatida davr tugmalari sarlavha ostida (vebda tor ekranda ustun bo'lib izohni siqadi) |
 | `src/pages/admin/teachers/admin-teachers-page.tsx` | 🟡 MOSLASH | `73fbd40d4d08` | mobilda `pages/admin/admin-teachers-page.tsx`; ko'rinish tanlagichi sarlavha ostida; `?teacher=` qatorga aylantiradi va belgilaydi |
 | `src/pages/admin/teachers/teacher-stats-dialog.tsx` | 🟡 MOSLASH | `b15753cd64fc` | mobilda `pages/admin/teacher-stats-sheet.tsx` (Dialog o'rniga Sheet) |
-| `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `03f62e428e61` | `AddLessonDialog` — mobilda `add-lesson-dialog.tsx` (tor ekran `ModalCard` -> `Sheet variant="app"`, sana/vaqt `MobilePickerField`); `AddAssignmentDialog` — hozircha eski `add-assignment-sheet.tsx` (4b) |
+| `src/widgets/group-workspace/group-action-dialogs.tsx` | 🟡 MOSLASH | `03f62e428e61` | `AddLessonDialog` — mobilda `add-lesson-dialog.tsx` (tor ekran `ModalCard` -> `Sheet variant="app"`, sana/vaqt `MobilePickerField`); `AddAssignmentDialog` — hozircha eski `add-assignment-sheet.tsx` (4b); `AddLessonDialog` "Bir nechta" rejimi — mutatsiya `add-lesson-dialog.tsx` ichida (`useCreateLessonsBulk`) |
 | `src/shared/ui/app-dialog.tsx` | 🟡 MOSLASH | `4dcce350160d` | `fullscreen` — mobilda `fullscreen-dialog.tsx`; `sheet` — `Sheet variant="app"` (tutqich, `text-h2` sarlavha, 44px yopish, qotirilgan `footer`; `icon`, `headingTitle`, `footerPadding` — vebdagi `icon`, `titleClassName`, `footerClassName`) |
 | `src/shared/ui/mobile-page.tsx` | 🟡 MOSLASH | `a7c5e4d901b8` | barcha bloklar RN'da; `mobileRoundButton`/`mobileButton` klasslari o'rniga `MobileRoundButton`/`MobileButton`; segmentda matn kesilmasligi uchun ichki chet kichik — suriladiganda 0, teng kenglikda 4 (CSS'da `nowrap` matn chetdan chiqib ko'rinadi); `MobileSegment` `badge`; `scroll` rejimida eni `minWidth: 114`, ichki chet 12; `MobileActionBar` shu faylda (vebda `mobile-action-bar.tsx` ga ajratilgan) |
 | `src/shared/ui/group-tile.tsx` | 🟡 MOSLASH | `74b48cf68e56` | `box`/`radius` — vebdagi `className="size-11 rounded-xl"` o'rnida |
@@ -407,11 +407,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/recording/recording-video.tsx` | 🟡 MOSLASH | `81d25e23dd52` | mobilda `recording-page.tsx` ichida, `expo-video`; vebdan farqi — oxirida to'liq ekran tugmasi; oxiriga yetgan video boshidan qo'yiladi (ExoPlayer o'zi qaytarmaydi); pleer QO'LDA to'xtatilmaydi; video yo'lagi yo'q (faqat audio) yozuvda native ko'rinish yashiriladi — iOS QuickTime belgisini chizardi |
 | `src/pages/recording/recording-desktop.tsx` | 🟡 MOSLASH | `8e22240fb02b` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
 | `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `42684a8f0678` | mobilda ishlatilmaydi (vebda ham hech qayerda chaqirilmaydi) — pleer `recording-video.tsx` asosida `recording-page.tsx` ichida |
-| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `b106a05bca46` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
+| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `ad93934ff3d1` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
 | `src/pages/schedule/mobile-schedule.tsx` | 🟡 MOSLASH | `108bc38855cf` | — |
 | `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `fac2f1b7392d` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
 | `src/pages/schedule/lesson-ratings-dialog.tsx` | 🟡 MOSLASH | `15d30680181e` | faqat tor ekran varianti |
-| `src/pages/schedule/new-lesson-dialog.tsx` | 🟡 MOSLASH | `bd28723e0f70` | faqat tor ekran varianti |
+| `src/pages/schedule/new-lesson-dialog.tsx` | 🟡 MOSLASH | `ffe994237d8c` | faqat tor ekran varianti; "Bir nechta" — `BulkLessonRows` |
 | `src/pages/schedule/schedule-states.tsx` | 🟡 MOSLASH | `11c7ac9f6fea` | faqat `MobileScheduleSkeleton` va `ScheduleError` |
 | `src/pages/schedule/lesson-tone.ts` | 🟢 NUSXA | `5c79242889d9` | — |
 | `src/pages/student/lib/attendance-rate.ts` | 🟢 NUSXA | `1ea3330ef1bc` | — |
@@ -540,7 +540,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/tutor/index.ts` | 🟡 MOSLASH | `6e07e223d9e3` | veb barrel minus `ui/` eksportlari; mobil `PracticeSession` alohida bo'limda |
 | `src/modules/tutor/lib/tutor.mappers.ts` | 🟢 NUSXA | `5e472f3de6e5` | — |
 | `src/modules/tutor/model/tutor.queries.ts` | 🟢 NUSXA | `59bfd0df3bfc` | — |
-| `src/pages/workspace/materials-page.tsx` | 🟡 MOSLASH | `8ef427675303` | faqat tor ekran varianti; `SelectPicker` -> `MobilePickerField`, `FilterChips compact` -> `MobileSegment scroll="auto"`, yuklash `AppDialog` -> `Sheet`; fayl `pickDocument` (kengaytmalar o'rniga MIME ro'yxati); yuklab olish — OS ulashish oynasi (`downloadBlob`) |
+| `src/pages/workspace/materials-page.tsx` | 🟡 MOSLASH | `af391ed2e781` | faqat tor ekran varianti; papka (`course`/`lesson`) URL emas, sahifa holatida — sarlavha va Android "orqaga" bir daraja yuqoriga; guruh va papka tanlash oddiy tanlov oynalari (vebda qidiruvli); yuklash `Sheet`, fayl `pickDocument`; yozuv `ROUTES.recording`; doska PDF `FileViewer` |
 | `src/pages/teacher/workspace/share-results-dialog.tsx` | 🟡 MOSLASH | `6e3853cc00dd` | mobilda `pages/workspace/tests/share-results-dialog.tsx`; `AppDialog` -> `Sheet variant="app"` |
 | `src/pages/teacher/workspace/homework/bank-assignment-card.tsx` | 🟡 MOSLASH | `95b33f61d167` | mobilda `pages/workspace/homework/bank-assignment-card.tsx` |
 | `src/pages/teacher/workspace/homework/bank-copies.tsx` | 🟡 MOSLASH | `e08a95963627` | mobilda `pages/workspace/homework/bank-copies.tsx` |
@@ -671,6 +671,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/lib/zoom.ts` | 🟢 NUSXA | `621584f47f73` | — |
 | `src/modules/lesson/lib/bulk-lessons.ts` | 🟢 NUSXA | `37de94dc8000` | — |
 | `src/modules/lesson/lib/recording-choice.ts` | 🟢 NUSXA | `ce8202a61f5d` | — |
+| `src/modules/lesson/ui/bulk-lesson-rows.tsx` | 🟡 MOSLASH | `9ec16fbb6073` | faqat tor ekran (`compact`) varianti — `compact` prop yo'q; `ring-1` o'rniga doimiy 1px chegara |
 | `src/modules/board/lib/board-edit.ts` | 🟢 NUSXA | `5c28899c0ef3` | — |
 | `src/modules/board/lib/board-resize.ts` | 🟢 NUSXA | `efadfe2884db` | — |
 | `src/modules/board/lib/board-select.ts` | 🟢 NUSXA | `b1d8d2ddf7e8` | — |

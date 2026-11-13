@@ -103,6 +103,8 @@ export type { LessonListProps } from "./ui/lesson-list";
 export { FinishLessonSheet, LessonRatingsSheet, RateLessonSheet } from "./ui/lesson-sheets";
 export { RatingSummary, StarRating } from "./ui/star-rating";
 export { LessonRatingForm } from "./ui/lesson-rating-form";
+export { BulkLessonRows } from "./ui/bulk-lesson-rows";
+export type { BulkLessonRowsProps } from "./ui/bulk-lesson-rows";
 export type { StarRatingProps } from "./ui/star-rating";
 
 export { useScheduleStore } from "./model/schedule.store";

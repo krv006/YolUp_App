@@ -28,8 +28,24 @@ function forKatex(latex: string): string {
   return latex.replace(/\\placeholder(?:\[[^\]]*\])?\{([^{}]*)\}/g, (_, value: string) => (value.trim() ? value : "\\square"));
 }
 
-/** `framed={false}` — doskadagi formula: chegarasiz, shaffof va chapga tekislangan (vebdagidek). */
-export function MathMarkup({ latex, size = 20, framed = true, color }: { latex: string; size?: number; framed?: boolean; color?: string }) {
+/**
+ * `framed={false}` — doskadagi formula: chegarasiz, shaffof va chapga tekislangan (vebdagidek).
+ * `onMeasure` — chizilgan formulaning o'lchami (CSS px): doskada tanlash ramkasi va
+ * o'chirg'ich shu bilan ishlaydi (vebda `.math-markup` DOM'dan o'lchanadi).
+ */
+export function MathMarkup({
+  latex,
+  size = 20,
+  framed = true,
+  color,
+  onMeasure,
+}: {
+  latex: string;
+  size?: number;
+  framed?: boolean;
+  color?: string;
+  onMeasure?: (size: { width: number; height: number }) => void;
+}) {
   const { palette } = useTheme();
   const [height, setHeight] = useState(size * 2.4);
 
@@ -68,7 +84,18 @@ export function MathMarkup({ latex, size = 20, framed = true, color }: { latex: 
     } catch (error) {
       target.textContent = source;
     }
-    window.ReactNativeWebView.postMessage(String(document.body.scrollHeight));
+    // Kenglik: KaTeX qatorlari (.base) yoki oddiy matnning o'ng chegarasi.
+    var left = target.getBoundingClientRect().left;
+    var right = left;
+    var bases = target.querySelectorAll('.katex-html .base');
+    if (bases.length) {
+      for (var i = 0; i < bases.length; i++) right = Math.max(right, bases[i].getBoundingClientRect().right);
+    } else {
+      var range = document.createRange();
+      range.selectNodeContents(target);
+      right = range.getBoundingClientRect().right;
+    }
+    window.ReactNativeWebView.postMessage(String(document.body.scrollHeight) + '|' + String(Math.ceil(right - left)));
   }
   window.addEventListener('load', render);
   setTimeout(render, 400);
@@ -88,8 +115,10 @@ export function MathMarkup({ latex, size = 20, framed = true, color }: { latex: 
         scrollEnabled={false}
         setSupportMultipleWindows={false}
         onMessage={(event) => {
-          const next = Number(event.nativeEvent.data);
-          if (Number.isFinite(next) && next > 0) setHeight(Math.max(size * 2, next + 8));
+          const [next = 0, width = 0] = String(event.nativeEvent.data).split("|").map(Number);
+          if (!Number.isFinite(next) || next <= 0) return;
+          setHeight(Math.max(size * 2, next + 8));
+          if (onMeasure && Number.isFinite(width) && width > 0) onMeasure({ width, height: next });
         }}
       />
     </View>

@@ -5,9 +5,8 @@
 > (`docs/MOBILE_PLAN.md` §18.4).
 
 - **Manba:** `Edu_Front` — port bosqichma-bosqich ketgan, har faylning hash'i
-  o'zi ko'chirilgan paytdagi veb holatini bildiradi. 2026-11-13 dan domen
-  qatlami veb `6469eb6` bilan sinxron; UI qatlami bosqichma-bosqich ko'chirilmoqda
-  (`feat/veb-noyabr-sync`).
+  o'zi ko'chirilgan paytdagi veb holatini bildiradi. 2026-11-13 holatiga ko'ra
+  domen va UI qatlami veb `6469eb6` bilan sinxron (`feat/veb-noyabr-sync`), drift yo'q.
 - **Oxirgi yangilanish:** 2026-11-13 (veb `6469eb6` — 3–13-noyabr, veb PR #174–#191)
 - **Drift tekshiruvi:** `npm run check-sync`
 
@@ -31,9 +30,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 ## Hisob
 
 - 🟢 NUSXA: **249**
-- 🟡/🔴 moslashtirilgan: **404**
-- 🆕 mobilga xos: **18**
-- Jami: **671**
+- 🟡/🔴 moslashtirilgan: **411**
+- 🆕 mobilga xos: **20**
+- Jami: **680**
 
 ## Olib tashlangan bo'limlar
 
@@ -102,13 +101,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/model/use-board-realtime.ts` | 🟢 NUSXA | `e74d4bba5e3b` | — |
 | `src/modules/board/ui/away-students-notice.tsx` | 🟡 MOSLASH | `c1402bd61e1f` | `useTeacherSignals` (vebdagidek); ko'rinish RN'da chizilgan (vebda `legacy.css` dagi `.away-students`) |
 | `src/modules/board/ui/bohr-model.tsx` | 🔴 QAYTA | `f70cf5b9dfcf` | veb three.js/WebGL bilan 3D chizadi; mobilda Skia bilan 2D — `expo-gl`+`expo-three` faqat shu oynacha uchun og'ir, tekis aylanada esa elektronlarni sanash osonroq |
-| `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `8162507a4b0c` | SVG o'rniga Skia tugunlari; shakl mantig'i (`strokeKindOf`, `arrowHeadPoints`) veb'dan; formatlangan matn `rich-text-stroke.tsx` ga ajratilgan |
+| `src/modules/board/ui/board-stroke.tsx` | 🟡 MOSLASH | `2cbf887fdd7e` | SVG o'rniga Skia tugunlari; shakl mantig'i (`strokeKindOf`, `arrowHeadPoints`) veb'dan; formatlangan matn `rich-text-stroke.tsx` ga ajratilgan |
 | `src/modules/board/ui/board-font.ts` | 🆕 MOBIL | `—` | Skia shrift oilasi; vebda brauzer shriftni o'zi tanlaydi, Skia'da oila nomi aniq berilishi shart |
 | `src/modules/board/ui/rich-text-stroke.tsx` | 🆕 MOBIL | `—` | veb `board-stroke.tsx` dagi `lines` shoxi; Skia'da har run uchun `matchFont` va qo'lda joylashtirish, tagiga chizish qo'lda `Rect` bilan |
-| `src/modules/board/ui/rich-text-input.tsx` | 🔴 QAYTA | `006238ccc013` | faqat `variant="mobile"`; `contenteditable` + `execCommand` RN'da yo'q: format QATOR darajasida (qalin/kursiv/tagi chizilgan butun qatorga), ro'yxat belgisi matnning o'zida ("• ", "1. ") — Enter'da davom etadi, bo'sh bandda Enter ro'yxatdan chiqaradi; natija `TextLineDto[]` |
-| `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `953af4036363` | mobilda ishlatilmaydi (vebda faqat keng ekran paneli); `BoardTool` turi `board-mobile.tsx` da |
-| `src/modules/board/ui/board-panel.tsx` | 🟡 MOSLASH | `9bf063c44073` | faqat tor ekran shoxi (`mobile` majburiy) — mobilda `board-surface.tsx`: Skia kanvas eni bo'yicha sig'adi (`fit="width"`); kanvas balandligi = server doskasi (`state.height`), karta doska nisbatida — vebdagidek karta nisbatiga cho'zilmaydi (server pastki nuqtalarni `height` bilan kesadi, 2026-11-13); nuqtali fon Skia `Points`; matn kartasi kanvas tashqarisida (klaviatura ochilganda kanvas kichrayadi, karta kesilmaydi); klaviatura joyi faqat karta ochiqligida (`useReanimatedKeyboardAnimation`). Keng ekran shoxi yo'q; o'quvchining uy vazifasi doskasi ham shu sirtda (`source` bilan) |
-| `src/modules/board/ui/board-mobile.tsx` | 🟡 MOSLASH | `f4b6b964103d` | ikonkalar `lucide-react-native`; pastki qatorda sahifa almashtirgich va "+ Sahifa" ichki chetlari 2–4px kichikroq — RN shrifti kengroq, aks holda tugma ekran chetiga tegadi; `BoardTool` turi shu yerda |
+| `src/modules/board/ui/rich-text-input.tsx` | 🔴 QAYTA | `b917aa7bc662` | faqat `variant="mobile"`; `contenteditable` + `execCommand` RN'da yo'q: format QATOR darajasida (qalin/kursiv/tagi chizilgan butun qatorga), ro'yxat belgisi matnning o'zida ("• ", "1. ") — Enter'da davom etadi, bo'sh bandda Enter ro'yxatdan chiqaradi; natija `TextLineDto[]` |
+| `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `9b6e6d0d4b4e` | mobilda ishlatilmaydi (vebda faqat keng ekran paneli); `BoardTool` turi `board-mobile.tsx` da |
+| `src/modules/board/ui/board-panel.tsx` | 🟡 MOSLASH | `4467d7e64fde` | faqat tor ekran shoxi (`mobile` majburiy) — mobilda `board-surface.tsx`: Skia kanvas eni bo'yicha sig'adi (`fit="width"`); kanvas balandligi = server doskasi (`state.height`), karta doska nisbatida — vebdagidek karta nisbatiga cho'zilmaydi (server pastki nuqtalarni `height` bilan kesadi, 2026-11-13); nuqtali fon Skia `Points`; matn kartasi kanvas tashqarisida (klaviatura ochilganda kanvas kichrayadi, karta kesilmaydi); klaviatura joyi faqat karta ochiqligida (`useReanimatedKeyboardAnimation`). Keng ekran shoxi yo'q; o'quvchining uy vazifasi doskasi ham shu sirtda (`source` bilan) |
+| `src/modules/board/ui/board-mobile.tsx` | 🟡 MOSLASH | `9d343f56b081` | ikonkalar `lucide-react-native`; pastki qatorda sahifa almashtirgich va "+ Sahifa" ichki chetlari 2–4px kichikroq — RN shrifti kengroq, aks holda tugma ekran chetiga tegadi; `BoardTool` turi shu yerda |
 | `src/modules/board/ui/board-pages-sheet.tsx` | 🟡 MOSLASH | `02563fb2ecab` | faqat tor ekran varianti (`Sheet variant="app" compact`); eskizlar Skia'da (`xMidYMin slice`); nomni o'zgartirish `onEndEditing` da |
 | `src/modules/board/ui/board-preview.tsx` | 🟡 MOSLASH | `a1620aaa5fb5` | Skia `BoardCanvas` faqat o'qish rejimida (vebda SVG) |
 | `src/modules/board/ui/board-permission-dialog.tsx` | 🟡 MOSLASH | `cb442712481d` | faqat tor ekran varianti (`Sheet variant="app" compact`) |
@@ -401,7 +400,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/homework/parent-homework-page.tsx` | 🟡 MOSLASH | `cb3f89693849` | faqat telefon shoxi (`HomeworkMobile`) |
 | `src/pages/parent/exams/parent-exams-page.tsx` | 🟡 MOSLASH | `33a9f589e315` | faqat telefon shoxi (`MockMobile`) |
 | `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `976d5b111c4a` | faqat telefon shoxi (`ResultsMobile`) |
-| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `5c58f38cd773` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
+| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `7933af57e755` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `f4237a24a07c` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
 | `src/modules/live/ui/lesson-pre-join.tsx` | 🟡 MOSLASH | `658cda176ab8` | faqat tor ekran varianti; o'qituvchining kompyuterdagi ekran ulashish shoxi yo'q; ruxsat rad etilsa `media-permission-dialog.tsx` ga qarang |
 | `src/modules/live/ui/media-permission-dialog.tsx` | 🟡 MOSLASH | `425eb1d4a350` | mobilda `lesson-pre-join.tsx` ichida (`ConfirmDialog`); "Qayta tekshirish" o'rniga tizim sozlamalari (`Linking.openSettings`), ilovaga qaytganda kamera qayta so'raladi; brauzerga xos izoh o'rniga `mobile.live.ruxsat_sozlamalarda` |
@@ -581,6 +580,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/floating-watermark.tsx` | 🟡 MOSLASH | `74bf70261276` | RN `View` + reanimated (opacity 1 s); `translate(-x%, -y%)` o'rniga `onLayout` o'lchami; logo — `Logo` komponenti; mobilda `recording-page.tsx` dagi `RecordingVideo` ustida |
 | `src/shared/ui/role-tag.tsx` | 🟡 MOSLASH | `050848b538b6` | RN `View` + `DsText`; `className` o'rniga `style` |
 | `src/shared/ui/checkbox-mark.tsx` | 🆕 MOBIL | `—` | belgilash katakchasi: tanlanganda `check-box-fill`, aks holda bo'sh kvadrat (vebda native checkbox) |
+| `src/modules/board/lib/board-history.ts` | 🆕 MOBIL | `—` | undo: o'z chizig'ini server id'si bilan bog'lash (`strokeKey` serverdagi `by`/`by_id` va yaxlitlash sababli mos kelmasdi) |
+| `src/modules/board/model/use-board-eraser.ts` | 🆕 MOBIL | `—` | veb `board-panel` dagi o'chirg'ich mantig'i hook bo'lib; radius ekran pikselida (telefonda doska birligi juda mayda) |
 | `src/modules/auth/ui/force-password-dialog.tsx` | 🟡 MOSLASH | `14e2219182ac` | markaziy oyna `CenterDialog` (yopilmaydi, klaviaturadan qochadi); vebda har rol marshrutida (`role-route.tsx`), mobilda ildiz layout'da bitta nusxa |
 | `src/modules/auth/lib/account-link.ts` | 🟢 NUSXA | `7d11d910393c` | — |
 | `src/modules/auth/lib/account-switch.ts` | 🟢 NUSXA | `c3456f35da4c` | — |
@@ -690,6 +691,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/lib/code-editing.ts` | 🟢 NUSXA | `37300f695eea` | — |
 | `src/modules/board/model/use-code-tokens.ts` | 🟢 NUSXA | `0c0a5f6d9fe4` | — |
 | `src/modules/board/lib/code-highlight.ts` | 🟡 MOSLASH | `c1ffcb9187c7` | `highlightedLines`: highlight.js HTML'i DOM (`<template>`) o'rniga qo'lda o'qiladi (span stack + HTML entity); ranglash qoidasi bir xil |
+| `src/modules/board/lib/board-measure.ts` | 🟡 MOSLASH | `14e66b4b8e0d` | DOM o'rniga Skia shrift o'lchovlari; kod `codeBoxWidth` + qatorlar; formula `MathMarkup onMeasure` yoki taxmin; `clientToBoard`/`boardScale` o'rniga `BoardCanvas` transformi |
+| `src/modules/board/model/use-board-selection.ts` | 🟡 MOSLASH | `58c682d81813` | pointer hodisalari o'rniga `BoardCanvas` gesture'lari (`tap`/`begin`/`move`/`end` + masshtab); tutqich masofa bo'yicha (22px); klaviatura va ikki marta bosish yo'q; qo'yib yuborilgach yangi holat kelguncha joy saqlanadi |
+| `src/modules/board/ui/code-block.tsx` | 🟡 MOSLASH | `5ea7aed5d325` | Skia; token kengligi monospace shrift bilan (iOS Menlo, Android monospace) |
+| `src/modules/board/ui/code-editor.tsx` | 🔴 QAYTA | `59f3223181c0` | `TextInput` + rangli `<Text>`; til `MobileSelectSheet`; Tab/Shift+Tab tugmalari, Enter chekinishni saqlaydi; klaviatura maslahati yo'q; qatorlar o'raladi |
+| `src/modules/board/ui/selection-overlay.tsx` | 🟡 MOSLASH | `6ef3b88449f4` | Skia, ekran koordinatasida; tutqich 12px |
+| `src/modules/board/ui/selection-toolbar.tsx` | 🟡 MOSLASH | `1312c18e0b04` | faqat `docked` (telefon) varianti, gorizontal ScrollView |
+| `src/modules/board/ui/board-zoom-controls.tsx` | 🟡 MOSLASH | `9cd1ee7588ad` | karta ichida yuqori o'ngda; foiz `useAnimatedReaction` bilan |
 | `src/modules/live/lib/share-source.ts` | 🟢 NUSXA | `c1da876a4f6e` | — |
 | `src/modules/live/lib/client-health.ts` | 🟢 NUSXA | `ba90ea5fcb94` | — |
 | `src/modules/live/model/use-media-mode-channel.ts` | 🟢 NUSXA | `8e33aed6b85f` | — |
@@ -732,6 +740,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/model/use-board-drawing.ts` | DOM pointer events — Faza 5 da Skia + gesture-handler |
 | `src/modules/live/lib/screen-capture.ts` | brauzer `getDisplayMedia` — mobilda ekran ulashish LiveKit orqali, iOS'da v1.1 |
 | `src/widgets/live-room/{share-control-window,share-preview}.tsx`, `use-document-pip.ts` | Document PiP — faqat brauzer (Chrome); loyiha egasi qarori bilan ko'chirilmadi (2026-11-13) |
+| `src/modules/board/ui/inline-text-editor.tsx` | Joyida yozish — veb ham telefonda pastki oynani qoldirgan (#177); klaviatura boshqaruvi, Ctrl+g'ildirak, Safari gesture — loyiha egasi qarori (2026-11-13) |
 | `src/shared/ui/** (80+ fayl)` | shadcn/Radix — mobil dizayn tizimi alohida (§8.2) |
 | `src/modules/*/ui/**` | UI ko'chirilmaydi (§5) |
 | `src/pages/**, src/widgets/**, src/app/**` | UI qatlami — mobil uchun qayta yoziladi |

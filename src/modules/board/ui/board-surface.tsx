@@ -5,23 +5,47 @@ import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { useKeepAwake } from "expo-keep-awake";
 import { Eye, Pencil, Users, Wifi } from "lucide-react-native";
+import { useAuth } from "@/modules/auth";
 import { useCourseStudents } from "@/modules/course";
 import { DsText, dsRadius, dsShadowHidden, Icon, ThemeScope, toast, useDs } from "@/shared/ui";
-import type { BoardSource, FormulaSolutionDto, Point, StrokeShapeDto, TextLineDto } from "../api/board.dto";
-import { BOARD_TEXT_SIZE, MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
-import { nextTextPoint } from "../lib/board-flow";
-import { hasRichFormatting, linesToPlainText } from "../lib/rich-text";
-import { useAddSheet, useAddStroke, useBoard, useEraseStrokes, useRenameSheet, useSetBoardPermissions, useSetCurrentSheet, useSolveFormula } from "../model/board.queries";
+import type { BoardSource, FormulaSolutionDto, Point, StrokeDto, StrokeShapeDto, StrokeUpdate, TextLineDto } from "../api/board.dto";
+import {
+  BOARD_TEXT_SIZE,
+  CODE_TEXT_COLOR,
+  CODE_TEXT_SIZE,
+  ERASER_SIZES,
+  MOBILE_BOARD_COLORS,
+  MOBILE_BOARD_WIDTHS,
+} from "../constants/board.constants";
+import { canEditStroke } from "../lib/board-edit";
+import { freeTextBaseline, nextTextPoint, type BoardObstacle } from "../lib/board-flow";
+import { ownStroke, resolveOwnStrokes, type OwnStroke } from "../lib/board-history";
+import { measureStroke, textWidth } from "../lib/board-measure";
+import { CODE_PAD, detectCodeLanguage } from "../lib/code-highlight";
+import { hasRichFormatting, linesToPlainText, plainTextToLines } from "../lib/rich-text";
+import {
+  useAddSheet,
+  useAddStroke,
+  useBoard,
+  useEraseStrokes,
+  useRenameSheet,
+  useSetBoardPermissions,
+  useSetCurrentSheet,
+  useSolveFormula,
+  useUpdateStroke,
+} from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
-import { BoardCanvas } from "./board-canvas";
+import { BoardCanvas, type BoardCanvasHandle } from "./board-canvas";
 import { MobileBoardFooter, MobileBoardHeader, MobileBoardPill, MobileBoardToolbar, type BoardTool } from "./board-mobile";
 import { BoardPagesSheet } from "./board-pages-sheet";
 import { BoardPermissionDialog } from "./board-permission-dialog";
+import { CodeEditor } from "./code-editor";
 import { EraseReasonDialog } from "./erase-reason-dialog";
 import { FormulaSolverDialog } from "./formula-solver-dialog";
 import { MathFieldInput } from "./math-field-input";
 import { PeriodicTableDialog } from "./periodic-table-dialog";
 import { RichTextInput } from "./rich-text-input";
+import { SelectionToolbar } from "./selection-toolbar";
 
 export interface BoardMobileChrome {
   title?: string;
@@ -48,8 +72,15 @@ export interface BoardSurfaceProps {
 /** Joylashtirish oynasi nuqtadan shuncha yuqorida turadi (`-translate-y-[34px]`). */
 const FORM_LIFT = 34;
 
-function strokeKey(stroke: StrokeShapeDto): string {
-  return JSON.stringify(stroke, (key, value) => (key === "id" ? undefined : typeof value === "number" ? Math.round(value * 10) / 10 : value));
+type PlacedTool = "text" | "math" | "code";
+
+interface Placement {
+  tool: PlacedTool;
+  point: Point;
+  /** Nuqtaning kanvasdagi ekran balandligi (zoom va siljish hisobga olingan) — oyna shu yerda. */
+  top: number;
+  /** Mavjud elementni tahrirlash (tanlash panelidagi "Tahrirlash"). */
+  editingId?: string;
 }
 
 /**
@@ -57,21 +88,26 @@ function strokeKey(stroke: StrokeShapeDto): string {
  * sarlavha (holat belgisi, ruxsat), nuqtali kanvas kartasi, asboblar va
  * pastki qator (bekor qilish/qaytarish, sahifalar, "+ Sahifa").
  *
- * Kanvas Skia'da (vebda SVG); eni bo'yicha sig'adi va matn oqimi bilan
- * pastga o'sadi. Matn/formula kartasi kanvas ustida, keyingi bo'sh joy
- * balandligida ochiladi.
+ * Kanvas Skia'da (vebda SVG), doska o'lchamida (16:9) va "− 100% +" zoom
+ * bilan. Matn/formula/kod oynasi kanvas ustida, bosilgan nuqta balandligida
+ * ochiladi (telefonda joyida yozish yo'q — veb #177 ham). "Tanlash"
+ * vositasida element paneli pastki asboblar ustida (veb #176), o'chirg'ich
+ * sudrab ishlaydi va sabab bir marta so'raladi (veb #190).
  */
 export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetIndex, onSheetChange, mobile }: BoardSurfaceProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
   // Doskada ishlayotganda ekran o'chib qolmasin.
   useKeepAwake();
+  const { user } = useAuth();
+  const userId = currentUserId ?? user?.id ?? null;
 
-  const realtime = useBoardRealtime(lessonId, !source, currentUserId);
+  const realtime = useBoardRealtime(lessonId, !source, userId);
   const board = useBoard(lessonId, { live: realtime.connected, enabled: !source });
   const addStroke = useAddStroke(lessonId);
   const addSheet = useAddSheet(lessonId);
   const erase = useEraseStrokes(lessonId);
+  const updateMutation = useUpdateStroke(lessonId);
   const permissions = useSetBoardPermissions(lessonId);
   const renameSheet = useRenameSheet(lessonId);
   const solve = useSolveFormula(lessonId);
@@ -84,22 +120,32 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const [tool, setTool] = useState<BoardTool>("pen");
   const [color, setColor] = useState<string>(MOBILE_BOARD_COLORS[1]);
   const [strokeWidth, setStrokeWidth] = useState<number>(MOBILE_BOARD_WIDTHS[1]);
-  const [history, setHistory] = useState<Array<{ sheet: number; shape: StrokeShapeDto }>>([]);
+  const [textSize, setTextSize] = useState<number>(BOARD_TEXT_SIZE);
+  const [eraserSize, setEraserSize] = useState<number>(ERASER_SIZES[1].value);
+  const [history, setHistory] = useState<OwnStroke[]>([]);
   const [redoStack, setRedoStack] = useState<Array<{ sheet: number; shape: StrokeShapeDto }>>([]);
-  const [selected, setSelected] = useState<string | null>(null);
+  /** "Tanlash" vositasida tanlangan element (pastki panel). */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  /** O'chirish kutilayotgan elementlar — sabab oynasi ochiq (o'chirg'ich yoki paneldagi "O'chirish"). */
+  const [deleteIds, setDeleteIds] = useState<string[]>([]);
 
   const [reasonOpen, setReasonOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [grantOpen, setGrantOpen] = useState(false);
   const [pagesOpen, setPagesOpen] = useState(false);
 
-  const [placement, setPlacement] = useState<{ tool: "text" | "math"; point: Point } | null>(null);
+  const [placement, setPlacement] = useState<Placement | null>(null);
   const [draftText, setDraftText] = useState("");
   const [draftLines, setDraftLines] = useState<TextLineDto[]>([]);
+  const [draftCode, setDraftCode] = useState("");
+  const [codeLanguage, setCodeLanguage] = useState("auto");
+  const [initialLines, setInitialLines] = useState<TextLineDto[] | undefined>(undefined);
   const [card, setCard] = useState({ width: 0, height: 0 });
   const [formHeight, setFormHeight] = useState(0);
 
   const rootRef = useRef<View>(null);
+  const canvasRef = useRef<BoardCanvasHandle>(null);
   const [bottomGap, setBottomGap] = useState(0);
   const { height: windowHeight } = useWindowDimensions();
   const keyboard = useReanimatedKeyboardAnimation();
@@ -120,6 +166,19 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const state = source ? source.state : board.data;
   const active = state?.sheets.find((item) => item.index === sheet) ?? state?.sheets[0];
   const canDraw = Boolean(state?.canDraw);
+
+  /*
+   * Bekor qilish tarixi: yangi strokelar kelganda o'z yozuvlarim server
+   * id'siga bog'lanadi (`board-history.ts` — nega `strokeKey` ishlamagani).
+   * "Oldingi render ma'lumotini saqlash" usuli: effekt emas, render vaqtida.
+   */
+  const sheets = state?.sheets;
+  const [seenSheets, setSeenSheets] = useState(sheets);
+  if (sheets !== seenSheets) {
+    setSeenSheets(sheets);
+    const resolved = sheets ? resolveOwnStrokes(history, sheets, userId) : history;
+    if (resolved !== history) setHistory(resolved);
+  }
   // Veb #161: o'quvchi o'qituvchi ochgan varaqqa ergashadi; o'qituvchi varaq almashtirsa, server xabar topadi.
   const followSheet = !source && board.data && !board.data.isTeacher ? board.data.currentSheet : null;
   const lastFollowed = useRef<number | null>(null);
@@ -159,18 +218,18 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   }
 
   function commitStroke(stroke: StrokeShapeDto) {
-    setHistory((current) => [...current, { sheet, shape: stroke }]);
+    setHistory((current) => [...current, ownStroke(sheet, stroke, state?.sheets ?? [])]);
     setRedoStack([]);
     sendStroke(stroke);
   }
 
   const lastOwn = history.filter((entry) => entry.sheet === sheet).at(-1) ?? null;
   const activeStrokes = active?.strokes;
-  const undoTarget = useMemo(() => {
-    if (!lastOwn) return null;
-    const key = strokeKey(lastOwn.shape);
-    return [...(activeStrokes ?? [])].reverse().find((stroke) => strokeKey(stroke) === key) ?? null;
-  }, [activeStrokes, lastOwn]);
+  const undoTargetId = lastOwn?.id ?? null;
+  const undoTarget = useMemo(
+    () => (undoTargetId ? ((activeStrokes ?? []).find((stroke) => stroke.id === undoTargetId) ?? null) : null),
+    [activeStrokes, undoTargetId]
+  );
 
   function undo() {
     if (!lastOwn || !undoTarget) return;
@@ -178,7 +237,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       const index = current.lastIndexOf(lastOwn);
       return current.filter((_, position) => position !== index);
     });
-    setRedoStack((current) => [...current, lastOwn]);
+    setRedoStack((current) => [...current, { sheet: lastOwn.sheet, shape: lastOwn.shape }]);
     if (source) source.eraseStroke(sheet, undoTarget.id);
     else erase.mutate({ sheet, strokeIds: [undoTarget.id], reason: t("mobile.undoReason") });
   }
@@ -187,49 +246,138 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
     const entry = redoStack.at(-1);
     if (!entry) return;
     setRedoStack((current) => current.slice(0, -1));
-    setHistory((current) => [...current, entry]);
+    setHistory((current) => [...current, ownStroke(entry.sheet, entry.shape, state?.sheets ?? [])]);
     if (entry.sheet !== sheet) setSheet(entry.sheet);
     if (source) source.addStroke(entry.sheet, entry.shape);
     else if (!realtime.sendStroke(entry.sheet, entry.shape)) addStroke.mutate({ sheet: entry.sheet, stroke: entry.shape });
   }
 
-  const draftPlainText = placement?.tool === "text" ? linesToPlainText(draftLines) : draftText;
+  function updateStroke(strokeId: string, update: StrokeUpdate) {
+    if (source) return source.updateStroke(sheet, strokeId, update);
+    updateMutation.mutate({ sheet, strokeId, update });
+  }
+
+  /** Veb #176: o'qituvchi hammasini, o'quvchi faqat o'zinikini (`by_id`); uy vazifasida hammasi o'ziniki. */
+  function canEdit(stroke: StrokeDto) {
+    return canEditStroke(stroke, { isTeacher: Boolean(state?.isTeacher), userId, personal: Boolean(source) });
+  }
+
+  const selectedStroke = tool === "select" && canDraw && selectedId ? ((activeStrokes ?? []).find((stroke) => stroke.id === selectedId) ?? null) : null;
+  const author = selectedStroke?.by
+    ? [selectedStroke.by, selectedStroke.edited_by && selectedStroke.edited_by !== selectedStroke.by ? t("edit.editedBy", { name: selectedStroke.edited_by }) : ""]
+        .filter(Boolean)
+        .join(" · ")
+    : undefined;
+
+  const draftPlainText = placement?.tool === "text" ? linesToPlainText(draftLines) : placement?.tool === "code" ? draftCode : draftText;
   const adding = !source && addStroke.isPending;
   const canPlaceBlock = Boolean(draftPlainText.trim()) && !adding;
 
-  /** Veb #161: matn va formula bosilgan joyga yoziladi (avval keyingi bo'sh qatorga). */
-  function openPlacement(point: Point) {
-    if (tool !== "text" && tool !== "math") return;
-    setDraftText("");
-    setDraftLines([]);
-    setPlacement({ tool, point });
+  /** Nuqtaning kanvasdagi ekran balandligi (zoom/siljish bilan). */
+  function viewTop(point: Point): number {
+    const fallback = card.width && state ? (point[1] * card.width) / state.width : 0;
+    return canvasRef.current?.toView(point)[1] ?? fallback;
   }
 
-  function anchorFor(point: Point): Point {
+  function resetDrafts() {
+    setDraftText("");
+    setDraftLines([]);
+    setDraftCode("");
+    setInitialLines(undefined);
+  }
+
+  /** Veb #161: matn, formula va kod bosilgan joyga yoziladi; telefonda pastki oyna orqali (veb #177 ham). */
+  function openPlacement(point: Point) {
+    if (tool !== "text" && tool !== "math" && tool !== "code") return;
+    resetDrafts();
+    setPlacement({ tool, point, top: viewTop(point) });
+  }
+
+  /** Tanlangan matn/formula/kod tegishli muharrirda eski qiymat bilan ochiladi. */
+  function openEditor(stroke: StrokeDto) {
+    if (stroke.type !== "text" && stroke.type !== "math" && stroke.type !== "code") return;
+    resetDrafts();
+    if (stroke.type === "text") {
+      const lines = stroke.lines?.length ? stroke.lines : plainTextToLines(stroke.text);
+      setInitialLines(lines);
+      setDraftLines(lines);
+    } else if (stroke.type === "math") {
+      setDraftText(stroke.latex);
+    } else {
+      setDraftCode(stroke.text);
+      setCodeLanguage(stroke.language ?? "auto");
+    }
+    const size = stroke.size ?? (stroke.type === "code" ? CODE_TEXT_SIZE : BOARD_TEXT_SIZE);
+    const point: Point = stroke.type === "code" ? [stroke.x - CODE_PAD, stroke.y - size * 1.05] : [stroke.x, stroke.y - BOARD_TEXT_SIZE * 0.35];
+    setPlacement({ tool: stroke.type, point, top: viewTop(point), editingId: stroke.id });
+  }
+
+  function anchorFor(point: Point, kind: PlacedTool): Point {
     const width = state?.width ?? 1600;
+    if (kind === "code") return [Math.min(Math.max(point[0] + CODE_PAD, CODE_PAD), width - 40), point[1] + CODE_TEXT_SIZE * 1.05];
     return [Math.min(Math.max(point[0], 8), width - 40), point[1] + BOARD_TEXT_SIZE * 0.35];
+  }
+
+  /** Matn, formula va kod — yangi matn ularga tegmasin (shakl va chizmalar to'siq emas). */
+  function textObstacles(): BoardObstacle[] {
+    return (activeStrokes ?? []).flatMap((stroke) => {
+      if (stroke.type !== "text" && stroke.type !== "math" && stroke.type !== "code") return [];
+      const box = measureStroke(stroke);
+      return box ? [{ left: box.minX, right: box.maxX, top: box.minY, bottom: box.maxY }] : [];
+    });
+  }
+
+  /**
+   * Veb #178: matn qator to'riga tushadi (qator = o'lcham × 1.35), band
+   * bo'lsa pastdagi birinchi bo'sh qatorga. Vebda yangi matn qatori 22 (M)
+   * bo'yicha hisoblanardi; bu yerda tanlangan o'lcham bo'yicha (XL matn
+   * yuqoridagi qatorga chiqib ketmasin).
+   */
+  function freeTextAnchor(x: number, y: number, text: string, size: number, obstacles: BoardObstacle[]): Point {
+    const width = Math.max(size, textWidth(text, size));
+    const lines = text.split("\n").length;
+    return [x, freeTextBaseline({ x, y, size, lines, width, obstacles, maxBaseline: boardHeight - 20 })];
   }
 
   function closePlacement() {
     // Maydon fokusda turib yo'qolsa klaviatura ochiq qoladi.
     Keyboard.dismiss();
     setPlacement(null);
-    setDraftText("");
-    setDraftLines([]);
+    resetDrafts();
+  }
+
+  function saveEdit(strokeId: string, kind: PlacedTool) {
+    if (kind === "math") {
+      updateStroke(strokeId, { changes: { latex: draftText.trim() } });
+    } else if (kind === "code") {
+      const text = draftCode.replace(/\s+$/, "");
+      updateStroke(strokeId, { changes: { text, language: codeLanguage === "auto" ? detectCodeLanguage(text) : codeLanguage } });
+    } else {
+      updateStroke(strokeId, { changes: { text: draftPlainText, lines: hasRichFormatting(draftLines) ? draftLines : [] } });
+    }
+    closePlacement();
   }
 
   /**
-   * Matn va formula HTTP orqali (veb ham `addStroke.mutate`): soket faqat
+   * Matn, formula va kod HTTP orqali (veb ham `addStroke.mutate`): soket faqat
    * chizma strokelarini saqlaydi.
    */
   function placeBlock() {
     if (!placement || !canPlaceBlock) return;
+    if (placement.editingId) return saveEdit(placement.editingId, placement.tool);
     let stroke: StrokeShapeDto;
-    const [x, y] = anchorFor(placement.point);
+    const [x, y] =
+      placement.tool === "text"
+        ? freeTextAnchor(anchorFor(placement.point, "text")[0], placement.point[1], draftPlainText, textSize, textObstacles())
+        : anchorFor(placement.point, placement.tool);
     if (placement.tool === "math") {
       stroke = { type: "math", latex: draftText.trim(), x, y, size: BOARD_TEXT_SIZE, color };
+    } else if (placement.tool === "code") {
+      const text = draftCode.replace(/\s+$/, "");
+      // "Avto" bo'lsa aniqlangan til saqlanadi — PDF ham shu tilda ranglanadi.
+      stroke = { type: "code", text, language: codeLanguage === "auto" ? detectCodeLanguage(text) : codeLanguage, x, y, size: CODE_TEXT_SIZE, color: CODE_TEXT_COLOR };
     } else {
-      stroke = { type: "text", text: draftPlainText, x, y, size: BOARD_TEXT_SIZE, color, ...(hasRichFormatting(draftLines) ? { lines: draftLines } : {}) };
+      stroke = { type: "text", text: draftPlainText, x, y, size: textSize, color, ...(hasRichFormatting(draftLines) ? { lines: draftLines } : {}) };
     }
     if (source) {
       source.addStroke(sheet, stroke);
@@ -239,26 +387,35 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
     addStroke.mutate({ sheet, stroke }, { onSuccess: closePlacement, onError: (error) => toast.error(error.message) });
   }
 
-  function handleStrokeClick(id: string | null) {
-    if (!id || tool !== "erase" || !canDraw) return;
-    if (source) return source.eraseStroke(sheet, id); // shaxsiy doska: o'chirishga sabab so'ralmaydi
-    setSelected(id);
+  /** O'chirish sababi so'raladi (jonli dars); uy vazifasida darhol. Bir nechta element — bitta oyna. */
+  function askToDelete(ids: string[]) {
+    if (!ids.length) return;
+    if (source) {
+      ids.forEach((id) => source.eraseStroke(sheet, id)); // shaxsiy doska: o'chirishga sabab so'ralmaydi
+      return;
+    }
+    setDeleteIds(ids);
     setReason(t("eraseDialog.reasons.wrongAnswer"));
     setReasonOpen(true);
   }
 
+  function deleteSelected(strokeId: string) {
+    setSelectedId(null);
+    askToDelete([strokeId]);
+  }
+
   function closeReasonDialog() {
     setReasonOpen(false);
-    setSelected(null);
+    setDeleteIds([]);
     setReason("");
   }
 
   async function removeSelected() {
-    if (!selected || !reason.trim()) return;
+    if (!deleteIds.length || !reason.trim()) return;
     try {
-      await erase.mutateAsync({ sheet, strokeIds: [selected], reason: reason.trim() });
+      await erase.mutateAsync({ sheet, strokeIds: deleteIds, reason: reason.trim() });
       closeReasonDialog();
-      toast.success(t("eraseDialog.deleted"));
+      toast.success(deleteIds.length > 1 ? t("eraseDialog.deletedCount", { count: deleteIds.length }) : t("eraseDialog.deleted"));
     } catch (error) {
       void error;
     }
@@ -315,8 +472,8 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
   const page = (active?.index ?? sheet) + 1;
   const total = state.sheets.length;
-  const scale = card.width ? card.width / state.width : 0;
-  const formTop = placement ? Math.max(0, Math.min(placement.point[1] * scale - FORM_LIFT, card.height - formHeight)) : 0;
+  const formTop = placement ? Math.max(0, Math.min(placement.top - FORM_LIFT, card.height - formHeight)) : 0;
+  const placeKinds: PlacedTool[] = state.codeEnabled ? ["text", "math", "code"] : ["text", "math"];
 
   const pill = source ? null : !canDraw ? (
     <MobileBoardPill icon={(fg) => <Eye size={14} color={fg} />} tone="neutral">
@@ -368,6 +525,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
           }}
         >
           <BoardCanvas
+            ref={canvasRef}
             strokes={active?.strokes ?? []}
             width={state.width}
             height={canvasHeight}
@@ -379,8 +537,20 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
             enabled={canDraw}
             onCommit={commitStroke}
             onPlacePoint={openPlacement}
-            onSelectStroke={handleStrokeClick}
-            selectedStrokeId={selected}
+            markedStrokeIds={deleteIds}
+            zoomControls
+            eraserSize={eraserSize}
+            onErase={askToDelete}
+            selection={{
+              selectedId,
+              onSelect: setSelectedId,
+              canEdit,
+              onDenied: () => toast.info(t("edit.notOwner")),
+              onMove: (strokeId, delta) => updateStroke(strokeId, { move: delta }),
+              onResize: (strokeId, changes) => updateStroke(strokeId, { changes }),
+              onDraggingChange: setDragging,
+              label: author,
+            }}
           />
         </View>
 
@@ -390,30 +560,39 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
             onLayout={(event) => setFormHeight(event.nativeEvent.layout.height)}
             style={[styles.form, { top: formTop, borderColor: ds.c.line, backgroundColor: ds.c.surface, boxShadow: ds.shadow.lg }]}
           >
-            <View accessibilityRole="tablist" style={[styles.tabs, { backgroundColor: ds.c.subtle }]}>
-              {(["text", "math"] as const).map((kind) => {
-                const on = placement.tool === kind;
-                return (
-                  <Pressable
-                    key={kind}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: on }}
-                    onPress={() => {
-                      setDraftText("");
-                      setDraftLines([]);
-                      setPlacement({ ...placement, tool: kind });
-                    }}
-                    style={[styles.tab, { backgroundColor: on ? ds.c.surface : "transparent", boxShadow: on ? ds.shadow.sm : dsShadowHidden(ds.shadow.sm) }]}
-                  >
-                    <DsText v="body-sm" w={on ? "600" : "500"} c={on ? "ink" : "ink-secondary"}>
-                      {kind === "math" ? t("inline.formula") : t("inline.text")}
-                    </DsText>
-                  </Pressable>
-                );
-              })}
-            </View>
+            {placement.editingId ? (
+              <DsText v="title-sm">{t(`inline.edit.${placement.tool}`)}</DsText>
+            ) : (
+              <View accessibilityRole="tablist" style={[styles.tabs, { backgroundColor: ds.c.subtle }]}>
+                {placeKinds.map((kind) => {
+                  const on = placement.tool === kind;
+                  return (
+                    <Pressable
+                      key={kind}
+                      accessibilityRole="tab"
+                      accessibilityState={{ selected: on }}
+                      onPress={() => {
+                        resetDrafts();
+                        setPlacement({ ...placement, tool: kind });
+                      }}
+                      style={[styles.tab, { backgroundColor: on ? ds.c.surface : "transparent", boxShadow: on ? ds.shadow.sm : dsShadowHidden(ds.shadow.sm) }]}
+                    >
+                      <DsText v="body-sm" w={on ? "600" : "500"} c={on ? "ink" : "ink-secondary"}>
+                        {t(`inline.${kind === "math" ? "formula" : kind}`)}
+                      </DsText>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
             <View style={styles.formBody}>
-              {placement.tool === "math" ? <MathFieldInput value={draftText} onChange={setDraftText} /> : <RichTextInput onChange={setDraftLines} />}
+              {placement.tool === "math" ? (
+                <MathFieldInput value={draftText} onChange={setDraftText} />
+              ) : placement.tool === "code" ? (
+                <CodeEditor value={draftCode} onChange={setDraftCode} language={codeLanguage} onLanguageChange={setCodeLanguage} languages={state.codeLanguages} />
+              ) : (
+                <RichTextInput key={placement.editingId ?? "new"} initialLines={initialLines} onChange={setDraftLines} />
+              )}
             </View>
             <View style={styles.formActions}>
               <Pressable
@@ -430,7 +609,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
                 style={({ pressed }) => [styles.formButton, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, !canPlaceBlock && styles.faded]}
               >
                 <DsText v="button" c="on-action">
-                  {t("inline.add")}
+                  {placement.editingId ? t("inline.save") : t("inline.add")}
                 </DsText>
               </Pressable>
             </View>
@@ -449,17 +628,30 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
       {canDraw ? (
         <View style={styles.toolbarSlot}>
+          {/* Veb `selectionToolbar(true)`: telefonda panel pastki asboblar ustida. */}
+          {selectedStroke && !placement && !dragging ? (
+            <SelectionToolbar
+              stroke={selectedStroke}
+              onEdit={selectedStroke.type === "text" || selectedStroke.type === "math" || selectedStroke.type === "code" ? () => openEditor(selectedStroke) : undefined}
+              onChange={(changes) => updateStroke(selectedStroke.id, { changes })}
+              onDelete={() => deleteSelected(selectedStroke.id)}
+            />
+          ) : null}
           <MobileBoardToolbar
             tool={tool}
             color={color}
             width={strokeWidth}
+            textSize={textSize}
+            eraserSize={eraserSize}
             onToolChange={(next) => {
-              setSelected(null);
+              setSelectedId(null);
               if (next === "math") setFormulaOpen(true);
               else setTool(next);
             }}
             onColorChange={setColor}
             onWidthChange={setStrokeWidth}
+            onTextSizeChange={setTextSize}
+            onEraserSizeChange={setEraserSize}
             onPeriodic={state.chemistryEnabled ? () => setPeriodicOpen(true) : undefined}
           />
         </View>
@@ -499,7 +691,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
           canAdd={state.isTeacher || Boolean(source)}
           onSelect={(index) => {
             changeSheet(index);
-            setSelected(null);
+            setSelectedId(null);
             setPagesOpen(false);
           }}
           onAdd={() => (source ? source.addSheet() : addSheet.mutate())}
@@ -584,7 +776,7 @@ const styles = StyleSheet.create({
   formButton: { flex: 1, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
   /* `absolute inset-x-1 -bottom-[13px] min-h-[60px] rounded-lg px-3 py-3 gap-2.5` */
   slowNote: { position: "absolute", left: 4, right: 4, bottom: -13, minHeight: 60, flexDirection: "row", alignItems: "center", gap: 10, padding: 12, borderRadius: dsRadius.lg },
-  /* `mx-1 mt-1.5 h-[94px] justify-end` */
-  toolbarSlot: { height: 94, marginTop: 6, marginHorizontal: 4, justifyContent: "flex-end" },
+  /* `mx-1 mt-1.5 min-h-[94px] flex-col justify-end gap-1.5` — tanlash paneli asboblar ustida */
+  toolbarSlot: { minHeight: 94, marginTop: 6, marginHorizontal: 4, justifyContent: "flex-end", gap: 6 },
   footer: { marginTop: 2, marginHorizontal: 4 },
 });

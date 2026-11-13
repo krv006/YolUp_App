@@ -3,13 +3,15 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Atom, ChevronLeft, ChevronRight, Plus, Redo2, Undo2 } from "lucide-react-native";
 import { DsText, dsRadius, Icon, useDs, type DsColor, type IconName } from "@/shared/ui";
-import { MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
+import { BOARD_TEXT_SIZES, ERASER_SIZES, MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
 import type { DrawKind } from "../lib/board.geometry";
 
 /** Veb `board-toolbar.tsx` dagi tur — mobilda keng ekran paneli yo'q, tur shu yerda. */
-export type BoardTool = DrawKind | "text" | "math" | "erase";
+export type BoardTool = DrawKind | "select" | "text" | "math" | "code" | "erase";
 
+/** "Kod" telefonda asboblar qatorida emas — joylashtirish oynasidagi "Matn / Formula / Kod" tablarida (veb #176). */
 const TOOLS: Array<{ id: BoardTool; labelKey: string; icon: IconName; size: number }> = [
+  { id: "select", labelKey: "tools.select", icon: "board-select", size: 22 },
   { id: "marker", labelKey: "tools.marker", icon: "board-marker", size: 21 },
   { id: "pen", labelKey: "tools.pen", icon: "board-pen", size: 24 },
   { id: "line", labelKey: "tools.line", icon: "board-line", size: 24 },
@@ -21,7 +23,7 @@ const TOOLS: Array<{ id: BoardTool; labelKey: string; icon: IconName; size: numb
   { id: "erase", labelKey: "tools.erase", icon: "board-eraser", size: 20 },
 ];
 
-const PLAIN_TOOLS: BoardTool[] = ["text", "math", "erase"];
+const PLAIN_TOOLS: BoardTool[] = ["select", "math"];
 
 export interface MobileBoardHeaderProps {
   title: ReactNode;
@@ -91,20 +93,39 @@ export interface MobileBoardToolbarProps {
   tool: BoardTool;
   color: string;
   width: number;
+  textSize: number;
+  eraserSize: number;
   onToolChange: (tool: BoardTool) => void;
   onColorChange: (color: string) => void;
   onWidthChange: (width: number) => void;
+  onTextSizeChange: (size: number) => void;
+  onEraserSizeChange: (size: number) => void;
   onPeriodic?: () => void;
 }
 
 /**
- * Asboblar — tepada ranglar va qalinlik (matn, formula va o'chirgichda
+ * Asboblar — tepada ranglar va qalinlik (matnda qalinlik o'rnida S/M/L/XL
+ * o'lcham, o'chirg'ichda faqat S/M/L aylana; tanlash va formulada qator
  * yashiriladi), pastda asboblar qatori; kimyo yoqilgan bo'lsa davriy jadval.
  */
-export function MobileBoardToolbar({ tool, color, width, onToolChange, onColorChange, onWidthChange, onPeriodic }: MobileBoardToolbarProps) {
+export function MobileBoardToolbar({
+  tool,
+  color,
+  width,
+  textSize,
+  eraserSize,
+  onToolChange,
+  onColorChange,
+  onWidthChange,
+  onTextSizeChange,
+  onEraserSizeChange,
+  onPeriodic,
+}: MobileBoardToolbarProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
   const plain = PLAIN_TOOLS.includes(tool);
+  const erase = tool === "erase";
+  const text = tool === "text";
   const button = onPeriodic ? styles.toolSmall : styles.tool;
   return (
     <View
@@ -114,7 +135,24 @@ export function MobileBoardToolbar({ tool, color, width, onToolChange, onColorCh
     >
       {plain ? null : (
         <View style={styles.swatches}>
-          {MOBILE_BOARD_COLORS.map((value) => {
+          {erase
+            ? ERASER_SIZES.map(({ value, label }, index) => {
+                const active = eraserSize === value;
+                return (
+                  <Pressable
+                    key={value}
+                    accessibilityRole="button"
+                    accessibilityLabel={t("tools.eraserSizeLabel", { value: label })}
+                    accessibilityState={{ selected: active }}
+                    onPress={() => onEraserSizeChange(value)}
+                    style={[styles.eraserSize, index > 0 && styles.eraserGap, active && { backgroundColor: ds.c["brand-subtle"] }]}
+                  >
+                    <View style={{ width: value / 2 + 6, height: value / 2 + 6, borderRadius: value / 4 + 3, borderWidth: 2, borderColor: ds.c["ink-secondary"] }} />
+                  </Pressable>
+                );
+              })
+            : null}
+          {erase ? null : MOBILE_BOARD_COLORS.map((value) => {
             const active = color.toLowerCase() === value;
             return (
               <Pressable
@@ -135,8 +173,27 @@ export function MobileBoardToolbar({ tool, color, width, onToolChange, onColorCh
               </Pressable>
             );
           })}
-          <View style={[styles.divider, { backgroundColor: ds.c.line }]} />
-          {MOBILE_BOARD_WIDTHS.map((value, index) => {
+          {erase ? null : <View style={[styles.divider, { backgroundColor: ds.c.line }]} />}
+          {text
+            ? BOARD_TEXT_SIZES.map(({ value, label }, index) => {
+                const active = textSize === value;
+                return (
+                  <Pressable
+                    key={value}
+                    accessibilityRole="button"
+                    accessibilityLabel={t("tools.textSizeLabel", { value: label })}
+                    accessibilityState={{ selected: active }}
+                    onPress={() => onTextSizeChange(value)}
+                    style={[styles.textSize, index > 0 && styles.textSizeGap, active && { backgroundColor: ds.c.brand }]}
+                  >
+                    <DsText v="caption-strong" c={active ? "on-action" : "ink"}>
+                      {label}
+                    </DsText>
+                  </Pressable>
+                );
+              })
+            : null}
+          {text || erase ? null : MOBILE_BOARD_WIDTHS.map((value, index) => {
             const active = width === value;
             return (
               <Pressable
@@ -156,7 +213,7 @@ export function MobileBoardToolbar({ tool, color, width, onToolChange, onColorCh
       <View style={styles.tools}>
         {TOOLS.map(({ id, labelKey, icon, size }) => {
           const active = tool === id;
-          const erase = id === "erase";
+          const eraser = id === "erase";
           return (
             <Pressable
               key={id}
@@ -164,9 +221,9 @@ export function MobileBoardToolbar({ tool, color, width, onToolChange, onColorCh
               accessibilityLabel={t(labelKey)}
               accessibilityState={{ selected: active }}
               onPress={() => onToolChange(id)}
-              style={[button, active && { backgroundColor: erase ? ds.c["danger-bg"] : ds.c.brand }]}
+              style={[button, active && { backgroundColor: eraser ? ds.c["danger-bg"] : ds.c.brand }]}
             >
-              <Icon name={icon} size={size} color={active ? (erase ? ds.c.danger : ds.c["on-action"]) : ds.c.ink} />
+              <Icon name={icon} size={size} color={active ? (eraser ? ds.c.danger : ds.c["on-action"]) : ds.c.ink} />
             </Pressable>
           );
         })}
@@ -281,9 +338,16 @@ const styles = StyleSheet.create({
   divider: { width: 1, height: 20, marginLeft: 7, marginRight: 8 },
   widthButton: { width: 28, height: 28, borderRadius: dsRadius.sm, alignItems: "center", justifyContent: "center" },
   widthGap: { marginLeft: 10 },
-  tools: { height: 36, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  tool: { width: 36, height: 36, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
-  toolSmall: { width: 32, height: 32, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
+  /* "Tanlash" qo'shilgach 10–11 tugma: tor ekranda tugmalar teng kichrayadi (vebda `shrink-0` — chetdan chiqib ketadi). */
+  tools: { height: 36, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 2 },
+  tool: { flex: 1, maxWidth: 36, height: 36, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
+  toolSmall: { flex: 1, maxWidth: 32, height: 32, borderRadius: dsRadius.md, alignItems: "center", justifyContent: "center" },
+  /* O'chirg'ich o'lchami — `size-8 rounded-sm`, faol `bg-brand-subtle`, oraliq `ml-2` */
+  eraserSize: { width: 32, height: 32, borderRadius: dsRadius.sm, alignItems: "center", justifyContent: "center" },
+  eraserGap: { marginLeft: 8 },
+  /* Matn o'lchami — `h-7 min-w-7 rounded-sm px-1 text-caption-strong`, oraliq `ml-1.5` */
+  textSize: { height: 28, minWidth: 28, paddingHorizontal: 4, borderRadius: dsRadius.sm, alignItems: "center", justifyContent: "center" },
+  textSizeGap: { marginLeft: 6 },
   /* `px-3`; pastki qatorda `px-2.5` — RN shrifti kengroq, "+ Sahifa" ekran chetiga tegmasin */
   pageNav: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12 },
   pageNavTight: { paddingHorizontal: 10 },

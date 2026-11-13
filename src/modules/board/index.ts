@@ -64,8 +64,8 @@ export type { DrawKind } from "./lib/board.geometry";
 
 // --- Mobil UI ---
 export { BoardCanvas } from "./ui/board-canvas";
-export type { BoardCanvasProps } from "./ui/board-canvas";
-export { BoardStroke, hitTestStroke, useBoardFont } from "./ui/board-stroke";
+export type { BoardCanvasHandle, BoardCanvasProps, BoardCanvasSelection } from "./ui/board-canvas";
+export { BoardStroke } from "./ui/board-stroke";
 export { BoardPreview } from "./ui/board-preview";
 export type { BoardPreviewProps } from "./ui/board-preview";
 export { BoardSurface } from "./ui/board-surface";

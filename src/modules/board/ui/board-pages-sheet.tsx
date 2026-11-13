@@ -5,7 +5,7 @@ import { Canvas, Group } from "@shopify/react-native-skia";
 import { Plus } from "lucide-react-native";
 import { bodyFont, DsText, dsRadius, dsType, MobileButton, Sheet, useDs } from "@/shared/ui";
 import type { BoardSheet } from "../api/board.dto";
-import { BoardStroke, useBoardFont } from "./board-stroke";
+import { BoardStroke } from "./board-stroke";
 
 /** Eskiz balandligi — `max-lg:h-28`. */
 const THUMB_HEIGHT = 112;
@@ -46,7 +46,6 @@ export function BoardPagesSheet({
 }: BoardPagesSheetProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
-  const font = useBoardFont();
   const [gridWidth, setGridWidth] = useState(0);
   const cell = gridWidth ? (gridWidth - GAP) / 2 : 0;
   const scale = cell ? Math.max(cell / Math.max(1, boardWidth), THUMB_HEIGHT / Math.max(1, boardHeight)) : 0;
@@ -77,7 +76,7 @@ export function BoardPagesSheet({
                   <Canvas style={styles.fill}>
                     <Group transform={[{ translateX: offsetX }, { scale }]}>
                       {item.strokes.map((stroke) => (
-                        <BoardStroke key={stroke.id} stroke={stroke} font={font} />
+                        <BoardStroke key={stroke.id} stroke={stroke} />
                       ))}
                     </Group>
                   </Canvas>

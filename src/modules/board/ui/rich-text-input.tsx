@@ -3,8 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, TextInput, View, type TextStyle } from "react-native";
 import { bodyFont, dsRadius, dsType, Icon, useDs, type IconName } from "@/shared/ui";
 import type { TextLineDto, TextListKind } from "../api/board.dto";
+import { listMarkers } from "../lib/rich-text";
 
 export interface RichTextInputProps {
+  /** Mavjud matnni tahrirlash — maydon eski qiymat bilan ochiladi (veb `initialLines`). */
+  initialLines?: TextLineDto[];
   onChange: (lines: TextLineDto[]) => void;
 }
 
@@ -73,6 +76,23 @@ function toLines(text: string, formats: LineFormat[]): TextLineDto[] {
 }
 
 /**
+ * `TextLineDto[]` -> maydon matni va qator formatlari. Format bu yerda
+ * QATOR darajasida: qatorning hamma bo'laklari qalin bo'lsagina qalin
+ * (aralash qator oddiy bo'lib ochiladi).
+ */
+function fromLines(lines: readonly TextLineDto[]): { text: string; formats: LineFormat[] } {
+  const markers = listMarkers(lines);
+  const every = (line: TextLineDto, key: Format) => {
+    const runs = line.runs.filter((run) => run.text);
+    return runs.length > 0 && runs.every((run) => run[key]);
+  };
+  return {
+    text: lines.map((line, index) => markers[index] + line.runs.map((run) => run.text).join("")).join("\n"),
+    formats: lines.map((line) => ({ bold: every(line, "bold"), italic: every(line, "italic"), underline: every(line, "underline") })),
+  };
+}
+
+/**
  * Formatlangan matn — veb `rich-text-input.tsx` (`variant="mobile"`): tepada
  * format tugmalari, ostida matn maydoni.
  *
@@ -81,13 +101,14 @@ function toLines(text: string, formats: LineFormat[]): TextLineDto[] {
  * belgisi esa matnning o'zida ("• ", "1. ") — Enter'da keyingi qatorga davom
  * etadi, bo'sh bandda Enter ro'yxatdan chiqaradi. Natija `TextLineDto[]`.
  */
-export function RichTextInput({ onChange }: RichTextInputProps) {
+export function RichTextInput({ initialLines, onChange }: RichTextInputProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
   const inputRef = useRef<TextInput>(null);
-  const [text, setText] = useState("");
-  const [formats, setFormats] = useState<LineFormat[]>([PLAIN]);
-  const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [initial] = useState(() => (initialLines?.length ? fromLines(initialLines) : { text: "", formats: [PLAIN] }));
+  const [text, setText] = useState(initial.text);
+  const [formats, setFormats] = useState<LineFormat[]>(initial.formats);
+  const [selection, setSelection] = useState({ start: initial.text.length, end: initial.text.length });
   /** Matn bilan BIR yangilanishda qo'yiladigan kursor (alohida `setSelection` klaviatura bilan poyga qiladi). */
   const [forced, setForced] = useState<{ start: number; end: number } | undefined>(undefined);
   const [focused, setFocused] = useState(false);

@@ -35,7 +35,10 @@ export interface SheetProps {
    * burchak, ingichka tutqich, `text-h2` sarlavha, 44px yopish tugmasi.
    */
   variant?: "classic" | "app";
-  /** Faqat `app`: aylanmaydigan pastki tugmalar qatori (`px-4 pt-6 gap-3`). */
+  /**
+   * Aylanmaydigan pastki tugmalar qatori: `app` — `px-4 pt-6 gap-3`;
+   * `classic` — eski `.dialog-actions.is-sticky` (ustida chiziq, oq fonda).
+   */
   footer?: ReactNode;
   /** Faqat `app`: kichik sarlavha (`text-title-lg font-semibold`) va `pt-5` pastki qator — tanlagich oynalari. */
   compact?: boolean;
@@ -229,7 +232,7 @@ export function Sheet({
                 : {
                     backgroundColor: palette["surface-elevated"],
                     borderColor: palette.border,
-                    paddingBottom: insets.bottom + 16,
+                    paddingBottom: footer ? 0 : insets.bottom + 16,
                   },
               sheetStyle,
             ]}
@@ -303,6 +306,9 @@ export function Sheet({
                 {footer}
               </View>
             ) : null}
+            {!app && footer ? (
+              <View style={[styles.footer, { borderTopColor: palette.border, paddingBottom: insets.bottom + 16 }]}>{footer}</View>
+            ) : null}
           </Animated.View>
         </GestureDetector>
         </KeyboardAvoidingView>
@@ -327,6 +333,8 @@ const styles = StyleSheet.create({
   head: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 16, gap: 8 },
   headBody: { flex: 1, gap: 2, paddingTop: 6 },
   body: { padding: 16, gap: 14 },
+  /* `.dialog-actions.is-sticky`: `padding: 14px 22px 22px; border-top` — o'ngga tekislangan */
+  footer: { flexDirection: "row", justifyContent: "flex-end", gap: 12, paddingHorizontal: 16, paddingTop: 14, borderTopWidth: 1 },
   /* Veb `AppDialog` sheet: `rounded-t-2xl bg-surface` */
   appSheet: { borderTopLeftRadius: dsRadius["2xl"], borderTopRightRadius: dsRadius["2xl"], borderWidth: 0, paddingTop: 0 },
   /* `mx-auto mt-2 mb-px h-[5px] w-10 rounded-full bg-line` */

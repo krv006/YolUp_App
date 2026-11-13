@@ -30,10 +30,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 ## Hisob
 
-- 🟢 NUSXA: **243**
-- 🟡/🔴 moslashtirilgan: **380**
+- 🟢 NUSXA: **245**
+- 🟡/🔴 moslashtirilgan: **393**
 - 🆕 mobilga xos: **18**
-- Jami: **641**
+- Jami: **656**
 
 ## Olib tashlangan bo'limlar
 
@@ -166,7 +166,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `17702116341c` | — |
 | `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `bed68bc9743a` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; chiqishdagi oxirgi saqlash qoldi |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `e63f770dcde0` | portal bloklari (`shared/ui/portal.tsx`) bilan; ko'rsatkichlar tor ekrandagidek bir ustun |
-| `src/modules/homework/ui/homework-result-dialog.tsx` | 🟡 MOSLASH | `b82a8abfa8af` | faqat tor ekran varianti (to'liq ekran Modal); eski `homework-result-sheet.tsx` ota-ona ekranida va xabar kartasidagi oynada qoladi |
+| `src/modules/homework/ui/homework-result-dialog.tsx` | 🟡 MOSLASH | `58a335905b1a` | faqat tor ekran varianti (to'liq ekran Modal); eski `homework-result-sheet.tsx` ota-ona ekranida va xabar kartasidagi oynada qoladi |
 | `src/modules/homework/ui/homework-message-card.tsx` | 🟡 MOSLASH | `ec1425959edf` | faqat tor ekran (`compact`) kartasi; natijalar `AssignmentDetailSheet` da |
 | `src/modules/homework/lib/google-form.ts` | 🟢 NUSXA | `7a1ec07d2db7` | — |
 | `src/modules/homework/lib/grade-display.ts` | 🟢 NUSXA | `c0fba5064925` | — |
@@ -174,14 +174,20 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/lib/homework-questions.ts` | 🟢 NUSXA | `8968f8e4260b` | — |
 | `src/modules/homework/lib/submission-ai-state.ts` | 🟢 NUSXA | `d4637ecf237c` | — |
 | `src/modules/homework/model/use-question-drafts.ts` | 🟢 NUSXA | `ac11f86fe110` | — |
-| `src/widgets/homework-workspace/assignment-form-dialog.tsx` | 🟡 MOSLASH | `59d4cea990ba` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida; vazifa formasi `pages/teacher/workspace/homework/assignment-form-dialog.tsx` qatoriga qarang |
+| `src/modules/homework/ui/assignment-detail-dialog.tsx` | 🟡 MOSLASH | `01ce15416f20` | mobilda `assignment-detail-sheet.tsx` (pastki oyna); faylsiz topshiriq "Matnli javob", yuklab olish va qayta tekshirish yo'q |
+| `src/modules/homework/ui/questions-editor.tsx` | 🟡 MOSLASH | `a77047aa21fe` | savol turi `MobilePickerField`; katakchalar `CheckboxMark`, radio `radio-unchecked/check-circle` |
+| `src/modules/homework/ui/questions-answer-form.tsx` | 🟡 MOSLASH | `9925b507ba89` | native radio/checkbox o'rniga chizilgan 18px belgilar; maydonlar `MobileInput` |
+| `src/modules/homework/ui/questions-result.tsx` | 🟡 MOSLASH | `ee5cead6c9f6` | ball maydoni `keyboardType="decimal-pad"` |
+| `src/modules/homework/ui/google-form-field.tsx` | 🟡 MOSLASH | `7b0e08d4022c` | `MobileInput`; `compact` varianti |
+| `src/modules/homework/ui/google-form-link.tsx` | 🟡 MOSLASH | `71caadf7ebd3` | `Linking.openURL`; `className` -> `style` |
+| `src/widgets/homework-workspace/assignment-form-dialog.tsx` | 🟡 MOSLASH | `49bb6b1f7cf5` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida; vazifa formasi `pages/teacher/workspace/homework/assignment-form-dialog.tsx` qatoriga qarang |
 | `src/widgets/homework-workspace/homework-workspace.tsx` | 🟡 MOSLASH | `73d9a0d04b48` | mobilda ishlatilmaydi — vebda ham ulanmagan (`/assignments` -> workspace vazifalari); vazifalar `pages/workspace/homework/` da |
-| `src/widgets/homework-workspace/submission-review.tsx` | 🟡 MOSLASH | `5cc04acc90bb` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida |
-| `src/pages/teacher/workspace/homework/homework-detail-page.tsx` | 🟡 MOSLASH | `535cc61668ce` | tor ekran (`mobile-homework-detail.tsx` bilan birga) — mobilda `pages/workspace/homework/homework-detail-page.tsx`; harfli baho ("A'lo") matn sifatida (vebda `Number()` NaN beradi); orqaga — stack ichida (vazifalar ro'yxatiga) |
+| `src/widgets/homework-workspace/submission-review.tsx` | 🟡 MOSLASH | `9f898ff74943` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida |
+| `src/pages/teacher/workspace/homework/homework-detail-page.tsx` | 🟡 MOSLASH | `259415841fe6` | tor ekran (`mobile-homework-detail.tsx` bilan birga) — mobilda `pages/workspace/homework/homework-detail-page.tsx`; harfli baho ("A'lo") matn sifatida (vebda `Number()` NaN beradi); orqaga — stack ichida (vazifalar ro'yxatiga) |
 | `src/pages/teacher/workspace/workspace-home-page.tsx` | 🟡 MOSLASH | `e6eb617a7514` | faqat tor ekran shoxi; mobilda `pages/workspace/workspace-home-page.tsx`; "Tekshirilmagan" soni `submissionsPending` dan (vebda `item.submissions` — ro'yxat API'si bermagani uchun doim 0) |
 | `src/pages/teacher/workspace/mobile-workspace-home.tsx` | 🟡 MOSLASH | `b8917e8df805` | mobilda `workspace-home-page.tsx` ichida; "+" menyusi `PopoverMenu` |
-| `src/pages/teacher/workspace/homework/homework-list-page.tsx` | 🟡 MOSLASH | `cec5ff40f113` | faqat tor ekran shoxi; mobilda `pages/workspace/homework/homework-list-page.tsx` |
-| `src/pages/teacher/workspace/homework/mobile-homework-list.tsx` | 🟡 MOSLASH | `d53e5e65c565` | mobilda `homework-list-page.tsx` ichida; kartadagi menyu `PopoverMenu` |
+| `src/pages/teacher/workspace/homework/homework-list-page.tsx` | 🟡 MOSLASH | `14f852dd4c8f` | faqat tor ekran shoxi; mobilda `pages/workspace/homework/homework-list-page.tsx` |
+| `src/pages/teacher/workspace/homework/mobile-homework-list.tsx` | 🟡 MOSLASH | `d435752aa894` | mobilda `homework-list-page.tsx` ichida; kartadagi menyu `PopoverMenu` |
 | `src/pages/teacher/workspace/analytics-page.tsx` | 🟡 MOSLASH | `ba900b109f48` | faqat tor ekran shoxi; mobilda `pages/workspace/analytics-page.tsx`; "Batafsil" — "Mening baholarim" (`profile/ratings`) |
 | `src/pages/teacher/workspace/mobile-analytics.tsx` | 🟡 MOSLASH | `f5298ec97e37` | mobilda `analytics-page.tsx` ichida |
 | `src/pages/teacher/workspace/ai-assistant-page.tsx` | 🟡 MOSLASH | `f7702322b4c9` | faqat tor ekran shoxi; mobilda `pages/workspace/ai-assistant-page.tsx`; `?view=jobs` stekka yangi sahifa bo'lib qo'shiladi (orqaga — formaga) |
@@ -208,9 +214,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/exam/ui/exam-writing-review.tsx` | 🟡 MOSLASH | `73d0c81638ec` | mobilda yo'q — vebda keng ekran natijalari (`exam-results-view.tsx`) uchun; tor ekranda AI tahlili `mock-results-page.tsx` da |
 | `src/pages/ai/ai-page.tsx` | 🟡 MOSLASH | `35afc5abef67` | mobilda yo'q — vebda ham hech qaysi marshrutga ulanmagan (`/teacher/ai` -> `/teacher/workspace/ai`) |
 | `src/modules/quiz/ui/ai-quiz-creator.tsx` | 🟡 MOSLASH | `856cbf831cab` | mobilda yo'q — vebda faqat ulanmagan `pages/ai/ai-page.tsx` ishlatadi |
-| `src/pages/teacher/workspace/homework/mobile-homework-detail.tsx` | 🟡 MOSLASH | `6c9eddbcac59` | mobilda `homework-detail-page.tsx` ichida; "⋮" — `PopoverMenu` |
-| `src/pages/teacher/workspace/homework/homework-review-page.tsx` | 🟡 MOSLASH | `3e5314c8bd12` | faqat tor ekran varianti; `?s=` — `router.setParams`; izoh maydoni klaviatura ustida (`KeyboardAwareScrollView`) |
-| `src/pages/teacher/workspace/homework/assignment-form-dialog.tsx` | 🟡 MOSLASH | `64e36282420d` | faqat tor ekran varianti (to'liq ekran Modal); mobilda `widgets/homework-workspace/assignment-form-dialog.tsx` (pages'ni widget import qila olmaydi) |
+| `src/pages/teacher/workspace/homework/mobile-homework-detail.tsx` | 🟡 MOSLASH | `904d5db1db87` | mobilda `homework-detail-page.tsx` ichida; "⋮" — `PopoverMenu` |
+| `src/pages/teacher/workspace/homework/homework-review-page.tsx` | 🟡 MOSLASH | `74673be66e18` | faqat tor ekran varianti; `?s=` — `router.setParams`; izoh maydoni klaviatura ustida (`KeyboardAwareScrollView`) |
+| `src/pages/teacher/workspace/homework/assignment-form-dialog.tsx` | 🟡 MOSLASH | `30ddf04ada5d` | faqat tor ekran varianti (to'liq ekran Modal); mobilda `widgets/homework-workspace/assignment-form-dialog.tsx` (pages'ni widget import qila olmaydi) |
 | `src/pages/teacher/workspace/homework/remind-dialog.tsx` | 🟡 MOSLASH | `dca5a552e063` | `AppDialog` -> `Sheet variant="app"` |
 | `src/pages/teacher/workspace/homework/resubmit-dialog.tsx` | 🟡 MOSLASH | `3124cd8e0e49` | `AppDialog` -> `Sheet variant="app"` |
 | `src/pages/teacher/workspace/homework/delete-assignment-dialog.tsx` | 🟡 MOSLASH | `81c16c551fbf` | faqat tor ekran (`ConfirmDialog`) |
@@ -323,6 +329,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/model/use-quiz-limits-text.ts` | 🟢 NUSXA | `27b75bf3b405` | — |
 | `src/modules/quiz/model/use-quiz-countdown.ts` | 🟡 MOSLASH | `894d79c8d1dc` | `window.setInterval` -> global `setInterval` (domen qatlamida `window` taqiqlangan) |
 | `src/modules/quiz/model/use-quiz-sessions.ts` | 🟡 MOSLASH | `bb70d161d006` | `window.setInterval` -> global `setInterval` (domen qatlamida `window` taqiqlangan) |
+| `src/modules/quiz/ui/student-checklist.tsx` | 🟡 MOSLASH | `21a3f69ea413` | `CheckboxMark` bilan; barrel orqali emas, to'g'ridan-to'g'ri import |
 | `src/pages/teacher/quizzes/teacher-quizzes-page.tsx` | 🟡 MOSLASH | `6181c5192d3a` | mobilda yo'q — vebda ham ulanmagan (`/teacher/quizzes` -> `/teacher/workspace/tests`) |
 | `src/modules/student/index.ts` | 🟡 MOSLASH | `b64689876640` | vebdagidek faqat yozilish oynasi; `StudentEnrollmentDialog` o'rniga `StudentEnrollmentSheet` |
 | `src/modules/student/ui/student-enrollment-dialog.tsx` | 🟡 MOSLASH | `b337e126089a` | mobilda `ui/student-enrollment-sheet.tsx` (pastdan chiquvchi oyna); eski uslubda — vebda ham `shared/ui/legacy` |
@@ -425,7 +432,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/student/workspace/student-mock-page.tsx` | 🟡 MOSLASH | `efc615d60b4a` | faqat tor ekran shoxi |
 | `src/pages/student/workspace/student-mock-result-page.tsx` | 🟡 MOSLASH | `31bf71bb6a6c` | faqat tor ekran shoxi |
 | `src/pages/student/workspace/student-homework-page.tsx` | 🟡 MOSLASH | `5b4b398b9667` | faqat tor ekran shoxi |
-| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `a787df93264c` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi) |
+| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `2cb9a242177a` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi) |
 | `src/pages/student/workspace/fresh-results.ts` | 🆕 MOBIL | `—` | yangi topshirilgan test natijasini natija sahifasiga uzatadi — expo-router'da `navigate(..., { state })` yo'q |
 | `src/pages/student/exams/student-exam-page.tsx` | 🟡 MOSLASH | `1a00701cb78f` | mobilda `pages/exams/student-exam-page.tsx`; orqaga va chiqish mock ro'yxatiga, qidiruv `ROUTES.student.search` |
 | `src/pages/student/homework-board/student-homework-board-page.tsx` | 🟡 MOSLASH | `c7b4f55dd806` | mobilda `pages/homework/student-homework-board-page.tsx`; tor ekran shoxi — `BoardSurface` `mobile` chrome bilan, tasdiqlash `ConfirmDialog` (brand); topshirgach `dismissTo` bilan stekdagi vazifa sahifasiga qaytadi |
@@ -478,7 +485,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/input.tsx` | 🟡 MOSLASH | `52da1927077d` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/palette.json` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/logo-svg.ts` | 🆕 MOBIL | `—` | avtomatik yaratiladi: `assets/y-logo.svg` -> `npm run build:icons` |
-| `src/shared/ui/sheet.tsx` | 🟡 MOSLASH | `28dce0df2571` | veb `Dialog` o'rni; sudrab yopish va klaviatura ishlovi qo'lda, sudrash ro'yxat bilan bir vaqtda tanilishi shart |
+| `src/shared/ui/sheet.tsx` | 🟡 MOSLASH | `28dce0df2571` | veb `Dialog` o'rni; sudrab yopish va klaviatura ishlovi qo'lda, sudrash ro'yxat bilan bir vaqtda tanilishi shart; `footer` endi `classic` variantda ham (eski `.dialog-actions.is-sticky`) |
 | `src/shared/ui/toast.tsx` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/shared/ui/tokens.ts` | 🆕 MOBIL | `—` | Mobilga xos, veb'da yo'q |
 | `src/widgets/group-workspace/group-workspace.tsx` | 🟡 MOSLASH | `b9cb653cfc49` | tablar va o'qituvchi bo'limlari (`lessons-panel.tsx`, `teacher-assignments.tsx`, `attendance-section.tsx`) tor ekran variantida; o'quvchi bo'limlari `widgets/student-group-workspace/`; o'qituvchida vazifa bosilganda hozircha `AssignmentDetailSheet` (vebdagidek dialog) |
@@ -495,10 +502,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/group-workspace/student-progress-dialog.tsx` | 🟡 MOSLASH | `c7256b9d58b1` | pastki `Sheet` (vebda panel dialog); topshiriq bosilsa oyna yopilib `homeworkReview(id)?s=` ochiladi; to'lov va bekor qilish oynalari ichma-ich |
 | `src/widgets/group-workspace/payment-dialog.tsx` | 🟡 MOSLASH | `c2f04579040b` | pastki `Sheet`; summa bo'shliqlar bilan formatlanadi |
 | `src/widgets/group-workspace/payment-settings-dialog.tsx` | 🟡 MOSLASH | `07b1436de9bb` | pastki `Sheet`; to'lov kuni `<select>` -> `MobilePickerField` |
+| `src/widgets/group-workspace/add-assignment-menu.tsx` | 🟡 MOSLASH | `968dc4a0026c` | `PopoverMenu`; mobilda `teacher-assignments.tsx` dagi "Vazifa berish" |
 | `src/widgets/student-group-workspace/student-group-workspace.tsx` | 🟡 MOSLASH | `6e635a063f9c` | faqat tor ekran shoxi (`StudentGroupSection`) — guruh chatidagi "Darslar" va "Vazifalar" tablari |
 | `src/widgets/student-group-workspace/student-lessons.tsx` | 🟡 MOSLASH | `a8a5b9c66857` | faqat tor ekran varianti; baholash `RateLessonSheet` |
 | `src/widgets/student-group-workspace/student-tasks.tsx` | 🟡 MOSLASH | `ad5dcf56cfb0` | faqat tor ekran varianti |
-| `src/widgets/student-group-workspace/use-assignment-rows.ts` | 🟡 MOSLASH | `4572affcc7ef` | `navigate` o'rniga `router.push(..., { withAnchor: true })` |
+| `src/widgets/student-group-workspace/use-assignment-rows.ts` | 🟡 MOSLASH | `734e4c2eff10` | `navigate` o'rniga `router.push(..., { withAnchor: true })` |
 | `src/widgets/forward-dialog/forward-dialog.tsx` | 🟡 MOSLASH | `c22c79a14efe` | pastki oyna (`Sheet variant="app"`) |
 | `src/pages/teacher/conversation-page.tsx` | 🟡 MOSLASH | `7ae453d9b1fb` | mobilda `pages/chats/conversation-page.tsx` (guruh qismi `group-workspace.tsx` dagi chat bilan birga). Tor ekrandagidek jonli dars chizig'i yo'q. O'quvchida vazifa kartasi vazifa sahifasini ochadi va topshirilganini ko'rsatadi; e'lonlar kanalida yozish maydoni o'rniga ogohlantirish. Qadalgan xabarni olib tashlash `pinned: true` bilan (vebda `false` ketadi — xabar qayta qadaladi, `useChat.pinMessage` ma'nosiga zid); o'qilganlik faqat kelgan xabarga (`readKey`); kutilayotgan/bloklangan shaxsiy chatda `DirectRequestBar` (oldingi qattiq yozilgan o'zbekcha izoh olib tashlandi) |
 | `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `b51311f38c8f` | tor ekran shoxi (`mobile-live-room.tsx` bilan bitta faylda): sahna, 3 ustunli plitkalar, pastki panel; brauzerdagi yozuv yo'q (yozuv server tomonda) — REC belgisi o'qituvchida ham server `recordingActive` dan (vebda o'qituvchida brauzer yozuvi); `MediaPermissionDialog` yo'q — ruxsatni Android so'raydi; doska to'liq ekranda hozircha `BoardSurface` (5-bosqichda `BoardPanel` mobil ko'rinishi) |
@@ -534,6 +542,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/tutor/model/tutor.queries.ts` | 🟢 NUSXA | `59bfd0df3bfc` | — |
 | `src/pages/workspace/materials-page.tsx` | 🟡 MOSLASH | `8ef427675303` | faqat tor ekran varianti; `SelectPicker` -> `MobilePickerField`, `FilterChips compact` -> `MobileSegment scroll="auto"`, yuklash `AppDialog` -> `Sheet`; fayl `pickDocument` (kengaytmalar o'rniga MIME ro'yxati); yuklab olish — OS ulashish oynasi (`downloadBlob`) |
 | `src/pages/teacher/workspace/share-results-dialog.tsx` | 🟡 MOSLASH | `6e3853cc00dd` | mobilda `pages/workspace/tests/share-results-dialog.tsx`; `AppDialog` -> `Sheet variant="app"` |
+| `src/pages/teacher/workspace/homework/bank-assignment-card.tsx` | 🟡 MOSLASH | `95b33f61d167` | mobilda `pages/workspace/homework/bank-assignment-card.tsx` |
+| `src/pages/teacher/workspace/homework/bank-copies.tsx` | 🟡 MOSLASH | `e08a95963627` | mobilda `pages/workspace/homework/bank-copies.tsx` |
+| `src/pages/teacher/workspace/homework/assignment-audience-card.tsx` | 🟡 MOSLASH | `d884c643f13a` | mobilda `pages/workspace/homework/assignment-audience-card.tsx`; tahrirlash pastki `Sheet` |
 | `src/pages/student/workspace/student-ai-page.tsx` | 🟡 MOSLASH | `3068926e14dc` | faqat tor ekran varianti; maydonlar klaviatura ustida (`KeyboardAwareScrollView`) |
 | `src/modules/tutor/ui/practice-session.tsx` | 🟡 MOSLASH | `fed1593cf756` | RN komponentlari; barrel'ning mobil UI bo'limidan eksport |
 | `src/pages/admin/certificates/admin-certificates-page.tsx` | 🟡 MOSLASH | `85eebc2f140b` | mobilda `pages/admin/admin-certificates-page.tsx`; portal uslubi (`admin-teachers-page` kabi); tugmalar qator ostida; fayl `Linking.openURL`; rad etish `Sheet` |
@@ -687,6 +698,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/channel-view/index.ts` | 🟢 NUSXA | `7d9248d9b9ef` | — |
 | `src/widgets/teacher-notify-dialog/teacher-notify-dialog.tsx` | 🟡 MOSLASH | `05d0a486b817` | pastki `Sheet`; guruh `<select>` -> picker; katakchalar `CheckboxMark` |
 | `src/widgets/teacher-notify-dialog/index.ts` | 🟢 NUSXA | `39f4fb954a01` | — |
+| `src/widgets/homework-assign/assign-homework-dialog.tsx` | 🟡 MOSLASH | `10dda717ec65` | pastki `Sheet`; muddat mobil sana/vaqt tanlagichlari bilan |
+| `src/widgets/homework-assign/group-targets-picker.tsx` | 🟡 MOSLASH | `6be1f79082f0` | `CheckboxMark`; guruh ochilsa o'quvchilar ro'yxati |
+| `src/widgets/homework-assign/group-targets.ts` | 🟢 NUSXA | `bb45eb71e00d` | — |
+| `src/widgets/homework-assign/index.ts` | 🟢 NUSXA | `c1b6f1744554` | — |
 
 ## Ataylab ko'chirilmagan
 

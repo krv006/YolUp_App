@@ -11,6 +11,7 @@ import {
   useRemindAssignment,
   useUpdateAssignment,
 } from "@/modules/homework";
+import { GoogleFormLink } from "@/modules/homework/ui/google-form-link";
 import { ROUTES } from "@/shared/config";
 import type { Submission } from "@/shared/types";
 import {
@@ -29,7 +30,10 @@ import {
   type DsColor,
   type IconName,
 } from "@/shared/ui";
+import { AssignHomeworkDialog } from "@/widgets/homework-assign";
 import { AssignmentFormDialog } from "@/widgets/homework-workspace";
+import { AssignmentAudienceCard } from "./assignment-audience-card";
+import { BankCopies } from "./bank-copies";
 import { DeleteAssignmentDialog } from "./delete-assignment-dialog";
 import { formatDue } from "./format-due";
 import { RemindDialog } from "./remind-dialog";
@@ -55,8 +59,10 @@ function rowStatus(row: Submission): keyof typeof STATUS {
 /**
  * Vazifa sahifasi — veb `homework-detail-page.tsx` + `mobile-homework-detail.tsx`
  * (tor ekran): sarlavha va "⋮" (tahrirlash, o'chirish), 3 ta ko'rsatkich,
- * AI guruh xulosasi, filtrlar, topshirganlar ro'yxati (AI va o'qituvchi
- * bahosi); pastda "Eslatma yuborish". Topshiriq bosilsa tekshirish sahifasi.
+ * Google Form havolasi, "Kimlarga berilgan", AI guruh xulosasi, filtrlar,
+ * topshirganlar ro'yxati (AI va o'qituvchi bahosi); pastda "Eslatma
+ * yuborish". Topshiriq bosilsa tekshirish sahifasi. Bazadagi vazifada
+ * ko'rsatkichlar o'rnida "Bu vazifa bazada", "Berilgan guruhlar" va pastda "Berish".
  */
 export function HomeworkDetailPage() {
   const { t } = useTranslation("homework");
@@ -74,9 +80,12 @@ export function HomeworkDetailPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [remindOpen, setRemindOpen] = useState(false);
+  const [giving, setGiving] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
 
   const item = assignment.data ?? null;
+  const isBank = Boolean(item?.isBank);
+  const bankEyebrow = [t("bank.badge"), item?.copiesCount ? t("bank.copies", { count: item.copiesCount }) : t("bank.notGiven")].join(" · ");
   const submissions = useMemo(() => item?.submissions ?? [], [item]);
   const total = item?.stats?.studentsCount ?? submissions.length;
   const summary = aiSummary.data ?? item?.aiGroupSummary ?? null;
@@ -112,26 +121,53 @@ export function HomeworkDetailPage() {
         </View>
 
         <DsText v="caption" c="ink-secondary" numberOfLines={1} style={styles.eyebrow}>
-          {t("mobileDetail.eyebrow", { course: item?.courseTitle ?? "", due: formatDue(item?.dueAt ?? null, months) })}
+          {isBank ? bankEyebrow : t("mobileDetail.eyebrow", { course: item?.courseTitle ?? "", due: formatDue(item?.dueAt ?? null, months) })}
         </DsText>
         <DsText w="700" style={styles.title}>
           {item?.title}
         </DsText>
 
-        <View style={styles.stats}>
-          {stats.map((stat) => (
-            <View key={stat.label} style={[styles.stat, { backgroundColor: ds.c.surface }]}>
-              <DsText v="title-lg" c={stat.tone} style={styles.statValue}>
-                {stat.value}
-              </DsText>
-              <DsText v="caption" c="ink-secondary" numberOfLines={1}>
-                {stat.label}
-              </DsText>
+        {isBank ? (
+          // `mt-4 gap-2 rounded-xl bg-surface p-4`
+          <View style={[styles.bankCard, { backgroundColor: ds.c.surface }]}>
+            <View style={styles.summaryHead}>
+              <Icon name="menu-book" size={20} color={ds.c.brand} />
+              <DsText v="title">{t("bank.detailTitle")}</DsText>
             </View>
-          ))}
-        </View>
+            <DsText v="body-sm" c="ink-secondary">
+              {t("bank.detailHint")}
+            </DsText>
+          </View>
+        ) : (
+          <View style={styles.stats}>
+            {stats.map((stat) => (
+              <View key={stat.label} style={[styles.stat, { backgroundColor: ds.c.surface }]}>
+                <DsText v="title-lg" c={stat.tone} style={styles.statValue}>
+                  {stat.value}
+                </DsText>
+                <DsText v="caption" c="ink-secondary" numberOfLines={1}>
+                  {stat.label}
+                </DsText>
+              </View>
+            ))}
+          </View>
+        )}
 
-        {submissions.length ? (
+        {item?.googleFormUrl ? (
+          <GoogleFormLink url={item.googleFormUrl} hint={item.googleFormUrl} style={[styles.formLink, { backgroundColor: ds.c.surface }]} />
+        ) : null}
+
+        {item ? (
+          <View style={styles.block}>
+            {isBank ? (
+              <BankCopies copies={item.copies} onOpen={(id) => router.push(ROUTES.teacher.homeworkItem(id) as never)} />
+            ) : (
+              <AssignmentAudienceCard assignmentId={item.id} />
+            )}
+          </View>
+        ) : null}
+
+        {isBank ? null : submissions.length ? (
           <>
             <View style={[styles.summary, { backgroundColor: ds.c.surface }]}>
               <View style={styles.summaryHead}>
@@ -235,23 +271,36 @@ export function HomeworkDetailPage() {
 
       {/* `rounded-t-2xl bg-surface px-4 pt-3 pb-8.5` */}
       <View style={[styles.footer, { backgroundColor: ds.c.surface, paddingBottom: Math.max(34, insets.bottom + 12) }]}>
-        <Pressable
-          accessibilityRole="button"
-          disabled={!missing}
-          onPress={() => setRemindOpen(true)}
-          style={({ pressed }) => [
-            styles.remind,
-            submissions.length
-              ? { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }
-              : { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand },
-            !missing && styles.half,
-          ]}
-        >
-          <Icon name="notifications" size={18} color={submissions.length ? ds.c.ink : ds.c["on-action"]} />
-          <DsText v="button" c={submissions.length ? "ink" : "on-action"}>
-            {t("detail.remind", { count: missing })}
-          </DsText>
-        </Pressable>
+        {isBank ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setGiving(true)}
+            style={({ pressed }) => [styles.remind, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}
+          >
+            <Icon name="send" size={18} color={ds.c["on-action"]} />
+            <DsText v="button" c="on-action">
+              {t("bank.give")}
+            </DsText>
+          </Pressable>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            disabled={!missing}
+            onPress={() => setRemindOpen(true)}
+            style={({ pressed }) => [
+              styles.remind,
+              submissions.length
+                ? { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }
+                : { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand },
+              !missing && styles.half,
+            ]}
+          >
+            <Icon name="notifications" size={18} color={submissions.length ? ds.c.ink : ds.c["on-action"]} />
+            <DsText v="button" c={submissions.length ? "ink" : "on-action"}>
+              {t("detail.remind", { count: missing })}
+            </DsText>
+          </Pressable>
+        )}
       </View>
 
       <PopoverMenu rect={rect} onClose={closeMenu} height={100}>
@@ -287,10 +336,15 @@ export function HomeworkDetailPage() {
             grading: item.grading,
             announceInChat: item.announceInChat,
             aiCheck: item.aiCheck,
+            googleFormUrl: item.googleFormUrl,
+            questions: item.questions,
+            questionsLocked: item.submissions.length > 0 || (item.submissionsCount ?? 0) > 0,
           }}
           onSubmit={(values) => update.mutate({ id: item.id, form: values }, { onSuccess: () => setEditOpen(false) })}
         />
       ) : null}
+
+      <AssignHomeworkDialog open={giving} onOpenChange={setGiving} assignment={isBank ? item : null} />
 
       <DeleteAssignmentDialog
         open={deleteOpen}
@@ -337,6 +391,8 @@ const styles = StyleSheet.create({
   statValue: { lineHeight: 24 },
   summary: { marginTop: 16, gap: 12, padding: 16, borderRadius: dsRadius.xl },
   summaryHead: { flexDirection: "row", alignItems: "center", gap: 8 },
+  bankCard: { marginTop: 16, gap: 8, padding: 16, borderRadius: dsRadius.xl },
+  formLink: { marginTop: 12 },
   adviceButton: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 22 },
   filters: { marginTop: 16, flexDirection: "row", gap: 8 },
   filter: { flex: 1, minWidth: 0, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },

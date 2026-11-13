@@ -6,12 +6,14 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   HomeworkResultDialog,
+  submissionAiState,
   useAssignment,
   useDownloadSubmissionFile,
   useRequestResubmit,
   useReviewSubmission,
   useSubmission,
 } from "@/modules/homework";
+import { QuestionsResult } from "@/modules/homework/ui/questions-result";
 import { ROUTES } from "@/shared/config";
 import { Avatar, DsGradient, DsText, dsRadius, Icon, MobileInput, MobileRoundButton, useDs } from "@/shared/ui";
 import { formatDue } from "./format-due";
@@ -23,8 +25,10 @@ const GRADES = [1, 2, 3, 4, 5];
 /**
  * Topshiriqlarni tekshirish — veb `homework-review-page.tsx` ning tor ekran
  * varianti: "N / M topshiriq" va oldingi/keyingi, o'quvchi, fayl ko'rinishi
- * (yuklab olish), AI dastlabki bahosi (bosilsa AI natijasi), 1–5 baho
- * tugmalari; pastda "Qayta topshirish" va "Tasdiqlash".
+ * (yuklab olish) yoki faylsiz topshiriqda matnli javob, AI holati (`ai_state`:
+ * tekshirilmoqda / baho / baholay olmadi / ball qo'ymadi; ishlatilmagan bo'lsa
+ * yo'q, bosilsa AI natijasi), 1–5 baho tugmalari, savollar bo'yicha ball;
+ * pastda "Qayta topshirish" va "Tasdiqlash".
  */
 export function HomeworkReviewPage() {
   const { t } = useTranslation("homework");
@@ -44,6 +48,7 @@ export function HomeworkReviewPage() {
   const [resubmitOpen, setResubmitOpen] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [answerScores, setAnswerScores] = useState<Record<string, string>>({});
 
   const item = assignment.data ?? null;
   const rows = useMemo(() => item?.submissions ?? [], [item]);
@@ -57,11 +62,17 @@ export function HomeworkReviewPage() {
     setGrade(current.gradeValue ?? null);
     setComment(current.teacherComment ?? "");
     setShareWithParent(current.shareWithParent);
+    setAnswerScores({});
   }
 
   const index = rows.findIndex((row) => row.id === activeId);
-  const checking = current?.status === "checking";
-  const aiScore = current?.overallScore ?? null;
+  const aiState = current ? submissionAiState(current) : "none";
+  const checking = aiState === "checking";
+  const aiFailed = aiState === "failed";
+  const aiUnscored = aiState === "unscored";
+  const hasFile = Boolean(current?.files.length);
+  const textAnswer = !hasFile && Boolean(current?.comment);
+  const aiScore = aiState === "ready" ? (current?.overallScore ?? null) : null;
   const aiGrade = aiScore === null ? null : Math.max(1, Math.min(5, Math.round(aiScore / 20)));
   const findings = (current?.result?.questions ?? []).filter((question) => (question.analysis ?? "").length > 0).slice(0, 2);
   const questions = current?.result?.questions ?? [];
@@ -80,7 +91,16 @@ export function HomeworkReviewPage() {
   function confirm() {
     if (!current) return;
     review.mutate(
-      { id: current.id, input: { gradeValue: grade, grade: grade === null ? "" : String(grade), shareWithParent, teacherComment: comment.trim() } },
+      {
+        id: current.id,
+        input: {
+          gradeValue: grade,
+          grade: grade === null ? "" : String(grade),
+          shareWithParent,
+          teacherComment: comment.trim(),
+          answerScores: parseAnswerScores(answerScores),
+        },
+      },
       { onSuccess: () => move(1) }
     );
   }
@@ -119,62 +139,89 @@ export function HomeworkReviewPage() {
           </View>
         </View>
 
-        {/* `h-42 rounded-xl bg-surface` — fayl ko'rinishi */}
-        <View style={[styles.preview, { backgroundColor: ds.c.surface }]}>
-          {current?.fileName ? (
-            <SubmissionPreview id={current.id} fileName={current.fileName} />
-          ) : (
-            <DsText v="body-sm" c="ink-secondary">
-              {t("review.noFile")}
-            </DsText>
-          )}
-          {current?.fileName ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => download.mutate({ id: current.id, fileName: current.fileName })}
-              style={({ pressed }) => [styles.download, { borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
-            >
-              <Icon name="add" size={18} color={ds.c.ink} />
-              <DsText v="button">{t("review.download")}</DsText>
-            </Pressable>
-          ) : null}
-        </View>
-
-        <Pressable
-          accessibilityRole="button"
-          disabled={!current}
-          onPress={() => setResultOpen(true)}
-          style={({ pressed }) => [styles.ai, { backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
-        >
-          <View style={styles.aiHead}>
-            <Icon name="auto-awesome" size={20} color={ds.c["accent-saffron-fg"]} />
-            <DsText v="title" style={styles.grow}>
-              {checking ? t("review.aiChecking") : t("mobileReview.aiGrade")}
-            </DsText>
-            {checking ? null : (
-              <DsText v="title-lg" c="brand">
-                {aiGrade ?? "—"} / 5
+        {textAnswer && current ? (
+          // Faylsiz topshiriq: izoh — o'quvchining matnli javobi (`mt-4 gap-2 rounded-xl bg-surface p-4`)
+          <View style={[styles.textAnswer, { backgroundColor: ds.c.surface }]}>
+            <View style={styles.textAnswerHead}>
+              <Icon name="edit-note" size={16} color={ds.c["ink-secondary"]} />
+              <DsText v="body-xs" c="ink-secondary">
+                {t("review.textAnswer")}
+              </DsText>
+            </View>
+            <DsText v="body">{current.comment}</DsText>
+          </View>
+        ) : (
+          /* `h-42 rounded-xl bg-surface` — fayl ko'rinishi */
+          <View style={[styles.preview, { backgroundColor: ds.c.surface }]}>
+            {current?.fileName ? (
+              <SubmissionPreview id={current.id} fileName={current.fileName} />
+            ) : (
+              <DsText v="body-sm" c="ink-secondary">
+                {t("review.noFile")}
               </DsText>
             )}
+            {current?.fileName ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => download.mutate({ id: current.id, fileName: current.fileName })}
+                style={({ pressed }) => [styles.download, { borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
+              >
+                <Icon name="add" size={18} color={ds.c.ink} />
+                <DsText v="button">{t("review.download")}</DsText>
+              </Pressable>
+            ) : null}
           </View>
-          <DsText v="caption" c="ink-secondary">
-            {checking ? t("review.aiCheckingHint") : t("review.aiSuggestionHint")}
-          </DsText>
-          {questions.length && !checking ? (
-            <View style={styles.finding}>
-              <Icon name="check-circle" size={18} color={ds.c.success} />
-              <DsText v="body-sm">{t("mobileReview.correct", { correct: correctCount, total: questions.length })}</DsText>
-            </View>
-          ) : null}
-          {findings.map((question, position) => (
-            <View key={position} style={styles.finding}>
-              <Icon name="warning" size={18} color={ds.c["accent-saffron-fg"]} />
-              <DsText v="body-sm" numberOfLines={2} style={styles.grow}>
-                {question.analysis}
+        )}
+
+        {aiState === "none" ? null : (
+          <Pressable
+            accessibilityRole="button"
+            disabled={!current}
+            onPress={() => setResultOpen(true)}
+            style={({ pressed }) => [styles.ai, { backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
+          >
+            <View style={styles.aiHead}>
+              <Icon name={aiFailed ? "warning" : "auto-awesome"} size={20} color={aiFailed ? ds.c["error-text"] : ds.c["accent-saffron-fg"]} />
+              <DsText v="title" style={styles.grow}>
+                {checking
+                  ? t("review.aiChecking")
+                  : aiFailed
+                    ? t("review.aiFailed")
+                    : aiUnscored
+                      ? t("review.aiUnscored")
+                      : t("mobileReview.aiGrade")}
               </DsText>
+              {checking || aiFailed || aiUnscored ? null : (
+                <DsText v="title-lg" c="brand">
+                  {aiGrade ?? "—"} / 5
+                </DsText>
+              )}
             </View>
-          ))}
-        </Pressable>
+            <DsText v="caption" c="ink-secondary" numberOfLines={3}>
+              {checking
+                ? t("review.aiCheckingHint")
+                : aiFailed
+                  ? current?.error || t("review.aiFailedHint")
+                  : aiUnscored
+                    ? current?.aiSummary || t("review.aiFailedHint")
+                    : t("review.aiSuggestionHint")}
+            </DsText>
+            {questions.length && !checking ? (
+              <View style={styles.finding}>
+                <Icon name="check-circle" size={18} color={ds.c.success} />
+                <DsText v="body-sm">{t("mobileReview.correct", { correct: correctCount, total: questions.length })}</DsText>
+              </View>
+            ) : null}
+            {findings.map((question, position) => (
+              <View key={position} style={styles.finding}>
+                <Icon name="warning" size={18} color={ds.c["accent-saffron-fg"]} />
+                <DsText v="body-sm" numberOfLines={2} style={styles.grow}>
+                  {question.analysis}
+                </DsText>
+              </View>
+            ))}
+          </Pressable>
+        )}
 
         <DsText v="body-sm" style={styles.gradeLabel}>
           {t("review.yourGrade")}
@@ -208,7 +255,16 @@ export function HomeworkReviewPage() {
           <DsText v="body-sm">{t("review.comment")}</DsText>
           <MobileInput surface multiline multilineHeight={96} value={comment} maxLength={2000} placeholder={t("review.commentPlaceholder")} onChangeText={setComment} />
         </View>
-        {current?.comment ? (
+        {current?.answers.length ? (
+          <View style={styles.note}>
+            <QuestionsResult
+              answers={current.answers}
+              scores={answerScores}
+              onScoreChange={(questionId, value) => setAnswerScores((scores) => ({ ...scores, [questionId]: value }))}
+            />
+          </View>
+        ) : null}
+        {current?.comment && !textAnswer ? (
           <View style={styles.note}>
             <DsText v="body-xs" c="ink-secondary">
               {t("review.studentComment")}
@@ -292,6 +348,15 @@ export function HomeworkReviewPage() {
   );
 }
 
+/** Savollar bo'yicha ball: bo'sh va son bo'lmagan qiymatlar yuborilmaydi. */
+function parseAnswerScores(scores: Record<string, string>): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(scores)
+      .filter(([, value]) => value.trim() !== "" && Number.isFinite(Number(value)))
+      .map(([id, value]) => [id, Number(value)])
+  );
+}
+
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   grow: { flex: 1, minWidth: 0 },
@@ -310,6 +375,8 @@ const styles = StyleSheet.create({
   studentBody: { flex: 1, minWidth: 0, alignItems: "flex-start", gap: 4 },
   studentMeta: { flexDirection: "row", alignItems: "center", gap: 8 },
   late: { height: 24, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, borderRadius: 12 },
+  textAnswer: { marginTop: 16, gap: 8, padding: 16, borderRadius: dsRadius.xl },
+  textAnswerHead: { flexDirection: "row", alignItems: "center", gap: 8 },
   preview: { marginTop: 16, height: 168, overflow: "hidden", alignItems: "center", justifyContent: "center", borderRadius: dsRadius.xl },
   download: { position: "absolute", right: 12, bottom: 12, height: 40, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, borderWidth: 1, borderRadius: 20 },
   ai: { marginTop: 16, gap: 8, padding: 16, borderRadius: dsRadius.xl },

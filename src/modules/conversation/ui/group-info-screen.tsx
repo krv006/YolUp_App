@@ -51,6 +51,7 @@ import {
 } from "@/shared/ui";
 import { DIRECT_STATUS } from "../constants/direct-status";
 import { useAnnouncementMode, useConversations, useRequestDirect, useSetRoomImage } from "../model/use-conversations";
+import { useStartDirectChat } from "../model/use-start-direct-chat";
 
 export interface GroupInfoScreenProps {
   conversation: Conversation;
@@ -80,6 +81,7 @@ export function GroupInfoScreen({ conversation, open, onClose }: GroupInfoScreen
   const studentViewer = user?.role === "STUDENT";
   const studentRooms = useConversations("student");
   const requestDirect = useRequestDirect();
+  const startChat = useStartDirectChat(ROUTES.teacher.chat);
   const muteKey = `fokus_muted_${conversation.id}`;
 
   const [muted, setMuted] = useState(() => storage.get(muteKey) === "true");
@@ -130,6 +132,11 @@ export function GroupInfoScreen({ conversation, open, onClose }: GroupInfoScreen
       },
       onError: (error: Error) => toast.error(error.message),
     });
+  }
+
+  /** Veb #182: o'qituvchi o'z o'quvchisiga so'rovsiz yozadi (`direct/open`). */
+  function messageStudent(studentId: string) {
+    startChat.start({ id: studentId, roomId: null, canMessage: "write" }, onClose);
   }
 
   const roomList = roomMembers.data ?? [];
@@ -331,6 +338,7 @@ export function GroupInfoScreen({ conversation, open, onClose }: GroupInfoScreen
                           src={state?.avatar}
                           subtitle={`@${member.username}${status ? ` · ${status}` : ""}`}
                           last={index === members.length - 1}
+                          message={{ label: tg("students.messageAria", { name: member.name }), disabled: startChat.pending, onPress: () => messageStudent(member.id) }}
                           menu={{ label: tg("students.removeAria", { name: member.name }), removeLabel: tg("students.remove"), onRemove: () => setRemoveTarget(member) }}
                         />
                       );
@@ -437,6 +445,7 @@ function MemberRow({
   last,
   menu,
   action,
+  message,
 }: {
   name: string;
   tone?: string;
@@ -447,6 +456,8 @@ function MemberRow({
   menu?: { label: string; removeLabel: string; onRemove: () => void };
   /** `h-9 rounded-full bg-brand-subtle px-3` — masalan "O'qituvchiga yozish". */
   action?: { label: string; disabled?: boolean; onPress: () => void };
+  /** `size-9 rounded-full bg-brand-subtle` chat belgisi — o'qituvchi o'quvchiga yozadi. */
+  message?: { label: string; disabled?: boolean; onPress: () => void };
 }) {
   const ds = useDs();
   const { anchorRef, rect, open, close } = usePopoverAnchor();
@@ -473,6 +484,17 @@ function MemberRow({
           <DsText v="caption-strong" c="brand">
             {action.label}
           </DsText>
+        </Pressable>
+      ) : null}
+      {message ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={message.label}
+          disabled={message.disabled}
+          onPress={message.onPress}
+          style={({ pressed }) => [styles.messageButton, { backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] }, message.disabled && styles.dim]}
+        >
+          <Icon name="chat" size={16} color={ds.c.brand} />
         </Pressable>
       ) : null}
       {menu ? (
@@ -636,6 +658,7 @@ const styles = StyleSheet.create({
   tab: { flex: 1, minWidth: 0, height: 44, alignItems: "center", justifyContent: "center", borderRadius: 22 },
   member: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
   dim: { opacity: 0.6 },
+  messageButton: { width: 36, height: 36, alignItems: "center", justifyContent: "center", borderRadius: 18 },
   memberAction: { height: 36, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingHorizontal: 12, borderRadius: dsRadius.full },
   more: { width: 36, height: 36, marginRight: -8, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   delete: { marginTop: 24, height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 26 },

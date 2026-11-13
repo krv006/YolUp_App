@@ -95,7 +95,7 @@ export function ConversationPage({ role }: { role: ConversationRole }) {
     markRead.mutate();
   }, [readKey, markRead]);
 
-  const backPath = role === "teacher" ? "/teacher/chats" : "/student/chats";
+  const backPath = role === "teacher" ? "/teacher/chats" : role === "parent" ? "/parent/chats" : "/student/chats";
   function goBack() {
     if (router.canGoBack()) router.back();
     else router.replace(backPath);

@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoleRoutes } from "@/modules/auth";
-import { useNewConversationStore } from "@/modules/conversation";
+import { directChatAction, PersonChatHint, useNewConversationStore, useStartDirectChat } from "@/modules/conversation";
 import {
   ConversationActionsSheet,
   type ConversationActionsFocus,
@@ -15,13 +15,13 @@ import {
   DsGradient,
   DsText,
   dsRadius,
-  Icon,
   MobileEmptyCard,
   MobileRoundButton,
   MobileSearchField,
   MobileSegment,
   MobileTitleHeader,
   PullRefresh,
+  RoleTag,
   useDs,
 } from "@/shared/ui";
 import { ConversationRowBody } from "@/widgets/chat-shell/conversation-row";
@@ -43,6 +43,8 @@ export function ChatsPage(_props: { role: ConversationRole }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const routes = useRoleRoutes();
+  // Veb #182: suhbat yo'q odamga ham yoziladi — `can_message` bo'yicha ochish yoki so'rov.
+  const startChat = useStartDirectChat(routes.chat);
   const openNewConversation = useNewConversationStore((state) => state.setOpen);
   const { data, isLoading, isError, refetch, filter, setFilter, search, setSearch, query, visible, peopleRows, unreadTotal, unreadByFilter } =
     useConversationList();
@@ -191,12 +193,8 @@ export function ChatsPage(_props: { role: ConversationRole }) {
                     <Pressable
                       key={person.id}
                       accessibilityRole="button"
-                      onPress={() => {
-                        if (person.roomId) {
-                          router.push(routes.chat(person.roomId) as never);
-                          setSearch("");
-                        }
-                      }}
+                      disabled={directChatAction(person) === "none" || startChat.pending}
+                      onPress={() => startChat.start(person, () => setSearch(""))}
                       style={({ pressed }) => [
                         styles.person,
                         index < peopleRows.length - 1 && { borderBottomWidth: 1, borderBottomColor: ds.c.line },
@@ -208,11 +206,14 @@ export function ChatsPage(_props: { role: ConversationRole }) {
                         <DsText v="title" numberOfLines={1}>
                           {person.name}
                         </DsText>
-                        <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
-                          @{person.username}
-                        </DsText>
+                        <View style={styles.usernameRow}>
+                          <DsText v="body-sm" c="ink-secondary" numberOfLines={1} style={styles.shrink}>
+                            @{person.username}
+                          </DsText>
+                          <RoleTag role={person.role} />
+                        </View>
                       </View>
-                      <Icon name="more" size={22} color={ds.c["ink-secondary"]} />
+                      <PersonChatHint action={directChatAction(person)} />
                     </Pressable>
                   ))}
                 </View>
@@ -250,6 +251,8 @@ const styles = StyleSheet.create({
   /* `px-4 py-3 gap-3` */
   row: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
   peopleTitle: { marginTop: 24 },
+  usernameRow: { flexDirection: "row", alignItems: "center", gap: 8, minWidth: 0 },
+  shrink: { flexShrink: 1 },
   people: { marginTop: 12 },
   /* `px-4 py-4 gap-3` */
   person: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 16 },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import { Bell, BellOff, Camera, Check, Copy, Pencil, Trash2, UserRound } from "lucide-react-native";
@@ -12,17 +12,22 @@ import {
   Avatar,
   Badge,
   Button,
+  DsText,
+  dsRadius,
+  Icon,
   Input,
   SelectField,
   Separator,
   Sheet,
   Text,
   toast,
+  useDs,
   useTheme,
 } from "@/shared/ui";
 import type { DirectAction } from "../api/conversation.dto";
 import { DIRECT_STATUS, useDirectStatusLabel } from "../constants/direct-status";
 import { useRespondDirect, useSetRoomImage } from "../model/use-conversations";
+import { ReportConversationDialog } from "./report-conversation-dialog";
 
 export interface ConversationInfoSheetProps {
   conversation: Conversation;
@@ -49,6 +54,8 @@ export function ConversationInfoSheet({
   onClose,
 }: ConversationInfoSheetProps) {
   const { t } = useTranslation("mobile");
+  const { t: tc } = useTranslation("chat");
+  const ds = useDs();
   const directStatusLabel = useDirectStatusLabel();
   const { palette } = useTheme();
   const router = useRouter();
@@ -60,6 +67,7 @@ export function ConversationInfoSheet({
 
   const [muted, setMuted] = useState(() => storage.get(muteKey) === "true");
   const [copied, setCopied] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ title: "", subject: "", description: "" });
   // Faqat tahrir rejimida so'raladi — oddiy ko'rish uchun kerak emas.
@@ -304,6 +312,29 @@ export function ConversationInfoSheet({
             </>
           ) : null}
 
+          {/* Veb #182: suhbatdosh ustidan shikoyat; spam deb topilgan chatda yo'q. */}
+          {!isGroup && conversation.directStatus !== DIRECT_STATUS.SPAM ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setReportOpen(true)}
+              style={({ pressed }) => [styles.report, { borderColor: ds.c.line }, pressed && { backgroundColor: ds.c["error-bg"] }]}
+            >
+              <Icon name="warning" size={18} color={ds.c["error-text"]} />
+              <DsText v="label-strong" c="error-text">
+                {tc("report.open")}
+              </DsText>
+            </Pressable>
+          ) : null}
+          {!isGroup ? (
+            <ReportConversationDialog
+              roomId={conversation.id}
+              name={conversation.title}
+              open={reportOpen}
+              onOpenChange={setReportOpen}
+              onReported={onClose}
+            />
+          ) : null}
+
           {teacherGroup ? (
             <>
               <Separator />
@@ -329,4 +360,6 @@ const styles = StyleSheet.create({
   actions: { flexDirection: "row", gap: 10 },
   action: { flex: 1 },
   teacher: { flexDirection: "row", alignItems: "center", gap: 8 },
+  /* `h-14 rounded-xl border border-line text-label-strong text-error-text` */
+  report: { height: 56, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderRadius: dsRadius.xl },
 });

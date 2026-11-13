@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCurrentUser } from "@/modules/auth";
 import { useConversations } from "@/modules/conversation";
 import {
   answerInputs,
@@ -56,6 +57,7 @@ export function StudentHomeworkItemPage() {
   const insets = useSafeAreaInsets();
   const { assignmentId = "" } = useLocalSearchParams<{ assignmentId: string }>();
   const assignment = useAssignment(assignmentId || null);
+  const user = useCurrentUser();
   const [resubmitting, setResubmitting] = useState(false);
 
   if (assignment.isError)
@@ -73,7 +75,20 @@ export function StudentHomeworkItemPage() {
       </View>
     );
 
-  const mine = assignment.data.mySubmission;
+  /*
+   * 🟡 MOBIL FARQI: backend vazifaning detail javobida `my_submission` ni
+   * bermayapti (2026-11-13 tekshirildi; ro'yxat javobida bor), faqat
+   * `submissions` keladi. Busiz topshirilgan vazifa yana bo'sh forma bo'lib
+   * ochilardi va o'quvchi uni qayta topshirib yuborardi. Shuning uchun
+   * `mySubmission` bo'lmasa o'quvchining eng oxirgi topshirig'i olinadi.
+   * Vebda ham shu holat — backend tuzatgach bu zaxira kerak bo'lmaydi.
+   */
+  const mine =
+    assignment.data.mySubmission ??
+    [...assignment.data.submissions]
+      .filter((item) => item.studentId === user?.id)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ??
+    null;
   if (mine && !resubmitting)
     return <HomeworkResult assignment={assignment.data} initial={mine} onResubmit={mine.status === "resubmit_requested" ? () => setResubmitting(true) : undefined} />;
   return <HomeworkSubmit assignment={assignment.data} />;

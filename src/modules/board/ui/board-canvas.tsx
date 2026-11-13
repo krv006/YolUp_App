@@ -4,6 +4,7 @@ import { Canvas, Circle, FillType, Group, Path, Points, Skia, vec } from "@shopi
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
+  runOnUI,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -61,9 +62,11 @@ export interface BoardCanvasProps {
   markedStrokeIds?: readonly string[];
   /**
    * `contain` — doska butunligicha sig'adi (jonli dars ko'rinishi); `width` —
-   * eni bo'yicha, tepaga tekislanadi (veb `.board-canvas { width: 100%; height: auto }`).
+   * eni bo'yicha, tepaga tekislanadi (veb `.board-canvas { width: 100%; height: auto }`);
+   * `height` — balandligi bo'yicha: tik telefonda 16:9 doska kattaroq ko'rinadi,
+   * yon tomonlariga ikki barmoq bilan suriladi (loyiha egasi qarori, 2026-11-13).
    */
-  fit?: "contain" | "width";
+  fit?: "contain" | "width" | "height";
   /** Nuqtali fon rangi — veb `radial-gradient(...) 28px 28px`, 6px siljigan. Kattalashtirishda joyida qoladi. */
   dotColor?: string;
   /** "− 100% +" tugmalari (veb `BoardZoomControls`). */
@@ -176,7 +179,19 @@ export function BoardCanvas({
     const vw = viewWidth.get();
     const vh = viewHeight.get();
     if (vw === 0 || vh === 0) return 1;
+    if (fitMode === "height") return vh / height;
     return fitMode === "width" ? vw / width : Math.min(vw / width, vh / height);
+  });
+  /*
+   * Eng kichik zoom: vebdagi 50%, lekin `height` rejimida doska butunligicha
+   * ko'rinadigan darajagacha kichraytirish mumkin (tik telefonda ~38%).
+   */
+  const minZoom = useDerivedValue(() => {
+    "worklet";
+    const vw = viewWidth.get();
+    const vh = viewHeight.get();
+    if (vw === 0 || vh === 0 || fitMode !== "height") return ZOOM_MIN;
+    return Math.min(ZOOM_MIN, Math.min(vw / width, vh / height) / (vh / height));
   });
   /** Ekran px / doska birligi. */
   const factor = useDerivedValue(() => {
@@ -272,8 +287,15 @@ export function BoardCanvas({
     translateY.set(clampAxis(translateY.get(), height * f, viewHeight.get()));
   }
 
-  /** Tugmalar: ko'rinish markazi atrofida (veb `zoomBy` — markaz joyida qoladi). */
-  function zoomTo(next: number) {
+  /**
+   * Tugmalar: ko'rinish markazi atrofida (veb `zoomBy` — markaz joyida qoladi).
+   *
+   * Hisob UI oqimida: JS oqimida `zoom.set()` dan keyingi `zoom.get()` eski
+   * qiymatni qaytarardi va `clampView` doskani eski zoom uchun markazlashtirib
+   * qo'yardi (40% dan 100% ga qaytganda doska pastga siljib qolardi).
+   */
+  function zoomOnUI(next: number) {
+    "worklet";
     const current = zoom.get();
     if (next === current) return;
     const ratio = next / current;
@@ -283,6 +305,10 @@ export function BoardCanvas({
     translateY.set(cy - (cy - translateY.get()) * ratio);
     zoom.set(next);
     clampView();
+  }
+
+  function zoomTo(next: number) {
+    runOnUI(zoomOnUI)(next);
     setMathZoom(next);
   }
 
@@ -407,7 +433,7 @@ export function BoardCanvas({
     .onChange((event) => {
       "worklet";
       const current = zoom.get();
-      const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, current * event.scaleChange));
+      const next = Math.min(ZOOM_MAX, Math.max(minZoom.get(), current * event.scaleChange));
       const ratio = next / current;
       translateX.set(event.focalX - (event.focalX - translateX.get()) * ratio);
       translateY.set(event.focalY - (event.focalY - translateY.get()) * ratio);
@@ -476,7 +502,14 @@ export function BoardCanvas({
   }, [strokes, markedStrokeIds, erasingIds, drag]);
 
   /** JS tomonidagi masshtab (kattalashtirishsiz) — formula shrifti uchun. */
-  const mathScale = size.width && size.height ? (fitMode === "width" ? size.width / width : Math.min(size.width / width, size.height / height)) : 0;
+  const mathScale =
+    size.width && size.height
+      ? fitMode === "height"
+        ? size.height / height
+        : fitMode === "width"
+          ? size.width / width
+          : Math.min(size.width / width, size.height / height)
+      : 0;
 
   function handleMathMeasure(id: string, measured: MathSize) {
     setMathSizes((current) => {
@@ -590,8 +623,9 @@ export function BoardCanvas({
       {zoomControls ? (
         <BoardZoomControls
           zoom={zoom}
+          minZoom={minZoom}
           onZoomIn={() => zoomTo(clampZoom(zoom.get() * BOARD_ZOOM.step))}
-          onZoomOut={() => zoomTo(clampZoom(zoom.get() / BOARD_ZOOM.step))}
+          onZoomOut={() => zoomTo(Math.max(Math.round(minZoom.get() * 100) / 100, Math.round((zoom.get() / BOARD_ZOOM.step) * 100) / 100))}
           onReset={() => zoomTo(1)}
         />
       ) : null}

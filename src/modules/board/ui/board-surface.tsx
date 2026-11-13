@@ -196,7 +196,6 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   }
 
   const boardHeight = state?.height ?? 900;
-  const boardWidth = state?.width ?? 1600;
   /*
    * Kanvas = serverdagi doska (`state.width × state.height`, odatda 16:9).
    *
@@ -518,7 +517,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
       <View style={styles.stage}>
         <View
-          style={[styles.card, { aspectRatio: boardWidth / boardHeight, backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
+          style={[styles.card, { backgroundColor: ds.c.surface, boxShadow: ds.shadow.sm }]}
           onLayout={(event) => {
             const { width, height } = event.nativeEvent.layout;
             setCard({ width, height });
@@ -529,7 +528,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
             strokes={active?.strokes ?? []}
             width={state.width}
             height={canvasHeight}
-            fit="width"
+            fit="height"
             dotColor={ds.c.line}
             tool={tool}
             color={color}
@@ -766,7 +765,7 @@ const styles = StyleSheet.create({
   /* `relative mt-1 flex-1`, karta `rounded-2xl bg-surface shadow-sm` */
   /* `zIndex` — ochiq matn kartasi pastdagi asboblar ustida tursin */
   stage: { flex: 1, minHeight: 0, marginTop: 4, zIndex: 1 },
-  card: { width: "100%", overflow: "hidden", borderRadius: dsRadius["2xl"] },
+  card: { flex: 1, overflow: "hidden", borderRadius: dsRadius["2xl"] },
   /* `absolute inset-x-6 rounded-lg border p-3 shadow-lg` */
   form: { position: "absolute", left: 24, right: 24, padding: 12, borderWidth: 1, borderRadius: dsRadius.lg },
   tabs: { height: 38, flexDirection: "row", padding: 3, borderRadius: 19 },

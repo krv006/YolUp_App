@@ -9,6 +9,8 @@ import { BOARD_ZOOM } from "../lib/board-zoom";
 export interface BoardZoomControlsProps {
   /** Joriy zoom (UI thread) — foiz barmoq bilan kattalashtirilayotganda ham yangilanadi. */
   zoom: SharedValue<number>;
+  /** Eng kichik zoom (`height` rejimida 50% dan kichik bo'lishi mumkin). */
+  minZoom?: SharedValue<number>;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
@@ -19,10 +21,18 @@ export interface BoardZoomControlsProps {
  * `rounded-xl bg-surface p-1 shadow-lg`). Foiz faqat shu komponentda
  * qayta chiziladi: kanvas pinch paytida React'ga chiqmaydi.
  */
-export function BoardZoomControls({ zoom, onZoomIn, onZoomOut, onReset }: BoardZoomControlsProps) {
+export function BoardZoomControls({ zoom, minZoom, onZoomIn, onZoomOut, onReset }: BoardZoomControlsProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
   const [percent, setPercent] = useState(100);
+  const [minPercent, setMinPercent] = useState(Math.round(BOARD_ZOOM.min * 100));
+
+  useAnimatedReaction(
+    () => Math.round((minZoom ? minZoom.get() : BOARD_ZOOM.min) * 100),
+    (value, previous) => {
+      if (value !== previous) runOnJS(setMinPercent)(value);
+    }
+  );
 
   useAnimatedReaction(
     () => Math.round(zoom.get() * 100),
@@ -31,7 +41,7 @@ export function BoardZoomControls({ zoom, onZoomIn, onZoomOut, onReset }: BoardZ
     }
   );
 
-  const canOut = percent > Math.round(BOARD_ZOOM.min * 100);
+  const canOut = percent > minPercent;
   const canIn = percent < Math.round(BOARD_ZOOM.max * 100);
 
   return (

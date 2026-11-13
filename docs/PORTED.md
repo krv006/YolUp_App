@@ -434,7 +434,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/student/workspace/student-mock-page.tsx` | 🟡 MOSLASH | `efc615d60b4a` | faqat tor ekran shoxi |
 | `src/pages/student/workspace/student-mock-result-page.tsx` | 🟡 MOSLASH | `31bf71bb6a6c` | faqat tor ekran shoxi |
 | `src/pages/student/workspace/student-homework-page.tsx` | 🟡 MOSLASH | `5b4b398b9667` | faqat tor ekran shoxi |
-| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `2cb9a242177a` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi) |
+| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `2cb9a242177a` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi); `mySubmission` kelmasa `submissions` ichidan o'quvchining oxirgi topshirig'i olinadi (backend detail javobida `my_submission` yo'q) |
 | `src/pages/student/workspace/fresh-results.ts` | 🆕 MOBIL | `—` | yangi topshirilgan test natijasini natija sahifasiga uzatadi — expo-router'da `navigate(..., { state })` yo'q |
 | `src/pages/student/exams/student-exam-page.tsx` | 🟡 MOSLASH | `1a00701cb78f` | mobilda `pages/exams/student-exam-page.tsx`; orqaga va chiqish mock ro'yxatiga, qidiruv `ROUTES.student.search` |
 | `src/pages/student/homework-board/student-homework-board-page.tsx` | 🟡 MOSLASH | `c7b4f55dd806` | mobilda `pages/homework/student-homework-board-page.tsx`; tor ekran shoxi — `BoardSurface` `mobile` chrome bilan, tasdiqlash `ConfirmDialog` (brand); topshirgach `dismissTo` bilan stekdagi vazifa sahifasiga qaytadi |
@@ -714,7 +714,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/new-chat-menu/new-chat-menu.tsx` | 🟡 MOSLASH | `be764d02ad98` | `Dropdown` -> `PopoverMenu`; trigger tugmasi komponent ichida (`children` o'rniga) |
 | `src/widgets/new-chat-menu/create-audience-dialog.tsx` | 🟡 MOSLASH | `da4a61b61f45` | pastki `Sheet` + `MobileInput` |
 | `src/widgets/channel-view/channel-view.tsx` | 🟡 MOSLASH | `f63b5a45e628` | faqat tor ekran; izohlar to'liq ekran `Modal` (`channel-thread.tsx`); mobilda `pages/chats/conversation-page.tsx` kanal turida shu ko'rinishni qaytaradi |
-| `src/widgets/channel-view/channel-thread.tsx` | 🟡 MOSLASH | `1b1f66ef493d` | to'liq ekran `Modal` (vebda tor ekranda `fixed inset-0`); `textarea` -> ko'p qatorli `TextInput` |
+| `src/widgets/channel-view/channel-thread.tsx` | 🟡 MOSLASH | `1b1f66ef493d` | to'liq ekran `Modal` (vebda tor ekranda `fixed inset-0`); `textarea` -> ko'p qatorli `TextInput`; klaviaturadan qochish `react-native-keyboard-controller` KAV bilan (Android edge-to-edge'da Modal kichraymaydi) |
 | `src/widgets/channel-view/channel-info-dialog.tsx` | 🟡 MOSLASH | `38e8017ad9ad` | pastki `Sheet`; rasm `pickImage`; a'zo qo'shish va o'chirish oynalari shu oynaning ichida (iOS) |
 | `src/widgets/channel-view/index.ts` | 🟢 NUSXA | `7d9248d9b9ef` | — |
 | `src/widgets/teacher-notify-dialog/teacher-notify-dialog.tsx` | 🟡 MOSLASH | `05d0a486b817` | pastki `Sheet`; guruh `<select>` -> picker; katakchalar `CheckboxMark` |

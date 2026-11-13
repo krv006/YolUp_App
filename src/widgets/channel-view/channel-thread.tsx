@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+/*
+ * RN ning o'z `KeyboardAvoidingView` i emas: Androidda (edge-to-edge) Modal
+ * oynasi kichraymaydi va izoh maydoni klaviatura ostida qolardi.
+ */
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { messageApi, messageKeys, upsertMessage } from "@/modules/message";
 import { formatMessageTime } from "@/shared/lib";
@@ -70,7 +75,7 @@ function ThreadBody({ roomId, role, post, canComment, currentUserId, onClose }: 
   const items = comments.data ?? [];
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <KeyboardAvoidingView style={styles.root} behavior="padding">
       {/* `h-16 gap-3 border-b border-line px-4` */}
       <View style={[styles.header, { borderBottomColor: ds.c.line }]}>
         <Pressable accessibilityRole="button" accessibilityLabel={t("channel.closeThread")} onPress={onClose} style={styles.close}>

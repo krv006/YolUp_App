@@ -3,7 +3,7 @@ import type { TeacherStats } from "./auth";
 
 export type AvatarTone = "violet" | "blue" | "emerald" | "amber" | "rose";
 
-export type ConversationRole = "teacher" | "student";
+export type ConversationRole = "teacher" | "student" | "parent";
 
 export interface DomainUser {
   id: string;
@@ -19,21 +19,24 @@ export interface DomainUser {
   status?: string;
 }
 
-export type DirectStatus = "pending" | "active" | "blocked";
+export type DirectStatus = "pending" | "active" | "blocked" | "spam";
+
+export type CanMessage = "write" | "request" | "none";
 
 export interface ConversationParticipant {
   id: string;
   username: string;
   name: string;
   phone: string | null;
+  role?: string;
 }
 
 export type PresenceStatus = "online" | "offline";
 
 export interface Conversation {
   id: string;
-  type: "group" | "direct";
-  kind: "course" | "direct";
+  type: "group" | "direct" | "channel";
+  kind: "course" | "direct" | "channel";
   courseId: string | null;
   title: string;
   participantId: string | null;
@@ -42,6 +45,7 @@ export interface Conversation {
   lastMessage: string;
   lastSender: string | null;
   lastSenderId?: string | null;
+  lastSenderRole?: string | null;
   lastMessageType?: string | null;
   updatedAt: string;
   unreadCount: number;
@@ -63,6 +67,12 @@ export interface Conversation {
   subject?: string;
   subjectLabel?: string;
   description?: string;
+  canWrite?: boolean;
+  canComment?: boolean;
+  unpaidCount?: number | null;
+  overdueCount?: number | null;
+  courseKind?: "group" | "club" | null;
+  linkedCourses?: Array<{ id: string; title: string }>;
 }
 
 export interface MessageReply {
@@ -164,6 +174,8 @@ export interface ChatMessage {
   clientMessageId?: string | null;
   replyToId?: string | null;
   replyToDeleted?: boolean;
+  commentCount?: number | null;
+  threadRootId?: string | null;
 }
 
 export interface Course {
@@ -185,6 +197,16 @@ export interface Course {
   lessonsPerWeek: number | null;
   monthlyFee: number | null;
   avatarUrl: string | null;
+  kind: "group" | "club";
+  paymentDay: number | null;
+  paymentReminderDays: number[];
+  unpaidCount: number | null;
+  overdueCount: number | null;
+}
+
+export interface Club extends Course {
+  membersCount: number;
+  chatRoomId: string | null;
 }
 
 export type EnrollmentStatus = "pending" | "approved" | "declined";
@@ -204,7 +226,7 @@ export interface CourseStudentSearchResult extends DomainUser {
 
 export type LessonStatus = "scheduled" | "live" | "finished" | "cancelled";
 
-export type LessonRecordingStatus = "recording" | "merging" | "completed" | "failed";
+export type LessonRecordingStatus = "recording" | "merging" | "converting" | "completed" | "failed";
 
 export interface LessonRecordingChapter {
   seconds: number;
@@ -220,6 +242,7 @@ export interface BoardPagePreview {
 export interface LessonRecording {
   status: LessonRecordingStatus;
   ready: boolean;
+  postToChat: boolean;
   title: string;
   streamUrl: string | null;
   createdAt: string | null;
@@ -257,6 +280,7 @@ export interface Lesson {
   participantsCount: number | null;
   attendanceRate: number | null;
   joinedCount: number | null;
+  focusExits: number | null;
   myRating: number | null;
   attended: boolean | null;
   recordingActive: boolean;
@@ -300,7 +324,17 @@ export type SubmissionStatus =
   | "error"
   | "resubmit_requested";
 
-export type AssignmentStatus = "draft" | "active";
+export type AssignmentStatus = "draft" | "active" | "bank";
+
+export interface AssignmentCopy {
+  id: string;
+  courseId: string;
+  courseTitle: string;
+  dueAt: string | null;
+  submissionsCount: number;
+  studentIds: string[] | null;
+  createdAt: string;
+}
 
 export type GradingScale = "five" | "hundred" | "none";
 
@@ -332,6 +366,30 @@ export interface AiResult {
   summary: AiSummary | null;
 }
 
+export type HomeworkQuestionType = "single" | "multiple" | "short" | "long";
+
+export interface HomeworkQuestion {
+  id: string;
+  type: HomeworkQuestionType;
+  text: string;
+  options: string[];
+  correct: number[] | null;
+  points: number;
+}
+
+export interface HomeworkAnswer {
+  questionId: string;
+  type: HomeworkQuestionType;
+  text: string;
+  options: string[];
+  points: number;
+  answer: number[] | string | null;
+  score: number | null;
+  correct: number[] | null;
+  isCorrect: boolean | null;
+  aiScore: number | null;
+}
+
 export interface Submission {
   id: string;
   assignmentId: string;
@@ -353,7 +411,13 @@ export interface Submission {
   comment: string;
   teacherComment: string;
   files: SubmissionFile[];
+  answers: HomeworkAnswer[];
+  aiState: AiCheckState | null;
+  aiSummary: string | null;
+  aiCheckingSince: string | null;
 }
+
+export type AiCheckState = "checking" | "ready" | "unscored" | "failed" | "none";
 
 export interface SubmissionFile {
   name: string;
@@ -365,6 +429,8 @@ export interface SubmissionFile {
 export interface AssignmentStats {
   studentsCount: number | null;
   submittedCount: number | null;
+  pendingReviewCount: number | null;
+  gradedCount: number | null;
   averageScore: number | null;
 }
 
@@ -378,6 +444,13 @@ export interface Assignment {
   body: string;
   attachmentName: string;
   hasAttachment: boolean;
+  googleFormUrl: string | null;
+  isBank: boolean;
+  sourceId: string | null;
+  copiesCount: number | null;
+  copies: AssignmentCopy[];
+  questionsCount: number | null;
+  studentIds: string[] | null;
   dueAt: string | null;
   skillKey: string;
   lessonId: string | null;
@@ -397,6 +470,9 @@ export interface Assignment {
   maxScore: number;
   aiGroupSummary: AiGroupSummary | null;
   groupStats?: { average: number | null; rank: number | null; total: number | null } | null;
+  questions: HomeworkQuestion[];
+  hasQuestions: boolean;
+  questionsPoints: number;
 }
 
 export interface AiGroupSummary {
@@ -742,6 +818,7 @@ export interface Material {
   mimeType: string;
   uploadedBy: { id: string; name: string } | null;
   createdAt: string;
+  lessonId: string | null;
 }
 
 export interface PracticeQuestion {
@@ -789,9 +866,19 @@ export interface QuizSummary {
   opensAt: string | null;
   createdAt: string;
   questionCount: number;
+  studentIds: string[] | null;
+  timeLimitMinutes: number | null;
+  maxAttempts: number | null;
+  questionsPerAttempt: number | null;
+  attemptsUsed: number | null;
+  attemptsLeft: number | null;
+  sessionEndsAt: string | null;
 }
 
 export interface QuizDetail extends QuizSummary {
+  startedAt: string | null;
+  endsAt: string | null;
+  needsStart: boolean;
   groupAvgPercentage: number | null;
   groups: QuizGroup[];
   questions: QuizQuestion[];

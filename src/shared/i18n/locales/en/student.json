@@ -27,7 +27,11 @@
       "open": "Open",
       "results": "View result",
       "emptyTitle": "No tasks yet",
-      "emptyHint": "Tasks from your teacher will appear here."
+      "emptyHint": "Tasks from your teacher will appear here.",
+      "continue": "Continue · {{time}}",
+      "continueAction": "Continue",
+      "attemptsOver": "No attempts left",
+      "score": "{{value}} / {{max}} points"
     },
     "lessonsTab": {
       "eyebrow": "SCHEDULE",
@@ -52,7 +56,7 @@
   "enrollmentDialog": {
     "title": "New conversation",
     "description": "Send a request to a teacher or join an open course.",
-    "parentRequestsEyebrow": "PARENT REQUESTS",
+    "parentRequestsEyebrow": "OBSERVER REQUESTS",
     "wantsToLink": "wants to link to your profile",
     "decline": "Decline",
     "approve": "Approve",
@@ -209,7 +213,10 @@
       "emptyHint": "Tests from your teacher will appear here.",
       "attemptsTitle": "My attempts",
       "attemptsSubtitle": "Your latest test attempts",
-      "attemptsEmpty": "You haven’t taken any tests yet"
+      "attemptsEmpty": "You haven’t taken any tests yet",
+      "attemptsOver": "No attempts left",
+      "continue": "Continue · {{time}}",
+      "continueAria": "Continue the test, {{time}} left"
     },
     "player": {
       "questions": "Questions · {{count}}",
@@ -249,7 +256,29 @@
       },
       "trueLabel": "True",
       "falseLabel": "False",
-      "finishShort": "Finish"
+      "finishShort": "Finish",
+      "timeUp": "Time is up — submitting the test",
+      "timeLeft": "Time left: {{time}}",
+      "start": {
+        "title": "Start the test",
+        "time_one": "Time: {{count}} minute",
+        "time_other": "Time: {{count}} minutes",
+        "attempts": "Attempts: {{left}} of {{total}} left",
+        "questions_one": "Questions: {{count}}",
+        "questions_other": "Questions: {{count}}",
+        "note": "Once you start, the timer keeps running even if you close the page. When time is up, the test is submitted automatically.",
+        "action": "Start",
+        "starting": "Starting…"
+      },
+      "over": {
+        "title": "No attempts left",
+        "text_one": "You have taken this test {{count}} time. There are no attempts left.",
+        "text_other": "You have taken this test {{count}} times. There are no attempts left.",
+        "results": "See the result",
+        "back": "Back to tests"
+      },
+      "metaTimed_one": "time: {{count}} minute",
+      "metaTimed_other": "time: {{count}} minutes"
     },
     "results": {
       "eyebrow": "Tests / Your result · {{course}}",
@@ -392,13 +421,13 @@
       "overdue": "Overdue",
       "aiCheck": "AI pre-check",
       "answer": "Your answer",
-      "answerHint": "Upload a file and leave a note if needed. Your teacher reviews it after you submit.",
+      "answerHint": "Upload a file or write your answer in the note. Your teacher reviews it after you submit.",
       "drop": "Drop a file here or browse",
       "dropHint": "PDF, JPG, PNG, DOCX · up to 25 MB",
       "dropSpeaking": "MP3, WAV, M4A, OGG · up to 25 MB",
       "fileReady": "{{size}} · selected",
       "remove": "Remove",
-      "comment": "Note (optional)",
+      "comment": "Note or written answer",
       "commentPlaceholder": "E.g. I needed help with exercise 124…",
       "dueNotice": "Due: {{date}} · {{left}}.",
       "lateAllowed": "Late submission is allowed.",
@@ -432,7 +461,9 @@
       "tooManyFiles": "You can attach up to {{count}} files",
       "filesCount": "{{count}} / {{max}} files",
       "myComment": "Your note",
-      "filesTitle": "Submitted files · {{count}}"
+      "filesTitle": "Submitted files · {{count}}",
+      "outOf": "/ {{max}} points",
+      "notGraded": "This task isn't graded with points"
     }
   },
   "tutor": {

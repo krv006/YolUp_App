@@ -1,13 +1,17 @@
+import { useCallback, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useBoardChannel, type BoardSocketEvent } from "@/modules/board";
 import { AppError } from "@/shared/api";
 import { liveApi } from "../api/live.api";
+import type { AttentionCheck, MediaKind, MediaMode, RoomToken } from "../api/live.dto";
 
 export const liveKeys = Object.freeze({
   all: ["live"] as const,
   token: (id: string) => ["live", "token", id] as const,
   attention: (id: string) => ["live", "attention", id] as const,
   presence: (id: string) => ["live", "presence", id] as const,
+  mediaMode: (id: string) => ["live", "media-mode", id] as const,
 });
 
 export function useLessonPresence(lessonId: string | undefined, enabled = true) {
@@ -27,6 +31,39 @@ export function useMuteAll(lessonId: string) {
   });
 }
 
+export function useCameraOffAll(lessonId: string) {
+  return useMutation({
+    mutationFn: (except: string[] = []) => liveApi.cameraOffAll(lessonId, except),
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Amal bajarilmadi"),
+  });
+}
+
+export function useMediaMode(lessonId: string) {
+  const client = useQueryClient();
+  return useQuery({
+    queryKey: liveKeys.mediaMode(lessonId),
+    queryFn: ({ signal }) => liveApi.getMediaMode(lessonId, { signal }),
+    initialData: () => client.getQueryData<RoomToken>(liveKeys.token(lessonId))?.mediaMode ?? undefined,
+    enabled: Boolean(lessonId),
+    staleTime: 60_000,
+  });
+}
+
+export function useSetMediaMode(lessonId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (patch: Partial<MediaMode>) => liveApi.setMediaMode(lessonId, patch),
+    onSuccess: (mode) => client.setQueryData(liveKeys.mediaMode(lessonId), mode),
+    onError: (error) => toast.error(error instanceof Error ? error.message : "Amal bajarilmadi"),
+  });
+}
+
+export function useReleaseMedia(lessonId: string) {
+  return useMutation({
+    mutationFn: (kind: MediaKind) => liveApi.releaseMedia(lessonId, kind),
+  });
+}
+
 export function useLiveToken(lessonId: string | undefined, enabled: boolean) {
   return useQuery({
     queryKey: liveKeys.token(lessonId ?? ""),
@@ -40,13 +77,31 @@ export function useLiveToken(lessonId: string | undefined, enabled: boolean) {
 // Tekshiruv oynasi 15 soniya (+8 s server imtiyozi). 6 s oraliqda o'quvchi eng kechi bilan 9 soniya qoladi; 3 s dan 2 barobar
 // kam so'rov (1 500 o'quvchida ~500 -> ~250 so'rov/s). Oraliqni 8 s dan oshirmang — oyna juda qisqa qoladi.
 const ATTENTION_POLL_MS = 6000;
+const ATTENTION_PUSH_POLL_MS = 30_000;
+
+export function attentionPollInterval(pushWorks: boolean, socketConnected: boolean): number {
+  return pushWorks && socketConnected ? ATTENTION_PUSH_POLL_MS : ATTENTION_POLL_MS;
+}
 
 export function useAttentionCheck(lessonId: string | undefined, enabled: boolean) {
+  const client = useQueryClient();
+  const active = Boolean(lessonId && enabled);
+  const [pushedLesson, setPushedLesson] = useState<string | null>(null);
+  const handleEvent = useCallback(
+    (event: BoardSocketEvent) => {
+      if (event.type !== "attention" || !lessonId) return;
+      setPushedLesson(lessonId);
+      const check: AttentionCheck = { id: event.checkId, dueAt: event.dueAt };
+      client.setQueryData(liveKeys.attention(lessonId), check);
+    },
+    [client, lessonId]
+  );
+  const channel = useBoardChannel(lessonId ?? "", active, handleEvent);
   return useQuery({
     queryKey: liveKeys.attention(lessonId ?? ""),
     queryFn: ({ signal }) => liveApi.getAttention(lessonId as string, { signal }),
-    enabled: Boolean(lessonId && enabled),
-    refetchInterval: ATTENTION_POLL_MS,
+    enabled: active,
+    refetchInterval: attentionPollInterval(pushedLesson === lessonId, channel.connected),
   });
 }
 

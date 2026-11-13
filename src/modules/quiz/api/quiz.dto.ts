@@ -56,6 +56,63 @@ export interface QuizSummaryDto {
   opens_at: string | null;
   question_count: number;
   created_at: string;
+  student_ids?: Array<string | number> | null;
+  time_limit_minutes?: number | null;
+  max_attempts?: number | null;
+  questions_per_attempt?: number | null;
+  attempts_used?: number | null;
+  attempts_left?: number | null;
+  session_ends_at?: string | null;
+}
+
+export interface QuizAudienceDto {
+  restricted?: boolean;
+  total?: number;
+  assigned_count?: number;
+  students?: Array<{
+    id: string | number;
+    name?: string | null;
+    username?: string | null;
+    avatar_url?: string | null;
+    assigned?: boolean;
+    can_attend?: boolean;
+    attempted?: boolean;
+  }>;
+}
+
+export interface QuizAudienceStudent {
+  id: string;
+  name: string;
+  username: string;
+  avatarUrl: string | null;
+  assigned: boolean;
+  attempted: boolean;
+}
+
+export interface QuizAudience {
+  restricted: boolean;
+  total: number;
+  assignedCount: number;
+  students: QuizAudienceStudent[];
+}
+
+export interface QuizAssignInput {
+  quizId: string;
+  courseId: string;
+  dueAt?: string | null;
+  studentIds?: string[] | null;
+  timeLimitMinutes?: number | null;
+  maxAttempts?: number | null;
+  questionsPerAttempt?: number | null;
+}
+
+export interface QuizStartDto {
+  started_at: string;
+  ends_at: string | null;
+  time_limit_minutes?: number | null;
+  attempts_used?: number | null;
+  attempts_left?: number | null;
+  question_count?: number | null;
 }
 
 export interface QuizGroupDto {
@@ -69,6 +126,9 @@ export interface QuizGroupDto {
 }
 
 export interface QuizDto extends QuizSummaryDto {
+  started_at?: string | null;
+  ends_at?: string | null;
+  needs_start?: boolean;
   group_avg_percentage?: number | null;
   groups?: QuizGroupDto[];
   questions: QuizQuestionDto[];

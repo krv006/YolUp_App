@@ -203,6 +203,9 @@ export const authApi = {
   switchRole(role: string) {
     return apiClient.post<SwitchAccountResponseDto>(authEndpoints.switchRole, { role });
   },
+  linkAccount(username: string, password: string) {
+    return apiClient.post<unknown>(authEndpoints.accountLinks, { username, password });
+  },
   createChild(dto: CreateChildRequestDto) {
     return apiClient.post(authEndpoints.children, dto);
   },
@@ -247,6 +250,9 @@ export const authApi = {
   },
   approveTeacher(id: string) {
     return apiClient.post<AuthUserDto>(authEndpoints.teacherApprove(id), {});
+  },
+  setTestAccess(id: string, enabled: boolean) {
+    return apiClient.patch<{ id: string; can_create_tests: boolean }>(authEndpoints.adminTestAccess(id), { enabled });
   },
   uploadCertificate(file: File, title?: string, issuer?: string, issuedYear?: number | null) {
     const body = new FormData();

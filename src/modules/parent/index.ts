@@ -42,7 +42,10 @@ export {
   useRemindLink,
   useUnlinkChild,
   useUsernameAvailability,
+  useChildScores,
 } from "./model/parent.queries";
+export { mapChildScores, SCORE_KINDS, scoreSeries } from "./lib/child-scores";
+export type { ChildScores, ScoreKind, ScorePeriod, ScoreRange } from "./lib/child-scores";
 export { useSelectedChild, useSelectedChildStore } from "./model/selected-child.store";
 export type { UseSelectedChildResult } from "./model/selected-child.store";
 export * as parentHome from "./lib/parent-home";

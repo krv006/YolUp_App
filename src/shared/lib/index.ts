@@ -9,14 +9,18 @@ export { currentAppState, isAppActive, onAppFocusChange, onAppStateChange } from
 export type { AppFocusState } from "./app-state";
 export { blobForViewing, fileKindLabel, fileKindOf, fileNameFor, formatFileSize } from "./file-kind";
 export type { FileKind } from "./file-kind";
+export { clampZoom, stepZoom, ZOOM_MAX, ZOOM_MIN } from "./zoom";
 export {
   formatConversationTime,
   formatDateTime,
+  formatDayLabel,
   formatDayTime,
   formatDuration,
   formatLocalized,
   formatMessageTime,
+  formatNotificationTime,
   formatRelativeShort,
+  isSameLocalDay,
 } from "./date";
 export { pickDocument, pickDocuments, pickImage, pickImages, toUploadFile } from "./file-picker";
 export { useBackTo } from "./use-back-to";

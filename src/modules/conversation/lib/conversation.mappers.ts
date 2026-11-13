@@ -17,7 +17,7 @@ export function mapConversationDto(dto: ChatRoomDto): Conversation {
   const other = dto.other_user;
   return {
     id: String(dto.id),
-    type: dto.kind === "course" ? "group" : "direct",
+    type: dto.kind === "course" ? "group" : dto.kind === "channel" ? "channel" : "direct",
     kind: dto.kind,
     courseId: dto.course ? String(dto.course) : null,
     title: dto.title,
@@ -28,19 +28,21 @@ export function mapConversationDto(dto: ChatRoomDto): Conversation {
           username: other.username,
           name: [other.first_name, other.last_name].filter(Boolean).join(" ") || other.username,
           phone: other.phone ?? null,
+          role: other.role,
         }
       : null,
     directStatus: dto.direct_status ?? null,
     lastMessage: dto.last_message?.text ?? "Hali xabar yo‘q",
     lastSender: dto.last_message?.sender ?? null,
     lastSenderId: dto.last_message?.sender_id == null ? null : String(dto.last_message.sender_id),
+    lastSenderRole: dto.last_message?.sender_role ?? null,
     lastMessageType: dto.last_message?.message_type ?? null,
     updatedAt: dto.last_message?.created_at ?? dto.updated_at,
     unreadCount: Number(dto.unread_count ?? dto.unread ?? 0),
     status: "offline",
     typing: false,
     avatarTone: toneFor(dto.id),
-    memberCount: Number(dto.member_count ?? 0),
+    memberCount: Number(dto.member_count ?? dto.members_count ?? 0),
     imageUrl: normalizeMediaUrl(dto.image_url ?? dto.image ?? other?.avatar ?? null),
     isPinned: Boolean(dto.is_pinned),
     isMuted: Boolean(dto.is_muted),
@@ -58,6 +60,19 @@ export function mapConversationDto(dto: ChatRoomDto): Conversation {
       messageType: item.message_type ?? "text",
       pinnedAt: item.pinned_at ?? "",
     })),
+    ...(dto.description ? { description: dto.description } : {}),
+    ...(dto.can_write === undefined ? {} : { canWrite: Boolean(dto.can_write) }),
+    ...(dto.can_comment === undefined ? {} : { canComment: Boolean(dto.can_comment) }),
+    unpaidCount: dto.unpaid_count ?? null,
+    overdueCount: dto.overdue_count ?? null,
+    ...(dto.course_kind === undefined ? {} : { courseKind: dto.course_kind === "club" ? "club" : dto.course_kind ? "group" : null }),
+    ...(dto.courses || dto.course_ids
+      ? {
+          linkedCourses: dto.courses
+            ? dto.courses.map((course) => ({ id: String(course.id), title: course.title ?? "" }))
+            : (dto.course_ids ?? []).map((id) => ({ id: String(id), title: "" })),
+        }
+      : {}),
   };
 }
 

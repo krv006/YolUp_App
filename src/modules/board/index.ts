@@ -20,6 +20,8 @@ export type {
   StrokeInput,
   StrokeKind,
   StrokeShapeDto,
+  CodeLanguage,
+  StrokeUpdate,
 } from "./api/board.dto";
 export { mapBoardDto, mapPeriodicElementDto } from "./lib/board.mappers";
 export { BoardSocketManager, parseBoardEvent } from "./lib/board-socket-manager";
@@ -40,10 +42,12 @@ export {
   useSetBoardPermissions,
   useSolveFormula,
   useTeacherSignals,
+  useUpdateStroke,
 } from "./model/board.queries";
 export { useBoardChannel } from "./model/use-board-channel";
 export { useBoardRealtime } from "./model/use-board-realtime";
-export { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS } from "./constants/board.constants";
+export { BOARD_COLORS, BOARD_TEXT_SIZE, BOARD_WIDTHS, DEFAULT_CODE_LANGUAGES } from "./constants/board.constants";
+export { applyStrokeUpdate, canEditStroke, clampMove, moveStroke, shapeBox } from "./lib/board-edit";
 export { arrowHeadPoints, boxFromDrag, buildStroke, strokeKindOf } from "./lib/board.geometry";
 export { FORMULA_GROUPS } from "./lib/formula-palette";
 export type { FormulaGroup, FormulaTemplate } from "./lib/formula-palette";

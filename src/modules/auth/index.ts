@@ -39,10 +39,12 @@ export {
   useAdminCertificates,
   useVerifyCertificate,
   useRejectCertificate,
+  useSetTeacherTestAccess,
 } from "./model/auth.queries";
 export { describeUserAgent } from "./lib/describe-user-agent";
 export { useAuth, useCurrentUser, useIsAuthenticated } from "./model/use-auth";
-export { useIsStudent, useRoleRoutes } from "./model/use-role-routes";
+export { useCanCreateTests, useIsStudent, useRoleRoutes } from "./model/use-role-routes";
+export { useAccountSwitch, type LinkPrompt } from "./model/use-account-switch";
 export { createLoginSchema, createRegisterSchema } from "./model/auth.schemas";
 export {
   useChangePasswordMutation,

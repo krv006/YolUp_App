@@ -4,3 +4,36 @@ export const MOBILE_BOARD_COLORS = ["#24264d", "#4567f5", "#e5484d", "#1f9d62", 
 export const MOBILE_BOARD_WIDTHS = [2, 4, 8] as const;
 
 export const BOARD_TEXT_SIZE = 22;
+export const ERASER_SIZES = [
+  { value: 8, label: "S" },
+  { value: 18, label: "M" },
+  { value: 32, label: "L" },
+] as const;
+export const BOARD_TEXT_SIZES = [
+  { value: 16, label: "S" },
+  { value: 22, label: "M" },
+  { value: 30, label: "L" },
+  { value: 40, label: "XL" },
+] as const;
+
+export const BOARD_SIZE_LIMITS = { min: 12, max: 48 } as const;
+export const CODE_TEXT_SIZE = 20;
+export const CODE_TEXT_COLOR = "#1c1e3a";
+export const CODE_MAX_CHARS = 6000;
+export const DEFAULT_CODE_LANGUAGES = [
+  { id: "auto", label: "Avto" },
+  { id: "sql", label: "SQL" },
+  { id: "python", label: "Python" },
+  { id: "javascript", label: "JavaScript" },
+  { id: "typescript", label: "TypeScript" },
+  { id: "html", label: "HTML" },
+  { id: "css", label: "CSS" },
+  { id: "java", label: "Java" },
+  { id: "csharp", label: "C#" },
+  { id: "cpp", label: "C++" },
+  { id: "c", label: "C" },
+  { id: "php", label: "PHP" },
+  { id: "json", label: "JSON" },
+  { id: "bash", label: "Bash" },
+  { id: "plaintext", label: "Oddiy matn" },
+] as const;

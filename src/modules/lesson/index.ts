@@ -45,7 +45,20 @@ export {
   useRateLesson,
   useLessonReminder,
   useUpdateLesson,
+  useCreateLessonsBulk,
+  useRecordingChoice,
+  useSetRecordingChoice,
 } from "./model/lesson.queries";
+export {
+  bulkRowErrors,
+  bulkRowsReady,
+  createBulkRow,
+  findBulkOverlaps,
+  isBulkRowInPast,
+  MAX_BULK_LESSONS,
+  nextBulkRow,
+} from "./lib/bulk-lessons";
+export type { BulkLessonRow } from "./lib/bulk-lessons";
 export { useLessonView, useLessonViewStore } from "./model/lesson-view.store";
 export type { LessonView } from "./model/lesson-view.store";
 export {

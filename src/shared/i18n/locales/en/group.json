@@ -3,7 +3,9 @@
     "chat": "Chat",
     "lessons": "Lessons",
     "assignments": "Assignments",
-    "attendance": "Attendance"
+    "attendance": "Attendance",
+    "progress": "Progress",
+    "members": "Members"
   },
   "sendFailed": "Couldn't send the message",
   "replyFallback": "Reply",
@@ -90,7 +92,9 @@
     "removeDialogDescription": "They lose access to the chat, lessons and assignments. Their grades and attendance stay.",
     "cancel": "Cancel",
     "remove": "Remove",
-    "removeConfirmTitle": "Remove {{name}} from the group?"
+    "removeConfirmTitle": "Remove {{name}} from the group?",
+    "message": "Message",
+    "messageAria": "Message {{name}}"
   },
   "attendance": {
     "eyebrow": "COURSE REPORT",
@@ -117,7 +121,10 @@
     "lessonsMeta": "Who came, who didn’t",
     "untitledLesson": "Untitled lesson",
     "lessonJoined": "{{joined}} / {{total}} attended",
-    "lessonOpen": "View attendance"
+    "lessonOpen": "View attendance",
+    "exits_one": "{{count}} exit",
+    "exits_other": "{{count}} exits",
+    "exitsHint": "Times the lesson window was left"
   },
   "dialogs": {
     "lesson": {
@@ -176,7 +183,14 @@
       "timeShort": "Time",
       "startShort": "Start",
       "durationMinutes": "Duration (minutes)",
-      "minutesValue": "{{count}} minutes"
+      "minutesValue": "{{count}} minutes",
+      "bulk": "Several lessons",
+      "bulkSubtitle": "Set a topic and time for each lesson",
+      "short": {
+        "single": "Once",
+        "repeat": "Weekly",
+        "bulk": "Several"
+      }
     },
     "conflict": {
       "singleTitle": "You already have a lesson at this time",
@@ -218,7 +232,8 @@
         "reading": "Reading",
         "listening": "Listening",
         "speaking": "Speaking"
-      }
+      },
+      "descriptionLabel": "Description"
     }
   },
   "addStudent": {
@@ -242,7 +257,7 @@
     "password": "Temporary password",
     "copyPassword": "Copy the password",
     "passwordCopied": "Password copied",
-    "parentPhone": "Parent phone · optional",
+    "parentPhone": "Observer phone · optional",
     "createNote": "Send the login and password to the student. They change the password on first sign-in.",
     "createSubmit": "Create the account",
     "requestsTitle": "Join requests · {{count}}",
@@ -252,7 +267,7 @@
     "decline": "Decline",
     "acceptAll": "Accept ({{count}})",
     "close": "Close",
-    "parentFor": "Parent · for {{name}}",
+    "parentFor": "Observer · for {{name}}",
     "createAccountShort": "New student account",
     "inviteShort": "Invite link",
     "copy": "Copy"
@@ -328,5 +343,138 @@
     "delete": "Delete",
     "results": "Results",
     "menu": "Actions"
+  },
+  "progress": {
+    "eyebrow": "STUDENT REPORT",
+    "title": "Student progress",
+    "fee": "Monthly fee: {{amount}} UZS",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "statPaid": "Paid",
+    "statAttendance": "Attendance",
+    "statHomework": "Homework",
+    "filterAll": "All",
+    "filterUnpaid": "Unpaid",
+    "filterPaid": "Paid",
+    "filterEmpty": "No students match this filter.",
+    "joined": "Joined: {{date}}",
+    "missed_one": "{{count}} assignment missed",
+    "missed_other": "{{count}} assignments missed",
+    "unpaidMonths_one": "{{count}} month unpaid",
+    "unpaidMonths_other": "{{count}} months unpaid",
+    "paid": "Paid",
+    "unpaid": "Unpaid",
+    "markPaid": "Mark as paid",
+    "undoPaid": "Remove paid mark",
+    "markedPaid": "{{name}} — payment recorded",
+    "unmarked": "{{name}} — payment mark removed",
+    "unmarkTitle": "Remove the paid mark?",
+    "unmarkDescription": "The \"paid\" mark for {{name}} in {{month}} will be removed.",
+    "unmarkConfirm": "Remove",
+    "cancel": "Cancel",
+    "errorTitle": "Could not load data",
+    "errorDescription": "Progress could not be loaded. Please try again.",
+    "retry": "Retry",
+    "emptyTitle": "No students yet",
+    "emptyDescription": "Once students join the group, their payments, attendance and homework results will show up here.",
+    "detail": {
+      "lessons": "Lessons",
+      "assignments": "Homework",
+      "payments": "Payments",
+      "attended": "Attended",
+      "absent": "Absent",
+      "minutes": "{{count}} min",
+      "noLessons": "No finished lessons yet.",
+      "noAssignments": "No assignments yet.",
+      "due": "Due: {{date}}",
+      "noDeadline": "No deadline",
+      "score": "{{value}} / 10",
+      "paidOn": "Paid: {{date}}",
+      "state": {
+        "done": "Graded",
+        "awaiting_review": "In review",
+        "resubmit": "Resubmit",
+        "missed": "Missed",
+        "not_submitted": "Not submitted"
+      },
+      "lateReason": "Late because: {{reason}}",
+      "absentReason": "Absent because: {{reason}}",
+      "teacherNote": "Note: {{note}}"
+    },
+    "gradeLabel": "Avg. grade",
+    "rangeLabel": "Attendance period",
+    "payment": {
+      "title": "Record payment",
+      "editTitle": "Edit payment",
+      "amount": "Amount",
+      "currency": "UZS",
+      "note": "Note (optional)",
+      "notePlaceholder": "e.g. cash, receipt number",
+      "notes": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Transfer"
+      },
+      "save": "Save",
+      "updated": "{{name}} — payment updated",
+      "edit": "Edit",
+      "sum": "{{amount}} UZS",
+      "markShort": "Paid"
+    },
+    "noFee": "No course fee set — payments aren't tracked",
+    "currentMonth": "Back to the current month",
+    "notJoinedYet": "Not joined yet",
+    "search": "Search students",
+    "sort": {
+      "label": "Sort",
+      "name": "Name (A–Z)",
+      "attendance": "Low attendance",
+      "homework": "Low homework",
+      "debt": "Most debt"
+    },
+    "searchShort": "Search",
+    "resubmit_one": "{{count}} resubmission requested",
+    "resubmit_other": "{{count}} resubmissions requested",
+    "neverVisited": "Hasn't joined a lesson yet",
+    "inactive_one": "No lessons for {{count}} day",
+    "inactive_other": "No lessons for {{count}} days",
+    "focusHint": "Focus {{value}}%",
+    "awaitingHint_one": "{{count}} awaiting review",
+    "awaitingHint_other": "{{count}} awaiting review",
+    "statFocus": "Focus",
+    "statAttendanceLessons": "Attendance · {{count}} lessons",
+    "lastVisit": "Last visit: {{date}}",
+    "noVisit": "Hasn't joined a lesson yet",
+    "overdue": "Overdue",
+    "unpaidBadge_one": "{{count}} student hasn't paid",
+    "unpaidBadge_other": "{{count}} students haven't paid"
+  },
+  "club": {
+    "eyebrow": "Speaking club",
+    "membersTitle": "Members · {{count}}",
+    "add": "Add members",
+    "addHint": "Pick groups or individual students — they join right away.",
+    "added": "Students added: {{count}}",
+    "empty": "No members yet"
+  },
+  "paymentSettings": {
+    "button": "Payment settings",
+    "title": "Payment settings",
+    "description": "Monthly fee, due day and reminders. Reminders go to the student and their observer.",
+    "fee": "Monthly fee (UZS)",
+    "feePlaceholder": "For example, 450000",
+    "day": "Due day every month",
+    "noDay": "Not set",
+    "dayOption": "Day {{day}}",
+    "dayHint": "If unpaid by this day, the student is marked as overdue.",
+    "reminders": "Send a reminder",
+    "reminderOption_one": "{{count}} day before",
+    "reminderOption_other": "{{count}} days before",
+    "remindersHint": "You can pick several. Only students who haven't paid this month get it.",
+    "remindersNeedDay": "Pick a due day first.",
+    "dueDay": "due on day {{day}}",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Payment settings saved"
   }
 }

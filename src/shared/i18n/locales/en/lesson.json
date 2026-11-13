@@ -117,11 +117,18 @@
   },
   "finishDialog": {
     "title": "Finish the lesson?",
-    "description": "Everyone will be removed from the room. The recording is saved and sent to the group chat.",
+    "description": "Everyone will be removed from the room. The recording is saved.",
     "cancel": "Cancel",
     "confirm": "Finish",
     "leaveOnly": "Just leave",
-    "mobileDescription": "Everyone will be removed. The recording is saved and posted to the chat."
+    "mobileDescription": "Everyone will be removed. The recording is saved.",
+    "postRecording": "Send the video recording to the group",
+    "postRecordingHint": "Once ready, the recording is posted to the group chat and students get a notification",
+    "keepRecordingHint": "The recording won't be posted — you can send it later from the recording page",
+    "finishedPosted": "Lesson finished — the recording will reach the group chat once it is ready",
+    "finishedKept": "Lesson finished — the recording is saved",
+    "postRecordingDecided": "Once ready, the recording will be posted to the group chat — you chose this when joining the lesson.",
+    "keepRecordingDecided": "The recording won't be posted — you chose this when joining the lesson. You can send it later from the recording page."
   },
   "rateDialog": {
     "title": "Rate the lesson",
@@ -220,7 +227,9 @@
     "volume": "Volume",
     "notFoundEyebrow": "LESSON RECORDING",
     "notFoundTitle": "Lesson not found",
-    "retry": "Try again"
+    "retry": "Try again",
+    "convertingTitle": "Converting...",
+    "converting": "The video is being converted to a format that opens on every device. It will open here as soon as it is ready."
   },
   "schedule": {
     "now": "NOW",
@@ -406,10 +415,44 @@
     "exits": "left {{count}} times ({{duration}})",
     "noExits": "stayed focused",
     "attention": "attention {{answered}}/{{total}}",
-    "alert": "Parent was notified about frequent exits",
+    "alert": "Observer was notified about frequent exits",
     "awayTotal": "Total away: {{duration}}",
     "longest": "Longest: {{duration}}",
     "notReturned": "did not return",
-    "empty": "No attendance data for this lesson."
+    "empty": "No attendance data for this lesson.",
+    "noteAdd": "Add a note",
+    "noteEdit": "Edit the note",
+    "reasonLabel": "Reason for being late",
+    "reasonPlaceholder": "e.g. transport",
+    "noteLabel": "Teacher's note",
+    "notePlaceholder": "e.g. Very active in class",
+    "noteHint": "Observers see this in their student's attendance",
+    "noteCancel": "Cancel",
+    "noteSave": "Save",
+    "noteSaved": "Note saved",
+    "noteFailed": "Couldn't save the note",
+    "reasonLine": "Reason: {{text}}",
+    "noteLine": "Note: {{text}}"
+  },
+  "bulk": {
+    "mode": "Several lessons",
+    "modeShort": "Several",
+    "topicPlaceholder": "Lesson topic",
+    "topicAria": "Lesson {{number}} topic",
+    "date": "Date",
+    "time": "Start",
+    "duration": "Duration",
+    "dateAria": "Lesson {{number}} date",
+    "timeAria": "Lesson {{number}} time and duration",
+    "remove": "Remove lesson {{number}}",
+    "addRow": "Add another lesson",
+    "limit": "{{count}} / {{max}} lessons",
+    "past": "This time has already passed",
+    "overlap": "Overlaps another lesson in this list",
+    "busy": "«{{title}}» is already at this time",
+    "submit_one": "Save {{count}} lesson",
+    "submit_other": "Save {{count}} lessons",
+    "saved_one": "{{count}} lesson added",
+    "saved_other": "{{count}} lessons added"
   }
 }

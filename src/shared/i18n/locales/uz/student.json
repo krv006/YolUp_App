@@ -27,7 +27,11 @@
       "open": "Ochish",
       "results": "Natijani ko‘rish",
       "emptyTitle": "Hali vazifa yo‘q",
-      "emptyHint": "O‘qituvchi vazifa berganda shu yerda ko‘rinadi."
+      "emptyHint": "O‘qituvchi vazifa berganda shu yerda ko‘rinadi.",
+      "continue": "Davom etish · {{time}}",
+      "continueAction": "Davom etish",
+      "attemptsOver": "Urinishlar tugagan",
+      "score": "{{value}} / {{max}} ball"
     },
     "lessonsTab": {
       "eyebrow": "DARS JADVALI",
@@ -52,7 +56,7 @@
   "enrollmentDialog": {
     "title": "Yangi muloqot",
     "description": "O'qituvchiga so'rov yuboring yoki ochiq kursga qo'shiling.",
-    "parentRequestsEyebrow": "OTA-ONA SO'ROVLARI",
+    "parentRequestsEyebrow": "KUZATUVCHI SO'ROVLARI",
     "wantsToLink": "profilga bog'lanmoqchi",
     "decline": "Rad etish",
     "approve": "Tasdiqlash",
@@ -209,7 +213,10 @@
       "emptyHint": "O‘qituvchingiz test bersa, shu yerda ko‘rinadi.",
       "attemptsTitle": "Urinishlarim",
       "attemptsSubtitle": "Oxirgi yechgan testlaringiz",
-      "attemptsEmpty": "Hali test yechmagansiz"
+      "attemptsEmpty": "Hali test yechmagansiz",
+      "attemptsOver": "Urinishlar tugagan",
+      "continue": "Davom etish · {{time}}",
+      "continueAria": "Testni davom ettirish, {{time}} qoldi"
     },
     "player": {
       "questions": "Savollar · {{count}}",
@@ -249,7 +256,25 @@
       },
       "trueLabel": "To‘g‘ri",
       "falseLabel": "Noto‘g‘ri",
-      "finishShort": "Yakunlash"
+      "finishShort": "Yakunlash",
+      "timeUp": "Vaqt tugadi — test topshirilmoqda",
+      "timeLeft": "Qolgan vaqt: {{time}}",
+      "start": {
+        "title": "Testni boshlash",
+        "time": "Vaqt: {{count}} daqiqa",
+        "attempts": "Urinishlar: {{total}} tadan {{left}} tasi qoldi",
+        "questions": "Savollar: {{count}} ta",
+        "note": "Boshlaganingizdan keyin vaqt to'xtamaydi — sahifani yopsangiz ham. Vaqt tugasa test o'zi topshiriladi.",
+        "action": "Boshlash",
+        "starting": "Boshlanmoqda…"
+      },
+      "over": {
+        "title": "Urinishlar tugagan",
+        "text": "Bu testni {{count}} marta topshirdingiz. Boshqa urinish qolmadi.",
+        "results": "Natijani ko'rish",
+        "back": "Testlarga qaytish"
+      },
+      "metaTimed": "vaqt: {{count}} daqiqa"
     },
     "results": {
       "eyebrow": "Testlar / Natijangiz · {{course}}",
@@ -392,13 +417,13 @@
       "overdue": "Muddati o‘tgan",
       "aiCheck": "AI dastlabki tekshiruv",
       "answer": "Javobingiz",
-      "answerHint": "Fayl yuklang va kerak bo‘lsa izoh qoldiring. Topshirgandan so‘ng o‘qituvchi tekshiradi.",
+      "answerHint": "Fayl yuklang yoki javobingizni izohga yozing. Topshirgandan so‘ng o‘qituvchi tekshiradi.",
       "drop": "Faylni shu yerga tashlang yoki tanlang",
       "dropHint": "PDF, JPG, PNG, DOCX · 25 MB gacha",
       "dropSpeaking": "MP3, WAV, M4A, OGG · 25 MB gacha",
       "fileReady": "{{size}} · tanlandi",
       "remove": "Olib tashlash",
-      "comment": "Izoh (ixtiyoriy)",
+      "comment": "Izoh yoki javob matni",
       "commentPlaceholder": "Masalan: 124-misolda yordam kerak bo‘ldi…",
       "dueNotice": "Muddat: {{date}} · {{left}}.",
       "lateAllowed": "Kech topshirishga ruxsat bor.",
@@ -432,7 +457,9 @@
       "tooManyFiles": "Ko‘pi bilan {{count}} ta fayl yuklash mumkin",
       "filesCount": "{{count}} / {{max}} fayl",
       "myComment": "Sizning izohingiz",
-      "filesTitle": "Yuborilgan fayllar · {{count}}"
+      "filesTitle": "Yuborilgan fayllar · {{count}}",
+      "outOf": "/ {{max}} ball",
+      "notGraded": "Bu vazifa ball bilan baholanmaydi"
     }
   },
   "tutor": {

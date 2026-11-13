@@ -2,15 +2,18 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { type QueryParams } from "@/shared/api";
 import { describeCreateError } from "@/modules/auth";
+import { i18n } from "@/shared/i18n";
 import { lessonApi } from "../api/lesson.api";
 import type { LessonFormInput, LessonRatingInput } from "../api/lesson.dto";
 import { addMinutesToTime, toBackendWeekdays, weeksBetween } from "../lib/lesson-schedule";
+import type { BulkLessonRow } from "../lib/bulk-lessons";
 
 export const lessonKeys = Object.freeze({
   all: ["lessons"] as const,
   list: (params: QueryParams = {}) => ["lessons", "list", params] as const,
   detail: (id: string) => ["lessons", "detail", id] as const,
   recording: (id: string) => ["lessons", "recording", id] as const,
+  recordingChoice: (id: string) => ["lessons", "recording-choice", id] as const,
   ratings: (id: string) => ["lessons", "ratings", id] as const,
 });
 
@@ -26,6 +29,7 @@ const RECORDING_POLL_MS = 15_000;
  * uzoq (eski qiymatda 15s gacha) kutib turishi mumkin edi.
  */
 const MERGING_POLL_MS = 2_000;
+const CONVERTING_POLL_MS = 30_000;
 
 /** `enabled` — chaqiruvchi ko'rinmayotgan bo'lim uchun so'rov yubormasligi mumkin. */
 export function useLessons(params: QueryParams = {}, enabled = true) {
@@ -102,6 +106,19 @@ export function useCreateLesson() {
       toast.success("Dars saqlandi");
     },
     // Admin hali tasdiqlamagan o'qituvchi dars yarata olmaydi (403) — sabab aniq ko'rsatiladi.
+    onError: (error) => toast.error(describeCreateError(error)),
+  });
+}
+
+export function useCreateLessonsBulk() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, rows }: { courseId: string; rows: readonly BulkLessonRow[] }) =>
+      lessonApi.createBulk(courseId, rows),
+    onSuccess: ({ count }) => {
+      client.invalidateQueries({ queryKey: lessonKeys.all });
+      toast.success(i18n.t("lesson:bulk.saved", { count }));
+    },
     onError: (error) => toast.error(describeCreateError(error)),
   });
 }
@@ -224,13 +241,37 @@ export function useFinishLesson() {
     // LiveKit Egress ishlamagani uchun yozilgan vaqtinchalik yechim edi.
     // Mobilda dars yozuvi TO'LIQ server tomonda (Egress) bo'ladi, shuning
     // uchun mijoz faqat darsni yakunlaydi.
-    mutationFn: ({ id, recordingTitle }: { id: string; recordingTitle?: string }) =>
-      lessonApi.finish(id, recordingTitle),
-    onSuccess: () => {
+    mutationFn: ({
+      id,
+      recordingTitle,
+      postRecording = true,
+    }: {
+      id: string;
+      recordingTitle?: string;
+      postRecording?: boolean;
+    }) => lessonApi.finish(id, { recordingTitle, postRecording }),
+    onSuccess: (_lesson, { postRecording = true }) => {
       client.invalidateQueries({ queryKey: lessonKeys.all });
-      toast.success("Dars yakunlandi — yozuv guruh chatiga tushadi");
+      toast.success(i18n.t(postRecording ? "lesson:finishDialog.finishedPosted" : "lesson:finishDialog.finishedKept"));
     },
     onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useRecordingChoice(id: string | null, enabled = true) {
+  return useQuery({
+    queryKey: lessonKeys.recordingChoice(id ?? ""),
+    queryFn: ({ signal }) => lessonApi.getRecordingChoice(id as string, { signal }),
+    enabled: Boolean(id) && enabled,
+    staleTime: Infinity,
+  });
+}
+
+export function useSetRecordingChoice(id: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (postRecording: boolean) => lessonApi.setRecordingChoice(id, postRecording),
+    onSuccess: (choice) => client.setQueryData(lessonKeys.recordingChoice(id), choice),
   });
 }
 
@@ -246,6 +287,7 @@ export function useLessonRecording(id: string | null) {
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       if (status === "merging") return MERGING_POLL_MS;
+      if (status === "converting") return CONVERTING_POLL_MS;
       if (status === "recording") return RECORDING_POLL_MS;
       return false;
     },

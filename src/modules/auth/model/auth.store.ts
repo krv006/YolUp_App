@@ -3,11 +3,12 @@ import { AppError, announceSessionChange, refreshTokenManager, tokenStorage } fr
 import type { TokenPair } from "@/shared/api";
 import { SUPPORTED_LANGUAGES, useLanguageStore, useTextSizeStore, type AppLanguage } from "@/shared/model";
 import { useAppearanceStore } from "@/shared/model/theme.store";
-import type { AuthStatus, AuthUser, LoginCredentials } from "@/shared/types";
+import type { AuthStatus, AuthUser, LinkedAccount, LoginCredentials } from "@/shared/types";
 import { unregisterPushDevice } from "@/modules/notification/model/push-device";
 import { authApi } from "../api/auth.api";
-import type { RegisterRequestDto, TwoFactorChallenge } from "../api/auth.dto";
+import { accountLinkResponseDtoSchema, type RegisterRequestDto, type TwoFactorChallenge } from "../api/auth.dto";
 import {
+  mapLinkedAccountDto,
   mapLoginRequest,
   mapLoginResponse,
   mapSwitchAccountResponse,
@@ -70,6 +71,7 @@ interface AuthState {
   switchAccount: (userId: string) => Promise<AuthUser>;
   /** Bitta hisob ichida rolni almashtirish. */
   switchRole: (role: string) => Promise<AuthUser>;
+  linkAccount: (username: string, password: string) => Promise<LinkedAccount>;
   /** Server qaytargan yangi token+profil juftligini joriy sessiya qilib oladi. */
   adoptSession: (response: unknown) => AuthUser;
   logout: () => Promise<void>;
@@ -237,6 +239,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   async switchRole(role) {
     return get().adoptSession(await authApi.switchRole(role));
+  },
+
+  async linkAccount(username, password) {
+    const { account } = accountLinkResponseDtoSchema.parse(await authApi.linkAccount(username, password));
+    set({ user: mapUserDto(await authApi.getCurrentUser()) });
+    return mapLinkedAccountDto(account);
   },
 
   adoptSession(response) {

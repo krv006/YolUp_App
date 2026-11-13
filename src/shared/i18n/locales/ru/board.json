@@ -42,7 +42,11 @@
     "toolbarAria": "Инструменты доски",
     "colorLabel": "Цвет {{value}}",
     "widthLabel": "Толщина {{value}}",
-    "styleAria": "Цвет и толщина"
+    "styleAria": "Цвет и толщина",
+    "code": "Код",
+    "select": "Выделение",
+    "textSizeLabel": "Размер текста: {{value}}",
+    "eraserSizeLabel": "Размер ластика: {{value}}"
   },
   "inline": {
     "cancel": "Отмена",
@@ -58,7 +62,14 @@
     "underline": "Подчёркнутый",
     "bulletList": "Маркированный список",
     "numberedList": "Нумерованный список",
-    "formatAria": "Форматирование текста"
+    "formatAria": "Форматирование текста",
+    "code": "Код",
+    "save": "Сохранить",
+    "edit": {
+      "text": "Изменить текст",
+      "math": "Изменить формулу",
+      "code": "Изменить код"
+    }
   },
   "eraseDialog": {
     "title": "Удалить элемент",
@@ -73,7 +84,11 @@
       "cleanup": "Очистка доски",
       "other": "Другое"
     },
-    "reasonPlaceholder": "Укажите причину"
+    "reasonPlaceholder": "Укажите причину",
+    "deletedCount_one": "Удалён {{count}} элемент",
+    "deletedCount_few": "Удалено {{count}} элемента",
+    "deletedCount_many": "Удалено {{count}} элементов",
+    "deletedCount_other": "Удалено {{count}} элемента"
   },
   "grantDialog": {
     "title": "Разрешение рисовать на доске",
@@ -213,5 +228,27 @@
     },
     "liveLesson": "Онлайн-урок",
     "menu": "Действия"
+  },
+  "code": {
+    "language": "Язык программирования",
+    "detected": "Авто · {{language}}",
+    "counter": "{{count}}/{{max}}",
+    "aria": "Написать код на доске",
+    "placeholder": "Напишите код…",
+    "hint": "Tab — 4 пробела · Shift+Tab — убрать отступ · Ctrl+Enter — подтвердить"
+  },
+  "edit": {
+    "notOwner": "Можно изменять только свои элементы",
+    "editedBy": "изменил(а) {{name}}",
+    "toolbar": "Действия с элементом",
+    "edit": "Изменить",
+    "delete": "Удалить",
+    "sizeDown": "Уменьшить",
+    "sizeUp": "Увеличить"
+  },
+  "zoom": {
+    "in": "Увеличить",
+    "out": "Уменьшить",
+    "reset": "Вернуть исходный масштаб ({{value}}%)"
   }
 }

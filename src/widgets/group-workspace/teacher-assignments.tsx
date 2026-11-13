@@ -8,11 +8,13 @@ import { useLessons } from "@/modules/lesson";
 import {
   AddQuizDialog,
   AssignQuizDialog,
+  PaidTestDialog,
   QuizAttemptsSheet,
   quizDisplayTitle,
   quizErrorMessage,
   useAssignQuizToCourse,
   useCreateQuiz,
+  usePaidTestGate,
   usePublishQuiz,
   useQuiz,
   useQuizAttempts,
@@ -57,6 +59,7 @@ export function TeacherAssignments({
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [quizDialog, setQuizDialog] = useState(false);
+  const quizGate = usePaidTestGate();
   const [bankDialog, setBankDialog] = useState(false);
   const [giveFromBank, setGiveFromBank] = useState(false);
   const [attemptsOf, setAttemptsOf] = useState<QuizSummary | null>(null);
@@ -112,7 +115,7 @@ export function TeacherAssignments({
         {hasItems || loading ? (
           <View style={styles.buttons}>
             <AddAssignmentMenu label={t("assignments.addAssignment")} onCreate={() => setDialog(true)} onFromBank={() => setGiveFromBank(true)} />
-            <AddQuizMenu onFromBank={() => setBankDialog(true)} onCreate={() => setQuizDialog(true)} />
+            <AddQuizMenu onFromBank={() => setBankDialog(true)} onCreate={quizGate.guard(() => setQuizDialog(true))} createLocked={!quizGate.allowed} />
           </View>
         ) : null}
       </View>
@@ -211,6 +214,8 @@ export function TeacherAssignments({
         pending={assignQuiz.isPending}
         onSubmit={(value) => void assignQuiz.mutateAsync(value).then(() => setBankDialog(false))}
       />
+
+      <PaidTestDialog open={quizGate.open} onOpenChange={quizGate.setOpen} />
 
       <AssignHomeworkDialog open={giveFromBank} onOpenChange={setGiveFromBank} courseId={courseId} />
 

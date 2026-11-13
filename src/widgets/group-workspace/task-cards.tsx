@@ -292,9 +292,13 @@ export function MobileAssignmentList({
   );
 }
 
-/** "Test qo'shish" — veb `add-quiz-menu.tsx`: tayyor testlardan yoki yangisini yaratish. */
-export function AddQuizMenu({ onFromBank, onCreate }: { onFromBank: () => void; onCreate: () => void }) {
-  const { t } = useTranslation("group");
+/**
+ * "Test qo'shish" — veb `add-quiz-menu.tsx`: tayyor testlardan yoki yangisini
+ * yaratish. `createLocked` — test yaratish pullik xizmati yoqilmagan: "Yangi
+ * test" qatorida qulf va "Pullik xizmat".
+ */
+export function AddQuizMenu({ onFromBank, onCreate, createLocked = false }: { onFromBank: () => void; onCreate: () => void; createLocked?: boolean }) {
+  const { t } = useTranslation(["group", "quiz"]);
   const ds = useDs();
   const { anchorRef, rect: menuRect, open: openMenu, close: closeMenu } = usePopoverAnchor();
   const options = [
@@ -318,6 +322,7 @@ export function AddQuizMenu({ onFromBank, onCreate }: { onFromBank: () => void; 
       <PopoverMenu rect={menuRect} onClose={closeMenu} width={320} height={64 * 2 + 12}>
         {options.map((option) => {
           const tone = toneColors(option.tone, ds);
+          const locked = createLocked && option.id === "create";
           return (
             <Pressable
               key={option.id}
@@ -336,10 +341,10 @@ export function AddQuizMenu({ onFromBank, onCreate }: { onFromBank: () => void; 
                   {t(`assignments.testMenu.${option.id}.title`)}
                 </DsText>
                 <DsText v="body-sm" c="ink-secondary" numberOfLines={1} style={styles.quizHint}>
-                  {t(`assignments.testMenu.${option.id}.hint`)}
+                  {locked ? t("quiz:paid.badge") : t(`assignments.testMenu.${option.id}.hint`)}
                 </DsText>
               </View>
-              <Icon name="chevron-right" size={20} color={ds.c["ink-secondary"]} />
+              <Icon name={locked ? "lock" : "chevron-right"} size={locked ? 18 : 20} color={ds.c["ink-secondary"]} />
             </Pressable>
           );
         })}

@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useMyAnalytics } from "@/modules/analytics";
+import { formatCountdown, useQuizSessionsLeft } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import type { Assignment, QuizSummary } from "@/shared/types";
 import { dsRadius, MobileEmptyCard, useDs } from "@/shared/ui";
@@ -21,7 +22,8 @@ export interface StudentTasksProps {
 /**
  * Guruhdagi vazifa va testlar (o'quvchi) — veb `student-tasks.tsx`: vazifalar
  * va testlar bitta ro'yxatda (`TaskCards`); test yechilgan bo'lsa natija,
- * aks holda "Yechish".
+ * aks holda "Yechish"; boshlangan seansda "Davom etish · 12:34" jonli taymer,
+ * urinishlar tugaganda "Urinishlar tugagan".
  */
 export function StudentTasks({ assignments, quizzes, loading, courseTitle, courseImage, courseTone }: StudentTasksProps) {
   const { t } = useTranslation("student");
@@ -30,6 +32,7 @@ export function StudentTasks({ assignments, quizzes, loading, courseTitle, cours
   const router = useRouter();
   const analytics = useMyAnalytics();
   const assignmentRow = useAssignmentRows();
+  const sessions = useQuizSessionsLeft(quizzes);
 
   const attempts = new Map((analytics.data?.kind === "student" ? analytics.data.recentAttempts : []).map((item) => [item.quizId, item]));
   const day = (value: string) => {
@@ -42,19 +45,43 @@ export function StudentTasks({ assignments, quizzes, loading, courseTitle, cours
     .filter((quiz) => quiz.status !== "draft")
     .map((quiz) => {
       const attempt = attempts.get(quiz.id);
-      const open = () => router.push((attempt ? ROUTES.student.testResults(quiz.id) : ROUTES.student.test(quiz.id)) as never, { withAnchor: true });
+      const left = sessions.get(quiz.id) ?? null;
+      const locked = left === null && !attempt && quiz.attemptsLeft === 0;
+      const open = () =>
+        router.push((attempt && left === null ? ROUTES.student.testResults(quiz.id) : ROUTES.student.test(quiz.id)) as never, { withAnchor: true });
       return {
         id: `quiz-${quiz.id}`,
         quizId: quiz.id,
         title: quiz.title,
-        meta: [t("groupWorkspace.tasks.quizMeta", { count: quiz.questionCount }), attempt ? "" : quiz.dueAt ? t("groupWorkspace.tasks.due", { date: day(quiz.dueAt) }) : t("groupWorkspace.tasks.noDue")]
+        meta: [
+          t("groupWorkspace.tasks.quizMeta", { count: quiz.questionCount }),
+          attempt || left !== null || locked ? "" : quiz.dueAt ? t("groupWorkspace.tasks.due", { date: day(quiz.dueAt) }) : t("groupWorkspace.tasks.noDue"),
+        ]
           .filter(Boolean)
           .join(" · "),
-        pill: attempt ? { tone: "success", icon: "check-circle", label: t("groupWorkspace.tasks.finished") } : { tone: "violet", icon: "edit", label: t("groupWorkspace.tasks.new") },
-        aside: attempt ? t("groupWorkspace.tasks.result", { value: `${Math.round(attempt.percentage ?? 0)}%` }) : t("groupWorkspace.tasks.solve"),
+        pill:
+          left !== null
+            ? { tone: left <= 60 ? "danger" : "brand", icon: "timer", label: t("groupWorkspace.tasks.continue", { time: formatCountdown(left) }) }
+            : attempt
+              ? { tone: "success", icon: "check-circle", label: t("groupWorkspace.tasks.finished") }
+              : locked
+                ? { tone: "danger", icon: "lock", label: t("groupWorkspace.tasks.attemptsOver") }
+                : { tone: "violet", icon: "edit", label: t("groupWorkspace.tasks.new") },
+        aside:
+          left !== null || locked
+            ? ""
+            : attempt
+              ? t("groupWorkspace.tasks.result", { value: `${Math.round(attempt.percentage ?? 0)}%` })
+              : t("groupWorkspace.tasks.solve"),
         progress: null,
         onOpen: open,
-        menu: [{ id: "open", label: attempt ? t("groupWorkspace.tasks.results") : t("groupWorkspace.tasks.solve"), run: open }],
+        menu: [
+          {
+            id: "open",
+            label: left !== null ? t("groupWorkspace.tasks.continueAction") : attempt ? t("groupWorkspace.tasks.results") : t("groupWorkspace.tasks.solve"),
+            run: open,
+          },
+        ],
       };
     });
 

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
+import type { QuizImportSource } from "@/modules/quiz";
 import {
   DsText,
   dsRadius,
@@ -28,10 +29,12 @@ export interface NewTestDialogProps {
   subjects: ReadonlyArray<{ value: string; label: string }>;
   pending?: boolean;
   onContinue: (draft: NewTestDraft) => void;
-  onImport: () => void;
+  onImport: (source: QuizImportSource) => void;
+  /** Ichki oynalar (import) — shu oynaning ichida ochiladi (iOS yonma-yon Modal'ni ko'rsatmaydi). */
+  children?: ReactNode;
 }
 
-const IMPORT_SOURCES: ReadonlyArray<{ id: string; icon: IconName }> = [
+const IMPORT_SOURCES: ReadonlyArray<{ id: QuizImportSource; icon: IconName }> = [
   { id: "docx", icon: "assignment-check-fill" },
   { id: "xlsx", icon: "bar-chart" },
   { id: "google", icon: "send" },
@@ -44,11 +47,11 @@ function today(): string {
 
 /**
  * Yangi test, 1-qadam — veb `new-test-dialog.tsx` ning tor ekran varianti
- * (to'liq ekran): guruh, nom, fan, muddat; import manbalari (Word, Excel,
- * Google — hammasi import oynasini ochadi); "Davom etish" savollar
- * muharririga (`?step=2`) olib o'tadi.
+ * (to'liq ekran): guruh (yoki "Guruhsiz saqlash"), nom, fan, muddat; import
+ * manbalari (Word, Excel, Google — har biri o'z import rejimini ochadi);
+ * "Davom etish" savollar muharririga (`?step=2`) olib o'tadi.
  */
-export function NewTestDialog({ open, onOpenChange, courses, subjects, pending = false, onContinue, onImport }: NewTestDialogProps) {
+export function NewTestDialog({ open, onOpenChange, courses, subjects, pending = false, onContinue, onImport, children }: NewTestDialogProps) {
   const { t } = useTranslation("quiz");
   const { t: tl } = useTranslation("lesson");
   const ds = useDs();
@@ -74,7 +77,7 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
       onOpenChange={onOpenChange}
       title={t("newTest.mobileTitle")}
       closeLabel={t("newTest.cancel")}
-      footer={<MobileButton icon="chevron-right" label={t("newTest.continue")} disabled={pending || !courseId || !title.trim()} onPress={submit} />}
+      footer={<MobileButton icon="chevron-right" label={t("newTest.continue")} disabled={pending || !title.trim()} onPress={submit} />}
     >
       <View style={[styles.progress, { backgroundColor: ds.c.subtle }]}>
         <View style={[styles.progressFill, { backgroundColor: ds.c.brand }]} />
@@ -86,13 +89,18 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
             type="select"
             surface
             value={courseId}
-            display={course ? course.label : t("assignDialog.pick")}
+            display={course ? course.label : t("newTest.noGroup")}
             placeholder={!course}
             ariaLabel={t("newTest.group")}
-            options={[...(course ? [] : [{ value: "", label: t("assignDialog.pick") }]), ...courses.map((item) => ({ value: item.id, label: item.label }))]}
+            options={[{ value: "", label: t("newTest.noGroup") }, ...courses.map((item) => ({ value: item.id, label: item.label }))]}
             onChange={setCourseId}
           />
         </MobileFieldLabel>
+        {course ? null : (
+          <DsText v="body-xs" c="ink-secondary" style={styles.noGroupHint}>
+            {t("newTest.noGroupHint")}
+          </DsText>
+        )}
 
         <MobileFieldLabel gap={7} label={t("newTest.name")}>
           <MobileInput surface value={title} placeholder={t("newTest.namePlaceholder")} onChangeText={setTitle} />
@@ -131,7 +139,7 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
           <View key={source.id} style={styles.sourceCell}>
             <Pressable
               accessibilityRole="button"
-              onPress={onImport}
+              onPress={() => onImport(source.id)}
               style={({ pressed }) => [styles.source, { backgroundColor: pressed ? ds.c.subtle : ds.c.surface }]}
             >
               <Icon name={source.icon} size={20} color={ds.c.brand} />
@@ -142,6 +150,7 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
           </View>
         ))}
       </View>
+      {children}
     </MobileScreenDialog>
   );
 }
@@ -151,6 +160,8 @@ const styles = StyleSheet.create({
   progress: { marginTop: 16, height: 6, overflow: "hidden", borderRadius: 3 },
   progressFill: { width: "27.5%", height: "100%", borderRadius: 3 },
   fields: { marginTop: 15, gap: 15 },
+  /* `-mt-2` */
+  noGroupHint: { marginTop: -8 },
   pair: { flexDirection: "row", gap: 12 },
   importHint: { marginTop: 16 },
   sources: { marginTop: 14, flexDirection: "row", gap: 8 },

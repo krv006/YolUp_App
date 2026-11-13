@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { quizDisplayTitle } from "@/modules/quiz";
+import { formatCountdown, quizDisplayTitle, useQuizLimitsText, useQuizSessionsLeft } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import type { QuizSummary, StudentAttemptSummary } from "@/shared/types";
 import { DsGradient, DsText, dsRadius, Icon, MobileEmptyCard, MobilePageHeader, MobileRoundButton, MobileSegment, PullRefresh, Sheet, useDs } from "@/shared/ui";
@@ -18,7 +18,8 @@ const FILTERS: Filter[] = ["all", "new", "solved", "overdue"];
 /**
  * O'quvchining testlari — veb `student-tests-page.tsx` (tor ekran): filtr
  * chiplari (soni bilan), fan bo'yicha bo'limlar, test kartalari ("Yechish"
- * yoki "Natija" / "Qayta yechish") va urinishlar oynasi.
+ * yoki "Natija" / "Qayta yechish"; boshlangan seansda "Davom etish · 12:34"
+ * jonli taymer, urinishlar tugaganda "Urinishlar tugagan") va urinishlar oynasi.
  */
 export function StudentTestsPage() {
   const { t } = useTranslation("student");
@@ -30,6 +31,7 @@ export function StudentTestsPage() {
   const data = useStudentWorkspace();
   const [filter, setFilter] = useState<Filter>("all");
   const [attemptsOpen, setAttemptsOpen] = useState(false);
+  const sessions = useQuizSessionsLeft(data.quizzes);
 
   const stateOf = (quiz: QuizSummary): Exclude<Filter, "all"> =>
     data.attemptByQuiz.has(quiz.id) ? "solved" : quiz.dueAt && new Date(quiz.dueAt).getTime() < data.now.getTime() ? "overdue" : "new";
@@ -89,6 +91,8 @@ export function StudentTestsPage() {
                   key={quiz.id}
                   quiz={quiz}
                   attempt={data.attemptByQuiz.get(quiz.id) ?? null}
+                  attemptsUsed={data.attempts.filter((item) => item.quizId === quiz.id).length}
+                  sessionLeft={sessions.get(quiz.id) ?? null}
                   overdue={stateOf(quiz) === "overdue"}
                   onSolve={() => router.push(ROUTES.student.test(quiz.id) as never)}
                   onResult={() => router.push(ROUTES.student.testResults(quiz.id) as never)}
@@ -117,10 +121,68 @@ export function StudentTestsPage() {
   );
 }
 
-function TestCard({ quiz, attempt, overdue, onSolve, onResult }: { quiz: QuizSummary; attempt: StudentAttemptSummary | null; overdue: boolean; onSolve: () => void; onResult: () => void }) {
+function TestCard({
+  quiz,
+  attempt,
+  attemptsUsed,
+  sessionLeft,
+  overdue,
+  onSolve,
+  onResult,
+}: {
+  quiz: QuizSummary;
+  attempt: StudentAttemptSummary | null;
+  attemptsUsed: number;
+  sessionLeft: number | null;
+  overdue: boolean;
+  onSolve: () => void;
+  onResult: () => void;
+}) {
   const { t } = useTranslation("student");
   const ds = useDs();
+  const limitsText = useQuizLimitsText()(quiz);
   const percent = attempt ? Math.round(attempt.percentage ?? 0) : null;
+  const attemptsOver =
+    sessionLeft === null && (quiz.attemptsLeft !== null ? quiz.attemptsLeft === 0 : Boolean(quiz.maxAttempts && attemptsUsed >= quiz.maxAttempts));
+  const mainAction =
+    sessionLeft !== null ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("workspace.tests.continueAria", { time: formatCountdown(sessionLeft) })}
+        onPress={onSolve}
+        style={({ pressed }) => [
+          attempt ? styles.action : styles.solve,
+          { backgroundColor: sessionLeft <= 60 ? ds.c.danger : pressed ? ds.c["brand-strong"] : ds.c.brand },
+          sessionLeft <= 60 && pressed && styles.dim,
+        ]}
+      >
+        <Icon name="timer" size={18} color={ds.c["ink-inverse"]} />
+        <DsText v="button" c="ink-inverse" numberOfLines={1} style={styles.tabular}>
+          {t("workspace.tests.continue", { time: formatCountdown(sessionLeft) })}
+        </DsText>
+      </Pressable>
+    ) : attemptsOver ? (
+      <View style={[attempt ? styles.action : styles.solve, { backgroundColor: ds.c.subtle }]}>
+        <Icon name="lock" size={18} color={ds.c["ink-secondary"]} />
+        <DsText v="button" c="ink-secondary" numberOfLines={1} style={styles.shrink}>
+          {t("workspace.tests.attemptsOver")}
+        </DsText>
+      </View>
+    ) : attempt ? (
+      <Pressable accessibilityRole="button" onPress={onSolve} style={({ pressed }) => [styles.action, { backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] }]}>
+        <Icon name="refresh" size={18} color={ds.c.brand} />
+        <DsText v="button" c="brand">
+          {t("workspace.tests.retry")}
+        </DsText>
+      </Pressable>
+    ) : (
+      <Pressable accessibilityRole="button" onPress={onSolve} style={({ pressed }) => [styles.solve, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}>
+        <Icon name="send" size={18} color={ds.c["ink-inverse"]} />
+        <DsText v="button" c="ink-inverse">
+          {t("workspace.tests.solve")}
+        </DsText>
+      </Pressable>
+    );
   return (
     <View style={[styles.card, { backgroundColor: ds.c.surface }]}>
       <View style={styles.cardHead}>
@@ -132,7 +194,7 @@ function TestCard({ quiz, attempt, overdue, onSolve, onResult }: { quiz: QuizSum
             {quizDisplayTitle(quiz)}
           </DsText>
           <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
-            {t("workspace.tests.meta", { subject: quiz.subjectLabel || t("workspace.tests.otherSubject"), count: quiz.questionCount })}
+            {[t("workspace.tests.meta", { subject: quiz.subjectLabel || t("workspace.tests.otherSubject"), count: quiz.questionCount }), limitsText].filter(Boolean).join(" · ")}
           </DsText>
         </View>
         {percent !== null ? (
@@ -161,20 +223,10 @@ function TestCard({ quiz, attempt, overdue, onSolve, onResult }: { quiz: QuizSum
             <Icon name="bar-chart" size={18} color={ds.c.ink} />
             <DsText v="button">{t("workspace.tests.result")}</DsText>
           </Pressable>
-          <Pressable accessibilityRole="button" onPress={onSolve} style={({ pressed }) => [styles.action, { backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] }]}>
-            <Icon name="refresh" size={18} color={ds.c.brand} />
-            <DsText v="button" c="brand">
-              {t("workspace.tests.retry")}
-            </DsText>
-          </Pressable>
+          {mainAction}
         </View>
       ) : (
-        <Pressable accessibilityRole="button" onPress={onSolve} style={({ pressed }) => [styles.solve, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}>
-          <Icon name="send" size={18} color={ds.c["ink-inverse"]} />
-          <DsText v="button" c="ink-inverse">
-            {t("workspace.tests.solve")}
-          </DsText>
-        </Pressable>
+        mainAction
       )}
     </View>
   );
@@ -248,6 +300,10 @@ const styles = StyleSheet.create({
   actions: { flexDirection: "row", gap: 8 },
   action: { flex: 1, height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 22 },
   solve: { height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 22 },
+  /* `hover:bg-danger/85` */
+  dim: { opacity: 0.85 },
+  shrink: { flexShrink: 1 },
+  tabular: { flexShrink: 1, fontVariant: ["tabular-nums"] },
   skeleton: { height: 132, gap: 16, padding: 16, borderRadius: dsRadius["2xl"] },
   skeletonHead: { flexDirection: "row", gap: 12 },
   skeletonIcon: { width: 40, height: 40, borderRadius: dsRadius.xl },

@@ -239,7 +239,7 @@ export function MobileChoiceChips<T extends string | number>({
                 : { borderWidth: 1, borderColor: ds.c["line-strong"], backgroundColor: pressed ? ds.c.subtle : ds.c.surface },
             ]}
           >
-            <DsText v="body-sm" w="500" c={active ? "on-action" : "ink"}>
+            <DsText v="body-sm" w="500" c={active ? "on-action" : "ink"} style={styles.chipText}>
               {render ? render(item) : String(item)}
             </DsText>
           </Pressable>
@@ -314,6 +314,12 @@ const styles = StyleSheet.create({
   option: { minHeight: 52, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
   chips: { flexDirection: "row", gap: 8 },
   chip: { flex: 1, minWidth: 0, height: 44, alignItems: "center", justifyContent: "center", borderRadius: dsRadius.full },
+  /*
+   * Matn chip kengligiga cho'ziladi: Androidda o'z o'lchagan kengligi chizishga
+   * bir necha piksel yetmay, "100 ballik" ning ikkinchi so'zi keyingi qatorga
+   * tushib kesilardi (faqat "100" ko'rinardi).
+   */
+  chipText: { alignSelf: "stretch", paddingHorizontal: 8, textAlign: "center" },
   toggle: { alignSelf: "flex-start", height: 52, flexDirection: "row", alignItems: "center", padding: 4, borderRadius: dsRadius.full },
   toggleItem: { height: 44, justifyContent: "center", paddingHorizontal: 16, borderRadius: dsRadius.full },
   radio: { width: 22, height: 22, borderRadius: dsRadius.full },

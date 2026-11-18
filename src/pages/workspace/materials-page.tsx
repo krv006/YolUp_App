@@ -224,7 +224,14 @@ export function MaterialsPage() {
             icon={folderIcon}
             tone="bg-brand-subtle"
             title={item.title}
-            meta={t("materials.filesCount", { count: item.fileCount })}
+            // Veb #195: dars papkalaridagi video va doska ham sanaladi; hammasi 0 bo'lsa "0 ta fayl".
+            meta={[
+              item.fileCount || (!item.recordingCount && !item.boardCount) ? t("materials.filesCount", { count: item.fileCount }) : "",
+              item.recordingCount ? t("materials.videoCount", { count: item.recordingCount }) : "",
+              item.boardCount ? t("materials.boardCount", { count: item.boardCount }) : "",
+            ]
+              .filter(Boolean)
+              .join(" · ")}
             badge={
               item.kind === "club" ? (
                 // `h-5 rounded-full bg-accent-saffron-bg px-2 text-caption-strong`

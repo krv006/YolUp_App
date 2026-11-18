@@ -550,7 +550,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/tutor/index.ts` | 🟡 MOSLASH | `6e07e223d9e3` | veb barrel minus `ui/` eksportlari; mobil `PracticeSession` alohida bo'limda |
 | `src/modules/tutor/lib/tutor.mappers.ts` | 🟢 NUSXA | `5e472f3de6e5` | — |
 | `src/modules/tutor/model/tutor.queries.ts` | 🟢 NUSXA | `59bfd0df3bfc` | — |
-| `src/pages/workspace/materials-page.tsx` | 🟡 MOSLASH | `af391ed2e781` | faqat tor ekran varianti; papka (`course`/`lesson`) URL emas, sahifa holatida — sarlavha va Android "orqaga" bir daraja yuqoriga; guruh va papka tanlash oddiy tanlov oynalari (vebda qidiruvli); yuklash `Sheet`, fayl `pickDocument`; yozuv `ROUTES.recording`; doska PDF `FileViewer` |
+| `src/pages/workspace/materials-page.tsx` | 🟡 MOSLASH | `95ecd4596f74` | faqat tor ekran varianti; papka (`course`/`lesson`) URL emas, sahifa holatida — sarlavha va Android "orqaga" bir daraja yuqoriga; guruh va papka tanlash oddiy tanlov oynalari (vebda qidiruvli); yuklash `Sheet`, fayl `pickDocument`; yozuv `ROUTES.recording`; doska PDF `FileViewer` |
 | `src/pages/teacher/workspace/share-results-dialog.tsx` | 🟡 MOSLASH | `6e3853cc00dd` | mobilda `pages/workspace/tests/share-results-dialog.tsx`; `AppDialog` -> `Sheet variant="app"` |
 | `src/pages/teacher/workspace/homework/bank-assignment-card.tsx` | 🟡 MOSLASH | `95b33f61d167` | mobilda `pages/workspace/homework/bank-assignment-card.tsx` |
 | `src/pages/teacher/workspace/homework/bank-copies.tsx` | 🟡 MOSLASH | `e08a95963627` | mobilda `pages/workspace/homework/bank-copies.tsx` |

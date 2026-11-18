@@ -19,6 +19,7 @@ import {
   type LessonPreJoinChoices,
 } from "@/modules/live";
 import { ROUTES } from "@/shared/config";
+import { ROLES } from "@/shared/constants";
 import { isOnline } from "@/shared/lib";
 import { DsText, dsRadius, Screen, ScreenLoading, ThemeScope, toast, useDs } from "@/shared/ui";
 import { LiveRoom } from "@/widgets/live-room/live-room";
@@ -54,6 +55,8 @@ const ROOM_OPTIONS: RoomOptions = {
  */
 const REJOIN_DELAYS_MS = [1_500, 3_000, 5_000, 8_000, 10_000, 15_000, 15_000, 20_000];
 const REJOIN_CONNECT_TIMEOUT_MS = 20_000;
+// Veb #193: o'quvchi boshlanmagan darsda — dars holati shu oraliqda tekshiriladi.
+const START_POLL_MS = 5_000;
 const FINAL_DISCONNECT_REASONS = new Set<DisconnectReason | undefined>([
   DisconnectReason.DUPLICATE_IDENTITY,
   DisconnectReason.PARTICIPANT_REMOVED,
@@ -154,6 +157,24 @@ export function LiveLessonPage() {
   }, [router]);
 
   const refetchLesson = lesson.refetch;
+  /*
+   * Veb #193: backend o'quvchini faqat `live` darsga kiritadi (token 400).
+   * Boshlanmagan darsda "ulanib bo'lmadi" xatosi o'rniga kutish holati
+   * chiqadi; holat har 5 soniyada tekshiriladi, o'qituvchi boshlagach
+   * "Darsga qo'shilish" yonadi — o'quvchi o'zi bosib kiradi.
+   */
+  const tokenStatus = (token.error as { status?: number } | null)?.status ?? 0;
+  const lessonStatus = lesson.data?.status;
+  const awaitingTeacher =
+    user?.role === ROLES.STUDENT && token.isError && tokenStatus === 400 && (lessonStatus === "scheduled" || lessonStatus === "live");
+  const teacherStarted = awaitingTeacher && lessonStatus === "live";
+
+  useEffect(() => {
+    if (!awaitingTeacher || teacherStarted) return undefined;
+    const timer = globalThis.setInterval(() => void refetchLesson(), START_POLL_MS);
+    return () => globalThis.clearInterval(timer);
+  }, [awaitingTeacher, teacherStarted, refetchLesson]);
+
   const handleLeave = useCallback(() => {
     leaving.current = true;
     if (isTeacher.current) {
@@ -277,6 +298,28 @@ export function LiveLessonPage() {
         <RateLessonSheet lesson={lesson.data} onClose={goBack} />
       </>
     );
+
+  if (awaitingTeacher) {
+    const start = new Date(lesson.data.startsAt);
+    const time = Number.isNaN(start.getTime())
+      ? lesson.data.time
+      : `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
+    return (
+      <LiveRoomState
+        tone="waiting"
+        lessonTitle={lesson.data.title || lesson.data.courseTitle}
+        subtitle={lesson.data.courseTitle}
+        title={teacherStarted ? t("state.startedTitle") : t("state.notStartedTitle")}
+        description={teacherStarted ? t("state.startedDescription") : t("state.notStartedDescription", { time })}
+        actionLabel={t("preJoin.join")}
+        actionDisabled={!teacherStarted || token.isFetching}
+        onAction={() => void token.refetch()}
+        secondaryLabel={t("state.mobileBackToChat")}
+        onSecondary={handleLeave}
+        onBack={handleLeave}
+      />
+    );
+  }
 
   if (token.isError || !token.data) {
     const finished = lesson.data.status === "finished";

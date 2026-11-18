@@ -131,6 +131,10 @@ export function useChat(
               if (event.type === "pinned") {
                 queryClient.invalidateQueries({ queryKey: messageKeys.pinned(conversationId ?? "") });
               }
+              // Veb #193: guruh chatidagi `lesson_live`/`lesson_ended` darslar ro'yxatini darhol yangilaydi.
+              if (event.type === "lessonChanged") {
+                queryClient.invalidateQueries({ queryKey: ["lessons"] });
+              }
               if (event.type === "roomUpdated" || event.type === "read") {
                 queryClient.invalidateQueries({
                   queryKey: conversationKeys.detail(conversationId ?? "", role),

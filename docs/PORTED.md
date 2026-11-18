@@ -263,7 +263,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/lib/message.mappers.ts` | 🟢 NUSXA | `2a3acba29114` | — |
 | `src/modules/message/model/message.keys.ts` | 🟢 NUSXA | `d00b7016c621` | — |
 | `src/modules/message/model/chat-ui.store.ts` | 🟢 NUSXA | `—` | xabar qidiruvi va tanlash holati (2026-10-20 qo'shildi) |
-| `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `ec92398177bb` | react-router useNavigate -> expo-router (2026-10-20 vebdan qayta sinxronlandi; literal matn moslashtirishi olib tashlandi — chat.json da `removedFromGroup` endi bor) |
+| `src/modules/message/model/use-chat.ts` | 🟡 MOSLASH | `dab39024468a` | react-router useNavigate -> expo-router (2026-10-20 vebdan qayta sinxronlandi; literal matn moslashtirishi olib tashlandi — chat.json da `removedFromGroup` endi bor) |
 | `src/modules/message/ui/message-attachment.tsx` | 🟡 MOSLASH | `b2144ef8b905` | rasm xabar ichida (`Image`, nisbat yuklangach); bosilganda `FileViewer` — fayl ilova ichida ochiladi |
 | `src/modules/message/ui/message-actions-menu.tsx` | 🟡 MOSLASH | `9fc6953c0866` | faqat telefon varianti (`focus`): pufak `measureInWindow` bilan o'lchanib Modal'da ko'tariladi; chekkalarga tizim panellari qo'shilgan |
 | `src/modules/message/ui/attachment-sheet.tsx` | 🟡 MOSLASH | `9d80259f1011` | `Sheet variant="app"`; fayl tanlash `expo-image-picker`/`expo-document-picker`; so'nggi rasm keshga yozilib `PickedFile` bo'ladi |
@@ -403,7 +403,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/exams/parent-exams-page.tsx` | 🟡 MOSLASH | `33a9f589e315` | faqat telefon shoxi (`MockMobile`) |
 | `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `976d5b111c4a` | faqat telefon shoxi (`ResultsMobile`) |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `7933af57e755` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
-| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `f4237a24a07c` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
+| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `2b1245c4cfc9` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
 | `src/modules/live/ui/lesson-pre-join.tsx` | 🟡 MOSLASH | `658cda176ab8` | faqat tor ekran varianti; o'qituvchining kompyuterdagi ekran ulashish shoxi yo'q; ruxsat rad etilsa `media-permission-dialog.tsx` ga qarang |
 | `src/modules/live/ui/media-permission-dialog.tsx` | 🟡 MOSLASH | `425eb1d4a350` | mobilda `lesson-pre-join.tsx` ichida (`ConfirmDialog`); "Qayta tekshirish" o'rniga tizim sozlamalari (`Linking.openSettings`), ilovaga qaytganda kamera qayta so'raladi; brauzerga xos izoh o'rniga `mobile.live.ruxsat_sozlamalarda` |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `befefce3e95e` | faqat tor ekran shoxi; xato holati `MobileEmptyCard` |
@@ -513,9 +513,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/student-group-workspace/use-assignment-rows.ts` | 🟡 MOSLASH | `734e4c2eff10` | `navigate` o'rniga `router.push(..., { withAnchor: true })` |
 | `src/widgets/forward-dialog/forward-dialog.tsx` | 🟡 MOSLASH | `c22c79a14efe` | pastki oyna (`Sheet variant="app"`) |
 | `src/pages/teacher/conversation-page.tsx` | 🟡 MOSLASH | `7ae453d9b1fb` | mobilda `pages/chats/conversation-page.tsx` (guruh qismi `group-workspace.tsx` dagi chat bilan birga). Tor ekrandagidek jonli dars chizig'i yo'q. O'quvchida vazifa kartasi vazifa sahifasini ochadi va topshirilganini ko'rsatadi; e'lonlar kanalida yozish maydoni o'rniga ogohlantirish. Qadalgan xabarni olib tashlash `pinned: true` bilan (vebda `false` ketadi — xabar qayta qadaladi, `useChat.pinMessage` ma'nosiga zid); o'qilganlik faqat kelgan xabarga (`readKey`); kutilayotgan/bloklangan shaxsiy chatda `DirectRequestBar` (oldingi qattiq yozilgan o'zbekcha izoh olib tashlandi) |
-| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `cf0a8da9cf76` | mobilda `mobile-live-room` ham shu faylda; o'qituvchi panelida "hammaga ochiq" almashtirgichlari, hammani o'chirish; yozuv tanlovi `recording-start-sheet.tsx`; Document PiP va SharePreview yo'q |
+| `src/widgets/live-room/live-room.tsx` | 🟡 MOSLASH | `7a19b744ef23` | mobilda `mobile-live-room` ham shu faylda; o'qituvchi panelida "hammaga ochiq" almashtirgichlari, hammani o'chirish; yozuv tanlovi `recording-start-sheet.tsx`; Document PiP va SharePreview yo'q; veb #193 ekran ulashishni to'xtatish (`getDisplayMedia` oqimini yopish, video yozuv xabari) — brauzerga xos, ko'chirilmadi |
 | `src/widgets/live-room/mobile-live-room.tsx` | 🟡 MOSLASH | `7d9e2c02059b` | mobilda `live-room.tsx` ichida: o'qituvchida 7 tugma, `toggleWithRelease`, sahnada "Ulashilmoqda" (RN'da trek nomi yo'q — "Ekran"), ekran ulashish publish sozlamasi (o'lchamsiz) |
-| `src/widgets/live-room/live-room-state.tsx` | 🟡 MOSLASH | `83ff7305c2e7` | faqat tor ekran varianti (doim qorong'i) |
+| `src/widgets/live-room/live-room-state.tsx` | 🟡 MOSLASH | `b11215dcb22b` | faqat tor ekran varianti (doim qorong'i) |
 | `src/widgets/live-room/use-elapsed-seconds.ts` | 🟢 NUSXA | `6a64d9089071` | — |
 | `src/widgets/live-room/use-silence-all.ts` | 🟢 NUSXA | `0ab3a87aac28` | — |
 | `src/widgets/live-room/use-screen-share-release.ts` | 🟢 NUSXA | `e42f27b21f34` | — |

@@ -18,9 +18,13 @@ import {
 export interface NewTestDraft {
   courseId: string;
   title: string;
+  /** Veb #193: ixtiyoriy tavsif — o'quvchining "Testni boshlash" ekranida. */
+  description: string;
   subject: string;
   dueAt: string | null;
 }
+
+const DESCRIPTION_MAX = 500;
 
 export interface NewTestDialogProps {
   open: boolean;
@@ -58,6 +62,7 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
   const months = tl("list.months", { returnObjects: true }) as string[];
   const [courseId, setCourseId] = useState("");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [subject, setSubject] = useState("");
   const [due, setDue] = useState(today);
 
@@ -68,7 +73,7 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
   const dueLabel = Number.isNaN(day.getTime()) ? due : `${day.getDate()}-${(months[day.getMonth()] ?? "").slice(0, 3).toLowerCase()}`;
 
   function submit() {
-    onContinue({ courseId, title: title.trim(), subject: finalSubject, dueAt: due ? `${due}T23:59` : null });
+    onContinue({ courseId, title: title.trim(), description: description.trim(), subject: finalSubject, dueAt: due ? `${due}T23:59` : null });
   }
 
   return (
@@ -104,6 +109,19 @@ export function NewTestDialog({ open, onOpenChange, courses, subjects, pending =
 
         <MobileFieldLabel gap={7} label={t("newTest.name")}>
           <MobileInput surface value={title} placeholder={t("newTest.namePlaceholder")} onChangeText={setTitle} />
+        </MobileFieldLabel>
+
+        {/* `min-h-22 rounded-lg bg-surface px-4 py-3`, 500 belgigacha */}
+        <MobileFieldLabel gap={7} label={t("newTest.description")}>
+          <MobileInput
+            surface
+            multiline
+            multilineHeight={88}
+            maxLength={DESCRIPTION_MAX}
+            value={description}
+            placeholder={t("newTest.descriptionPlaceholder")}
+            onChangeText={setDescription}
+          />
         </MobileFieldLabel>
 
         <View style={styles.pair}>

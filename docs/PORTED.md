@@ -555,6 +555,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/teacher/workspace/homework/bank-assignment-card.tsx` | 🟡 MOSLASH | `95b33f61d167` | mobilda `pages/workspace/homework/bank-assignment-card.tsx` |
 | `src/pages/teacher/workspace/homework/bank-copies.tsx` | 🟡 MOSLASH | `e08a95963627` | mobilda `pages/workspace/homework/bank-copies.tsx` |
 | `src/pages/teacher/workspace/homework/assignment-audience-card.tsx` | 🟡 MOSLASH | `d884c643f13a` | mobilda `pages/workspace/homework/assignment-audience-card.tsx`; tahrirlash pastki `Sheet` |
+| `src/pages/teacher/workspace/homework/review-progress.ts` | 🟢 NUSXA | `27ca6d6c4c95` | mobilda `pages/workspace/homework/review-progress.ts` |
+| `src/pages/teacher/workspace/homework/review-saved-dialog.tsx` | 🟡 MOSLASH | `ae2e59b662bc` | mobilda `pages/workspace/homework/`; `AppDialog` o'rniga `CenterDialog` |
 | `src/pages/student/workspace/student-ai-page.tsx` | 🟡 MOSLASH | `3068926e14dc` | faqat tor ekran varianti; maydonlar klaviatura ustida (`KeyboardAwareScrollView`) |
 | `src/pages/student/workspace/student-test-gate.tsx` | 🟡 MOSLASH | `1d6e82970829` | faqat tor ekran shoxi; orqaga `router.back()` (bo'lmasa testlar sahifasi) |
 | `src/pages/student/workspace/homework-submitted-dialog.tsx` | 🟡 MOSLASH | `8c3ca552497c` | `AppDialog variant="confirm"` o'rniga `CenterDialog`; doskadan qaytishda `location.state.submitted` o'rniga marshrut parametri `submitted=1` |

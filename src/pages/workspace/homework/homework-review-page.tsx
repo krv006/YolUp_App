@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,9 +15,12 @@ import {
 } from "@/modules/homework";
 import { QuestionsResult } from "@/modules/homework/ui/questions-result";
 import { ROUTES } from "@/shared/config";
+import type { Submission } from "@/shared/types";
 import { Avatar, DsGradient, DsText, dsRadius, Icon, MobileInput, MobileRoundButton, useDs } from "@/shared/ui";
 import { formatDue } from "./format-due";
 import { ResubmitDialog } from "./resubmit-dialog";
+import { nextPendingSubmission, reviewedCount } from "./review-progress";
+import { ReviewSavedDialog, type ReviewSaved } from "./review-saved-dialog";
 import { SubmissionPreview } from "./submission-preview";
 
 const GRADES = [1, 2, 3, 4, 5];
@@ -38,8 +41,9 @@ export function HomeworkReviewPage() {
   const months = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
   const { assignmentId = null, s } = useLocalSearchParams<{ assignmentId: string; s?: string }>();
   const assignment = useAssignment(assignmentId);
-  const review = useReviewSubmission();
-  const resubmit = useRequestResubmit();
+  // Veb #196: natija oynada ko'rsatiladi — toast ikkilanmasin.
+  const review = useReviewSubmission({ notify: false });
+  const resubmit = useRequestResubmit({ notify: false });
   const download = useDownloadSubmissionFile();
 
   const [grade, setGrade] = useState<number | null>(null);
@@ -49,11 +53,14 @@ export function HomeworkReviewPage() {
   const [resultOpen, setResultOpen] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
   const [answerScores, setAnswerScores] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState<ReviewSaved | null>(null);
+  // Baholangan ish oyna ochiq turganda joyida qoladi: ro'yxat yangilanib `visible[0]` keyingisiga o'tib ketmasin.
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
 
   const item = assignment.data ?? null;
   const rows = useMemo(() => item?.submissions ?? [], [item]);
   const visible = rows.filter((row) => row.status !== "done");
-  const activeId = s ?? visible[0]?.id ?? rows[0]?.id ?? null;
+  const activeId = pinnedId ?? s ?? visible[0]?.id ?? rows[0]?.id ?? null;
   const submission = useSubmission(activeId);
   const current = submission.data ?? rows.find((row) => row.id === activeId) ?? null;
 
@@ -80,7 +87,9 @@ export function HomeworkReviewPage() {
 
   function move(step: number) {
     const next = rows[index + step];
-    if (next) router.setParams({ s: next.id });
+    if (!next) return;
+    setPinnedId(null);
+    router.setParams({ s: next.id });
   }
 
   function back() {
@@ -88,8 +97,37 @@ export function HomeworkReviewPage() {
     else router.replace((assignmentId ? ROUTES.teacher.homeworkItem(assignmentId) : ROUTES.teacher.workspace) as never);
   }
 
+  function showSaved(target: Submission, kind: ReviewSaved["kind"]) {
+    const next = nextPendingSubmission(rows, target.id);
+    setPinnedId(target.id);
+    setSaved({
+      kind,
+      studentName: target.studentName,
+      grade: kind === "graded" ? grade : null,
+      reviewed: reviewedCount(rows, target.id),
+      total: rows.length,
+      next: next ? { id: next.id, name: next.studentName } : null,
+    });
+  }
+
+  function requestResubmit(value: string) {
+    if (!current) return;
+    const target = current;
+    resubmit.mutate(
+      { id: target.id, comment: value },
+      {
+        onSuccess: () => {
+          setResubmitOpen(false);
+          // 🟡 iOS yopilayotgan Modal ustida yangisini ko'rsatmaydi — pastki oyna yopilishini kutamiz.
+          setTimeout(() => showSaved(target, "resubmit"), Platform.OS === "ios" ? 400 : 0);
+        },
+      }
+    );
+  }
+
   function confirm() {
     if (!current) return;
+    const target = current;
     review.mutate(
       {
         id: current.id,
@@ -101,7 +139,7 @@ export function HomeworkReviewPage() {
           answerScores: parseAnswerScores(answerScores),
         },
       },
-      { onSuccess: () => move(1) }
+      { onSuccess: () => showSaved(target, "graded") }
     );
   }
 
@@ -334,7 +372,21 @@ export function HomeworkReviewPage() {
         student={current?.studentName ?? ""}
         pending={resubmit.isPending}
         onOpenChange={setResubmitOpen}
-        onConfirm={(comment) => current && resubmit.mutate({ id: current.id, comment }, { onSuccess: () => setResubmitOpen(false) })}
+        onConfirm={requestResubmit}
+      />
+      <ReviewSavedDialog
+        saved={saved}
+        onNext={(id) => {
+          // Vebda URL o'zgarishi sahifani qayta yaratadi; Expo Router'da `setParams` yaratmaydi — qadoq qo'lda olinadi.
+          setSaved(null);
+          setPinnedId(null);
+          router.setParams({ s: id });
+        }}
+        onBack={() => {
+          setSaved(null);
+          back();
+        }}
+        onClose={() => setSaved(null)}
       />
       <HomeworkResultDialog
         submissionId={current?.id}

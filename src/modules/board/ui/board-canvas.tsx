@@ -48,6 +48,12 @@ export interface BoardCanvasSelection {
 export interface BoardCanvasProps {
   ref?: Ref<BoardCanvasHandle>;
   strokes: StrokeDto[];
+  /**
+   * Veb #192: yuborilgan, lekin server hali tasdiqlamagan chiziqlar —
+   * qo'yib yuborilganda yo'qolib qolmasin. Faqat chiziladi: tanlash va
+   * o'chirishga tushmaydi.
+   */
+  pendingStrokes?: StrokeDto[];
   /** Doska koordinata tizimi (`state.width` / `state.height`). */
   width: number;
   height: number;
@@ -125,6 +131,7 @@ function clampAxis(offset: number, content: number, view: number): number {
 export function BoardCanvas({
   ref,
   strokes,
+  pendingStrokes,
   width,
   height,
   tool,
@@ -474,7 +481,14 @@ export function BoardCanvas({
    * sabab shrift o'lchami doska masshtabiga JS'da ko'paytiriladi, joyi esa
    * siljitish/kattalashtirishga UI thread'da ergashadi (`MathItem`).
    */
-  const mathStrokes = useMemo(() => strokes.filter((stroke) => stroke.type === "math"), [strokes]);
+  const mathStrokes = useMemo(
+    () => [...strokes, ...(pendingStrokes ?? [])].filter((stroke) => stroke.type === "math"),
+    [strokes, pendingStrokes]
+  );
+  const pendingNodes = useMemo(
+    () => (pendingStrokes ?? []).map((stroke) => (stroke.type === "math" ? null : <BoardStroke key={stroke.id} stroke={stroke} />)),
+    [pendingStrokes]
+  );
 
   // Saqlangan stroke'lar React tomonda memo qilinadi — draft ularga tegmaydi.
   const rendered = useMemo(() => {
@@ -568,6 +582,7 @@ export function BoardCanvas({
           {zoomControls ? <Path path={outside} color={ds.c.subtle} /> : null}
           <Group transform={canvasTransform}>
             {rendered}
+            {pendingNodes}
             <Path
               path={draftPath}
               color={color}

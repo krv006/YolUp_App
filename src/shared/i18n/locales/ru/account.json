@@ -285,7 +285,16 @@
     "certificateIssuerPlaceholder": "Например: British Council",
     "certificateYear": "Год",
     "certificateRejected": "Отклонён",
-    "certificateRejectReason": "Причина: {{reason}}"
+    "certificateRejectReason": "Причина: {{reason}}",
+    "emailNotSet": "Не добавлен",
+    "emailVerified": "Подтверждён",
+    "emailUnverified": "Не подтверждён",
+    "emailAdd": "Добавить",
+    "emailVerify": "Подтвердить",
+    "emailChange": "Изменить",
+    "currentPasswordRequired": "Введите текущий пароль",
+    "passwordSame": "Новый пароль должен отличаться от текущего",
+    "passwordChangeFailed": "Не удалось сменить пароль. Попробуйте снова."
   },
   "help": {
     "search": "Поиск вопроса или темы…",

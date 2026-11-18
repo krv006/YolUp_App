@@ -41,8 +41,7 @@ export function useOpenNotificationLink() {
       const type = link.type.toLowerCase();
 
       if (type === "teacher") return go(`/admin/teachers?teacher=${encodeURIComponent(link.id)}`);
-      // Veb `admin-dashboard-page` `openNotificationLink`: admin sertifikat, murojaat va shikoyat sahifalariga.
-      if (admin && type === "certificate") return go(`${ROUTES.admin.certificates}?certificate=${encodeURIComponent(link.id)}`);
+      // Veb `admin-dashboard-page` `openNotificationLink`: admin murojaat va shikoyat sahifalariga (sertifikat sahifasi veb #193 da olib tashlandi).
       if (admin && type === "support") return go(`${ROUTES.admin.support}?ticket=${encodeURIComponent(link.id)}`);
       if (admin && type === "spam_report") return go(`${ROUTES.admin.reports}?report=${encodeURIComponent(link.id)}`);
       if (type === "lesson") return go(kind?.includes("recording") ? `/recordings/${link.id}` : `/live/${link.id}`);

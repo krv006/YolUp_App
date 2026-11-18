@@ -423,7 +423,7 @@
       "answer": "Your answer",
       "answerHint": "Upload a file or write your answer in the note. Your teacher reviews it after you submit.",
       "drop": "Drop a file here or browse",
-      "dropHint": "PDF, JPG, PNG, DOCX · up to 25 MB",
+      "dropHint": "PDF, JPG, PNG, HEIC, DOCX · up to 25 MB",
       "dropSpeaking": "MP3, WAV, M4A, OGG · up to 25 MB",
       "fileReady": "{{size}} · selected",
       "remove": "Remove",
@@ -463,7 +463,17 @@
       "myComment": "Your note",
       "filesTitle": "Submitted files · {{count}}",
       "outOf": "/ {{max}} points",
-      "notGraded": "This task isn't graded with points"
+      "notGraded": "This task isn't graded with points",
+      "doneTitle": "Homework submitted",
+      "doneText": "“{{title}}” was sent to your teacher. What happens next:",
+      "doneSent": "Submitted",
+      "doneAi": "AI pre-check",
+      "doneAiHint": "Your answers are being checked — the result will appear on the homework page",
+      "doneTeacher": "Teacher's grade",
+      "doneTeacherHint": "You'll get a notification once it's graded",
+      "doneReview": "Teacher review",
+      "doneReviewHint": "This homework isn't graded — your teacher may leave a comment",
+      "doneBack": "Back to homework"
     }
   },
   "tutor": {

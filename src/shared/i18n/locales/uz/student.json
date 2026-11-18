@@ -419,7 +419,7 @@
       "answer": "Javobingiz",
       "answerHint": "Fayl yuklang yoki javobingizni izohga yozing. Topshirgandan so‘ng o‘qituvchi tekshiradi.",
       "drop": "Faylni shu yerga tashlang yoki tanlang",
-      "dropHint": "PDF, JPG, PNG, DOCX · 25 MB gacha",
+      "dropHint": "PDF, JPG, PNG, HEIC, DOCX · 25 MB gacha",
       "dropSpeaking": "MP3, WAV, M4A, OGG · 25 MB gacha",
       "fileReady": "{{size}} · tanlandi",
       "remove": "Olib tashlash",
@@ -459,7 +459,17 @@
       "myComment": "Sizning izohingiz",
       "filesTitle": "Yuborilgan fayllar · {{count}}",
       "outOf": "/ {{max}} ball",
-      "notGraded": "Bu vazifa ball bilan baholanmaydi"
+      "notGraded": "Bu vazifa ball bilan baholanmaydi",
+      "doneTitle": "Vazifa topshirildi",
+      "doneText": "«{{title}}» o‘qituvchiga yuborildi. Keyingi bosqichlar:",
+      "doneSent": "Topshirildi",
+      "doneAi": "AI dastlabki tekshiruvi",
+      "doneAiHint": "Javoblaringiz tekshirilmoqda — natija vazifa sahifasida chiqadi",
+      "doneTeacher": "O‘qituvchi bahosi",
+      "doneTeacherHint": "Baho qo‘yilgach sizga bildirishnoma keladi",
+      "doneReview": "O‘qituvchi ko‘rib chiqadi",
+      "doneReviewHint": "Bu vazifa baholanmaydi — o‘qituvchi izoh qoldirishi mumkin",
+      "doneBack": "Vazifalarga qaytish"
     }
   },
   "tutor": {

@@ -364,6 +364,7 @@ export interface AiResult {
   grade: string;
   questions: AiQuestion[];
   summary: AiSummary | null;
+  skippedImages: number;
 }
 
 export type HomeworkQuestionType = "single" | "multiple" | "short" | "long";
@@ -415,6 +416,16 @@ export interface Submission {
   aiState: AiCheckState | null;
   aiSummary: string | null;
   aiCheckingSince: string | null;
+  focus: HomeworkFocus | null;
+}
+
+export interface HomeworkFocus {
+  exits: number;
+  awaySeconds: number;
+  longestSeconds: number;
+  onPageSeconds: number;
+  totalSeconds: number;
+  timeline: Array<{ leftAt: string; returnedAt: string | null; seconds: number }>;
 }
 
 export type AiCheckState = "checking" | "ready" | "unscored" | "failed" | "none";

@@ -58,7 +58,6 @@
       "noCourses": "No active courses found.",
       "noTeachers": "No active teachers found."
     },
-    "certificatesLink": "Certificates",
     "supportLink": "Support",
     "reportsLink": "Reports"
   },
@@ -125,34 +124,6 @@
     "peakLabel": "Busiest moment",
     "pointNote": "{{count}} points"
   },
-  "certificates": {
-    "eyebrow": "Review",
-    "title": "Certificates",
-    "subtitle": "Review and approve certificates uploaded by users.",
-    "listTitle": "Certificates",
-    "filterLabel": "Status",
-    "status": {
-      "pending": "Pending",
-      "verified": "Verified",
-      "rejected": "Rejected"
-    },
-    "empty": {
-      "pending": "No certificates awaiting review.",
-      "verified": "No verified certificates.",
-      "rejected": "No rejected certificates."
-    },
-    "loading": "Loading certificates",
-    "openFile": "Open file",
-    "verify": "Verify",
-    "reject": "Reject",
-    "reason": "Reason: {{reason}}",
-    "rejectTitle": "Reject certificate",
-    "reasonLabel": "Reason",
-    "reasonPlaceholder": "E.g. the document is unreadable or belongs to someone else",
-    "cancel": "Cancel",
-    "verifiedToast": "Certificate verified",
-    "rejectedToast": "Certificate rejected"
-  },
   "support": {
     "eyebrow": "Support",
     "title": "Support requests",
@@ -213,6 +184,37 @@
       "resolve": "Report confirmed, the chat stays blocked",
       "dismiss": "Report dismissed, the chat is open again",
       "unblock": "The chat is open again"
+    }
+  },
+  "clientHealth": {
+    "eyebrow": "Devices",
+    "title": "Client health",
+    "note": "Reports browsers send every 30 seconds during live lessons: whose computer or internet is slowing the lesson down. Reports are kept for 14 days.",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "loading": "Loading reports…",
+    "reports": "Reports",
+    "cpuLimited": "CPU-limited reports",
+    "users": "Users",
+    "slowUsers": "Slow computers",
+    "empty": "No reports in this period.",
+    "cores_one": "{{count}} core",
+    "cores_other": "{{count}} cores",
+    "memory": "{{value}} GB",
+    "columns": {
+      "user": "User",
+      "reports": "Reports",
+      "cpu": "CPU limited",
+      "network": "Network limited",
+      "minFps": "Min FPS",
+      "device": "Device",
+      "lastAt": "Last"
+    },
+    "roles": {
+      "student": "student",
+      "teacher": "teacher",
+      "parent": "parent",
+      "admin": "admin"
     }
   }
 }

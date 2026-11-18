@@ -44,6 +44,7 @@ export {
   useAddChannelMembers,
   useCreateChannel,
   useDeleteChannel,
+  useDetachChannelCourse,
   useRemoveChannelMember,
   useUpdateChannel,
 } from "./model/use-channels";

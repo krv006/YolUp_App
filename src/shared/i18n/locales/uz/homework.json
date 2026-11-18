@@ -2,7 +2,6 @@
   "toast": {
     "assignmentCreated": "Vazifa yuborildi",
     "assignmentUpdated": "Vazifa yangilandi",
-    "submitted": "Vazifa topshirildi, AI tekshiruvi boshlandi",
     "assignmentDeleted": "Vazifa o'chirildi",
     "rechecking": "Qayta tekshirish boshlandi",
     "gradeUpdated": "Baho yangilandi",
@@ -504,5 +503,30 @@
     "submitted": "Topshirgan",
     "notSubmitted": "Topshirmagan",
     "loading": "Yuklanmoqda…"
-  }
+  },
+  "reviewSaved": {
+    "gradedTitle": "Baho saqlandi",
+    "gradedText": "{{name}} — {{grade}} baho. O‘quvchiga bildirishnoma yuborildi.",
+    "resubmitTitle": "Qayta topshirish so‘raldi",
+    "resubmitText": "{{name}}ga izohingiz bilan bildirishnoma yuborildi. Yangi javob kelganda yana tekshirasiz.",
+    "progress": "Tekshirildi: {{done}} / {{total}}",
+    "allDone": "Barcha ishlar tekshirildi",
+    "next": "Keyingi: {{name}}",
+    "back": "Vazifaga qaytish",
+    "close": "Yopish"
+  },
+  "reviewFocus": {
+    "title": "Sahifadan chiqish",
+    "exits": "{{count}} marta chiqqan",
+    "stayed": "Chiqmagan",
+    "stayedHint": "Vazifa sahifasidan boshqa oyna yoki tabga o‘tilmagan",
+    "away": "Tashqarida jami {{total}} · eng uzuni {{longest}}",
+    "notReturned": "qaytmagan",
+    "more": "Yana {{count}} ta",
+    "seconds": "{{seconds}} s",
+    "minutes": "{{minutes}} daq",
+    "minutesSeconds": "{{minutes}} daq {{seconds}} s",
+    "hours": "{{hours}} soat {{minutes}} daq"
+  },
+  "aiSkipped": "{{count}} ta sahifa AI'ga sig‘madi — ball faqat ko‘rilgan sahifalar bo‘yicha. Qolganini o‘zingiz ko‘rib chiqing."
 }

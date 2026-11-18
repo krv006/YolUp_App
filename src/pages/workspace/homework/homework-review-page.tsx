@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+  AiSkippedNotice,
   HomeworkResultDialog,
   submissionAiState,
   useAssignment,
@@ -18,6 +19,7 @@ import { ROUTES } from "@/shared/config";
 import type { Submission } from "@/shared/types";
 import { Avatar, DsGradient, DsText, dsRadius, Icon, MobileInput, MobileRoundButton, useDs } from "@/shared/ui";
 import { formatDue } from "./format-due";
+import { HomeworkFocusCard } from "./homework-focus-card";
 import { ResubmitDialog } from "./resubmit-dialog";
 import { nextPendingSubmission, reviewedCount } from "./review-progress";
 import { ReviewSavedDialog, type ReviewSaved } from "./review-saved-dialog";
@@ -244,6 +246,8 @@ export function HomeworkReviewPage() {
                     ? current?.aiSummary || t("review.aiFailedHint")
                     : t("review.aiSuggestionHint")}
             </DsText>
+            {/* Veb #201: AI'ga sig'magan sahifalar */}
+            {checking ? null : <AiSkippedNotice count={current?.result?.skippedImages ?? 0} />}
             {questions.length && !checking ? (
               <View style={styles.finding}>
                 <Icon name="check-circle" size={18} color={ds.c.success} />
@@ -332,6 +336,12 @@ export function HomeworkReviewPage() {
                 <Icon name="download" size={18} color={ds.c["icon-secondary"]} />
               </Pressable>
             ))}
+          </View>
+        ) : null}
+        {/* Veb #197: o'quvchi vazifa sahifasidan chiqib-kirishi */}
+        {current?.focus ? (
+          <View style={styles.note}>
+            <HomeworkFocusCard focus={current.focus} />
           </View>
         ) : null}
       </KeyboardAwareScrollView>

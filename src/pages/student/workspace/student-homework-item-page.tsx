@@ -13,10 +13,12 @@ import {
   homeworkFieldError,
   homeworkKeys,
   latestSubmission,
+  pauseHomeworkFocus,
   useAssignment,
   useDownloadAssignmentFile,
   useDownloadSubmissionFile,
   useHomeworkDraft,
+  useHomeworkFocusTracker,
   useSaveHomeworkDraft,
   useSubmission,
   useSubmitHomework,
@@ -147,6 +149,8 @@ function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; o
   // Veb #162: qoralama serverda (avval qurilma xotirasida edi), 5 tagacha fayl.
   const draft = useHomeworkDraft(assignment.id);
   const saveDraftMutation = useSaveHomeworkDraft(assignment.id);
+  // Veb #197: vazifa formasi ochiq turganda ilovadan chiqib-qaytish qayd etiladi (Google Form'li vazifada emas).
+  useHomeworkFocusTracker(assignment.id, !assignment.googleFormUrl);
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [comment, setComment] = useState("");
@@ -172,7 +176,8 @@ function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; o
   }, [serverDraft]);
 
   async function pick() {
-    const incoming = await pickDocuments(speaking ? ACCEPT_SPEAKING : ACCEPT);
+    // Fayl tanlash oynasi ilovani fonga o'tkazadi — bu chiqish deb sanalmaydi.
+    const incoming = await pauseHomeworkFocus(pickDocuments(speaking ? ACCEPT_SPEAKING : ACCEPT));
     if (!incoming.length) return;
     setError(null);
     setFiles((current) => {

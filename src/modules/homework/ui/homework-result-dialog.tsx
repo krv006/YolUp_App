@@ -6,6 +6,7 @@ import { toIntlLocale } from "@/shared/i18n";
 import type { Submission } from "@/shared/types";
 import { DsGradient, DsText, dsRadius, Icon, MobileRoundButton, useDs, type DsColor, type IconName } from "@/shared/ui";
 import { submissionAiState } from "../lib/submission-ai-state";
+import { AiSkippedNotice } from "./ai-skipped-notice";
 import { useRecheckSubmission, useReviewSubmission, useSubmission } from "../model/homework.queries";
 
 export interface HomeworkResultDialogProps {
@@ -236,6 +237,7 @@ export function HomeworkResultDialog({ submissionId, initial = null, open, onOpe
                   )}
                 </View>
               </View>
+              <AiSkippedNotice count={submission.result?.skippedImages ?? 0} style={styles.skipped} />
               {reviewError ? (
                 <View style={[styles.reviewError, { backgroundColor: ds.c["danger-bg"] }]}>
                   <DsText v="body-sm" c="error-text">
@@ -314,6 +316,8 @@ const styles = StyleSheet.create({
   gradeText: { fontSize: 28, lineHeight: 34 },
   pair: { flexDirection: "row", gap: 8 },
   scoreButton: { flex: 1, minWidth: 0, height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 22 },
+  /* Veb #201: `mt-3` */
+  skipped: { marginTop: 12 },
   reviewError: { marginTop: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.xl },
   section: { marginTop: 16, gap: 8, padding: 16, borderRadius: dsRadius.lg },
   sectionHead: { flexDirection: "row", alignItems: "center", gap: 8 },

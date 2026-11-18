@@ -728,7 +728,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/new-chat-menu/create-audience-dialog.tsx` | 🟡 MOSLASH | `da4a61b61f45` | pastki `Sheet` + `MobileInput` |
 | `src/widgets/channel-view/channel-view.tsx` | 🟡 MOSLASH | `f63b5a45e628` | faqat tor ekran; izohlar to'liq ekran `Modal` (`channel-thread.tsx`); mobilda `pages/chats/conversation-page.tsx` kanal turida shu ko'rinishni qaytaradi |
 | `src/widgets/channel-view/channel-thread.tsx` | 🟡 MOSLASH | `1b1f66ef493d` | to'liq ekran `Modal` (vebda tor ekranda `fixed inset-0`); `textarea` -> ko'p qatorli `TextInput`; klaviaturadan qochish `react-native-keyboard-controller` KAV bilan (Android edge-to-edge'da Modal kichraymaydi) |
-| `src/widgets/channel-view/channel-info-dialog.tsx` | 🟡 MOSLASH | `38e8017ad9ad` | pastki `Sheet`; rasm `pickImage`; a'zo qo'shish va o'chirish oynalari shu oynaning ichida (iOS) |
+| `src/widgets/channel-view/channel-info-dialog.tsx` | 🟡 MOSLASH | `80009794425c` | pastki `Sheet`; rasm `pickImage`; a'zo qo'shish va o'chirish oynalari shu oynaning ichida (iOS) |
 | `src/widgets/channel-view/index.ts` | 🟢 NUSXA | `7d9248d9b9ef` | — |
 | `src/widgets/teacher-notify-dialog/teacher-notify-dialog.tsx` | 🟡 MOSLASH | `05d0a486b817` | pastki `Sheet`; guruh `<select>` -> picker; katakchalar `CheckboxMark` |
 | `src/widgets/teacher-notify-dialog/index.ts` | 🟢 NUSXA | `39f4fb954a01` | — |

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useConnectionState,
@@ -43,6 +43,7 @@ import {
   type MediaMode,
   type MicRequest,
 } from "@/modules/live";
+import { FEATURES } from "@/shared/config";
 import type { Lesson } from "@/shared/types";
 import {
   Avatar,
@@ -277,7 +278,8 @@ function RoomBody({ lesson, isTeacher, onLeave }: LiveRoomProps) {
           onRelease={camera.release}
         />
         {isTeacher ? <SilenceAllButton lessonId={lesson.id} /> : null}
-        <ShareButton />
+        {/* Android'da ekran ulashish hozircha o'chiq (`FEATURES.androidScreenShare` — Play fon xizmati e'loni). */}
+        {Platform.OS !== "android" || FEATURES.androidScreenShare ? <ShareButton /> : null}
         <ToolbarButton icon={<Icon name="edit" size={22} color={boardOpen ? ds.c["on-action"] : ds.c.ink} />} label={t("room.board")} tone={boardOpen ? "active" : "default"} onPress={() => setBoardOpen(!boardOpen)} />
         <ToolbarButton
           icon={<Icon name="person" size={22} color={ds.c.ink} />}

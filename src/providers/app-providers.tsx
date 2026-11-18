@@ -82,6 +82,19 @@ export function AppProviders({ children }: { children: ReactNode }) {
   const fontsSettled = fontsLoaded || fontError !== null;
 
   /*
+   * Zaxira: tizim splash'i odatda `BootScreen` ning birinchi `onLayout`
+   * ida yopiladi. Yangi o'rnatishda (saqlangan token yo'q, shriftlar
+   * keshda) hammasi bir zumda tayyor bo'lib, `BootScreen` joylashguncha
+   * almashib ketadi — `hideAsync` chaqirilmay, splash welcome sahifasi
+   * ustida qolib, bosishlarni ham to'sardi (2026-11-18, release APK,
+   * emulyator). `hideAsync` qayta chaqirilsa zarari yo'q.
+   */
+  const booted = ready && fontsSettled;
+  useEffect(() => {
+    if (booted) void SplashScreen.hideAsync().catch(() => undefined);
+  }, [booted]);
+
+  /*
    * Hali tayyor emas — marshrutlar EMAS, ochilish ekrani chiziladi: aks
    * holda guard'lar noma'lum auth holati ustida qaror qabul qilib qo'yadi.
    * Tizim splash'i shu ekranning birinchi kadrida yopiladi (u faqat statik

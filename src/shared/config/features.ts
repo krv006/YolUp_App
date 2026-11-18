@@ -1,3 +1,5 @@
+import NATIVE_FEATURES from "./native-features.json";
+
 /**
  * Mobil ilovada vaqtincha o'chirilgan imkoniyatlar — 🆕 mobilga xos.
  *
@@ -22,4 +24,15 @@ export const FEATURES = Object.freeze({
    * tekshiruvi bu bayroqqa bog'liq emas.
    */
   aiAssistant: false,
+  /*
+   * Android'da jonli darsda telefon ekranini ulashish ("Ulashish").
+   * 2026-11-18 loyiha egasi qarori bilan o'chirildi: Play yopiq test uchun
+   * `FOREGROUND_SERVICE_MEDIA_PROJECTION` e'loni va funksiyani ko'rsatuvchi
+   * video talab qiladi. O'chiq bo'lsa `app.config.ts` ruxsatni va
+   * `react-native-webrtc` xizmatini olib tashlaydi, tugma yashiriladi.
+   * iOS va vebga ta'sir qilmaydi. Qiymat `native-features.json` da —
+   * `app.config.ts` ham shu faylni o'qiydi. Qaytarish — u yerda `true`,
+   * prebuild va Play'da e'lon.
+   */
+  androidScreenShare: NATIVE_FEATURES.androidScreenShare,
 });

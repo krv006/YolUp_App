@@ -9,6 +9,8 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  * bilan oshiriladi va git diffda yaqqol ko'rinadi.
  */
 import versionInfo from "./version.json";
+// Nativ qismga ta'sir qiladigan bayroqlar (`FEATURES` ham shu fayldan o'qiydi).
+import NATIVE_FEATURES from "./src/shared/config/native-features.json";
 
 /**
  * YolUp mobil ilova konfiguratsiyasi.
@@ -124,11 +126,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         "android.permission.ACCESS_NETWORK_STATE",
         // Simsiz quloqchin bilan gapirish uchun.
         "android.permission.BLUETOOTH_CONNECT",
-        // Dars fon rejimiga o'tganda ovoz uzilmasligi uchun.
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-        // Ekran ulashish (Android; iOS'da Broadcast Extension kerak — v1.1).
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+        /*
+         * Ekran ulashish (Android; iOS'da Broadcast Extension kerak — v1.1).
+         * Hozircha o'chiq (`androidScreenShare`): Play har fon
+         * xizmati turiga e'lon va video talab qiladi.
+         *
+         * `FOREGROUND_SERVICE_MEDIA_PLAYBACK` olib tashlandi (2026-11-18):
+         * uni hech bir funksiya ishlatmasdi — jonli dars ovozi bu xizmatdan
+         * foydalanmaydi, ovozli xabarlar faqat ilova ochiq turganda.
+         */
+        ...(NATIVE_FEATURES.androidScreenShare
+          ? ["android.permission.FOREGROUND_SERVICE", "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"]
+          : []),
       ],
       /*
        * Play Market siyosatiga ko'ra keraksiz ruxsatlar:
@@ -143,6 +152,9 @@ export default ({ config }: ConfigContext): ExpoConfig => {
        */
       blockedPermissions: [
         "android.permission.READ_MEDIA_IMAGES",
+        // Kutubxonalar qo'shsa ham — e'lonsiz fon xizmati turi Play'da relizni to'xtatadi.
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        ...(NATIVE_FEATURES.androidScreenShare ? [] : ["android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"]),
         ...(VARIANT === "production" ? ["android.permission.SYSTEM_ALERT_WINDOW"] : []),
       ],
     },
@@ -212,6 +224,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           microphonePermission:
             "Jonli darsda gapirish va og'zaki vazifani yozib topshirish uchun.",
+          /*
+           * Fonda ijro (qulf ekranidagi boshqaruv, `AudioControlsService` +
+           * `FOREGROUND_SERVICE_MEDIA_PLAYBACK`) ishlatilmaydi. Standart
+           * `true` — Play e'lon talab qilardi. iOS fon audio rejimi
+           * `ios.infoPlist.UIBackgroundModes` da alohida berilgan.
+           */
+          enableBackgroundPlayback: false,
         },
       ],
       [
@@ -224,6 +243,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       // Release APK'ni haqiqiy kalit bilan imzolaydi. `credentials/`
       // bo'lmasa jim o'tadi va debug kaliti ishlatiladi.
       "./plugins/with-release-signing",
+      ...(NATIVE_FEATURES.androidScreenShare ? [] : ["./plugins/without-media-projection-service"]),
     ],
     // typedRoutes ATAYLAB o'chiq: marshrut yo'llari veb'dan ko'chirilgan
     // `shared/config/routes.ts` dan oddiy `string` sifatida keladi (masalan

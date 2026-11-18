@@ -64,7 +64,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `78e7cc73261d` | — |
 | `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `8254f8a234ac` | — |
 | `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `389e0f383451` | — |
-| `src/modules/auth/index.ts` | 🟡 MOSLASH | `c552ad7b6ca8` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/auth/index.ts` | 🟡 MOSLASH | `ae90ffffb002` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/auth/lib/auth-session.ts` | 🟢 NUSXA | `4e39458e320b` | — |
 | `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `4c1c2b14f055` | — |
 | `src/modules/auth/lib/uz-phone.ts` | 🟢 NUSXA | `3c5a2a144ed8` | — |
@@ -370,10 +370,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/switch.tsx` | 🟡 MOSLASH | `edc97d390894` | radix o'rniga Pressable; `lg` o'lcham; radius aniq yarim balandlik (Android `boxShadow` 999 ni kesmaydi) |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `a30c57d10aa4` | faqat tor ekran varianti (`Sheet variant="app" compact`); tezkor tugmalar kursor joyiga (`onSelectionChange` + `setSelection`) |
 | `src/pages/teacher/exams/teacher-exams-page.tsx` | 🟡 MOSLASH | `aaec2fc43c46` | mobilda yo'q — vebda ham ulanmagan (`/teacher/exams` -> `/teacher/workspace/mock`) |
-| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): "Parolni unutdingizmi?" yashirin, 2FA talab qilinsa kod oynasi o'rniga izoh |
-| `src/modules/auth/ui/mobile-login-form.tsx` | 🟡 MOSLASH | `f2830b3adbe5` | mobilda `pages/auth/login-page.tsx` ichida |
+| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): "Parolni unutdingizmi?" yashirin, 2FA talab qilinsa kod oynasi o'rniga izoh; veb #199/#201 400 (ko'p akkauntli email) va 429 xabarlari; "Parolni unutdingizmi?" `FEATURES.emailPasswordReset` bilan (tiklash email orqali) |
+| `src/modules/auth/ui/mobile-login-form.tsx` | 🟡 MOSLASH | `b0ae01cbbbfd` | mobilda `pages/auth/login-page.tsx` ichida |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `fd6ead08a2a2` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
-| `src/modules/auth/ui/mobile-register-form.tsx` | 🟡 MOSLASH | `eee88e0d2a0c` | mobilda `pages/auth/register-page.tsx` ichida |
+| `src/modules/auth/ui/mobile-register-form.tsx` | 🟡 MOSLASH | `ad079b307a22` | mobilda `pages/auth/register-page.tsx` ichida |
 | `src/modules/auth/ui/auth-screen.tsx` | 🟡 MOSLASH | `821d80dc5c6f` | `AuthScreen` (tor ekran varianti, M1–M4) + maydon/tugma komponentlari; `AuthShell` (keng ekran) yo'q; fon gradienti `DsGradient`, maydonlar klaviatura ustiga `KeyboardAwareScrollView` bilan suriladi; placeholder o'lchami RN'da alohida berilmagani uchun bo'sh maydonda shrift placeholder'nikiga o'tadi |
 | `src/modules/auth/ui/otp-input.tsx` | 🟡 MOSLASH | `56a812e2324e` | har katak alohida `TextInput`; SMS avtoto'ldirish `oneTimeCode`/`sms-otp`; fokus o'tishidan oldin kelgan raqam keyingi kataklarga tarqatiladi (vebda `maxLength=1`) |
 | `src/modules/auth/ui/two-factor-form.tsx` | 🟡 MOSLASH | `e6f1e33d6c41` | faqat `MobileTwoFactorForm` (veb tor ekranda shuni ko'rsatadi); `TwoFactorForm` (keng ekran) yo'q |
@@ -383,7 +383,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/profile/profile-shell.tsx` | 🟡 MOSLASH | `282318c579f7` | `ProfileSubPage` — maydonlar klaviatura ustida (`KeyboardAwareScrollView`); orqaga — stekdan, bo'lmasa profil bosh sahifasiga |
 | `src/pages/profile/profile-dialogs.tsx` | 🟡 MOSLASH | `b40b451d2915` | `AppDialog` -> `Sheet variant="app"` / `ConfirmDialog`; faqat tor ekran shoxi; `LinkAccountDialog` almashtirish oynasi ichida (iOS) |
 | `src/pages/profile/settings-tones.ts` | 🟢 NUSXA | `3d58b6ad30a4` | — |
-| `src/pages/profile/personal-info-page.tsx` | 🟡 MOSLASH | `28200661b973` | faqat tor ekran varianti; fan va shahar `<select>` o'rniga `MobilePickerField`; xato `MobileActionBar` ustida |
+| `src/pages/profile/personal-info-page.tsx` | 🟡 MOSLASH | `f435ac374526` | faqat tor ekran varianti; fan va shahar `<select>` o'rniga `MobilePickerField`; xato `MobileActionBar` ustida |
 | `src/pages/profile/system-settings-page.tsx` | 🟡 MOSLASH | `f5135024240f` | faqat tor ekran varianti; push — veb Web Push o'rniga OS ruxsati (o'chirish tizim sozlamalarini ochadi, ilovaga qaytganda qayta o'qiladi); eski mobil sahifadagi kesh tozalash va bildirishnoma turlari olib tashlandi (vebda yo'q); mavzu va matn o'lchami vebdagidek serverga ham yoziladi |
 | `src/pages/profile/my-ratings-page.tsx` | 🟡 MOSLASH | `d8a2a399924a` | faqat tor ekran shoxlari: o'qituvchida `TeacherRatings`, o'quvchida `student-ratings.tsx` |
 | `src/pages/profile/student-ratings.tsx` | 🟡 MOSLASH | `681aec74e6b1` | faqat tor ekran varianti |
@@ -598,6 +598,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/lib/email-code.ts` | 🟢 NUSXA | `0ac35d1bafdf` | — |
 | `src/modules/auth/lib/email-setup.ts` | 🟢 NUSXA | `8ab10913d518` | — |
 | `src/modules/auth/model/use-email-code.ts` | 🟢 NUSXA | `eb36f25d2da2` | — |
+| `src/modules/auth/model/use-register-email.ts` | 🟢 NUSXA | `770044b5c0c4` | — |
+| `src/modules/auth/ui/register-email-field.tsx` | 🟡 MOSLASH | `301367497034` | `AuthField` `trailing` ichida kichik `Pressable` tugmalar; `readOnly` o'rniga `editable` |
+| `src/modules/auth/ui/email-verify-form.tsx` | 🟡 MOSLASH | `8c69a7e09a33` | `MobileInput` + `MobileButton`; forma `onSubmit` o'rniga klaviaturadagi "send" |
+| `src/modules/auth/ui/email-verify-dialog.tsx` | 🟡 MOSLASH | `1700739024b1` | `AppDialog variant="adaptive"` o'rniga `Sheet variant="app"` |
+| `src/modules/auth/ui/email-setup-dialog.tsx` | 🟡 MOSLASH | `21902f42a9f1` | `CenterDialog`; mobilda `app/_layout.tsx` da `ForcePasswordDialog` yonida; "Keyinroq" `sessionStorage` o'rniga ilova jarayoni xotirasida |
 | `src/modules/parent/api/parent.endpoints.ts` | 🟢 NUSXA | `85b3cf9db4d0` | — |
 | `src/modules/parent/lib/parent-attendance.ts` | 🟢 NUSXA | `b3352ac652af` | — |
 | `src/modules/parent/lib/parent-errors.ts` | 🟢 NUSXA | `ce4e5985c831` | — |

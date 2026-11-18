@@ -14,6 +14,8 @@ import {
   AuthPhoneField,
   AuthScreen,
 } from "@/modules/auth/ui/auth-screen";
+import { useRegisterEmail } from "@/modules/auth/model/use-register-email";
+import { RegisterEmailField } from "@/modules/auth/ui/register-email-field";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
 import { ROUTES } from "@/shared/config";
 import type { AuthUser } from "@/shared/types";
@@ -35,6 +37,8 @@ export function RegisterPage() {
   const { isAuthenticated } = useAuth();
   const register = useRegisterMutation();
   const schema = useMemo(() => createRegisterSchema(t), [t]);
+  // Veb #199: email maydoni backend sozlamasiga qarab (yo'q / ixtiyoriy / majburiy).
+  const email = useRegisterEmail();
   const [createdUser, setCreatedUser] = useState<AuthUser | null>(null);
   const [confirm, setConfirm] = useState("");
   const [confirmError, setConfirmError] = useState<string | null>(null);
@@ -61,9 +65,11 @@ export function RegisterPage() {
       return;
     }
     setConfirmError(null);
+    if (!email.validate()) return;
     try {
-      setCreatedUser(await register.mutateAsync(values));
+      setCreatedUser(await register.mutateAsync(email.withEmail(values)));
     } catch (error) {
+      if (email.takeServerError(error)) return;
       const appError = error as AppError;
       if (!applyApiFieldErrors(appError, setError, { first_name: "firstName", last_name: "lastName" })) {
         setError("root", { message: appError.message });
@@ -211,6 +217,10 @@ export function RegisterPage() {
             />
           )}
         />
+
+        {email.visible ? (
+          <RegisterEmailField key={email.fieldKey} required={email.required} value={email.value} onChange={email.change} error={email.error} />
+        ) : null}
 
         <Controller
           control={control}

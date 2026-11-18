@@ -22,6 +22,7 @@ export {
 } from "./lib/analytics.mappers";
 export {
   analyticsKeys,
+  useClientHealth,
   useDashboardSummary,
   useDashboardTrends,
   useMonitoringCurrent,
@@ -32,6 +33,7 @@ export {
   useDashboardActivity,
   useTeacherVideoStats,
 } from "./model/analytics.queries";
+export { shortUserAgent, type ClientHealthSummary, type ClientHealthUser } from "./lib/client-health";
 
 // --- Mobil UI ---
 export { TrendLineChart } from "./ui/trend-line-chart";

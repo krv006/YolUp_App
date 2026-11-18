@@ -282,7 +282,16 @@
     "certificateIssuerPlaceholder": "Masalan: British Council",
     "certificateYear": "Yil",
     "certificateRejected": "Rad etildi",
-    "certificateRejectReason": "Sabab: {{reason}}"
+    "certificateRejectReason": "Sabab: {{reason}}",
+    "emailNotSet": "Qo‘shilmagan",
+    "emailVerified": "Tasdiqlangan",
+    "emailUnverified": "Tasdiqlanmagan",
+    "emailAdd": "Qo‘shish",
+    "emailVerify": "Tasdiqlash",
+    "emailChange": "O‘zgartirish",
+    "currentPasswordRequired": "Joriy parolni kiriting",
+    "passwordSame": "Yangi parol joriy paroldan farq qilishi kerak",
+    "passwordChangeFailed": "Parolni o‘zgartirib bo‘lmadi. Qaytadan urinib ko‘ring."
   },
   "help": {
     "search": "Savol yoki mavzu qidirish…",

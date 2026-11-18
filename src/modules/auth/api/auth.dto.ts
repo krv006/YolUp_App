@@ -58,6 +58,9 @@ export const userDtoSchema = z.object({
   middle_name: z.string().nullable().optional(),
   birth_date: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
+  email_verified: z.boolean().nullable().optional(),
+  email_setup_required: z.boolean().nullable().optional(),
+  email_setup_deadline: z.string().nullable().optional(),
   subject: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
   bio: z.string().nullable().optional(),
@@ -127,10 +130,6 @@ export type LinkedAccountDto = z.infer<typeof linkedAccountDtoSchema>;
 export type LoginRecordDto = z.infer<typeof loginRecordDtoSchema>;
 export type CertificateDto = z.infer<typeof certificateDtoSchema>;
 
-export interface AdminCertificateDto extends CertificateDto {
-  owner?: { id: string | number; name?: string; username?: string; first_name?: string; last_name?: string; role?: string; avatar?: string | null } | null;
-  user?: { id: string | number; name?: string; username?: string; first_name?: string; last_name?: string; role?: string; avatar?: string | null } | null;
-}
 export type SwitchAccountResponseDto = z.infer<typeof switchAccountResponseDtoSchema>;
 
 export interface LoginRecord {
@@ -175,6 +174,25 @@ export interface RegisterRequestDto {
   last_name: string;
   role: string;
   phone: string;
+  email?: string;
+  email_token?: string;
+}
+
+export interface RegisterOptionsDto {
+  email_required?: boolean | null;
+  email_available?: boolean | null;
+  phone_available?: boolean | null;
+}
+
+export interface RegisterOptions {
+  emailRequired: boolean;
+  emailAvailable: boolean;
+}
+
+export interface CodeSentDto {
+  sent?: boolean;
+  expires_in?: number | null;
+  retry_after?: number | null;
 }
 
 export interface CreateChildRequestDto {
@@ -202,6 +220,8 @@ export interface RegisterFormValues {
   lastName: string;
   phone?: string;
   role: "teacher" | "parent" | "student";
+  email?: string;
+  emailToken?: string;
 }
 
 export interface TokenPair {

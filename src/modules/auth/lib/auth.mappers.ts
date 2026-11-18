@@ -2,7 +2,6 @@ import { normalizeMediaUrl, normalizePagination, type Page, type PaginationOptio
 import { normalizeRole } from "@/modules/permission";
 import type { Role } from "@/shared/constants";
 import type {
-  AdminCertificate,
   AuthUser,
   Certificate,
   LinkedAccount,
@@ -18,7 +17,6 @@ import {
   switchAccountResponseDtoSchema,
   tokenPairDtoSchema,
   userDtoSchema,
-  type AdminCertificateDto,
   type LinkedAccountDto,
   type LoginRecord,
   type LoginRequestDto,
@@ -96,6 +94,9 @@ export function mapUserDto(dto: unknown): AuthUser {
     inviteCode: parsed.invite_code ?? null,
     avatarUrl: normalizeMediaUrl(parsed.avatar),
     email: parsed.email ?? null,
+    emailVerified: parsed.email_verified === true,
+    emailSetupRequired: parsed.email_setup_required === true,
+    emailSetupDeadline: parsed.email_setup_deadline ?? null,
     status: "online",
     avgRating: parsed.avg_rating ?? null,
     ratingCount: parsed.rating_count ?? null,
@@ -137,22 +138,6 @@ export function mapSwitchAccountResponse(dto: unknown): { tokens: TokenPair; use
   return {
     tokens: { accessToken: parsed.access, refreshToken: parsed.refresh },
     user: mapUserDto(parsed.user),
-  };
-}
-
-export function mapAdminCertificate(dto: AdminCertificateDto): AdminCertificate {
-  const owner = dto.owner ?? dto.user ?? null;
-  return {
-    ...mapCertificateDto(dto),
-    owner: owner
-      ? {
-          id: String(owner.id),
-          name: owner.name || [owner.first_name, owner.last_name].filter(Boolean).join(" ") || owner.username || "—",
-          username: owner.username ?? "",
-          role: owner.role ?? "",
-          avatarUrl: normalizeMediaUrl(owner.avatar ?? null),
-        }
-      : null,
   };
 }
 

@@ -90,6 +90,12 @@ export function TestStartScreen({ quiz, meta }: { quiz: QuizDetail; meta: string
               </DsText>
             ) : null}
           </View>
+          {/* Veb #193: `text-body whitespace-pre-line text-ink-secondary` */}
+          {quiz.description ? (
+            <DsText c="ink-secondary" style={styles.center}>
+              {quiz.description}
+            </DsText>
+          ) : null}
           <View style={styles.rows}>
             {rows.map((row) => (
               <View key={row.id} style={[styles.row, { backgroundColor: ds.c.subtle }]}>

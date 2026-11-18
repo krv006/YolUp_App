@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
-import { useAuth, useIsStudent, useUpdateProfileMutation } from "@/modules/auth";
+import { Pressable, StyleSheet, View } from "react-native";
+import { EmailVerifyDialog, useAuth, useIsStudent, useUpdateProfileMutation } from "@/modules/auth";
 import { useCourses, useSubjects } from "@/modules/course";
 import { AppError } from "@/shared/api";
 import { bodyFont, DsText, dsRadius, dsType, Icon, MobileButton, MobileFieldLabel, MobileInput, MobilePickerField, toast, useDs } from "@/shared/ui";
@@ -9,7 +9,41 @@ import { ProfileSubPage } from "./profile-shell";
 
 const CITIES = ["Toshkent", "Samarqand", "Buxoro", "Andijon", "Farg'ona", "Namangan", "Qarshi", "Nukus", "Urganch", "Jizzax", "Guliston", "Navoiy", "Termiz"];
 
-type TextField = "firstName" | "lastName" | "username" | "phone" | "email";
+type TextField = "firstName" | "lastName" | "username" | "phone";
+
+/**
+ * Email holati — veb #199 `EmailRow`: manzil, "Tasdiqlangan"/"Tasdiqlanmagan"
+ * belgisi va "Qo'shish"/"Tasdiqlash"/"O'zgartirish". Email endi PATCH bilan
+ * yuborilmaydi (aks holda `email_verified` qayta `false` bo'lardi) —
+ * faqat tasdiqlash oynasi orqali.
+ */
+function EmailRow({ onOpen }: { onOpen: () => void }) {
+  const { t } = useTranslation("account");
+  const ds = useDs();
+  const { user } = useAuth();
+  const email = user?.email ?? "";
+  const verified = Boolean(email && user?.emailVerified);
+  return (
+    <View style={[styles.emailRow, { backgroundColor: ds.c.surface }]}>
+      <DsText numberOfLines={1} c={email ? "ink" : "ink-tertiary"} style={styles.grow}>
+        {email || t("page.emailNotSet")}
+      </DsText>
+      {email ? (
+        <View style={[styles.emailBadge, { backgroundColor: verified ? ds.c["success-bg"] : ds.c["warning-bg"] }]}>
+          <Icon name={verified ? "check-circle" : "warning"} size={14} color={verified ? ds.c["success-fg"] : ds.c["warning-fg"]} />
+          <DsText v="caption-strong" c={verified ? "success-fg" : "warning-fg"}>
+            {verified ? t("page.emailVerified") : t("page.emailUnverified")}
+          </DsText>
+        </View>
+      ) : null}
+      <Pressable accessibilityRole="button" onPress={onOpen} style={({ pressed }) => [styles.emailAction, pressed && { backgroundColor: ds.c["brand-subtle"] }]}>
+        <DsText v="body-xs" w="600" c="brand">
+          {!email ? t("page.emailAdd") : verified ? t("page.emailChange") : t("page.emailVerify")}
+        </DsText>
+      </Pressable>
+    </View>
+  );
+}
 
 /**
  * Shaxsiy ma'lumotlar — veb `personal-info-page.tsx` (tor ekran): ism va
@@ -31,7 +65,6 @@ export function PersonalInfoPage() {
     lastName: user?.lastName ?? "",
     username: user?.username ?? "",
     phone: user?.phone ?? "",
-    email: user?.email ?? "",
     subject: user?.subject ?? "",
     city: user?.city ?? "",
   });
@@ -49,7 +82,9 @@ export function PersonalInfoPage() {
     );
   }
 
-  const field = (key: TextField, keyboardType?: "phone-pad" | "email-address") => (
+  const [emailOpen, setEmailOpen] = useState(false);
+
+  const field = (key: TextField, keyboardType?: "phone-pad") => (
     <MobileInput
       surface
       value={form[key]}
@@ -102,7 +137,7 @@ export function PersonalInfoPage() {
           {field("phone", "phone-pad")}
         </MobileFieldLabel>
         <MobileFieldLabel gap={7} label={t("page.email")}>
-          {field("email", "email-address")}
+          <EmailRow onOpen={() => setEmailOpen(true)} />
         </MobileFieldLabel>
         <View style={styles.pair}>
           <View style={styles.grow}>
@@ -141,6 +176,7 @@ export function PersonalInfoPage() {
           </View>
         </View>
       </View>
+      <EmailVerifyDialog open={emailOpen} onOpenChange={setEmailOpen} initialEmail={user?.email ?? ""} />
     </ProfileSubPage>
   );
 }
@@ -152,6 +188,10 @@ const styles = StyleSheet.create({
   pair: { flexDirection: "row", gap: 12 },
   username: { gap: 6 },
   readonly: { height: 52, justifyContent: "center", paddingHorizontal: 16, borderRadius: dsRadius.lg },
+  /* Maydon o'lchamida (`MOBILE_INPUT_SURFACE`): manzil, belgi va tugma bir qatorda. */
+  emailRow: { height: 52, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 16, paddingRight: 6, borderRadius: dsRadius.lg },
+  emailBadge: { height: 24, flexShrink: 0, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, borderRadius: dsRadius.full },
+  emailAction: { flexShrink: 0, paddingHorizontal: 10, paddingVertical: 4, borderRadius: dsRadius.full },
   readonlyText: { fontSize: dsType.body.fontSize, fontFamily: bodyFont("400") },
   error: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 12, borderRadius: dsRadius.xl },
 });

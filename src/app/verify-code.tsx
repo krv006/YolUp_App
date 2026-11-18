@@ -5,7 +5,7 @@ import { FEATURES, ROUTES } from "@/shared/config";
 
 export default function Route() {
   // SMS bilan tasdiqlash hozircha o'chirilgan (`FEATURES`) — eski havola kirishga qaytaradi.
-  if (!FEATURES.smsVerification) return <Redirect href={ROUTES.auth.login as never} />;
+  if (!FEATURES.emailPasswordReset) return <Redirect href={ROUTES.auth.login as never} />;
   return (
     <PublicRoute>
       <VerifyCodePage />

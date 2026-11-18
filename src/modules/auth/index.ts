@@ -36,9 +36,6 @@ export {
   useTeachers,
   useTwoFactorStatus,
   useLoginHistoryPage,
-  useAdminCertificates,
-  useVerifyCertificate,
-  useRejectCertificate,
   useSetTeacherTestAccess,
 } from "./model/auth.queries";
 export { describeUserAgent } from "./lib/describe-user-agent";
@@ -85,4 +82,7 @@ export { UZ_PHONE_LENGTH, formatUzPhone } from "./lib/uz-phone";
 export { describeCreateError } from "./lib/teacher-approval";
 export { describeTwoFactorChallenge } from "./lib/describe-two-factor";
 export { describeResetError } from "./lib/describe-reset-error";
+export { describeEmailCodeError, isValidEmail, normalizeEmail } from "./lib/email-code";
+export { EmailVerifyDialog } from "./ui/email-verify-dialog";
+export { EmailSetupDialog } from "./ui/email-setup-dialog";
 

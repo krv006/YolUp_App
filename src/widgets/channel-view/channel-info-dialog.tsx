@@ -7,6 +7,7 @@ import {
   ChannelAvatar,
   useAddChannelMembers,
   useDeleteChannel,
+  useDetachChannelCourse,
   useRemoveChannelMember,
   useRemoveRoomImage,
   useSetRoomImage,
@@ -57,6 +58,7 @@ export function ChannelInfoDialog({ conversation, open, onOpenChange, manage, cu
   const [addOpen, setAddOpen] = useState(false);
   const [audience, setAudience] = useState<AudienceInput>({ courseIds: [], studentIds: [] });
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [detaching, setDetaching] = useState<{ id: string; title: string } | null>(null);
   const members = useQuery({
     queryKey: messageKeys.members(conversation.id, ""),
     queryFn: ({ signal }) => messageApi.getMembers(conversation.id, "", { signal }),
@@ -66,6 +68,7 @@ export function ChannelInfoDialog({ conversation, open, onOpenChange, manage, cu
   const remove = useDeleteChannel();
   const addMembers = useAddChannelMembers();
   const removeMember = useRemoveChannelMember();
+  const detachCourse = useDetachChannelCourse();
   const setImage = useSetRoomImage();
   const removeImage = useRemoveRoomImage();
   const imageBusy = setImage.isPending || removeImage.isPending;
@@ -79,6 +82,22 @@ export function ChannelInfoDialog({ conversation, open, onOpenChange, manage, cu
       { roomId: conversation.id, image: toUploadFile(picked) },
       {
         onSuccess: () => toast.success(t("channel.imageUpdated")),
+        onError: (error: Error) => toast.error(error.message),
+      }
+    );
+  }
+
+  /** Veb #197: guruhni kanaldan ajratish — shu guruh orqali qo'shilganlar chiqariladi. */
+  function detach() {
+    if (!detaching) return;
+    detachCourse.mutate(
+      { id: conversation.id, courseId: detaching.id },
+      {
+        onSuccess: (count) => {
+          toast.success(t("channel.groupDetached", { title: detaching.title, count }));
+          setDetaching(null);
+          void members.refetch();
+        },
         onError: (error: Error) => toast.error(error.message),
       }
     );
@@ -195,11 +214,23 @@ export function ChannelInfoDialog({ conversation, open, onOpenChange, manage, cu
             <DsText v="title-sm">{t("channel.linkedGroups")}</DsText>
             <View style={styles.chips}>
               {linkedCourses.map((course) => (
-                <View key={course.id} style={[styles.chip, { backgroundColor: ds.c.subtle }]}>
+                <View key={course.id} style={[styles.chip, manage && styles.chipManage, { backgroundColor: ds.c.subtle }]}>
                   <Icon name="groups" size={16} color={ds.c["ink-secondary"]} />
                   <DsText v="caption-strong" numberOfLines={1} style={styles.shrink}>
                     {course.title || t("channel.groupFallback")}
                   </DsText>
+                  {/* Veb #197: faqat kanal egasi — `size-6 rounded-full`, bosilganda `bg-error-bg` */}
+                  {manage ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t("channel.detachGroup", { title: course.title || t("channel.groupFallback") })}
+                      hitSlop={6}
+                      onPress={() => setDetaching({ id: course.id, title: course.title || t("channel.groupFallback") })}
+                      style={({ pressed }) => [styles.chipRemove, pressed && { backgroundColor: ds.c["error-bg"] }]}
+                    >
+                      {({ pressed }) => <Icon name="close" size={14} color={pressed ? ds.c["error-text"] : ds.c["ink-tertiary"]} />}
+                    </Pressable>
+                  ) : null}
                 </View>
               ))}
             </View>
@@ -300,6 +331,18 @@ export function ChannelInfoDialog({ conversation, open, onOpenChange, manage, cu
       </Sheet>
 
       <ConfirmDialog
+        open={Boolean(detaching)}
+        onOpenChange={(next) => !next && setDetaching(null)}
+        icon="groups"
+        title={t("channel.detachTitle")}
+        description={t("channel.detachHint", { title: detaching?.title ?? "" })}
+        confirmLabel={t("channel.detachConfirm")}
+        cancelLabel={t("channel.cancel")}
+        pending={detachCourse.isPending}
+        onConfirm={detach}
+      />
+
+      <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         icon="trash"
@@ -336,6 +379,9 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 8 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { height: 32, maxWidth: "100%", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: 16 },
+  /* `pl-3 pr-1` — o'ng tomonda × tugmasi */
+  chipManage: { paddingRight: 4 },
+  chipRemove: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   list: { overflow: "hidden", borderWidth: 1, borderRadius: dsRadius.xl },
   member: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 10 },
   removeMember: { width: 32, height: 32, borderRadius: 16, alignItems: "center", justifyContent: "center" },

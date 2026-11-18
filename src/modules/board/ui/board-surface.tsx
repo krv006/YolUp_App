@@ -18,6 +18,7 @@ import {
   MOBILE_BOARD_WIDTHS,
 } from "../constants/board.constants";
 import { canEditStroke } from "../lib/board-edit";
+import { confirmsPending } from "../lib/board-pending";
 import { freeTextBaseline, nextTextPoint, type BoardObstacle } from "../lib/board-flow";
 import { ownStroke, resolveOwnStrokes, type OwnStroke } from "../lib/board-history";
 import { measureStroke, textWidth } from "../lib/board-measure";
@@ -71,6 +72,13 @@ export interface BoardSurfaceProps {
 
 /** Joylashtirish oynasi nuqtadan shuncha yuqorida turadi (`-translate-y-[34px]`). */
 const FORM_LIFT = 34;
+/** Veb #192: server javob bermasa vaqtinchalik chiziq shuncha vaqtdan keyin o'chadi. */
+const PENDING_STROKE_MS = 8000;
+
+interface PendingStroke {
+  sheet: number;
+  stroke: StrokeDto;
+}
 
 type PlacedTool = "text" | "math" | "code";
 
@@ -143,6 +151,8 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const [initialLines, setInitialLines] = useState<TextLineDto[] | undefined>(undefined);
   const [card, setCard] = useState({ width: 0, height: 0 });
   const [formHeight, setFormHeight] = useState(0);
+  const [pendingStrokes, setPendingStrokes] = useState<PendingStroke[]>([]);
+  const pendingSeq = useRef(0);
 
   const rootRef = useRef<View>(null);
   const canvasRef = useRef<BoardCanvasHandle>(null);
@@ -211,9 +221,20 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
     return nextTextPoint(active?.strokes ?? [], { boardWidth: state?.width ?? 1200, boardHeight: canvasHeight, size: BOARD_TEXT_SIZE, lines });
   }
 
-  function sendStroke(stroke: StrokeShapeDto) {
-    if (source) return source.addStroke(sheet, stroke);
-    if (!realtime.sendStroke(sheet, stroke)) addStroke.mutate({ sheet, stroke });
+  /**
+   * Veb #192: yuborilgan chiziq server tasdiqlaguncha vaqtinchalik
+   * (`pending-N`) ko'rinadi — qalam qo'yib yuborilganda yo'qolib qolmaydi.
+   * Server nusxasi kelgach u yashiriladi (`confirmsPending`); saqlash xato
+   * bersa olib tashlanadi, javob kelmasa 8 soniyadan keyin o'chadi.
+   */
+  function sendStroke(stroke: StrokeShapeDto, target = sheet) {
+    if (source) return source.addStroke(target, stroke);
+    pendingSeq.current += 1;
+    const id = `pending-${pendingSeq.current}`;
+    const drop = () => setPendingStrokes((current) => current.filter((item) => item.stroke.id !== id));
+    setPendingStrokes((current) => [...current, { sheet: target, stroke: { ...stroke, id } as StrokeDto }]);
+    globalThis.setTimeout(drop, PENDING_STROKE_MS);
+    if (!realtime.sendStroke(target, stroke)) addStroke.mutate({ sheet: target, stroke }, { onError: drop });
   }
 
   function commitStroke(stroke: StrokeShapeDto) {
@@ -224,6 +245,14 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
   const lastOwn = history.filter((entry) => entry.sheet === sheet).at(-1) ?? null;
   const activeStrokes = active?.strokes;
+  const visiblePending = useMemo(
+    () =>
+      pendingStrokes
+        .filter((item) => item.sheet === sheet)
+        .filter((item) => !(activeStrokes ?? []).some((stroke) => confirmsPending(stroke, item.stroke)))
+        .map((item) => item.stroke),
+    [pendingStrokes, activeStrokes, sheet]
+  );
   const undoTargetId = lastOwn?.id ?? null;
   const undoTarget = useMemo(
     () => (undoTargetId ? ((activeStrokes ?? []).find((stroke) => stroke.id === undoTargetId) ?? null) : null),
@@ -247,8 +276,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
     setRedoStack((current) => current.slice(0, -1));
     setHistory((current) => [...current, ownStroke(entry.sheet, entry.shape, state?.sheets ?? [])]);
     if (entry.sheet !== sheet) setSheet(entry.sheet);
-    if (source) source.addStroke(entry.sheet, entry.shape);
-    else if (!realtime.sendStroke(entry.sheet, entry.shape)) addStroke.mutate({ sheet: entry.sheet, stroke: entry.shape });
+    sendStroke(entry.shape, entry.sheet);
   }
 
   function updateStroke(strokeId: string, update: StrokeUpdate) {
@@ -319,7 +347,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
   /** Matn, formula va kod — yangi matn ularga tegmasin (shakl va chizmalar to'siq emas). */
   function textObstacles(): BoardObstacle[] {
-    return (activeStrokes ?? []).flatMap((stroke) => {
+    return [...(activeStrokes ?? []), ...visiblePending].flatMap((stroke) => {
       if (stroke.type !== "text" && stroke.type !== "math" && stroke.type !== "code") return [];
       const box = measureStroke(stroke);
       return box ? [{ left: box.minX, right: box.maxX, top: box.minY, bottom: box.maxY }] : [];
@@ -526,6 +554,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
           <BoardCanvas
             ref={canvasRef}
             strokes={active?.strokes ?? []}
+            pendingStrokes={visiblePending}
             width={state.width}
             height={canvasHeight}
             fit="height"

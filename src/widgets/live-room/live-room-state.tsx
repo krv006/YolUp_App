@@ -9,8 +9,10 @@ export interface LiveRoomStateProps {
   description?: ReactNode;
   lessonTitle?: string;
   subtitle?: string;
-  tone?: "error" | "neutral" | "offline";
+  /** `waiting` — veb #193: o'quvchi boshlanmagan darsni kutmoqda. */
+  tone?: "error" | "neutral" | "offline" | "waiting";
   actionLabel?: string;
+  actionDisabled?: boolean;
   onAction?: () => void;
   secondaryLabel?: string;
   onSecondary?: () => void;
@@ -30,7 +32,19 @@ export function LiveRoomState(props: LiveRoomStateProps) {
   );
 }
 
-function StateBody({ title, description, lessonTitle, tone = "error", actionLabel, onAction, secondaryLabel, onSecondary, onBack }: LiveRoomStateProps) {
+function StateBody({
+  title,
+  description,
+  lessonTitle,
+  tone = "error",
+  actionLabel,
+  actionDisabled = false,
+  onAction,
+  secondaryLabel,
+  onSecondary,
+  onBack,
+}: LiveRoomStateProps) {
+  const waiting = tone === "waiting";
   const { t } = useTranslation("live");
   const ds = useDs();
   const insets = useSafeAreaInsets();
@@ -52,7 +66,7 @@ function StateBody({ title, description, lessonTitle, tone = "error", actionLabe
       <View style={styles.body}>
         {tone !== "neutral" ? (
           <View style={[styles.icon, { backgroundColor: ds.c.subtle }]}>
-            <Icon name={tone === "offline" ? "wifi" : "error"} size={40} color={ds.c["error-text"]} />
+            <Icon name={waiting ? "schedule" : tone === "offline" ? "wifi" : "error"} size={40} color={waiting ? ds.c.brand : ds.c["error-text"]} />
           </View>
         ) : null}
         {lessonTitle ? (
@@ -69,8 +83,14 @@ function StateBody({ title, description, lessonTitle, tone = "error", actionLabe
           </DsText>
         ) : null}
         {actionLabel && onAction ? (
-          <Pressable accessibilityRole="button" onPress={onAction} style={({ pressed }) => [styles.button, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}>
-            {tone === "neutral" ? null : <Icon name="refresh" size={20} color={ds.c["on-action"]} />}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: actionDisabled }}
+            disabled={actionDisabled}
+            onPress={onAction}
+            style={({ pressed }) => [styles.button, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }, actionDisabled && styles.disabled]}
+          >
+            {tone === "neutral" ? null : <Icon name={waiting ? "videocam-fill" : "refresh"} size={20} color={ds.c["on-action"]} />}
             <DsText v="title" w="600" c="on-action">
               {actionLabel}
             </DsText>
@@ -101,4 +121,6 @@ const styles = StyleSheet.create({
   title: { marginTop: 14 },
   description: { marginTop: 20, paddingHorizontal: 24 },
   button: { marginTop: 16, alignSelf: "stretch", height: 52, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderRadius: 26 },
+  /* `disabled:opacity-40` */
+  disabled: { opacity: 0.4 },
 });

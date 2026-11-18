@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Send } from "lucide-react-native";
 import { BoardSurface } from "@/modules/board";
-import { useAssignment, useHomeworkBoard, useHomeworkBoardSource, useSubmitHomeworkBoard } from "@/modules/homework";
+import { useAssignment, useHomeworkBoard, useHomeworkBoardSource, useHomeworkFocusTracker, useSubmitHomeworkBoard } from "@/modules/homework";
 import { ROUTES } from "@/shared/config";
 import type { Assignment } from "@/shared/types";
 import { ConfirmDialog, DsText, Screen, ScreenError, ScreenLoading, ThemeScope, useDs } from "@/shared/ui";
@@ -45,7 +45,8 @@ export function StudentHomeworkBoardPage() {
       assignment={assignment.data}
       board={board.data}
       onBack={goBack}
-      onSubmitted={() => router.dismissTo(ROUTES.student.homeworkItem(assignment.data.id) as never)}
+      // Veb #196: vazifa sahifasida "Vazifa topshirildi" oynasi ochiladi.
+      onSubmitted={() => router.dismissTo({ pathname: ROUTES.student.homeworkItem(assignment.data.id), params: { submitted: "1" } } as never)}
     />
   );
 }
@@ -66,6 +67,8 @@ function HomeworkBoardScreen({
   const insets = useSafeAreaInsets();
   const { source, saveState, flush } = useHomeworkBoardSource(assignment.id, board);
   const submit = useSubmitHomeworkBoard();
+  // Veb #197: doskada yechayotganda ham ilovadan chiqib-qaytish qayd etiladi.
+  useHomeworkFocusTracker(assignment.id, true);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function send() {

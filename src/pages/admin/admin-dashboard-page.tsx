@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import {
-  Award,
   BookOpen,
   CalendarCheck,
   CheckCircle2,
@@ -40,7 +39,7 @@ import {
   useTheme,
 } from "@/shared/ui";
 import { AdminTable, Pill, Rank, Stars } from "./admin-table";
-import { ServerMonitoringPanel, StoragePanel } from "./system-panels";
+import { ClientHealthPanel, ServerMonitoringPanel, StoragePanel } from "./system-panels";
 
 const PERIODS: DashboardPeriod[] = ["day", "week", "month", "year"];
 
@@ -122,8 +121,7 @@ export function AdminDashboardPage() {
                 label={t("dashboard.teachersLink")}
                 onPress={() => router.push(ROUTES.admin.teachers)}
               />
-              {/* Veb #159: sertifikatlar va murojaatlar */}
-              <PortalButton variant="primary" size="link" icon={Award} label={t("dashboard.certificatesLink")} onPress={() => router.push(ROUTES.admin.certificates)} />
+              {/* Veb #159: murojaatlar (sertifikatlar sahifasi veb #193 da olib tashlandi — backend o'zi tasdiqlaydi) */}
               <PortalButton variant="primary" size="link" icon={LifeBuoy} label={t("dashboard.supportLink")} onPress={() => router.push(ROUTES.admin.support)} />
               {/* Veb #182: chat shikoyatlari */}
               <PortalButton variant="primary" size="link" icon={Flag} label={t("dashboard.reportsLink")} onPress={() => router.push(ROUTES.admin.reports)} />
@@ -250,6 +248,7 @@ export function AdminDashboardPage() {
 
         <StoragePanel />
         <ServerMonitoringPanel />
+        <ClientHealthPanel />
 
         {can(user, PERMISSIONS.NOTIFICATION_SEND) ? <SentNotificationsPanel /> : null}
       </ScrollView>

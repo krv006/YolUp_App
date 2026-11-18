@@ -4,17 +4,18 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { Check } from "lucide-react-native";
 import {
-  UZ_PHONE_LENGTH,
   describeResetError,
+  isValidEmail,
+  normalizeEmail,
   usePasswordResetConfirmMutation,
   usePasswordResetRequestMutation,
   usePasswordResetVerifyMutation,
 } from "@/modules/auth";
 import {
   AuthButton,
+  AuthField,
   AuthFieldError,
   AuthPasswordField,
-  AuthPhoneInput,
   AuthScreen,
 } from "@/modules/auth/ui/auth-screen";
 import { OtpInput } from "@/modules/auth/ui/otp-input";
@@ -25,9 +26,10 @@ import { DsText, dsRadius, showErrorToast, useDs } from "@/shared/ui";
 /*
  * Parolni tiklash — veb `forgot-password-page.tsx` (M4.1–4.4),
  * `verify-code-page.tsx` (M4.5–4.9) va `new-password-page.tsx` (M4.10–4.13):
- * telefon -> SMS kodi -> yangi parol -> "Parol yangilandi".
+ * email -> emaildagi kod -> yangi parol -> "Parol yangilandi" (veb #199:
+ * tiklash faqat email orqali).
  *
- * Vebda qadamlar orasidagi ma'lumot (telefon, taymerlar, `reset_token`)
+ * Vebda qadamlar orasidagi ma'lumot (email, taymerlar, `reset_token`)
  * `location.state` da yuradi; Expo Router'da uning o'rni — marshrut
  * parametrlari. Parametrsiz ochilsa, vebdagidek boshiga qaytariladi.
  */
@@ -50,19 +52,20 @@ export function ForgotPasswordPage() {
   const { t } = useTranslation("auth");
   const router = useRouter();
   const back = useBack();
-  const params = useLocalSearchParams<{ digits?: string }>();
+  const params = useLocalSearchParams<{ email?: string }>();
   const requestCode = usePasswordResetRequestMutation();
-  const [digits, setDigits] = useState(params.digits ?? "");
+  const [email, setEmail] = useState(params.email ?? "");
+  const valid = isValidEmail(email);
 
   async function sendCode() {
-    const phone = `+998${digits}`;
+    if (!valid) return;
+    const address = normalizeEmail(email);
     try {
-      const response = await requestCode.mutateAsync(phone);
+      const response = await requestCode.mutateAsync(address);
       router.push({
         pathname: ROUTES.auth.verifyCode,
         params: {
-          phone,
-          digits,
+          email: address,
           expiresIn: String(response.expires_in ?? DEFAULT_EXPIRES_IN),
           retryAfter: String(response.retry_after ?? DEFAULT_RETRY_AFTER),
         },
@@ -81,7 +84,7 @@ export function ForgotPasswordPage() {
         <AuthButton
           loading={requestCode.isPending}
           loadingLabel={t("mobile.reset.sending")}
-          disabled={digits.length < UZ_PHONE_LENGTH}
+          disabled={!valid}
           onPress={() => void sendCode()}
         >
           {t("mobile.reset.sendCode")}
@@ -89,21 +92,27 @@ export function ForgotPasswordPage() {
       }
       footer={<LoginLink prefix={t("mobile.reset.remembered")} />}
     >
-      <AuthPhoneInput
-        autoFocus
-        label={t("mobile.reset.phoneLabel")}
-        hint={t("mobile.reset.phoneHint")}
-        placeholder={t("mobile.reset.phoneNationalPlaceholder")}
-        value={digits}
-        onChange={setDigits}
-      />
+      <View style={styles.emailField}>
+        <AuthField
+          autoFocus
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="send"
+          label={t("mobile.reset.emailLabel")}
+          placeholder={t("mobile.reset.emailPlaceholder")}
+          value={email}
+          onChangeText={setEmail}
+          onSubmitEditing={() => void sendCode()}
+        />
+        <DsText v="caption" c="ink-secondary" style={styles.emailHint}>
+          {t("mobile.reset.emailHint")}
+        </DsText>
+      </View>
     </AuthScreen>
   );
-}
-
-/** `+998 90 ••• •• 67` — kod yuborilgan raqam yashirib ko'rsatiladi. */
-function maskPhone(digits: string): string {
-  return `+998 ${digits.slice(0, 2)} ••• •• ${digits.slice(7, 9)}`;
 }
 
 /** `00:59` */
@@ -116,9 +125,8 @@ export function VerifyCodePage() {
   const { t } = useTranslation("auth");
   const router = useRouter();
   const back = useBack();
-  const params = useLocalSearchParams<{ phone?: string; digits?: string; expiresIn?: string; retryAfter?: string }>();
-  const phone = params.phone ?? "";
-  const digits = params.digits ?? phone.replace(/^\+?998/, "");
+  const params = useLocalSearchParams<{ email?: string; expiresIn?: string; retryAfter?: string }>();
+  const email = params.email ?? "";
   const verifyCode = usePasswordResetVerifyMutation();
   const requestCode = usePasswordResetRequestMutation();
   const [code, setCode] = useState("");
@@ -138,9 +146,9 @@ export function VerifyCodePage() {
   const expired = expiresIn <= 0;
 
   async function confirm(value = code) {
-    if (!phone || value.length < CODE_LENGTH || expired) return;
+    if (!email || value.length < CODE_LENGTH || expired) return;
     try {
-      const response = await verifyCode.mutateAsync({ phone, code: value });
+      const response = await verifyCode.mutateAsync({ email, code: value });
       router.replace({ pathname: ROUTES.auth.newPassword, params: { resetToken: response.reset_token } });
     } catch (caught) {
       // Noto'g'ri kod — kataklar qizil; tarmoq yoki server xatosi — toast.
@@ -153,9 +161,9 @@ export function VerifyCodePage() {
   }
 
   async function resend() {
-    if (!phone) return;
+    if (!email) return;
     try {
-      const response = await requestCode.mutateAsync(phone);
+      const response = await requestCode.mutateAsync(email);
       setExpiresIn(response.expires_in ?? DEFAULT_EXPIRES_IN);
       setRetryIn(response.retry_after ?? DEFAULT_RETRY_AFTER);
       setCode("");
@@ -165,7 +173,7 @@ export function VerifyCodePage() {
     }
   }
 
-  if (!phone) return <Redirect href={ROUTES.auth.forgotPassword} />;
+  if (!email) return <Redirect href={ROUTES.auth.forgotPassword} />;
 
   const error = expired ? t("mobile.code.expired") : invalid ? t("mobile.code.invalid") : null;
 
@@ -173,7 +181,7 @@ export function VerifyCodePage() {
     <AuthScreen
       onBack={back}
       title={t("mobile.code.title")}
-      description={t("mobile.code.descriptionPhone", { phone: maskPhone(digits), length: CODE_LENGTH })}
+      description={t("mobile.code.descriptionEmail", { email, length: CODE_LENGTH })}
       action={
         <AuthButton
           loading={verifyCode.isPending}
@@ -186,12 +194,12 @@ export function VerifyCodePage() {
       }
       footer={
         <>
-          {t("mobile.code.wrongNumber")}{" "}
+          {t("mobile.code.wrongEmail")}{" "}
           <DsText
             v="body-sm"
             w="600"
             c="brand-strong"
-            onPress={() => router.replace({ pathname: ROUTES.auth.forgotPassword, params: { digits } })}
+            onPress={() => router.replace({ pathname: ROUTES.auth.forgotPassword, params: { email } })}
           >
             {t("mobile.code.change")}
           </DsText>
@@ -372,6 +380,9 @@ function LoginLink({ prefix }: { prefix: string }) {
 }
 
 const styles = StyleSheet.create({
+  /* `flex flex-col gap-2`; izoh `px-1 text-caption` */
+  emailField: { gap: 8 },
+  emailHint: { paddingHorizontal: 4 },
   /* `flex-col items-center` */
   code: { alignItems: "center" },
   /* `mt-3 text-center` */

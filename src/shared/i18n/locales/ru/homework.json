@@ -2,7 +2,6 @@
   "toast": {
     "assignmentCreated": "Задание отправлено",
     "assignmentUpdated": "Задание обновлено",
-    "submitted": "Работа отправлена, начата проверка ИИ",
     "assignmentDeleted": "Задание удалено",
     "rechecking": "Повторная проверка начата",
     "gradeUpdated": "Оценка обновлена",
@@ -525,5 +524,39 @@
     "submitted": "Сдал",
     "notSubmitted": "Не сдал",
     "loading": "Загрузка…"
-  }
+  },
+  "reviewSaved": {
+    "gradedTitle": "Оценка сохранена",
+    "gradedText": "{{name}} — оценка {{grade}}. Ученику отправлено уведомление.",
+    "resubmitTitle": "Запрошена пересдача",
+    "resubmitText": "{{name}} получит уведомление с вашим комментарием. Новую работу проверите, когда она придёт.",
+    "progress": "Проверено: {{done}} из {{total}}",
+    "allDone": "Все работы проверены",
+    "next": "Следующий: {{name}}",
+    "back": "К заданию",
+    "close": "Закрыть"
+  },
+  "reviewFocus": {
+    "title": "Уходы со страницы",
+    "exits_one": "Уходил {{count}} раз",
+    "exits_few": "Уходил {{count}} раза",
+    "exits_many": "Уходил {{count}} раз",
+    "exits_other": "Уходил {{count}} раза",
+    "stayed": "Не уходил",
+    "stayedHint": "Не переключался на другие окна или вкладки со страницы задания",
+    "away": "Вне страницы всего {{total}} · самое долгое {{longest}}",
+    "notReturned": "не вернулся",
+    "more_one": "Ещё {{count}}",
+    "more_few": "Ещё {{count}}",
+    "more_many": "Ещё {{count}}",
+    "more_other": "Ещё {{count}}",
+    "seconds": "{{seconds}} с",
+    "minutes": "{{minutes}} мин",
+    "minutesSeconds": "{{minutes}} мин {{seconds}} с",
+    "hours": "{{hours}} ч {{minutes}} мин"
+  },
+  "aiSkipped_one": "{{count}} страница не поместилась в ИИ — балл только по просмотренным. Остальное проверьте сами.",
+  "aiSkipped_few": "{{count}} страницы не поместились в ИИ — балл только по просмотренным. Остальное проверьте сами.",
+  "aiSkipped_many": "{{count}} страниц не поместились в ИИ — балл только по просмотренным. Остальное проверьте сами.",
+  "aiSkipped_other": "{{count}} страницы не поместились в ИИ — балл только по просмотренным. Остальное проверьте сами."
 }

@@ -65,10 +65,12 @@ export function LoginPage() {
       router.replace(resolveHomeRoute(result.user));
     } catch (error) {
       const appError = error as AppError;
+      // Veb #199/#201: "bu email bir nechta akkauntga bog'langan" (400) va 10 ta xato urinishdan keyingi kutish (429) — backend matni.
+      const explained = (appError?.status === 400 && !appError.fields) || appError?.status === 429 ? appError.message : "";
       if (!applyApiFieldErrors(appError, setError, { username: "login" })) {
-        setError("root", { type: "server", message: t("mobile.login.failed") });
+        setError("root", { type: "server", message: explained || t("mobile.login.failed") });
       }
-      showErrorToast({ title: t("mobile.login.errorToastTitle"), description: t("mobile.login.errorToastDescription") });
+      showErrorToast({ title: t("mobile.login.errorToastTitle"), description: explained || t("mobile.login.errorToastDescription") });
     }
   }
 
@@ -186,7 +188,7 @@ export function LoginPage() {
           {failed ? <AuthFieldError>{errors.root?.message}</AuthFieldError> : null}
         </View>
 
-        {FEATURES.smsVerification ? (
+        {FEATURES.emailPasswordReset ? (
           <Pressable accessibilityRole="link" onPress={() => router.push(ROUTES.auth.forgotPassword)} style={styles.forgot}>
             <DsText v="body-sm" c="brand-strong">
               {t("mobile.login.forgotPassword")}

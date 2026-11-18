@@ -5,7 +5,6 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCurrentUser } from "@/modules/auth";
 import { useConversations } from "@/modules/conversation";
 import {
   answerInputs,
@@ -13,10 +12,13 @@ import {
   gradePercent,
   homeworkFieldError,
   homeworkKeys,
+  latestSubmission,
+  pauseHomeworkFocus,
   useAssignment,
   useDownloadAssignmentFile,
   useDownloadSubmissionFile,
   useHomeworkDraft,
+  useHomeworkFocusTracker,
   useSaveHomeworkDraft,
   useSubmission,
   useSubmitHomework,
@@ -31,11 +33,21 @@ import type { Assignment, Submission } from "@/shared/types";
 import { bodyFont, dsAlpha, DsGradient, DsText, dsRadius, dsType, headingFont, HtmlView, Icon, MobileActionBar, MobileEmptyCard, MobilePageHeader, toast, useDs } from "@/shared/ui";
 import { SubmissionPreview } from "@/pages/workspace/homework/submission-preview";
 import { shortDateTime } from "../lib/format";
+import { HomeworkSubmittedDialog } from "./homework-submitted-dialog";
 
 const DAY_MS = 86_400_000;
 const GRADES = [1, 2, 3, 4, 5];
 /** Veb `accept=".pdf,.png,.jpg,.jpeg,.webp,.docx"` va gapirish uchun `.mp3,.wav,.m4a,.ogg`. */
-const ACCEPT = ["application/pdf", "image/png", "image/jpeg", "image/webp", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+// Veb #201: iPhone HEIC/HEIF ham qabul qilinadi — server JPEG'ga o'giradi.
+const ACCEPT = [
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
 const ACCEPT_SPEAKING = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/mp4", "audio/x-m4a", "audio/ogg"];
 
 const MAX_FILES = 5;
@@ -55,10 +67,20 @@ export function StudentHomeworkItemPage() {
   const { t } = useTranslation("student");
   const ds = useDs();
   const insets = useSafeAreaInsets();
-  const { assignmentId = "" } = useLocalSearchParams<{ assignmentId: string }>();
+  const router = useRouter();
+  // `submitted=1` — doskada yechib topshirilgach (vebdagi `location.state.submitted`).
+  const { assignmentId = "", submitted } = useLocalSearchParams<{ assignmentId: string; submitted?: string }>();
   const assignment = useAssignment(assignmentId || null);
-  const user = useCurrentUser();
   const [resubmitting, setResubmitting] = useState(false);
+  const [doneOpen, setDoneOpen] = useState(submitted === "1");
+  const [sent, setSent] = useState<Submission | null>(null);
+
+  // Doska sahifasi `dismissTo` bilan shu (allaqachon ochiq) sahifaga qaytadi — parametr keyin keladi.
+  const [seenSubmitted, setSeenSubmitted] = useState(submitted);
+  if (submitted !== seenSubmitted) {
+    setSeenSubmitted(submitted);
+    if (submitted === "1") setDoneOpen(true);
+  }
 
   if (assignment.isError)
     return (
@@ -75,23 +97,40 @@ export function StudentHomeworkItemPage() {
       </View>
     );
 
-  /*
-   * 🟡 MOBIL FARQI: backend vazifaning detail javobida `my_submission` ni
-   * bermayapti (2026-11-13 tekshirildi; ro'yxat javobida bor), faqat
-   * `submissions` keladi. Busiz topshirilgan vazifa yana bo'sh forma bo'lib
-   * ochilardi va o'quvchi uni qayta topshirib yuborardi. Shuning uchun
-   * `mySubmission` bo'lmasa o'quvchining eng oxirgi topshirig'i olinadi.
-   * Vebda ham shu holat — backend tuzatgach bu zaxira kerak bo'lmaydi.
-   */
-  const mine =
-    assignment.data.mySubmission ??
-    [...assignment.data.submissions]
-      .filter((item) => item.studentId === user?.id)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ??
-    null;
+  // Veb #196: detail javobida `my_submission` yo'q — `submissions` dagi eng oxirgisi olinadi.
+  const mine = assignment.data.mySubmission ?? latestSubmission(assignment.data.submissions);
+  const doneDialog = (
+    <HomeworkSubmittedDialog
+      open={doneOpen}
+      assignment={assignment.data}
+      submission={sent ?? mine}
+      onDone={() => {
+        setDoneOpen(false);
+        // `dismissTo`: ro'yxat stekda bo'lsa unga qaytadi (ikkinchi nusxa ochilmaydi), bo'lmasa shu sahifani almashtiradi.
+        router.dismissTo(ROUTES.student.homework as never);
+      }}
+    />
+  );
   if (mine && !resubmitting)
-    return <HomeworkResult assignment={assignment.data} initial={mine} onResubmit={mine.status === "resubmit_requested" ? () => setResubmitting(true) : undefined} />;
-  return <HomeworkSubmit assignment={assignment.data} />;
+    return (
+      <>
+        <HomeworkResult assignment={assignment.data} initial={mine} onResubmit={mine.status === "resubmit_requested" ? () => setResubmitting(true) : undefined} />
+        {doneDialog}
+      </>
+    );
+  return (
+    <>
+      <HomeworkSubmit
+        assignment={assignment.data}
+        onSubmitted={(submission) => {
+          setSent(submission);
+          setResubmitting(false);
+          setDoneOpen(true);
+        }}
+      />
+      {doneDialog}
+    </>
+  );
 }
 
 function useCourseRoom(courseId: string) {
@@ -99,7 +138,7 @@ function useCourseRoom(courseId: string) {
   return conversations.data?.find((item) => item.courseId === courseId)?.id ?? null;
 }
 
-function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
+function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; onSubmitted: (submission: Submission | null) => void }) {
   const { t } = useTranslation("student");
   const { t: th } = useTranslation("homework");
   const months = useTranslation("lesson").t("list.months", { returnObjects: true }) as string[];
@@ -111,6 +150,8 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   // Veb #162: qoralama serverda (avval qurilma xotirasida edi), 5 tagacha fayl.
   const draft = useHomeworkDraft(assignment.id);
   const saveDraftMutation = useSaveHomeworkDraft(assignment.id);
+  // Veb #197: vazifa formasi ochiq turganda ilovadan chiqib-qaytish qayd etiladi (Google Form'li vazifada emas).
+  useHomeworkFocusTracker(assignment.id, !assignment.googleFormUrl);
   const queryClient = useQueryClient();
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [comment, setComment] = useState("");
@@ -136,7 +177,8 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
   }, [serverDraft]);
 
   async function pick() {
-    const incoming = await pickDocuments(speaking ? ACCEPT_SPEAKING : ACCEPT);
+    // Fayl tanlash oynasi ilovani fonga o'tkazadi — bu chiqish deb sanalmaydi.
+    const incoming = await pauseHomeworkFocus(pickDocuments(speaking ? ACCEPT_SPEAKING : ACCEPT));
     if (!incoming.length) return;
     setError(null);
     setFiles((current) => {
@@ -150,8 +192,9 @@ function HomeworkSubmit({ assignment }: { assignment: Assignment }) {
     setError(null);
     submit
       .mutateAsync({ assignmentId: assignment.id, files: files.map(toUploadFile), skillKey: assignment.skillKey, comment, answers: answerList })
-      .then(() => {
+      .then((submission) => {
         if (serverDraft) saveDraftMutation.mutate("", { onSuccess: () => rememberDraft("") });
+        onSubmitted(submission ?? null);
       })
       .catch((reason: unknown) => setError(homeworkFieldError(reason, "file")));
   }

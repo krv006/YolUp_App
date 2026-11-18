@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
-import { Activity, HardDrive } from "lucide-react-native";
+import { Activity, Gauge, HardDrive } from "lucide-react-native";
 import {
+  shortUserAgent,
   TrendLineChart,
+  useClientHealth,
   useMonitoringCurrent,
   useMonitoringHistory,
   useTeacherVideoStats,
@@ -14,6 +16,7 @@ import { PortalCard, PortalSectionHead, Text, useLegacyColors, useTheme } from "
 import { AdminTable } from "./admin-table";
 
 const HOUR_OPTIONS = [6, 24, 72, 168];
+const CLIENT_HOUR_OPTIONS = [24, 72, 168, 336];
 const MAX_POINTS = 48;
 
 /** Vebdagi bilan bir xil: har bo'lakdan eng band (CPU) o'lchov olinadi. */
@@ -198,6 +201,123 @@ export function ServerMonitoringPanel() {
   );
 }
 
+/**
+ * Mijoz salomatligi — veb #197 `ClientHealthPanel`
+ * (`GET /monitoring/client-health/?hours=`): 24 soat – 14 kun filtrlari,
+ * 4 ta ko'rsatkich va foydalanuvchilar jadvali (avval CPU cheklovi
+ * ko'plar, keyin eng past FPS). Muammoli qiymatlar qizil. Davr tugmalari
+ * server panelidagidek sarlavha ostida.
+ */
+export function ClientHealthPanel() {
+  const { t } = useTranslation("admin");
+  const { palette } = useTheme();
+  const colors = useLegacyColors();
+  const [hours, setHours] = useState(24);
+  const health = useClientHealth(hours);
+  const data = health.data;
+  const users = data?.users ?? [];
+  const limitedShare = data?.total ? Math.round((data.cpuLimitedTotal / data.total) * 100) : 0;
+  const alert = (value: string | number, bad: boolean) => (
+    <Text variant="label" style={bad ? [styles.alert, { color: palette["destructive-strong"] }] : undefined}>
+      {value}
+    </Text>
+  );
+
+  return (
+    <PortalCard style={styles.panel}>
+      <PortalSectionHead eyebrowIcon={Gauge} eyebrow={t("clientHealth.eyebrow")} title={t("clientHealth.title")} note={t("clientHealth.note")} />
+
+      <View style={styles.range}>
+        {CLIENT_HOUR_OPTIONS.map((value) => {
+          const active = value === hours;
+          return (
+            <Pressable
+              key={value}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              onPress={() => setHours(value)}
+              style={[
+                styles.rangeButton,
+                active
+                  ? { borderColor: palette["border-accent-strong"], backgroundColor: palette["primary-soft"] }
+                  : { borderColor: colors.border, backgroundColor: palette.surface },
+              ]}
+            >
+              <Text variant="caption" style={[styles.rangeText, { color: active ? palette["primary-text"] : colors.muted }]}>
+                {value < 48 ? t("monitoring.hours", { count: value }) : t("clientHealth.days", { count: value / 24 })}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {health.isLoading ? <Loading label={t("clientHealth.loading")} /> : null}
+      {health.isError ? (
+        <Text variant="body" style={{ color: colors.muted }}>
+          {health.error.message}
+        </Text>
+      ) : null}
+
+      {data ? (
+        <>
+          <View style={styles.now}>
+            <NowCard value={String(data.total)} label={t("clientHealth.reports")} />
+            <NowCard value={`${data.cpuLimitedTotal} · ${limitedShare}%`} label={t("clientHealth.cpuLimited")} />
+            <NowCard value={String(users.length)} label={t("clientHealth.users")} />
+            <NowCard value={String(users.filter((user) => user.cpuLimitedReports > 0).length)} label={t("clientHealth.slowUsers")} />
+          </View>
+
+          {users.length ? (
+            <AdminTable
+              rows={users.length}
+              columns={[
+                {
+                  key: "user",
+                  header: t("clientHealth.columns.user"),
+                  strong: true,
+                  cell: (row) => `@${users[row]!.username || "—"} · ${t(`clientHealth.roles.${users[row]!.role}`, { defaultValue: users[row]!.role })}`,
+                },
+                { key: "reports", header: t("clientHealth.columns.reports"), cell: (row) => users[row]!.reports },
+                { key: "cpu", header: t("clientHealth.columns.cpu"), cell: (row) => alert(users[row]!.cpuLimitedReports, users[row]!.cpuLimitedReports > 0) },
+                { key: "network", header: t("clientHealth.columns.network"), cell: (row) => users[row]!.bandwidthLimitedReports },
+                {
+                  key: "fps",
+                  header: t("clientHealth.columns.minFps"),
+                  cell: (row) => {
+                    const fps = users[row]!.minFps;
+                    return alert(fps ?? "—", fps !== null && fps < 10);
+                  },
+                },
+                {
+                  key: "device",
+                  header: t("clientHealth.columns.device"),
+                  cell: (row) => {
+                    const user = users[row]!;
+                    return (
+                      [
+                        user.cores ? t("clientHealth.cores", { count: user.cores }) : "",
+                        user.memoryGb ? t("clientHealth.memory", { value: user.memoryGb }) : "",
+                        shortUserAgent(user.userAgent),
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "—"
+                    );
+                  },
+                },
+                { key: "last", header: t("clientHealth.columns.lastAt"), cell: (row) => (users[row]!.lastAt ? formatDateTime(users[row]!.lastAt!) : "—") },
+              ]}
+            />
+          ) : (
+            <Text variant="body" style={{ color: colors.muted }}>
+              {t("clientHealth.empty")}
+            </Text>
+          )}
+        </>
+      ) : null}
+    </PortalCard>
+  );
+}
+
 function NowCard({ value, label }: { value: string; label: string }) {
   const { palette } = useTheme();
   const colors = useLegacyColors();
@@ -233,6 +353,8 @@ const styles = StyleSheet.create({
   range: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   rangeButton: { minHeight: 30, justifyContent: "center", paddingHorizontal: 11, borderWidth: 1, borderRadius: 999 },
   rangeText: { fontSize: 11, lineHeight: 16.5, fontWeight: "700" },
+  /* `font-semibold text-error-text` */
+  alert: { fontWeight: "600" },
   now: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   /* `.teacher-stats-grid article` — 12 bo'shliq, radius 13 */
   nowCard: { flexGrow: 1, flexBasis: "40%", gap: 3, padding: 12, borderWidth: 1, borderRadius: 13 },

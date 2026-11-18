@@ -18,7 +18,9 @@ import { measureStroke, type MathSize } from "../lib/board-measure";
 import { resizedBox, resizeHandles } from "../lib/board-resize";
 import { BOARD_ZOOM, clampZoom } from "../lib/board-zoom";
 import { useBoardEraser } from "../model/use-board-eraser";
+import { useBoardGuides } from "../model/use-board-guides";
 import { useBoardSelection } from "../model/use-board-selection";
+import { BoardGuides } from "./board-guides";
 import type { BoardTool } from "./board-mobile";
 import { BoardStroke } from "./board-stroke";
 import { BoardZoomControls } from "./board-zoom-controls";
@@ -48,6 +50,12 @@ export interface BoardCanvasSelection {
 export interface BoardCanvasProps {
   ref?: Ref<BoardCanvasHandle>;
   strokes: StrokeDto[];
+  /**
+   * Veb #192: yuborilgan, lekin server hali tasdiqlamagan chiziqlar —
+   * qo'yib yuborilganda yo'qolib qolmasin. Faqat chiziladi: tanlash va
+   * o'chirishga tushmaydi.
+   */
+  pendingStrokes?: StrokeDto[];
   /** Doska koordinata tizimi (`state.width` / `state.height`). */
   width: number;
   height: number;
@@ -125,6 +133,7 @@ function clampAxis(offset: number, content: number, view: number): number {
 export function BoardCanvas({
   ref,
   strokes,
+  pendingStrokes,
   width,
   height,
   tool,
@@ -193,6 +202,8 @@ export function BoardCanvas({
     if (vw === 0 || vh === 0 || fitMode !== "height") return ZOOM_MIN;
     return Math.min(ZOOM_MIN, Math.min(vw / width, vh / height) / (vh / height));
   });
+  /** Veb #198: yordamchi katak — holati telefonda saqlanadi, zoom tugmalari bor doskada. */
+  const { guides, toggleGuides } = useBoardGuides();
   /** Ekran px / doska birligi. */
   const factor = useDerivedValue(() => {
     "worklet";
@@ -474,7 +485,14 @@ export function BoardCanvas({
    * sabab shrift o'lchami doska masshtabiga JS'da ko'paytiriladi, joyi esa
    * siljitish/kattalashtirishga UI thread'da ergashadi (`MathItem`).
    */
-  const mathStrokes = useMemo(() => strokes.filter((stroke) => stroke.type === "math"), [strokes]);
+  const mathStrokes = useMemo(
+    () => [...strokes, ...(pendingStrokes ?? [])].filter((stroke) => stroke.type === "math"),
+    [strokes, pendingStrokes]
+  );
+  const pendingNodes = useMemo(
+    () => (pendingStrokes ?? []).map((stroke) => (stroke.type === "math" ? null : <BoardStroke key={stroke.id} stroke={stroke} />)),
+    [pendingStrokes]
+  );
 
   // Saqlangan stroke'lar React tomonda memo qilinadi — draft ularga tegmaydi.
   const rendered = useMemo(() => {
@@ -567,7 +585,9 @@ export function BoardCanvas({
           {dots.length ? <Points points={dots} mode="points" color={dotColor} style="stroke" strokeWidth={2.5} strokeCap="round" /> : null}
           {zoomControls ? <Path path={outside} color={ds.c.subtle} /> : null}
           <Group transform={canvasTransform}>
+            {zoomControls && guides ? <BoardGuides width={width} height={height} factor={factor} /> : null}
             {rendered}
+            {pendingNodes}
             <Path
               path={draftPath}
               color={color}
@@ -627,6 +647,8 @@ export function BoardCanvas({
           onZoomIn={() => zoomTo(clampZoom(zoom.get() * BOARD_ZOOM.step))}
           onZoomOut={() => zoomTo(Math.max(Math.round(minZoom.get() * 100) / 100, Math.round((zoom.get() / BOARD_ZOOM.step) * 100) / 100))}
           onReset={() => zoomTo(1)}
+          guides={guides}
+          onToggleGuides={toggleGuides}
         />
       ) : null}
     </View>

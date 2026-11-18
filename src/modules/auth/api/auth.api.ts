@@ -1,8 +1,7 @@
 import { apiClient, normalizePagination, type RequestOptions } from "@/shared/api";
 import { authEndpoints } from "./auth.endpoints";
-import { mapAdminCertificate, mapLoginRecords, mapLoginRecordsPage, mapTeacherRatings, mapTeacherStats } from "../lib/auth.mappers";
+import { mapLoginRecords, mapLoginRecordsPage, mapTeacherRatings, mapTeacherStats } from "../lib/auth.mappers";
 import type {
-  AdminCertificateDto,
   AuthUserDto,
   CertificateDto,
   ConsentRequestDto,
@@ -11,6 +10,8 @@ import type {
   LoginRequestDto,
   LoginResponseDto,
   RefreshRequestDto,
+  CodeSentDto,
+  RegisterOptionsDto,
   RegisterRequestDto,
   SwitchAccountResponseDto,
   TokenPairDto,
@@ -89,17 +90,17 @@ export const authApi = {
   disableTwoFactor(password: string) {
     return apiClient.post<{ enabled?: boolean }>(authEndpoints.twoFactorDisable, { password });
   },
-  requestPasswordReset(phone: string) {
-    return apiClient.post<{ sent?: boolean; expires_in?: number; retry_after?: number }>(
+  requestPasswordReset(email: string) {
+    return apiClient.post<CodeSentDto>(
       authEndpoints.passwordResetRequest,
-      { phone },
+      { email },
       { skipAuth: true, skipRefresh: true }
     );
   },
-  verifyPasswordReset(phone: string, code: string) {
+  verifyPasswordReset(email: string, code: string) {
     return apiClient.post<{ reset_token: string; expires_in?: number }>(
       authEndpoints.passwordResetVerify,
-      { phone, code },
+      { email, code },
       { skipAuth: true, skipRefresh: true }
     );
   },
@@ -107,6 +108,33 @@ export const authApi = {
     return apiClient.post<{ ok?: boolean }>(
       authEndpoints.passwordResetConfirm,
       { reset_token: resetToken, password },
+      { skipAuth: true, skipRefresh: true }
+    );
+  },
+  requestEmailChange(email: string) {
+    return apiClient.post<CodeSentDto>(authEndpoints.meEmailRequest, { email });
+  },
+  confirmEmailChange(email: string, code: string) {
+    return apiClient.post<AuthUserDto>(authEndpoints.meEmailConfirm, { email, code });
+  },
+  getRegisterOptions(options?: RequestOptions) {
+    return apiClient.get<RegisterOptionsDto>(authEndpoints.registerOptions, {
+      ...options,
+      skipAuth: true,
+      skipRefresh: true,
+    });
+  },
+  requestRegisterEmailCode(email: string) {
+    return apiClient.post<CodeSentDto>(
+      authEndpoints.registerEmailRequest,
+      { email },
+      { skipAuth: true, skipRefresh: true }
+    );
+  },
+  verifyRegisterEmailCode(email: string, code: string) {
+    return apiClient.post<{ email_token: string; expires_in?: number }>(
+      authEndpoints.registerEmailVerify,
+      { email, code },
       { skipAuth: true, skipRefresh: true }
     );
   },
@@ -174,17 +202,6 @@ export const authApi = {
       await apiClient.get(authEndpoints.logins, { ...options, query: { page, page_size: pageSize } }),
       { page, pageSize }
     );
-  },
-  async getAdminCertificates(status: string, options?: RequestOptions) {
-    return normalizePagination<AdminCertificateDto>(
-      await apiClient.get(authEndpoints.adminCertificates, { ...options, query: { status, page_size: 100 } })
-    ).items.map(mapAdminCertificate);
-  },
-  verifyCertificate(id: string) {
-    return apiClient.post(authEndpoints.adminCertificateVerify(id), {});
-  },
-  rejectCertificate(id: string, reason: string) {
-    return apiClient.post(authEndpoints.adminCertificateReject(id), { reason });
   },
   updateAvatar(avatar: File | null) {
     const body = new FormData();

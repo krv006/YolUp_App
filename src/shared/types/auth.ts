@@ -16,10 +16,6 @@ export interface Certificate {
   verifiedAt: string | null;
 }
 
-export interface AdminCertificate extends Certificate {
-  owner: { id: string; name: string; username: string; role: string; avatarUrl: string | null } | null;
-}
-
 export interface LinkedAccount {
   id: string;
   username: string;
@@ -40,6 +36,9 @@ export interface AuthUser {
   inviteCode: string | null;
   avatarUrl: string | null;
   email: string | null;
+  emailVerified: boolean;
+  emailSetupRequired: boolean;
+  emailSetupDeadline: string | null;
   status: string;
   avgRating: number | null;
   ratingCount: number | null;

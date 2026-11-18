@@ -35,6 +35,7 @@ export interface AiResultDto {
   grade?: string;
   questions?: AiQuestionDto[];
   summary?: AiSummaryDto | null;
+  skipped_images?: number | null;
 }
 
 export interface SubmissionDto {
@@ -61,6 +62,16 @@ export interface SubmissionDto {
   ai_state?: "checking" | "ready" | "unscored" | "failed" | "none" | null;
   ai_summary?: string | null;
   ai_checking_since?: string | null;
+  focus?: HomeworkFocusDto | null;
+}
+
+export interface HomeworkFocusDto {
+  exits?: number | null;
+  away_seconds?: number | null;
+  longest_seconds?: number | null;
+  on_page_seconds?: number | null;
+  total_seconds?: number | null;
+  timeline?: Array<{ left_at: string; returned_at?: string | null; seconds?: number | null }> | null;
 }
 
 export interface HomeworkQuestionDto {

@@ -2,6 +2,7 @@
 import "@/shared/lib/bootstrap";
 import { Stack, type ErrorBoundaryProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { EmailSetupDialog } from "@/modules/auth/ui/email-setup-dialog";
 import { ForcePasswordDialog } from "@/modules/auth/ui/force-password-dialog";
 import { AppProviders } from "@/providers/app-providers";
 import { NotificationBridge } from "@/providers/notification-bridge";
@@ -27,6 +28,8 @@ export default function RootLayout() {
       <NotificationBridge />
       {/* Veb `role-route.tsx` — vaqtinchalik parol bilan kirgan hisob yangi parol o'rnatmaguncha. */}
       <ForcePasswordDialog />
+      {/* Veb #199 `role-route.tsx`: email eslatmasi (muddatdan keyin majburiy). */}
+      <EmailSetupDialog />
     </AppProviders>
   );
 }

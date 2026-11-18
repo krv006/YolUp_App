@@ -557,6 +557,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/teacher/workspace/homework/assignment-audience-card.tsx` | 🟡 MOSLASH | `d884c643f13a` | mobilda `pages/workspace/homework/assignment-audience-card.tsx`; tahrirlash pastki `Sheet` |
 | `src/pages/student/workspace/student-ai-page.tsx` | 🟡 MOSLASH | `3068926e14dc` | faqat tor ekran varianti; maydonlar klaviatura ustida (`KeyboardAwareScrollView`) |
 | `src/pages/student/workspace/student-test-gate.tsx` | 🟡 MOSLASH | `1d6e82970829` | faqat tor ekran shoxi; orqaga `router.back()` (bo'lmasa testlar sahifasi) |
+| `src/pages/student/workspace/homework-submitted-dialog.tsx` | 🟡 MOSLASH | `8c3ca552497c` | `AppDialog variant="confirm"` o'rniga `CenterDialog`; doskadan qaytishda `location.state.submitted` o'rniga marshrut parametri `submitted=1` |
 | `src/modules/tutor/ui/practice-session.tsx` | 🟡 MOSLASH | `fed1593cf756` | RN komponentlari; barrel'ning mobil UI bo'limidan eksport |
 | `src/pages/admin/support/admin-support-page.tsx` | 🟡 MOSLASH | `21a5e503ddbb` | mobilda `pages/admin/admin-support-page.tsx`; portal uslubi; yozishma `SupportDialog staffView`; `?ticket=` — `router.setParams` |
 | `src/pages/admin/reports/admin-reports-page.tsx` | 🟡 MOSLASH | `3046d75083be` | marshrut `app/admin/reports.tsx`; portal uslubi; `AppDialog` -> `Sheet variant="app"`; `?report=` — `router.setParams`; xabarlar ro'yxati ichki aylanishsiz |

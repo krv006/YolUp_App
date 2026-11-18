@@ -45,7 +45,8 @@ export function StudentHomeworkBoardPage() {
       assignment={assignment.data}
       board={board.data}
       onBack={goBack}
-      onSubmitted={() => router.dismissTo(ROUTES.student.homeworkItem(assignment.data.id) as never)}
+      // Veb #196: vazifa sahifasida "Vazifa topshirildi" oynasi ochiladi.
+      onSubmitted={() => router.dismissTo({ pathname: ROUTES.student.homeworkItem(assignment.data.id), params: { submitted: "1" } } as never)}
     />
   );
 }

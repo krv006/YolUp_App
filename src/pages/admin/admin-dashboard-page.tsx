@@ -39,7 +39,7 @@ import {
   useTheme,
 } from "@/shared/ui";
 import { AdminTable, Pill, Rank, Stars } from "./admin-table";
-import { ServerMonitoringPanel, StoragePanel } from "./system-panels";
+import { ClientHealthPanel, ServerMonitoringPanel, StoragePanel } from "./system-panels";
 
 const PERIODS: DashboardPeriod[] = ["day", "week", "month", "year"];
 
@@ -248,6 +248,7 @@ export function AdminDashboardPage() {
 
         <StoragePanel />
         <ServerMonitoringPanel />
+        <ClientHealthPanel />
 
         {can(user, PERMISSIONS.NOTIFICATION_SEND) ? <SentNotificationsPanel /> : null}
       </ScrollView>

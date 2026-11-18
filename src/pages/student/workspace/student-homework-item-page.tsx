@@ -106,7 +106,8 @@ export function StudentHomeworkItemPage() {
       submission={sent ?? mine}
       onDone={() => {
         setDoneOpen(false);
-        router.navigate(ROUTES.student.homework as never);
+        // `dismissTo`: ro'yxat stekda bo'lsa unga qaytadi (ikkinchi nusxa ochilmaydi), bo'lmasa shu sahifani almashtiradi.
+        router.dismissTo(ROUTES.student.homework as never);
       }}
     />
   );

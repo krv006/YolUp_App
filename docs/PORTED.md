@@ -282,7 +282,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `b5ebf59d897d` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `58debbd4a6a4` | — |
 | `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `c48e653a4cfc` | — |
-| `src/modules/notification/index.ts` | 🟡 MOSLASH | `48b1ff3a3fe8` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/notification/index.ts` | 🟡 MOSLASH | `229d6c16b8f3` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs); veb #201 `PushPrompt` eksporti yo'q (brauzer bildirishnoma taklifi) |
 | `src/modules/notification/lib/notification-socket-manager.ts` | 🟢 NUSXA | `3717cfa6e2d2` | — |
 | `src/modules/notification/lib/notification.mappers.ts` | 🟢 NUSXA | `3adafe007db1` | — |
 | `src/modules/notification/model/notification.queries.ts` | 🟢 NUSXA | `3e3023b0c072` | — |
@@ -370,7 +370,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/ui/switch.tsx` | 🟡 MOSLASH | `edc97d390894` | radix o'rniga Pressable; `lg` o'lcham; radius aniq yarim balandlik (Android `boxShadow` 999 ni kesmaydi) |
 | `src/modules/board/ui/formula-solver-dialog.tsx` | 🟡 MOSLASH | `a30c57d10aa4` | faqat tor ekran varianti (`Sheet variant="app" compact`); tezkor tugmalar kursor joyiga (`onSelectionChange` + `setSelection`) |
 | `src/pages/teacher/exams/teacher-exams-page.tsx` | 🟡 MOSLASH | `aaec2fc43c46` | mobilda yo'q — vebda ham ulanmagan (`/teacher/exams` -> `/teacher/workspace/mock`) |
-| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): "Parolni unutdingizmi?" yashirin, 2FA talab qilinsa kod oynasi o'rniga izoh; veb #199/#201 400 (ko'p akkauntli email) va 429 xabarlari; "Parolni unutdingizmi?" `FEATURES.emailPasswordReset` bilan (tiklash email orqali) |
+| `src/pages/auth/login-page.tsx` | 🟡 MOSLASH | `47267c572c0a` | manba: veb `mobile-login-form.tsx` (tor ekran varianti); oflayn ogohlantirish NetInfo orqali; SMS bilan tasdiqlash hozircha o'chiq (`FEATURES.smsVerification`, 2026-10-29 loyiha egasi qarori): 2FA talab qilinsa kod oynasi o'rniga izoh; veb #199/#201 400 (ko'p akkauntli email) va 429 xabarlari; "Parolni unutdingizmi?" `FEATURES.emailPasswordReset` bilan (tiklash email orqali) |
 | `src/modules/auth/ui/mobile-login-form.tsx` | 🟡 MOSLASH | `b0ae01cbbbfd` | mobilda `pages/auth/login-page.tsx` ichida |
 | `src/pages/auth/register-page.tsx` | 🟡 MOSLASH | `fd6ead08a2a2` | manba: veb `mobile-register-form.tsx`; "tayyor" ekrani haqiqatan ko'rsatiladi (vebda `PublicRoute` uni darhol yo'naltirib yuboradi) |
 | `src/modules/auth/ui/mobile-register-form.tsx` | 🟡 MOSLASH | `ad079b307a22` | mobilda `pages/auth/register-page.tsx` ichida |
@@ -749,6 +749,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 
 | Veb fayl | Sabab |
 |---|---|
+| `public/sw.js` | Brauzer service worker'i (veb #194, #201: push havolasi) — mobil push `providers/notification-bridge.tsx` da `link_type`/`link_id` bilan ochiladi |
+| `src/modules/notification/lib/push-prompt.ts` | Brauzer `Notification.permission` taklifi (veb #201) — mobilda OS ruxsati |
+| `src/modules/notification/ui/push-prompt.tsx` | Yuqoridagining oynasi |
+| `src/pages/notifications/notification-open-page.tsx` | Push uchun oraliq `/notification-open` sahifasi (veb #201) — mobilda push to'g'ridan-to'g'ri sahifani ochadi |
 | `src/modules/lesson/lib/teacher-audio-recording.ts` | Mijoz tomon yozuvi — Egress server tomonda (§7.3) |
 | `src/modules/lesson/lib/teacher-video-recording.ts` | Mijoz tomon yozuvi — Egress server tomonda (§7.3) |
 | `src/modules/lesson/model/use-teacher-audio-recording.ts` | Yuqoridagining hook'i |

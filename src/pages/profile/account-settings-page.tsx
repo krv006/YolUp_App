@@ -6,18 +6,37 @@ import { useAuth, useAuthStore, useChangePasswordMutation, useDeleteAccountMutat
 import { AppError } from "@/shared/api";
 import { DsText, dsRadius, Icon, MobileButton, MobileFieldLabel, MobileInput, Sheet, toast, useDs } from "@/shared/ui";
 import { DeleteAccountDialog } from "./profile-dialogs";
+import { passwordChangeIssues, passwordChangeServerErrors, type PasswordChangeErrors } from "./password-change";
 import { ProfileSubPage, SettingsRow, SettingsSection } from "./profile-shell";
 import { SETTINGS_TONES } from "./settings-tones";
 
 type DialogId = "password" | "delete" | null;
 
-function PasswordField({ label, value, invalid = false, autoComplete, onChange, children }: { label: string; value: string; invalid?: boolean; autoComplete: "current-password" | "new-password"; onChange: (value: string) => void; children?: ReactNode }) {
+/** `icon` — vebdagidek ogohlantirish belgisi faqat takroriy parol maydonida; qolganlarida qizil chegara. */
+function PasswordField({
+  label,
+  value,
+  invalid = false,
+  icon = false,
+  autoComplete,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  invalid?: boolean;
+  icon?: boolean;
+  autoComplete: "current-password" | "new-password";
+  onChange: (value: string) => void;
+  children?: ReactNode;
+}) {
   const ds = useDs();
+  const showIcon = invalid && icon;
   return (
     <MobileFieldLabel gap={7} label={label}>
       <View>
-        <MobileInput secureTextEntry autoComplete={autoComplete} autoCapitalize="none" value={value} invalid={invalid} onChangeText={onChange} style={invalid ? styles.withIcon : undefined} />
-        {invalid ? (
+        <MobileInput secureTextEntry autoComplete={autoComplete} autoCapitalize="none" value={value} invalid={invalid} onChangeText={onChange} style={showIcon ? styles.withIcon : undefined} />
+        {showIcon ? (
           <View pointerEvents="none" style={styles.inputIcon}>
             <Icon name="warning-fill" size={20} color={ds.c.danger} />
           </View>
@@ -48,7 +67,8 @@ export function AccountSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-  const [mismatch, setMismatch] = useState(false);
+  // Veb #200: xatolar toast emas, tegishli maydon ostida.
+  const [passwordErrors, setPasswordErrors] = useState<PasswordChangeErrors>({});
   const [username, setUsername] = useState<string | null>(null);
   const [usernameError, setUsernameError] = useState<string | null>(null);
 
@@ -79,18 +99,21 @@ export function AccountSettingsPage() {
     setCurrentPassword("");
     setNewPassword("");
     setRepeatPassword("");
-    setMismatch(false);
+    setPasswordErrors({});
   }
 
   function savePassword() {
-    if (!currentPassword || !newPassword) {
-      toast.error(t("page.passwordRule"));
+    const issues = passwordChangeIssues(currentPassword, newPassword, repeatPassword);
+    const local: PasswordChangeErrors = {
+      current: issues.current ? t("page.currentPasswordRequired") : undefined,
+      next: issues.next === "rule" ? t("page.passwordRule") : issues.next === "same" ? t("page.passwordSame") : undefined,
+      repeat: issues.repeat ? t("page.passwordMismatch") : undefined,
+    };
+    if (local.current || local.next || local.repeat) {
+      setPasswordErrors(local);
       return;
     }
-    if (newPassword !== repeatPassword) {
-      setMismatch(true);
-      return;
-    }
+    setPasswordErrors({});
     changePassword.mutate(
       { currentPassword, newPassword },
       {
@@ -98,7 +121,7 @@ export function AccountSettingsPage() {
           toast.success(t("page.passwordChanged"));
           closePassword();
         },
-        onError: (error: Error) => toast.error(error.message),
+        onError: (error: Error) => setPasswordErrors(passwordChangeServerErrors(error, t("page.passwordChangeFailed"))),
       }
     );
   }
@@ -152,28 +175,64 @@ export function AccountSettingsPage() {
         footer={<MobileButton label={t("page.updatePassword")} disabled={changePassword.isPending} onPress={savePassword} />}
       >
         <View style={styles.fields}>
-          <PasswordField label={t("page.currentPassword")} autoComplete="current-password" value={currentPassword} onChange={setCurrentPassword} />
-          <PasswordField label={t("page.newPassword")} autoComplete="new-password" value={newPassword} onChange={setNewPassword}>
-            <DsText v="body-xs" c="ink-tertiary">
-              {t("page.passwordRule")}
+          <PasswordField
+            label={t("page.currentPassword")}
+            autoComplete="current-password"
+            value={currentPassword}
+            invalid={Boolean(passwordErrors.current)}
+            onChange={(value) => {
+              setCurrentPassword(value);
+              setPasswordErrors((current) => ({ ...current, current: undefined, form: undefined }));
+            }}
+          >
+            {passwordErrors.current ? (
+              <DsText v="body-xs" c="danger" accessibilityRole="alert">
+                {passwordErrors.current}
+              </DsText>
+            ) : null}
+          </PasswordField>
+          <PasswordField
+            label={t("page.newPassword")}
+            autoComplete="new-password"
+            value={newPassword}
+            invalid={Boolean(passwordErrors.next)}
+            onChange={(value) => {
+              setNewPassword(value);
+              setPasswordErrors((current) => ({ ...current, next: undefined, form: undefined }));
+            }}
+          >
+            <DsText v="body-xs" c={passwordErrors.next ? "danger" : "ink-tertiary"}>
+              {passwordErrors.next ?? t("page.passwordRule")}
             </DsText>
           </PasswordField>
           <PasswordField
             label={t("page.repeatPassword")}
             autoComplete="new-password"
             value={repeatPassword}
-            invalid={mismatch}
+            invalid={Boolean(passwordErrors.repeat)}
+            icon
             onChange={(value) => {
               setRepeatPassword(value);
-              setMismatch(false);
+              setPasswordErrors((current) => ({ ...current, repeat: undefined, form: undefined }));
             }}
           >
-            {mismatch ? (
-              <DsText v="body-xs" c="danger">
-                {t("page.passwordMismatch")}
+            {passwordErrors.repeat ? (
+              <DsText v="body-xs" c="danger" accessibilityRole="alert">
+                {passwordErrors.repeat}
               </DsText>
             ) : null}
           </PasswordField>
+          {/* `rounded-xl bg-danger-bg px-3.5 py-2.5 text-body-sm text-error-text` */}
+          {passwordErrors.form ? (
+            <View accessibilityRole="alert" style={[styles.formError, { backgroundColor: ds.c["danger-bg"] }]}>
+              <View style={styles.formErrorIcon}>
+                <Icon name="warning" size={18} color={ds.c["error-text"]} />
+              </View>
+              <DsText v="body-sm" c="error-text" style={styles.grow}>
+                {passwordErrors.form}
+              </DsText>
+            </View>
+          ) : null}
         </View>
       </Sheet>
 
@@ -239,5 +298,7 @@ const styles = StyleSheet.create({
   /* `-mt-0.5 gap-[15px]` */
   fields: { marginTop: -2, gap: 15 },
   withIcon: { paddingRight: 48 },
+  formError: { flexDirection: "row", alignItems: "flex-start", gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: dsRadius.xl },
+  formErrorIcon: { marginTop: 1 },
   inputIcon: { position: "absolute", top: 0, bottom: 0, right: 16, justifyContent: "center" },
 });

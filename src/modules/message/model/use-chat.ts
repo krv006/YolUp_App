@@ -15,7 +15,7 @@ import {
   useConversations,
   useRoomTyping,
 } from "@/modules/conversation";
-import type { ChatMessage, Conversation, ConversationRole, SendMessagePayload } from "@/shared/types";
+import type { ChatMessage, Conversation, ConversationRole, MessageAttachment, SendMessagePayload } from "@/shared/types";
 import { messageApi } from "../api/message.api";
 import { ChatSocketManager, type SocketState } from "../lib/chat-socket-manager";
 import { applyReactions, markMessageFailed, upsertMessage } from "../lib/message.mappers";
@@ -32,6 +32,24 @@ export interface UseChatOptions {
 
 interface OptimisticContext {
   temporaryId: string;
+}
+
+/**
+ * Veb #203: yuborilayotgan fayl xabarda darhol ko'rinadi. 🟡 Vebda rasm
+ * `URL.createObjectURL` bilan; mobilda `toUploadFile` qoldirgan mahalliy `uri`.
+ */
+function pendingAttachment(messageId: string, file: File | null | undefined): MessageAttachment | undefined {
+  if (!file) return undefined;
+  const image = file.type.startsWith("image/");
+  const uri = (file as File & { uri?: string }).uri ?? null;
+  return {
+    messageId,
+    name: file.name,
+    mimeType: file.type,
+    size: file.size,
+    url: image ? uri : null,
+    kind: image ? "image" : "file",
+  };
 }
 
 export function useChat(
@@ -164,6 +182,7 @@ export function useChat(
       messageApi.send(conversationId as string, payload, senderId),
     onMutate: async (payload): Promise<OptimisticContext> => {
       const temporaryId = `temp-${crypto.randomUUID()}`;
+      const attachment = pendingAttachment(temporaryId, payload.file);
       const optimistic: ChatMessage = {
         id: temporaryId,
         clientMessageId: payload.clientMessageId ?? null,
@@ -174,7 +193,8 @@ export function useChat(
         text: payload.text,
         replyTo: payload.replyTo,
         replyToId: payload.replyToId ?? null,
-        type: "text",
+        type: attachment ? (attachment.kind ?? "file") : "text",
+        ...(attachment ? { attachment } : {}),
         createdAt: new Date().toISOString(),
         status: "pending",
         pending: true,

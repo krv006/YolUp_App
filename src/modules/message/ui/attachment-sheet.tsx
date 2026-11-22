@@ -7,6 +7,7 @@ import type { ChatMessage } from "@/shared/types";
 import { DsText, dsRadius, Icon, Sheet, toast, toneColors, useDs, type IconName } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
 import { messageKeys } from "../model/message.keys";
+import { useChatImage } from "../model/use-chat-image";
 
 const RECENT_LIMIT = 3;
 
@@ -34,7 +35,7 @@ export function AttachmentSheet({ open, onClose, onPick, onAssignment, maxSizeMb
 
   const recent = roomId
     ? (client.getQueryData<ChatMessage[]>(messageKeys.all(roomId)) ?? [])
-        .filter((message) => message.attachment?.kind === "image" && message.attachment.url)
+        .filter((message) => message.attachment?.kind === "image" && message.attachment.url && !message.pending)
         .slice(-RECENT_LIMIT)
         .reverse()
     : [];
@@ -101,7 +102,7 @@ export function AttachmentSheet({ open, onClose, onPick, onAssignment, maxSizeMb
               onPress={() => void pickRecent(message)}
               style={[styles.shot, { backgroundColor: ds.c.subtle, opacity: loadingId === message.id ? 0.6 : 1 }]}
             >
-              <Image source={{ uri: message.attachment?.url ?? "" }} style={styles.photo} resizeMode="cover" />
+              <ChatThumb url={message.attachment?.url ?? null} />
             </Pressable>
           ))}
         </View>
@@ -129,6 +130,12 @@ export function AttachmentSheet({ open, onClose, onPick, onAssignment, maxSizeMb
       </View>
     </Sheet>
   );
+}
+
+/** So'nggi rasm eskizi — veb `ChatThumb`: token bilan (`useChatImage`), yuklanguncha bo'sh katak. */
+function ChatThumb({ url }: { url: string | null }) {
+  const { source } = useChatImage(url, { thumb: true });
+  return source ? <Image source={source} style={styles.photo} resizeMode="cover" /> : null;
 }
 
 const styles = StyleSheet.create({

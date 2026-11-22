@@ -15,6 +15,7 @@ export {
   MICROPHONE_SOURCE,
   SCREEN_SHARE_SOURCE,
 } from "./lib/live-permissions";
+export { JOIN_DELAY_LIMIT_MS, joinDelayTooLong, queueSecondsLeft } from "./lib/join-queue";
 export { MIC_TRACK, tokenAllowsTrack } from "./lib/live-token";
 export { decodeScreenShareRequest, encodeScreenShareRequest } from "./lib/screen-share-signal";
 export { useFocusTracker } from "./lib/use-focus-tracker";

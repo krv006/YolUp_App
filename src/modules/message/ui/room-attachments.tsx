@@ -5,6 +5,7 @@ import { Image, Pressable, StyleSheet, View } from "react-native";
 import type { RoomAttachment } from "@/shared/types";
 import { DsText, dsRadius, FileViewer, Icon, useDs } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
+import { useChatImage } from "../model/use-chat-image";
 import { MessageAttachment } from "./message-attachment";
 
 export interface RoomAttachmentsProps {
@@ -88,7 +89,8 @@ function MediaTile({ item }: { item: RoomAttachment }) {
   const [open, setOpen] = useState(false);
   const video = item.mimeType.startsWith("video");
   // 🟡 Vebdan farqi: rasm bo'lmagan faylni (backend "media" ga doska PDF'ini ham qo'shadi) rasm qilib chizmaymiz.
-  const preview = item.thumbnailUrl ?? (item.mimeType.startsWith("image") ? item.url : null);
+  // Veb #203: eskiz token bilan so'raladi (`useChatImage`).
+  const preview = useChatImage(item.thumbnailUrl ?? (item.mimeType.startsWith("image") ? item.url : null), { thumb: true }).source;
   return (
     <>
       <Pressable
@@ -98,7 +100,7 @@ function MediaTile({ item }: { item: RoomAttachment }) {
         style={[styles.tile, styles.center, { backgroundColor: ds.c.subtle }]}
       >
         {preview ? (
-          <Image source={{ uri: preview }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <Image source={preview} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : (
           <Icon name={video ? "videocam" : item.mimeType.startsWith("image") ? "image" : "assign"} size={24} color={ds.c["ink-tertiary"]} />
         )}

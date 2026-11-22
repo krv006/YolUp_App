@@ -48,8 +48,8 @@ export interface ChildScoreChartProps {
 }
 
 /**
- * Ball dinamikasi — veb `widgets/child-score-chart`: uy vazifasi, test va
- * mock ballari (10 ballik) bo'yicha umumiy chiziq, tur filtri va davr
+ * Ball dinamikasi — veb `widgets/child-score-chart`: uy vazifasi va test
+ * ballari (10 ballik) bo'yicha umumiy chiziq, tur filtri va davr
  * (8 hafta / 6 oy / hammasi). O'quvchi tahlilga ruxsat bermagan bo'lsa
  * (`consent_required` yoki 403) shu haqida yozuv chiqadi.
  *

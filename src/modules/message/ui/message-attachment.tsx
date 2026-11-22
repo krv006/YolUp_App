@@ -5,6 +5,7 @@ import { fileKindLabel, fileKindOf, formatFileSize } from "@/shared/lib";
 import type { MessageAttachment as Attachment } from "@/shared/types";
 import { dsAlpha, DsText, dsRadius, FileViewer, Icon, useDs } from "@/shared/ui";
 import { messageApi } from "../api/message.api";
+import { useChatImage } from "../model/use-chat-image";
 
 /**
  * Xabardagi fayl — veb `message-attachment.tsx`: rasm bo'lsa xabar ichida
@@ -26,7 +27,10 @@ export function MessageAttachment({
   const ds = useDs();
   const [open, setOpen] = useState(false);
   const [ratio, setRatio] = useState<number | null>(null);
+  const [imageFailed, setImageFailed] = useState(false);
   const kind = fileKindOf(attachment.mimeType, attachment.name);
+  // Veb #203: rasm token bilan, xabar ichida eskiz (`?thumb=1`).
+  const image = useChatImage(kind === "image" && !failed ? attachment.url : null, { thumb: true });
   const extension = attachment.name.split(".").pop()?.slice(0, 4).toUpperCase() ?? "FILE";
   const meta = [
     attachment.size ? formatFileSize(attachment.size) : "",
@@ -45,7 +49,7 @@ export function MessageAttachment({
     />
   );
 
-  if (kind === "image" && attachment.url && !failed) {
+  if (kind === "image" && attachment.url && !failed && !image.failed && !imageFailed) {
     return (
       <>
         <Pressable
@@ -54,15 +58,21 @@ export function MessageAttachment({
           onPress={() => setOpen(true)}
           style={styles.image}
         >
-          <Image
-            source={{ uri: attachment.url }}
-            onLoad={(event) => {
-              const { width, height } = event.nativeEvent.source;
-              if (width && height) setRatio(width / height);
-            }}
-            style={[styles.picture, { aspectRatio: ratio ?? 4 / 3, backgroundColor: ds.c.subtle }]}
-            resizeMode="cover"
-          />
+          {image.source ? (
+            <Image
+              source={image.source}
+              onError={() => setImageFailed(true)}
+              onLoad={(event) => {
+                const { width, height } = event.nativeEvent.source;
+                if (width && height) setRatio(width / height);
+              }}
+              style={[styles.picture, { aspectRatio: ratio ?? 4 / 3, backgroundColor: ds.c.subtle }]}
+              resizeMode="cover"
+            />
+          ) : (
+            // Veb `animate-pulse bg-skeleton aspect-[4/3]` — rasm yuklanguncha.
+            <View style={[styles.picture, { aspectRatio: 4 / 3, backgroundColor: ds.c.subtle }]} />
+          )}
           {uploading ? (
             <View
               style={[

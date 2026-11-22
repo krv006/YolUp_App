@@ -244,6 +244,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       // bo'lmasa jim o'tadi va debug kaliti ishlatiladi.
       "./plugins/with-release-signing",
       ...(NATIVE_FEATURES.androidScreenShare ? [] : ["./plugins/without-media-projection-service"]),
+      // Wi-Fi va portret ekran ixtiyoriy — Play qurilma cheklovi ogohlantirishi.
+      "./plugins/optional-hardware-features",
     ],
     // typedRoutes ATAYLAB o'chiq: marshrut yo'llari veb'dan ko'chirilgan
     // `shared/config/routes.ts` dan oddiy `string` sifatida keladi (masalan

@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import * as Device from "expo-device";
 import { getStoredLanguage } from "@/shared/model";
 import { tokenStorage } from "./token-storage";
 import type { ResponseType } from "./api-response";
@@ -45,7 +46,9 @@ export function buildRequestUrl(baseUrl: string, path: string, query?: QueryPara
  */
 const DEVICE_NAME = (() => {
   const constants = Platform.constants as { Brand?: string; Model?: string; Release?: string };
-  const model = Platform.OS === "android" ? [constants.Brand, constants.Model].filter(Boolean).join(" ") : "iPhone";
+  // iOS model nomini bermaydi — `expo-device` ("iPhone 15 Pro", "iPad Air"). Backend
+  // kirish tarixini qurilma nomi bo'yicha guruhlaydi: aks holda hamma iPhone bitta qator.
+  const model = Platform.OS === "android" ? [constants.Brand, constants.Model].filter(Boolean).join(" ") : (Device.modelName ?? "iPhone");
   const os = Platform.OS === "android" ? `Android ${constants.Release ?? ""}`.trim() : `iOS ${Platform.Version}`;
   return `YolUp (${model}, ${os})`.replace(/[^\x20-\x7E]/g, "");
 })();

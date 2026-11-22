@@ -59,6 +59,8 @@ export function toUploadFile(picked: PickedFile): File {
     // Tanlagich o'lchamni bermasa (kamera) fayldan o'qiladi.
     size: picked.size || source.size,
     bytes: () => source.bytes(),
+    // Yuborilayotgan rasmni chatda darhol ko'rsatish uchun (`use-chat` `pendingAttachment`).
+    uri: picked.uri,
   } as unknown as File;
 }
 

@@ -5,6 +5,8 @@
  * domen qatlami to'liq, `ui/` eksportlari olib tashlangan — mobil UI alohida
  * yoziladi va o'z fayllaridan import qilinadi.
  */
+export { AI_MATERIAL_ACCEPT, checkAiMaterials } from "./lib/ai-material";
+export type { AiMaterialProblem } from "./lib/ai-material";
 export type { ImportedQuiz, QuizExportMode, QuizExportType } from "./api/quiz.api";
 export { quizApi } from "./api/quiz.api";
 export { quizEndpoints } from "./api/quiz.endpoints";

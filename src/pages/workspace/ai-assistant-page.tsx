@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSubjects } from "@/modules/course";
-import { useAiQuizJobs, useGenerateQuizFromBank, useStartAiQuiz, type AiQuizJob, type AiQuizStandard } from "@/modules/quiz";
+import { checkAiMaterials, useAiQuizJobs, useGenerateQuizFromBank, useStartAiQuiz, type AiQuizJob, type AiQuizStandard } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import { pickDocuments, toUploadFile, type PickedFile } from "@/shared/lib";
 import {
@@ -30,11 +30,25 @@ import {
 type Tab = "simple" | "rules" | "bank";
 
 const STANDARDS: AiQuizStandard[] = ["uzbmb", "ielts", "sat"];
-const MAX_FILES = 5;
-const MAX_TOTAL_MB = 20;
 const MIN_QUESTIONS = 5;
 const MAX_QUESTIONS = 50;
-const FILE_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/*"];
+/**
+ * Veb `AI_MATERIAL_ACCEPT` (pdf, docx, pptx, xlsx, xlsm, csv, txt, md) ning
+ * MIME ko'rinishi — tizim tanlagichi kengaytma emas, MIME bilan cheklaydi.
+ * Tanlangan fayl baribir `checkAiMaterials` da nomi bo'yicha tekshiriladi.
+ */
+const FILE_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel.sheet.macroEnabled.12",
+  "text/csv",
+  "text/comma-separated-values",
+  "text/plain",
+  "text/markdown",
+  "text/x-markdown",
+];
 
 
 /**
@@ -159,11 +173,11 @@ function AiForm({ subjects, pending, error, onBack, onHistory, onSubmit, bankPen
   );
 
   async function chooseFiles() {
-    const picked = (await pickDocuments(FILE_TYPES)).slice(0, MAX_FILES);
+    const picked = await pickDocuments(FILE_TYPES);
     if (!picked.length) return;
-    const total = picked.reduce((sum, file) => sum + file.size, 0);
-    if (total > MAX_TOTAL_MB * 1024 * 1024) {
-      setFileError(t("ai.mobile.filesTooBig", { size: MAX_TOTAL_MB }));
+    const problem = checkAiMaterials(picked);
+    if (problem) {
+      setFileError(t(`ai.material.${problem.kind}`, problem));
       return;
     }
     setFileError(null);

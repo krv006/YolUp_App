@@ -50,18 +50,12 @@ export function AttentionCard({ items, childId, now }: { items: AttentionItem[];
                     : t("home.attention.homeworkSoon");
               meta = `${item.assignment.title} · ${formatDayTime(due)}`;
               open = () => router.navigate(ROUTES.parent.homework as never);
-            } else if (item.kind === "login") {
+            } else {
               icon = "shield";
               tone = { bg: "danger-bg", fg: "error-text" };
               title = t("home.attention.login");
               meta = `${item.device} · ${formatDayTime(item.at)}`;
               open = () => go(ROUTES.parent.childLogins(childId));
-            } else {
-              icon = "emoji-events";
-              tone = { bg: "accent-blue-bg", fg: "accent-blue-fg" };
-              title = t("home.attention.exam");
-              meta = t("home.attention.examMeta", { title: item.exam.title });
-              open = () => router.navigate(ROUTES.parent.exams as never);
             }
             return (
               <Pressable

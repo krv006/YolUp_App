@@ -9,11 +9,16 @@ export interface MathTextProps {
   v?: DsTextProps["v"];
   w?: DsTextProps["w"];
   style?: StyleProp<TextStyle>;
+  /**
+   * Vebdagi `whitespace-pre-line` ota element kabi: qator ko'chirishlari
+   * saqlanadi (vazifa javoblari, izohlar). Odatda o'chiq — test matni.
+   */
+  preLine?: boolean;
 }
 
 /** HTML matn oqimi kabi: qator ko'chirish va ketma-ket bo'shliqlar bitta bo'shliq (vebda brauzer shunday chizadi). */
-function collapse(text: string): string {
-  return text.replace(/\s+/g, " ");
+function collapse(text: string, preLine = false): string {
+  return preLine ? text.replace(/[^\S\n]+/g, " ").replace(/ ?\n ?/g, "\n") : text.replace(/\s+/g, " ");
 }
 
 function hasMath(text: string): boolean {
@@ -25,11 +30,11 @@ function hasMath(text: string): boolean {
  * Vebda formula matn qatorida turadi; RN'da WebView matn ichiga kirmaydi,
  * shuning uchun formulali matn bo'laklarga bo'linib ustma-ust chiziladi.
  */
-export function MathText({ text, size = 17, v, w, style }: MathTextProps) {
+export function MathText({ text, size = 17, v, w, style, preLine = false }: MathTextProps) {
   if (!hasMath(text))
     return (
       <DsText v={v} w={w} style={style}>
-        {collapse(text).trim()}
+        {collapse(text, preLine).trim()}
       </DsText>
     );
   const parts = text.split(/(\$[^$]+\$)/g).filter((part) => part.trim());
@@ -40,7 +45,7 @@ export function MathText({ text, size = 17, v, w, style }: MathTextProps) {
           <MathMarkup key={index} latex={part.slice(1, -1)} size={size} framed={false} />
         ) : (
           <DsText key={index} v={v} w={w} style={style}>
-            {collapse(part).trim()}
+            {collapse(part, preLine).trim()}
           </DsText>
         )
       )}

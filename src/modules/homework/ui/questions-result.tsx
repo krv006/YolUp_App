@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, TextInput, View } from "react-native";
+import { MathText } from "@/modules/quiz";
 import type { HomeworkAnswer } from "@/shared/types";
 import { bodyFont, dsAlpha, DsText, dsRadius, dsType, useDs } from "@/shared/ui";
 
@@ -117,11 +118,13 @@ export function QuestionsResult({ answers, scores, onScoreChange }: QuestionsRes
                 })}
               </View>
             ) : (
-              <DsText v="body-sm" style={[styles.answer, { backgroundColor: ds.c.subtle }]}>
-                {typeof answer.answer === "string" && answer.answer
-                  ? answer.answer
-                  : t("questions.noAnswer")}
-              </DsText>
+              <View style={[styles.answer, { backgroundColor: ds.c.subtle }]}>
+                {typeof answer.answer === "string" && answer.answer ? (
+                  <MathText text={answer.answer} size={15} v="body-sm" preLine />
+                ) : (
+                  <DsText v="body-sm">{t("questions.noAnswer")}</DsText>
+                )}
+              </View>
             )}
             {answer.aiScore !== null && onScoreChange ? (
               <DsText v="caption" c="ink-tertiary">

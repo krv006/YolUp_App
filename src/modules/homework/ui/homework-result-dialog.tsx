@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { MathText } from "@/modules/quiz";
 import { toIntlLocale } from "@/shared/i18n";
 import type { Submission } from "@/shared/types";
 import { DsGradient, DsText, dsRadius, Icon, MobileRoundButton, useDs, type DsColor, type IconName } from "@/shared/ui";
@@ -128,7 +129,7 @@ export function HomeworkResultDialog({ submissionId, initial = null, open, onOpe
               <DsText v="caption" c="ink-secondary">
                 {t("detailDialog.textAnswer")}
               </DsText>
-              <DsText v="body-sm">{textAnswer}</DsText>
+              <MathText text={textAnswer} size={15} v="body-sm" preLine />
             </View>
           ) : null}
 

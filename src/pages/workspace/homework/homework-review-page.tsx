@@ -15,6 +15,7 @@ import {
   useSubmission,
 } from "@/modules/homework";
 import { QuestionsResult } from "@/modules/homework/ui/questions-result";
+import { MathText } from "@/modules/quiz";
 import { ROUTES } from "@/shared/config";
 import type { Submission } from "@/shared/types";
 import { Avatar, DsGradient, DsText, dsRadius, Icon, MobileInput, MobileRoundButton, useDs } from "@/shared/ui";
@@ -188,7 +189,7 @@ export function HomeworkReviewPage() {
                 {t("review.textAnswer")}
               </DsText>
             </View>
-            <DsText v="body">{current.comment}</DsText>
+            <MathText text={current.comment} v="body" preLine />
           </View>
         ) : (
           /* `h-42 rounded-xl bg-surface` — fayl ko'rinishi */
@@ -312,7 +313,7 @@ export function HomeworkReviewPage() {
               {t("review.studentComment")}
             </DsText>
             <View style={[styles.noteBox, { borderColor: ds.c.line }]}>
-              <DsText v="body-sm">{current.comment}</DsText>
+              <MathText text={current.comment} size={15} v="body-sm" preLine />
             </View>
           </View>
         ) : null}

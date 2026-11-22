@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import type { HomeworkQuestion } from "@/shared/types";
 import { DsText, dsRadius, Icon, MobileInput, useDs } from "@/shared/ui";
 import { isAnswered, type AnswerDraft } from "../lib/homework-answers";
+import { FormulaField } from "./formula-field";
 
 export interface QuestionsAnswerFormProps {
   questions: HomeworkQuestion[];
@@ -129,25 +130,37 @@ export function QuestionsAnswerForm({
                 })}
               </View>
             ) : (
-              <MobileInput
-                accessibilityLabel={t("questions.number", { n: index + 1 })}
-                editable={!disabled}
+              // Veb #202: javob ostida "Formula" tugmasi (`FormulaField`).
+              <FormulaField
                 value={text}
-                placeholder={
-                  question.type === "short"
-                    ? t("questions.shortPlaceholder")
-                    : t("questions.longPlaceholder")
-                }
+                disabled={disabled}
                 maxLength={question.type === "short" ? 500 : 10000}
-                multiline={question.type === "long"}
-                // `textarea rows={5} py-3`
-                multilineHeight={144}
-                onChangeText={(next) => onChange({ ...value, [question.id]: next })}
-                style={[
-                  question.type === "short" ? styles.short : styles.long,
-                  disabled && styles.disabled,
-                ]}
-              />
+                onValueChange={(next) => onChange({ ...value, [question.id]: next })}
+              >
+                {(bind) => (
+                  <MobileInput
+                    ref={bind.ref}
+                    onSelectionChange={bind.onSelectionChange}
+                    accessibilityLabel={t("questions.number", { n: index + 1 })}
+                    editable={!disabled}
+                    value={text}
+                    placeholder={
+                      question.type === "short"
+                        ? t("questions.shortPlaceholder")
+                        : t("questions.longPlaceholder")
+                    }
+                    maxLength={question.type === "short" ? 500 : 10000}
+                    multiline={question.type === "long"}
+                    // `textarea rows={5} py-3`
+                    multilineHeight={144}
+                    onChangeText={(next) => onChange({ ...value, [question.id]: next })}
+                    style={[
+                      question.type === "short" ? styles.short : styles.long,
+                      disabled && styles.disabled,
+                    ]}
+                  />
+                )}
+              </FormulaField>
             )}
           </View>
         );

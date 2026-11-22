@@ -24,6 +24,7 @@ import {
   useSubmitHomework,
   type AnswerDraft,
 } from "@/modules/homework";
+import { FormulaField } from "@/modules/homework/ui/formula-field";
 import { GoogleFormLink } from "@/modules/homework/ui/google-form-link";
 import { QuestionsAnswerForm } from "@/modules/homework/ui/questions-answer-form";
 import { QuestionsResult } from "@/modules/homework/ui/questions-result";
@@ -360,22 +361,36 @@ function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; o
             <DsText v="body-sm" w="500">
               {t("workspace.hwItem.comment")}
             </DsText>
-            <TextInput
-              multiline
-              scrollEnabled={false}
+            {/* Veb #202: izohga ham formula qo'shiladi (`FormulaField`). */}
+            <FormulaField
               value={comment}
               maxLength={2000}
-              placeholder={t("workspace.hwItem.commentPlaceholder")}
-              placeholderTextColor={ds.c["ink-tertiary"]}
-              textAlignVertical="top"
-              onChangeText={(value) => {
+              onValueChange={(value) => {
                 touched.current = true;
                 setComment(value);
               }}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              style={[styles.comment, { borderColor: focused ? ds.c.focus : ds.c["line-strong"], backgroundColor: ds.c.surface, color: ds.c.ink }]}
-            />
+            >
+              {(bind) => (
+                <TextInput
+                  ref={bind.ref}
+                  onSelectionChange={bind.onSelectionChange}
+                  multiline
+                  scrollEnabled={false}
+                  value={comment}
+                  maxLength={2000}
+                  placeholder={t("workspace.hwItem.commentPlaceholder")}
+                  placeholderTextColor={ds.c["ink-tertiary"]}
+                  textAlignVertical="top"
+                  onChangeText={(value) => {
+                    touched.current = true;
+                    setComment(value);
+                  }}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                  style={[styles.comment, { borderColor: focused ? ds.c.focus : ds.c["line-strong"], backgroundColor: ds.c.surface, color: ds.c.ink }]}
+                />
+              )}
+            </FormulaField>
           </View>
 
           <View style={[styles.notice, { backgroundColor: locked ? ds.c["danger-bg"] : ds.c["accent-teal-bg"] }]}>

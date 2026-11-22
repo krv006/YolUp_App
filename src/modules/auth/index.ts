@@ -13,6 +13,8 @@ export type {
   ConsentRequestDto,
   CreateChildRequestDto,
   LinkAction,
+  LoginDevice,
+  LoginDeviceType,
   LoginRecord,
   LoginRecordDto,
   ProfileFormValues,
@@ -35,7 +37,7 @@ export {
   useTeacherStats,
   useTeachers,
   useTwoFactorStatus,
-  useLoginHistoryPage,
+  useLoginDevicesPage,
   useSetTeacherTestAccess,
 } from "./model/auth.queries";
 export { describeUserAgent } from "./lib/describe-user-agent";

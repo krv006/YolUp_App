@@ -61,12 +61,12 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/attendance/lib/attendance.mappers.ts` | 🟢 NUSXA | `52babbbc63ad` | — |
 | `src/modules/attendance/lib/group-by-lesson.ts` | 🟢 NUSXA | `2a79a46a78ac` | — |
 | `src/modules/attendance/model/attendance.queries.ts` | 🟢 NUSXA | `06c1277db8a4` | — |
-| `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `78e7cc73261d` | — |
-| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `8254f8a234ac` | — |
+| `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `c300d841413c` | — |
+| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `f3e52df39d26` | — |
 | `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `389e0f383451` | — |
-| `src/modules/auth/index.ts` | 🟡 MOSLASH | `ae90ffffb002` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/auth/index.ts` | 🟡 MOSLASH | `4c2097948ec8` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/auth/lib/auth-session.ts` | 🟢 NUSXA | `4e39458e320b` | — |
-| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `4c1c2b14f055` | — |
+| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `016e434b4d9e` | — |
 | `src/modules/auth/lib/uz-phone.ts` | 🟢 NUSXA | `3c5a2a144ed8` | — |
 | `src/modules/auth/lib/describe-reset-error.ts` | 🟢 NUSXA | `fc0246494e75` | — |
 | `src/modules/auth/lib/describe-two-factor.ts` | 🟢 NUSXA | `20c09ae21e84` | — |
@@ -74,7 +74,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/lib/resolve-home-route.ts` | 🟢 NUSXA | `1e015eda25e9` | — |
 | `src/modules/auth/lib/teacher-approval.ts` | 🟢 NUSXA | `ea465e71f081` | — |
 | `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `5b40b95d445a` | — |
-| `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `04899b98b395` | — |
+| `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `09a85b19426f` | — |
 | `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `ea7834ad1d1c` | — |
 | `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `845be1f01a71` | window hodisalari -> refreshTokenManager; tab obunasi yo'q; sessiya raqami olindi; til sinxroni vebdagidek. Profil keshi (`USER_SNAPSHOT`) — modul yuklanganda emas, `bootstrap()` ichida o'qiladi (tokenlar `hydrate()` dan keyin keladi); yangi sessiyada `beginSession` keshni tozalaydi; serverdagi mavzu va matn o'lchami (`syncPreferencesFromServer`) — vebdagi `useThemeStore` o'rniga `useAppearanceStore` |
 | `src/modules/auth/model/use-role-routes.ts` | 🟢 NUSXA | `53dfe7671897` | — |
@@ -377,7 +377,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/profile/my-ratings-page.tsx` | 🟡 MOSLASH | `d8a2a399924a` | faqat tor ekran shoxlari: o'qituvchida `TeacherRatings`, o'quvchida `student-ratings.tsx` |
 | `src/pages/profile/student-ratings.tsx` | 🟡 MOSLASH | `681aec74e6b1` | faqat tor ekran varianti |
 | `src/pages/profile/certificates-page.tsx` | 🟡 MOSLASH | `25dea699b601` | faqat tor ekran varianti; fayl `pickDocument` bilan; faylni ochish `Linking.openURL`; qator menyusi `PopoverMenu` |
-| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `3844db93624c` | faqat tor ekran varianti |
+| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `82ea882239d5` | faqat tor ekran varianti; `DeviceFilter` gorizontal `ScrollView` |
 | `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `2771d2562e58` | tanishuvni qayta ko'rsatish — `storage` dagi kalit o'chiriladi (vebda `localStorage`); FAQ javobi `AppDialog` o'rniga `Sheet`; video `Linking.openURL`; `?ticket=` — `useLocalSearchParams`/`router.setParams`; ota-onaga qo'llanma va tanishuv yo'q (vebdagidek) |
 | `src/pages/profile/password-change.ts` | 🟢 NUSXA | `e66a48cb2147` | — |
 | `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | ota-onada `pages/parent/settings/settings-mobile-system.tsx` (veb `settings-mobile-system` bilan); Web Push qatori o'rnida OS push ruxsati |

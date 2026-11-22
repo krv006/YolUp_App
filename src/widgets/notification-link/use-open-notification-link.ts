@@ -69,11 +69,6 @@ export function useOpenNotificationLink() {
         if (student) return go(isResult(kind) ? ROUTES.student.testResults(link.id) : ROUTES.student.test(link.id));
         return go(`${prefix}/quizzes?quiz=${link.id}`);
       }
-      if (type === "exam" || type === "mock") {
-        if (prefix === "/teacher") return go(ROUTES.teacher.mockResults(link.id));
-        if (student) return go(isResult(kind) ? ROUTES.student.mockResults(link.id) : ROUTES.student.mockExams);
-        return go(`${prefix}/exams`);
-      }
       // Club (speaking club) bildirishnomasi ham guruh chatini ochadi.
       if (type === "course" || type === "club") {
         const room = conversations.data?.find((item) => item.courseId === link.id);

@@ -30,7 +30,6 @@ export {
   useRespondParentLink,
   useSetParentConsent,
   useCancelLink,
-  useChildExams,
   useChildRank,
   useChildSessions,
   useChildSummary,

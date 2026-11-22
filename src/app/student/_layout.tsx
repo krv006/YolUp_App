@@ -6,7 +6,7 @@ import { NewConversationHost } from "@/widgets/new-conversation";
 /**
  * O'quvchining suzuvchi paneli — veb `widgets/mobile-tab-bar` (o'qituvchidagi
  * bilan bir xil): Workspace, Jadval, markazda Asosiy, Chat, Profil.
- * Testlar, mock, vazifalar va tahlil Workspace ichida (`workspace/...`).
+ * Testlar, vazifalar va tahlil Workspace ichida (`workspace/...`).
  */
 const TABS = [
   {

@@ -6,7 +6,6 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTeacherDashboard } from "@/modules/analytics";
 import { useCourses } from "@/modules/course";
-import { useExams } from "@/modules/exam";
 import { homeworkApi, homeworkKeys } from "@/modules/homework";
 import { useQuizzes } from "@/modules/quiz";
 import { FEATURES, ROUTES } from "@/shared/config";
@@ -31,7 +30,6 @@ const ALL_MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to:
   { id: "tests", icon: "quiz", tone: "bg-accent-blue-bg text-accent-blue-fg", to: ROUTES.teacher.tests },
   { id: "analytics", icon: "bar-chart", tone: "bg-accent-green-bg text-accent-green-fg", to: ROUTES.teacher.workspaceAnalytics },
   { id: "ai", icon: "sparkles-fill", tone: "bg-accent-saffron-bg text-accent-saffron-fg", to: ROUTES.teacher.workspaceAi },
-  { id: "mock", icon: "assignment-check-fill", tone: "bg-accent-violet-bg text-accent-violet-fg", to: ROUTES.teacher.mockExams },
   { id: "assignments", icon: "assign", tone: "bg-accent-red-bg text-accent-red-fg", to: ROUTES.teacher.homework },
   { id: "materials", icon: "folder", tone: "bg-accent-violet-bg text-accent-red-fg", to: ROUTES.teacher.materials },
 ];
@@ -39,7 +37,6 @@ const ALL_MODULES: ReadonlyArray<{ id: string; icon: IconName; tone: string; to:
 const ALL_CREATE: ReadonlyArray<{ id: string; icon: IconName; to: string }> = [
   { id: "test", icon: "quiz", to: `${ROUTES.teacher.tests}?new=1` },
   { id: "homework", icon: "assign", to: `${ROUTES.teacher.homework}?new=1` },
-  { id: "mock", icon: "assignment-check-fill", to: `${ROUTES.teacher.mockExams}?new=1` },
   { id: "ai", icon: "sparkles-fill", to: ROUTES.teacher.workspaceAi },
 ];
 
@@ -50,8 +47,8 @@ const CREATE = ALL_CREATE.filter((item) => item.id !== "ai" || FEATURES.aiAssist
 /**
  * O'qituvchining Workspace bosh sahifasi — veb `workspace-home-page.tsx` +
  * `mobile-workspace-home.tsx` (tor ekran): sarlavha va "+" menyusi (test,
- * vazifa, mock, AI), ko'k umumiy ko'rinish kartasi (tekshirilmagan ishlar,
- * testlar, mock imtihonlar) va modullar ro'yxati.
+ * vazifa, AI), ko'k umumiy ko'rinish kartasi (tekshirilmagan ishlar,
+ * testlar) va modullar ro'yxati.
  */
 export function WorkspaceHomePage() {
   const { t } = useTranslation("workspace");
@@ -61,7 +58,6 @@ export function WorkspaceHomePage() {
   const { anchorRef, rect, open, close } = usePopoverAnchor();
   const courses = useCourses();
   const quizzes = useQuizzes(null);
-  const exams = useExams(null);
   const dashboard = useTeacherDashboard();
 
   const groups = useMemo(() => courses.data ?? [], [courses.data]);
@@ -76,7 +72,7 @@ export function WorkspaceHomePage() {
   const unchecked = dashboard.data?.submissionsPending ?? assignments.reduce((sum, item) => sum + item.submissions.filter((entry) => !entry.grade).length, 0);
 
   function refresh() {
-    return Promise.all([courses.refetch(), quizzes.refetch(), exams.refetch(), dashboard.refetch(), ...assignmentQueries.map((query) => query.refetch())]);
+    return Promise.all([courses.refetch(), quizzes.refetch(), dashboard.refetch(), ...assignmentQueries.map((query) => query.refetch())]);
   }
 
   return (
@@ -117,7 +113,6 @@ export function WorkspaceHomePage() {
           items={[
             { id: "unchecked", value: unchecked, label: t("home.mobile.stats.unchecked") },
             { id: "tests", value: quizzes.data?.length ?? 0, label: t("home.mobile.stats.tests") },
-            { id: "mock", value: exams.data?.length ?? 0, label: t("home.mobile.stats.mock") },
           ]}
         />
 

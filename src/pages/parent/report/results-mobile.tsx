@@ -12,12 +12,11 @@ import { subjectLook } from "../attendance/attendance-styles";
 import { MobileConnect } from "../dashboard/parent-home-mobile";
 import { ChildScoreChart } from "@/widgets/child-score-chart";
 import { useHomeworkView } from "../homework/use-homework-view";
-import { ResultsTabs } from "./results-parts";
 
 /**
  * Natijalar (reyting) — veb `results-mobile.tsx`: oy tanlash, to'rtta
  * ko'rsatkich (berilgan, topshirilgan, o'rtacha, fanlar), ball dinamikasi
- * (`ChildScoreChart` — vazifa, test va mock ballari) va fanlar ro'yxati
+ * (`ChildScoreChart` — vazifa va test ballari) va fanlar ro'yxati
  * (bosilsa kurs sahifasi).
  */
 export function ResultsMobile() {
@@ -58,7 +57,6 @@ export function ResultsMobile() {
         title={t("results.title")}
         action={<MobileRoundButton icon="tune" label={t("results.month")} background="surface" onPress={() => setMonthOpen(true)} />}
       />
-      <ResultsTabs />
       {online && view.failed ? <ParentErrorBanner onRetry={view.retry} /> : null}
       {!view.loading && !view.child ? (
         <MobileConnect />

@@ -20,11 +20,11 @@ const TABS: readonly TabDefinition[] = [
   { name: "attendance", labelKey: "mobile.tabs.attendance", iconName: "event" },
   { name: "dashboard", labelKey: "mobile.tabs.home", iconName: "home", center: true },
   { name: "homework", labelKey: "mobile.tabs.homework", iconName: "assignment", badge: OpenHomeworkBadge },
-  { name: "grades", labelKey: "mobile.tabs.results", iconName: "bar-chart", siblings: ["exams"] },
+  { name: "grades", labelKey: "mobile.tabs.results", iconName: "bar-chart" },
 ];
 
 /* `(account)` — profil, sozlamalar, yordam va bildirishnomalar (o'z stack'i, URL'da guruh nomi yo'q). */
-const HIDDEN = ["exams", "chats", "(account)", "[...missing]"];
+const HIDDEN = ["chats", "(account)", "[...missing]"];
 
 export default function ParentLayout() {
   return (

@@ -49,7 +49,7 @@ export function MessageAttachment({
     />
   );
 
-  if (kind === "image" && image.source && !failed && !imageFailed) {
+  if (kind === "image" && attachment.url && !failed && !image.failed && !imageFailed) {
     return (
       <>
         <Pressable
@@ -58,16 +58,21 @@ export function MessageAttachment({
           onPress={() => setOpen(true)}
           style={styles.image}
         >
-          <Image
-            source={image.source}
-            onError={() => setImageFailed(true)}
-            onLoad={(event) => {
-              const { width, height } = event.nativeEvent.source;
-              if (width && height) setRatio(width / height);
-            }}
-            style={[styles.picture, { aspectRatio: ratio ?? 4 / 3, backgroundColor: ds.c.subtle }]}
-            resizeMode="cover"
-          />
+          {image.source ? (
+            <Image
+              source={image.source}
+              onError={() => setImageFailed(true)}
+              onLoad={(event) => {
+                const { width, height } = event.nativeEvent.source;
+                if (width && height) setRatio(width / height);
+              }}
+              style={[styles.picture, { aspectRatio: ratio ?? 4 / 3, backgroundColor: ds.c.subtle }]}
+              resizeMode="cover"
+            />
+          ) : (
+            // Veb `animate-pulse bg-skeleton aspect-[4/3]` — rasm yuklanguncha.
+            <View style={[styles.picture, { aspectRatio: 4 / 3, backgroundColor: ds.c.subtle }]} />
+          )}
           {uploading ? (
             <View
               style={[

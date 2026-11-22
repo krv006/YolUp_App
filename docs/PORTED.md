@@ -271,7 +271,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/message/ui/typing-indicator.tsx` | 🟡 MOSLASH | `ab2967c41ff4` | mobilda `message-list.tsx` ichida (`TypingIndicator`) |
 | `src/modules/message/ui/message-text.tsx` | 🟡 MOSLASH | `9ba5cb9dd097` | havolalar `Text onPress`; ichki havola ilova ichida, tashqisi brauzerda |
 | `src/modules/message/ui/pinned-message-bar.tsx` | 🟡 MOSLASH | `d8b8f14c948f` | faqat tor ekran ko'rinishi |
-| `src/modules/message/model/use-chat-image.ts` | 🟡 MOSLASH | `46e8ecf61add` | blob URL o'rniga `Image` manbasi `{ uri, headers: { Authorization } }` (RN'da `URL.createObjectURL` yo'q; ovozli xabar ham shunday); mahalliy fayl (`file:`, `content:`) tokensiz |
+| `src/modules/message/model/use-chat-image.ts` | 🟡 MOSLASH | `46e8ecf61add` | blob `URL.createObjectURL` o'rniga kesh fayli (`writeBlobToCache`) va `file://`; `Image headers` yo'li Android'da 401 berdi; mahalliy fayl (`file:`, `content:`) yuklanmaydi |
 | `src/modules/notification/api/notification.api.ts` | 🟢 NUSXA | `b5ebf59d897d` | — |
 | `src/modules/notification/api/notification.dto.ts` | 🟢 NUSXA | `58debbd4a6a4` | — |
 | `src/modules/notification/api/notification.endpoints.ts` | 🟢 NUSXA | `c48e653a4cfc` | — |

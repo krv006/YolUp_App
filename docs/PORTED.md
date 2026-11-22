@@ -237,7 +237,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/live/api/live.api.ts` | 🟢 NUSXA | `6bcde4cb0067` | — |
 | `src/modules/live/api/live.dto.ts` | 🟢 NUSXA | `ebd0415d0318` | — |
 | `src/modules/live/api/live.endpoints.ts` | 🟢 NUSXA | `d9cfc57d5604` | — |
-| `src/modules/live/index.ts` | 🟡 MOSLASH | `857a64dd345f` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs); `screen-capture` (getDisplayMedia, `DISPLAY_CAPTURE_OPTIONS`, `SCREEN_SHARE_*`) eksportlari yo'q — brauzerga xos |
+| `src/modules/live/index.ts` | 🟡 MOSLASH | `2511303fcd1a` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs); `screen-capture` (getDisplayMedia, `DISPLAY_CAPTURE_OPTIONS`, `SCREEN_SHARE_*`) eksportlari yo'q — brauzerga xos |
 | `src/modules/live/lib/live-permissions.ts` | 🟢 NUSXA | `bc79fd025682` | — |
 | `src/modules/live/lib/live-token.ts` | 🟢 NUSXA | `3578fb00f20a` | — |
 | `src/modules/live/lib/live.mappers.ts` | 🟢 NUSXA | `7e043d7e03d1` | — |
@@ -394,7 +394,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/homework/parent-homework-page.tsx` | 🟡 MOSLASH | `cb3f89693849` | faqat telefon shoxi (`HomeworkMobile`) |
 | `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `976d5b111c4a` | faqat telefon shoxi (`ResultsMobile`) |
 | `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `7933af57e755` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
-| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `2b1245c4cfc9` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
+| `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `2a2aa1539043` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
+| `src/pages/live/join-queue-state.tsx` | 🟡 MOSLASH | `7038063dfcd5` | mobil `LiveRoomState` (qorong'i, tor ekran); `role=status` o'rniga oddiy matn |
 | `src/modules/live/ui/lesson-pre-join.tsx` | 🟡 MOSLASH | `658cda176ab8` | faqat tor ekran varianti; o'qituvchining kompyuterdagi ekran ulashish shoxi yo'q; ruxsat rad etilsa `media-permission-dialog.tsx` ga qarang |
 | `src/modules/live/ui/media-permission-dialog.tsx` | 🟡 MOSLASH | `425eb1d4a350` | mobilda `lesson-pre-join.tsx` ichida (`ConfirmDialog`); "Qayta tekshirish" o'rniga tizim sozlamalari (`Linking.openSettings`), ilovaga qaytganda kamera qayta so'raladi; brauzerga xos izoh o'rniga `mobile.live.ruxsat_sozlamalarda` |
 | `src/pages/recording/recording-page.tsx` | 🟡 MOSLASH | `befefce3e95e` | faqat tor ekran shoxi; xato holati `MobileEmptyCard` |
@@ -697,6 +698,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/live/lib/client-health.ts` | 🟢 NUSXA | `ba90ea5fcb94` | — |
 | `src/modules/live/model/use-media-mode-channel.ts` | 🟢 NUSXA | `8e33aed6b85f` | — |
 | `src/modules/live/ui/attention-check-dialog.tsx` | 🟡 MOSLASH | `95718a707918` | mobilda `AttentionCheckSheet` (`live-room.tsx` ichida); vaqt tugasa yopiladi |
+| `src/modules/live/lib/join-queue.ts` | 🟢 NUSXA | `98fe4f9cc4e5` | — |
 | `src/modules/parent/lib/child-scores.ts` | 🟢 NUSXA | `d315370bf45e` | — |
 | `src/modules/progress/api/progress.api.ts` | 🟢 NUSXA | `9a77a51535f4` | — |
 | `src/modules/progress/api/progress.dto.ts` | 🟢 NUSXA | `9e67b4007e81` | — |

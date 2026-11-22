@@ -11,6 +11,7 @@ import { Info } from "lucide-react-native";
 import { useAuth } from "@/modules/auth";
 import { RateLessonSheet, useLesson } from "@/modules/lesson";
 import {
+  joinDelayTooLong,
   LessonPreJoin,
   liveApi,
   MIC_TRACK,
@@ -24,6 +25,7 @@ import { isOnline } from "@/shared/lib";
 import { DsText, dsRadius, Screen, ScreenLoading, ThemeScope, toast, useDs } from "@/shared/ui";
 import { LiveRoom } from "@/widgets/live-room/live-room";
 import { LiveRoomState } from "@/widgets/live-room/live-room-state";
+import { JoinQueueState } from "./join-queue-state";
 
 /**
  * LiveKit RN WebRTC global'larini o'rnatadi.
@@ -125,10 +127,11 @@ export function LiveLessonPage() {
   /**
    * FIFO navbat kechikishi: 20+ o'quvchi bir vaqtda ulansa LiveKit'da CPU
    * keskin portlaydi. Server har mijozga o'z kechikishini beradi; o'qituvchida 0.
+   * Veb #202: 5 daqiqadan katta qiymat — navbat xatosi, kutilmaydi.
    */
   const joinDelayMs = token.data?.joinDelayMs ?? 0;
   useEffect(() => {
-    if (!choices || joinDelayMs <= 0) return undefined;
+    if (!choices || joinDelayMs <= 0 || joinDelayTooLong(joinDelayMs)) return undefined;
     const timer = setTimeout(() => setDelayElapsed(true), joinDelayMs);
     return () => clearTimeout(timer);
   }, [choices, joinDelayMs]);
@@ -348,13 +351,33 @@ export function LiveLessonPage() {
       />
     );
 
+  if (joinDelayMs > 0 && !delayElapsed && joinDelayTooLong(joinDelayMs))
+    return (
+      <LiveRoomState
+        tone="error"
+        lessonTitle={lesson.data.title || lesson.data.courseTitle}
+        subtitle={lesson.data.courseTitle}
+        title={t("state.queueStuckTitle")}
+        description={t("state.queueStuckDescription")}
+        actionLabel={t("state.retry")}
+        actionDisabled={token.isFetching}
+        onAction={() => void token.refetch()}
+        secondaryLabel={t("state.mobileBackToChat")}
+        onSecondary={handleLeave}
+        onBack={handleLeave}
+      />
+    );
+
   if (joinDelayMs > 0 && !delayElapsed)
     return (
-      <ThemeScope scheme="dark">
-        <Screen>
-          <ScreenLoading label={t("connection.connecting")} />
-        </Screen>
-      </ThemeScope>
+      <JoinQueueState
+        key={token.dataUpdatedAt}
+        delayMs={joinDelayMs}
+        lessonTitle={lesson.data.title || lesson.data.courseTitle}
+        subtitle={lesson.data.courseTitle}
+        backLabel={t("state.mobileBackToChat")}
+        onLeave={handleLeave}
+      />
     );
 
   const liveToken = freshToken ?? token.data;

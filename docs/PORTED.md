@@ -316,7 +316,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/quiz/ui/quiz-attempts-dialog.tsx` | 🟡 MOSLASH | `—` | mobilda `quiz-attempts-sheet.tsx`; yuklab olish `downloadBlob` (ulashish oynasi) orqali |
 | `src/modules/quiz/ui/quiz-attempts-drawer.tsx` | 🟡 MOSLASH | `06aac0ff56aa` | faqat tor ekran varianti (`MobileScreenDialog`) |
 | `src/modules/quiz/ui/quiz-attempt-dialog.tsx` | 🟡 MOSLASH | `8145f21d6231` | mobilda ishlatilmaydi (vebda ham faqat eksport qilinadi); o'quvchi testni `pages/student/workspace/student-test-page.tsx` da yechadi |
-| `src/modules/quiz/ui/math-text.tsx` | 🟡 MOSLASH | `bea477c89a44` | `$..$` bo'laklari `MathMarkup framed={false}`, qolgani `Text`; bo'shliqlar bittaga qisqaradi (HTML'dagidek); `v`/`w`/`style` uzatiladi; `preLine` — vebdagi `whitespace-pre-line` ota element o'rnida (vazifa javoblari) |
+| `src/modules/quiz/ui/math-text.tsx` | 🟡 MOSLASH | `bea477c89a44` | matn va formulalar BITTA WebView'da (vebdagidek formula qator ichida, `\displaystyle` — telefonda kasr/ildiz kichraymasin); balandlik `ResizeObserver` + `document.fonts.ready` bilan; `pointerEvents="none"`; formulasiz matn `DsText`; `preLine` — vebdagi `whitespace-pre-line` ota element o'rnida |
 | `src/modules/quiz/ui/quiz-group-panel.tsx` | 🟡 MOSLASH | `c07454149183` | audio `expo-audio` bilan; eski `quiz-attempt-sheet.tsx` dan ajratildi |
 | `src/modules/quiz/ui/quiz-import-dialog.tsx` | 🟡 MOSLASH | `9128a84d8a50` | faqat tor ekran varianti; fayl `pickDocument` + `toUploadFile` |
 | `src/modules/quiz/lib/countdown.ts` | 🟢 NUSXA | `b78e4ca075cf` | — |

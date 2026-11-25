@@ -1,17 +1,11 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
-import { addDays } from "date-fns";
 import { useIsStudent, useRoleRoutes } from "@/modules/auth";
 import { useConversations, useGroupImages } from "@/modules/conversation";
 import { useCourses } from "@/modules/course";
 import {
-  buildScheduleDates,
   RateLessonSheet,
-  useCancelLesson,
-  useCreateLesson,
-  useCreateLessonSchedule,
-  useCreateLessonsBulk,
   useLessonReminder,
   useLessons,
   useScheduleQuizzes,
@@ -21,10 +15,11 @@ import { useOnlineStatus } from "@/shared/model";
 import type { Lesson } from "@/shared/types";
 import { toast } from "@/shared/ui";
 import { useFloatingTabInset } from "@/providers/role-tabs";
+import { CancelLessonDialog } from "@/modules/lesson/ui/cancel-lesson-dialog";
+import { AddLessonDialog } from "@/widgets/group-workspace/add-lesson-dialog";
 import { LessonDetailDrawer } from "./lesson-detail-drawer";
 import { LessonRatingsDialog } from "./lesson-ratings-dialog";
 import { MobileSchedule, type MobileScheduleView } from "./mobile-schedule";
-import { NewLessonDialog, type NewLessonValues } from "./new-lesson-dialog";
 import { isQuizEvent, quizEventId, quizEvents, scheduleRange } from "./quiz-events";
 
 /**
@@ -48,10 +43,6 @@ export function SchedulePage() {
   const courses = useCourses();
   const conversations = useConversations(student ? "student" : "teacher");
   const groupImages = useGroupImages(student ? "student" : "teacher");
-  const createLesson = useCreateLesson();
-  const createSchedule = useCreateLessonSchedule();
-  const createBulk = useCreateLessonsBulk();
-  const cancelLesson = useCancelLesson();
   const reminder = useLessonReminder();
 
   const [now] = useState(() => new Date());
@@ -59,6 +50,8 @@ export function SchedulePage() {
   const [ratingsOf, setRatingsOf] = useState<Lesson | null>(null);
   const [rateTarget, setRateTarget] = useState<Lesson | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<Lesson | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<Lesson | null>(null);
   const [view, setView] = useState<MobileScheduleView>("day");
 
   const quizItems = useMemo(
@@ -108,31 +101,6 @@ export function SchedulePage() {
     [conversations.data]
   );
 
-  function createFromDialog(values: NewLessonValues) {
-    if (!values.repeatWeeks) {
-      createLesson.mutate(values, { onSuccess: () => setCreateOpen(false) });
-      return;
-    }
-    const first = new Date(`${values.date}T00:00`);
-    const endsOn = addDays(first, values.repeatWeeks * 7 - 1);
-    const range = {
-      startsOn: values.date,
-      endsOn: `${endsOn.getFullYear()}-${String(endsOn.getMonth() + 1).padStart(2, "0")}-${String(endsOn.getDate()).padStart(2, "0")}`,
-      weekdays: [first.getDay() === 0 ? 7 : first.getDay()],
-    };
-    createSchedule.mutate(
-      {
-        courseId: values.courseId,
-        title: values.topic,
-        time: values.time,
-        durationMinutes: Number(values.duration) || 45,
-        ...range,
-        dates: buildScheduleDates(range),
-      },
-      { onSuccess: () => setCreateOpen(false) }
-    );
-  }
-
   function openChat(lesson: Lesson) {
     const room = roomByCourse.get(lesson.courseId);
     router.push((room ? routes.chat(room) : routes.chats) as never);
@@ -172,6 +140,10 @@ export function SchedulePage() {
           setDetail(null);
           openChat(lesson);
         }}
+        onEdit={(lesson) => {
+          setDetail(null);
+          setEditing(lesson);
+        }}
         // Mobilda jadval stekda qoladi — qaytganda eski oyna ochiq turmasin.
         onJoin={(lesson) => {
           setDetail(null);
@@ -192,9 +164,10 @@ export function SchedulePage() {
           setDetail(null);
           setRatingsOf(lesson);
         }}
+        // Veb #217: bekor qilish endi tasdiq so'raydi (takrorlanuvchida — "faqat shu" yoki "keyingilar ham").
         onCancel={(lesson) => {
-          cancelLesson.mutate({ id: lesson.id, scope: "one" });
           setDetail(null);
+          setCancelTarget(lesson);
         }}
       />
 
@@ -203,20 +176,26 @@ export function SchedulePage() {
       {student ? (
         <RateLessonSheet lesson={rateTarget} onClose={() => setRateTarget(null)} />
       ) : (
-        <NewLessonDialog
-          open={createOpen}
-          onOpenChange={setCreateOpen}
-          courses={(courses.data ?? []).map((course) => ({
-            id: course.id,
-            title: course.title,
-            studentCount: course.studentCount ?? 0,
-            tone: course.color,
-            image: course.avatarUrl ?? groupImages.get(course.id) ?? null,
-          }))}
-          pending={createLesson.isPending || createSchedule.isPending || createBulk.isPending}
-          onSubmit={createFromDialog}
-          onSubmitBulk={(courseId, rows) => createBulk.mutateAsync({ courseId, rows }).then(() => setCreateOpen(false))}
-        />
+        <>
+          {/* Veb #212: jadval va guruhdagi oyna bitta — jadvaldan guruh tanlanadi; "Tahrirlash" shu oynada. */}
+          <AddLessonDialog
+            key={editing?.id ?? "new"}
+            open={createOpen || Boolean(editing)}
+            onClose={() => {
+              setCreateOpen(false);
+              setEditing(null);
+            }}
+            editing={editing}
+            courses={(courses.data ?? []).map((course) => ({
+              id: course.id,
+              title: course.title,
+              studentCount: course.studentCount ?? 0,
+              tone: course.color,
+              image: course.avatarUrl ?? groupImages.get(course.id) ?? null,
+            }))}
+          />
+          <CancelLessonDialog lesson={cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)} />
+        </>
       )}
     </>
   );

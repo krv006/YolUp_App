@@ -9,6 +9,8 @@ export interface LessonDetailDrawerProps {
   now: Date;
   onOpenChange: (open: boolean) => void;
   onChat: (lesson: Lesson) => void;
+  /** Veb #212: "Tahrirlash" darsni tahrirlaydi (avval chatni ochardi). */
+  onEdit?: (lesson: Lesson) => void;
   onJoin: (lesson: Lesson) => void;
   onRatings: (lesson: Lesson) => void;
   onCancel: (lesson: Lesson) => void;
@@ -38,6 +40,7 @@ export function LessonDetailDrawer({
   now,
   onOpenChange,
   onChat,
+  onEdit,
   onJoin,
   onRatings,
   onCancel,
@@ -150,7 +153,7 @@ export function LessonDetailDrawer({
               icon={finished ? "star" : "edit"}
               label={finished ? t("schedule.ratings") : t("schedule.edit")}
               outline
-              onPress={() => (finished ? onRatings(lesson) : onChat(lesson))}
+              onPress={() => (finished ? onRatings(lesson) : (onEdit ?? onChat)(lesson))}
             />
             <ActionButton icon="close" label={t("schedule.cancel")} tone="danger" disabled={finished} onPress={() => onCancel(lesson)} />
           </View>

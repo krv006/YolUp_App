@@ -412,11 +412,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/recording/recording-video.tsx` | 🟡 MOSLASH | `81d25e23dd52` | mobilda `recording-page.tsx` ichida, `expo-video`; vebdan farqi — oxirida to'liq ekran tugmasi; oxiriga yetgan video boshidan qo'yiladi (ExoPlayer o'zi qaytarmaydi); pleer QO'LDA to'xtatilmaydi; video yo'lagi yo'q (faqat audio) yozuvda native ko'rinish yashiriladi — iOS QuickTime belgisini chizardi |
 | `src/pages/recording/recording-desktop.tsx` | 🟡 MOSLASH | `a8c8e7cc62fb` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
 | `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `5acbd8ce03f4` | mobilda ishlatilmaydi (vebda ham hech qayerda chaqirilmaydi) — pleer `recording-video.tsx` asosida `recording-page.tsx` ichida |
-| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `ad93934ff3d1` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
+| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `7d15876bce69` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
 | `src/pages/schedule/mobile-schedule.tsx` | 🟡 MOSLASH | `7dc0e0bec1e8` | 🟡 jadval testlari "Qo'shilish" kartasiga chiqmaydi (`upcoming` testni o'tkazib yuboradi) |
-| `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `fac2f1b7392d` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
+| `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `0ab52fb9f39e` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
 | `src/pages/schedule/lesson-ratings-dialog.tsx` | 🟡 MOSLASH | `15d30680181e` | faqat tor ekran varianti |
-| `src/pages/schedule/new-lesson-dialog.tsx` | 🟡 MOSLASH | `ffe994237d8c` | faqat tor ekran varianti; "Bir nechta" — `BulkLessonRows` |
 | `src/pages/schedule/schedule-states.tsx` | 🟡 MOSLASH | `11c7ac9f6fea` | faqat `MobileScheduleSkeleton` va `ScheduleError` |
 | `src/pages/schedule/lesson-tone.ts` | 🟢 NUSXA | `5c79242889d9` | — |
 | `src/pages/schedule/quiz-events.ts` | 🟢 NUSXA | `e5ddafaaa69d` | — |
@@ -688,6 +687,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/lesson/lib/recording-choice.ts` | 🟢 NUSXA | `ce8202a61f5d` | — |
 | `src/modules/lesson/ui/bulk-lesson-rows.tsx` | 🟡 MOSLASH | `9ec16fbb6073` | faqat tor ekran (`compact`) varianti — `compact` prop yo'q; `ring-1` o'rniga doimiy 1px chegara |
 | `src/modules/lesson/lib/schedule-feed.ts` | 🟢 NUSXA | `5b6aaff3ada7` | — |
+| `src/modules/lesson/ui/cancel-lesson-dialog.tsx` | 🟡 MOSLASH | `8e33cf24714d` | `ConfirmDialog` (markazdagi tasdiq) ichida "Faqat shu / keyingilar ham" tanlovi |
+| `src/modules/lesson/ui/lesson-form-dialog.tsx` | 🟡 MOSLASH | `bc321c47b7bf` | mobilda `widgets/group-workspace/add-lesson-dialog.tsx` (`AddLessonDialog`) — jadval ham, guruh ham shu oynani ochadi; saqlash mutatsiyalari oyna ichida |
 | `src/modules/board/lib/board-edit.ts` | 🟢 NUSXA | `5c28899c0ef3` | — |
 | `src/modules/board/lib/board-resize.ts` | 🟢 NUSXA | `efadfe2884db` | — |
 | `src/modules/board/lib/board-select.ts` | 🟢 NUSXA | `b1d8d2ddf7e8` | — |

@@ -63,17 +63,21 @@ export function usePushRegistration(enabled: boolean): void {
   // Bitta sessiyada bir marta yuborish uchun: token o'zgarmasa qayta
   // urinilmaydi.
   const lastToken = useRef<string | null>(null);
+  const sending = useRef<string | null>(null);
 
   useEffect(() => {
     if (!enabled) {
       lastToken.current = null;
+      sending.current = null;
       return undefined;
     }
 
     let cancelled = false;
 
     async function send(token: string): Promise<void> {
-      if (cancelled || token === lastToken.current) return;
+      if (cancelled || token === lastToken.current || token === sending.current) return;
+      // Boshlang'ich so'rov va token tinglovchisi bir vaqtda bir xil tokenni bermasin (ikki POST).
+      sending.current = token;
       try {
         await pushDeviceApi.register({
           token,
@@ -83,6 +87,7 @@ export function usePushRegistration(enabled: boolean): void {
         });
         lastToken.current = token;
       } catch {
+        sending.current = null;
         /*
          * Tarmoq yo'q yoki backend javob bermadi. Keyingi ochilishda
          * qaytadan urinib ko'riladi — `lastToken` yangilanmagani uchun.

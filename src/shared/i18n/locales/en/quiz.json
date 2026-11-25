@@ -260,7 +260,24 @@
         "fill_blank": "Fill in the blank",
         "essay": "Essay (Writing)"
       }
-    }
+    },
+    "addImage": "Add an image",
+    "imageHint": "pick one, drop it here, or press Ctrl+V",
+    "replaceImage": "Replace",
+    "removeImage": "Remove",
+    "textAfterPlaceholder": "Text below the image (optional)",
+    "uploadingImage": "Uploading image…",
+    "imageBadType": "Only PNG, JPG, WEBP or GIF images work.",
+    "imageTooLarge": "The image is over 5 MB. Pick a smaller one.",
+    "imageAlt": "Question image",
+    "suggestAnswers": "Let AI suggest answers ({{count}})",
+    "suggesting": "AI is thinking…",
+    "suggestSaveFirst": "Save your changes first",
+    "suggestDone": "Answers suggested for {{done}} questions. Review and save.",
+    "suggestSome": "Suggestions for {{done}} questions; AI found no confident answer for {{skipped}}.",
+    "suggestNone": "AI found no confident answers. Mark them yourself.",
+    "aiSuggested": "AI suggestion, please check",
+    "aiSuggestedLow": "AI suggestion (low confidence), please check"
   },
   "answer": {
     "true": "True",
@@ -408,12 +425,16 @@
     "courseLabel": "Group",
     "submit": "Send",
     "cancel": "Cancel",
-    "noQuizzes": "There are no ready group-less tests. Create a new one on the AI page.",
+    "noQuizzes": "There are no ready tests yet. Create a new one on the AI page.",
     "draftHint": "The test is published as soon as it is given to the group and students can see it (if every question has a correct answer marked).",
     "dueLabel": "Due",
     "timeLabel": "Time",
     "pick": "Select",
-    "students": "{{count}} students"
+    "students": "{{count}} students",
+    "opensLabel": "Opens (optional)",
+    "opensTimeLabel": "Opening time",
+    "opensNow": "Leave empty to open right away",
+    "opensAfterDue": "The opening time must be before the deadline."
   },
   "exportDialog": {
     "title": "Download the test",
@@ -465,7 +486,9 @@
       "deleteTitle": "Delete the test?",
       "deleteDescription": "“{{title}}” and its results will be deleted permanently.",
       "emptySearch": "Nothing found"
-    }
+    },
+    "assignedCount_one": "Assigned to {{count}} group",
+    "assignedCount_other": "Assigned to {{count}} groups"
   },
   "typeDialog": {
     "title": "Add a question",
@@ -717,5 +740,170 @@
       "attempts_other": "{{count}} attempts",
       "perAttempt": "{{count}} per student"
     }
+  },
+  "newPage": {
+    "eyebrow": "Workspace / Tests",
+    "title": "New test",
+    "back": "Back to tests",
+    "tabs": {
+      "ai": "Create with AI",
+      "import": "Upload a ready test",
+      "manual": "Write by hand"
+    },
+    "leads": {
+      "ai": "Give your lesson material or a topic. AI writes the questions and you review them.",
+      "import": "Your questions are already written: in Word, Excel, Google Forms or text. We will bring them in.",
+      "manual": "You write the questions yourself. After “Start writing” a big page opens with ready question templates."
+    },
+    "import": {
+      "fileTitle": "Word or Excel file",
+      "fileHint": "A file of ready questions. The correct answer is read from the file.",
+      "pickFile": "Choose a file",
+      "templateWord": "Word template",
+      "templateExcel": "Excel template",
+      "reading": "Reading the file…",
+      "found": "{{count}} questions found",
+      "foundWarnings": "{{count}} questions need checking (no answer found).",
+      "createTest": "Create the test",
+      "googleTitle": "Google Form or document link",
+      "googleHint": "Link sharing must be open to anyone. Google Forms does not give correct answers, so you mark them afterwards.",
+      "googleInvalid": "Enter a link to an open Google Form or document.",
+      "read": "Read it",
+      "textTitle": "Paste text",
+      "textHint": "Questions from ChatGPT or elsewhere. Format: number, options, “Answer: B”.",
+      "textPlaceholder": "1. Question text\nA) First option\nB) Second option\nAnswer: B"
+    },
+    "manual": {
+      "settings": "Test settings",
+      "name": "Test name",
+      "namePlaceholder": "For example: Present Perfect quiz",
+      "defaultName": "New test",
+      "count": "How many questions?",
+      "countHint": "That many blank templates will open. You can add or remove later.",
+      "type": "Question type",
+      "typeHint": "This is the general type. You can change each question's type separately later.",
+      "start": "Start writing",
+      "back": "Back",
+      "progress": "Ready: {{ready}} / {{total}}",
+      "save": "Save",
+      "globalType": "General type",
+      "globalTypeHint": "New questions open in this type. You can change each question's type separately.",
+      "retypeNote": "General type set to “{{type}}”. Applied to {{count}} blank questions; written ones are unchanged.",
+      "retypeAll": "Apply to written ones too",
+      "insertHere": "Add a question here",
+      "addQuestion": "Add a question",
+      "moveUp": "Up",
+      "moveDown": "Down",
+      "duplicate": "Duplicate",
+      "deleted": "Question deleted.",
+      "undo": "Undo",
+      "leaveConfirm": "What you wrote will not be saved. Leave?",
+      "leave": "Yes, leave",
+      "stay": "Stay",
+      "state": {
+        "empty": "Empty",
+        "partial": "Incomplete",
+        "ready": "Ready"
+      },
+      "missing": "Missing: {{reason}}",
+      "incompleteList": "{{count}} questions are incomplete:",
+      "emptyList": "{{count}} questions are empty:",
+      "saveWithoutEmpty": "Save without the empty ones",
+      "noQuestions": "No question has been written yet.",
+      "typeHints": {
+        "single": "One correct option out of A, B, C, D. The most common type.",
+        "multiple": "Several options are correct.",
+        "true_false": "The student picks whether the statement is true or false.",
+        "numeric": "The student types a number.",
+        "text": "The student types a word or phrase. You list the accepted answers.",
+        "matching": "The student connects each item on the left with its match on the right.",
+        "ordering": "You write the correct order; the student sees it shuffled and sorts it.",
+        "fill_blank": "Part of the sentence is blank and the student fills it in.",
+        "essay": "The student writes a long answer. A teacher or AI grades it."
+      },
+      "typeExamples": {
+        "single": "Example: What is the capital? A) Tashkent B) Bukhara",
+        "multiple": "Example: Which are prime numbers? 2, 3, 4, 5",
+        "true_false": "Example: The Earth is round.",
+        "numeric": "Example: What is 12 + 5? Answer: 17",
+        "text": "Example: Write the capital. Answer: Tashkent",
+        "matching": "Example: Tashkent with Uzbekistan, Paris with France",
+        "ordering": "Example: Put the events in chronological order",
+        "fill_blank": "Example: Tashkent is the capital of {{Uzbekistan}}.",
+        "essay": "Example: Write about your favourite season"
+      }
+    },
+    "ai": {
+      "material": "Material",
+      "uploadLabel": "Upload a file",
+      "dropTitle": "Choose or drop a file",
+      "dropHint": "PDF, Word, PowerPoint, Excel, TXT · up to 5 files · up to 20 MB",
+      "textLabel": "Or paste text",
+      "textPlaceholder": "Text copied from a textbook or a website",
+      "textHint": "You can use a file and text together.",
+      "settings": "Settings",
+      "format": "Format",
+      "formatSimple": "Simple test (A-B-C-D)",
+      "formatOther": "Other exam…",
+      "language": "Language",
+      "languages": {
+        "auto": "Auto (by subject)",
+        "uz": "Uzbek (Latin)",
+        "uzCyrl": "Uzbek (Cyrillic)",
+        "ru": "Russian",
+        "en": "English",
+        "tr": "Türkçe"
+      },
+      "simpleHint": "In a simple test, AI writes multiple-choice questions only.",
+      "examHint": "In an exam format, the number and types of questions follow the format.",
+      "topic": "Topic · optional",
+      "topicPlaceholder": "If empty, AI finds it in the material",
+      "topicHint": "If you write the topic precisely, AI will write questions on exactly that topic, even from a big book.",
+      "group": "Group · optional",
+      "noGroup": "No group (draft)",
+      "create": "Create",
+      "needMaterial": "Add material or write a topic.",
+      "progressTitle": "Creating the test",
+      "progressHint": "You can close the page, the work continues. You will get a notification when it is ready.",
+      "steps": {
+        "read": "Reading the material",
+        "write": "Writing questions",
+        "save": "Saving the draft"
+      },
+      "resultNote": "Draft. Not visible to students.",
+      "report": "Report",
+      "loadingResult": "Loading the result…",
+      "ready": "questions ready",
+      "shortage": "{{requested}} requested, {{produced}} ready. The material may not be enough for that many questions. You can add more in the editor.",
+      "warnings": "{{count}} questions need checking. Review them in the editor.",
+      "another": "Create another test",
+      "open": "Open in editor",
+      "failedTitle": "The test was not created",
+      "retry": "Try again",
+      "languageHint": "Auto: in an English, Russian or Turkish language group the test is in that language; for other subjects it is in Uzbek."
+    }
+  },
+  "view": {
+    "title": "Test",
+    "eyebrow": "Workspace / Tests / View",
+    "back": "Back",
+    "edit": "Edit",
+    "results": "Results",
+    "opens": "Opens: {{date}}",
+    "due": "Due: {{date}}",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "points_one": "{{count}} point",
+    "points_other": "{{count}} points",
+    "true": "True",
+    "false": "False",
+    "essay": "Essay — graded by the teacher or AI",
+    "noKey": "No correct answer marked",
+    "loadError": "Couldn't load the test.",
+    "open": "View",
+    "openAria": "View the “{{title}}” test"
+  },
+  "schedule": {
+    "testLabel": "Test: {{title}}"
   }
 }

@@ -14,6 +14,7 @@ import {
   useCreateLessonsBulk,
   useLessonReminder,
   useLessons,
+  useScheduleQuizzes,
 } from "@/modules/lesson";
 import { ROUTES } from "@/shared/config";
 import { useOnlineStatus } from "@/shared/model";
@@ -24,6 +25,7 @@ import { LessonDetailDrawer } from "./lesson-detail-drawer";
 import { LessonRatingsDialog } from "./lesson-ratings-dialog";
 import { MobileSchedule, type MobileScheduleView } from "./mobile-schedule";
 import { NewLessonDialog, type NewLessonValues } from "./new-lesson-dialog";
+import { isQuizEvent, quizEventId, quizEvents, scheduleRange } from "./quiz-events";
 
 /**
  * Jadval — veb `pages/schedule/schedule-page.tsx` ning tor ekran shoxi
@@ -37,7 +39,12 @@ export function SchedulePage() {
   const student = useIsStudent();
   const routes = useRoleRoutes();
   const floatingInset = useFloatingTabInset();
-  const lessons = useLessons({ page_size: 200 });
+  const { t: tq } = useTranslation("quiz");
+  const [anchor, setAnchor] = useState(() => new Date());
+  // Veb #217: backend darslarni yangidan eskiga beradi — ko'rinib turgan oy oralig'i so'raladi.
+  const range = useMemo(() => scheduleRange(anchor), [anchor]);
+  const lessons = useLessons({ starts_at__gte: range.from, starts_at__lte: range.to, ordering: "starts_at", page_size: 200 }, true, true);
+  const quizzes = useScheduleQuizzes(range);
   const courses = useCourses();
   const conversations = useConversations(student ? "student" : "teacher");
   const groupImages = useGroupImages(student ? "student" : "teacher");
@@ -47,7 +54,6 @@ export function SchedulePage() {
   const cancelLesson = useCancelLesson();
   const reminder = useLessonReminder();
 
-  const [anchor, setAnchor] = useState(() => new Date());
   const [now] = useState(() => new Date());
   const [detail, setDetail] = useState<Lesson | null>(null);
   const [ratingsOf, setRatingsOf] = useState<Lesson | null>(null);
@@ -55,7 +61,23 @@ export function SchedulePage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [view, setView] = useState<MobileScheduleView>("day");
 
-  const items = useMemo(() => lessons.data ?? [], [lessons.data]);
+  const quizItems = useMemo(
+    () =>
+      quizEvents(quizzes.data ?? [], {
+        courseTitle: (courseId) => (courses.data ?? []).find((course) => course.id === courseId)?.title ?? "",
+        label: (title) => tq("schedule.testLabel", { title }),
+        now,
+      }),
+    [quizzes.data, courses.data, tq, now]
+  );
+  const items = useMemo(() => [...(lessons.data ?? []), ...quizItems], [lessons.data, quizItems]);
+
+  /** Test bosilsa — test sahifasi (o'qituvchida savollar va to'g'ri javoblar), dars bosilsa — tafsilotlar. */
+  function select(lesson: Lesson) {
+    if (!isQuizEvent(lesson)) return setDetail(lesson);
+    const quizId = quizEventId(lesson);
+    router.push((student ? ROUTES.student.test(quizId) : ROUTES.teacher.test(quizId)) as never);
+  }
   const detailLesson = detail ? (items.find((item) => item.id === detail.id) ?? detail) : null;
 
   function toggleReminder(lesson: Lesson) {
@@ -132,7 +154,7 @@ export function SchedulePage() {
         courseLook={courseLook}
         onView={setView}
         onAnchor={setAnchor}
-        onSelect={setDetail}
+        onSelect={select}
         onChat={openChat}
         onJoin={joinLesson}
         student={student}

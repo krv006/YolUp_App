@@ -33,6 +33,7 @@ export {
   useLessonRecording,
   useLessonWaiting,
   useLessonConflicts,
+  useScheduleQuizzes,
   useShareRecording,
   useLiveLesson,
   useLiveLessons,
@@ -49,6 +50,7 @@ export {
   useRecordingChoice,
   useSetRecordingChoice,
 } from "./model/lesson.queries";
+export type { ScheduleQuizItem } from "./lib/schedule-feed";
 export {
   bulkRowErrors,
   bulkRowsReady,

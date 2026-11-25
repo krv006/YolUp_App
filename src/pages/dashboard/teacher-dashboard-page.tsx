@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -73,7 +74,9 @@ export function TeacherDashboardPage() {
   const { user } = useAuth();
   const openNewGroup = useNewConversationStore((state) => state.setOpen);
   const courses = useCourses();
-  const lessons = useLessons({ page_size: LESSON_PAGE_SIZE });
+  // Veb #217: backend darslarni yangidan eskiga beradi — bugundan boshlab, eskidan yangiga.
+  const [fromDay] = useState(() => format(new Date(), "yyyy-MM-dd"));
+  const lessons = useLessons({ starts_at__gte: fromDay, ordering: "starts_at", page_size: LESSON_PAGE_SIZE });
   const dashboard = useTeacherDashboard();
   const conversations = useConversations("teacher");
   const groupImages = useGroupImages("teacher");

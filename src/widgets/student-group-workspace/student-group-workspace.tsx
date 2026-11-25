@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { format, subDays } from "date-fns";
 import { useCourse } from "@/modules/course";
 import { useAssignments } from "@/modules/homework";
 import { useLessons } from "@/modules/lesson";
@@ -12,7 +14,9 @@ import { StudentTasks } from "./student-tasks";
  */
 export function StudentGroupSection({ tab, courseId, groupImage = null }: { tab: "lessons" | "assignments"; courseId: string; groupImage?: string | null }) {
   const course = useCourse(courseId);
-  const lessons = useLessons({ course: courseId, page_size: 100 }, tab === "lessons");
+  // Veb #217: oxirgi 30 kun va keyingilari, eskidan yangiga (backend standarti endi yangidan eskiga).
+  const [historyFrom] = useState(() => format(subDays(new Date(), 30), "yyyy-MM-dd"));
+  const lessons = useLessons({ course: courseId, starts_at__gte: historyFrom, ordering: "starts_at", page_size: 100 }, tab === "lessons");
   const assignments = useAssignments(courseId, tab === "assignments");
   const quizzes = useQuizzes(courseId, tab === "assignments" && Boolean(courseId));
 

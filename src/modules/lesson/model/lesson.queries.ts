@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { type QueryParams } from "@/shared/api";
 import { describeCreateError } from "@/modules/auth";
@@ -32,12 +32,13 @@ const MERGING_POLL_MS = 2_000;
 const CONVERTING_POLL_MS = 30_000;
 
 /** `enabled` — chaqiruvchi ko'rinmayotgan bo'lim uchun so'rov yubormasligi mumkin. */
-export function useLessons(params: QueryParams = {}, enabled = true) {
+export function useLessons(params: QueryParams = {}, enabled = true, keepPrevious = false) {
   return useQuery({
     queryKey: lessonKeys.list(params),
     queryFn: ({ signal }) => lessonApi.getAll({ signal, query: params }),
     select: (page) => page.items,
     enabled,
+    placeholderData: keepPrevious ? keepPreviousData : undefined,
   });
 }
 
@@ -306,6 +307,15 @@ export function useLessonWaiting(id: string | null, enabled = true) {
 export function useShareRecording(id: string | null) {
   return useMutation({
     mutationFn: () => lessonApi.shareRecording(id as string),
+  });
+}
+
+/** Veb #217: jadvaldagi testlar — `GET /schedule/?from&to` (ko'rinib turgan oraliq). */
+export function useScheduleQuizzes(range: { from: string; to: string }) {
+  return useQuery({
+    queryKey: ["schedule", "quizzes", range.from, range.to],
+    queryFn: ({ signal }) => lessonApi.getScheduleQuizzes(range, { signal }),
+    placeholderData: keepPreviousData,
   });
 }
 

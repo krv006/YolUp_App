@@ -25,6 +25,9 @@ export interface QuizQuestionDto {
   id: string | number;
   type?: QuizQuestionTypeDto;
   text: string;
+  text_after?: string | null;
+  /** O'qituvchiga `{id, url}`, o'quvchiga faqat manzil (matn). */
+  image?: { id: string | number; url: string } | string | null;
   group?: string | number | null;
   points: number;
   order: number;
@@ -54,6 +57,7 @@ export interface QuizSummaryDto {
   description?: string;
   due_at: string | null;
   opens_at: string | null;
+  source_quiz_id?: string | number | null;
   question_count: number;
   created_at: string;
   student_ids?: Array<string | number> | null;
@@ -100,6 +104,7 @@ export interface QuizAssignInput {
   quizId: string;
   courseId: string;
   dueAt?: string | null;
+  opensAt?: string | null;
   studentIds?: string[] | null;
   timeLimitMinutes?: number | null;
   maxAttempts?: number | null;
@@ -181,6 +186,8 @@ export interface AiQuizRequest {
   materialText?: string;
   /** Imtihon nomi: AI uning rasmiy tuzilmasini o'zi eslaydi (qoidalar berilmasa). */
   examName?: string;
+  /** Test tili: uz | uz_cyrl | ru | en. Bo'sh = avtomatik (material tili). */
+  language?: "" | "uz" | "uz_cyrl" | "ru" | "en" | "tr";
 }
 
 export interface AiQuizJobDto {
@@ -209,6 +216,7 @@ export interface AiQuizJob {
   questionCount: number;
   quizId: string | null;
   error: string;
+  warnings: QuizImportWarningDto[];
   createdAt: string;
 }
 

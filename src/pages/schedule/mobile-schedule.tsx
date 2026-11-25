@@ -17,6 +17,7 @@ import type { Lesson } from "@/shared/types";
 import { dsAlpha, DsGradient, DsText, dsRadius, GroupTile, Icon, MobileRoundButton, PullRefresh, useDs } from "@/shared/ui";
 import { MobileUserHeader } from "@/widgets/mobile-user-header";
 import type { CourseLook } from "./lesson-tone";
+import { isQuizEvent } from "./quiz-events";
 import { MobileScheduleSkeleton, ScheduleError } from "./schedule-states";
 
 export type MobileScheduleView = "day" | "week" | "month";
@@ -44,6 +45,11 @@ export interface MobileScheduleProps {
   student?: boolean;
   /** Pastki suzuvchi panel egallaydigan joy (`pb-32`). */
   bottomInset?: number;
+}
+
+/** Kun sarlavhasidagi "N ta dars" — testlar sanalmaydi (veb `lessonsOnly`). */
+function lessonsOnly(rows: readonly Lesson[]): number {
+  return rows.filter((row) => !isQuizEvent(row)).length;
 }
 
 function clock(value: string | Date): string {
@@ -235,7 +241,7 @@ function DayView(props: MobileScheduleProps) {
         })}
       </View>
 
-      <DayHeading day={anchor} now={now} count={rows.length} pending={props.loading || props.error} />
+      <DayHeading day={anchor} now={now} count={lessonsOnly(rows)} pending={props.loading || props.error} />
 
       {props.loading ? (
         <MobileScheduleSkeleton />
@@ -257,9 +263,10 @@ function DayView(props: MobileScheduleProps) {
 function Timeline({ rows, now, courseLook, onSelect, onChat, onJoin, student = false }: MobileScheduleProps & { rows: Lesson[] }) {
   const { t } = useTranslation("lesson");
   const ds = useDs();
+  // 🟡 Test (veb #217 jadval testlari) "Qo'shilish" kartasiga chiqmaydi — u dars emas.
   const upcoming =
     rows.find((lesson) => lesson.status === "live") ??
-    rows.find((lesson) => lesson.status !== "finished" && new Date(lesson.startsAt).getTime() >= now.getTime());
+    rows.find((lesson) => !isQuizEvent(lesson) && lesson.status !== "finished" && new Date(lesson.startsAt).getTime() >= now.getTime());
 
   return (
     <View style={styles.timeline}>
@@ -348,6 +355,12 @@ function Timeline({ rows, now, courseLook, onSelect, onChat, onJoin, student = f
 function LessonMeta({ lesson, finished, live = false, look, student }: { lesson: Lesson; finished: boolean; live?: boolean; look: CourseLook; student: boolean }) {
   const { t } = useTranslation("lesson");
   const ds = useDs();
+  if (isQuizEvent(lesson))
+    return (
+      <DsText v="body-sm" c="accent-violet-fg" numberOfLines={1}>
+        {lesson.title}
+      </DsText>
+    );
   if (live)
     return (
       <View style={styles.metaRow}>
@@ -510,7 +523,7 @@ function WeekView(props: MobileScheduleProps) {
                 {isSameDay(day, now) ? ` · ${t("schedule.today")}` : ""}
               </DsText>
               <DsText v="caption" c="ink-secondary">
-                {t("schedule.lessonCountShort", { count: rows.length })}
+                {t("schedule.lessonCountShort", { count: lessonsOnly(rows) })}
               </DsText>
             </View>
             <LessonRows {...props} rows={rows} />
@@ -589,7 +602,7 @@ function MonthView(props: MobileScheduleProps) {
           {anchor.getDate()}-{(monthsLong[anchor.getMonth()] ?? "").toLowerCase()}, {weekdaysLong[(anchor.getDay() + 6) % 7]}
         </DsText>
         <DsText v="body-sm" c="ink-secondary">
-          {rows.length ? t("schedule.lessonCount", { count: rows.length }) : t("schedule.noLessonsDay")}
+          {lessonsOnly(rows) ? t("schedule.lessonCount", { count: lessonsOnly(rows) }) : t("schedule.noLessonsDay")}
         </DsText>
       </View>
 

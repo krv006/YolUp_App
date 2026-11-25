@@ -592,11 +592,21 @@ export interface QuizGroup {
   transcript?: string;
 }
 
+/** Savolga biriktirilgan rasm. O'quvchiga `id` kelmaydi (faqat manzil). */
+export interface QuizQuestionImage {
+  id: string | null;
+  url: string;
+}
+
 export interface QuizQuestion {
   id: string;
   type: QuizQuestionType;
   groupId: string | null;
+  /** Savol matni; rasm bo'lsa — rasmdan OLDIN ko'rsatiladi. */
   text: string;
+  image?: QuizQuestionImage | null;
+  /** Rasmdan KEYIN ko'rsatiladigan matn (rasm bo'lmasa bo'sh). */
+  textAfter?: string;
   points: number;
   order: number;
   options: QuizOption[];
@@ -670,6 +680,7 @@ export interface QuizSummary {
   description: string;
   dueAt: string | null;
   opensAt: string | null;
+  sourceQuizId: string | null;
   createdAt: string;
   questionCount: number;
   studentIds: string[] | null;
@@ -739,6 +750,9 @@ export interface QuizQuestionFormValues {
   type: QuizQuestionType;
   groupIndex?: number | null;
   text: string;
+  /** `POST /quizzes/question-images/` qaytargan id. */
+  imageId?: string | null;
+  textAfter?: string;
   points: number;
   options: Array<{ text: string; isCorrect: boolean }>;
   correctBool?: boolean;

@@ -5,7 +5,36 @@
  * domen qatlami to'liq, `ui/` eksportlari olib tashlangan — mobil UI alohida
  * yoziladi va o'z fayllaridan import qilinadi.
  */
-export { AI_MATERIAL_ACCEPT, checkAiMaterials } from "./lib/ai-material";
+export { copiesBySource } from "./lib/quiz-copies";
+export { AI_MATERIAL_ACCEPT, AI_MATERIAL_MAX_FILES, checkAiMaterials } from "./lib/ai-material";
+export {
+  AI_DEFAULT_QUESTIONS,
+  AI_EXAM_FORMATS,
+  AI_MAX_QUESTIONS,
+  AI_MIN_QUESTIONS,
+  aiJobStep,
+  checkAiForm,
+  isAiJobActive,
+} from "./lib/ai-form";
+export {
+  QUESTION_IMAGE_ACCEPT,
+  QUESTION_IMAGE_MAX_MB,
+  checkQuestionImage,
+  pickImageFile,
+} from "./lib/question-image";
+export {
+  cloneDraft,
+  createBlankDrafts,
+  draftStatus,
+  insertAfter,
+  insertDraft,
+  moveDraft,
+  retypeDrafts,
+  summarizeDrafts,
+} from "./lib/bulk-draft";
+export type { DraftState, DraftStatus } from "./lib/bulk-draft";
+export { applySuggestions, needsAnswer, unansweredCount } from "./lib/answer-suggestions";
+export type { AnswerSuggestion, AnswerSuggestionResult, SuggestionConfidence } from "./lib/answer-suggestions";
 export type { AiMaterialProblem } from "./lib/ai-material";
 export type { ImportedQuiz, QuizExportMode, QuizExportType } from "./api/quiz.api";
 export { quizApi } from "./api/quiz.api";
@@ -68,6 +97,9 @@ export {
   useStartQuiz,
   useQuizAudience,
   useSetQuizAudience,
+  useImportQuizText,
+  useSuggestQuizAnswers,
+  useUploadQuestionImage,
 } from "./model/quiz.queries";
 export { useQuizLimitsText } from "./model/use-quiz-limits-text";
 export { useQuizCountdown } from "./model/use-quiz-countdown";
@@ -91,7 +123,7 @@ export {
   questionToDraft,
   validateDraft,
 } from "./lib/question-draft";
-export type { GroupDraft, KeyFactory, QuestionDraft } from "./lib/question-draft";
+export type { DraftError, GroupDraft, KeyFactory, QuestionDraft } from "./lib/question-draft";
 export type { QuestionBlock } from "./lib/group-questions";
 export type { QuizAttemptAnswerInput } from "./lib/quiz.mappers";
 export { quizErrorMessage } from "./lib/quiz-errors";

@@ -172,7 +172,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/lib/homework-questions.ts` | 🟢 NUSXA | `8968f8e4260b` | — |
 | `src/modules/homework/lib/submission-ai-state.ts` | 🟢 NUSXA | `d4637ecf237c` | — |
 | `src/modules/homework/model/use-question-drafts.ts` | 🟢 NUSXA | `ac11f86fe110` | — |
-| `src/modules/homework/ui/assignment-detail-dialog.tsx` | 🟡 MOSLASH | `01ce15416f20` | mobilda `assignment-detail-sheet.tsx` (pastki oyna); faylsiz topshiriq "Matnli javob", yuklab olish va qayta tekshirish yo'q |
+| `src/modules/homework/ui/assignment-detail-dialog.tsx` | 🟡 MOSLASH | `b63b3b2777f2` | mobilda `assignment-detail-sheet.tsx` (pastki oyna); faylsiz topshiriq "Matnli javob", yuklab olish va qayta tekshirish yo'q |
 | `src/modules/homework/ui/questions-editor.tsx` | 🟡 MOSLASH | `a77047aa21fe` | savol turi `MobilePickerField`; katakchalar `CheckboxMark`, radio `radio-unchecked/check-circle` |
 | `src/modules/homework/ui/questions-answer-form.tsx` | 🟡 MOSLASH | `87607ef0e0fb` | native radio/checkbox o'rniga chizilgan 18px belgilar; maydonlar `MobileInput` (`FormulaField` ichida) |
 | `src/modules/homework/ui/questions-result.tsx` | 🟡 MOSLASH | `805e0975ad9c` | ball maydoni `keyboardType="decimal-pad"` |
@@ -436,7 +436,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/student/workspace/student-test-results-page.tsx` | 🟡 MOSLASH | `fc49635b853d` | faqat tor ekran shoxi; yangi topshirilgan natija `takeFreshResult` dan, aks holda urinishlar ro'yxatidan |
 | `src/pages/student/workspace/student-analytics-page.tsx` | 🟡 MOSLASH | `ad0d589d9c6c` | faqat tor ekran shoxi; ustunli diagramma oddiy `View` lar bilan |
 | `src/pages/student/workspace/student-homework-page.tsx` | 🟡 MOSLASH | `5b4b398b9667` | faqat tor ekran shoxi |
-| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `da29bef8f363` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi); veb #196 `latestSubmission` va "Vazifa topshirildi" oynasi (doskadan `submitted=1` parametri); veb #197 fokus kuzatuvi, fayl tanlash `pauseHomeworkFocus` ichida; veb #201 HEIC/HEIF MIME |
+| `src/pages/student/workspace/student-homework-item-page.tsx` | 🟡 MOSLASH | `fae477398e7e` | faqat tor ekran shoxlari; fayllar `pickDocuments` bilan (5 tagacha); topshiriq ko'rinishi `SubmissionPreview`; qoralama serverda — saqlangach `homeworkKeys.draft` keshi yangilanadi (vebda `staleTime: Infinity` sababli shu seansda eski qiymat chiqadi); veb #196 `latestSubmission` va "Vazifa topshirildi" oynasi (doskadan `submitted=1` parametri); veb #197 fokus kuzatuvi, fayl tanlash `pauseHomeworkFocus` ichida; veb #201 HEIC/HEIF MIME |
 | `src/pages/student/workspace/fresh-results.ts` | 🆕 MOBIL | `—` | yangi topshirilgan test natijasini natija sahifasiga uzatadi — expo-router'da `navigate(..., { state })` yo'q |
 | `src/pages/student/homework-board/student-homework-board-page.tsx` | 🟡 MOSLASH | `ba4f267d7e37` | mobilda `pages/homework/student-homework-board-page.tsx`; tor ekran shoxi — `BoardSurface` `mobile` chrome bilan, tasdiqlash `ConfirmDialog` (brand); topshirgach `dismissTo` bilan stekdagi vazifa sahifasiga qaytadi |
 | `src/shared/api/api-client.ts` | 🟡 MOSLASH | `debfdc44dc73` | navigator.onLine -> NetInfo |
@@ -735,6 +735,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/homework-assign/index.ts` | 🟢 NUSXA | `c1b6f1744554` | — |
 | `src/widgets/child-score-chart/child-score-chart.tsx` | 🟡 MOSLASH | `19ba4755e1c6` | react-native-svg; viewBox karta eniga cho'ziladi; nuqta qiymati `<title>` o'rniga bosilganda `ChartTooltip` (`modules/analytics`); davr yozuvlari absolute View |
 | `src/widgets/child-score-chart/index.ts` | 🟢 NUSXA | `29e9a0bc773c` | — |
+| `src/modules/rich-editor/ui/rich-content.tsx` | 🟡 MOSLASH | `3eec24cb1ec9` | bitta WebView: tozalash DOMPurify o'rniga WebView ichida DOM bilan (xuddi shu teg/atribut/style ro'yxatlari), KaTeX va highlight.js CDN'dan faqat kerak bo'lsa; `/media/` rasm API serveriga; havola tizim brauzerida; jadval yonga aylanadi |
+| `src/modules/rich-editor/index.ts` | 🟡 MOSLASH | `2a5a6b74a94a` | faqat `RichContent` — muharrir (TipTap) mobilda yo'q |
 
 ## Ataylab ko'chirilmagan
 

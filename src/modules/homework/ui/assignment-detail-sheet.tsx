@@ -11,6 +11,7 @@ import {
   useDownloadSubmissionFile,
   useRecheckSubmission,
 } from "../model/homework.queries";
+import { RichContent } from "@/modules/rich-editor";
 import { HomeworkResultSheet } from "./homework-result-sheet";
 
 export interface AssignmentDetailSheetProps {
@@ -59,9 +60,12 @@ export function AssignmentDetailSheet({ assignmentId, open, onClose }: Assignmen
           <View style={[styles.loading, { backgroundColor: palette.muted }]} />
         ) : (
           <View style={styles.body}>
-            {data.description || data.body ? (
+            {/* Veb #210 `assignment-detail-dialog`: boy matn bo'lsa `RichContent`, aks holda tavsif. */}
+            {data.body ? (
+              <RichContent html={data.body} />
+            ) : data.description ? (
               <Text variant="body" style={[styles.text, { color: palette["muted-foreground"] }]}>
-                {data.description || data.body}
+                {data.description}
               </Text>
             ) : null}
 

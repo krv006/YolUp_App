@@ -5,7 +5,7 @@ import { describeCreateError } from "@/modules/auth";
 import { i18n } from "@/shared/i18n";
 import { lessonApi } from "../api/lesson.api";
 import type { LessonFormInput, LessonRatingInput } from "../api/lesson.dto";
-import { addMinutesToTime, toBackendWeekdays, weeksBetween } from "../lib/lesson-schedule";
+import { seriesWeeks, toBackendWeekdays } from "../lib/lesson-schedule";
 import type { BulkLessonRow } from "../lib/bulk-lessons";
 
 export const lessonKeys = Object.freeze({
@@ -127,68 +127,42 @@ export function useCreateLessonsBulk() {
 export interface LessonScheduleInput {
   courseId: string;
   title: string;
-  /** `HH:mm` */
   time: string;
   durationMinutes: number;
-  /** ISO hafta kunlari: 1 = Dushanba … 7 = Yakshanba. */
   weekdays: number[];
-  /** `YYYY-MM-DD` */
   startsOn: string;
   endsOn: string;
-  /** Zaxira usul uchun oldindan hisoblangan sanalar. */
   dates: string[];
+  quizId?: string;
 }
 
-/**
- * Takrorlanuvchi jadval bo'yicha darslar yaratadi.
- *
- * Avval SERVER endpointi sinaladi (`POST /courses/{id}/schedule/`): u amalni
- * atomik bajaradi va o'qituvchining barcha kurslari bo'yicha to'qnashuvni
- * tekshiradi — bu mijoz tomonida imkonsiz, chunki `GET /lessons/` boshqa
- * o'qituvchining darslarini ko'rsatmaydi.
- *
- * Endpoint hali hamma muhitga chiqarilmagan. 404 kelsa, eski usulga —
- * har sana uchun alohida `POST /lessons/` ga qaytiladi. U atomik emas,
- * shuning uchun natijada nechtasi saqlanmagani ham aytiladi.
- */
 export function useCreateLessonSchedule() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: async (input: LessonScheduleInput) => {
-      const viaServer = await lessonApi.createSchedule(input.courseId, {
-        title: input.title,
-        days: toBackendWeekdays(input.weekdays),
-        start_time: input.time,
-        end_time: addMinutesToTime(input.time, input.durationMinutes),
-        weeks: weeksBetween(input.startsOn, input.endsOn),
-        start_date: input.startsOn,
-      });
-
-      if (viaServer) {
-        return { created: viaServer.count, failed: [] as Array<{ date: string; message: string }> };
-      }
-
-      const local = await lessonApi.createMany(input.dates, {
+      const [first] = [...input.dates].sort();
+      if (!first) return 0;
+      await lessonApi.create({
         courseId: input.courseId,
         topic: input.title,
+        date: first,
         time: input.time,
         duration: input.durationMinutes,
+        ...(input.quizId ? { quizId: input.quizId } : {}),
+        recurrence: {
+          freq: "weekly",
+          weeks: seriesWeeks(first, input.endsOn),
+          weekdays: toBackendWeekdays(input.weekdays),
+        },
       });
-      return { created: local.created.length, failed: local.failed };
+      return input.dates.length;
     },
-    onSuccess: ({ created, failed }) => {
+    onSuccess: (count) => {
       client.invalidateQueries({ queryKey: lessonKeys.all });
-      if (!failed.length) {
-        toast.success(`${created} ta dars jadvalga qo‘shildi`);
-        return;
-      }
-      if (created) {
-        toast.warning(`${created} ta dars qo‘shildi, ${failed.length} tasi saqlanmadi`);
-        return;
-      }
-      toast.error("Darslarni saqlab bo‘lmadi");
+      client.invalidateQueries({ queryKey: ["schedule"] });
+      toast.success(i18n.t("lesson:bulk.saved", { count }));
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error) => toast.error(describeCreateError(error)),
   });
 }
 

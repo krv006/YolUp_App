@@ -217,16 +217,16 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/teacher/workspace/homework/delete-assignment-dialog.tsx` | 🟡 MOSLASH | `81c16c551fbf` | faqat tor ekran (`ConfirmDialog`) |
 | `src/pages/teacher/workspace/homework/submission-preview.tsx` | 🟡 MOSLASH | `8e34b745e05a` | rasm token bilan yuklanib keshga yoziladi (`writeBlobToCache`), `Image` bilan |
 | `src/pages/teacher/workspace/homework/format-due.ts` | 🟢 NUSXA | `7e83c7c05b1f` | — |
-| `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `d16946ffa409` | — |
-| `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `efadc084ca96` | — |
-| `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `3b7360e74fd8` | — |
+| `src/modules/lesson/api/lesson.api.ts` | 🟢 NUSXA | `924ded055da7` | — |
+| `src/modules/lesson/api/lesson.dto.ts` | 🟢 NUSXA | `18e9c5f37606` | — |
+| `src/modules/lesson/api/lesson.endpoints.ts` | 🟢 NUSXA | `9c6d1d53252a` | — |
 | `src/modules/lesson/index.ts` | 🟡 MOSLASH | `95d09a2c4d7e` | generatsiya: veb barrel minus `ui/`; WEEKDAY_LABELS mobil UI fayliga ko'chdi |
 | `src/modules/lesson/lib/lesson-calendar.ts` | 🟢 NUSXA | `76769eb5a69d` | — |
-| `src/modules/lesson/lib/lesson-schedule.ts` | 🟢 NUSXA | `2ff11bc462bd` | — |
+| `src/modules/lesson/lib/lesson-schedule.ts` | 🟢 NUSXA | `c4c991f1834e` | — |
 | `src/modules/lesson/lib/lesson-status.ts` | 🟢 NUSXA | `43afd26367df` | — |
-| `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `73a2bf779da6` | — |
+| `src/modules/lesson/lib/lesson.mappers.ts` | 🟢 NUSXA | `4b490e161cab` | — |
 | `src/modules/lesson/model/lesson-view.store.ts` | 🟢 NUSXA | `31172199c0d6` | — |
-| `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `91343698572e` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda); `postRecording` va toast matni vebdagidek |
+| `src/modules/lesson/model/lesson.queries.ts` | 🟡 MOSLASH | `89b4fc3c126c` | useFinishLesson: mijoz tomon MediaRecorder flush olib tashlandi (Egress server tomonda); `postRecording` va toast matni vebdagidek |
 | `src/modules/lesson/model/schedule.store.ts` | 🟢 NUSXA | `—` | jadval ko'rinishi, tayanch sana va qadam (2026-10-20 qo'shildi) |
 | `src/modules/lesson/ui/lesson-calendar.tsx` | 🟡 MOSLASH | `f4baf96b5725` | mobilda ishlatilmaydi (vebda ham hech qayerda chaqirilmaydi) |
 | `src/modules/lesson/ui/live-lesson-bar.tsx` | 🟡 MOSLASH | `e1fdea2ab542` | mobilda ishlatilmaydi — veb tor ekranda jonli dars chizig'ini ko'rsatmaydi |
@@ -412,9 +412,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/recording/recording-video.tsx` | 🟡 MOSLASH | `81d25e23dd52` | mobilda `recording-page.tsx` ichida, `expo-video`; vebdan farqi — oxirida to'liq ekran tugmasi; oxiriga yetgan video boshidan qo'yiladi (ExoPlayer o'zi qaytarmaydi); pleer QO'LDA to'xtatilmaydi; video yo'lagi yo'q (faqat audio) yozuvda native ko'rinish yashiriladi — iOS QuickTime belgisini chizardi |
 | `src/pages/recording/recording-desktop.tsx` | 🟡 MOSLASH | `a8c8e7cc62fb` | mobilda ishlatilmaydi (vebda faqat keng ekran) |
 | `src/modules/lesson/ui/lesson-recording-player.tsx` | 🟡 MOSLASH | `5acbd8ce03f4` | mobilda ishlatilmaydi (vebda ham hech qayerda chaqirilmaydi) — pleer `recording-video.tsx` asosida `recording-page.tsx` ichida |
-| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `7d15876bce69` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
+| `src/pages/schedule/schedule-page.tsx` | 🟡 MOSLASH | `145d90408af1` | faqat tor ekran shoxi (`MobileSchedule` va oynalar); o'quvchi baholashi `RateLessonSheet`; yozuv `/recordings/:id`; darsga yoki yozuvga o'tishda tafsilot oynasi yopiladi (mobilda jadval stekda qoladi) |
 | `src/pages/schedule/mobile-schedule.tsx` | 🟡 MOSLASH | `7dc0e0bec1e8` | 🟡 jadval testlari "Qo'shilish" kartasiga chiqmaydi (`upcoming` testni o'tkazib yuboradi) |
-| `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `0ab52fb9f39e` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
+| `src/pages/schedule/lesson-detail-drawer.tsx` | 🟡 MOSLASH | `c651a91b8deb` | faqat tor ekran variantlari (o'qituvchi va o'quvchi), `Sheet variant="app"` |
 | `src/pages/schedule/lesson-ratings-dialog.tsx` | 🟡 MOSLASH | `15d30680181e` | faqat tor ekran varianti |
 | `src/pages/schedule/schedule-states.tsx` | 🟡 MOSLASH | `11c7ac9f6fea` | faqat `MobileScheduleSkeleton` va `ScheduleError` |
 | `src/pages/schedule/lesson-tone.ts` | 🟢 NUSXA | `5c79242889d9` | — |

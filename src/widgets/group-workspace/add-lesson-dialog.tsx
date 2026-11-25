@@ -241,6 +241,7 @@ export function AddLessonDialog({ open, onClose, courseId: fixedCourseId = "", c
           startsOn: range.from,
           endsOn: range.to,
           dates,
+          quizId: quizId || undefined,
         });
       } else {
         const form = { courseId, topic, date: date || todayString(), time, duration, quizId };

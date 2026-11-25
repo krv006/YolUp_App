@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
-import { CalendarDays, FileUp, GraduationCap, Paperclip } from "lucide-react-native";
+import { CalendarDays, FileUp, GraduationCap, Paperclip, Sparkles } from "lucide-react-native";
 import {
   googleFormUrlInvalid,
   useAssignment,
@@ -18,8 +18,10 @@ import {
   SelectField,
   Sheet,
   SheetButton,
+  Switch,
   Text,
   toast,
+  useDs,
   useTheme,
   type SelectOption,
 } from "@/shared/ui";
@@ -73,6 +75,7 @@ export function AddAssignmentSheet({
     () => SKILLS.map((skill) => ({ value: skill, label: t(`dialogs.assignment.skillOptions.${skill || "general"}`) })),
     [t]
   );
+  const ds = useDs();
   const { palette } = useTheme();
   const create = useCreateAssignment();
   const update = useUpdateAssignment();
@@ -91,6 +94,8 @@ export function AddAssignmentSheet({
   const [lessonId, setLessonId] = useState(assignment?.lessonId ?? "");
   const [file, setFile] = useState<PickedFile | null>(null);
   const [googleFormUrl, setGoogleFormUrl] = useState(assignment?.googleFormUrl ?? "");
+  // Veb #213: "AI tekshirsin" — standart yoqilgan; o'chirilsa topshiriqlarni faqat o'qituvchi baholaydi.
+  const [aiCheck, setAiCheck] = useState(assignment?.aiCheck ?? true);
   const googleFormInvalid = googleFormUrlInvalid(googleFormUrl);
   // Ro'yxatdagi vazifada savollar yo'q — tahrirlashda tafsilot so'raladi.
   const detail = useAssignment(open && assignment ? assignment.id : null);
@@ -157,6 +162,7 @@ export function AddAssignmentSheet({
       file: file ? toUploadFile(file) : null,
       questions: questions.payload(),
       googleFormUrl: googleFormUrl.trim(),
+      aiCheck,
     };
 
     try {
@@ -296,6 +302,20 @@ export function AddAssignmentSheet({
         </View>
       </View>
 
+      {/* `rounded-xl bg-subtle px-4 py-3`: belgi, sarlavha + izoh, katta tumbler */}
+      <View style={[styles.aiRow, { backgroundColor: ds.c.subtle }]}>
+        <View style={[styles.aiIcon, { backgroundColor: ds.c["accent-saffron-bg"] }]}>
+          <Sparkles size={18} color={ds.c["accent-saffron-fg"]} />
+        </View>
+        <View style={styles.grow}>
+          <Text variant="label">{tHomework("form.aiCheck")}</Text>
+          <Text variant="caption" tone="muted">
+            {tHomework("form.aiCheckHint")}
+          </Text>
+        </View>
+        <Switch size="lg" checked={aiCheck} onCheckedChange={setAiCheck} accessibilityLabel={tHomework("form.aiCheck")} />
+      </View>
+
       {/* `mt-4` */}
       <View style={styles.questions}>
         <QuestionsEditor value={questions.drafts} onChange={questions.setDrafts} locked={questions.locked} showIssues={questions.showIssues} />
@@ -316,4 +336,6 @@ const styles = StyleSheet.create({
   fileName: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 6 },
   hint: { marginTop: 4 },
   questions: { marginTop: 2 },
+  aiRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16 },
+  aiIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },
 });

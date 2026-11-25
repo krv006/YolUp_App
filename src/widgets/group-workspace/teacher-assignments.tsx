@@ -83,11 +83,12 @@ export function TeacherAssignments({
     () => (courseQuizzes.data ?? []).filter((quiz) => quiz.courseId === courseId),
     [courseQuizzes.data, courseId]
   );
-  // Tayyor (guruhsiz) testlar: avval shu guruh fanidagilar — AI yaratganlari ham shu yerda.
+  // Veb #217: berish nusxalaydi — o'qituvchining shu guruhga tegishli bo'lmagan barcha ASL testlari
+  // (bankdagi ham, boshqa guruhdagi ham); avval shu guruh fanidagilar.
   const bankOptions = useMemo(
     () =>
       (allQuizzes.data ?? [])
-        .filter((quiz) => !quiz.courseId)
+        .filter((quiz) => !quiz.sourceQuizId && quiz.courseId !== courseId)
         .sort((a, b) => Number(b.subject === courseSubject) - Number(a.subject === courseSubject))
         .map((quiz) => ({
           id: quiz.id,
@@ -95,7 +96,7 @@ export function TeacherAssignments({
             quiz.status === "draft" ? ` · ${quizT("teacherPage.draftBadge")}` : ""
           }`,
         })),
-    [allQuizzes.data, courseSubject, quizT, t]
+    [allQuizzes.data, courseId, courseSubject, quizT, t]
   );
   const items = assignments.data ?? [];
 

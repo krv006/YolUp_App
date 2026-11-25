@@ -11,6 +11,7 @@ import {
   MathText,
   optionLetter,
   QuestionAnswerInput,
+  QuestionMedia,
   quizApi,
   quizDisplayTitle,
   QuizGroupPanel,
@@ -381,6 +382,8 @@ function QuestionBody({
           <MathText text={question.text} w="600" style={styles.questionText} />
         </View>
       )}
+      {/* Veb #204: savol rasmi va rasmdan keyingi matn. */}
+      <QuestionMedia question={question} />
       {choices ? (
         <View accessibilityRole={question.type === "multiple" ? undefined : "radiogroup"} style={[styles.choices, styles.mt12]}>
           {choices.map((choice, position) => {

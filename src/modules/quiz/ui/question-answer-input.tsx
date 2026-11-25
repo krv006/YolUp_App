@@ -5,6 +5,7 @@ import { ArrowDown, ArrowUp, Check, ChevronDown } from "lucide-react-native";
 import type { QuizAnswerValue, QuizQuestion } from "@/shared/types";
 import { radius, Sheet, Text, useTheme } from "@/shared/ui";
 import { emptyAnswer } from "../lib/answer-value";
+import { QuestionMedia } from "./question-media";
 import { QUIZ_RADIUS, useQuizColors } from "./quiz-colors";
 
 /**
@@ -62,12 +63,15 @@ export function QuestionPrompt({ question }: { question: QuizQuestion }) {
     );
   }
   return (
-    <Text
-      variant="label"
-      style={[styles.prompt, question.type === "essay" && styles.essayPrompt, { color: colors.foreground }]}
-    >
-      {question.text}
-    </Text>
+    <>
+      <Text
+        variant="label"
+        style={[styles.prompt, question.type === "essay" && styles.essayPrompt, { color: colors.foreground }]}
+      >
+        {question.text}
+      </Text>
+      <QuestionMedia question={question} />
+    </>
   );
 }
 

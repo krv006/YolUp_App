@@ -132,6 +132,7 @@ export { quizErrorMessage } from "./lib/quiz-errors";
 export { QuestionAnswerInput, QuestionPrompt } from "./ui/question-answer-input";
 export { QuizGroupPanel } from "./ui/quiz-group-panel";
 export { MathText } from "./ui/math-text";
+export { QuestionMedia } from "./ui/question-media";
 export type { MathTextProps } from "./ui/math-text";
 export type { QuizGroupPanelProps } from "./ui/quiz-group-panel";
 export type { QuestionAnswerInputProps } from "./ui/question-answer-input";

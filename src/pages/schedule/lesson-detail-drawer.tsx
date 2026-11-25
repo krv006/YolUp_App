@@ -84,7 +84,8 @@ export function LessonDetailDrawer({
   const footer = (
     <>
       <MobileButton variant="secondary" label={t("schedule.openChat")} onPress={() => onChat(lesson)} />
-      {student && closed ? null : <MobileButton label={t("schedule.join")} onPress={() => onJoin(lesson)} />}
+      {/* Veb #217: tugagan yoki bekor qilingan darsga hech kim (o'qituvchi ham) qo'shilmaydi. */}
+      {closed ? null : <MobileButton label={t("schedule.join")} onPress={() => onJoin(lesson)} />}
     </>
   );
 

@@ -84,11 +84,17 @@ export function LiveLessonPage() {
   const { user } = useAuth();
   // Veb #161: yozuv holati (`recordingActive`) yangilanib turishi uchun.
   const lesson = useLesson(lessonId ?? null, 30_000);
-  const token = useLiveToken(lessonId, true);
+  const [choices, setChoices] = useState<LessonPreJoinChoices | null>(null);
+  /*
+   * Veb #217: backend token berishda darsni LIVE qiladi. O'qituvchi kirish
+   * oynasini ochishi bilan dars boshlanib ketmasligi uchun uning tokeni faqat
+   * "Qo'shilish" (choices) dan keyin so'raladi.
+   */
+  const deferToken = user?.role === ROLES.TEACHER && !choices;
+  const token = useLiveToken(lessonId, !deferToken);
   const joined = useRef(false);
   const isTeacher = useRef(false);
   const [ratePrompt, setRatePrompt] = useState(false);
-  const [choices, setChoices] = useState<LessonPreJoinChoices | null>(null);
   const [delayElapsed, setDelayElapsed] = useState(false);
   // Avtomatik qayta kirish: `session` o'zgarsa LiveKitRoom yangidan yaratiladi, `rejoinAttempt` > 0 bo'lsa banner ko'rinadi.
   const [session, setSession] = useState(0);
@@ -264,7 +270,7 @@ export function LiveLessonPage() {
     if (rejoining.current) stopRejoin();
   }, [stopRejoin]);
 
-  if (lesson.isLoading || token.isLoading)
+  if (lesson.isLoading || (token.isLoading && !deferToken))
     return (
       <ThemeScope scheme="dark">
         <Screen>
@@ -324,7 +330,11 @@ export function LiveLessonPage() {
     );
   }
 
-  if (token.isError || !token.data) {
+  if (deferToken && lesson.data.status !== "finished" && lesson.data.status !== "cancelled")
+    return <LessonPreJoin lesson={lesson.data} userName={user?.name} onJoin={setChoices} onCancel={goBack} />;
+
+  // Veb #217: tugagan darsga keshdagi (90 daqiqalik) token bilan qayta ulanilmaydi.
+  if (token.isError || !token.data || (lesson.data.status === "finished" && !choices)) {
     const finished = lesson.data.status === "finished";
     const current = lesson.data;
     return (

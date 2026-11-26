@@ -199,7 +199,8 @@ export function MaterialsPage() {
     ));
   }
 
-  const emptyHint = canManage ? t("materials.emptyHintTeacher") : t("materials.emptyHintStudent");
+  // Veb #213: o'qituvchiga bo'sh papkada izoh yo'q (yuklash tugmasi bor), o'quvchiga — bor.
+  const emptyHint = canManage ? undefined : t("materials.emptyHintStudent");
   const folderIcon = <Icon name="folder" size={22} color={ds.c.brand} />;
 
   let body: ReactNode;
@@ -554,6 +555,8 @@ function MaterialRow({
               item.size !== null ? formatFileSize(item.size) : "",
               shortDate(item.createdAt),
               showUploader ? item.uploadedBy?.name : "",
+              // Veb #219: guruh chatiga yuborilgan fayl ham "Umumiy" papkada — u "Chatdan".
+              item.source === "chat" ? t("materials.fromChat") : "",
             ]
               .filter(Boolean)
               .join(" · ")}
@@ -568,7 +571,8 @@ function MaterialRow({
       >
         <Icon name="download" size={20} color={ds.c["ink-secondary"]} />
       </Pressable>
-      {canManage ? (
+      {/* Chat faylini Materiallardan o'chirib bo'lmaydi (`DELETE /materials/{id}/` ishlamaydi) — faqat chatdan. */}
+      {canManage && item.source !== "chat" ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("materials.delete")}

@@ -19,6 +19,12 @@ export interface RequestOptions {
   requestId?: string;
   skipAuth?: boolean;
   skipRefresh?: boolean;
+  /**
+   * Veb #219: yuklash foizi (`xhrFetch`). 🟡 Mobilda e'tiborsiz: fayl
+   * `expo/fetch` bilan `bytes()` orqali yuboriladi, RN `XMLHttpRequest` esa
+   * bunday fayl obyektini yubora olmaydi — foiz o'rniga "Yuklanmoqda" belgisi.
+   */
+  onUploadProgress?: (fraction: number) => void;
 }
 
 export function appendQuery(url: string, query?: QueryParams): string {

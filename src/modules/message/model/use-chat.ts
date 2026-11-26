@@ -19,6 +19,7 @@ import type { ChatMessage, Conversation, ConversationRole, MessageAttachment, Se
 import { messageApi } from "../api/message.api";
 import { ChatSocketManager, type SocketState } from "../lib/chat-socket-manager";
 import { applyReactions, markMessageFailed, upsertMessage } from "../lib/message.mappers";
+import { uploadFailureReason } from "../lib/upload-failure";
 import { messageKeys } from "./message.keys";
 
 const TYPING_RESET_MS = 2600;
@@ -215,10 +216,13 @@ export function useChat(
       );
       queryClient.invalidateQueries({ queryKey: conversationKeys.list(role), exact: true });
     },
-    onError: (_error, _payload, context) =>
+    // Veb #219: fayl yuklanmasa sababi xabarda — "vaqt tugadi" yoki backend matni ("Fayl 20 MB dan katta.").
+    onError: (error, payload, context) => {
+      const reason = payload.file || payload.voice ? uploadFailureReason(error, i18n.t("chat:attachment.timeout")) : null;
       queryClient.setQueryData<ChatMessage[]>(messagesKey, (current = []) =>
-        markMessageFailed(current, context?.temporaryId ?? "")
-      ),
+        markMessageFailed(current, context?.temporaryId ?? "", reason)
+      );
+    },
   });
 
   const updateMessage = useMutation({

@@ -18,10 +18,13 @@ export function MessageAttachment({
   attachment,
   failed = false,
   uploading = false,
+  failReason = null,
 }: {
   attachment: Attachment;
   failed?: boolean;
   uploading?: boolean;
+  /** Veb #219: yuklanmagan fayl sababi. */
+  failReason?: string | null;
 }) {
   const { t } = useTranslation("chat");
   const ds = useDs();
@@ -117,9 +120,9 @@ export function MessageAttachment({
           <DsText v="label-strong" numberOfLines={1}>
             {attachment.name}
           </DsText>
-          <DsText v="caption" c={failed ? "error-text" : "ink-tertiary"} numberOfLines={1}>
+          <DsText v="caption" c={failed ? "error-text" : "ink-tertiary"} numberOfLines={failed ? 2 : 1}>
             {failed
-              ? `${t("attachment.uploadFailed")} · ${fileKindLabel(kind)}`
+              ? `${t("attachment.uploadFailed")} · ${failReason || fileKindLabel(kind)}`
               : uploading
                 ? t("attachment.uploading")
                 : meta || `${fileKindLabel(kind)} · ${t("attachment.openSuffix")}`}

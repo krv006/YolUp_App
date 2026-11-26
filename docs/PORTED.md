@@ -62,11 +62,11 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/attendance/lib/group-by-lesson.ts` | 🟢 NUSXA | `2a79a46a78ac` | — |
 | `src/modules/attendance/model/attendance.queries.ts` | 🟢 NUSXA | `06c1277db8a4` | — |
 | `src/modules/auth/api/auth.api.ts` | 🟢 NUSXA | `c300d841413c` | — |
-| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `f3e52df39d26` | — |
+| `src/modules/auth/api/auth.dto.ts` | 🟢 NUSXA | `1127a1779e0b` | — |
 | `src/modules/auth/api/auth.endpoints.ts` | 🟢 NUSXA | `389e0f383451` | — |
 | `src/modules/auth/index.ts` | 🟡 MOSLASH | `4c2097948ec8` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/auth/lib/auth-session.ts` | 🟢 NUSXA | `4e39458e320b` | — |
-| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `016e434b4d9e` | — |
+| `src/modules/auth/lib/auth.mappers.ts` | 🟢 NUSXA | `a22aab47195c` | — |
 | `src/modules/auth/lib/uz-phone.ts` | 🟢 NUSXA | `3c5a2a144ed8` | — |
 | `src/modules/auth/lib/describe-reset-error.ts` | 🟢 NUSXA | `fc0246494e75` | — |
 | `src/modules/auth/lib/describe-two-factor.ts` | 🟢 NUSXA | `20c09ae21e84` | — |
@@ -76,7 +76,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/model/auth.mutations.ts` | 🟢 NUSXA | `5b40b95d445a` | — |
 | `src/modules/auth/model/auth.queries.ts` | 🟢 NUSXA | `09a85b19426f` | — |
 | `src/modules/auth/model/auth.schemas.ts` | 🟢 NUSXA | `ea7834ad1d1c` | — |
-| `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `845be1f01a71` | window hodisalari -> refreshTokenManager; tab obunasi yo'q; sessiya raqami olindi; til sinxroni vebdagidek. Profil keshi (`USER_SNAPSHOT`) — modul yuklanganda emas, `bootstrap()` ichida o'qiladi (tokenlar `hydrate()` dan keyin keladi); yangi sessiyada `beginSession` keshni tozalaydi; serverdagi mavzu va matn o'lchami (`syncPreferencesFromServer`) — vebdagi `useThemeStore` o'rniga `useAppearanceStore` |
+| `src/modules/auth/model/auth.store.ts` | 🟡 MOSLASH | `fbbb68a45e25` | window hodisalari -> refreshTokenManager; tab obunasi yo'q; sessiya raqami olindi; til sinxroni vebdagidek. Profil keshi (`USER_SNAPSHOT`) — modul yuklanganda emas, `bootstrap()` ichida o'qiladi (tokenlar `hydrate()` dan keyin keladi); yangi sessiyada `beginSession` keshni tozalaydi; serverdagi mavzu va matn o'lchami (`syncPreferencesFromServer`) — vebdagi `useThemeStore` o'rniga `useAppearanceStore` |
 | `src/modules/auth/model/use-role-routes.ts` | 🟢 NUSXA | `53dfe7671897` | — |
 | `src/modules/notification/lib/notification-display.ts` | 🟡 MOSLASH | `68eb4acba68e` | `notificationLines` — `DOMParser` o'rniga `htmlToPlainText` (RN'da DOM yo'q); qolgani bayt-bayt bir xil |
 | `src/modules/voice/model/voice-ui.store.ts` | 🟢 NUSXA | `cad4aa4b6000` | — |
@@ -390,7 +390,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/profile/my-ratings-page.tsx` | 🟡 MOSLASH | `d8a2a399924a` | faqat tor ekran shoxlari: o'qituvchida `TeacherRatings`, o'quvchida `student-ratings.tsx` |
 | `src/pages/profile/student-ratings.tsx` | 🟡 MOSLASH | `681aec74e6b1` | faqat tor ekran varianti |
 | `src/pages/profile/certificates-page.tsx` | 🟡 MOSLASH | `25dea699b601` | faqat tor ekran varianti; fayl `pickDocument` bilan; faylni ochish `Linking.openURL`; qator menyusi `PopoverMenu` |
-| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `82ea882239d5` | faqat tor ekran varianti; `DeviceFilter` gorizontal `ScrollView` |
+| `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `eddd7300ed0f` | faqat tor ekran varianti; `DeviceFilter` gorizontal `ScrollView` |
 | `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `2771d2562e58` | tanishuvni qayta ko'rsatish — `storage` dagi kalit o'chiriladi (vebda `localStorage`); FAQ javobi `AppDialog` o'rniga `Sheet`; video `Linking.openURL`; `?ticket=` — `useLocalSearchParams`/`router.setParams`; ota-onaga qo'llanma va tanishuv yo'q (vebdagidek) |
 | `src/pages/profile/password-change.ts` | 🟢 NUSXA | `e66a48cb2147` | — |
 | `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | ota-onada `pages/parent/settings/settings-mobile-system.tsx` (veb `settings-mobile-system` bilan); Web Push qatori o'rnida OS push ruxsati |
@@ -587,7 +587,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/model/use-board-eraser.ts` | 🆕 MOBIL | `—` | veb `board-panel` dagi o'chirg'ich mantig'i hook bo'lib; radius ekran pikselida (telefonda doska birligi juda mayda) |
 | `src/modules/auth/ui/force-password-dialog.tsx` | 🟡 MOSLASH | `14e2219182ac` | markaziy oyna `CenterDialog` (yopilmaydi, klaviaturadan qochadi); vebda har rol marshrutida (`role-route.tsx`), mobilda ildiz layout'da bitta nusxa |
 | `src/modules/auth/lib/account-link.ts` | 🟢 NUSXA | `7d11d910393c` | — |
-| `src/modules/auth/lib/account-switch.ts` | 🟢 NUSXA | `c3456f35da4c` | — |
+| `src/modules/auth/lib/account-switch.ts` | 🟢 NUSXA | `8cc8baf33eec` | — |
 | `src/modules/auth/model/use-account-switch.ts` | 🟡 MOSLASH | `0378ebd833ab` | react-router `useNavigate` -> expo-router `useRouter` (`replace`/`push`) |
 | `src/modules/auth/ui/link-account-dialog.tsx` | 🟡 MOSLASH | `b37bb4522e4e` | pastki `Sheet` + `MobileInput`; mantiq (`seed`, xato turlari, qulflangan login) bir xil; `SwitchAccountDialog` ichida ichma-ich ochiladi (iOS ikkita yonma-yon Modal'ni ko'rsatmaydi) |
 | `src/modules/auth/lib/email-code.ts` | 🟢 NUSXA | `0ac35d1bafdf` | — |
@@ -597,7 +597,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/ui/register-email-field.tsx` | 🟡 MOSLASH | `301367497034` | `AuthField` `trailing` ichida kichik `Pressable` tugmalar; `readOnly` o'rniga `editable` |
 | `src/modules/auth/ui/email-verify-form.tsx` | 🟡 MOSLASH | `8c69a7e09a33` | `MobileInput` + `MobileButton`; forma `onSubmit` o'rniga klaviaturadagi "send" |
 | `src/modules/auth/ui/email-verify-dialog.tsx` | 🟡 MOSLASH | `1700739024b1` | `AppDialog variant="adaptive"` o'rniga `Sheet variant="app"` |
-| `src/modules/auth/ui/email-setup-dialog.tsx` | 🟡 MOSLASH | `21902f42a9f1` | `CenterDialog`; mobilda `app/_layout.tsx` da `ForcePasswordDialog` yonida; "Keyinroq" `sessionStorage` o'rniga ilova jarayoni xotirasida |
+| `src/modules/auth/ui/email-setup-dialog.tsx` | 🟡 MOSLASH | `4321099de5f2` | `CenterDialog`; "Keyinroq" ilova jarayonida eslanadi (`sessionStorage` o'rniga); banner pastki suzuvchi menyu ustida (balandlik `role-tabs` import qilinmasdan hisoblanadi — aylanma bog'liqlik) |
 | `src/modules/parent/api/parent.endpoints.ts` | 🟢 NUSXA | `85b3cf9db4d0` | — |
 | `src/modules/parent/lib/parent-attendance.ts` | 🟢 NUSXA | `b3352ac652af` | — |
 | `src/modules/parent/lib/parent-errors.ts` | 🟢 NUSXA | `ce4e5985c831` | — |

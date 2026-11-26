@@ -165,7 +165,7 @@ export function MaterialsPage() {
 
   async function download(item: Material) {
     try {
-      await downloadBlob(await materialApi.download(item.id), item.name || item.title);
+      await downloadBlob(await materialApi.download(item), item.name || item.title);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("materials.downloadFailed"));
     }
@@ -180,7 +180,7 @@ export function MaterialsPage() {
       name: item.name || item.title,
       mimeType: item.mimeType,
       meta: [item.courseTitle, item.size !== null ? formatFileSize(item.size) : ""].filter(Boolean).join(" · "),
-      load: (signal) => materialApi.download(item.id, { signal }),
+      load: (signal) => materialApi.download(item, { signal }),
     });
   }
 

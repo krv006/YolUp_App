@@ -10,6 +10,7 @@ export type {
   AiResultDto,
   AssignmentDto,
   AssignmentFormInput,
+  AssignmentVoiceInput,
   HomeworkCourseReportDto,
   HomeworkReportDto,
   SubmissionDto,

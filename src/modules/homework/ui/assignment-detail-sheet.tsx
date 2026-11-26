@@ -12,6 +12,7 @@ import {
   useRecheckSubmission,
 } from "../model/homework.queries";
 import { RichContent } from "@/modules/rich-editor";
+import { AssignmentVoicePlayer } from "./assignment-voice-player";
 import { HomeworkResultSheet } from "./homework-result-sheet";
 
 export interface AssignmentDetailSheetProps {
@@ -68,6 +69,8 @@ export function AssignmentDetailSheet({ assignmentId, open, onClose }: Assignmen
                 {data.description}
               </Text>
             ) : null}
+
+            {data.voice ? <AssignmentVoicePlayer voice={data.voice} /> : null}
 
             {data.hasAttachment ? (
               <Pressable

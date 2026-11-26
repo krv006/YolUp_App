@@ -35,6 +35,7 @@ import type { Assignment, Submission } from "@/shared/types";
 import { bodyFont, dsAlpha, DsGradient, DsText, dsRadius, dsType, headingFont, Icon, MobileActionBar, MobileEmptyCard, MobilePageHeader, toast, useDs } from "@/shared/ui";
 import { SubmissionPreview } from "@/pages/workspace/homework/submission-preview";
 import { shortDateTime } from "../lib/format";
+import { AssignmentVoicePlayer } from "@/modules/homework/ui/assignment-voice-player";
 import { HomeworkSubmittedDialog } from "./homework-submitted-dialog";
 
 const DAY_MS = 86_400_000;
@@ -246,6 +247,7 @@ function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; o
           {assignment.description ? <DsText style={styles.description}>{assignment.description}</DsText> : null}
           {/* Veb #210: vazifa matni boy HTML (formula, kod, jadval, rasm). */}
           {assignment.body ? <RichContent html={assignment.body} /> : null}
+          {assignment.voice ? <AssignmentVoicePlayer voice={assignment.voice} /> : null}
           {assignment.hasAttachment ? (
             <Pressable
               accessibilityRole="button"

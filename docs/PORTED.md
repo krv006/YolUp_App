@@ -154,13 +154,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/course/ui/course-members-section.tsx` | 🟡 MOSLASH | `b6d72beb8504` | mobilda ishlatilmaydi — vebda faqat keng ekranda; tor ekranda kursli guruh ma'lumoti `MobileGroupInfo` (mobilda `group-info-screen.tsx`) |
 | `src/modules/course/api/club.api.ts` | 🟢 NUSXA | `8e55ba23d474` | — |
 | `src/modules/course/model/club.queries.ts` | 🟢 NUSXA | `b4ef4cebb515` | — |
-| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `69833d40218f` | — |
-| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `fe8029513f9a` | — |
-| `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `54a1dc87bb63` | — |
+| `src/modules/homework/api/homework.api.ts` | 🟢 NUSXA | `c58fa56e2491` | — |
+| `src/modules/homework/api/homework.dto.ts` | 🟢 NUSXA | `8cd7a4248e36` | — |
+| `src/modules/homework/api/homework.endpoints.ts` | 🟢 NUSXA | `b92d14792c3d` | — |
 | `src/modules/homework/constants/homework.constants.ts` | 🟢 NUSXA | `b08aa7220559` | — |
-| `src/modules/homework/index.ts` | 🟡 MOSLASH | `d9863d070968` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
+| `src/modules/homework/index.ts` | 🟡 MOSLASH | `be056baca19c` | generatsiya: veb barrel minus `ui/` eksportlari (port-barrels.mjs) |
 | `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `d1a936efe3b5` | — |
-| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `1ad97e9bf4e9` | — |
+| `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `e58747278c64` | — |
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `0ab58f148cc6` | — |
 | `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `bed68bc9743a` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; chiqishdagi oxirgi saqlash qoldi |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `e63f770dcde0` | portal bloklari (`shared/ui/portal.tsx`) bilan; ko'rsatkichlar tor ekrandagidek bir ustun |
@@ -183,10 +183,13 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/ui/ai-skipped-notice.tsx` | 🟡 MOSLASH | `232c931016c7` | RN `View` + `DsText` |
 | `src/modules/homework/lib/insert-formula.ts` | 🟢 NUSXA | `a6854708701a` | — |
 | `src/modules/homework/ui/formula-field.tsx` | 🟡 MOSLASH | `91223f6c181f` | maydon `children(bind)` orqali (`MobileInput` yoki `TextInput`); oyna `Sheet`; MathLive o'rniga doskadagi `MathFieldInput` (LaTeX matn + KaTeX), shablon formula oxiriga qo'shiladi; ko'rinish tugma ostida alohida blok |
-| `src/widgets/homework-workspace/assignment-form-dialog.tsx` | 🟡 MOSLASH | `49bb6b1f7cf5` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida; vazifa formasi `pages/teacher/workspace/homework/assignment-form-dialog.tsx` qatoriga qarang |
+| `src/modules/homework/ui/assignment-voice-player.tsx` | 🟡 MOSLASH | `b8ea5a9b3b8e` | `<audio controls>` o'rniga `expo-audio` pleer (ijro/pauza, progress, vaqt); manba `Authorization` sarlavhasi bilan (`useProtectedAudio` blob o'rniga, chatdagi ovozli xabar kabi) |
+| `src/modules/homework/ui/voice-note-field.tsx` | 🟡 MOSLASH | `776f793e2ce0` | `MediaRecorder` o'rniga `expo-audio` yozgich (`.m4a`), chat kompozeridagi sozlama; yangi yozuvda qurilmadagi `uri` bilan oldindan eshitish |
+| `src/modules/homework/model/use-protected-audio.ts` | 🟡 MOSLASH | `a215daf8f307` | mobilda yo'q — `expo-audio` manbasining o'zi token sarlavhasini yuboradi (`assignment-voice-player.tsx`) |
+| `src/widgets/homework-workspace/assignment-form-dialog.tsx` | 🟡 MOSLASH | `793daf49cd00` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida; vazifa formasi `pages/teacher/workspace/homework/assignment-form-dialog.tsx` qatoriga qarang |
 | `src/widgets/homework-workspace/homework-workspace.tsx` | 🟡 MOSLASH | `73d9a0d04b48` | mobilda ishlatilmaydi — vebda ham ulanmagan (`/assignments` -> workspace vazifalari); vazifalar `pages/workspace/homework/` da |
 | `src/widgets/homework-workspace/submission-review.tsx` | 🟡 MOSLASH | `9f898ff74943` | mobilda ishlatilmaydi — faqat ulanmagan `HomeworkWorkspace` ichida |
-| `src/pages/teacher/workspace/homework/homework-detail-page.tsx` | 🟡 MOSLASH | `259415841fe6` | tor ekran (`mobile-homework-detail.tsx` bilan birga) — mobilda `pages/workspace/homework/homework-detail-page.tsx`; harfli baho ("A'lo") matn sifatida (vebda `Number()` NaN beradi); orqaga — stack ichida (vazifalar ro'yxatiga) |
+| `src/pages/teacher/workspace/homework/homework-detail-page.tsx` | 🟡 MOSLASH | `25c7b11fa81f` | tor ekran (`mobile-homework-detail.tsx` bilan birga) — mobilda `pages/workspace/homework/homework-detail-page.tsx`; harfli baho ("A'lo") matn sifatida (vebda `Number()` NaN beradi); orqaga — stack ichida (vazifalar ro'yxatiga) |
 | `src/pages/teacher/workspace/workspace-home-page.tsx` | 🟡 MOSLASH | `57b106147f83` | faqat tor ekran shoxi; mobilda `pages/workspace/workspace-home-page.tsx`; "Tekshirilmagan" soni `submissionsPending` dan (vebda `item.submissions` — ro'yxat API'si bermagani uchun doim 0) |
 | `src/pages/teacher/workspace/mobile-workspace-home.tsx` | 🟡 MOSLASH | `5aeb5b1031de` | mobilda `workspace-home-page.tsx` ichida; "+" menyusi `PopoverMenu` |
 | `src/pages/teacher/workspace/homework/homework-list-page.tsx` | 🟡 MOSLASH | `14f852dd4c8f` | faqat tor ekran shoxi; mobilda `pages/workspace/homework/homework-list-page.tsx` |
@@ -477,9 +480,9 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/shared/lib/utils.ts` | 🟢 NUSXA | `4dd93deacc31` | — |
 | `src/shared/types/auth.ts` | 🟢 NUSXA | `aa2cb801d57a` | — |
 | `src/shared/types/chat.ts` | 🟢 NUSXA | `855595f833bd` | — |
-| `src/shared/types/domain.ts` | 🟢 NUSXA | `0ba2c8c7178d` | — |
+| `src/shared/types/domain.ts` | 🟢 NUSXA | `57fbb7732d71` | — |
 | `src/shared/types/dto.ts` | 🟢 NUSXA | `ffc508231f4e` | — |
-| `src/shared/types/index.ts` | 🟢 NUSXA | `31402adcd979` | — |
+| `src/shared/types/index.ts` | 🟢 NUSXA | `677354a846cf` | — |
 | `src/shared/ui/avatar.tsx` | 🟡 MOSLASH | `8f4429737fdb` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/badge.tsx` | 🟡 MOSLASH | `f0c6b9cbc966` | farq qayd etilmagan — tekshiring |
 | `src/shared/ui/button.tsx` | 🟡 MOSLASH | `693a56cdfe79` | farq qayd etilmagan — tekshiring |
@@ -523,8 +526,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/live-room/recording-start-dialog.tsx` | 🟡 MOSLASH | `9233bafa96ac` | mobilda `recording-start-sheet.tsx`, faqat telefon shoxi (`withScreen=false`): faqat "yozuv guruhga yuborilsin" tanlovi |
 | `src/widgets/live-room/silence-all-control.tsx` | 🟡 MOSLASH | `688a265a4850` | mobilda ishlatilmaydi (desktop panel); mobil tugma `live-room.tsx` dagi `SilenceAllButton` |
 | `src/modules/conversation/lib/last-message.ts` | 🟢 NUSXA | `9a3b37afbe12` | — |
-| `src/modules/material/api/material.api.ts` | 🟢 NUSXA | `f9bb02fd9c43` | — |
-| `src/modules/material/api/material.dto.ts` | 🟢 NUSXA | `80c5b1924978` | — |
+| `src/modules/material/api/material.api.ts` | 🟢 NUSXA | `7bd63c25794b` | — |
+| `src/modules/material/api/material.dto.ts` | 🟢 NUSXA | `5a9c0c320328` | — |
 | `src/modules/material/api/material.endpoints.ts` | 🟢 NUSXA | `42ffb0ad938d` | — |
 | `src/modules/material/index.ts` | 🟢 NUSXA | `7d4168ed2ca4` | — |
 | `src/modules/material/model/material.queries.ts` | 🟢 NUSXA | `24ff3daab927` | — |
@@ -659,7 +662,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/homework/homework-format.ts` | 🟢 NUSXA | `8e80b63c0ae1` | — |
 | `src/pages/parent/homework/homework-mobile.tsx` | 🟡 MOSLASH | `6ec3854cbb80` | ko'rinish bir xil |
 | `src/pages/parent/homework/homework-list.tsx` | 🟡 MOSLASH | `1a0bbee4920e` | `selectedId` yo'q — telefonda tafsilot alohida sahifa |
-| `src/pages/parent/homework/homework-detail.tsx` | 🟡 MOSLASH | `138c6623185e` | yuklab olish `shared/lib` `downloadBlob` (ulashish oynasi) |
+| `src/pages/parent/homework/homework-detail.tsx` | 🟡 MOSLASH | `26677d8c660e` | yuklab olish `shared/lib` `downloadBlob` (ulashish oynasi) |
 | `src/pages/parent/homework/homework-styles.ts` | 🟡 MOSLASH | `d8968c2f66b1` | Tailwind sinflari o'rnida `ds` tokenlari |
 | `src/pages/parent/homework/parent-homework-item-page.tsx` | 🟡 MOSLASH | `3a3679a2de5f` | mobilda `app/parent/homework/[assignmentId].tsx` |
 | `src/pages/parent/report/results-mobile.tsx` | 🟡 MOSLASH | `c9067d777b57` | oy tanlash `<select>` -> `MobileSelectSheet` |

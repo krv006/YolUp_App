@@ -9,6 +9,7 @@ import type { Assignment, Course } from "@/shared/types";
 import { Avatar, DsText, dsRadius, FileViewer, Icon, toast, useDs, type DsColor, type IconName } from "@/shared/ui";
 import { subjectLook } from "../attendance/attendance-styles";
 import { fileKind, formatBytes, resultTone } from "./homework-format";
+import { AssignmentVoicePlayer } from "@/modules/homework/ui/assignment-voice-player";
 import { StateChip } from "./homework-list";
 
 type Step = { tone: "done" | "fail" | "current" | "todo"; title: string; meta?: string };
@@ -388,6 +389,8 @@ export function HomeworkDetail({
       ) : null}
 
       {(state === "pending" || state === "overdue") && attachment ? <FileCard file={attachment} onView={setViewing} /> : null}
+      {/* Veb #219: o'qituvchining ovozli izohi. */}
+      {(state === "pending" || state === "overdue") && assignment.voice ? <AssignmentVoicePlayer voice={assignment.voice} /> : null}
       {submission ? answers.map((file) => <FileCard key={`${file.name}-${file.meta}`} file={file} onView={setViewing} />) : null}
 
       <FileViewer

@@ -12,6 +12,8 @@ import {
 import { QuestionsEditor } from "@/modules/homework/ui/questions-editor";
 import type { Assignment, Lesson } from "@/shared/types";
 import { pickDocument, toUploadFile, type PickedFile } from "@/shared/lib";
+import { VoiceNoteField } from "@/modules/homework/ui/voice-note-field";
+import type { AssignmentVoiceInput } from "@/modules/homework";
 import {
   DateTimeField,
   Input,
@@ -96,6 +98,8 @@ export function AddAssignmentSheet({
   const [googleFormUrl, setGoogleFormUrl] = useState(assignment?.googleFormUrl ?? "");
   // Veb #213: "AI tekshirsin" — standart yoqilgan; o'chirilsa topshiriqlarni faqat o'qituvchi baholaydi.
   const [aiCheck, setAiCheck] = useState(assignment?.aiCheck ?? true);
+  // Veb #219: ovozli izoh — `undefined` o'zgarmagan, `null` o'chirish, qiymat yangi yozuv.
+  const [voice, setVoice] = useState<AssignmentVoiceInput | null | undefined>(undefined);
   const googleFormInvalid = googleFormUrlInvalid(googleFormUrl);
   // Ro'yxatdagi vazifada savollar yo'q — tahrirlashda tafsilot so'raladi.
   const detail = useAssignment(open && assignment ? assignment.id : null);
@@ -129,6 +133,7 @@ export function AddAssignmentSheet({
     setLessonId("");
     setFile(null);
     setGoogleFormUrl("");
+    setVoice(undefined);
   }
 
   function close() {
@@ -163,6 +168,7 @@ export function AddAssignmentSheet({
       questions: questions.payload(),
       googleFormUrl: googleFormUrl.trim(),
       aiCheck,
+      voice,
     };
 
     try {
@@ -253,6 +259,8 @@ export function AddAssignmentSheet({
             </View>
           ) : null}
         </View>
+
+        <VoiceNoteField existing={assignment?.voice ?? null} value={voice} onChange={setVoice} disabled={create.isPending || update.isPending} />
 
         <DateTimeField label={t("dialogs.assignment.dueLabel")} value={dueAt} onChange={setDueAt} optional />
 

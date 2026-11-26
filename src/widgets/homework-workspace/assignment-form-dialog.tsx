@@ -3,10 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { googleFormUrlInvalid, useQuestionDrafts, type AssignmentFormInput } from "@/modules/homework";
+import { googleFormUrlInvalid, useQuestionDrafts, type AssignmentFormInput, type AssignmentVoiceInput } from "@/modules/homework";
 import { GoogleFormField } from "@/modules/homework/ui/google-form-field";
+import { VoiceNoteField } from "@/modules/homework/ui/voice-note-field";
 import { QuestionsEditor } from "@/modules/homework/ui/questions-editor";
-import type { GradingScale, HomeworkQuestion } from "@/shared/types";
+import type { AssignmentVoice, GradingScale, HomeworkQuestion } from "@/shared/types";
 import {
   bodyFont,
   DsGradient,
@@ -44,6 +45,7 @@ export interface AssignmentFormDialogProps {
     googleFormUrl?: string | null;
     questions?: HomeworkQuestion[];
     questionsLocked?: boolean;
+    voice?: AssignmentVoice | null;
   } | null;
   onSubmit: (values: AssignmentFormInput) => void;
 }
@@ -90,6 +92,8 @@ export function AssignmentFormDialog({
   const [time, setTime] = useState(() => initial?.dueAt?.slice(11, 16) ?? "18:00");
   const [grading, setGrading] = useState<GradingScale>(initial?.grading ?? "five");
   const [aiCheck, setAiCheck] = useState(initial?.aiCheck ?? true);
+  // Veb #219: ovozli izoh — `undefined` o'zgarmagan, `null` o'chirish, qiymat yangi yozuv.
+  const [voice, setVoice] = useState<AssignmentVoiceInput | null | undefined>(undefined);
   const [announce, setAnnounce] = useState(initial?.announceInChat ?? true);
   const [googleFormUrl, setGoogleFormUrl] = useState(initial?.googleFormUrl ?? "");
   const [touched, setTouched] = useState(false);
@@ -138,6 +142,7 @@ export function AssignmentFormDialog({
       aiCheck,
       grading,
       googleFormUrl: googleFormUrl.trim(),
+      voice,
     });
   }
 
@@ -239,6 +244,10 @@ export function AssignmentFormDialog({
                 style={[styles.body, { color: ds.c.ink }]}
               />
             </View>
+          </MobileFieldLabel>
+
+          <MobileFieldLabel label={t("voice.label")}>
+            <VoiceNoteField existing={initial?.voice ?? null} value={voice} onChange={setVoice} disabled={pending} />
           </MobileFieldLabel>
 
           {inBank ? null : (

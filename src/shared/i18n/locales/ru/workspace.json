@@ -231,7 +231,6 @@
     "cancel": "Отмена",
     "emptyTitle": "Материалов пока нет",
     "emptyFiltered": "Ничего не найдено",
-    "emptyHintTeacher": "Загрузите учебник, аудио или видео — ученики группы увидят их.",
     "emptyHintStudent": "Здесь появятся материалы, которые загрузит учитель.",
     "upload": "Загрузить",
     "uploading": "Загрузка…",
@@ -269,6 +268,7 @@
     "boardCount_one": "{{count}} доска",
     "boardCount_few": "{{count}} доски",
     "boardCount_many": "{{count}} досок",
-    "boardCount_other": "{{count}} доски"
+    "boardCount_other": "{{count}} доски",
+    "fromChat": "Из чата"
   }
 }

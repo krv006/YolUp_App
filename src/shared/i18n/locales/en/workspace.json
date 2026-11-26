@@ -231,7 +231,6 @@
     "cancel": "Cancel",
     "emptyTitle": "No materials yet",
     "emptyFiltered": "Nothing found",
-    "emptyHintTeacher": "Upload a textbook, audio or video — your group's students will see it.",
     "emptyHintStudent": "Materials your teacher uploads will appear here.",
     "upload": "Upload",
     "uploading": "Uploading…",
@@ -263,6 +262,7 @@
     "videoCount_one": "{{count}} video",
     "videoCount_other": "{{count}} videos",
     "boardCount_one": "{{count}} board",
-    "boardCount_other": "{{count}} boards"
+    "boardCount_other": "{{count}} boards",
+    "fromChat": "From chat"
   }
 }

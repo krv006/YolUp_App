@@ -25,6 +25,7 @@ import type { Lesson } from "@/shared/types";
 import {
   DsText,
   dsRadius,
+  GroupTile,
   Icon,
   MobileButton,
   MobileChoiceChips,
@@ -36,10 +37,21 @@ import {
   useDs,
 } from "@/shared/ui";
 
+/** Jadvaldan ochilganda tanlanadigan guruh — veb `LessonFormCourse`. */
+export interface LessonFormCourse {
+  id: string;
+  title: string;
+  studentCount?: number;
+  tone?: string;
+  image?: string | null;
+}
+
 export interface AddLessonDialogProps {
   open: boolean;
   onClose: () => void;
-  courseId: string;
+  /** Guruh ichidan — qat'iy guruh. Jadvaldan — bo'sh, `courses` dan tanlanadi. */
+  courseId?: string;
+  courses?: readonly LessonFormCourse[];
   /**
    * Berilsa — oyna tahrir rejimida: maydonlar to'ldirilgan, takrorlash yo'q
    * va saqlash `update` ga ketadi. Chaqiruvchi `key={editing?.id ?? "new"}`
@@ -80,8 +92,9 @@ function parseDate(value: string): Date {
 }
 
 /**
- * Yangi dars / darsni tahrirlash — veb `group-action-dialogs.tsx` dagi
- * `AddLessonDialog` ning tor ekran (`ModalCard`) varianti: mavzu, "Bir
+ * Yangi dars / darsni tahrirlash — veb `lesson-form-dialog.tsx` (#212:
+ * jadval va guruhdagi oyna bitta) ning tor ekran (`ModalCard`) varianti.
+ * Jadvaldan ochilsa tepada guruh tanlanadi (2 ustunli kartalar). Mavzu, "Bir
  * marta / Har hafta / Bir nechta", sana va vaqt tanlagichlari, davomiylik
  * chiplari, test; takrorlanuvchida hafta kunlari, oraliq va nechta dars
  * bo'lishi; "Bir nechta" da har dars alohida qator (`BulkLessonRows`), server
@@ -90,10 +103,13 @@ function parseDate(value: string): Date {
  *
  * Saqlash shu yerda (vebda `LessonsPanel` da) — mutatsiyalar oyna bilan birga.
  */
-export function AddLessonDialog({ open, onClose, courseId, editing = null, onDelete }: AddLessonDialogProps) {
+export function AddLessonDialog({ open, onClose, courseId: fixedCourseId = "", courses, editing = null, onDelete }: AddLessonDialogProps) {
   const { t } = useTranslation("group");
   const { t: tl } = useTranslation("lesson");
   const ds = useDs();
+  const [pickedCourse, setPickedCourse] = useState(editing?.courseId ?? "");
+  const courseId = fixedCourseId || pickedCourse;
+  const needsCourse = !fixedCourseId && Boolean(courses?.length);
   const create = useCreateLesson();
   const update = useUpdateLesson();
   const createSchedule = useCreateLessonSchedule();
@@ -112,7 +128,7 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
   const [topic, setTopic] = useState(editing?.topic ?? editing?.title ?? "");
   const [date, setDate] = useState(editing?.date ?? todayString());
   const [time, setTime] = useState(editing?.time ?? "18:30");
-  const [duration, setDuration] = useState(String(editing?.durationMinutes ?? editing?.duration ?? "45"));
+  const [duration, setDuration] = useState(String(editing?.durationMinutes ?? editing?.duration ?? "90"));
   const [quizId, setQuizId] = useState(editing?.quizId ?? "");
   const [mode, setMode] = useState<LessonDialogMode>("single");
   const [weekdays, setWeekdays] = useState<number[]>([...ODD_WEEKDAYS]);
@@ -131,7 +147,7 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
     ...(canBulk ? [{ id: "bulk" as const, label: t("dialogs.lesson.bulk") }] : []),
   ];
   const shortModes = modes.map((item) => ({ ...item, label: t(`dialogs.lesson.short.${item.id}`) }));
-  const durationMinutes = Number(duration) || 45;
+  const durationMinutes = Number(duration) || 90;
   const durationPicker = { value: durationMinutes, options: MOBILE_DURATIONS, onChange: (value: number) => setDuration(String(value)) };
   const today = todayString();
   const editingPast = Boolean(editing) && date < today;
@@ -158,7 +174,7 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
     setTopic("");
     setDate(todayString());
     setTime("18:30");
-    setDuration("45");
+    setDuration("90");
     setQuizId("");
     setMode("single");
     setWeekdays([...ODD_WEEKDAYS]);
@@ -187,11 +203,11 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
 
   const timeBusy = singleConflicts.length > 0 || startsInPast;
   const pending = create.isPending || update.isPending || createSchedule.isPending || createBulk.isPending;
-  const submitDisabled = isBulk
+  const submitDisabled = !courseId || (isBulk
     ? !bulkRowsReady(rows)
     : isRepeating
       ? !dates.length || invalidRange || scheduleConflicts.length > 0
-      : !topic.trim() || startsInPast || singleConflicts.length > 0;
+      : !topic.trim() || startsInPast || singleConflicts.length > 0);
   const submitLabel = editing
     ? t("dialogs.lesson.saveChanges")
     : isBulk
@@ -225,6 +241,7 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
           startsOn: range.from,
           endsOn: range.to,
           dates,
+          quizId: quizId || undefined,
         });
       } else {
         const form = { courseId, topic, date: date || todayString(), time, duration, quizId };
@@ -289,6 +306,39 @@ export function AddLessonDialog({ open, onClose, courseId, editing = null, onDel
         </View>
       }
     >
+      {needsCourse ? (
+        <MobileFieldLabel label={tl("scheduleDialog.group")}>
+          {/* `grid grid-cols-2 gap-x-2 gap-y-3`, karta `h-14 rounded-lg border-[1.5px] px-3` */}
+          <View style={styles.courses}>
+            {courses?.map((course) => {
+              const active = course.id === courseId;
+              return (
+                <Pressable
+                  key={course.id}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => setPickedCourse(course.id)}
+                  style={[
+                    styles.course,
+                    { borderColor: active ? ds.c.brand : "transparent", backgroundColor: active ? ds.c["brand-subtle"] : ds.c.subtle },
+                  ]}
+                >
+                  <GroupTile name={course.title} tone={course.tone} src={course.image} box={32} radius={dsRadius.md} />
+                  <View style={styles.courseText}>
+                    <DsText v="body-sm" w="600" numberOfLines={1}>
+                      {course.title}
+                    </DsText>
+                    <DsText v="caption" c="ink-secondary" numberOfLines={1}>
+                      {tl("schedule.students", { count: course.studentCount ?? 0 })}
+                    </DsText>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        </MobileFieldLabel>
+      ) : null}
+
       {singleMode ? (
         <MobileFieldLabel label={t("dialogs.lesson.topicLabel")}>
           <MobileInput value={topic} onChangeText={setTopic} placeholder={t("dialogs.lesson.topicPlaceholder")} />
@@ -508,6 +558,9 @@ function ConflictNotice({
 }
 
 const styles = StyleSheet.create({
+  courses: { flexDirection: "row", flexWrap: "wrap", columnGap: 8, rowGap: 12, marginTop: 2 },
+  course: { width: "48.5%", height: 56, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 12, borderWidth: 1.5, borderRadius: dsRadius.lg },
+  courseText: { flex: 1, minWidth: 0 },
   grow: { flex: 1, minWidth: 0 },
   pair: { flexDirection: "row", gap: 12 },
   timeColumn: { gap: 6 },

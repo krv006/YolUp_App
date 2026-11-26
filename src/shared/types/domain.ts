@@ -163,6 +163,8 @@ export interface ChatMessage {
   status: string;
   pending: boolean;
   failed: boolean;
+  uploadProgress?: number;
+  failReason?: string | null;
   editedAt?: string | null;
   retryPayload?: SendMessagePayload;
   attachment?: MessageAttachment;
@@ -455,6 +457,7 @@ export interface Assignment {
   body: string;
   attachmentName: string;
   hasAttachment: boolean;
+  voice: AssignmentVoice | null;
   googleFormUrl: string | null;
   isBank: boolean;
   sourceId: string | null;
@@ -484,6 +487,12 @@ export interface Assignment {
   questions: HomeworkQuestion[];
   hasQuestions: boolean;
   questionsPoints: number;
+}
+
+export interface AssignmentVoice {
+  url: string;
+  durationMs: number | null;
+  mime: string;
 }
 
 export interface AiGroupSummary {
@@ -592,11 +601,21 @@ export interface QuizGroup {
   transcript?: string;
 }
 
+/** Savolga biriktirilgan rasm. O'quvchiga `id` kelmaydi (faqat manzil). */
+export interface QuizQuestionImage {
+  id: string | null;
+  url: string;
+}
+
 export interface QuizQuestion {
   id: string;
   type: QuizQuestionType;
   groupId: string | null;
+  /** Savol matni; rasm bo'lsa — rasmdan OLDIN ko'rsatiladi. */
   text: string;
+  image?: QuizQuestionImage | null;
+  /** Rasmdan KEYIN ko'rsatiladigan matn (rasm bo'lmasa bo'sh). */
+  textAfter?: string;
   points: number;
   order: number;
   options: QuizOption[];
@@ -633,6 +652,8 @@ export interface Material {
   uploadedBy: { id: string; name: string } | null;
   createdAt: string;
   lessonId: string | null;
+  source: "upload" | "chat";
+  url: string | null;
 }
 
 export interface PracticeQuestion {
@@ -670,6 +691,7 @@ export interface QuizSummary {
   description: string;
   dueAt: string | null;
   opensAt: string | null;
+  sourceQuizId: string | null;
   createdAt: string;
   questionCount: number;
   studentIds: string[] | null;
@@ -739,6 +761,9 @@ export interface QuizQuestionFormValues {
   type: QuizQuestionType;
   groupIndex?: number | null;
   text: string;
+  /** `POST /quizzes/question-images/` qaytargan id. */
+  imageId?: string | null;
+  textAfter?: string;
   points: number;
   options: Array<{ text: string; isCorrect: boolean }>;
   correctBool?: boolean;

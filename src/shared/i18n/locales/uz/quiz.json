@@ -180,13 +180,13 @@
   "types": {
     "single": "Bitta to'g'ri javob",
     "multiple": "Bir nechta to'g'ri javob",
-    "true_false": "To'g'ri / noto'g'ri",
-    "numeric": "Son kiritish",
-    "text": "Qisqa matn",
-    "matching": "Moslashtirish",
-    "ordering": "Tartibga solish",
-    "fill_blank": "Bo'sh joyni to'ldirish",
-    "essay": "Insho (Writing)"
+    "true_false": "To'g'ri yoki noto'g'ri",
+    "numeric": "Son yozish",
+    "text": "Qisqa yozma javob",
+    "matching": "Juftlash",
+    "ordering": "To'g'ri tartibga qo'yish",
+    "fill_blank": "Gapdagi bo'sh joyni to'ldirish",
+    "essay": "Insho (uzun javob)"
   },
   "editor": {
     "back": "Orqaga",
@@ -260,7 +260,24 @@
         "fill_blank": "Bo‘sh joy",
         "essay": "Insho (Writing)"
       }
-    }
+    },
+    "addImage": "Rasm qo'shish",
+    "imageHint": "tanlang, shu yerga tashlang yoki Ctrl+V bosing",
+    "replaceImage": "Almashtirish",
+    "removeImage": "Olib tashlash",
+    "textAfterPlaceholder": "Rasm ostiga yozuv (ixtiyoriy)",
+    "uploadingImage": "Rasm yuklanmoqda…",
+    "imageBadType": "Faqat PNG, JPG, WEBP yoki GIF rasm qo'ying.",
+    "imageTooLarge": "Rasm 5 MB dan katta. Kichikroq rasm tanlang.",
+    "imageAlt": "Savol rasmi",
+    "suggestAnswers": "AI javob taklif qilsin ({{count}})",
+    "suggesting": "AI o'ylayapti…",
+    "suggestSaveFirst": "Avval o'zgarishlarni saqlang",
+    "suggestDone": "{{done}} ta savolga javob taklif qilindi. Tekshirib, saqlang.",
+    "suggestSome": "{{done}} ta savolga taklif berildi, {{skipped}} tasiga AI ishonchli javob topa olmadi.",
+    "suggestNone": "AI hech qaysi savolga ishonchli javob topa olmadi. Javoblarni o'zingiz belgilang.",
+    "aiSuggested": "AI taklifi, tekshiring",
+    "aiSuggestedLow": "AI taklifi (ishonch past), tekshiring"
   },
   "answer": {
     "true": "To'g'ri",
@@ -408,12 +425,16 @@
     "courseLabel": "Guruh",
     "submit": "Yuborish",
     "cancel": "Bekor qilish",
-    "noQuizzes": "Guruhsiz tayyor testlar yo'q. AI sahifasida yangi test yarating.",
+    "noQuizzes": "Hali tayyor test yo'q. AI sahifasida yangi test yarating.",
     "draftHint": "Test guruhga berilishi bilan e'lon qilinadi va o'quvchilarga ko'rinadi (savollarda to'g'ri javob belgilangan bo'lsa).",
     "dueLabel": "Muddat",
     "timeLabel": "Vaqt",
     "pick": "Tanlang",
-    "students": "{{count}} o‘quvchi"
+    "students": "{{count}} o‘quvchi",
+    "opensLabel": "Ochilish (ixtiyoriy)",
+    "opensTimeLabel": "Ochilish vaqti",
+    "opensNow": "Bo'sh qolsa — darhol ochiladi",
+    "opensAfterDue": "Ochilish vaqti muddatdan oldin bo'lishi kerak."
   },
   "exportDialog": {
     "title": "Testni yuklab olish",
@@ -465,7 +486,8 @@
       "deleteTitle": "Testni o‘chirasizmi?",
       "deleteDescription": "“{{title}}” testi va uning natijalari butunlay o‘chiriladi.",
       "emptySearch": "Hech narsa topilmadi"
-    }
+    },
+    "assignedCount": "{{count}} ta guruhga berilgan"
   },
   "typeDialog": {
     "title": "Savol qo‘shish",
@@ -715,5 +737,168 @@
       "attempts": "{{count}} urinish",
       "perAttempt": "{{count}} tadan savol"
     }
+  },
+  "newPage": {
+    "eyebrow": "Workspace / Testlar",
+    "title": "Yangi test",
+    "back": "Testlarga qaytish",
+    "tabs": {
+      "ai": "AI bilan yaratish",
+      "import": "Tayyor testni yuklash",
+      "manual": "Qo'lda yozish"
+    },
+    "leads": {
+      "ai": "Dars materialingizni yoki mavzuni bering. AI savollarni o'zi yozadi, siz tekshirib chiqasiz.",
+      "import": "Savollaringiz allaqachon yozilgan: Word, Excel, Google Form yoki matnda. Biz ularni olib kiramiz.",
+      "manual": "Savollarni o'zingiz yozasiz. «Yozishni boshlash» desangiz katta sahifa ochiladi va savollar tayyor shablon bo'lib turadi."
+    },
+    "import": {
+      "fileTitle": "Word yoki Excel fayl",
+      "fileHint": "Tayyor savollar fayli. To'g'ri javob fayldan o'qiladi.",
+      "pickFile": "Fayl tanlash",
+      "templateWord": "Word shablon",
+      "templateExcel": "Excel shablon",
+      "reading": "Fayl o'qilmoqda…",
+      "found": "{{count}} ta savol topildi",
+      "foundWarnings": "{{count}} ta savolni tekshirish kerak bo'ladi (javobi topilmadi).",
+      "createTest": "Testni yaratish",
+      "googleTitle": "Google Form yoki hujjat havolasi",
+      "googleHint": "Havola «Havolaga ega har kim» rejimida bo'lishi kerak. Google Form to'g'ri javobni bermaydi, ularni keyin o'zingiz belgilaysiz.",
+      "googleInvalid": "Ochiq Google Form yoki Google hujjat havolasini kiriting.",
+      "read": "O'qib olish",
+      "textTitle": "Matn joylash",
+      "textHint": "ChatGPT yoki boshqa joydan olingan savollar. Format: raqam, variantlar, «Javob: B».",
+      "textPlaceholder": "1. Savol matni\nA) Birinchi variant\nB) Ikkinchi variant\nJavob: B"
+    },
+    "manual": {
+      "settings": "Test sozlamasi",
+      "name": "Test nomi",
+      "namePlaceholder": "Masalan: Present Perfect nazorat",
+      "defaultName": "Yangi test",
+      "count": "Nechta savol bo'ladi?",
+      "countHint": "Shuncha bo'sh shablon ochiladi. Keyin qo'shish yoki olib tashlash mumkin.",
+      "type": "Savollar turi",
+      "typeHint": "Bu umumiy tur. Keyin har bir savolning turini alohida o'zgartirish mumkin.",
+      "start": "Yozishni boshlash",
+      "back": "Orqaga",
+      "progress": "Tayyor: {{ready}} / {{total}}",
+      "save": "Saqlash",
+      "globalType": "Umumiy tur",
+      "globalTypeHint": "Yangi savollar shu turda ochiladi. Har bir savolning turini alohida o'zgartirish mumkin.",
+      "retypeNote": "Umumiy tur «{{type}}» qilindi. {{count}} ta bo'sh savolga qo'lladim, yozilgan savollar o'zgarmadi.",
+      "retypeAll": "Yozilganlariga ham qo'llash",
+      "insertHere": "Shu yerga savol qo'shish",
+      "addQuestion": "Savol qo'shish",
+      "moveUp": "Yuqoriga",
+      "moveDown": "Pastga",
+      "duplicate": "Nusxa olish",
+      "deleted": "Savol o'chirildi.",
+      "undo": "Qaytarish",
+      "leaveConfirm": "Yozganlaringiz saqlanmaydi. Chiqaymi?",
+      "leave": "Ha, chiqish",
+      "stay": "Qolish",
+      "state": {
+        "empty": "Bo'sh",
+        "partial": "To'liq emas",
+        "ready": "Tayyor"
+      },
+      "missing": "Yetishmaydi: {{reason}}",
+      "incompleteList": "{{count}} ta savol to'liq emas:",
+      "emptyList": "{{count}} ta savol bo'sh:",
+      "saveWithoutEmpty": "Bo'shlarsiz saqlash",
+      "noQuestions": "Hali birorta savol yozilmagan.",
+      "typeHints": {
+        "single": "A, B, C, D variantlardan bittasi to'g'ri. Eng ko'p ishlatiladigan tur.",
+        "multiple": "Variantlardan bir nechtasi to'g'ri bo'ladi.",
+        "true_false": "Gap to'g'rimi yoki noto'g'rimi, o'quvchi tanlaydi.",
+        "numeric": "O'quvchi son yozadi.",
+        "text": "O'quvchi so'z yoki gapni o'zi yozadi. To'g'ri javoblarni siz yozib qo'yasiz.",
+        "matching": "O'quvchi chap tomondagi har bir narsani o'ng tomondagi mosi bilan bog'laydi.",
+        "ordering": "Siz to'g'ri tartibda yozasiz, o'quvchiga aralash ko'rinadi, u tartibga soladi.",
+        "fill_blank": "Gapning bir qismi bo'sh qoladi, o'quvchi uni to'ldiradi.",
+        "essay": "O'quvchi uzun yozadi. O'qituvchi yoki AI baholaydi."
+      },
+      "typeExamples": {
+        "single": "Misol: Poytaxt qaysi? A) Toshkent B) Buxoro",
+        "multiple": "Misol: Qaysilari tub son? 2, 3, 4, 5",
+        "true_false": "Misol: Yer yumaloq.",
+        "numeric": "Misol: 12 + 5 nechiga teng? Javob: 17",
+        "text": "Misol: Poytaxtni yozing. Javob: Toshkent",
+        "matching": "Misol: Toshkent bilan O'zbekiston, Parij bilan Fransiya",
+        "ordering": "Misol: Voqealarni yil bo'yicha tartiblang",
+        "fill_blank": "Misol: Toshkent {{O'zbekiston}} poytaxti.",
+        "essay": "Misol: Sevimli faslingiz haqida yozing"
+      }
+    },
+    "ai": {
+      "material": "Material",
+      "uploadLabel": "Fayl yuklang",
+      "dropTitle": "Faylni tanlang yoki tashlang",
+      "dropHint": "PDF, Word, PowerPoint, Excel, TXT · 5 tagacha · 20 MB gacha",
+      "textLabel": "Yoki matnni qo'ying",
+      "textPlaceholder": "Darslik yoki saytdan nusxalangan matn",
+      "textHint": "Fayl va matnni birga ishlatish mumkin.",
+      "settings": "Sozlamalar",
+      "format": "Format",
+      "formatSimple": "Oddiy test (A-B-C-D)",
+      "formatOther": "Boshqa imtihon…",
+      "language": "Til",
+      "languages": {
+        "auto": "Avto (fanga qarab)",
+        "uz": "O'zbekcha (lotin)",
+        "uzCyrl": "Ўзбекча (кирилл)",
+        "ru": "Русский",
+        "en": "English",
+        "tr": "Türkçe"
+      },
+      "simpleHint": "Oddiy testda AI faqat variantli savol yozadi.",
+      "examHint": "Imtihon formatida savollar soni va turlari format bo'yicha belgilanadi.",
+      "topic": "Mavzu · ixtiyoriy",
+      "topicPlaceholder": "Bo'sh bo'lsa, AI materialdan topadi",
+      "topicHint": "Mavzuni aniq yozsangiz, AI katta kitobdan ham aynan shu mavzuga oid qismlardan savol tuzadi.",
+      "group": "Guruh · ixtiyoriy",
+      "noGroup": "Guruhsiz (qoralama)",
+      "create": "Yaratish",
+      "needMaterial": "Material qo'shing yoki mavzu yozing.",
+      "progressTitle": "Test yaratilmoqda",
+      "progressHint": "Sahifani yopsangiz ham ish davom etadi. Tayyor bo'lganda bildirishnoma keladi.",
+      "steps": {
+        "read": "Material o'qilmoqda",
+        "write": "Savollar yozilmoqda",
+        "save": "Qoralama saqlanmoqda"
+      },
+      "resultNote": "Qoralama. O'quvchilarga ko'rinmaydi.",
+      "report": "Hisobot",
+      "loadingResult": "Natija yuklanmoqda…",
+      "ready": "savol tayyor",
+      "shortage": "{{requested}} ta so'raldi, {{produced}} ta tayyor. Material shuncha savolga yetmagan bo'lishi mumkin. Muharrirda o'zingiz qo'shishingiz mumkin.",
+      "warnings": "{{count}} ta savolni tekshirish kerak. Muharrirda ko'rib chiqing.",
+      "another": "Yana test yaratish",
+      "open": "Muharrirda ochish",
+      "failedTitle": "Test yaratilmadi",
+      "retry": "Qayta urinish",
+      "languageHint": "Avto: ingliz, rus yoki turk tili guruhida test shu tilda chiqadi, boshqa fanlarda o‘zbekcha."
+    }
+  },
+  "view": {
+    "title": "Test",
+    "eyebrow": "Workspace / Testlar / Ko'rish",
+    "back": "Orqaga",
+    "edit": "Tahrirlash",
+    "results": "Natijalar",
+    "opens": "Ochiladi: {{date}}",
+    "due": "Muddat: {{date}}",
+    "questions": "{{count}} ta savol",
+    "points": "{{count}} ball",
+    "true": "To'g'ri",
+    "false": "Noto'g'ri",
+    "essay": "Insho — o'qituvchi yoki AI baholaydi",
+    "noKey": "To'g'ri javob belgilanmagan",
+    "loadError": "Testni yuklab bo'lmadi.",
+    "open": "Ko'rish",
+    "openAria": "«{{title}}» testini ko'rish"
+  },
+  "schedule": {
+    "testLabel": "Test: {{title}}"
   }
 }

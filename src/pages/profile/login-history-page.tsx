@@ -175,7 +175,7 @@ export function LoginHistoryPage() {
       ) : null}
 
       {GROUPS.map((group) => {
-        const items = rows.filter((row) => groupOf(row.lastLoginAt) === group);
+        const items = rows.filter((row) => groupOf(row.lastSeenAt) === group);
         if (!items.length) return null;
         return (
           <SettingsSection key={group} label={t(`page.${group}`)}>
@@ -196,7 +196,7 @@ export function LoginHistoryPage() {
                       </DsText>
                     ) : (
                       <View style={styles.seen}>
-                        <DsText v="caption-strong">{lastSeen(row.lastLoginAt, group)}</DsText>
+                        <DsText v="caption-strong">{lastSeen(row.lastSeenAt, group)}</DsText>
                         {row.sessionActive ? (
                           <DsText v="caption" c="success-fg">
                             {t("page.activeSession")}

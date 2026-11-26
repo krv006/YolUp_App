@@ -13,10 +13,9 @@
     "slowSyncNote": "Синхронизация в медленном режиме — ваши записи сохранятся и отправятся после восстановления связи"
   },
   "sheet": {
-    "addSheet": "Страница",
-    "pageOf": "Страница {{page}} / {{total}}",
-    "prev": "Предыдущая страница",
-    "next": "Следующая страница"
+    "page": "Страница {{page}}",
+    "addPage": "Добавить страницу",
+    "pageAdded": "Добавлена страница {{page}}"
   },
   "permission": {
     "grantButton": "Разрешение",
@@ -70,25 +69,6 @@
       "math": "Изменить формулу",
       "code": "Изменить код"
     }
-  },
-  "eraseDialog": {
-    "title": "Удалить элемент",
-    "description": "Вы удаляете выбранный элемент. Выберите причину — её увидит ученик.",
-    "reasonLabel": "Причина",
-    "cancel": "Отмена",
-    "confirm": "Удалить",
-    "deleted": "Элемент удалён",
-    "reasons": {
-      "wrongAnswer": "Неверный ответ",
-      "offTopic": "Не по теме",
-      "cleanup": "Очистка доски",
-      "other": "Другое"
-    },
-    "reasonPlaceholder": "Укажите причину",
-    "deletedCount_one": "Удалён {{count}} элемент",
-    "deletedCount_few": "Удалено {{count}} элемента",
-    "deletedCount_many": "Удалено {{count}} элементов",
-    "deletedCount_other": "Удалено {{count}} элемента"
   },
   "grantDialog": {
     "title": "Разрешение рисовать на доске",
@@ -217,17 +197,16 @@
     "empty": "Доска пока пуста"
   },
   "mobile": {
-    "title": "Доска · {{page}} / {{total}}",
     "undo": "Отменить",
     "redo": "Повторить",
-    "undoReason": "Шаг отменён",
     "modes": {
       "teacher": "Только вы",
       "selected": "Выбранные",
       "everyone": "Все"
     },
     "liveLesson": "Онлайн-урок",
-    "menu": "Действия"
+    "menu": "Действия",
+    "boardTitle": "Доска"
   },
   "code": {
     "language": "Язык программирования",

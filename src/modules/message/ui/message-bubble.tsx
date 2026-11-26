@@ -221,7 +221,7 @@ export function MessageBubbleCard({ message, outgoing, showName = true, highligh
         message.attachment.kind === "voice" || message.attachment.mimeType?.startsWith("audio/") ? (
           <VoiceMessage attachment={message.attachment} outgoing={outgoing} />
         ) : (
-          <MessageAttachment attachment={message.attachment} failed={message.failed} uploading={message.pending} />
+          <MessageAttachment attachment={message.attachment} failed={message.failed} uploading={message.pending} failReason={message.failReason} />
         )
       ) : null}
 

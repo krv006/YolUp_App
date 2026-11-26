@@ -339,6 +339,7 @@ export function HomeworkDetailPage() {
             googleFormUrl: item.googleFormUrl,
             questions: item.questions,
             questionsLocked: item.submissions.length > 0 || (item.submissionsCount ?? 0) > 0,
+            voice: item.voice,
           }}
           onSubmit={(values) => update.mutate({ id: item.id, form: values }, { onSuccess: () => setEditOpen(false) })}
         />

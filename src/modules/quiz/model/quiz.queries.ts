@@ -12,6 +12,7 @@ export const quizKeys = Object.freeze({
   all: ["quizzes"] as const,
   lists: ["quizzes", "list"] as const,
   list: (courseId: string | null) => ["quizzes", "list", courseId] as const,
+  assignable: ["quizzes", "assignable"] as const,
   detail: (id: string) => ["quizzes", "detail", id] as const,
   attempts: (id: string) => ["quizzes", "attempts", id] as const,
   draft: (id: string) => ["quizzes", "draft", id] as const,
@@ -22,6 +23,14 @@ export function useQuizzes(courseId: string | null, enabled = true) {
   return useQuery({
     queryKey: quizKeys.list(courseId),
     queryFn: ({ signal }) => quizApi.getAll(courseId, { signal }),
+    enabled,
+  });
+}
+
+export function useAssignableQuizzes(enabled = true) {
+  return useQuery({
+    queryKey: quizKeys.assignable,
+    queryFn: ({ signal }) => quizApi.getAssignable({ signal }),
     enabled,
   });
 }
@@ -148,6 +157,36 @@ export function useImportGoogleLink() {
       client.invalidateQueries({ queryKey: quizKeys.all });
       toast.success(t("toast.importSuccess", { count: result.quiz.questions.length }));
     },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useImportQuizText() {
+  const { t } = useTranslation("quiz");
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ text, request }: { text: string; request: QuizImportRequest }) =>
+      quizApi.importText(text, request),
+    onSuccess: (result) => {
+      client.invalidateQueries({ queryKey: quizKeys.all });
+      toast.success(t("toast.importSuccess", { count: result.quiz.questions.length }));
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+/** Javobsiz savollar uchun AI taklifi (hech narsa saqlanmaydi). */
+export function useSuggestQuizAnswers() {
+  return useMutation({
+    mutationFn: (quizId: string) => quizApi.suggestAnswers(quizId),
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+/** Savol rasmini yuklash. Xatolik bu yerda ko'rsatiladi; muvaffaqiyatda chaqiruvchi `onSuccess` beradi. */
+export function useUploadQuestionImage() {
+  return useMutation({
+    mutationFn: (file: File) => quizApi.uploadQuestionImage(file),
     onError: (error: Error) => toast.error(error.message),
   });
 }

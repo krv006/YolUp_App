@@ -9,6 +9,8 @@ export interface LessonDetailDrawerProps {
   now: Date;
   onOpenChange: (open: boolean) => void;
   onChat: (lesson: Lesson) => void;
+  /** Veb #212: "Tahrirlash" darsni tahrirlaydi (avval chatni ochardi). */
+  onEdit?: (lesson: Lesson) => void;
   onJoin: (lesson: Lesson) => void;
   onRatings: (lesson: Lesson) => void;
   onCancel: (lesson: Lesson) => void;
@@ -38,6 +40,7 @@ export function LessonDetailDrawer({
   now,
   onOpenChange,
   onChat,
+  onEdit,
   onJoin,
   onRatings,
   onCancel,
@@ -60,13 +63,16 @@ export function LessonDetailDrawer({
   const today = starts.toDateString() === now.toDateString();
   const live = lesson.status === "live";
   const finished = lesson.status === "finished";
+  // Veb #219: bekor qilish va "X daqiqadan so'ng" faqat rejalashtirilgan darsda; bekor qilinganda tahrirlash ham yo'q.
+  const cancellable = lesson.status === "scheduled";
+  const editable = lesson.status !== "cancelled";
   const closed = finished || lesson.status === "cancelled";
 
   const timeValue = `${today ? `${t("schedule.today")}, ` : `${starts.getDate()}-${months[starts.getMonth()]}, `}${clock(starts)} – ${clock(ends)} · ${t(
     "list.durationMinutes",
     { count: lesson.durationMinutes || 45 }
   )}`;
-  const statusLabel = live ? t("schedule.live") : minutes >= 0 ? t("schedule.startsIn", { count: minutes }) : t(`status.${lesson.status}`);
+  const statusLabel = live ? t("schedule.live") : cancellable && minutes >= 0 ? t("schedule.startsIn", { count: minutes }) : t(`status.${lesson.status}`);
   const statusTone = toneColors(live ? "bg-danger-bg text-error-text" : finished ? "bg-success-bg text-success-fg" : "bg-accent-teal-bg text-accent-teal-fg", ds);
   const repeatValue = lesson.recurrence
     ? [
@@ -84,7 +90,8 @@ export function LessonDetailDrawer({
   const footer = (
     <>
       <MobileButton variant="secondary" label={t("schedule.openChat")} onPress={() => onChat(lesson)} />
-      {student && closed ? null : <MobileButton label={t("schedule.join")} onPress={() => onJoin(lesson)} />}
+      {/* Veb #217: tugagan yoki bekor qilingan darsga hech kim (o'qituvchi ham) qo'shilmaydi. */}
+      {closed ? null : <MobileButton label={t("schedule.join")} onPress={() => onJoin(lesson)} />}
     </>
   );
 
@@ -143,17 +150,17 @@ export function LessonDetailDrawer({
               />
             </View>
           )
-        ) : (
+        ) : editable ? (
           <View style={[styles.pair, styles.actionsTeacher]}>
             <ActionButton
               icon={finished ? "star" : "edit"}
               label={finished ? t("schedule.ratings") : t("schedule.edit")}
               outline
-              onPress={() => (finished ? onRatings(lesson) : onChat(lesson))}
+              onPress={() => (finished ? onRatings(lesson) : (onEdit ?? onChat)(lesson))}
             />
-            <ActionButton icon="close" label={t("schedule.cancel")} tone="danger" disabled={finished} onPress={() => onCancel(lesson)} />
+            {cancellable ? <ActionButton icon="close" label={t("schedule.cancel")} tone="danger" onPress={() => onCancel(lesson)} /> : null}
           </View>
-        )}
+        ) : null}
       </View>
     </Sheet>
   );

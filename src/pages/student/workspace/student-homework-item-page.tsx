@@ -26,14 +26,16 @@ import {
 } from "@/modules/homework";
 import { FormulaField } from "@/modules/homework/ui/formula-field";
 import { GoogleFormLink } from "@/modules/homework/ui/google-form-link";
+import { RichContent } from "@/modules/rich-editor";
 import { QuestionsAnswerForm } from "@/modules/homework/ui/questions-answer-form";
 import { QuestionsResult } from "@/modules/homework/ui/questions-result";
 import { ROUTES } from "@/shared/config";
-import { pickDocuments, sanitizeHtml, toUploadFile, type PickedFile } from "@/shared/lib";
+import { pickDocuments, toUploadFile, type PickedFile } from "@/shared/lib";
 import type { Assignment, Submission } from "@/shared/types";
-import { bodyFont, dsAlpha, DsGradient, DsText, dsRadius, dsType, headingFont, HtmlView, Icon, MobileActionBar, MobileEmptyCard, MobilePageHeader, toast, useDs } from "@/shared/ui";
+import { bodyFont, dsAlpha, DsGradient, DsText, dsRadius, dsType, headingFont, Icon, MobileActionBar, MobileEmptyCard, MobilePageHeader, toast, useDs } from "@/shared/ui";
 import { SubmissionPreview } from "@/pages/workspace/homework/submission-preview";
 import { shortDateTime } from "../lib/format";
+import { AssignmentVoicePlayer } from "@/modules/homework/ui/assignment-voice-player";
 import { HomeworkSubmittedDialog } from "./homework-submitted-dialog";
 
 const DAY_MS = 86_400_000;
@@ -167,7 +169,6 @@ function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; o
   const overdue = assignment.dueAt ? new Date(assignment.dueAt).getTime() < now : false;
   const locked = overdue && !assignment.allowLate;
   const leftLabel = left === null ? "" : overdue ? t("workspace.hwItem.overdue") : left <= 0 ? t("workspace.hwItem.today") : t("workspace.hwItem.daysLeft", { count: left });
-  const html = assignment.body ? sanitizeHtml(assignment.body) : "";
   const serverDraft = draft.data?.comment ?? "";
   // Veb #183: fayl, savol javoblari yoki izohdan bittasi yetarli (faylsiz topshirish).
   const answerList = answerInputs(assignment.questions, answers);
@@ -244,7 +245,9 @@ function HomeworkSubmit({ assignment, onSubmitted }: { assignment: Assignment; o
             ) : null}
           </View>
           {assignment.description ? <DsText style={styles.description}>{assignment.description}</DsText> : null}
-          {html ? <HtmlView html={html} minHeight={20} /> : null}
+          {/* Veb #210: vazifa matni boy HTML (formula, kod, jadval, rasm). */}
+          {assignment.body ? <RichContent html={assignment.body} /> : null}
+          {assignment.voice ? <AssignmentVoicePlayer voice={assignment.voice} /> : null}
           {assignment.hasAttachment ? (
             <Pressable
               accessibilityRole="button"

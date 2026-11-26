@@ -6,8 +6,15 @@ import {
   normalizePagination,
   type RequestOptions,
 } from "@/shared/api";
-import type { QuizDetail, QuizEditValues, QuizFormValues, QuizImportWarning } from "@/shared/types";
+import type {
+  QuizDetail,
+  QuizEditValues,
+  QuizFormValues,
+  QuizImportWarning,
+  QuizQuestionImage,
+} from "@/shared/types";
 import { quizEndpoints } from "./quiz.endpoints";
+import type { AnswerSuggestionResult } from "../lib/answer-suggestions";
 import type { QuizAttemptAnswerInput } from "../lib/quiz.mappers";
 import type {
   AiQuizJob,
@@ -56,6 +63,13 @@ function mapImportedQuizDto(dto: QuizDto): ImportedQuiz {
 }
 
 export const quizApi = {
+  async getAssignable(options: RequestOptions = {}) {
+    const dto = await apiClient.get<unknown>(quizEndpoints.list, {
+      ...options,
+      query: { is_copy: false, status: "published", ordering: "-created_at", page_size: 100 },
+    });
+    return normalizePagination<QuizSummaryDto>(dto).items.map(mapQuizSummaryDto);
+  },
   async getAll(courseId: string | null, options: RequestOptions = {}) {
     const dto = await apiClient.get<unknown>(quizEndpoints.list, {
       ...options,
@@ -78,9 +92,8 @@ export const quizApi = {
       await apiClient.patch<QuizDto>(quizEndpoints.detail(id), mapQuizEditRequest(values))
     );
   },
-  /** Guruhsiz testni (masalan, AI yaratgan) o'qituvchining guruhiga biriktiradi. */
   async assignToCourse({ quizId, ...input }: QuizAssignInput) {
-    return mapQuizDto(await apiClient.patch<QuizDto>(quizEndpoints.detail(quizId), assignRequestBody(input)));
+    return mapQuizDto(await apiClient.post<QuizDto>(quizEndpoints.assign(quizId), assignRequestBody(input)));
   },
   async getAudience(id: string, options?: RequestOptions) {
     return mapQuizAudienceDto(await apiClient.get<QuizAudienceDto>(quizEndpoints.audience(id), options));
@@ -107,6 +120,19 @@ export const quizApi = {
       await apiClient.post<QuizDto>(endpoint, { url, ...mapQuizImportRequest(request) })
     );
   },
+  /** Joylangan matndan (masalan ChatGPT yozgan) darhol qoralama test yaratadi. */
+  async importText(text: string, request: QuizImportRequest) {
+    return mapImportedQuizDto(
+      await apiClient.post<QuizDto>(quizEndpoints.importText, { text, ...mapQuizImportRequest(request) })
+    );
+  },
+  /** Savol rasmini yuklaydi; qaytgan `id` savolning `imageId` maydoniga yuboriladi. */
+  async uploadQuestionImage(file: File): Promise<QuizQuestionImage> {
+    const body = new FormData();
+    body.set("file", file);
+    const dto = await apiClient.post<{ id: string | number; url: string }>(quizEndpoints.questionImages, body);
+    return { id: String(dto.id), url: dto.url };
+  },
   async startAiGenerate(files: File[], request: AiQuizRequest) {
     const body = new FormData();
     for (const file of files) body.append("file", file);
@@ -116,6 +142,7 @@ export const quizApi = {
     if (request.rulesText) body.set("rules_text", request.rulesText);
     if (request.materialText) body.set("material_text", request.materialText);
     if (request.examName) body.set("exam_name", request.examName);
+    if (request.language) body.set("language", request.language);
     body.set("question_count", String(request.questionCount));
     if (request.courseId) body.set("course", request.courseId);
     if (request.subject) body.set("subject", request.subject);
@@ -146,8 +173,27 @@ export const quizApi = {
       questionCount: item.question_count ?? 0,
       quizId: item.quiz === null || item.quiz === undefined ? null : String(item.quiz),
       error: item.error ?? "",
+      warnings: item.warnings ?? [],
       createdAt: item.created_at ?? "",
     }));
+  },
+  /** Javobi belgilanmagan savollar uchun AI taklifi. Hech narsa saqlanmaydi: o'qituvchi tekshirib, muharrirda saqlaydi. */
+  async suggestAnswers(id: string): Promise<AnswerSuggestionResult> {
+    const dto = await apiClient.post<{
+      asked?: number;
+      skipped?: number;
+      suggestions?: Array<{ number: number; question: string | number; correct: number[]; confidence?: string }>;
+    }>(quizEndpoints.suggestAnswers(id), {}, { timeoutMs: AI_UPLOAD_TIMEOUT_MS });
+    return {
+      asked: dto.asked ?? 0,
+      skipped: dto.skipped ?? 0,
+      suggestions: (dto.suggestions ?? []).map((item) => ({
+        number: item.number,
+        questionId: String(item.question),
+        correct: item.correct ?? [],
+        confidence: item.confidence === "high" || item.confidence === "medium" ? item.confidence : "low",
+      })),
+    };
   },
   async publish(id: string) {
     return mapQuizDto(await apiClient.post<QuizDto>(quizEndpoints.publish(id), {}));

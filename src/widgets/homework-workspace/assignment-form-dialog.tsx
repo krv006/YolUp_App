@@ -3,10 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { googleFormUrlInvalid, useQuestionDrafts, type AssignmentFormInput } from "@/modules/homework";
+import { googleFormUrlInvalid, useQuestionDrafts, type AssignmentFormInput, type AssignmentVoiceInput } from "@/modules/homework";
 import { GoogleFormField } from "@/modules/homework/ui/google-form-field";
+import { VoiceNoteField } from "@/modules/homework/ui/voice-note-field";
 import { QuestionsEditor } from "@/modules/homework/ui/questions-editor";
-import type { GradingScale, HomeworkQuestion } from "@/shared/types";
+import type { AssignmentVoice, GradingScale, HomeworkQuestion } from "@/shared/types";
 import {
   bodyFont,
   DsGradient,
@@ -44,12 +45,12 @@ export interface AssignmentFormDialogProps {
     googleFormUrl?: string | null;
     questions?: HomeworkQuestion[];
     questionsLocked?: boolean;
+    voice?: AssignmentVoice | null;
   } | null;
   onSubmit: (values: AssignmentFormInput) => void;
 }
 
 const GRADINGS: GradingScale[] = ["five", "hundred", "none"];
-const FORMAT_BUTTONS: IconName[] = ["format-bold", "format-italic", "format-underlined", "format-list-bulleted", "link", "functions"];
 /** Guruh tanlovidagi "Guruhsiz — bazaga saqlash" qiymati. */
 const BANK_VALUE = "__bank__";
 
@@ -91,6 +92,8 @@ export function AssignmentFormDialog({
   const [time, setTime] = useState(() => initial?.dueAt?.slice(11, 16) ?? "18:00");
   const [grading, setGrading] = useState<GradingScale>(initial?.grading ?? "five");
   const [aiCheck, setAiCheck] = useState(initial?.aiCheck ?? true);
+  // Veb #219: ovozli izoh — `undefined` o'zgarmagan, `null` o'chirish, qiymat yangi yozuv.
+  const [voice, setVoice] = useState<AssignmentVoiceInput | null | undefined>(undefined);
   const [announce, setAnnounce] = useState(initial?.announceInChat ?? true);
   const [googleFormUrl, setGoogleFormUrl] = useState(initial?.googleFormUrl ?? "");
   const [touched, setTouched] = useState(false);
@@ -139,6 +142,7 @@ export function AssignmentFormDialog({
       aiCheck,
       grading,
       googleFormUrl: googleFormUrl.trim(),
+      voice,
     });
   }
 
@@ -227,15 +231,8 @@ export function AssignmentFormDialog({
           </MobileFieldLabel>
 
           <MobileFieldLabel label={<RequiredLabel>{t("form.bodyLabel")}</RequiredLabel>}>
-            {/* `rounded-lg bg-surface`: formatlash paneli va matn maydoni */}
+            {/* `rounded-lg bg-surface`. Veb #214: hech narsa qilmaydigan B/I/U/ro'yxat/havola/formula paneli olib tashlandi. */}
             <View style={[styles.editor, { backgroundColor: ds.c.surface }]}>
-              <View style={[styles.toolbar, { borderBottomColor: ds.c.line }]}>
-                {FORMAT_BUTTONS.map((icon) => (
-                  <View key={icon} style={styles.tool}>
-                    <Icon name={icon} size={18} color={ds.c["ink-secondary"]} />
-                  </View>
-                ))}
-              </View>
               <TextInput
                 multiline
                 value={body}
@@ -247,6 +244,10 @@ export function AssignmentFormDialog({
                 style={[styles.body, { color: ds.c.ink }]}
               />
             </View>
+          </MobileFieldLabel>
+
+          <MobileFieldLabel label={t("voice.label")}>
+            <VoiceNoteField existing={initial?.voice ?? null} value={voice} onChange={setVoice} disabled={pending} />
           </MobileFieldLabel>
 
           {inBank ? null : (
@@ -378,8 +379,6 @@ const styles = StyleSheet.create({
   inputWithIcon: { paddingRight: 48 },
   inputIcon: { position: "absolute", top: 16, right: 16 },
   editor: { overflow: "hidden", borderRadius: dsRadius.lg },
-  toolbar: { height: 47, flexDirection: "row", alignItems: "center", paddingHorizontal: 6, borderBottomWidth: 1 },
-  tool: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   body: { height: 96, paddingHorizontal: 16, paddingVertical: 12, fontSize: dsType.body.fontSize, fontFamily: bodyFont("400") },
   pair: { flexDirection: "row", gap: 12 },
   bankBadge: { alignSelf: "flex-start", height: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 16, borderRadius: 22 },

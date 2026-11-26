@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { useCourseStudents } from "@/modules/course";
-import { dsRadius, MobileButton, MobileFieldLabel, MobilePickerField, Sheet, useDs } from "@/shared/ui";
+import { DsText, dsRadius, MobileButton, MobileFieldLabel, MobilePickerField, Sheet, useDs } from "@/shared/ui";
 import type { QuizAssignInput } from "../api/quiz.dto";
 import { parseQuizLimits, quizLimitsDraft, type QuizLimitsDraft } from "../lib/quiz-limits";
 import { useQuiz } from "../model/quiz.queries";
@@ -56,6 +56,9 @@ export function AssignQuizDialog({
   const [pickedCourse, setPickedCourse] = useState("");
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("23:59");
+  // Veb #212: ochilish vaqti ixtiyoriy — bo'sh bo'lsa test darhol ochiladi.
+  const [opensDate, setOpensDate] = useState("");
+  const [opensTime, setOpensTime] = useState("09:00");
 
   const finalQuiz = pickedQuiz ?? quizId ?? "";
   const finalCourse = courseId ?? pickedCourse;
@@ -77,7 +80,10 @@ export function AssignQuizDialog({
   const excludedIds = excluded.course === finalCourse ? excluded.ids : new Set<string>();
   const chosen = students.filter((student) => !excludedIds.has(student.id)).map((student) => student.id);
   const nobody = students.length > 0 && chosen.length === 0;
-  const blocked = pending || !finalQuiz || !finalCourse || nobody || limits.invalid.length > 0 || !detail.data;
+  const opensAt = opensDate ? `${opensDate}T${opensTime || "00:00"}` : null;
+  const dueAt = date ? `${date}T${time || "23:59"}` : null;
+  const opensAfterDue = Boolean(opensAt && dueAt && opensAt >= dueAt);
+  const blocked = opensAfterDue || pending || !finalQuiz || !finalCourse || nobody || limits.invalid.length > 0 || !detail.data;
   const quizOptions = quizId && !quizzes.some((item) => item.id === quizId) ? [{ id: quizId, label: quizLabel }, ...quizzes] : quizzes;
   const quiz = quizOptions.find((item) => item.id === finalQuiz) ?? null;
   const course = courses.find((item) => item.id === finalCourse) ?? null;
@@ -85,12 +91,18 @@ export function AssignQuizDialog({
     item.studentCount === undefined ? item.label : `${item.label} · ${t("assignDialog.students", { count: item.studentCount })}`;
   const day = new Date(`${date}T00:00`);
   const dateLabel = Number.isNaN(day.getTime()) ? date : `${day.getDate()}-${(months[day.getMonth()] ?? "").slice(0, 3).toLowerCase()}`;
+  const shortDate = (value: string) => {
+    const parsed = new Date(`${value}T00:00`);
+    return Number.isNaN(parsed.getTime()) ? value : `${parsed.getDate()}-${(months[parsed.getMonth()] ?? "").slice(0, 3).toLowerCase()}`;
+  };
 
   function changeOpen(next: boolean) {
     if (!next) {
       setPickedQuiz(null);
       setExcluded({ course: "", ids: new Set() });
       setLimitsDraft(null);
+      setOpensDate("");
+      setOpensTime("09:00");
     }
     onOpenChange(next);
   }
@@ -99,7 +111,8 @@ export function AssignQuizDialog({
     onSubmit({
       quizId: finalQuiz,
       courseId: finalCourse,
-      dueAt: date ? `${date}T${time || "23:59"}` : null,
+      dueAt,
+      opensAt,
       studentIds: excludedIds.size ? chosen : null,
       ...limits.limits,
     });
@@ -167,6 +180,34 @@ export function AssignQuizDialog({
             </MobileFieldLabel>
           </View>
         </View>
+
+        <View style={styles.pair}>
+          <View style={styles.grow}>
+            <MobileFieldLabel label={t("assignDialog.opensLabel")}>
+              <MobilePickerField
+                type="date"
+                value={opensDate}
+                display={opensDate ? shortDate(opensDate) : t("assignDialog.opensNow")}
+                min={today()}
+                ariaLabel={t("assignDialog.opensLabel")}
+                onChange={setOpensDate}
+              />
+            </MobileFieldLabel>
+          </View>
+          {/* 🟡 Sana tanlanmagan bo'lsa maydon to'liq kenglikda — "Bo'sh qolsa — darhol ochiladi" kesilmasin. */}
+          {opensDate ? (
+            <View style={styles.grow}>
+              <MobileFieldLabel label={t("assignDialog.timeLabel")}>
+                <MobilePickerField type="time" value={opensTime} display={opensTime} ariaLabel={t("assignDialog.opensTimeLabel")} onChange={setOpensTime} />
+              </MobileFieldLabel>
+            </View>
+          ) : null}
+        </View>
+        {opensAfterDue ? (
+          <DsText v="body-xs" c="error-text">
+            {t("assignDialog.opensAfterDue")}
+          </DsText>
+        ) : null}
 
         {detail.data ? (
           <QuizLimitsFields

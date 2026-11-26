@@ -70,7 +70,6 @@ export { BoardPreview } from "./ui/board-preview";
 export type { BoardPreviewProps } from "./ui/board-preview";
 export { BoardSurface } from "./ui/board-surface";
 export type { BoardMobileChrome, BoardSurfaceProps } from "./ui/board-surface";
-export { MobileBoardPageNav } from "./ui/board-mobile";
 export type { BoardTool } from "./ui/board-mobile";
 export { AwayStudentsNotice } from "./ui/away-students-notice";
 export type { AwayStudentsNoticeProps } from "./ui/away-students-notice";

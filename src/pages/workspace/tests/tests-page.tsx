@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCourses, useSubjects } from "@/modules/course";
 import {
   AssignQuizDialog,
+  copiesBySource,
   PaidTestDialog,
   QuizAttemptsDrawer,
   QuizExportDialog,
@@ -84,6 +85,14 @@ export function TestsPage() {
   const attempts = useQuizAttempts(attemptsOf?.id ?? null, Boolean(attemptsOf));
 
   const items = useMemo(() => quizzes.data ?? [], [quizzes.data]);
+  // Veb #217: asl testda "N ta guruhga berilgan", guruhga berilgan nusxada guruh nomi.
+  const assignedCounts = useMemo(() => copiesBySource(items), [items]);
+  const courseTitles = useMemo(() => new Map((courses.data ?? []).map((course) => [course.id, course.title])), [courses.data]);
+  const groupNote = (quiz: QuizSummary) => {
+    if (quiz.sourceQuizId) return courseTitles.get(quiz.courseId) ?? "";
+    const count = assignedCounts.get(quiz.id);
+    return count ? t("tests.assignedCount", { count }) : "";
+  };
   const courseOptions = (courses.data ?? []).map((course) => ({
     id: course.id,
     label: course.title,
@@ -152,6 +161,7 @@ export function TestsPage() {
 
   const card = {
     publishPending: publish.isPending,
+    groupNote,
     onEdit: (quiz: QuizSummary) => router.push((quiz.status === DRAFT ? ROUTES.teacher.test(quiz.id) : ROUTES.teacher.testEdit(quiz.id)) as never),
     onPublish: (quiz: QuizSummary) => publish.mutate(quiz.id),
     onResults: (quiz: QuizSummary) => router.push(ROUTES.teacher.testResults(quiz.id) as never),
@@ -262,7 +272,8 @@ export function TestsPage() {
         onOpenChange={(open) => !open && setAssignTarget(null)}
         quizId={assignTarget?.id ?? null}
         quizLabel={assignTarget ? quizDisplayTitle(assignTarget) : ""}
-        quizzes={items.filter((quiz) => quiz.status !== DRAFT).map((quiz) => ({ id: quiz.id, label: quizDisplayTitle(quiz) }))}
+        // Tanlash ro'yxatida faqat asl testlar — nusxani yana nusxalash shart emas (veb #217).
+        quizzes={items.filter((quiz) => quiz.status !== DRAFT && !quiz.sourceQuizId).map((quiz) => ({ id: quiz.id, label: quizDisplayTitle(quiz) }))}
         courses={courseOptions.map((course) => ({ id: course.id, label: course.label, studentCount: course.studentCount }))}
         pending={assign.isPending}
         onSubmit={(value) => void assign.mutateAsync(value).then(() => setAssignTarget(null))}
@@ -306,6 +317,7 @@ export function TestsPage() {
 interface TestCardProps {
   quiz: QuizSummary;
   publishPending: boolean;
+  groupNote: (quiz: QuizSummary) => string;
   onEdit: (quiz: QuizSummary) => void;
   onPublish: (quiz: QuizSummary) => void;
   onResults: (quiz: QuizSummary) => void;
@@ -342,7 +354,7 @@ function TestCard({ quiz, ...props }: TestCardProps) {
                 {quizDisplayTitle(quiz)}
               </DsText>
               <DsText v="body-sm" c="ink-secondary" numberOfLines={1}>
-                {[quiz.subjectLabel, t("tests.questionCount", { count: quiz.questionCount }), limitsText(quiz)].filter(Boolean).join(" · ")}
+                {[quiz.subjectLabel, t("tests.questionCount", { count: quiz.questionCount }), limitsText(quiz), props.groupNote(quiz)].filter(Boolean).join(" · ")}
               </DsText>
             </View>
           </Pressable>

@@ -19,6 +19,7 @@ import {
   useQuiz,
   useQuizAttempts,
   useQuizzes,
+  useAssignableQuizzes,
   useRemoveGroupAudio,
   useUpdateQuiz,
   useUploadGroupAudio,
@@ -49,7 +50,6 @@ export function TeacherAssignments({
   highlightId?: string | null;
 }) {
   const { t } = useTranslation("group");
-  const { t: quizT } = useTranslation("quiz");
   const ds = useDs();
   const course = useCourse(courseId);
   const assignments = useAssignments(courseId);
@@ -76,26 +76,24 @@ export function TeacherAssignments({
   const removeAudio = useRemoveGroupAudio(editQuizTarget?.id ?? "");
   const lessons = useLessons({ course: courseId, page_size: 100 }, dialog);
   const courseQuizzes = useQuizzes(courseId, Boolean(courseId));
-  const allQuizzes = useQuizzes(null, bankDialog);
+  const assignable = useAssignableQuizzes(bankDialog);
   const courseSubject = course.data?.subject ?? "";
 
   const courseQuizList = useMemo(
     () => (courseQuizzes.data ?? []).filter((quiz) => quiz.courseId === courseId),
     [courseQuizzes.data, courseId]
   );
-  // Tayyor (guruhsiz) testlar: avval shu guruh fanidagilar — AI yaratganlari ham shu yerda.
+  // Veb #217, 382c87f: berish nusxalaydi — `GET /quizzes/?is_copy=false&status=published`
+  // (guruh bo'yicha cheklanmaydi); avval shu guruh fanidagilar.
   const bankOptions = useMemo(
     () =>
-      (allQuizzes.data ?? [])
-        .filter((quiz) => !quiz.courseId)
+      [...(assignable.data ?? [])]
         .sort((a, b) => Number(b.subject === courseSubject) - Number(a.subject === courseSubject))
         .map((quiz) => ({
           id: quiz.id,
-          label: `${quizDisplayTitle(quiz)} · ${t("assignments.quizQuestions", { count: quiz.questionCount })}${
-            quiz.status === "draft" ? ` · ${quizT("teacherPage.draftBadge")}` : ""
-          }`,
+          label: `${quizDisplayTitle(quiz)} · ${t("assignments.quizQuestions", { count: quiz.questionCount })}`,
         })),
-    [allQuizzes.data, courseSubject, quizT, t]
+    [assignable.data, courseSubject, t]
   );
   const items = assignments.data ?? [];
 

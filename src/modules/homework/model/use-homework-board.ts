@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { applyStrokeUpdate, DEFAULT_CODE_LANGUAGES, type BoardSource, type BoardState, type StrokeDto, type StrokeInput } from "@/modules/board";
-import { useSaveHomeworkBoard } from "./homework.queries";
+import { homeworkKeys, useSaveHomeworkBoard } from "./homework.queries";
 
 const AUTOSAVE_MS = 1500;
 
@@ -25,6 +26,7 @@ export function useHomeworkBoardSource(assignmentId: string, init: HomeworkBoard
   const sheetsRef = useRef(sheets);
   const [saveState, setSaveState] = useState<HomeworkBoardSaveState>("saved");
   const save = useSaveHomeworkBoard(assignmentId);
+  const client = useQueryClient();
   const dirty = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saving = useRef(false);
@@ -41,7 +43,13 @@ export function useHomeworkBoardSource(assignmentId: string, init: HomeworkBoard
       while (dirty.current) {
         dirty.current = false;
         setSaveState("saving");
-        await save.mutateAsync(sheetsRef.current); // saqlash paytida yana o'zgargan bo'lsa, sikl yana yozadi
+        const saved = await save.mutateAsync(sheetsRef.current); // saqlash paytida yana o'zgargan bo'lsa, sikl yana yozadi
+        /*
+         * 🟡 Kesh yangilanadi: `useHomeworkBoard` `staleTime: Infinity` — doska shu
+         * seansda qayta ochilsa eski (birinchi yuklangan) holatdan boshlanardi va
+         * keyingi saqlash serverdagi chizmalarni o'chirib yuborardi (2026-11-26).
+         */
+        client.setQueryData(homeworkKeys.board(assignmentId), saved);
       }
       setSaveState("saved");
       return true;
@@ -53,7 +61,7 @@ export function useHomeworkBoardSource(assignmentId: string, init: HomeworkBoard
     } finally {
       saving.current = false;
     }
-  }, [save]);
+  }, [save, client, assignmentId]);
 
   useEffect(() => {
     flushRef.current = flush;

@@ -19,29 +19,27 @@ import {
 } from "../constants/board.constants";
 import { canEditStroke } from "../lib/board-edit";
 import { confirmsPending } from "../lib/board-pending";
-import { freeTextBaseline, nextTextPoint, type BoardObstacle } from "../lib/board-flow";
+import { FLOW_MARGIN, freeTextBaseline, nextTextPoint, strokeSpan, type BoardObstacle } from "../lib/board-flow";
+import { buildLenta, pageAt, shiftChanges, shiftStroke, strokeTop, type LentaPage } from "../lib/board-lenta";
 import { ownStroke, resolveOwnStrokes, type OwnStroke } from "../lib/board-history";
 import { measureStroke, textWidth } from "../lib/board-measure";
 import { CODE_PAD, detectCodeLanguage } from "../lib/code-highlight";
 import { hasRichFormatting, linesToPlainText, plainTextToLines } from "../lib/rich-text";
+import { wrapToWidth } from "../lib/wrap-text";
 import {
   useAddSheet,
   useAddStroke,
   useBoard,
   useEraseStrokes,
-  useRenameSheet,
   useSetBoardPermissions,
-  useSetCurrentSheet,
   useSolveFormula,
   useUpdateStroke,
 } from "../model/board.queries";
 import { useBoardRealtime } from "../model/use-board-realtime";
 import { BoardCanvas, type BoardCanvasHandle } from "./board-canvas";
 import { MobileBoardFooter, MobileBoardHeader, MobileBoardPill, MobileBoardToolbar, type BoardTool } from "./board-mobile";
-import { BoardPagesSheet } from "./board-pages-sheet";
 import { BoardPermissionDialog } from "./board-permission-dialog";
 import { CodeEditor } from "./code-editor";
-import { EraseReasonDialog } from "./erase-reason-dialog";
 import { FormulaSolverDialog } from "./formula-solver-dialog";
 import { MathFieldInput } from "./math-field-input";
 import { PeriodicTableDialog } from "./periodic-table-dialog";
@@ -64,9 +62,6 @@ export interface BoardSurfaceProps {
   currentUserId?: string | null;
   /** Berilsa - doska dars o'rniga shu manbadan ishlaydi (uy vazifasi doskasi): realtime va ruxsatlarsiz. */
   source?: BoardSource;
-  /** Sahifa tashqaridan boshqarilsa (arxiv sahifasi). */
-  sheetIndex?: number;
-  onSheetChange?: (index: number) => void;
   mobile: BoardMobileChrome;
 }
 
@@ -74,6 +69,10 @@ export interface BoardSurfaceProps {
 const FORM_LIFT = 34;
 /** Veb #192: server javob bermasa vaqtinchalik chiziq shuncha vaqtdan keyin o'chadi. */
 const PENDING_STROKE_MS = 8000;
+/** Sahifa ajratgichi va "N-sahifa" yorlig'i (veb `board-panel` lenta chizig'i). */
+const PAGE_LABEL_SIZE = 22;
+/** Sahifaga o'tganda ajratgich ko'rinib tursin — shuncha yuqoridan (doska birligida; veb `PAGE_REVEAL_MARGIN`). */
+const PAGE_REVEAL_MARGIN = 40;
 
 interface PendingStroke {
   sheet: number;
@@ -94,15 +93,23 @@ interface Placement {
 /**
  * Dars doskasi — veb `board-panel.tsx` ning tor ekran shoxi (`mobile` berilganda):
  * sarlavha (holat belgisi, ruxsat), nuqtali kanvas kartasi, asboblar va
- * pastki qator (bekor qilish/qaytarish, sahifalar, "+ Sahifa").
+ * pastki qator (bekor qilish/qaytarish, "Sahifa qo'shish").
+ *
+ * Veb #215 (b39e0d9, 8216a74, d3929d4): doska sahifalar o'rniga BITTA LENTA —
+ * hamma sahifalar tepa-past ketma-ket, hammasi tahrirlanadi. Kanvasda strokelar
+ * sahifa siljishi (`offset`) bilan lenta koordinatasida; yangi element tepasi
+ * tushgan sahifaga mahalliy koordinata bilan yuboriladi (`place`), tahrir va
+ * o'chirish elementning o'z sahifasiga (`homeOf`). Sahifalar orasida chiziq va
+ * "N-sahifa" yorlig'i; ochilganda oxirgi sahifaga aylanadi; yangi sahifa
+ * qo'shilsa "N-sahifa qo'shildi" va unga o'tiladi.
  *
  * Kanvas Skia'da (vebda SVG), doska o'lchamida (16:9) va "− 100% +" zoom
  * bilan. Matn/formula/kod oynasi kanvas ustida, bosilgan nuqta balandligida
  * ochiladi (telefonda joyida yozish yo'q — veb #177 ham). "Tanlash"
  * vositasida element paneli pastki asboblar ustida (veb #176), o'chirg'ich
- * sudrab ishlaydi va sabab bir marta so'raladi (veb #190).
+ * sudrab ishlaydi. Veb #213: o'chirishda sabab so'ralmaydi, `reason` bo'sh.
  */
-export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetIndex, onSheetChange, mobile }: BoardSurfaceProps) {
+export function BoardSurface({ lessonId, courseId, currentUserId, source, mobile }: BoardSurfaceProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
   // Doskada ishlayotganda ekran o'chib qolmasin.
@@ -117,14 +124,9 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const erase = useEraseStrokes(lessonId);
   const updateMutation = useUpdateStroke(lessonId);
   const permissions = useSetBoardPermissions(lessonId);
-  const renameSheet = useRenameSheet(lessonId);
   const solve = useSolveFormula(lessonId);
-  const currentSheet = useSetCurrentSheet(lessonId);
   const members = useCourseStudents(board.data?.isTeacher ? courseId : null, { page_size: 100 });
 
-  const [localSheet, setLocalSheet] = useState(0);
-  const sheet = sheetIndex ?? localSheet;
-  const setSheet = onSheetChange ?? setLocalSheet;
   const [tool, setTool] = useState<BoardTool>("pen");
   const [color, setColor] = useState<string>(MOBILE_BOARD_COLORS[1]);
   const [strokeWidth, setStrokeWidth] = useState<number>(MOBILE_BOARD_WIDTHS[1]);
@@ -135,13 +137,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   /** "Tanlash" vositasida tanlangan element (pastki panel). */
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  /** O'chirish kutilayotgan elementlar — sabab oynasi ochiq (o'chirg'ich yoki paneldagi "O'chirish"). */
-  const [deleteIds, setDeleteIds] = useState<string[]>([]);
-
-  const [reasonOpen, setReasonOpen] = useState(false);
-  const [reason, setReason] = useState("");
   const [grantOpen, setGrantOpen] = useState(false);
-  const [pagesOpen, setPagesOpen] = useState(false);
 
   const [placement, setPlacement] = useState<Placement | null>(null);
   const [draftText, setDraftText] = useState("");
@@ -174,8 +170,54 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   const [solution, setSolution] = useState<FormulaSolutionDto | null>(null);
 
   const state = source ? source.state : board.data;
-  const active = state?.sheets.find((item) => item.index === sheet) ?? state?.sheets[0];
+  const orderedSheets = useMemo(() => [...(state?.sheets ?? [])].sort((a, b) => a.index - b.index), [state?.sheets]);
+  /** Lentaning oxirgi sahifasi — bekor qilish tarixi va davriy jadval shunga bog'lanadi (vebdagidek). */
+  const sheet = orderedSheets[orderedSheets.length - 1]?.index ?? 0;
   const canDraw = Boolean(state?.canDraw);
+  const boardHeight = state?.height ?? 900;
+  const boardWidth = state?.width ?? 1600;
+
+  /** Sahifa balandligi — kamida doska balandligi, pastdagi element ostida `FLOW_MARGIN` joy. */
+  const lenta = useMemo(
+    () =>
+      buildLenta(orderedSheets, (strokes) => {
+        const bottom = strokes.reduce((max, stroke) => {
+          const span = strokeSpan(stroke as StrokeDto);
+          return span ? Math.max(max, span.bottom) : max;
+        }, 0);
+        return Math.max(boardHeight, Math.ceil(bottom + FLOW_MARGIN));
+      }),
+    [orderedSheets, boardHeight]
+  );
+  const strokeHome = useMemo(() => {
+    const homes = new Map<string, LentaPage>();
+    for (const item of orderedSheets) {
+      const page = lenta.pages.find((entry) => entry.index === item.index);
+      if (page) for (const stroke of item.strokes) homes.set(stroke.id, page);
+    }
+    return homes;
+  }, [orderedSheets, lenta]);
+  /** Lentadagi hamma strokelar — har biri o'z sahifasi siljishi bilan. */
+  const active = useMemo(
+    () => ({
+      strokes: orderedSheets.flatMap((item) => {
+        const offset = lenta.pages.find((entry) => entry.index === item.index)?.offset ?? 0;
+        return offset ? item.strokes.map((stroke) => shiftStroke(stroke, offset)) : item.strokes;
+      }),
+    }),
+    [orderedSheets, lenta]
+  );
+  const lastPage = lenta.pages[lenta.pages.length - 1] ?? { index: sheet, offset: 0, height: boardHeight };
+
+  function homeOf(strokeId: string): LentaPage {
+    return strokeHome.get(strokeId) ?? lastPage;
+  }
+
+  /** Lenta koordinatasidagi element tepasi tushgan sahifa va o'sha sahifadagi shakli. */
+  function place<T extends StrokeShapeDto>(shape: T): { sheet: number; shape: T } {
+    const page = pageAt(lenta.pages, strokeTop(shape)) ?? lastPage;
+    return { sheet: page.index, shape: shiftStroke(shape, -page.offset) };
+  }
 
   /*
    * Bekor qilish tarixi: yangi strokelar kelganda o'z yozuvlarim server
@@ -189,23 +231,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
     const resolved = sheets ? resolveOwnStrokes(history, sheets, userId) : history;
     if (resolved !== history) setHistory(resolved);
   }
-  // Veb #161: o'quvchi o'qituvchi ochgan varaqqa ergashadi; o'qituvchi varaq almashtirsa, server xabar topadi.
-  const followSheet = !source && board.data && !board.data.isTeacher ? board.data.currentSheet : null;
-  const lastFollowed = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (followSheet === null || followSheet === lastFollowed.current) return;
-    lastFollowed.current = followSheet;
-    setSheet(followSheet);
-  }, [followSheet, setSheet]);
-
-  const { mutate: announceSheet } = currentSheet;
-  function changeSheet(next: number) {
-    setSheet(next);
-    if (!source && board.data?.isTeacher) announceSheet(next);
-  }
-
-  const boardHeight = state?.height ?? 900;
   /*
    * Kanvas = serverdagi doska (`state.width × state.height`, odatda 16:9).
    *
@@ -215,7 +241,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
    * ("ma'lum qismdan keyin chizib bo'lmayapti"). Endi karta doska nisbatida,
    * mayda yozish uchun ikki barmoq bilan kattalashtiriladi.
    */
-  const canvasHeight = boardHeight;
+  const canvasHeight = Math.max(lenta.total, boardHeight);
 
   function flowPointFor(lines: number): Point {
     return nextTextPoint(active?.strokes ?? [], { boardWidth: state?.width ?? 1200, boardHeight: canvasHeight, size: BOARD_TEXT_SIZE, lines });
@@ -227,23 +253,30 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
    * Server nusxasi kelgach u yashiriladi (`confirmsPending`); saqlash xato
    * bersa olib tashlanadi, javob kelmasa 8 soniyadan keyin o'chadi.
    */
-  function sendStroke(stroke: StrokeShapeDto, target = sheet) {
-    if (source) return source.addStroke(target, stroke);
+  /** `stroke` — lenta koordinatasida; vaqtinchalik nusxa ham lentada ko'rinadi. */
+  function sendStroke(stroke: StrokeShapeDto) {
+    const target = place(stroke);
+    if (source) return source.addStroke(target.sheet, target.shape);
     pendingSeq.current += 1;
     const id = `pending-${pendingSeq.current}`;
     const drop = () => setPendingStrokes((current) => current.filter((item) => item.stroke.id !== id));
-    setPendingStrokes((current) => [...current, { sheet: target, stroke: { ...stroke, id } as StrokeDto }]);
+    setPendingStrokes((current) => [...current, { sheet, stroke: { ...stroke, id } as StrokeDto }]);
     globalThis.setTimeout(drop, PENDING_STROKE_MS);
-    if (!realtime.sendStroke(target, stroke)) addStroke.mutate({ sheet: target, stroke }, { onError: drop });
+    if (!realtime.sendStroke(target.sheet, target.shape)) addStroke.mutate({ sheet: target.sheet, stroke: target.shape }, { onError: drop });
+  }
+
+  /** Tarix yozuvi: stroke tushadigan sahifa (id bog'lash shu sahifa bo'yicha), shakl — lentada (qaytarish uchun). */
+  function remember(stroke: StrokeShapeDto) {
+    setHistory((current) => [...current, { ...ownStroke(place(stroke).sheet, stroke, state?.sheets ?? []), shape: stroke }]);
   }
 
   function commitStroke(stroke: StrokeShapeDto) {
-    setHistory((current) => [...current, ownStroke(sheet, stroke, state?.sheets ?? [])]);
+    remember(stroke);
     setRedoStack([]);
     sendStroke(stroke);
   }
 
-  const lastOwn = history.filter((entry) => entry.sheet === sheet).at(-1) ?? null;
+  const lastOwn = history.at(-1) ?? null;
   const activeStrokes = active?.strokes;
   const visiblePending = useMemo(
     () =>
@@ -266,22 +299,24 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       return current.filter((_, position) => position !== index);
     });
     setRedoStack((current) => [...current, { sheet: lastOwn.sheet, shape: lastOwn.shape }]);
-    if (source) source.eraseStroke(sheet, undoTarget.id);
-    else erase.mutate({ sheet, strokeIds: [undoTarget.id], reason: t("mobile.undoReason") });
+    const home = homeOf(undoTarget.id);
+    if (source) source.eraseStroke(home.index, undoTarget.id);
+    else erase.mutate({ sheet: home.index, strokeIds: [undoTarget.id], reason: "" });
   }
 
   function redo() {
     const entry = redoStack.at(-1);
     if (!entry) return;
     setRedoStack((current) => current.slice(0, -1));
-    setHistory((current) => [...current, ownStroke(entry.sheet, entry.shape, state?.sheets ?? [])]);
-    if (entry.sheet !== sheet) setSheet(entry.sheet);
-    sendStroke(entry.shape, entry.sheet);
+    remember(entry.shape);
+    sendStroke(entry.shape);
   }
 
   function updateStroke(strokeId: string, update: StrokeUpdate) {
-    if (source) return source.updateStroke(sheet, strokeId, update);
-    updateMutation.mutate({ sheet, strokeId, update });
+    const home = homeOf(strokeId);
+    const local: StrokeUpdate = update.changes ? { ...update, changes: shiftChanges(update.changes, -home.offset) } : update;
+    if (source) return source.updateStroke(home.index, strokeId, local);
+    updateMutation.mutate({ sheet: home.index, strokeId, update: local });
   }
 
   /** Veb #176: o'qituvchi hammasini, o'quvchi faqat o'zinikini (`by_id`); uy vazifasida hammasi o'ziniki. */
@@ -363,7 +398,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
   function freeTextAnchor(x: number, y: number, text: string, size: number, obstacles: BoardObstacle[]): Point {
     const width = Math.max(size, textWidth(text, size));
     const lines = text.split("\n").length;
-    return [x, freeTextBaseline({ x, y, size, lines, width, obstacles, maxBaseline: boardHeight - 20 })];
+    return [x, freeTextBaseline({ x, y, size, lines, width, obstacles, maxBaseline: canvasHeight - 20 })];
   }
 
   function closePlacement() {
@@ -403,49 +438,44 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       const text = draftCode.replace(/\s+$/, "");
       // "Avto" bo'lsa aniqlangan til saqlanadi — PDF ham shu tilda ranglanadi.
       stroke = { type: "code", text, language: codeLanguage === "auto" ? detectCodeLanguage(text) : codeLanguage, x, y, size: CODE_TEXT_SIZE, color: CODE_TEXT_COLOR };
+    } else if (hasRichFormatting(draftLines)) {
+      stroke = { type: "text", text: draftPlainText, x, y, size: textSize, color, lines: draftLines };
     } else {
-      stroke = { type: "text", text: draftPlainText, x, y, size: textSize, color, ...(hasRichFormatting(draftLines) ? { lines: draftLines } : {}) };
+      // Veb #212: uzun matn doska chetida yangi qatorga o'tadi (yonga cheksiz ketmaydi).
+      const text = wrapToWidth(draftPlainText, boardWidth - x - 24, (value) => textWidth(value, textSize));
+      stroke = { type: "text", text, x, y, size: textSize, color };
     }
+    const target = place(stroke);
     if (source) {
-      source.addStroke(sheet, stroke);
+      source.addStroke(target.sheet, target.shape);
       closePlacement();
       return;
     }
-    addStroke.mutate({ sheet, stroke }, { onSuccess: closePlacement, onError: (error) => toast.error(error.message) });
+    addStroke.mutate({ sheet: target.sheet, stroke: target.shape }, { onSuccess: closePlacement, onError: (error) => toast.error(error.message) });
   }
 
-  /** O'chirish sababi so'raladi (jonli dars); uy vazifasida darhol. Bir nechta element — bitta oyna. */
-  function askToDelete(ids: string[]) {
+  /**
+   * Veb #213 (0903e0c, e82bead): o'chirish darhol, sabab so'ralmaydi (`reason`
+   * bo'sh — o'quvchiga hech narsa ko'rsatilmaydi). Lentada elementlar o'z
+   * sahifalari bo'yicha guruhlanadi.
+   */
+  function eraseNow(ids: string[]) {
     if (!ids.length) return;
     if (source) {
-      ids.forEach((id) => source.eraseStroke(sheet, id)); // shaxsiy doska: o'chirishga sabab so'ralmaydi
+      ids.forEach((id) => source.eraseStroke(homeOf(id).index, id));
       return;
     }
-    setDeleteIds(ids);
-    setReason(t("eraseDialog.reasons.wrongAnswer"));
-    setReasonOpen(true);
+    const bySheet = new Map<number, string[]>();
+    for (const id of ids) {
+      const index = homeOf(id).index;
+      bySheet.set(index, [...(bySheet.get(index) ?? []), id]);
+    }
+    bySheet.forEach((strokeIds, index) => erase.mutate({ sheet: index, strokeIds, reason: "" }));
   }
 
   function deleteSelected(strokeId: string) {
     setSelectedId(null);
-    askToDelete([strokeId]);
-  }
-
-  function closeReasonDialog() {
-    setReasonOpen(false);
-    setDeleteIds([]);
-    setReason("");
-  }
-
-  async function removeSelected() {
-    if (!deleteIds.length || !reason.trim()) return;
-    try {
-      await erase.mutateAsync({ sheet, strokeIds: deleteIds, reason: reason.trim() });
-      closeReasonDialog();
-      toast.success(deleteIds.length > 1 ? t("eraseDialog.deletedCount", { count: deleteIds.length }) : t("eraseDialog.deleted"));
-    } catch (error) {
-      void error;
-    }
+    eraseNow([strokeId]);
   }
 
   async function solveFormula() {
@@ -461,19 +491,77 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
     const steps = solution.steps?.length ? `\n${solution.steps.join("\n")}` : "";
     const text = `${solution.pretty}\n${solution.result}${steps}`;
     const [x, y] = flowPointFor(text.split("\n").length);
-    const stroke: StrokeShapeDto = { type: "text", text, x, y, size: BOARD_TEXT_SIZE, color };
+    const target = place<StrokeShapeDto>({ type: "text", text, x, y, size: BOARD_TEXT_SIZE, color });
     const done = () => {
       setFormulaOpen(false);
       setFormula("");
       setSolution(null);
     };
     if (source) {
-      source.addStroke(sheet, stroke);
+      source.addStroke(target.sheet, target.shape);
       done();
       return;
     }
-    addStroke.mutate({ sheet, stroke }, { onSuccess: done });
+    addStroke.mutate({ sheet: target.sheet, stroke: target.shape }, { onSuccess: done });
   }
+
+  const canAddPage = Boolean(source) || Boolean(state?.isTeacher && canDraw);
+  const revealNewPage = useRef(false);
+  const pageCount = lenta.pages.length;
+  const lastOffset = lastPage.offset;
+
+  function addPage() {
+    revealNewPage.current = true;
+    if (source) source.addSheet();
+    else addSheet.mutate();
+  }
+
+  /** Ochilganda oxirgi (ishchi) sahifaga aylanadi — bir marta. */
+  const lentaScrolled = useRef(false);
+  useEffect(() => {
+    if (lentaScrolled.current || !lastOffset || !card.height) return;
+    lentaScrolled.current = true;
+    const frame = requestAnimationFrame(() => canvasRef.current?.scrollToY(lastOffset - PAGE_REVEAL_MARGIN, false));
+    return () => cancelAnimationFrame(frame);
+  }, [lastOffset, card.height]);
+
+  /** Yangi sahifa: "N-sahifa qo'shildi"; o'zim qo'shgan bo'lsam — o'sha sahifaga silliq aylanadi. */
+  const knownPages = useRef<number | null>(null);
+  const boardReady = Boolean(state);
+  useEffect(() => {
+    if (!boardReady) return;
+    const known = knownPages.current;
+    knownPages.current = pageCount;
+    if (known === null || pageCount <= known) return;
+    toast.success(t("sheet.pageAdded", { page: pageCount }));
+    if (!revealNewPage.current) return;
+    revealNewPage.current = false;
+    const frame = requestAnimationFrame(() => canvasRef.current?.scrollToY(lastOffset - PAGE_REVEAL_MARGIN));
+    return () => cancelAnimationFrame(frame);
+  }, [pageCount, boardReady, lastOffset, t]);
+
+  /** Sahifalar orasidagi chiziq va "N-sahifa" yorlig'i — `pendingStrokes` sifatida (tanlanmaydi, o'chmaydi). */
+  const pageBreaks = useMemo<StrokeDto[]>(
+    () =>
+      lenta.pages.slice(1).flatMap((page, position) => {
+        const label = t("sheet.page", { page: position + 2 });
+        return [
+          { id: `page-break-${page.index}`, type: "line", x1: 0, y1: page.offset, x2: boardWidth, y2: page.offset, color: ds.c.brand, width: 3 },
+          {
+            id: `page-label-${page.index}`,
+            type: "text",
+            text: label,
+            // Chap chetda: doska balandligi bo'yicha sig'adi, o'ng qismi ekrandan tashqarida bo'lishi mumkin.
+            x: FLOW_MARGIN,
+            // Chiziq ostida: sahifaga o'tilganda yorliq ekran tepasidan chiqib ketmasin.
+            y: page.offset + PAGE_LABEL_SIZE + 10,
+            size: PAGE_LABEL_SIZE,
+            color: ds.c.brand,
+          },
+        ] as StrokeDto[];
+      }),
+    [lenta.pages, boardWidth, ds.c.brand, t]
+  );
 
   if (!source && board.isLoading)
     return (
@@ -497,8 +585,6 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       </View>
     );
 
-  const page = (active?.index ?? sheet) + 1;
-  const total = state.sheets.length;
   const formTop = placement ? Math.max(0, Math.min(placement.top - FORM_LIFT, card.height - formHeight)) : 0;
   const placeKinds: PlacedTool[] = state.codeEnabled ? ["text", "math", "code"] : ["text", "math"];
 
@@ -527,7 +613,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       onLayout={() => rootRef.current?.measureInWindow((_x, y, _width, height) => setBottomGap(Math.max(0, windowHeight - y - height)))}
     >
       <MobileBoardHeader
-        title={mobile.title ?? t("mobile.title", { page, total })}
+        title={mobile.title ?? t("mobile.boardTitle")}
         subtitle={mobile.subtitle}
         live={mobile.live}
         backLabel={mobile.backLabel}
@@ -554,10 +640,11 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
           <BoardCanvas
             ref={canvasRef}
             strokes={active?.strokes ?? []}
-            pendingStrokes={visiblePending}
+            pendingStrokes={[...pageBreaks, ...visiblePending]}
             width={state.width}
             height={canvasHeight}
             fit="height"
+            fitHeight={boardHeight}
             dotColor={ds.c.line}
             tool={tool}
             color={color}
@@ -565,10 +652,9 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
             enabled={canDraw}
             onCommit={commitStroke}
             onPlacePoint={openPlacement}
-            markedStrokeIds={deleteIds}
             zoomControls
             eraserSize={eraserSize}
-            onErase={askToDelete}
+            onErase={eraseNow}
             selection={{
               selectedId,
               onSelect: setSelectedId,
@@ -688,17 +774,13 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
       <View style={styles.footer}>
         {mobile.footer ?? (
           <MobileBoardFooter
-            page={page}
-            total={total}
             showHistory={canDraw}
             canUndo={Boolean(undoTarget)}
             canRedo={redoStack.length > 0}
             onUndo={undo}
             onRedo={redo}
-            onPrev={() => changeSheet(Math.max(0, sheet - 1))}
-            onNext={() => changeSheet(Math.min(total - 1, sheet + 1))}
-            onPages={() => setPagesOpen(true)}
-            onAdd={state.isTeacher || source ? () => (source ? source.addSheet() : addSheet.mutate()) : undefined}
+            onAdd={canAddPage ? addPage : undefined}
+            adding={!source && addSheet.isPending}
           />
         )}
       </View>
@@ -707,25 +789,7 @@ export function BoardSurface({ lessonId, courseId, currentUserId, source, sheetI
 
       {/* Oynalar ilova mavzusida (vebda portal orqali, `data-theme="light"` dan tashqarida). */}
       <ThemeScope scheme={null}>
-        <EraseReasonDialog open={reasonOpen} pending={erase.isPending} reason={reason} onReasonChange={setReason} onCancel={closeReasonDialog} onConfirm={() => void removeSelected()} />
 
-        <BoardPagesSheet
-          open={pagesOpen}
-          onOpenChange={setPagesOpen}
-          sheets={state.sheets}
-          active={sheet}
-          boardWidth={state.width}
-          boardHeight={state.height}
-          canAdd={state.isTeacher || Boolean(source)}
-          onSelect={(index) => {
-            changeSheet(index);
-            setSelectedId(null);
-            setPagesOpen(false);
-          }}
-          onAdd={() => (source ? source.addSheet() : addSheet.mutate())}
-          canRename={state.isTeacher && !source}
-          onRename={(index, title) => renameSheet.mutate({ index, title })}
-        />
 
         <BoardPermissionDialog
           open={grantOpen}

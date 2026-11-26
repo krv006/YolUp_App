@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Atom, ChevronLeft, ChevronRight, Plus, Redo2, Undo2 } from "lucide-react-native";
+import { Atom, ChevronLeft, Plus, Redo2, Undo2 } from "lucide-react-native";
 import { DsText, dsRadius, Icon, useDs, type DsColor, type IconName } from "@/shared/ui";
 import { BOARD_TEXT_SIZES, ERASER_SIZES, MOBILE_BOARD_COLORS, MOBILE_BOARD_WIDTHS } from "../constants/board.constants";
 import type { DrawKind } from "../lib/board.geometry";
@@ -238,49 +238,24 @@ export function MobileBoardToolbar({
 }
 
 export interface MobileBoardFooterProps {
-  page: number;
-  total: number;
   canUndo: boolean;
   canRedo: boolean;
   showHistory: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  onPrev: () => void;
-  onNext: () => void;
-  onPages: () => void;
+  /** Lenta oxiriga yangi sahifa (o'qituvchi yoki shaxsiy doska). */
   onAdd?: () => void;
+  adding?: boolean;
 }
 
-/** Sahifa almashtirgich — `rounded-full bg-surface px-3`, o'rtada "1 / 3" (sahifalar oynasini ochadi). */
-export function MobileBoardPageNav({
-  page,
-  total,
-  onPrev,
-  onNext,
-  onPages,
-  height = 64,
-  tight = false,
-}: Pick<MobileBoardFooterProps, "page" | "total" | "onPrev" | "onNext" | "onPages"> & { height?: number; tight?: boolean }) {
-  const { t } = useTranslation("board");
-  const ds = useDs();
-  return (
-    <View style={[styles.pageNav, tight && styles.pageNavTight, { height, borderRadius: height / 2, backgroundColor: ds.c.surface }]}>
-      <Pressable accessibilityRole="button" accessibilityLabel={t("sheet.prev")} disabled={page <= 1} onPress={onPrev} style={styles.round}>
-        <ChevronLeft size={18} color={page <= 1 ? ds.c["ink-tertiary"] : ds.c.ink} />
-      </Pressable>
-      <Pressable accessibilityRole="button" onPress={onPages} style={styles.pageLabel}>
-        <DsText v="title-sm" style={styles.center}>
-          {page} / {total}
-        </DsText>
-      </Pressable>
-      <Pressable accessibilityRole="button" accessibilityLabel={t("sheet.next")} disabled={page >= total} onPress={onNext} style={styles.round}>
-        <ChevronRight size={18} color={page >= total ? ds.c["ink-tertiary"] : ds.c.ink} />
-      </Pressable>
-    </View>
-  );
-}
-
-/** Pastki qator — bekor qilish/qaytarish, sahifalar va "+ Sahifa". */
+/**
+ * Pastki qator — bekor qilish/qaytarish va "Sahifa qo'shish".
+ *
+ * Veb #215: sahifa almashtirgich ("1 / 3") olib tashlandi — doska bitta
+ * lenta. 🟡 "Sahifa qo'shish" vebda telefonda lenta oxirida (kanvas ostida);
+ * mobilda kanvas Skia'da siljitiladi, tugma pastki qatorda (veb
+ * `border-dashed border-brand bg-brand-subtle` uslubida).
+ */
 export function MobileBoardFooter(props: MobileBoardFooterProps) {
   const { t } = useTranslation("board");
   const ds = useDs();
@@ -298,21 +273,23 @@ export function MobileBoardFooter(props: MobileBoardFooterProps) {
       ) : (
         <View style={styles.historySpacer} />
       )}
-      <MobileBoardPageNav {...props} tight />
       {props.onAdd ? (
         <Pressable
           accessibilityRole="button"
+          disabled={props.adding}
           onPress={props.onAdd}
-          style={({ pressed }) => [styles.add, { backgroundColor: pressed ? ds.c["brand-strong"] : ds.c.brand }]}
+          style={({ pressed }) => [
+            styles.add,
+            { borderColor: ds.c.brand, backgroundColor: pressed ? ds.c.tint : ds.c["brand-subtle"] },
+            props.adding && styles.faded,
+          ]}
         >
-          <Plus size={18} color={ds.c["on-action"]} />
-          <DsText v="title-sm" c="on-action" numberOfLines={1}>
-            {t("sheet.addSheet")}
+          <Plus size={18} color={ds.c.brand} />
+          <DsText v="button" c="brand" numberOfLines={1}>
+            {t("sheet.addPage")}
           </DsText>
         </Pressable>
-      ) : (
-        <View style={styles.addSpacer} />
-      )}
+      ) : null}
     </View>
   );
 }
@@ -348,15 +325,11 @@ const styles = StyleSheet.create({
   /* Matn o'lchami — `h-7 min-w-7 rounded-sm px-1 text-caption-strong`, oraliq `ml-1.5` */
   textSize: { height: 28, minWidth: 28, paddingHorizontal: 4, borderRadius: dsRadius.sm, alignItems: "center", justifyContent: "center" },
   textSizeGap: { marginLeft: 6 },
-  /* `px-3`; pastki qatorda `px-2.5` — RN shrifti kengroq, "+ Sahifa" ekran chetiga tegmasin */
-  pageNav: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12 },
-  pageNavTight: { paddingHorizontal: 10 },
-  pageLabel: { minWidth: 56, alignSelf: "stretch", justifyContent: "center" },
   footer: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 },
   history: { height: 40, flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 8, borderRadius: 20 },
   historyButton: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   historySpacer: { width: 78 },
   /* `px-4` -> 12: yuqoridagi sabab */
-  add: { height: 40, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, borderRadius: 20 },
-  addSpacer: { width: 98 },
+  add: { height: 40, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 18, borderWidth: 1, borderStyle: "dashed", borderRadius: 20 },
+  faded: { opacity: 0.6 },
 });

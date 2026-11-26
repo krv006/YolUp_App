@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withTiming,
   type SharedValue,
 } from "react-native-reanimated";
 import { useDs } from "@/shared/ui";
@@ -31,6 +32,8 @@ import { SelectionOverlay } from "./selection-overlay";
 export interface BoardCanvasHandle {
   /** Doska nuqtasining kanvas ichidagi (ekran) joyi — zoom va siljish hisobga olinadi. */
   toView: (point: Point) => Point;
+  /** Veb #215 lenta: doska `y` nuqtasini ko'rinish tepasiga olib keladi (sahifaga o'tish). */
+  scrollToY: (y: number, animated?: boolean) => void;
 }
 
 /** "Tanlash" vositasi — tanlangan element ota komponentda (pastdagi panel uchun). */
@@ -75,6 +78,12 @@ export interface BoardCanvasProps {
    * yon tomonlariga ikki barmoq bilan suriladi (loyiha egasi qarori, 2026-11-13).
    */
   fit?: "contain" | "width" | "height";
+  /**
+   * `fit="height"` uchun asos balandlik (doska birligida). Lentada kanvas
+   * `height` — barcha sahifalar yig'indisi, masshtab esa bitta sahifadan
+   * olinadi: sahifa ekranga sig'adi, qolgani ikki barmoq bilan aylantiriladi.
+   */
+  fitHeight?: number;
   /** Nuqtali fon rangi — veb `radial-gradient(...) 28px 28px`, 6px siljigan. Kattalashtirishda joyida qoladi. */
   dotColor?: string;
   /** "− 100% +" tugmalari (veb `BoardZoomControls`). */
@@ -144,6 +153,7 @@ export function BoardCanvas({
   onPlacePoint,
   markedStrokeIds,
   fit: fitMode = "contain",
+  fitHeight,
   dotColor,
   zoomControls = false,
   eraserSize = ERASER_SIZES[1].value,
@@ -188,7 +198,7 @@ export function BoardCanvas({
     const vw = viewWidth.get();
     const vh = viewHeight.get();
     if (vw === 0 || vh === 0) return 1;
-    if (fitMode === "height") return vh / height;
+    if (fitMode === "height") return vh / (fitHeight ?? height);
     return fitMode === "width" ? vw / width : Math.min(vw / width, vh / height);
   });
   /*
@@ -200,7 +210,8 @@ export function BoardCanvas({
     const vw = viewWidth.get();
     const vh = viewHeight.get();
     if (vw === 0 || vh === 0 || fitMode !== "height") return ZOOM_MIN;
-    return Math.min(ZOOM_MIN, Math.min(vw / width, vh / height) / (vh / height));
+    const basis = fitHeight ?? height;
+    return Math.min(ZOOM_MIN, Math.min(vw / width, vh / basis) / (vh / basis));
   });
   /** Veb #198: yordamchi katak — holati telefonda saqlanadi, zoom tugmalari bor doskada. */
   const { guides, toggleGuides } = useBoardGuides();
@@ -236,8 +247,13 @@ export function BoardCanvas({
         const f = fit.get() * zoom.get();
         return [x * f + translateX.get(), y * f + translateY.get()];
       },
+      scrollToY: (y: number, animated = true) => {
+        const f = fit.get() * zoom.get();
+        const target = clampAxis(-y * f, height * f, viewHeight.get());
+        translateY.set(animated ? withTiming(target, { duration: 450 }) : target);
+      },
     }),
-    [fit, zoom, translateX, translateY]
+    [fit, zoom, translateX, translateY, height, viewHeight]
   );
 
   const draftPath = useDerivedValue(() => {
@@ -523,7 +539,7 @@ export function BoardCanvas({
   const mathScale =
     size.width && size.height
       ? fitMode === "height"
-        ? size.height / height
+        ? size.height / (fitHeight ?? height)
         : fitMode === "width"
           ? size.width / width
           : Math.min(size.width / width, size.height / height)

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePathname } from "expo-router";
 import { CenterDialog, DsText, dsRadius, Icon, toast, useDs } from "@/shared/ui";
 import { emailSetupOverdue, formatDeadline } from "../lib/email-setup";
 import { useAuth } from "../model/use-auth";
@@ -32,7 +33,15 @@ export function EmailSetupDialog() {
   const overdue = emailSetupOverdue(deadline);
   const required = Boolean(user?.emailSetupRequired) && !user?.mustChangePassword;
   const open = required && (overdue || !later);
-  const showBanner = required && !overdue && later;
+  /*
+   * 🟡 Banner faqat pastki menyusi bor bo'lim ekranlarida (`/{rol}/{bo'lim}`).
+   * Vebda u `fixed` — telefonda doska, chat yoki forma ekranida asboblar va
+   * yozish maydonini yopib qo'yardi.
+   */
+  const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+  const onTabScreen = segments.length === 2 && !["notifications", "search"].includes(segments[1] ?? "");
+  const showBanner = required && !overdue && later && onTabScreen;
   // Pastki suzuvchi menyu ustida (`providers/role-tabs.tsx` `useFloatingTabInset`: 30 + 68 + 14).
   // Import qilinmaydi — auth -> providers -> conversation -> course -> auth aylanma bog'liqlik.
   const insets = useSafeAreaInsets();

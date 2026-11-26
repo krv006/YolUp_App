@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { boardApi, BoardSurface, MobileBoardPageNav, useBoard, useSendBoardToChat } from "@/modules/board";
+import { boardApi, BoardSurface, useBoard, useSendBoardToChat } from "@/modules/board";
 import { useLesson } from "@/modules/lesson";
 import { downloadBlob } from "@/shared/lib";
 import { DsText, Icon, PopoverMenu, PopoverMenuItem, ThemeScope, toast, useDs, usePopoverAnchor } from "@/shared/ui";
@@ -27,7 +27,6 @@ export function BoardPage() {
   const sendToChat = useSendBoardToChat(lessonId ?? "");
   const { anchorRef, rect, open: openMenu, close: closeMenu } = usePopoverAnchor();
   const [busy, setBusy] = useState(false);
-  const [sheet, setSheet] = useState(0);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace("/"));
 
@@ -87,8 +86,6 @@ export function BoardPage() {
         <BoardSurface
           lessonId={data.id}
           courseId={data.courseId}
-          sheetIndex={sheet}
-          onSheetChange={setSheet}
           mobile={{
             title: editable ? undefined : data.title,
             subtitle: editable
@@ -124,14 +121,6 @@ export function BoardPage() {
             ),
             footer: editable ? undefined : (
               <View style={styles.footer}>
-                <MobileBoardPageNav
-                  height={60}
-                  page={sheet + 1}
-                  total={Math.max(1, sheets.length)}
-                  onPrev={() => setSheet(Math.max(0, sheet - 1))}
-                  onNext={() => setSheet(Math.min(sheets.length - 1, sheet + 1))}
-                  onPages={() => undefined}
-                />
                 <View style={styles.actions}>
                   <Pressable
                     accessibilityRole="button"
@@ -169,8 +158,8 @@ const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
   round: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   faded: { opacity: 0.5 },
-  /* `items-center pt-3`, tugmalar `-mt-px grid-cols-2 gap-3`, tugma `h-13 rounded-full` */
+  /* Veb #215: sahifa almashtirgich yo'q (doska bitta lenta) — faqat PDF va chatga yuborish. */
   footer: { alignItems: "center", paddingTop: 12 },
-  actions: { marginTop: -1, alignSelf: "stretch", flexDirection: "row", gap: 12 },
+  actions: { alignSelf: "stretch", flexDirection: "row", gap: 12 },
   action: { flex: 1, height: 52, alignItems: "center", justifyContent: "center", paddingHorizontal: 12, borderRadius: 26 },
 });

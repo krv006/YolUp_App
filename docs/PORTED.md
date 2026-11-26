@@ -86,7 +86,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/api/board.dto.ts` | 🟢 NUSXA | `6cb20114035f` | — |
 | `src/modules/board/api/board.endpoints.ts` | 🟢 NUSXA | `7834515903b6` | — |
 | `src/modules/board/constants/board.constants.ts` | 🟢 NUSXA | `e22d4a84179a` | — |
-| `src/modules/board/index.ts` | 🟡 MOSLASH | `f0109eadee57` | generatsiya: veb barrel minus `ui/` + mobil doska UI eksportlari |
+| `src/modules/board/index.ts` | 🟡 MOSLASH | `bcfa0ad2ccd2` | generatsiya: veb barrel minus `ui/` + mobil doska UI eksportlari |
 | `src/modules/board/lib/board-channel.ts` | 🟢 NUSXA | `561ddd1ea25e` | — |
 | `src/modules/board/lib/board-flow.ts` | 🟢 NUSXA | `bbb53245ccda` | — |
 | `src/modules/board/lib/board-socket-manager.ts` | 🟢 NUSXA | `9963093db153` | — |
@@ -105,12 +105,10 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/ui/rich-text-stroke.tsx` | 🆕 MOBIL | `—` | veb `board-stroke.tsx` dagi `lines` shoxi; Skia'da har run uchun `matchFont` va qo'lda joylashtirish, tagiga chizish qo'lda `Rect` bilan |
 | `src/modules/board/ui/rich-text-input.tsx` | 🔴 QAYTA | `b917aa7bc662` | faqat `variant="mobile"`; `contenteditable` + `execCommand` RN'da yo'q: format QATOR darajasida (qalin/kursiv/tagi chizilgan butun qatorga), ro'yxat belgisi matnning o'zida ("• ", "1. ") — Enter'da davom etadi, bo'sh bandda Enter ro'yxatdan chiqaradi; natija `TextLineDto[]` |
 | `src/modules/board/ui/board-toolbar.tsx` | 🟡 MOSLASH | `9b6e6d0d4b4e` | mobilda ishlatilmaydi (vebda faqat keng ekran paneli); `BoardTool` turi `board-mobile.tsx` da |
-| `src/modules/board/ui/board-panel.tsx` | 🟡 MOSLASH | `fa85beba7a43` | faqat tor ekran shoxi (`mobile` majburiy) — mobilda `board-surface.tsx`: Skia kanvas eni bo'yicha sig'adi (`fit="width"`); kanvas = server doskasi (`state.width × state.height`), karta ekranning bo'sh joyini egallaydi va doska balandligi bo'yicha sig'adi (`fit="height"`), yon tomonlariga ikki barmoq bilan suriladi, zoom butun doska ko'ringuncha kichrayadi (loyiha egasi qarori, 2026-11-13; server pastki nuqtalarni `height` bilan kesadi); nuqtali fon Skia `Points`; matn kartasi kanvas tashqarisida (klaviatura ochilganda kanvas kichrayadi, karta kesilmaydi); klaviatura joyi faqat karta ochiqligida (`useReanimatedKeyboardAnimation`). Keng ekran shoxi yo'q; o'quvchining uy vazifasi doskasi ham shu sirtda (`source` bilan); veb #192 vaqtinchalik chiziqlar `BoardCanvas.pendingStrokes` orqali (tanlash/o'chirishga tushmaydi); veb #198 yordamchi katak `BoardCanvas` ichida (zoom tugmalari shu yerda) |
-| `src/modules/board/ui/board-mobile.tsx` | 🟡 MOSLASH | `9d343f56b081` | ikonkalar `lucide-react-native`; pastki qatorda sahifa almashtirgich va "+ Sahifa" ichki chetlari 2–4px kichikroq — RN shrifti kengroq, aks holda tugma ekran chetiga tegadi; `BoardTool` turi shu yerda |
-| `src/modules/board/ui/board-pages-sheet.tsx` | 🟡 MOSLASH | `02563fb2ecab` | faqat tor ekran varianti (`Sheet variant="app" compact`); eskizlar Skia'da (`xMidYMin slice`); nomni o'zgartirish `onEndEditing` da |
+| `src/modules/board/ui/board-panel.tsx` | 🟡 MOSLASH | `f6b12a4023bd` | faqat tor ekran shoxi (`mobile` majburiy) — mobilda `board-surface.tsx`. Veb #215 lenta: hamma sahifa bitta Skia kanvasda (`offset` bilan), `place`/`homeOf`, ajratgich va "N-sahifa" yorlig'i `pendingStrokes` sifatida (yorliq chap chetda, chiziq ostida); masshtab bitta sahifadan (`fitHeight`), lenta ikki barmoq bilan aylanadi, `scrollToY`; "Sahifa qo'shish" lenta oxiri o'rniga pastki qatorda (Skia kanvas siljitiladi); uzun matn `wrapToWidth` bilan joylashtirishda |
+| `src/modules/board/ui/board-mobile.tsx` | 🟡 MOSLASH | `f0c0b19e72d5` | ikonkalar `lucide-react-native`; veb #215: sahifa almashtirgich yo'q, pastki qatorda bekor qilish/qaytarish va punktirli "Sahifa qo'shish"; `BoardTool` turi shu yerda |
 | `src/modules/board/ui/board-preview.tsx` | 🟡 MOSLASH | `a1620aaa5fb5` | Skia `BoardCanvas` faqat o'qish rejimida (vebda SVG) |
 | `src/modules/board/ui/board-permission-dialog.tsx` | 🟡 MOSLASH | `cb442712481d` | faqat tor ekran varianti (`Sheet variant="app" compact`) |
-| `src/modules/board/ui/erase-reason-dialog.tsx` | 🟡 MOSLASH | `71b533f95680` | faqat tor ekran varianti (`MobileAlertDialog`: `titleVariant="title-lg"`, `shift={24}` — veb `titleClassName`, `className`) |
 | `src/modules/board/ui/formula-palette.tsx` | 🟡 MOSLASH | `c3db89716ff5` | shablonlar to'ri BITTA WebView'da (KaTeX `\displaystyle`, `.formula-palette-grid` o'lchamlari, bosilgan shablon `postMessage` bilan); tablar `Chip`; MathLive placeholder'lari (#0, #?) olib tashlanadi — mobilda LaTeX oddiy TextInput da yoziladi |
 | `src/modules/board/ui/math-markup.tsx` | 🔴 QAYTA | `13d0ea12199d` | MathLive renderi o'rniga KaTeX (CDN) WebView'da; `\placeholder{}` katakchaga almashtiriladi (KaTeX bilmaydi); doskada `framed={false}` — chapga tekislangan, rang chiziqdan. Doskada WebView `scale` bilan kichraytirilmaydi (Android Modal ochilganda asl o'lchamga qaytaradi) — shrift masshtabda, joyi `translate` bilan |
 | `src/modules/board/ui/math-field-input.tsx` | 🔴 QAYTA | `2a8cdafb3b77` | MathLive Web Component RN'da yo'q: LaTeX matn sifatida yoziladi, ostida KaTeX ko'rinishi; MathLive klaviaturasi o'rniga telefon klaviaturasi |
@@ -162,7 +160,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/homework/lib/homework-validation.ts` | 🟢 NUSXA | `d1a936efe3b5` | — |
 | `src/modules/homework/lib/homework.mappers.ts` | 🟢 NUSXA | `e58747278c64` | — |
 | `src/modules/homework/model/homework.queries.ts` | 🟢 NUSXA | `0ab58f148cc6` | — |
-| `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `bed68bc9743a` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; chiqishdagi oxirgi saqlash qoldi |
+| `src/modules/homework/model/use-homework-board.ts` | 🟡 MOSLASH | `bed68bc9743a` | brauzerning `beforeunload` ogohlantirishi olib tashlandi; 🟡 saqlangach `homeworkKeys.board` keshi yangilanadi — doska shu seansda qayta ochilsa eski holat serverdagini bosib ketmasin (vebda ham shu xato bor) |
 | `src/modules/homework/ui/homework-report-view.tsx` | 🟡 MOSLASH | `e63f770dcde0` | portal bloklari (`shared/ui/portal.tsx`) bilan; ko'rsatkichlar tor ekrandagidek bir ustun |
 | `src/modules/homework/ui/homework-result-dialog.tsx` | 🟡 MOSLASH | `2bfc9a09baf1` | faqat tor ekran varianti (to'liq ekran Modal); eski `homework-result-sheet.tsx` ota-ona ekranida va xabar kartasidagi oynada qoladi |
 | `src/modules/homework/ui/homework-message-card.tsx` | 🟡 MOSLASH | `ec1425959edf` | faqat tor ekran (`compact`) kartasi; natijalar `AssignmentDetailSheet` da |
@@ -407,7 +405,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/attendance/parent-attendance-page.tsx` | 🟡 MOSLASH | `9b8c3bc6ee33` | faqat telefon shoxi (`AttendanceMobile`) |
 | `src/pages/parent/homework/parent-homework-page.tsx` | 🟡 MOSLASH | `cb3f89693849` | faqat telefon shoxi (`HomeworkMobile`) |
 | `src/pages/parent/report/parent-report-page.tsx` | 🟡 MOSLASH | `976d5b111c4a` | faqat telefon shoxi (`ResultsMobile`) |
-| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `7933af57e755` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
+| `src/pages/board/board-page.tsx` | 🟡 MOSLASH | `dcccadd4a428` | faqat tor ekran shoxi; PDF yuklab olish `downloadBlob` (ulashish oynasi); menyu `PopoverMenu`; yuklanish vebdagi `LoadingFallback` o'rniga oddiy belgi |
 | `src/pages/live/live-lesson-page.tsx` | 🟡 MOSLASH | `de4736e2c9e0` | avtomatik qayta kirish (NetInfo `isOnline()`, `room.reconnectingMobile` banneri, qayta kirishda `onError` toast yo'q); darsdan faqat `!lesson.data` da chiqiladi (oflaynda fon refetch xatosi darsdan chiqarmasin); ROOM_OPTIONS vebdagidek (540p@24 + 180p, adaptiveStream, dynacast) |
 | `src/pages/live/join-queue-state.tsx` | 🟡 MOSLASH | `7038063dfcd5` | mobil `LiveRoomState` (qorong'i, tor ekran); `role=status` o'rniga oddiy matn |
 | `src/modules/live/ui/lesson-pre-join.tsx` | 🟡 MOSLASH | `658cda176ab8` | faqat tor ekran varianti; o'qituvchining kompyuterdagi ekran ulashish shoxi yo'q; ruxsat rad etilsa `media-permission-dialog.tsx` ga qarang |
@@ -598,7 +596,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/auth/ui/register-email-field.tsx` | 🟡 MOSLASH | `301367497034` | `AuthField` `trailing` ichida kichik `Pressable` tugmalar; `readOnly` o'rniga `editable` |
 | `src/modules/auth/ui/email-verify-form.tsx` | 🟡 MOSLASH | `8c69a7e09a33` | `MobileInput` + `MobileButton`; forma `onSubmit` o'rniga klaviaturadagi "send" |
 | `src/modules/auth/ui/email-verify-dialog.tsx` | 🟡 MOSLASH | `1700739024b1` | `AppDialog variant="adaptive"` o'rniga `Sheet variant="app"` |
-| `src/modules/auth/ui/email-setup-dialog.tsx` | 🟡 MOSLASH | `4321099de5f2` | `CenterDialog`; "Keyinroq" ilova jarayonida eslanadi (`sessionStorage` o'rniga); banner pastki suzuvchi menyu ustida (balandlik `role-tabs` import qilinmasdan hisoblanadi — aylanma bog'liqlik) |
+| `src/modules/auth/ui/email-setup-dialog.tsx` | 🟡 MOSLASH | `4321099de5f2` | `CenterDialog`; "Keyinroq" ilova jarayonida eslanadi; banner faqat pastki menyuli bo'lim ekranlarida (`/{rol}/{bo'lim}`) — doska/chat/forma asboblarini yopmasin; balandlik `role-tabs` import qilinmasdan (aylanma bog'liqlik) |
 | `src/modules/parent/api/parent.endpoints.ts` | 🟢 NUSXA | `85b3cf9db4d0` | — |
 | `src/modules/parent/lib/parent-attendance.ts` | 🟢 NUSXA | `b3352ac652af` | — |
 | `src/modules/parent/lib/parent-errors.ts` | 🟢 NUSXA | `ce4e5985c831` | — |
@@ -711,6 +709,8 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/board/lib/board-pending.ts` | 🟢 NUSXA | `11dc6ef9059c` | — |
 | `src/modules/board/model/use-board-guides.ts` | 🟢 NUSXA | `8bda62bccaab` | — |
 | `src/modules/board/ui/board-guides.tsx` | 🟡 MOSLASH | `cd5f4320784c` | SVG `pattern` o'rniga Skia yo'li (har 30 birlikda chiziq) kanvas transformatsiyasi ichida; `non-scaling-stroke` o'rniga qalinlik `1 / factor` |
+| `src/modules/board/lib/board-lenta.ts` | 🟢 NUSXA | `c52fc79c5e10` | — |
+| `src/modules/board/lib/wrap-text.ts` | 🟢 NUSXA | `25b386562882` | — |
 | `src/modules/live/lib/share-source.ts` | 🟢 NUSXA | `c1da876a4f6e` | — |
 | `src/modules/live/lib/client-health.ts` | 🟢 NUSXA | `ba90ea5fcb94` | — |
 | `src/modules/live/model/use-media-mode-channel.ts` | 🟢 NUSXA | `8e33aed6b85f` | — |

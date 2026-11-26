@@ -88,6 +88,7 @@ export {
   useQuizDetailLoader,
   useQuizQuestionStats,
   useQuizzes,
+  useAssignableQuizzes,
   useRemoveGroupAudio,
   useStartAiMiniQuiz,
   useStartAiQuiz,

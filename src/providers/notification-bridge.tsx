@@ -1,10 +1,14 @@
 import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import { useCurrentUser, useIsAuthenticated } from "@/modules/auth";
-import { useNotificationFeed, type OpenNotificationLink } from "@/modules/notification";
+import { conversationKeys } from "@/modules/conversation";
+import { useActiveConversationStore } from "@/modules/conversation/model/chat-realtime";
+import { notificationKeys, useNotificationFeed, type OpenNotificationLink } from "@/modules/notification";
 import { ROLES } from "@/shared/constants";
 import { useOpenNotificationLink } from "@/widgets/notification-link";
 import { useParentNotificationLink } from "@/widgets/parent-shell";
+import { setActiveChatResolver, useForegroundPushStore } from "./foreground-push";
 import { RealtimeSync } from "./realtime-sync";
 import { usePushRegistration } from "./use-push-registration";
 
@@ -35,6 +39,7 @@ export function NotificationBridge() {
  */
 function NotificationLinks() {
   const role = useCurrentUser()?.role;
+  useForegroundPushSync();
   return role === ROLES.PARENT ? <ParentNotificationLinks /> : <RoleNotificationLinks />;
 }
 
@@ -58,10 +63,52 @@ function ParentNotificationLinks() {
   return <NotificationFeed openLink={openLink} />;
 }
 
-/** Ota-ona va admin — veb `NotificationBell` dagi kabi faqat bildirishnomalar kanali. */
+/**
+ * Ota-ona va admin — veb `NotificationBell` dagi kabi faqat bildirishnomalar
+ * kanali. Push yetib kelayotgan bo'lsa (Android) soket o'chadi — xabarni
+ * tizim banneri ko'rsatadi, ro'yxat esa push kelganda yangilanadi
+ * (`useForegroundPushSync`).
+ */
 function NotificationFeed({ openLink }: { openLink: OpenNotificationLink }) {
-  useNotificationFeed(true, openLink);
+  const pushActive = useForegroundPushStore((state) => state.active);
+  useNotificationFeed(!pushActive, openLink);
   return null;
+}
+
+/**
+ * Ilova ochiq turgandagi push uchun ikki narsa:
+ * - ochiq chatni aniqlash (o'z xabari jim qoladi) — guruh chatida push
+ *   havolasi kurs id bo'lgani uchun kurs id suhbatlar keshidan olinadi;
+ * - push kelganda bildirishnomalar ro'yxati va soni yangilanadi.
+ */
+function useForegroundPushSync(): void {
+  const queryClient = useQueryClient();
+
+  useEffect(
+    () =>
+      setActiveChatResolver(() => {
+        const id = useActiveConversationStore.getState().id;
+        if (!id) return null;
+        let courseId: string | null = null;
+        for (const [, data] of queryClient.getQueriesData<unknown>({ queryKey: conversationKeys.all })) {
+          const items = Array.isArray(data) ? data : data ? [data] : [];
+          const room = items.find((item): item is { id: string; courseId?: string | null } => (item as { id?: unknown })?.id === id);
+          if (room?.courseId) {
+            courseId = room.courseId;
+            break;
+          }
+        }
+        return { id, courseId };
+      }),
+    [queryClient]
+  );
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(() => {
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+    });
+    return () => subscription.remove();
+  }, [queryClient]);
 }
 
 /**

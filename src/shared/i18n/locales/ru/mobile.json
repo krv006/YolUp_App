@@ -208,7 +208,8 @@
     "tayyorlanmoqda": "Готовится",
     "yozuvni_ochib_bolmadi_hali_tayyorlanayotgan": "Не удалось открыть запись. Возможно, она ещё обрабатывается — попробуйте чуть позже.",
     "qayta_urinish": "Повторить",
-    "toliq_ekran": "Во весь экран"
+    "toliq_ekran": "Во весь экран",
+    "ekrandan_chiqish": "Выйти из полноэкранного режима"
   },
   "schedule": {
     "kalendar_yuklanmoqda": "Загрузка календаря…",

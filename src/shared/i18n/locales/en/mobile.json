@@ -208,7 +208,8 @@
     "tayyorlanmoqda": "Preparing",
     "yozuvni_ochib_bolmadi_hali_tayyorlanayotgan": "The recording could not be opened. It may still be processing — please try again shortly.",
     "qayta_urinish": "Try again",
-    "toliq_ekran": "Full screen"
+    "toliq_ekran": "Full screen",
+    "ekrandan_chiqish": "Exit full screen"
   },
   "schedule": {
     "kalendar_yuklanmoqda": "Loading calendar…",

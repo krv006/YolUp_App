@@ -78,6 +78,16 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       infoPlist: {
         // Jonli dars fon rejimida uzilmasin (MOBILE_PLAN §7.2).
         UIBackgroundModes: ["audio"],
+        /*
+         * Ilova portretda (`orientation` + `expo-screen-orientation` boshlang'ich
+         * qulfi), faqat dars yozuvining to'liq ekrani yotiq holatga o'tadi.
+         * iOS qulfni faqat shu ro'yxatdagi yo'nalishlarga qo'ya oladi.
+         */
+        UISupportedInterfaceOrientations: [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight",
+        ],
         NSCameraUsageDescription:
           "Jonli darsda kameradan foydalanish va uy vazifasiga rasm biriktirish uchun.",
         NSMicrophoneUsageDescription:
@@ -173,6 +183,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ],
       // Dars yozuvini "picture in picture" da ko'rish uchun.
       ["expo-video", { supportsPictureInPicture: true }],
+      ["expo-screen-orientation", { initialOrientation: "PORTRAIT_UP" }],
       [
         "expo-build-properties",
         {
@@ -238,6 +249,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           icon: "./assets/android-icon-monochrome.png",
           color: "#4A66F0",
+          // Fondagi push shu kanalga tushadi (MAX — banner va ovoz), `use-push-registration.ts`.
+          defaultChannel: "default",
         },
       ],
       // Release APK'ni haqiqiy kalit bilan imzolaydi. `credentials/`

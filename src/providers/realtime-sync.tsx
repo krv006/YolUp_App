@@ -2,8 +2,9 @@ import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/modules/auth";
 import { applyChatActivity, applyChatTyping, conversationKeys, useConversationSync } from "@/modules/conversation";
-import { useRealtimeSocket, useShowLiveNotification, type OpenNotificationLink } from "@/modules/notification";
+import { notificationKeys, useRealtimeSocket, useShowLiveNotification, type OpenNotificationLink } from "@/modules/notification";
 import type { ConversationRole } from "@/shared/types";
+import { useForegroundPushStore } from "./foreground-push";
 
 /**
  * Real vaqt kanali — veb `app/router/realtime-sync.tsx` (#165): o'qituvchi va
@@ -32,7 +33,9 @@ export function RealtimeSync({ role, openLink }: { role: ConversationRole; openL
     Boolean(userId),
     (event) => {
       if (event.type === "notification") {
-        showNotification(event.notification);
+        // Push yetib kelayotgan bo'lsa xabarni tizim banneri ko'rsatadi (ovoz bilan) — toast takror bo'lardi.
+        if (useForegroundPushStore.getState().active) void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+        else showNotification(event.notification);
         return;
       }
       if (event.type === "chatActivity") {

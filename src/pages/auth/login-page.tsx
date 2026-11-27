@@ -31,7 +31,7 @@ interface PendingChallenge {
  * (veb `login-page.tsx` dagi `pending` holati).
  */
 export function LoginPage() {
-  const { t } = useTranslation("auth");
+  const { t, i18n } = useTranslation("auth");
   const { t: tm } = useTranslation("mobile");
   const ds = useDs();
   const router = useRouter();
@@ -65,8 +65,17 @@ export function LoginPage() {
       router.replace(resolveHomeRoute(result.user));
     } catch (error) {
       const appError = error as AppError;
-      // Veb #199/#201: "bu email bir nechta akkauntga bog'langan" (400) va 10 ta xato urinishdan keyingi kutish (429) — backend matni.
-      const explained = (appError?.status === 400 && !appError.fields) || appError?.status === 429 ? appError.message : "";
+      /*
+       * Backend matni (EMAIL_LOGIN_FRONTEND_VAZIFA-2, 2026-11-27):
+       * - 400 — "Email hali tasdiqlanmagan…" yoki "bir nechta akkauntga bog'langan" (veb #199/#201);
+       * - 429 — ko'p xato urinish;
+       * - 401 — "Login yoki parol noto'g'ri." Backend matni faqat o'zbekcha, shuning uchun
+       *   boshqa tilda o'z tarjimamiz qoladi. Matnsiz 401 da `defaultMessage` ("Sessiya
+       *   tugagan") kirish oynasiga to'g'ri kelmaydi — `details` bo'lsagina backend matni.
+       */
+      const backendText =
+        appError?.status === 401 ? Boolean(appError.details) && i18n.language.startsWith("uz") : (appError?.status === 400 && !appError.fields) || appError?.status === 429;
+      const explained = backendText ? appError.message : "";
       if (!applyApiFieldErrors(appError, setError, { username: "login" })) {
         setError("root", { type: "server", message: explained || t("mobile.login.failed") });
       }

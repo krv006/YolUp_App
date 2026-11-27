@@ -2,7 +2,7 @@
 
 **Sana:** 2026-11-27
 **Kimdan:** mobil ilova (YolUp, Android/iOS)
-**Holat:** backend javobi kutilmoqda
+**Holat:** hal qilindi (2026-11-27). Backend javobi: email bilan kirish productionda ishlaydi, faqat **tasdiqlangan** email bilan. Maydon `username` bo'lib qoladi, `mapLoginRequest` o'zgarmaydi. Tasdiqlanmagan email va to'g'ri parol uchun `400` qaytadi, xabari: «Email hali tasdiqlanmagan…». Bu matn kirish oynasida maydon ostida ko'rsatiladi (`login-page.tsx`, `400` va `fields` yo'q holat). `401` xabari endi o'zbekcha.
 
 ## Muammo
 

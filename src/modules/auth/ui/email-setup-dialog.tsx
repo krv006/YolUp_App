@@ -40,7 +40,11 @@ export function EmailSetupDialog() {
    */
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
-  const onTabScreen = segments.length === 2 && !["notifications", "search"].includes(segments[1] ?? "");
+  // Faqat rol tablari (`/teacher/schedule` kabi) — `/recordings/<id>` ham 2 bo'lakli, lekin tab emas.
+  const onTabScreen =
+    segments.length === 2 &&
+    ["teacher", "student", "parent"].includes(segments[0] ?? "") &&
+    !["notifications", "search"].includes(segments[1] ?? "");
   const showBanner = required && !overdue && later && onTabScreen;
   // Pastki suzuvchi menyu ustida (`providers/role-tabs.tsx` `useFloatingTabInset`: 30 + 68 + 14).
   // Import qilinmaydi — auth -> providers -> conversation -> course -> auth aylanma bog'liqlik.

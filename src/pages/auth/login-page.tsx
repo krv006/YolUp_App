@@ -146,6 +146,8 @@ export function LoginPage() {
               <AuthField
                 autoComplete="username"
                 textContentType="username"
+                // Login yoki email — `@` klaviaturada darhol bo'lsin (username yozishga xalaqit bermaydi).
+                keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
                 label={t("form.loginLabel")}

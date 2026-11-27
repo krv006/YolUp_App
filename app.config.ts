@@ -249,6 +249,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           icon: "./assets/android-icon-monochrome.png",
           color: "#4A66F0",
+          // Fondagi push shu kanalga tushadi (MAX — banner va ovoz), `use-push-registration.ts`.
+          defaultChannel: "default",
         },
       ],
       // Release APK'ni haqiqiy kalit bilan imzolaydi. `credentials/`

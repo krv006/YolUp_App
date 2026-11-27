@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { pushDeviceApi } from "@/modules/notification/api/push-device.api";
 import { getDeviceId } from "@/modules/notification/lib/device-id";
+import { isPushForOpenChat, setForegroundPushActive } from "./foreground-push";
 
 /**
  * Android bildirishnoma kanali.
@@ -11,23 +12,32 @@ import { getDeviceId } from "@/modules/notification/lib/device-id";
  * Androidda kanal BO'LMASA bildirishnoma jimgina kelib, yuqorida
  * ko'rinmaydi (faqat panelga tushadi). `MAX` muhimligi "heads-up"
  * bannerini beradi — dars boshlanishi kabi xabar ko'zdan qochmasin.
+ * Ovoz ko'rsatilmagan — Android standart bildirishnoma ovozi.
+ *
+ * Ilova fonda yoki yopiq bo'lsa push'ni FCM o'zi chizadi va shu kanalni
+ * manifestdagi `default_notification_channel_id` dan oladi
+ * (`app.config.ts`, `expo-notifications` → `defaultChannel`). Usiz u
+ * "Miscellaneous" (`fcm_fallback_notification_channel`) ga tushib, banner
+ * va ovozsiz kelardi.
  */
 const ANDROID_CHANNEL = "default";
 
 /**
- * Ilova OCHIQ turganda tizim banneri KO'RSATILMAYDI.
- *
- * Sabab: o'sha paytda WebSocket kanali allaqachon ichki toast chiqaradi
- * (`use-notification-feed.ts`). Ikkalasi birga ishlasa bitta xabar ekranda
- * ikki marta ko'rinardi.
+ * Ilova OCHIQ turganda: push yetib kelayotgan bo'lsa (Android) — tizim
+ * banneri va ovoz, xuddi fondagidek; WebSocket toast'i o'sha xabar uchun
+ * chiqmaydi (`foreground-push.ts`). Faqat hozir ochiq chatning o'z xabari
+ * jim — u ekranda ko'rinib turibdi.
  */
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: false,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: true,
-  }),
+  handleNotification: async (notification) => {
+    const quiet = isPushForOpenChat(notification.request.content.data as Record<string, unknown> | undefined);
+    return {
+      shouldShowBanner: !quiet,
+      shouldShowList: true,
+      shouldPlaySound: !quiet,
+      shouldSetBadge: true,
+    };
+  },
 });
 
 async function ensureAndroidChannel(): Promise<void> {
@@ -69,6 +79,7 @@ export function usePushRegistration(enabled: boolean): void {
     if (!enabled) {
       lastToken.current = null;
       sending.current = null;
+      setForegroundPushActive(false);
       return undefined;
     }
 
@@ -86,6 +97,8 @@ export function usePushRegistration(enabled: boolean): void {
           app_version: Constants.expoConfig?.version ?? undefined,
         });
         lastToken.current = token;
+        // iOS push hali yo'q (APNs) — u yerda token bo'lsa ham xabar yetmaydi.
+        setForegroundPushActive(Platform.OS === "android");
       } catch {
         sending.current = null;
         /*

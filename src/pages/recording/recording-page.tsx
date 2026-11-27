@@ -1,12 +1,13 @@
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useEvent, useEventListener } from "expo";
 import { useTranslation } from "react-i18next";
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Image, Modal, Pressable, StatusBar, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVideoPlayer, VideoView, type VideoPlayer } from "expo-video";
 import { useKeepAwake } from "expo-keep-awake";
-import { Maximize2, Pause, Play, Volume1, Volume2, VolumeX } from "lucide-react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { Maximize2, Minimize2, Pause, Play, Volume1, Volume2, VolumeX } from "lucide-react-native";
 import { useAttendance } from "@/modules/attendance";
 import { useAuth } from "@/modules/auth";
 import { boardApi } from "@/modules/board";
@@ -382,6 +383,10 @@ const VOLUME_STEP = 0.05;
  * qora karta, o'rtada oq doira ichida "Play", boshlangach pastda vaqt,
  * chiziq, ovoz tugmasi va balandligi surgichi (veb #161). Vebdan farqi:
  * oxirida to'liq ekran tugmasi bor; surgich bosib yoki sudrab o'zgaradi.
+ *
+ * To'liq ekran — o'zimizniki (Modal + yotiq holat), nativ emas: ilova
+ * portretga qulflangan, nativ to'liq ekran videoni burmasdi (16:9 tik
+ * ekranda to'liq egallamasdi) va suv belgisini ham yashirardi.
  */
 function RecordingVideo({ src, poster }: { src: string; poster?: string | null }) {
   // Video ko'rayotganda ekran o'chib qolmasin.
@@ -392,12 +397,15 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
   const ds = useDs();
   const { user } = useAuth();
   const watermark = `@${user?.username || user?.name || "YolUp"} · YolUp`;
-  const viewRef = useRef<VideoView>(null);
+  const [fullscreen, setFullscreen] = useState(false);
   const [started, setStarted] = useState(false);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
   const [trackWidth, setTrackWidth] = useState(0);
   const [volumeWidth, setVolumeWidth] = useState(0);
+  /** Surgichning ekrandagi chap cheti — `locationX` ichki elementga nisbatan sakrab ketardi. */
+  const volumeRef = useRef<View>(null);
+  const volumeLeft = useRef(0);
   /** Oxirgi noldan katta balandlik — ovoz qaytarilganda shu tiklanadi. */
   const [volume, setVolumeState] = useState(1);
   /*
@@ -424,6 +432,28 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
     setAudioOnly(payload.availableVideoTracks.length === 0);
   });
   useEventListener(player, "playingChange", (payload) => payload.isPlaying && setStarted(true));
+
+  /*
+   * Pleer boshqa VideoView'ga o'tgach (to'liq ekranga kirish/chiqish) pauzadagi
+   * video qora qolardi — yangi sirt keyingi kadrni kutadi. Joriy joyga qayta
+   * o'tib kadr chizdiriladi.
+   */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        if (!player.playing && player.currentTime > 0) seekTo(player, player.currentTime);
+      } catch {
+        // Pleer bo'shatilgan (sahifa yopilgan) — chizadigan joy ham yo'q.
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [fullscreen, player]);
+
+  // Sahifadan to'liq ekranda chiqib ketilsa ham ilova portretga qaytadi.
+  useEffect(() => {
+    if (!fullscreen) return;
+    return () => void ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => undefined);
+  }, [fullscreen]);
 
   /*
    * IJRO XATOSI — ALOHIDA HOLAT. Backend yozuvni avval WebM sifatida beradi
@@ -461,10 +491,25 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
     else setMuted(player, true);
   }
 
-  function volumeAt(x: number) {
+  /*
+   * Surgich darhol javob beradi (holat shu yerda yangilanadi, nativ hodisani
+   * kutmaydi) va qiymat o'zgarganda pleerga bir marta yuboriladi.
+   */
+  function volumeAt(pageX: number) {
     if (!volumeWidth) return;
-    const ratio = Math.max(0, Math.min(x / volumeWidth, 1));
-    setVolume(player, Math.round(ratio / VOLUME_STEP) * VOLUME_STEP);
+    const ratio = Math.max(0, Math.min((pageX - volumeLeft.current) / volumeWidth, 1));
+    const next = Math.round(ratio / VOLUME_STEP) * VOLUME_STEP;
+    if (next === (silent ? 0 : volume)) return;
+    if (next > 0) setVolumeState(next);
+    setVolume(player, next);
+  }
+
+  async function enterFullscreen() {
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(() => undefined);
+    setFullscreen(true);
+  }
+  function exitFullscreen() {
+    setFullscreen(false);
   }
   function toggle() {
     if (isPlaying) {
@@ -476,16 +521,14 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
     player.play();
   }
 
-  return (
-    <View style={[styles.frame, { backgroundColor: ds.c["surface-inverse"] }]}>
+  const body = (
+    <>
       <VideoView
-        ref={viewRef}
         style={[StyleSheet.absoluteFill, audioOnly && styles.hidden]}
         player={player}
         nativeControls={false}
-        fullscreenOptions={{ enable: true }}
         allowsPictureInPicture
-        contentFit="cover"
+        contentFit={fullscreen ? "contain" : "cover"}
       />
       {/* Veb `<video poster>`: ijro boshlanguncha muqova rasmi. */}
       {poster && !started ? <Image source={{ uri: poster }} resizeMode="cover" style={StyleSheet.absoluteFill} /> : null}
@@ -503,7 +546,7 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
 
       {/* `absolute inset-x-5 bottom-5 h-8.5 rounded-md bg-surface-inverse/55 px-3 gap-3` */}
       {started ? (
-        <View style={[styles.controls, { backgroundColor: dsAlpha(ds.c["surface-inverse"], 0.55) }]}>
+        <View style={[styles.controls, fullscreen && styles.controlsWide, { backgroundColor: dsAlpha(ds.c["surface-inverse"], 0.55) }]}>
           <Pressable accessibilityRole="button" accessibilityLabel={isPlaying ? t("recording.pause") : t("recording.play")} onPress={toggle} hitSlop={8} style={styles.control}>
             {isPlaying ? <Pause size={14} color={ds.c["ink-inverse"]} fill={ds.c["ink-inverse"]} /> : <Play size={14} color={ds.c["ink-inverse"]} fill={ds.c["ink-inverse"]} />}
           </Pressable>
@@ -542,25 +585,59 @@ function RecordingVideo({ src, poster }: { src: string; poster?: string | null }
             onAccessibilityAction={(event) =>
               setVolume(player, Math.max(0, Math.min(1, (silent ? 0 : volume) + (event.nativeEvent.actionName === "increment" ? 0.1 : -0.1))))
             }
-            onLayout={(event) => setVolumeWidth(event.nativeEvent.layout.width)}
+            ref={volumeRef}
+            onLayout={(event) => {
+              setVolumeWidth(event.nativeEvent.layout.width);
+              volumeRef.current?.measureInWindow((x) => (volumeLeft.current = x));
+            }}
             onStartShouldSetResponder={() => true}
             onMoveShouldSetResponder={() => true}
-            onResponderGrant={(event) => volumeAt(event.nativeEvent.locationX)}
-            onResponderMove={(event) => volumeAt(event.nativeEvent.locationX)}
-            hitSlop={8}
-            style={styles.volume}
+            // Sudrash paytida ota ScrollView teginishni tortib olmasin (surgich qotib qolardi).
+            onResponderTerminationRequest={() => false}
+            onResponderGrant={(event) => {
+              const { pageX, locationX } = event.nativeEvent;
+              // Joy o'zgargan bo'lishi mumkin (aylantirish, to'liq ekran) — bosilgan nuqtadan qayta hisoblanadi.
+              if (event.target === event.currentTarget) volumeLeft.current = pageX - locationX;
+              volumeAt(pageX);
+            }}
+            onResponderMove={(event) => volumeAt(event.nativeEvent.pageX)}
+            hitSlop={12}
+            style={[styles.volume, fullscreen && styles.volumeWide]}
           >
             <View pointerEvents="none" style={[styles.trackBar, { backgroundColor: dsAlpha(ds.c["ink-inverse"], 0.3) }]}>
               <View style={[styles.trackFill, { width: `${(silent ? 0 : volume) * 100}%`, backgroundColor: ds.c["ink-inverse"] }]} />
             </View>
           </View>
           {audioOnly ? null : (
-            <Pressable accessibilityRole="button" accessibilityLabel={tm("recording.toliq_ekran")} onPress={() => void viewRef.current?.enterFullscreen()} hitSlop={8} style={styles.control}>
-              <Maximize2 size={15} color={ds.c["ink-inverse"]} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={fullscreen ? tm("recording.ekrandan_chiqish") : tm("recording.toliq_ekran")}
+              onPress={() => (fullscreen ? exitFullscreen() : void enterFullscreen())}
+              hitSlop={8}
+              style={styles.control}
+            >
+              {fullscreen ? <Minimize2 size={15} color={ds.c["ink-inverse"]} /> : <Maximize2 size={15} color={ds.c["ink-inverse"]} />}
             </Pressable>
           )}
         </View>
       ) : null}
+    </>
+  );
+
+  return (
+    <View style={[styles.frame, { backgroundColor: ds.c["surface-inverse"] }]}>
+      {fullscreen ? null : body}
+      <Modal
+        visible={fullscreen}
+        animationType="fade"
+        supportedOrientations={["landscape", "landscape-left", "landscape-right"]}
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={exitFullscreen}
+      >
+        <StatusBar hidden />
+        <View style={[styles.fill, { backgroundColor: "#000" }]}>{fullscreen ? body : null}</View>
+      </Modal>
     </View>
   );
 }
@@ -617,6 +694,9 @@ const styles = StyleSheet.create({
   track: { flex: 1, minWidth: 0, height: 16, justifyContent: "center" },
   trackBar: { height: 4, overflow: "hidden", borderRadius: 2 },
   volume: { width: 56, flexShrink: 0, height: 16, justifyContent: "center" },
+  /* To'liq ekranda (yotiq) joy ko'p — surgich kattaroq, chetlardan kesik/tugma uchun joy. */
+  volumeWide: { width: 96 },
+  controlsWide: { left: 48, right: 48, bottom: 24, height: 40 },
   trackFill: { position: "absolute", top: 0, bottom: 0, left: 0, borderRadius: 2 },
   skeleton: { gap: 20, paddingHorizontal: 16 },
   skeletonHeader: { flexDirection: "row", alignItems: "center", gap: 16 },

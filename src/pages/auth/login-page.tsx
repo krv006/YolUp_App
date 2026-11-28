@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { CloudOff } from "lucide-react-native";
 import { createLoginSchema, resolveHomeRoute, useAuth, type TwoFactorChallenge } from "@/modules/auth";
+import { loginErrorMessage } from "@/modules/auth/lib/login-error";
 import { AuthButton, AuthField, AuthFieldError, AuthPasswordField, AuthScreen } from "@/modules/auth/ui/auth-screen";
 import { MobileTwoFactorForm } from "@/modules/auth/ui/two-factor-form";
 import { applyApiFieldErrors, type AppError } from "@/shared/api";
@@ -65,21 +66,16 @@ export function LoginPage() {
       router.replace(resolveHomeRoute(result.user));
     } catch (error) {
       const appError = error as AppError;
-      /*
-       * Backend matni (EMAIL_LOGIN_FRONTEND_VAZIFA-2, 2026-11-27):
-       * - 400 — "Email hali tasdiqlanmagan…" yoki "bir nechta akkauntga bog'langan" (veb #199/#201);
-       * - 429 — ko'p xato urinish;
-       * - 401 — "Login yoki parol noto'g'ri." Backend matni faqat o'zbekcha, shuning uchun
-       *   boshqa tilda o'z tarjimamiz qoladi. Matnsiz 401 da `defaultMessage` ("Sessiya
-       *   tugagan") kirish oynasiga to'g'ri kelmaydi — `details` bo'lsagina backend matni.
-       */
-      const backendText =
-        appError?.status === 401 ? Boolean(appError.details) && i18n.language.startsWith("uz") : (appError?.status === 400 && !appError.fields) || appError?.status === 429;
-      const explained = backendText ? appError.message : "";
+      // Backend matni — 400/429 sababi, 401 faqat o'zbekcha (veb `login-error.ts`, 9c697c3).
+      const fallback = t("mobile.login.failed");
+      const message = loginErrorMessage(appError, i18n.language, fallback);
       if (!applyApiFieldErrors(appError, setError, { username: "login" })) {
-        setError("root", { type: "server", message: explained || t("mobile.login.failed") });
+        setError("root", { type: "server", message });
       }
-      showErrorToast({ title: t("mobile.login.errorToastTitle"), description: explained || t("mobile.login.errorToastDescription") });
+      showErrorToast({
+        title: t("mobile.login.errorToastTitle"),
+        description: message !== fallback ? message : t("mobile.login.errorToastDescription"),
+      });
     }
   }
 

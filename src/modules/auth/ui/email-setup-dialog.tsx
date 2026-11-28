@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePathname } from "expo-router";
 import { CenterDialog, DsText, dsRadius, Icon, toast, useDs } from "@/shared/ui";
-import { emailSetupOverdue, formatDeadline } from "../lib/email-setup";
+import { emailBannerAllowed, emailSetupOverdue, formatDeadline } from "../lib/email-setup";
 import { useAuth } from "../model/use-auth";
 import { EmailVerifyForm } from "./email-verify-form";
 
@@ -39,13 +39,7 @@ export function EmailSetupDialog() {
    * yozish maydonini yopib qo'yardi.
    */
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-  // Faqat rol tablari (`/teacher/schedule` kabi) — `/recordings/<id>` ham 2 bo'lakli, lekin tab emas.
-  const onTabScreen =
-    segments.length === 2 &&
-    ["teacher", "student", "parent"].includes(segments[0] ?? "") &&
-    !["notifications", "search"].includes(segments[1] ?? "");
-  const showBanner = required && !overdue && later && onTabScreen;
+  const showBanner = required && !overdue && later && emailBannerAllowed(pathname);
   // Pastki suzuvchi menyu ustida (`providers/role-tabs.tsx` `useFloatingTabInset`: 30 + 68 + 14).
   // Import qilinmaydi — auth -> providers -> conversation -> course -> auth aylanma bog'liqlik.
   const insets = useSafeAreaInsets();

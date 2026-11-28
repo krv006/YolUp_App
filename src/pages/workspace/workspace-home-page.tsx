@@ -1,12 +1,10 @@
-import { useMemo } from "react";
-import { useQueries } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTeacherDashboard } from "@/modules/analytics";
 import { useCourses } from "@/modules/course";
-import { homeworkApi, homeworkKeys } from "@/modules/homework";
+import { useAllAssignments } from "@/modules/homework";
 import { useQuizzes } from "@/modules/quiz";
 import { FEATURES, ROUTES } from "@/shared/config";
 import {
@@ -60,19 +58,14 @@ export function WorkspaceHomePage() {
   const quizzes = useQuizzes(null);
   const dashboard = useTeacherDashboard();
 
-  const groups = useMemo(() => courses.data ?? [], [courses.data]);
-  const assignmentQueries = useQueries({
-    queries: groups.map((course) => ({
-      queryKey: homeworkKeys.assignments(course.id),
-      queryFn: ({ signal }: { signal: AbortSignal }) => homeworkApi.getAssignments(course.id, { signal }),
-    })),
-  });
-  const assignments = assignmentQueries.flatMap((query) => query.data ?? []);
+  // Veb f43796a: hamma guruhlar vazifalari bitta so'rovda.
+  const allAssignments = useAllAssignments();
+  const assignments = allAssignments.data ?? [];
   // 🟡 Vebdan farqi: ro'yxat API'si `submissions` ni qaytarmaydi, shuning uchun hisob doim 0 chiqardi — asosiy sahifadagi kabi server soni.
   const unchecked = dashboard.data?.submissionsPending ?? assignments.reduce((sum, item) => sum + item.submissions.filter((entry) => !entry.grade).length, 0);
 
   function refresh() {
-    return Promise.all([courses.refetch(), quizzes.refetch(), dashboard.refetch(), ...assignmentQueries.map((query) => query.refetch())]);
+    return Promise.all([courses.refetch(), quizzes.refetch(), dashboard.refetch(), allAssignments.refetch()]);
   }
 
   return (

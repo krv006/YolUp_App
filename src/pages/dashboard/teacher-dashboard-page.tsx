@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useQueries } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
@@ -10,7 +9,7 @@ import { useAuth } from "@/modules/auth";
 import { useTeacherDashboard } from "@/modules/analytics";
 import { useConversations, useGroupImages, useNewConversationStore } from "@/modules/conversation";
 import { useCourses } from "@/modules/course";
-import { homeworkApi, homeworkKeys } from "@/modules/homework";
+import { useAllAssignments } from "@/modules/homework";
 import { useLessons } from "@/modules/lesson";
 import { useLessonPresence } from "@/modules/live";
 import { ROUTES } from "@/shared/config";
@@ -84,13 +83,9 @@ export function TeacherDashboardPage() {
 
   const groups = useMemo(() => courses.data ?? [], [courses.data]);
 
-  const assignmentQueries = useQueries({
-    queries: groups.map((course) => ({
-      queryKey: homeworkKeys.assignments(course.id),
-      queryFn: ({ signal }: { signal: AbortSignal }) => homeworkApi.getAssignments(course.id, { signal }),
-    })),
-  });
-  const assignments = useMemo(() => assignmentQueries.flatMap((query) => query.data ?? []), [assignmentQueries]);
+  // Veb f43796a: hamma guruhlar vazifalari bitta `GET /homework/assignments/` so'rovida.
+  const allAssignments = useAllAssignments();
+  const assignments = useMemo(() => allAssignments.data ?? [], [allAssignments.data]);
 
   const todayLessons = useMemo(
     () =>

@@ -75,7 +75,7 @@ export function useOpenNotificationLink() {
         return go(room ? `${prefix}/chats/${room.id}` : `${prefix}/chats`);
       }
       if (type === "certificate") return go(`${prefix}/profile/certificates`);
-      if (type === "support") return go(`${prefix}/profile/help?ticket=${encodeURIComponent(link.id)}`);
+      if (type === "support") return go(`${prefix}/profile/help/tickets/${encodeURIComponent(link.id)}`);
       if (type === "conversation" || type === "room" || type === "chat" || type === "chat_room" || type === "message") {
         return go(`${prefix}/chats/${link.id}`);
       }

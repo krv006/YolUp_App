@@ -132,7 +132,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/chat-shell/use-conversation-list.ts` | 🟢 NUSXA | `581727dc7f31` | mantiq bir xil, faqat mobil import yo'llari |
 | `src/widgets/mobile-tab-bar/mobile-tab-bar.tsx` | 🟡 MOSLASH | `da37f448a0b4` | mobilda `providers/role-tabs.tsx` dagi `FloatingTabBar` (`variant="floating"`); faqat bo'limlarning o'zida ko'rinadi; eski bo'limlarga `inset`, Workspace'da bo'shliq stack bosh sahifasida (`useFloatingTabInset`); faol tab soyasi doim turadi, faol emasida shaffof (`dsShadowHidden`) — Android keyin qo'shilgan `boxShadow` ga radius qo'llamaydi |
 | `src/widgets/mobile-user-header/mobile-user-header.tsx` | 🟡 MOSLASH | `458790186999` | qo'ng'iroq — `MobileRoundButton` + `lucide` Bell, o'qilmagan bo'lsa qizil nuqta |
-| `src/widgets/notification-link/use-open-notification-link.ts` | 🟡 MOSLASH | `78030a2ee143` | o'qituvchi va o'quvchi havolalari vebdagidek (vazifa, test va uning natijalari); veb #202 mock havolalari olib tashlandi; admin uchun `teacher` havolasi; sertifikat va murojaat havolalari profilga (`/profile/certificates`, `/profile/help?ticket=`); admin sertifikat va murojaat havolalari veb `admin-dashboard-page` `openNotificationLink` dagidek; ota-onada `widgets/parent-shell/use-parent-notification-link.ts`; veb #201 `{ replace }` parametri vebdagi oraliq `/notification-open` sahifasi uchun — mobilda push to'g'ridan-to'g'ri ochiladi (`notification-bridge`), ko'chirilmadi; veb #193 admin sertifikat havolasi olib tashlandi |
+| `src/widgets/notification-link/use-open-notification-link.ts` | 🟡 MOSLASH | `f4e1e0417142` | o'qituvchi va o'quvchi havolalari vebdagidek (vazifa, test va uning natijalari); veb #202 mock havolalari olib tashlandi; admin uchun `teacher` havolasi; sertifikat va murojaat havolalari profilga (`/profile/certificates`, `/profile/help?ticket=`); admin sertifikat va murojaat havolalari veb `admin-dashboard-page` `openNotificationLink` dagidek; ota-onada `widgets/parent-shell/use-parent-notification-link.ts`; veb #201 `{ replace }` parametri vebdagi oraliq `/notification-open` sahifasi uchun — mobilda push to'g'ridan-to'g'ri ochiladi (`notification-bridge`), ko'chirilmadi; veb #193 admin sertifikat havolasi olib tashlandi |
 | `src/pages/teacher/dashboard/teacher-dashboard-page.tsx` | 🟡 MOSLASH | `e5eb10369d26` | faqat tor ekran shoxi; mobilda `pages/dashboard/teacher-dashboard-page.tsx` (`mobile-dashboard.tsx` bilan birga); Jadval va Vazifalar havolalari mobilning hozirgi marshrutlariga; "Tekshirish kerak" dagi vazifalar soni `assignmentsPending` dan (vebda `toReview.length` — ro'yxat API'si `submissions` bermagani uchun doim 0) |
 | `src/pages/teacher/dashboard/mobile-dashboard.tsx` | 🟡 MOSLASH | `1abc9723488c` | mobilda `pages/dashboard/teacher-dashboard-page.tsx` ichida |
 | `src/pages/teacher/dashboard/mobile-onboarding.tsx` | 🟡 MOSLASH | `62a51e7e3e44` | mobilda `pages/dashboard/mobile-onboarding.tsx`; xira fon panel ostida (sahifa ichida), karta va ramka ustida |
@@ -390,7 +390,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/profile/student-ratings.tsx` | 🟡 MOSLASH | `681aec74e6b1` | faqat tor ekran varianti |
 | `src/pages/profile/certificates-page.tsx` | 🟡 MOSLASH | `25dea699b601` | faqat tor ekran varianti; fayl `pickDocument` bilan; faylni ochish `Linking.openURL`; qator menyusi `PopoverMenu` |
 | `src/pages/profile/login-history-page.tsx` | 🟡 MOSLASH | `eddd7300ed0f` | faqat tor ekran varianti; `DeviceFilter` gorizontal `ScrollView` |
-| `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `2771d2562e58` | tanishuvni qayta ko'rsatish — `storage` dagi kalit o'chiriladi (vebda `localStorage`); FAQ javobi `AppDialog` o'rniga `Sheet`; video `Linking.openURL`; `?ticket=` — `useLocalSearchParams`/`router.setParams`; ota-onaga qo'llanma va tanishuv yo'q (vebdagidek) |
+| `src/pages/profile/help-center-page.tsx` | 🟡 MOSLASH | `c78d7c999279` | veb ichki `Routes` o'rniga expo-router fayllari (`app/<rol>/profile/help/...`); bu bosh sahifa; eski `?ticket=` — murojaat sahifasiga |
 | `src/pages/profile/password-change.ts` | 🟢 NUSXA | `e66a48cb2147` | — |
 | `src/widgets/account-menu/notification-settings.tsx` | 🟡 MOSLASH | `01088df91bda` | ota-onada `pages/parent/settings/settings-mobile-system.tsx` (veb `settings-mobile-system` bilan); Web Push qatori o'rnida OS push ruxsati |
 | `src/modules/auth/ui/login-history-dialog.tsx` | 🟡 MOSLASH | `6aa57a5cc062` | mobilda `login-history-sheet.tsx` (Dialog o'rniga Sheet) |
@@ -535,12 +535,15 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/modules/search/api/search.endpoints.ts` | 🟢 NUSXA | `9d234707726a` | — |
 | `src/modules/search/index.ts` | 🟢 NUSXA | `7b9bd0bd2699` | — |
 | `src/modules/search/model/search.queries.ts` | 🟢 NUSXA | `b03fcec57b3e` | — |
-| `src/modules/support/api/support.api.ts` | 🟢 NUSXA | `6563a2ec4da0` | — |
-| `src/modules/support/api/support.dto.ts` | 🟢 NUSXA | `da35f39b892c` | — |
-| `src/modules/support/api/support.endpoints.ts` | 🟢 NUSXA | `4074a461df2f` | — |
-| `src/modules/support/index.ts` | 🟡 MOSLASH | `30f7a662d77d` | veb barrel minus `ui/` eksportlari; mobil `SupportDialog` alohida bo'limda |
-| `src/modules/support/model/support.queries.ts` | 🟢 NUSXA | `dc55fa0171da` | — |
-| `src/modules/support/ui/support-dialog.tsx` | 🟡 MOSLASH | `8ac44facd076` | `AppDialog variant="panel"` -> `Sheet variant="app"`; yangi murojaat va javob tugmalari oyna pastki qatorida; xodim ko'rinishi `SupportDialog staffView` (vebda alohida `SupportThread staffView`) |
+| `src/modules/support/api/support.api.ts` | 🟢 NUSXA | `748340fe39fa` | — |
+| `src/modules/support/api/support.dto.ts` | 🟢 NUSXA | `3030e3304efe` | — |
+| `src/modules/support/api/support.endpoints.ts` | 🟢 NUSXA | `92ab6267c903` | — |
+| `src/modules/support/index.ts` | 🟡 MOSLASH | `6afda211c365` | veb barrel; `SupportThread` o'rniga mobil `SupportDialog` (admin, `staffView`) eksporti |
+| `src/modules/support/model/support.queries.ts` | 🟢 NUSXA | `20ce0d13c67b` | — |
+| `src/modules/support/ui/support-dialog.tsx` | 🟡 MOSLASH | `0979ec78961c` | veb #225 da `support-dialog.tsx` o'chirildi, admin uchun `support-thread.tsx` qoldi — mobilda admin yozishmasi shu faylda (`SupportDialog staffView`, `Sheet`); javob `reply.mutate({ message })`; foydalanuvchi murojaatlari endi `pages/help` |
+| `src/modules/support/content/help-content.ts` | 🟢 NUSXA | `870a76e666fe` | — |
+| `src/modules/support/lib/help-search.ts` | 🟢 NUSXA | `766f6a4337b9` | — |
+| `src/modules/support/lib/ticket-helpers.ts` | 🟡 MOSLASH | `dde85ac31d94` | `deviceInfo()` — vebda `navigator`/`window.screen` (RN'da yiqitardi), mobilda `shared/lib/device-info.ts` (`Platform`, `Dimensions`, ilova versiyasi); qolgani bayt-bayt |
 | `src/modules/tutor/api/tutor.api.ts` | 🟢 NUSXA | `528d187d1499` | — |
 | `src/modules/tutor/api/tutor.dto.ts` | 🟢 NUSXA | `3e37a652c909` | — |
 | `src/modules/tutor/api/tutor.endpoints.ts` | 🟢 NUSXA | `684db9b4d7ab` | — |
@@ -623,7 +626,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/parent-shell/parent-state-styles.ts` | 🟡 MOSLASH | `27ff538fb319` | mobilda `parent-state-screen.tsx` ichida |
 | `src/widgets/parent-shell/parent-locked-card.tsx` | 🟡 MOSLASH | `f087b471afc8` | telefonda ruxsatlar sahifasiga (`withAnchor`) |
 | `src/widgets/parent-shell/parent-error-banner.tsx` | 🟡 MOSLASH | `f557d547d20e` | ko'rinish bir xil |
-| `src/widgets/parent-shell/use-parent-notification-link.ts` | 🟡 MOSLASH | `776a14013ffe` | `navigate` -> `router.push(..., { withAnchor })`; push bosilganda ham ishlaydi (`providers/notification-bridge.tsx`, `data.student_id`); veb #201 `{ replace }` parametri vebdagi oraliq `/notification-open` sahifasi uchun — mobilda push to'g'ridan-to'g'ri ochiladi (`notification-bridge`), ko'chirilmadi |
+| `src/widgets/parent-shell/use-parent-notification-link.ts` | 🟡 MOSLASH | `ad5fe2201950` | `navigate` -> `router.push(..., { withAnchor })`; push bosilganda ham ishlaydi (`providers/notification-bridge.tsx`, `data.student_id`); veb #201 `{ replace }` parametri vebdagi oraliq `/notification-open` sahifasi uchun — mobilda push to'g'ridan-to'g'ri ochiladi (`notification-bridge`), ko'chirilmadi |
 | `src/widgets/parent-shell/index.ts` | 🟡 MOSLASH | `ed29f02cba0c` | keng ekran eksportlari yo'q; `ParentScreen`, `useParentBack`, `OpenHomeworkBadge`, holat ekranlari qo'shilgan |
 | `src/pages/parent/dashboard/use-parent-home.ts` | 🟢 NUSXA | `152bcef32776` | — |
 | `src/pages/parent/dashboard/home-format.ts` | 🟢 NUSXA | `4eb42b803570` | — |
@@ -669,7 +672,7 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/pages/parent/report/parent-course-page.tsx` | 🟡 MOSLASH | `0e9312907473` | mobilda `app/parent/grades/[courseId].tsx` |
 | `src/pages/parent/settings/parent-profile-page.tsx` | 🟡 MOSLASH | `c7f8cd16476b` | mobilda `app/parent/(account)/profile.tsx` |
 | `src/pages/parent/settings/parent-settings-page.tsx` | 🟡 MOSLASH | `eb3c8a32a1a7` | `section` marshrut parametri (`app/parent/(account)/settings/[section].tsx`) |
-| `src/pages/parent/settings/parent-help-page.tsx` | 🟡 MOSLASH | `e76812a19546` | telefon shoxi — umumiy `HelpCenterPage` |
+| `src/pages/parent/settings/parent-help-page.tsx` | 🟡 MOSLASH | `14de2d0fa6cb` | telefon shoxi — umumiy `HelpCenterPage` (`app/parent/(account)/help/...`) |
 | `src/pages/parent/settings/parent-not-found-page.tsx` | 🟡 MOSLASH | `fec50f1a61c2` | mobilda `app/parent/[...missing].tsx` to'g'ridan-to'g'ri `ParentNotFound` |
 | `src/pages/parent/settings/settings-mobile-profile.tsx` | 🟡 MOSLASH | `73b8dab8ec0b` | avatar — `pickImage` (kamera / galereya); nusxa `expo-clipboard`; qatorlar `settings-parts.tsx` |
 | `src/pages/parent/settings/settings-mobile-system.tsx` | 🟡 MOSLASH | `c5d9acc70f7d` | push — OS ruxsati (`usePushPermission`), sarlavha `account:page.pushTitle` (vebda "Brauzer bildirishnomalari"); Xavfsizlik sahifasida "Akkauntni o'chirish" — mobilga xos (vebda ota-onada yo'q, Play Market ilova ichida o'chirishni talab qiladi) |
@@ -741,6 +744,15 @@ uni qayta hisoblab, veb tomonda o'zgargan fayllarni ko'rsatadi.
 | `src/widgets/child-score-chart/index.ts` | 🟢 NUSXA | `29e9a0bc773c` | — |
 | `src/modules/rich-editor/ui/rich-content.tsx` | 🟡 MOSLASH | `3eec24cb1ec9` | bitta WebView: tozalash DOMPurify o'rniga WebView ichida DOM bilan (xuddi shu teg/atribut/style ro'yxatlari), KaTeX va highlight.js CDN'dan faqat kerak bo'lsa; `/media/` rasm API serveriga; havola tizim brauzerida; jadval yonga aylanadi |
 | `src/modules/rich-editor/index.ts` | 🟡 MOSLASH | `2a5a6b74a94a` | faqat `RichContent` — muharrir (TipTap) mobilda yo'q |
+| `src/pages/help/help-actions.ts` | 🟡 MOSLASH | `ceb82f8628de` | kontekst o'rniga hook: har doim `/new?category=` sahifasi (vebda kompyuterda oyna) |
+| `src/pages/help/use-help.ts` | 🟡 MOSLASH | `5cf0509ac1d5` | `openVideo` — `window.open` o'rniga `Linking.openURL`; qolgani bayt-bayt |
+| `src/pages/help/help-ui.tsx` | 🟡 MOSLASH | `25fc825a7653` | mobil qismi RN'da; `HelpRow` — `MobileListRow`, `EmptyBlock` — `MobileEmptyCard`, `RowsSkeleton` — `MobileListSkeleton`; qo'shimcha `HelpRows`, `ToneTile`, `Pills` |
+| `src/pages/help/help-screen.tsx` | 🟡 MOSLASH | `7b18d5121696` | `MobileHelpScreen` — `KeyboardAvoidingView` + `ScrollView`; pastki qator qator yo'nalishida (`MobileButton flex-1`) |
+| `src/pages/help/help-home.tsx` | 🟡 MOSLASH | `8e25ea4b413b` | faqat mobil varianti; telefon/Telegram `Linking`; kompyuterdagi `HeroSearch` yo'q |
+| `src/pages/help/help-article.tsx` | 🟡 MOSLASH | `8bb3be2e3988` | mobil varianti; `Navigate` — `Redirect`; fikr oynasi `Sheet`; ulashish — veb manzili yo'q, maqola matni `Share.share` bilan |
+| `src/pages/help/help-search.tsx` | 🟡 MOSLASH | `a0c07310689e` | faqat `HelpSearchPage` mobil varianti; `?q=` — `router.setParams`; `HeroSearch` (kompyuter) ko'chirilmadi |
+| `src/pages/help/help-new-ticket.tsx` | 🟡 MOSLASH | `65be3e69d343` | faqat `NewTicketPage`; fayllar `pickDocuments` (PNG/JPG/PDF); yuklash foizi o'rniga noaniq chiziq (ilova `fetch` i progress bermaydi); tizim orqaga tugmasi ham bekor qilish tasdig'ini so'raydi (`beforeRemove`); `NewTicketDialog` (kompyuter) ko'chirilmadi |
+| `src/pages/help/help-tickets.tsx` | 🟡 MOSLASH | `4062ddd69bf9` | ro'yxat va suhbat alohida marshrut (`tickets/[ticketId]`); menyu `DropdownMenu` o'rniga kichik `Sheet`; fayl blob — `downloadBlob` (tizim oynasi); baho `Sheet` |
 
 ## Ataylab ko'chirilmagan
 

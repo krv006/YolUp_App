@@ -104,6 +104,15 @@ function dayMonth(value: string): { day: string; month: string } {
  */
 export function MaterialsPage() {
   const { t } = useTranslation("workspace");
+
+  function folderMeta(item: { fileCount: number; recordingCount: number; boardCount: number }): string {
+    const parts = [
+      item.recordingCount ? t("materials.videoCount", { count: item.recordingCount }) : "",
+      item.boardCount ? t("materials.boardCount", { count: item.boardCount }) : "",
+    ].filter(Boolean);
+    const total = t("materials.filesCount", { count: item.fileCount });
+    return parts.length ? `${total} (${t("materials.including", { parts: parts.join(", ") })})` : total;
+  }
   const ds = useDs();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -225,14 +234,8 @@ export function MaterialsPage() {
             icon={folderIcon}
             tone="bg-brand-subtle"
             title={item.title}
-            // Veb #195: dars papkalaridagi video va doska ham sanaladi; hammasi 0 bo'lsa "0 ta fayl".
-            meta={[
-              item.fileCount || (!item.recordingCount && !item.boardCount) ? t("materials.filesCount", { count: item.fileCount }) : "",
-              item.recordingCount ? t("materials.videoCount", { count: item.recordingCount }) : "",
-              item.boardCount ? t("materials.boardCount", { count: item.boardCount }) : "",
-            ]
-              .filter(Boolean)
-              .join(" · ")}
+            // Veb ce00d44: umumiy `file_count`, video va doska "shundan" — ikki marta sanalgandek ko'rinmaydi.
+            meta={folderMeta(item)}
             badge={
               item.kind === "club" ? (
                 // `h-5 rounded-full bg-accent-saffron-bg px-2 text-caption-strong`

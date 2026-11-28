@@ -25,3 +25,4 @@ export {
 export { pickDocument, pickDocuments, pickImage, pickImages, toUploadFile } from "./file-picker";
 export { useBackTo } from "./use-back-to";
 export type { PickedFile } from "./file-picker";
+export { deviceInfoJson } from "./device-info";

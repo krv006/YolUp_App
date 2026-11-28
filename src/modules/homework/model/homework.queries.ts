@@ -45,6 +45,14 @@ export function useAssignments(courseId: string | null, enabled = true) {
   });
 }
 
+export function useAllAssignments(enabled = true) {
+  return useQuery({
+    queryKey: homeworkKeys.assignments(null),
+    queryFn: ({ signal }) => homeworkApi.getAssignments(null, { signal }),
+    enabled,
+  });
+}
+
 export function useAssignment(id: string | null | undefined) {
   return useQuery({
     queryKey: homeworkKeys.assignment(id ?? ""),
@@ -94,6 +102,7 @@ export function useCreateAssignment() {
     mutationFn: (form: AssignmentFormInput) => homeworkApi.createAssignment(form),
     onSuccess: (item) => {
       client.invalidateQueries({ queryKey: item.isBank ? homeworkKeys.bank : homeworkKeys.assignments(item.courseId) });
+      if (!item.isBank) client.invalidateQueries({ queryKey: homeworkKeys.assignments(null) });
       toast.success(item.isBank ? t("bank.saved") : t("toast.assignmentCreated"));
     },
     onError: (error: Error) => toast.error(error.message),
@@ -108,6 +117,7 @@ export function useUpdateAssignment() {
       homeworkApi.updateAssignment(id, form),
     onSuccess: (item) => {
       client.invalidateQueries({ queryKey: item.isBank ? homeworkKeys.bank : homeworkKeys.assignments(item.courseId) });
+      if (!item.isBank) client.invalidateQueries({ queryKey: homeworkKeys.assignments(null) });
       client.invalidateQueries({ queryKey: homeworkKeys.assignment(item.id) });
       toast.success(t("toast.assignmentUpdated"));
     },
@@ -214,8 +224,21 @@ export function useHomeworkBoard(assignmentId: string | null) {
   });
 }
 
+type HomeworkBoardData = Awaited<ReturnType<typeof homeworkApi.getBoard>>;
+
 export function useSaveHomeworkBoard(assignmentId: string) {
-  return useMutation({ mutationFn: (sheets: StrokeDto[][]) => homeworkApi.saveBoard(assignmentId, sheets) });
+  const client = useQueryClient();
+  const key = homeworkKeys.board(assignmentId);
+  return useMutation({
+    mutationFn: (sheets: StrokeDto[][]) => homeworkApi.saveBoard(assignmentId, sheets),
+    onMutate: (sheets) => {
+      client.setQueryData<HomeworkBoardData>(key, (current) => (current ? { ...current, sheets } : current));
+    },
+    onSuccess: (saved) => {
+      if (saved.sheets.length) client.setQueryData<HomeworkBoardData>(key, saved);
+    },
+    onError: () => client.invalidateQueries({ queryKey: key }),
+  });
 }
 
 export function useSubmitHomeworkBoard() {

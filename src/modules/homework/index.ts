@@ -25,7 +25,7 @@ export { latestSubmission } from "./lib/latest-submission";
 export { pauseHomeworkFocus, useHomeworkFocusTracker } from "./model/use-homework-focus";
 export { AiSkippedNotice } from "./ui/ai-skipped-notice";
 export { validateHomeworkFile } from "./lib/homework-validation";
-export { getHomeworkPollingInterval, homeworkKeys, useAssignmentAiSummary, useHomeworkAiStats, useRemindAssignment, useRequestResubmit, useAssignment, useAssignments, useSubmission, useCreateAssignment, useDeleteAssignment, useDownloadAssignmentFile, useHomeworkBoard, useHomeworkDraft, useSaveHomeworkDraft, useSaveHomeworkBoard, useSubmitHomeworkBoard, useDownloadSubmissionFile, useHomeworkReport, useRecheckSubmission, useReviewSubmission, useSubmitHomework, useUpdateAssignment, useHomeworkBank, useAssignFromBank, useAssignmentAudience, useSetAssignmentAudience } from "./model/homework.queries";
+export { getHomeworkPollingInterval, homeworkKeys, useAssignmentAiSummary, useHomeworkAiStats, useRemindAssignment, useRequestResubmit, useAssignment, useAssignments, useAllAssignments, useSubmission, useCreateAssignment, useDeleteAssignment, useDownloadAssignmentFile, useHomeworkBoard, useHomeworkDraft, useSaveHomeworkDraft, useSaveHomeworkBoard, useSubmitHomeworkBoard, useDownloadSubmissionFile, useHomeworkReport, useRecheckSubmission, useReviewSubmission, useSubmitHomework, useUpdateAssignment, useHomeworkBank, useAssignFromBank, useAssignmentAudience, useSetAssignmentAudience } from "./model/homework.queries";
 export { submissionAiState } from "./lib/submission-ai-state";
 export { googleFormUrlInvalid, isGoogleFormUrl } from "./lib/google-form";
 export {

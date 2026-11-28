@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
-import { useQueries } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCourses } from "@/modules/course";
-import { homeworkApi, homeworkKeys, useCreateAssignment, useDeleteAssignment, useHomeworkBank } from "@/modules/homework";
+import { useAllAssignments, useCreateAssignment, useDeleteAssignment, useHomeworkBank } from "@/modules/homework";
 import { ROUTES } from "@/shared/config";
 import type { Assignment, Course } from "@/shared/types";
 import {
@@ -81,14 +80,10 @@ export function HomeworkListPage() {
   const bankMode = filter === "bank";
 
   const groups = useMemo(() => courses.data ?? [], [courses.data]);
-  const queries = useQueries({
-    queries: groups.map((course) => ({
-      queryKey: homeworkKeys.assignments(course.id),
-      queryFn: ({ signal }: { signal: AbortSignal }) => homeworkApi.getAssignments(course.id, { signal }),
-    })),
-  });
-  const items = queries.flatMap((query) => query.data ?? []);
-  const loading = courses.isLoading || queries.some((query) => query.isLoading);
+  // Veb f43796a: hamma guruhlar vazifalari bitta so'rovda.
+  const all = useAllAssignments();
+  const items = all.data ?? [];
+  const loading = courses.isLoading || all.isLoading;
   const lookup = new Map(groups.map((course) => [course.id, course]));
 
   const active = items.filter((item) => item.status === "active");
@@ -132,7 +127,7 @@ export function HomeworkListPage() {
         style={styles.fill}
         contentContainerStyle={[styles.page, { paddingTop: insets.top + 22, paddingBottom: insets.bottom + 32 }]}
         refreshControl={
-          <PullRefresh onRefresh={() => Promise.all([courses.refetch(), bank.refetch(), ...queries.map((query) => query.refetch())])} />
+          <PullRefresh onRefresh={() => Promise.all([courses.refetch(), bank.refetch(), all.refetch()])} />
         }
       >
         <DsGradient name="auth" />

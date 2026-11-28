@@ -28,6 +28,7 @@ import enAdmin from "./locales/en/admin.json";
 import enAuth from "./locales/en/auth.json";
 import enBoard from "./locales/en/board.json";
 import enChat from "./locales/en/chat.json";
+import enHelp from "./locales/en/help.json";
 import enCommon from "./locales/en/common.json";
 import enDashboard from "./locales/en/dashboard.json";
 import enGroup from "./locales/en/group.json";
@@ -48,6 +49,7 @@ import ruAdmin from "./locales/ru/admin.json";
 import ruAuth from "./locales/ru/auth.json";
 import ruBoard from "./locales/ru/board.json";
 import ruChat from "./locales/ru/chat.json";
+import ruHelp from "./locales/ru/help.json";
 import ruCommon from "./locales/ru/common.json";
 import ruDashboard from "./locales/ru/dashboard.json";
 import ruGroup from "./locales/ru/group.json";
@@ -68,6 +70,7 @@ import uzAdmin from "./locales/uz/admin.json";
 import uzAuth from "./locales/uz/auth.json";
 import uzBoard from "./locales/uz/board.json";
 import uzChat from "./locales/uz/chat.json";
+import uzHelp from "./locales/uz/help.json";
 import uzCommon from "./locales/uz/common.json";
 import uzDashboard from "./locales/uz/dashboard.json";
 import uzGroup from "./locales/uz/group.json";
@@ -90,6 +93,7 @@ const resources: Resource = {
     auth: enAuth,
     board: enBoard,
     chat: enChat,
+    help: enHelp,
     common: enCommon,
     dashboard: enDashboard,
     group: enGroup,
@@ -111,6 +115,7 @@ const resources: Resource = {
     auth: ruAuth,
     board: ruBoard,
     chat: ruChat,
+    help: ruHelp,
     common: ruCommon,
     dashboard: ruDashboard,
     group: ruGroup,
@@ -132,6 +137,7 @@ const resources: Resource = {
     auth: uzAuth,
     board: uzBoard,
     chat: uzChat,
+    help: uzHelp,
     common: uzCommon,
     dashboard: uzDashboard,
     group: uzGroup,

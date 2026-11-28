@@ -83,7 +83,7 @@ export function SupportDialog({ open, onOpenChange, ticketId = null, staffView =
 
   function submitReply() {
     if (!reply.trim()) return;
-    send.mutate(reply.trim(), { onSuccess: () => setReply(""), onError: (error: Error) => toast.error(error.message) });
+    send.mutate({ message: reply.trim() }, { onSuccess: () => setReply(""), onError: (error: Error) => toast.error(error.message) });
   }
 
   return (
